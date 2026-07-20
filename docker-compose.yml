@@ -1,0 +1,94 @@
+name: rag-cic
+
+x-backend-common: &backend-common
+  image: rag-cic-backend
+  build:
+    context: ./backend
+    target: development
+  env_file: ${ENV_FILE:-.env}
+  environment:
+    DATABASE_URL: ${DATABASE_URL}
+    REDIS_URL: redis://redis:6379/0
+  volumes:
+    - ${GOOGLE_SERVICE_ACCOUNT_HOST_FILE:-./secrets/google-service-account.json}:/app/secrets/google-service-account.json:ro
+  restart: unless-stopped
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+    minio: { condition: service_healthy }
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rag_cic}
+      POSTGRES_USER: ${POSTGRES_USER:-rag_cic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rag_cic_dev_password}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  redis:
+    image: redis:7.4-alpine
+    command: redis-server --appendonly yes
+    volumes: [redis_data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes: [minio_data:/data]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  backend:
+    <<: *backend-common
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  celery-worker:
+    <<: *backend-common
+    command: celery -A app.tasks.celery_app:celery_app worker --loglevel=INFO --concurrency=2
+  celery-beat:
+    <<: *backend-common
+    command: celery -A app.tasks.celery_app:celery_app beat --loglevel=INFO
+  frontend:
+    build:
+      context: ./frontend
+      args: { NEXT_PUBLIC_API_URL: /api/v1 }
+    environment:
+      HOSTNAME: "0.0.0.0"
+    restart: unless-stopped
+    depends_on:
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["80:80"]
+    volumes: [./nginx/nginx.conf:/etc/nginx/nginx.conf:ro]
+    depends_on:
+      frontend: { condition: service_healthy }
+      backend: { condition: service_healthy }
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

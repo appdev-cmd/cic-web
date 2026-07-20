@@ -1,0 +1,11 @@
+{
+  "name": "CIC Technology - Đối tác công nghệ chiến lược",
+  "description": "Nền tảng cung cấp giải pháp chuyển đổi số và tư vấn kỹ thuật hàng đầu cho các ngành Xây dựng, Giao thông và Công nghiệp tại Việt Nam.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

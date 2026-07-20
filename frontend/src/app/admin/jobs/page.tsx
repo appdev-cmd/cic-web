@@ -1,0 +1,7 @@
+"use client";
+import {useQuery} from "@tanstack/react-query";
+import {RefreshCw} from "lucide-react";
+import {apiRequest} from "@/lib/api";
+import {Button} from "@/components/ui/button";
+type Job={id:string;name:string;type:string;status:string;error:string|null;updated_at:string};
+export default function JobsPage(){const q=useQuery<Job[]>({queryKey:["jobs"],queryFn:()=>apiRequest("/system/jobs"),refetchInterval:10000});return <main className="mx-auto max-w-7xl space-y-6 p-6"><header className="flex justify-between"><div><p className="text-xs font-bold uppercase text-blue-700">Vận hành</p><h1 className="text-2xl font-bold">Tác vụ nền</h1></div><Button variant="outline" onClick={()=>q.refetch()}><RefreshCw className="mr-2 h-4 w-4"/>Làm mới</Button></header><div className="overflow-x-auto rounded-2xl border bg-white"><table className="w-full text-sm"><thead className="bg-slate-50"><tr>{["Tác vụ","Loại","Trạng thái","Lỗi","Cập nhật"].map(x=><th key={x} className="p-4 text-left">{x}</th>)}</tr></thead><tbody>{q.data?.map(j=><tr key={j.id} className="border-t"><td className="p-4 font-semibold">{j.name}</td><td className="p-4">{j.type}</td><td className="p-4"><span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700">{j.status}</span></td><td className="max-w-md p-4 text-rose-600">{j.error||"—"}</td><td className="p-4">{new Date(j.updated_at).toLocaleString("vi-VN")}</td></tr>)}</tbody></table></div></main>}

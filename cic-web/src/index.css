@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;700;900&family=Inter:wght@400;700;900&display=swap');
+
+@theme {
+  --font-sans: "Be Vietnam Pro", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Be Vietnam Pro", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom background patterns for high-tech feel */
+.bg-tech-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(234, 88, 12, 0.1) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.high-tech-counter {
+  text-shadow: 0 0 10px rgba(234, 88, 12, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-modern-interaction {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+
+.btn-modern-interaction::after {
+  content: '';
+  @apply absolute inset-0 bg-white opacity-0 transition-opacity duration-300;
+}
+
+.btn-modern-interaction:hover::after {
+  @apply opacity-10;
+}
+
+.btn-modern-interaction:hover {
+  @apply -translate-y-1 shadow-2xl;
+  filter: brightness(1.1);
+}
+
+.btn-modern-interaction:active {
+  @apply scale-95 translate-y-0;
+}
+
+.card-hightech-hover:hover {
+  border-color: rgba(234, 88, 12, 0.4);
+  box-shadow: 0 0 20px rgba(234, 88, 12, 0.1);
+}
+
+/* Ensure all interactive components have cursor pointer */
+button,
+a,
+select,
+option,
+input[type="submit"],
+input[type="button"],
+[role="button"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+

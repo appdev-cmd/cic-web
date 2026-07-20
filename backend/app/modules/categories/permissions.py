@@ -1,0 +1,4 @@
+CATEGORY_VIEW = "category.view"
+CATEGORY_MANAGE = "category.manage"
+
+PERMISSIONS = (CATEGORY_VIEW, CATEGORY_MANAGE)

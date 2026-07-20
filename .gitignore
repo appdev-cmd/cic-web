@@ -1,0 +1,16 @@
+.env
+secrets/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+node_modules/
+.next/
+playwright-report/
+test-results/
+dist/
+*.log
+.DS_Store

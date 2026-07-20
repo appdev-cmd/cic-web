@@ -1,0 +1,23 @@
+Metadata-Version: 2.4
+Name: rag-cic-backend
+Version: 0.1.0
+Requires-Python: >=3.11
+Requires-Dist: alembic<2,>=1.14
+Requires-Dist: asyncpg<1,>=0.30
+Requires-Dist: celery[redis]<6,>=5.4
+Requires-Dist: email-validator<3,>=2.2
+Requires-Dist: fastapi<1,>=0.115
+Requires-Dist: httpx<1,>=0.28
+Requires-Dist: pwdlib[argon2]<1,>=0.3
+Requires-Dist: prometheus-client<1,>=0.21
+Requires-Dist: pydantic-settings<3,>=2.7
+Requires-Dist: pyjwt<3,>=2.10
+Requires-Dist: python-multipart<1,>=0.0.20
+Requires-Dist: redis<6,>=5.2
+Requires-Dist: sqlalchemy[asyncio]<3,>=2.0.36
+Requires-Dist: uvicorn[standard]<1,>=0.34
+Provides-Extra: dev
+Requires-Dist: aiosqlite<1,>=0.20; extra == "dev"
+Requires-Dist: pytest<9,>=8.3; extra == "dev"
+Requires-Dist: pytest-asyncio<1,>=0.25; extra == "dev"
+Requires-Dist: ruff<1,>=0.9; extra == "dev"

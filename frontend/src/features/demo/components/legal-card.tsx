@@ -1,0 +1,7 @@
+import { ExternalLink, Scale } from "lucide-react";
+import type { LegalDocument } from "../types";
+
+export function LegalCard({ document }: { document: LegalDocument }) {
+  const status={effective:["Còn hiệu lực","bg-emerald-50 text-emerald-700"],expired:["Đã hết hiệu lực","bg-rose-50 text-rose-700"],pending:["Sắp có hiệu lực","bg-amber-50 text-amber-700"]}[document.status];
+  return <article className="rounded-xl border border-slate-200 bg-white p-4"><div className="flex items-start gap-3"><div className="rounded-lg bg-blue-50 p-2 text-blue-700"><Scale className="h-4 w-4" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="font-mono text-xs font-bold text-blue-700">{document.documentNumber}</p><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${status[1]}`}>{status[0]}</span></div><h3 className="mt-1 text-sm font-bold">{document.title}</h3><p className="mt-2 text-xs font-semibold text-slate-500">{document.article} · {document.clause}</p><p className="mt-2 text-sm leading-6 text-slate-700">{document.text}</p>{document.replacement&&<p className="mt-2 rounded-lg bg-rose-50 p-2 text-xs text-rose-700">Đã được thay thế bởi {document.replacement}.</p>}<button className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-700"><ExternalLink className="h-3.5 w-3.5" />Mở nguồn mô phỏng</button></div></div></article>;
+}
