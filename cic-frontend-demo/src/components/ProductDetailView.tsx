@@ -129,7 +129,7 @@ export function ProductDetailView({
                 </button>
 
                 {/* Indicator Overlay */}
-                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-wider">
                   Slide {currentSlide + 1} / {slideImages.length}
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function ProductDetailView({
               <span className="px-3 py-1 bg-slate-950 text-white text-[10px] font-black uppercase tracking-widest">
                 {product.field}
               </span>
-              <span className="text-orange-600 text-xs font-black uppercase tracking-widest">
+              <span className="text-orange-600 text-xs font-sans font-black uppercase tracking-widest">
                 Hãng: {product.brand}
               </span>
             </div>
@@ -219,7 +219,7 @@ export function ProductDetailView({
                 className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction"
               >
                 <Download size={16} />
-                Tải tài liệu
+                Tải phần mềm
               </button>
 
               <button
@@ -245,7 +245,7 @@ export function ProductDetailView({
                 { id: 'overview', label: 'Tổng quan' },
                 { id: 'features', label: 'Chi tiết tính năng' },
                 { id: 'video', label: 'Video sản phẩm' },
-                { id: 'documents', label: 'Tài liệu liên quan' }
+                { id: 'documents', label: 'Tải bộ cài & HDSD' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -377,7 +377,7 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-3"
                 >
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">Chọn file tài liệu để tải về thiết bị:</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">Đăng ký nhận liên kết tải bộ cài dùng thử & tài liệu hướng dẫn sử dụng chuyên sâu:</span>
                   {[
                     { title: `Brochure giới thiệu chi tiết sản phẩm ${product.name}`, size: '4.5 MB', type: 'PDF' },
                     { title: `Hướng dẫn cài đặt & Cấu hình hệ thống đề nghị`, size: '2.8 MB', type: 'PDF' },
@@ -395,7 +395,7 @@ export function ProductDetailView({
                         </div>
                         <div>
                           <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.title}</h4>
-                          <span className="text-[10px] font-mono text-slate-400">{doc.size}</span>
+                          <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>
                         </div>
                       </div>
                       <Download size={16} className="text-slate-400 group-hover:text-orange-600 transition-colors" />
@@ -434,11 +434,11 @@ export function ProductDetailView({
                   <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-700">Đinh Trần Tuấn</span>
-                      <a href="tel:0859999698" className="font-mono font-black text-orange-600 hover:text-orange-700 hover:underline">085 999 9698</a>
+                      <a href="tel:0859999698" className="font-sans font-black text-orange-600 hover:text-orange-700 hover:underline">085 999 9698</a>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-700">Miền Nam</span>
-                      <a href="tel:0913347960" className="font-mono font-black text-orange-600 hover:text-orange-700 hover:underline">0913 34 79 60</a>
+                      <a href="tel:0913347960" className="font-sans font-black text-orange-600 hover:text-orange-700 hover:underline">0913 34 79 60</a>
                     </div>
                   </div>
                 </div>
@@ -449,7 +449,7 @@ export function ProductDetailView({
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Hỗ trợ kỹ thuật
                   </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-mono text-xs">
+                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-sans text-xs">
                     <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
                       <span className="font-bold text-slate-700 font-sans">Chí Chung</span>
                       <a href="tel:0945285978" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0945 285 978</a>
@@ -471,7 +471,7 @@ export function ProductDetailView({
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Kinh doanh Miền Bắc
                   </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-mono text-xs">
+                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-sans text-xs">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-700 font-sans">Tổng đài MB</span>
                       <a href="tel:0886462020" className="font-black text-orange-600 hover:text-orange-700 hover:underline">088 646 2020</a>
@@ -485,7 +485,7 @@ export function ProductDetailView({
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Kinh doanh Miền Nam
                   </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-mono text-xs">
+                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-sans text-xs">
                     <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
                       <span className="font-bold text-slate-700 font-sans">Hoàng Yến</span>
                       <a href="tel:0934045088" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0934 045 088</a>
@@ -520,7 +520,7 @@ export function ProductDetailView({
         <div className="pt-16 border-t border-slate-200 mt-16 space-y-8">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-black uppercase tracking-tight text-slate-950">Sản phẩm liên quan</h3>
-            <span className="text-xs font-bold uppercase tracking-wider text-orange-600">Được đề xuất nhiều nhất</span>
+            <span className="text-xs font-sans font-bold uppercase tracking-wider text-orange-600">Được đề xuất nhiều nhất</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -558,12 +558,12 @@ export function ProductDetailView({
                 {/* Info */}
                 <div className="p-4 flex-1 flex flex-col justify-between gap-3">
                   <div className="space-y-1">
-                    <span className="text-[9px] font-black uppercase text-orange-600">{rel.brand}</span>
+                    <span className="text-[9px] font-sans font-black uppercase text-orange-600">{rel.brand}</span>
                     <h4 className="text-xs font-black text-slate-950 group-hover:text-orange-600 line-clamp-2 leading-snug">{rel.name}</h4>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-[10px] font-bold">
                     <span className="text-slate-400 uppercase">Giá bán:</span>
-                    <span className="text-orange-600 font-black font-mono">{rel.price}</span>
+                    <span className="text-orange-600 font-black font-sans">{rel.price}</span>
                   </div>
                 </div>
               </div>

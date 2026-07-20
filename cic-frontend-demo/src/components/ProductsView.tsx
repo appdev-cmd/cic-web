@@ -44,6 +44,7 @@ export function ProductsView() {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [downloadFormSubmitted, setDownloadFormSubmitted] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
 
@@ -62,15 +63,15 @@ export function ProductsView() {
 
   // Filter subsets for Show More / Show Less
   const displayedFields = useMemo(() => {
-    return isFieldsExpanded ? fields : fields.slice(0, 4);
+    return isFieldsExpanded ? fields : fields.slice(0, 10);
   }, [fields, isFieldsExpanded]);
 
   const displayedBrands = useMemo(() => {
-    return isBrandsExpanded ? brands : brands.slice(0, 4);
+    return isBrandsExpanded ? brands : brands.slice(0, 10);
   }, [brands, isBrandsExpanded]);
 
   const displayedApps = useMemo(() => {
-    return isAppsExpanded ? apps : apps.slice(0, 4);
+    return isAppsExpanded ? apps : apps.slice(0, 10);
   }, [apps, isAppsExpanded]);
 
   // Filter and Sort logic
@@ -119,10 +120,18 @@ export function ProductsView() {
     }
   };
 
-  // Simulated download handler
+  // Simulated download handler showing download registration form first
   const triggerDownload = (product: Product) => {
     setActiveProduct(product);
     setModalType('download');
+    setDownloadFormSubmitted(false);
+    setDownloading(false);
+    setDownloadProgress(0);
+  };
+
+  const handleDownloadFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDownloadFormSubmitted(true);
     setDownloading(true);
     setDownloadProgress(0);
 
@@ -220,7 +229,7 @@ export function ProductsView() {
                         : 'border-transparent text-slate-400 hover:text-slate-600'
                     }`}
                   >
-                    Tải tài liệu
+                    Tải phần mềm
                   </button>
                 </div>
 
@@ -232,39 +241,106 @@ export function ProductsView() {
 
                 {/* Download Modal Mode */}
                 {modalType === 'download' && (
-                  <div className="text-center py-4">
-                    <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
-                      <Download size={32} className={downloading ? 'animate-bounce' : ''} />
-                    </div>
-                    <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
-                      Tải tài liệu kỹ thuật
-                    </h3>
-                    
-                    {downloading ? (
+                  <div>
+                    {!downloadFormSubmitted ? (
                       <div className="space-y-4">
-                        <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị file tài liệu, brochure và bản dùng thử...</p>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
-                          <div 
-                            style={{ width: `${downloadProgress}%` }}
-                            className="h-full bg-orange-600 transition-all duration-150"
-                          ></div>
+                        <div className="text-center pb-2">
+                          <div className="w-12 h-12 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-3 rounded-none">
+                            <Download size={24} />
+                          </div>
+                          <h3 className="text-base font-black uppercase text-slate-950 tracking-tight">
+                            Đăng ký tải bộ cài dùng thử (Trial)
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-1 font-medium">
+                            Vui lòng nhập thông tin để kích hoạt liên kết tải xuống phần mềm {activeProduct.name}.
+                          </p>
                         </div>
-                        <span className="text-xs font-mono font-black text-slate-700">{downloadProgress}%</span>
+                        <form className="space-y-4" onSubmit={handleDownloadFormSubmit}>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên *</label>
+                            <input 
+                              required 
+                              type="text" 
+                              placeholder="Nguyễn Văn A" 
+                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số điện thoại *</label>
+                              <input 
+                                required 
+                                type="tel" 
+                                placeholder="0912 xxx xxx" 
+                                className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email nhận link tải *</label>
+                              <input 
+                                required 
+                                type="email" 
+                                placeholder="username@domain.com" 
+                                className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn vị / Doanh nghiệp</label>
+                            <input 
+                              type="text" 
+                              placeholder="Công ty Xây dựng XYZ" 
+                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                            />
+                          </div>
+                          
+                          <button 
+                            type="submit" 
+                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
+                          >
+                            Bắt đầu tải phần mềm
+                          </button>
+                        </form>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
-                          <Check size={16} /> Tải tài liệu thành công!
+                      <div className="text-center py-4">
+                        <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
+                          <Download size={32} className={downloading ? 'animate-bounce' : ''} />
                         </div>
-                        <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                          Tệp tin quảng cáo, hướng dẫn kỹ thuật và bộ cài dùng thử của <b>{activeProduct.name}</b> đã được lưu vào thiết bị của bạn thành công.
-                        </p>
-                        <button 
-                          onClick={() => setModalType(null)}
-                          className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
-                        >
-                          Đóng cửa sổ
-                        </button>
+                        <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
+                          Tải phần mềm {activeProduct.name}
+                        </h3>
+                        
+                        {downloading ? (
+                          <div className="space-y-4">
+                            <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...</p>
+                            <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
+                              <div 
+                                style={{ width: `${downloadProgress}%` }}
+                                className="h-full bg-orange-600 transition-all duration-150"
+                              ></div>
+                            </div>
+                            <span className="text-xs font-sans font-black text-slate-700">{downloadProgress}%</span>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
+                              <Check size={16} /> Tải phần mềm thành công!
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                              Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
+                            </p>
+                            <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
+                              Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào địa chỉ email của bạn.
+                            </p>
+                            <button 
+                              onClick={() => setModalType(null)}
+                              className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
+                            >
+                              Đóng cửa sổ
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -378,7 +454,7 @@ export function ProductsView() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600/10 border border-orange-600/20 mb-4"
           >
             <span className="h-2 w-2 bg-orange-600"></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-orange-600">
+            <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] text-orange-600">
               CIC Technology Catalog
             </span>
           </motion.div>
@@ -495,7 +571,7 @@ export function ProductsView() {
                   </button>
                 ))}
               </div>
-              {fields.length > 4 && (
+              {fields.length > 10 && (
                 <button
                   onClick={() => setIsFieldsExpanded(!isFieldsExpanded)}
                   className="text-[11px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors mt-1.5 px-3 flex items-center gap-1"
@@ -526,7 +602,7 @@ export function ProductsView() {
                   </button>
                 ))}
               </div>
-              {brands.length > 4 && (
+              {brands.length > 10 && (
                 <button
                   onClick={() => setIsBrandsExpanded(!isBrandsExpanded)}
                   className="text-[11px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors mt-1.5 px-3 flex items-center gap-1"
@@ -557,7 +633,7 @@ export function ProductsView() {
                   </button>
                 ))}
               </div>
-              {apps.length > 4 && (
+              {apps.length > 10 && (
                 <button
                   onClick={() => setIsAppsExpanded(!isAppsExpanded)}
                   className="text-[11px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors mt-1.5 px-3 flex items-center gap-1"
@@ -633,7 +709,7 @@ export function ProductsView() {
                       <div className="space-y-1.5">
                         {/* Brand & App badges */}
                         <div className="flex flex-wrap gap-2">
-                          <span className="text-[9px] font-black uppercase text-orange-600 tracking-wider">
+                          <span className="text-[9px] font-sans font-black uppercase text-orange-600 tracking-wider">
                             {product.brand}
                           </span>
                           <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
@@ -790,7 +866,7 @@ export function ProductsView() {
                       : 'border-transparent text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  Tải tài liệu
+                  Tải phần mềm
                 </button>
               </div>
 
@@ -802,39 +878,106 @@ export function ProductsView() {
 
               {/* Download Modal Mode */}
               {modalType === 'download' && (
-                <div className="text-center py-4">
-                  <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
-                    <Download size={32} className={downloading ? 'animate-bounce' : ''} />
-                  </div>
-                  <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
-                    Tải tài liệu kỹ thuật
-                  </h3>
-                  
-                  {downloading ? (
+                <div>
+                  {!downloadFormSubmitted ? (
                     <div className="space-y-4">
-                      <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị file tài liệu, brochure và bản dùng thử...</p>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
-                        <div 
-                          style={{ width: `${downloadProgress}%` }}
-                          className="h-full bg-orange-600 transition-all duration-150"
-                        ></div>
+                      <div className="text-center pb-2">
+                        <div className="w-12 h-12 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-3 rounded-none">
+                          <Download size={24} />
+                        </div>
+                        <h3 className="text-base font-black uppercase text-slate-950 tracking-tight">
+                          Đăng ký tải bộ cài dùng thử (Trial)
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">
+                          Vui lòng nhập thông tin để kích hoạt liên kết tải xuống phần mềm {activeProduct.name}.
+                        </p>
                       </div>
-                      <span className="text-xs font-mono font-black text-slate-700">{downloadProgress}%</span>
+                      <form className="space-y-4" onSubmit={handleDownloadFormSubmit}>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên *</label>
+                          <input 
+                            required 
+                            type="text" 
+                            placeholder="Nguyễn Văn A" 
+                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số điện thoại *</label>
+                            <input 
+                              required 
+                              type="tel" 
+                              placeholder="0912 xxx xxx" 
+                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email nhận link tải *</label>
+                            <input 
+                              required 
+                              type="email" 
+                              placeholder="username@domain.com" 
+                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn vị / Doanh nghiệp</label>
+                          <input 
+                            type="text" 
+                            placeholder="Công ty Xây dựng XYZ" 
+                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
+                          />
+                        </div>
+                        
+                        <button 
+                          type="submit" 
+                          className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
+                        >
+                          Bắt đầu tải phần mềm
+                        </button>
+                      </form>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
-                        <Check size={16} /> Tải tài liệu thành công!
+                    <div className="text-center py-4">
+                      <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
+                        <Download size={32} className={downloading ? 'animate-bounce' : ''} />
                       </div>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                        Tệp tin quảng cáo, hướng dẫn kỹ thuật và bộ cài dùng thử của <b>{activeProduct.name}</b> đã được lưu vào thiết bị của bạn thành công.
-                      </p>
-                      <button 
-                        onClick={() => setModalType(null)}
-                        className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
-                      >
-                        Đóng cửa sổ
-                      </button>
+                      <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
+                        Tải phần mềm {activeProduct.name}
+                      </h3>
+                      
+                      {downloading ? (
+                        <div className="space-y-4">
+                          <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...</p>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
+                            <div 
+                              style={{ width: `${downloadProgress}%` }}
+                              className="h-full bg-orange-600 transition-all duration-150"
+                            ></div>
+                          </div>
+                          <span className="text-xs font-sans font-black text-slate-700">{downloadProgress}%</span>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
+                            <Check size={16} /> Tải phần mềm thành công!
+                          </div>
+                          <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                            Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
+                          </p>
+                          <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
+                            Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào địa chỉ email của bạn.
+                          </p>
+                          <button 
+                            onClick={() => setModalType(null)}
+                            className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
+                          >
+                            Đóng cửa sổ
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

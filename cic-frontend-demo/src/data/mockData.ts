@@ -571,5 +571,125 @@ export const productsData: Product[] = [
     brand: 'ALLPLAN',
     app: 'Thiết kế CAD & BIM',
     img: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 41,
+    name: 'Ansys Mechanical - Phân tích phần tử hữu hạn cơ khí',
+    price: 'Liên hệ',
+    description: 'Ansys Mechanical cung cấp các công cụ phân tích cấu trúc, nhiệt, va đập độ bền mỏi chuyên sâu cho lĩnh vực cơ khí chế tạo máy.',
+    field: 'Cơ khí & Chế tạo',
+    brand: 'Ansys (Mỹ)',
+    app: 'Phân tích ứng suất vật liệu',
+    img: 'https://images.unsplash.com/photo-1537462715879-360eeb61a0bc?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 42,
+    name: 'ArcGIS Enterprise - Hệ thống thông tin địa lý GIS chuyên sâu',
+    price: 'Liên hệ',
+    description: 'Nền tảng GIS mạnh mẽ giúp quản lý dữ liệu không gian, xây dựng bản đồ số và triển khai các giải pháp định vị quy mô lớn.',
+    field: 'Viễn thông & CNTT',
+    brand: 'Esri (Mỹ)',
+    app: 'Hệ thống định vị thông minh',
+    img: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 43,
+    name: 'FARO Focus Premium - Máy quét laser 3D mặt đất tốc độ cao',
+    price: 'Liên hệ',
+    description: 'Máy quét laser 3D cung cấp các mô hình đám mây điểm siêu chính xác cho công trình kiến trúc, di sản và nông nghiệp công nghệ cao.',
+    field: 'Nông nghiệp & Công nghệ cao',
+    brand: 'FARO',
+    app: 'Quét đám mây điểm 3D',
+    img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 44,
+    name: 'CIC Greenhouse Monitor - Phần mềm báo cáo kiểm kê phát thải',
+    price: 'Liên hệ',
+    description: 'Phần mềm đáp ứng đầy đủ quy chuẩn ISO 14064-1 để tự động hóa hoạt động báo cáo kiểm kê phát thải khí nhà kính cho doanh nghiệp.',
+    field: 'Giám sát An toàn & Cảnh báo',
+    brand: 'CIC Tech',
+    app: 'Báo cáo khí nhà kính',
+    img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 45,
+    name: 'MIKE 21 - Mô hình thủy động lực học sóng biển và cửa sông',
+    price: 'Liên hệ',
+    description: 'Bộ công cụ mô phỏng 2 chiều thủy động lực học của nước, bùn cát, chất lượng nước ở sông ngòi, cửa biển và công trình hàng hải.',
+    field: 'Hàng hải & Cảng biển',
+    brand: 'DHI (Đan Mạch)',
+    app: 'Tính toán thủy lực dòng',
+    img: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 46,
+    name: 'VR Trainer Master - Thiết bị thực tế ảo đào tạo nghề cơ khí',
+    price: 'Liên hệ',
+    description: 'Hệ thống huấn luyện ảo mô phỏng quy trình bảo dưỡng động cơ và vận hành thiết bị công nghiệp an toàn tuyệt đối.',
+    field: 'Hóa chất & Vật liệu mới',
+    brand: 'Lander',
+    app: 'Đào tạo mô phỏng thực tế ảo',
+    img: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 47,
+    name: 'SmartPlant 3D - Phần mềm thiết kế nhà máy hóa chất chuyên sâu',
+    price: 'Liên hệ',
+    description: 'Giải pháp mô hình hóa 3D cho thiết kế đường ống, thiết bị công nghiệp trong các nhà máy lọc dầu, hóa chất, vật liệu quy mô lớn.',
+    field: 'Hóa chất & Vật liệu mới',
+    brand: 'Intergraph',
+    app: 'Phân tích ứng suất vật liệu',
+    img: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 48,
+    name: 'Agisoft Metashape - Phần mềm dựng mô hình 3D từ ảnh chụp UAV',
+    price: 'Liên hệ',
+    description: 'Xử lý hình ảnh từ máy bay không người lái để tạo ra các mô hình độ cao số hóa (DEM), chỉnh hình trực ảnh chính xác cho nông nghiệp.',
+    field: 'Nông nghiệp & Công nghệ cao',
+    brand: 'Agisoft',
+    app: 'Quét đám mây điểm 3D',
+    img: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 49,
+    name: 'QGIS Enterprise Server - Quản lý bản đồ hạ tầng đô thị',
+    price: 'Liên hệ',
+    description: 'Cung cấp nền tảng bản đồ số mã nguồn mở tích hợp cơ sở dữ liệu hạ tầng, cho phép tìm kiếm định vị thông tin quy hoạch nhanh chóng.',
+    field: 'Viễn thông & CNTT',
+    brand: 'QGIS Group',
+    app: 'Hệ thống định vị thông minh',
+    img: 'https://images.unsplash.com/photo-1512418490979-917bd593a8ec?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 50,
+    name: 'CAESAR II - Phần mềm phân tích ứng suất đường ống lò hơi',
+    price: 'Liên hệ',
+    description: 'CAESAR II là chuẩn mực phân tích ứng suất và dịch chuyển của hệ thống đường ống công nghiệp dưới tác động của nhiệt độ và áp suất.',
+    field: 'Cơ khí & Chế tạo',
+    brand: 'Hexagon',
+    app: 'Phân tích ứng suất vật liệu',
+    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 51,
+    name: 'GasLeak Pro - Hệ thống cảm biến cảnh báo rò rỉ khí gas độc hại',
+    price: 'Liên hệ',
+    description: 'Hệ thống thiết bị IoT đo nồng độ và giám sát an toàn cháy nổ tự động tích hợp cảnh báo khẩn cấp thời gian thực qua đám mây.',
+    field: 'Giám sát An toàn & Cảnh báo',
+    brand: 'Instantel',
+    app: 'Báo cáo khí nhà kính',
+    img: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80'
+  },
+  {
+    id: 52,
+    name: 'ShipMotion Pro - Mô phỏng dao động tàu biển khi cập cảng',
+    price: 'Liên hệ',
+    description: 'Thiết kế thử nghiệm động học tàu biển tương tác với sóng gió dòng chảy tại cảng, hỗ trợ quy hoạch hạ tầng hàng hải tối ưu.',
+    field: 'Hàng hải & Cảng biển',
+    brand: 'DHI (Đan Mạch)',
+    app: 'Tính toán thủy lực dòng',
+    img: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&q=80'
   }
 ];

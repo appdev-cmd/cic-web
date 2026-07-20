@@ -20,20 +20,35 @@ import { ZaloIcon } from './shared/Icons';
 import { navLinks } from '../data/mockData';
 
 interface HeaderProps {
-  currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms';
-  setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms') => void;
+  currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search';
+  setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   activeLink: string;
   setActiveLink: (link: string) => void;
   setAboutSubTab: (tab: 'overview' | 'structure' | 'experience') => void;
   onSelectService?: (id: string | null) => void;
   onSelectProject?: (id: string | null) => void;
   onSelectNewsCategory?: (category: string | null) => void;
+  onSearch?: (query: string) => void;
+  onOpenConsultation?: () => void;
 }
 
-export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink, setAboutSubTab, onSelectService, onSelectProject, onSelectNewsCategory }: HeaderProps) => {
+export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink, setAboutSubTab, onSelectService, onSelectProject, onSelectNewsCategory, onSearch, onOpenConsultation }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+
+  const handleGlobalSearch = () => {
+    if (localSearchQuery.trim()) {
+      if (onSearch) {
+        onSearch(localSearchQuery);
+      }
+      setCurrentView('search');
+      setActiveLink('');
+      setIsSearchOpen(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,7 +60,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
     };
   }, []);
 
-  const isSolidView = currentView === 'products' || currentView === 'about' || currentView === 'services' || currentView === 'projects' || currentView === 'news' || currentView === 'events' || currentView === 'contact';
+  const isSolidView = currentView === 'products' || currentView === 'about' || currentView === 'services' || currentView === 'projects' || currentView === 'news' || currentView === 'events' || currentView === 'contact' || currentView === 'privacy' || currentView === 'terms' || currentView === 'search';
   // Header should be styled as white/dark-text if we are in solid page views OR if we scrolled down on homepage
   const isHeaderWhite = isScrolled || isSolidView;
 
@@ -235,10 +250,17 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
               </button>
             </div>
 
-            <button className={`p-2 transition-colors ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}>
+            <button 
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`p-2 transition-colors ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
+              title="Tìm kiếm"
+            >
               <Search size={20} />
             </button>
-            <button className="hidden sm:block px-5 py-2 bg-orange-600 text-white rounded-none text-sm font-black transition-all active:scale-95 border-2 border-orange-600 btn-modern-interaction">
+            <button 
+              onClick={onOpenConsultation}
+              className="hidden sm:block px-5 py-2 bg-orange-600 text-white rounded-none text-sm font-black transition-all active:scale-95 border-2 border-orange-600 btn-modern-interaction"
+            >
               Tư vấn ngay
             </button>
             <button 
@@ -253,6 +275,47 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
             </button>
           </div>
         </div>
+
+        {/* Dropdown Search Bar underneath the header without pushing header row items */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              className="bg-white border-t border-slate-100 shadow-[0_15px_30px_rgba(0,0,0,0.1)] py-4 px-6 overflow-hidden"
+            >
+              <div className="max-w-4xl mx-auto flex items-center gap-3">
+                <Search className="text-slate-400 shrink-0" size={18} />
+                <input
+                  type="text"
+                  value={localSearchQuery}
+                  onChange={(e) => setLocalSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleGlobalSearch();
+                    }
+                  }}
+                  placeholder="Nhập từ khóa tìm kiếm sản phẩm, dịch vụ, dự án, tin tức..."
+                  className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-none font-bold"
+                  autoFocus
+                />
+                <button
+                  onClick={handleGlobalSearch}
+                  className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs tracking-wider transition-colors shrink-0"
+                >
+                  Tìm kiếm
+                </button>
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -405,6 +468,17 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                 );
               })}
             </nav>
+            <div className="mt-auto pt-6 border-t border-white/10">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenConsultation?.();
+                }}
+                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black text-center uppercase tracking-wider text-sm transition-all border-2 border-orange-600 active:scale-[0.98]"
+              >
+                Tư vấn ngay
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

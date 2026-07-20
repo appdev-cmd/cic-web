@@ -119,10 +119,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
             >
               {/* Heading */}
               <div className="text-center max-w-3xl mx-auto space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-200/50 rounded-none">
-                  <Sparkles size={12} className="text-orange-600" />
-                  <span className="font-sans text-[9px] font-black text-orange-600 uppercase tracking-widest">DỊCH VỤ TƯ VẤN CHUYÊN SÂU</span>
-                </div>
                 <h1 className="text-4xl md:text-5xl font-black text-slate-950 uppercase tracking-tighter leading-none">
                   GIẢI PHÁP & <span className="text-orange-600">DỊCH VỤ</span> KỸ THUẬT SỐ
                 </h1>
@@ -529,23 +525,20 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 <div className="lg:col-span-4 space-y-8">
                   
                   {/* Modern Form Card */}
-                  <div className="bg-slate-950 text-white p-8 border border-white/10 shadow-2xl relative">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                  <div className="bg-white text-slate-900 p-8 border border-slate-200 shadow-xl relative">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-slate-950">
                       <Briefcase size={80} />
                     </div>
 
                     <div className="space-y-4 relative z-10">
-                      <span className="font-sans text-[9px] font-black text-orange-500 uppercase tracking-widest bg-white/5 border border-white/10 px-2 py-1">
-                        FORM ĐĂNG KÝ CHUYÊN BIỆT
-                      </span>
-                      <h3 className="text-lg font-black uppercase tracking-tight text-white leading-tight">
+                      <h3 className="text-lg font-black uppercase tracking-tight text-slate-950 leading-tight">
                         Tư Vấn Giải Pháp Thích Hợp
                       </h3>
-                      <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                      <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
                         Điền nhanh thông tin dưới đây, Đội ngũ chuyên gia Trung tâm dịch vụ CIC sẽ kết nối tư vấn miễn phí trong 15 phút.
                       </p>
 
-                      <div className="w-full h-[1px] bg-white/10 my-4"></div>
+                      <div className="w-full h-[1px] bg-slate-100 my-4"></div>
 
                       {formSubmitted ? (
                         <motion.div 
@@ -563,81 +556,81 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         <form className="space-y-5" onSubmit={handleFormSubmit}>
                           
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Họ và tên *</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Họ và tên *</label>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><User size={14} /></span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
                               <input 
                                 type="text"
                                 required
                                 value={formData.fullname}
                                 onChange={(e) => setFormData({...formData, fullname: e.target.value})}
                                 placeholder="Ví dụ: Nguyễn Đức Anh" 
-                                className="w-full bg-white/5 border border-white/10 px-9 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Số điện thoại *</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Số điện thoại *</label>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><Phone size={14} /></span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={14} /></span>
                               <input 
                                 type="tel"
                                 required
                                 value={formData.phone}
                                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                 placeholder="Ví dụ: 0868934576" 
-                                className="w-full bg-white/5 border border-white/10 px-9 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Email liên hệ</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Email liên hệ</label>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><Mail size={14} /></span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
                               <input 
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 placeholder="Ví dụ: anh.nguyen@company.com" 
-                                className="w-full bg-white/5 border border-white/10 px-9 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Doanh nghiệp / Tổ chức</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Doanh nghiệp / Tổ chức</label>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><Building2 size={14} /></span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Building2 size={14} /></span>
                               <input 
                                 type="text"
                                 value={formData.company}
                                 onChange={(e) => setFormData({...formData, company: e.target.value})}
                                 placeholder="Ví dụ: Công ty Tư vấn xây dựng A" 
-                                className="w-full bg-white/5 border border-white/10 px-9 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Yêu cầu cụ thể</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Yêu cầu cụ thể</label>
                             <textarea 
                               rows={3}
                               value={formData.notes}
                               onChange={(e) => setFormData({...formData, notes: e.target.value})}
                               placeholder="Mô tả ngắn yêu cầu để chúng tôi chuẩn bị hồ sơ tư vấn tốt nhất..." 
-                              className="w-full bg-white/5 border border-white/10 px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-all font-bold resize-none"
+                              className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold resize-none"
                             ></textarea>
                           </div>
 
-                          <div className="text-[9px] text-slate-500 font-bold leading-relaxed">
+                          <div className="text-[11px] text-slate-600 font-bold leading-relaxed">
                             Bằng cách đăng ký, bạn đồng ý với chính sách bảo mật và cam kết bảo vệ thông tin doanh nghiệp của CIC.
                           </div>
 
                           <button 
                             type="submit"
-                            className="w-full py-3 bg-orange-600 text-white rounded-none font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-none font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
                           >
                             Gửi yêu cầu tư vấn <Send size={14} />
                           </button>

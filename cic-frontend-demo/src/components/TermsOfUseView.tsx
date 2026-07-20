@@ -35,7 +35,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
         <div className="space-y-4">
           <p className="text-slate-700 leading-relaxed font-medium">
             Khi truy cập và sử dụng website{' '}
-            <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline font-bold font-mono">
+            <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline font-bold font-sans">
               www.cic.com.vn
             </a>
             , khách hàng mặc định đồng ý với các điều khoản điều kiện này. Nếu không đồng ý, vui lòng ngưng sử dụng trang web.
@@ -120,12 +120,12 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
             CIC có toàn quyền cập nhật, sửa đổi, bổ sung các điều khoản sử dụng này bất cứ lúc nào mà không cần báo trước. Các thay đổi sẽ có hiệu lực ngay khi được công bố chính thức trên website. Việc quý khách hàng tiếp tục sử dụng website sau khi cập nhật đồng nghĩa với việc chấp nhận các điều khoản mới.
           </p>
           <div className="bg-gradient-to-r from-slate-900 to-slate-950 text-slate-100 p-6 border-l-4 border-orange-600 shadow-md space-y-3 mt-4">
-            <h4 className="text-xs font-black uppercase tracking-widest text-orange-500 font-mono">Thông tin liên hệ & Hỗ trợ kỹ thuật</h4>
+            <h4 className="text-xs font-black uppercase tracking-widest text-orange-500 font-sans">Thông tin liên hệ & Hỗ trợ kỹ thuật</h4>
             <p className="text-xs text-slate-300 leading-relaxed">
               Mọi thắc mắc hoặc yêu cầu làm rõ liên quan đến nội dung, sở hữu trí tuệ hoặc chính sách tải xuống phần mềm bản quyền của CIC xin vui lòng gửi về Ban quản trị qua email:{' '}
-              <a href="mailto:info@cic.com.vn" className="text-orange-400 font-bold hover:underline font-mono">info@cic.com.vn</a>
+              <a href="mailto:info@cic.com.vn" className="text-orange-400 font-bold hover:underline font-sans">info@cic.com.vn</a>
               {' '}hoặc Hotline trực tiếp:{' '}
-              <span className="font-bold text-white font-mono">024 3976 1381</span> để được phản hồi và giải đáp kịp thời.
+              <span className="font-bold text-white font-sans">024 3976 1381</span> để được phản hồi và giải đáp kịp thời.
             </p>
           </div>
         </div>
@@ -138,7 +138,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* BREADCRUMB */}
-        <nav id="terms-breadcrumb" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 font-mono">
+        <nav id="terms-breadcrumb" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8 font-sans">
           <button 
             onClick={onNavigateHome} 
             className="hover:text-orange-600 transition-colors cursor-pointer"
@@ -156,7 +156,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
           </div>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="max-w-3xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-orange-600 block mb-3 font-mono">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-orange-600 block mb-3 font-sans">
                 QUY ĐỊNH & PHÁP LÝ
               </span>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-slate-950 mb-4 font-sans leading-none">
@@ -169,15 +169,15 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
             
             {/* DOC METADATA CARD */}
             <div className="bg-white border border-slate-200 p-5 shrink-0 flex flex-col gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.02)] min-w-[240px]">
-              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 font-mono uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 font-sans uppercase tracking-wider">
                 <Calendar className="w-3.5 h-3.5 text-orange-600" />
                 <span>Cập nhật: 19/07/2026</span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 font-mono uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 font-sans uppercase tracking-wider">
                 <Clock className="w-3.5 h-3.5 text-orange-600" />
                 <span>Thời gian đọc: 5 phút</span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 font-mono uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 font-sans uppercase tracking-wider">
                 <Bookmark className="w-3.5 h-3.5 text-orange-600" />
                 <span>Phiên bản: v2.4 (Mới nhất)</span>
               </div>
@@ -231,7 +231,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`font-mono text-xs font-bold transition-colors ${activeTab === 'all' ? 'text-orange-600' : 'text-slate-400'}`}>
+                  <span className={`font-sans text-xs font-bold transition-colors ${activeTab === 'all' ? 'text-orange-600' : 'text-slate-400'}`}>
                     ALL
                   </span>
                   <span className="text-xs uppercase tracking-wider font-bold">Hiển thị tất cả điều khoản</span>
@@ -251,7 +251,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`font-mono text-xs font-extrabold transition-colors ${activeTab === sec.id ? 'text-orange-600' : 'text-slate-400'}`}>
+                    <span className={`font-sans text-xs font-extrabold transition-colors ${activeTab === sec.id ? 'text-orange-600' : 'text-slate-400'}`}>
                       {sec.id}
                     </span>
                     <span className="text-xs uppercase tracking-wider font-bold truncate max-w-[200px] lg:max-w-[180px] xl:max-w-[220px]">
@@ -268,16 +268,16 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
               <div className="absolute right-[-15px] bottom-[-15px] opacity-10">
                 <HelpCircle size={100} />
               </div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-orange-500 mb-2 font-mono">Trợ giúp pháp lý?</h3>
+              <h3 className="text-sm font-black uppercase tracking-wider text-orange-500 mb-2 font-sans">Trợ giúp pháp lý?</h3>
               <p className="text-xs text-slate-400 leading-relaxed mb-4 font-medium">
                 Nếu bạn cần trao đổi thêm về các quy định bản quyền, sở hữu trí tuệ hoặc điều kiện cấp phép phần mềm tại CIC.
               </p>
               <div className="space-y-3 pt-2 border-t border-slate-800">
-                <a href="tel:02439761381" className="flex items-center gap-2.5 text-xs text-white hover:text-orange-500 transition-colors font-bold font-mono">
+                <a href="tel:02439761381" className="flex items-center gap-2.5 text-xs text-white hover:text-orange-500 transition-colors font-bold font-sans">
                   <Phone size={14} className="text-orange-600 shrink-0" />
                   <span>024 3976 1381</span>
                 </a>
-                <a href="mailto:info@cic.com.vn" className="flex items-center gap-2.5 text-xs text-white hover:text-orange-500 transition-colors font-bold font-mono">
+                <a href="mailto:info@cic.com.vn" className="flex items-center gap-2.5 text-xs text-white hover:text-orange-500 transition-colors font-bold font-sans">
                   <Mail size={14} className="text-orange-600 shrink-0" />
                   <span>info@cic.com.vn</span>
                 </a>
@@ -308,14 +308,14 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
                       
                       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
                         <div className="flex items-center gap-3">
-                          <span className="font-mono text-3xl font-black text-orange-600 leading-none">
+                          <span className="font-sans text-3xl font-black text-orange-600 leading-none">
                             {sec.id}
                           </span>
                           <div>
-                            <span className="block text-[9px] font-black tracking-widest text-slate-400 font-mono uppercase">
+                            <span className="block text-[9px] font-black tracking-widest text-slate-400 font-sans uppercase">
                               CHƯƠNG / MỤC
                             </span>
-                            <span className="block text-[11px] font-black tracking-wider text-slate-800 uppercase font-mono">
+                            <span className="block text-[11px] font-black tracking-wider text-slate-800 uppercase font-sans">
                               {sec.tag}
                             </span>
                           </div>
@@ -350,14 +350,14 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
                     <div key={sec.id} className="space-y-6">
                       <div className="flex items-center justify-between pb-6 border-b border-slate-100">
                         <div className="flex items-center gap-4">
-                          <span className="font-mono text-4xl font-black text-orange-600 leading-none">
+                          <span className="font-sans text-4xl font-black text-orange-600 leading-none">
                             {sec.id}
                           </span>
                           <div>
-                            <span className="block text-[10px] font-black tracking-widest text-slate-400 font-mono uppercase">
+                            <span className="block text-[10px] font-black tracking-widest text-slate-400 font-sans uppercase">
                               ĐANG ĐỌC CHI TIẾT
                             </span>
-                            <span className="block text-xs font-black tracking-wider text-slate-900 uppercase font-mono">
+                            <span className="block text-xs font-black tracking-wider text-slate-900 uppercase font-sans">
                               PHÂN MỤC: {sec.tag}
                             </span>
                           </div>
@@ -417,7 +417,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
 
         {/* BACK TO HOME - DESIGNED FOR MAXIMUM CRAFT */}
         <div id="terms-footer-back" className="mt-20 pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-sans">
             © 2026 CIC. All rights reserved.
           </p>
           <button

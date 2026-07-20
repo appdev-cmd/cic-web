@@ -236,33 +236,6 @@ export const EventsView = ({
   return (
     <div className="pt-24 pb-20 relative z-10 min-h-screen bg-slate-50/70">
       <div className="max-w-7xl mx-auto px-6">
-        
-        {/* BREADCRUMB */}
-        <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8 font-mono">
-          <button 
-            onClick={() => {
-              if (onNavigateHome) onNavigateHome();
-            }} 
-            className="hover:text-orange-600 transition-colors"
-          >
-            Trang chủ
-          </button>
-          <ChevronRight size={12} />
-          <button 
-            onClick={() => setSelectedEvent(null)}
-            className={`hover:text-orange-600 transition-colors ${!selectedEvent ? 'text-slate-800' : ''}`}
-          >
-            Sự kiện
-          </button>
-          {selectedEvent && (
-            <>
-              <ChevronRight size={12} />
-              <span className="text-slate-800 truncate max-w-[250px] md:max-w-[400px]">
-                {selectedEvent.title}
-              </span>
-            </>
-          )}
-        </nav>
 
         <AnimatePresence mode="wait">
           {!selectedEvent ? (
@@ -279,9 +252,6 @@ export const EventsView = ({
               {/* HEADER AREA */}
               <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-8 gap-6">
                 <div>
-                  <span className="text-xs font-black uppercase tracking-widest text-orange-600 block mb-2 font-mono">
-                    Hội thảo & Đào tạo
-                  </span>
                   <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-950">
                     Cổng Sự kiện CIC
                   </h1>
@@ -293,13 +263,13 @@ export const EventsView = ({
                 {/* Counter Stats */}
                 <div className="flex gap-4 self-start md:self-end">
                   <div className="bg-white border border-slate-200 px-4 py-3 min-w-[100px] text-center shadow-sm">
-                    <span className="block text-2xl font-black text-slate-950 font-mono">
+                    <span className="block text-2xl font-black text-slate-950 font-sans">
                       {eventsData.filter(e => e.status === 'upcoming').length}
                     </span>
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Sắp diễn ra</span>
                   </div>
                   <div className="bg-white border border-slate-200 px-4 py-3 min-w-[100px] text-center shadow-sm">
-                    <span className="block text-2xl font-black text-orange-600 font-mono">
+                    <span className="block text-2xl font-black text-orange-600 font-sans">
                       {eventsData.filter(e => e.isOpenRegistration).length}
                     </span>
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Mở Đăng ký</span>
@@ -449,7 +419,7 @@ export const EventsView = ({
                             Đăng ký ngay
                           </button>
                         ) : (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 font-sans">
                             Đã đóng đăng ký
                           </span>
                         )}
@@ -538,11 +508,11 @@ export const EventsView = ({
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute top-6 left-6 flex gap-2">
-                      <span className={`px-3 py-1 text-xs font-black uppercase tracking-wider font-mono shadow-md ${getStatusColor(selectedEvent.status)}`}>
+                      <span className={`px-3 py-1 text-xs font-black uppercase tracking-wider font-sans shadow-md ${getStatusColor(selectedEvent.status)}`}>
                         {getStatusLabel(selectedEvent.status)}
                       </span>
                       {selectedEvent.isOpenRegistration && (
-                        <span className="bg-orange-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider font-mono shadow-md">
+                        <span className="bg-orange-600 text-white px-3 py-1 text-xs font-black uppercase tracking-wider font-sans shadow-md">
                           Mở Đăng Ký
                         </span>
                       )}
@@ -563,7 +533,7 @@ export const EventsView = ({
                         <div>
                           <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400">Thời gian</span>
                           <span className="font-bold text-slate-800 text-sm leading-snug block">{selectedEvent.date}</span>
-                          <span className="text-xs text-slate-500 font-medium font-mono">Bắt đầu: {selectedEvent.startDate.split('T')[1].slice(0, 5)}</span>
+                          <span className="text-xs text-slate-500 font-medium font-sans">Bắt đầu: {selectedEvent.startDate.split('T')[1].slice(0, 5)}</span>
                         </div>
                       </div>
 
@@ -590,7 +560,7 @@ export const EventsView = ({
                         </div>
 
                         {/* Flip clock numbers */}
-                        <div className="flex gap-2 text-center font-mono">
+                        <div className="flex gap-2 text-center font-sans">
                           {[
                             { value: timeLeft.days, label: 'NGÀY' },
                             { value: timeLeft.hours, label: 'GIỜ' },
@@ -652,11 +622,11 @@ export const EventsView = ({
                         
                         <div className="space-y-1">
                           <div className="flex flex-col md:flex-row md:items-center gap-2">
-                            <span className="px-2.5 py-1 bg-slate-950 text-white font-mono text-[10px] font-black uppercase tracking-wider shrink-0 w-fit">
+                            <span className="px-2.5 py-1 bg-slate-950 text-white font-sans text-[10px] font-black uppercase tracking-wider shrink-0 w-fit">
                               {item.time}
                             </span>
                             {item.speaker && (
-                              <span className="text-xs font-bold text-orange-600 font-mono">
+                              <span className="text-xs font-bold text-orange-600 font-sans">
                                 • Diễn giả: {item.speaker}
                               </span>
                             )}
@@ -796,7 +766,7 @@ export const EventsView = ({
 
                   <div className="space-y-4">
                     <div className="bg-slate-50 p-4 border border-slate-200">
-                      <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 font-mono">Trạng thái</span>
+                      <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 font-sans">Trạng thái</span>
                       <div className="flex items-center gap-2">
                         <span className={`w-2.5 h-2.5 ${selectedEvent.isOpenRegistration ? 'bg-emerald-500' : 'bg-slate-400 animate-none'} rounded-full animate-pulse`}></span>
                         <span className="text-xs font-black uppercase text-slate-700">
@@ -843,7 +813,7 @@ export const EventsView = ({
                   {/* DOCUMENT DOWNLOADS */}
                   {selectedEvent.documents.length > 0 && (
                     <div className="pt-6 border-t border-slate-100 space-y-3.5">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block font-mono">Tài liệu đính kèm</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block font-sans">Tài liệu đính kèm</span>
                       <div className="space-y-2">
                         {selectedEvent.documents.map((doc, idx) => (
                           <a
@@ -893,7 +863,7 @@ export const EventsView = ({
                         <div className="aspect-video bg-slate-100 overflow-hidden mb-1">
                           <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-wider text-orange-600 block">{item.date}</span>
+                        <span className="text-[9px] font-sans font-black uppercase tracking-wider text-orange-600 block">{item.date}</span>
                         <h4 
                           onClick={() => {
                             setSelectedEvent(item);
@@ -929,7 +899,7 @@ export const EventsView = ({
               {/* Modal header */}
               <div className="bg-slate-950 text-white px-8 py-5 flex items-center justify-between border-b border-white/10">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-mono">Phiếu Đăng Ký Trực Tuyến</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-sans">Phiếu Đăng Ký Trực Tuyến</span>
                   <h3 className="text-base font-black text-white uppercase tracking-tight">Đăng ký tham dự sự kiện</h3>
                 </div>
                 <button
@@ -950,9 +920,9 @@ export const EventsView = ({
                 <div className="bg-slate-50 border border-slate-200 p-4 flex gap-4 items-center">
                   <Calendar className="text-orange-600 shrink-0" size={24} />
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-mono">Sự kiện lựa chọn:</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-sans">Sự kiện lựa chọn:</h4>
                     <span className="font-black text-slate-950 text-sm block leading-snug">{registerEvent.title}</span>
-                    <span className="text-xs text-slate-500 font-medium font-mono">{registerEvent.date} — {registerEvent.location.split(',')[0]}</span>
+                    <span className="text-xs text-slate-500 font-medium font-sans">{registerEvent.date} — {registerEvent.location.split(',')[0]}</span>
                   </div>
                 </div>
 
@@ -978,7 +948,7 @@ export const EventsView = ({
                             formErrors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
-                        {formErrors.fullName && <p className="text-[10px] font-bold text-red-500 font-mono">{formErrors.fullName}</p>}
+                        {formErrors.fullName && <p className="text-[10px] font-bold text-red-500 font-sans">{formErrors.fullName}</p>}
                       </div>
 
                       {/* Phone input */}
@@ -996,7 +966,7 @@ export const EventsView = ({
                             formErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
-                        {formErrors.phone && <p className="text-[10px] font-bold text-red-500 font-mono">{formErrors.phone}</p>}
+                        {formErrors.phone && <p className="text-[10px] font-bold text-red-500 font-sans">{formErrors.phone}</p>}
                       </div>
 
                       {/* Email input */}
@@ -1014,7 +984,7 @@ export const EventsView = ({
                             formErrors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
-                        {formErrors.email && <p className="text-[10px] font-bold text-red-500 font-mono">{formErrors.email}</p>}
+                        {formErrors.email && <p className="text-[10px] font-bold text-red-500 font-sans">{formErrors.email}</p>}
                       </div>
 
                       {/* Company input */}
@@ -1032,7 +1002,7 @@ export const EventsView = ({
                             formErrors.company ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
-                        {formErrors.company && <p className="text-[10px] font-bold text-red-500 font-mono">{formErrors.company}</p>}
+                        {formErrors.company && <p className="text-[10px] font-bold text-red-500 font-sans">{formErrors.company}</p>}
                       </div>
 
                       {/* Position input */}
@@ -1050,7 +1020,7 @@ export const EventsView = ({
                             formErrors.position ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
-                        {formErrors.position && <p className="text-[10px] font-bold text-red-500 font-mono">{formErrors.position}</p>}
+                        {formErrors.position && <p className="text-[10px] font-bold text-red-500 font-sans">{formErrors.position}</p>}
                       </div>
 
                       {/* Number of attendees */}
@@ -1098,11 +1068,11 @@ export const EventsView = ({
                           Tôi đồng ý cung cấp thông tin phục vụ công tác tổ chức sự kiện và nhận các tài liệu công nghệ, giải pháp hữu ích từ CIC Tech qua các kênh Email/SMS. <span className="text-orange-600">*</span>
                         </span>
                       </label>
-                      {formErrors.consent && <p className="text-[10px] font-bold text-red-500 font-mono pl-6">{formErrors.consent}</p>}
+                      {formErrors.consent && <p className="text-[10px] font-bold text-red-500 font-sans pl-6">{formErrors.consent}</p>}
                     </div>
 
                     {/* UTM Parameters Hidden values tracking block (For Transparency / proof of work) */}
-                    <div className="bg-slate-50 border border-slate-200 p-3 text-[10px] font-mono text-slate-400 space-y-1">
+                    <div className="bg-slate-50 border border-slate-200 p-3 text-[10px] font-sans text-slate-400 space-y-1">
                       <span className="font-bold text-slate-500 uppercase block">UTM Tracking Parameters (Tự động ghi nhận):</span>
                       <div className="grid grid-cols-3 gap-2">
                         <span>source: <strong className="text-slate-600">{utmParams.source}</strong></span>
@@ -1154,7 +1124,7 @@ export const EventsView = ({
 
                     {/* MOCK SMTP EMAIL NOTIFICATION BOX */}
                     <div className="bg-emerald-50 border border-emerald-200/60 p-4 max-w-md mx-auto text-left space-y-2.5">
-                      <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs font-mono uppercase">
+                      <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs font-sans uppercase">
                         <Check size={16} className="bg-emerald-600 text-white rounded-full p-0.5" />
                         <span>Mô phỏng Email xác nhận đã gửi</span>
                       </div>
@@ -1164,7 +1134,7 @@ export const EventsView = ({
                     </div>
 
                     {/* REGISTRATION ID / QR DETAILS */}
-                    <div className="bg-slate-50 border border-slate-200 p-6 max-w-md mx-auto text-left font-mono space-y-3">
+                    <div className="bg-slate-50 border border-slate-200 p-6 max-w-md mx-auto text-left font-sans space-y-3">
                       <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Thông tin vé điện tử</h4>
                       <div className="grid grid-cols-2 gap-y-1.5 text-xs">
                         <span className="text-slate-400">Mã đăng ký:</span>

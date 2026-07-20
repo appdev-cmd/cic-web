@@ -241,7 +241,7 @@ export function NewsView({
               >
                 <ArrowLeft size={16} /> Quay lại danh sách tin tức
               </button>
-              <div className="text-[10px] font-mono font-bold text-slate-400">
+              <div className="text-[10px] font-sans font-bold text-slate-400">
                 TIN TỨC / {selectedItem.category.toUpperCase()} / {selectedItem.id.toUpperCase()}
               </div>
             </div>
@@ -253,7 +253,7 @@ export function NewsView({
               <div className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-6 lg:p-8 shadow-sm">
                 
                 {/* Meta details */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono text-slate-400">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-sans text-slate-400">
                   <span className="px-2 py-0.5 bg-orange-600/10 border border-orange-500/20 text-orange-600 text-[10px] font-sans font-black uppercase tracking-wider">
                     {categoriesList.find(c => c.id === selectedItem.category)?.label}
                   </span>
@@ -284,7 +284,7 @@ export function NewsView({
 
                 {/* Recruitment Specific Info Box */}
                 {selectedItem.category === 'recruitment' && (
-                  <div className="bg-slate-950 text-white p-6 border-l-4 border-orange-600 grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                  <div className="bg-slate-950 text-white p-6 border-l-4 border-orange-600 grid grid-cols-1 md:grid-cols-2 gap-4 font-sans text-xs">
                     <div className="space-y-2">
                       <p><span className="text-slate-400">Vị trí ứng tuyển:</span> <span className="text-white font-bold">{(selectedItem as RecruitmentNewsItem).position}</span></p>
                       <p><span className="text-slate-400">Phòng ban:</span> <span className="text-white font-bold">{(selectedItem as RecruitmentNewsItem).department}</span></p>
@@ -304,7 +304,7 @@ export function NewsView({
                     <h3 className="font-black uppercase tracking-wider text-orange-800 flex items-center gap-1.5">
                       <Percent size={16} /> Thông tin chương trình khuyến mại
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-slate-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-sans text-slate-700">
                       <p><span className="font-bold">Chương trình:</span> {(selectedItem as PromotionNewsItem).programName}</p>
                       <p><span className="font-bold">Thời gian áp dụng:</span> {(selectedItem as PromotionNewsItem).timeFrame}</p>
                       <p className="md:col-span-2"><span className="font-bold">Sản phẩm áp dụng:</span> {(selectedItem as PromotionNewsItem).appliedTargets.join(', ')}</p>
@@ -314,7 +314,7 @@ export function NewsView({
 
                 {/* Shareholder Specific Info Box */}
                 {selectedItem.category === 'shareholder' && (
-                  <div className="bg-slate-900 text-white p-6 border-b-2 border-orange-600 grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                  <div className="bg-slate-900 text-white p-6 border-b-2 border-orange-600 grid grid-cols-1 md:grid-cols-2 gap-4 font-sans text-xs">
                     <p><span className="text-slate-400">Loại văn bản:</span> <span className="text-orange-400 font-bold">{(selectedItem as ShareholderNewsItem).docType}</span></p>
                     <p><span className="text-slate-400">Năm tài chính công bố:</span> <span className="text-white font-bold">{(selectedItem as ShareholderNewsItem).year}</span></p>
                   </div>
@@ -350,7 +350,7 @@ export function NewsView({
                             if (!cleanLine) return null;
                             return (
                               <li key={lIdx} className="flex gap-2 text-slate-600 font-medium">
-                                <span className="h-5 w-5 bg-slate-950 text-white rounded-none flex items-center justify-center text-[9px] font-mono shrink-0 mt-0.5">{lIdx + 1}</span>
+                                <span className="h-5 w-5 bg-slate-950 text-white rounded-none flex items-center justify-center text-[9px] font-sans shrink-0 mt-0.5">{lIdx + 1}</span>
                                 <span>{cleanLine}</span>
                               </li>
                             );
@@ -427,7 +427,7 @@ export function NewsView({
                                       <h5 className="text-[11px] font-black text-slate-950 line-clamp-2 uppercase">
                                         {file.title}
                                       </h5>
-                                      <p className="text-[9px] font-mono text-slate-400">{file.size}</p>
+                                      <p className="text-[9px] font-sans text-slate-400">{file.size}</p>
                                     </div>
                                   </div>
 
@@ -538,7 +538,7 @@ export function NewsView({
                             />
                           </div>
                           <div className="space-y-1 flex-1">
-                            <span className="text-[8px] font-mono font-black text-orange-600 block">{article.date}</span>
+                            <span className="text-[8px] font-sans font-black text-orange-600 block">{article.date}</span>
                             <h4 className="text-xs font-black text-slate-900 group-hover:text-orange-600 transition-colors uppercase line-clamp-2 leading-snug">
                               {article.title}
                             </h4>
@@ -618,9 +618,9 @@ export function NewsView({
 
               {/* Little stats badge */}
               <div className="bg-slate-800 border border-slate-700 p-4 text-center shrink-0 min-w-[120px]">
-                <span className="text-[10px] font-mono text-slate-400 uppercase font-bold block">Tổng số lượng</span>
-                <span className="text-3xl font-black text-orange-500 font-mono">{filteredNews.length}</span>
-                <span className="text-[9px] font-mono text-slate-400 block">bài viết</span>
+                <span className="text-[10px] font-sans text-slate-400 uppercase font-bold block">Tổng số lượng</span>
+                <span className="text-3xl font-black text-orange-500 font-sans">{filteredNews.length}</span>
+                <span className="text-[9px] font-sans text-slate-400 block">bài viết</span>
               </div>
             </div>
 
@@ -635,7 +635,7 @@ export function NewsView({
                 
                 {/* Search query (Universal for all views) */}
                 <div className="md:col-span-5 space-y-1.5">
-                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Từ khóa tìm kiếm</label>
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Từ khóa tìm kiếm</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
                     <input
@@ -651,7 +651,7 @@ export function NewsView({
                 {/* Sub-Filters conditional on Selected Category */}
                 {activeCategory === 'company' && (
                   <div className="md:col-span-4 space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Chuyên mục nhỏ</label>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Chuyên mục nhỏ</label>
                     <select
                       value={companySubType}
                       onChange={(e: any) => setCompanySubType(e.target.value)}
@@ -666,7 +666,7 @@ export function NewsView({
 
                 {activeCategory === 'specialty' && (
                   <div className="md:col-span-4 space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Phân loại nội dung</label>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Phân loại nội dung</label>
                     <select
                       value={specialtySubType}
                       onChange={(e: any) => setSpecialtySubType(e.target.value)}
@@ -682,7 +682,7 @@ export function NewsView({
                 {activeCategory === 'recruitment' && (
                   <>
                     <div className="md:col-span-2 space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Phòng ban</label>
+                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Phòng ban</label>
                       <select
                         value={recruitmentDept}
                         onChange={(e) => setRecruitmentDept(e.target.value)}
@@ -693,7 +693,7 @@ export function NewsView({
                     </div>
 
                     <div className="md:col-span-2 space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Địa điểm</label>
+                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Địa điểm</label>
                       <select
                         value={recruitmentLoc}
                         onChange={(e) => setRecruitmentLoc(e.target.value)}
@@ -704,7 +704,7 @@ export function NewsView({
                     </div>
 
                     <div className="md:col-span-2 space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Trạng thái</label>
+                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Trạng thái</label>
                       <select
                         value={recruitmentStatus}
                         onChange={(e) => setRecruitmentStatus(e.target.value)}
@@ -718,7 +718,7 @@ export function NewsView({
 
                 {activeCategory === 'promotion' && (
                   <div className="md:col-span-4 space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Trạng thái ưu đãi</label>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Trạng thái ưu đãi</label>
                     <select
                       value={promotionStatus}
                       onChange={(e) => setPromotionStatus(e.target.value)}
@@ -732,7 +732,7 @@ export function NewsView({
                 {activeCategory === 'shareholder' && (
                   <>
                     <div className="md:col-span-3 space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Năm tài liệu</label>
+                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Năm tài liệu</label>
                       <select
                         value={shareholderYear}
                         onChange={(e) => setShareholderYear(e.target.value)}
@@ -743,7 +743,7 @@ export function NewsView({
                     </div>
 
                     <div className="md:col-span-3 space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-mono">Loại tài liệu</label>
+                      <label className="text-[9px] font-black uppercase tracking-wider text-slate-400 font-sans">Loại tài liệu</label>
                       <select
                         value={shareholderDocType}
                         onChange={(e) => setShareholderDocType(e.target.value)}
@@ -811,14 +811,14 @@ export function NewsView({
                     const r = news as RecruitmentNewsItem;
                     const isClosed = r.status === 'Đã hết hạn';
                     typeBadge = (
-                      <span className={`px-2 py-0.5 font-mono text-[9px] font-black uppercase ${
+                      <span className={`px-2 py-0.5 font-sans text-[9px] font-black uppercase ${
                         isClosed ? 'bg-slate-200 text-slate-500' : 'bg-emerald-100 text-emerald-800'
                       }`}>
                         {r.status}
                       </span>
                     );
                     customMetaBlock = (
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-mono text-slate-400 pt-2 border-t border-slate-100">
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-sans text-slate-400 pt-2 border-t border-slate-100">
                         <span className="flex items-center gap-1"><Briefcase size={10} className="text-orange-600" /> Vị trí: {r.position}</span>
                         <span className="flex items-center gap-1"><MapPin size={10} className="text-orange-600" /> {r.location}</span>
                         <span className="flex items-center gap-1"><DollarSign size={10} className="text-orange-600" /> {r.salary}</span>
@@ -828,40 +828,40 @@ export function NewsView({
                     const p = news as PromotionNewsItem;
                     const isClosed = p.status === 'Đã kết thúc';
                     typeBadge = (
-                      <span className={`px-2 py-0.5 font-mono text-[9px] font-black uppercase ${
+                      <span className={`px-2 py-0.5 font-sans text-[9px] font-black uppercase ${
                         isClosed ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-800'
                       }`}>
                         {p.status}
                       </span>
                     );
                     customMetaBlock = (
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-mono text-slate-400 pt-2 border-t border-slate-100">
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-sans text-slate-400 pt-2 border-t border-slate-100">
                         <span className="flex items-center gap-1"><Clock size={10} className="text-orange-600" /> Hạn: {p.timeFrame}</span>
                       </div>
                     );
                   } else if (news.category === 'shareholder') {
                     const s = news as ShareholderNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 font-mono text-[9px] font-black uppercase bg-indigo-100 text-indigo-800">
+                      <span className="px-2 py-0.5 font-sans text-[9px] font-black uppercase bg-indigo-100 text-indigo-800">
                         {s.docType}
                       </span>
                     );
                     customMetaBlock = (
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-mono text-slate-400 pt-2 border-t border-slate-100">
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-sans text-slate-400 pt-2 border-t border-slate-100">
                         <span className="flex items-center gap-1"><FileText size={10} className="text-orange-600" /> Năm: {s.year}</span>
                       </div>
                     );
                   } else if (news.category === 'company') {
                     const c = news as CompanyNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 font-mono text-[9px] font-black uppercase bg-amber-100 text-amber-800">
+                      <span className="px-2 py-0.5 font-sans text-[9px] font-black uppercase bg-amber-100 text-amber-800">
                         {c.subType}
                       </span>
                     );
                   } else if (news.category === 'specialty') {
                     const sp = news as SpecialtyNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 font-mono text-[9px] font-black uppercase bg-sky-100 text-sky-800">
+                      <span className="px-2 py-0.5 font-sans text-[9px] font-black uppercase bg-sky-100 text-sky-800">
                         {sp.subType}
                       </span>
                     );
@@ -897,7 +897,7 @@ export function NewsView({
                       {/* Content details part */}
                       <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                         <div className="space-y-2">
-                          <span className="text-[10px] font-mono font-bold text-slate-400 block flex items-center gap-1">
+                          <span className="text-[10px] font-sans font-bold text-slate-400 block flex items-center gap-1">
                             <Clock size={11} className="text-orange-500" /> {news.date}
                           </span>
                           <h3 

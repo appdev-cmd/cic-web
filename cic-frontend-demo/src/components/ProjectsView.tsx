@@ -184,7 +184,7 @@ export function ProjectsView({
                       {/* Content side */}
                       <div className="lg:col-span-5 p-8 lg:p-12 flex flex-col justify-center space-y-6 bg-slate-950">
                         <div className="space-y-3">
-                          <span className="inline-block px-2.5 py-0.5 bg-orange-600/20 border border-orange-600/40 text-orange-400 text-[9px] font-black uppercase tracking-widest">
+                          <span className="inline-block px-2.5 py-0.5 bg-orange-600/20 border border-orange-600/40 text-orange-400 text-[9px] font-sans font-black uppercase tracking-widest">
                             {featuredProjects[currentFeaturedIndex].sector}
                           </span>
                           <h2 className="text-xl lg:text-2xl font-black uppercase tracking-tight text-white leading-tight">
@@ -362,7 +362,7 @@ export function ProjectsView({
                     {/* Right side: Content */}
                     <div className="p-6 md:w-3/5 flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 block">
+                        <span className="text-[10px] font-sans font-black uppercase tracking-wider text-orange-600 block">
                           {project.solution}
                         </span>
                         <h3 
@@ -573,7 +573,7 @@ export function ProjectsView({
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute bottom-4 right-4 bg-black/75 text-white text-[9px] font-mono px-2 py-1 uppercase tracking-wider">
+                    <div className="absolute bottom-4 right-4 bg-black/75 text-white text-[9px] font-sans px-2 py-1 uppercase tracking-wider">
                       Hình {activeGalleryIndex + 1} / {activeProject.gallery.length}
                     </div>
                   </div>
@@ -652,7 +652,7 @@ export function ProjectsView({
                             <h5 className="text-xs font-bold text-slate-950 line-clamp-2">
                               {activeProject.pdf.title}
                             </h5>
-                            <span className="text-[9px] font-mono text-slate-400">{activeProject.pdf.size}</span>
+                            <span className="text-[9px] font-sans text-slate-400">{activeProject.pdf.size}</span>
                           </div>
                         </div>
 
@@ -723,7 +723,7 @@ export function ProjectsView({
                       className="bg-white border border-slate-200 p-4 flex justify-between items-center group/link hover:border-orange-500 transition-all shadow-sm"
                     >
                       <div className="space-y-0.5">
-                        <span className="text-[8px] font-mono font-black uppercase text-slate-400 tracking-wider">
+                        <span className="text-[8px] font-sans font-black uppercase text-slate-400 tracking-wider">
                           {link.view === 'products' ? 'Sản Phẩm Phần Mềm' : 'Dịch Vụ Tư Vấn'}
                         </span>
                         <h5 className="text-xs font-bold text-slate-800 group-hover/link:text-orange-600 transition-colors">
@@ -766,18 +766,18 @@ export function ProjectsView({
                     >
                       <div className="h-40 overflow-hidden relative">
                         <img src={proj.img} alt={proj.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
-                        <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-900/90 text-white font-mono text-[8px] font-black uppercase tracking-wider">
+                        <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-900/90 text-white font-sans text-[8px] font-black uppercase tracking-wider">
                           {proj.location}
                         </span>
                       </div>
                       <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
                         <div className="space-y-1">
-                          <span className="text-[8px] font-black uppercase tracking-widest text-orange-600 block">{proj.solution}</span>
+                          <span className="text-[8px] font-sans font-black uppercase tracking-widest text-orange-600 block">{proj.solution}</span>
                           <h4 className="text-xs font-black uppercase text-slate-900 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
                             {proj.name}
                           </h4>
                         </div>
-                        <span className="text-[9px] text-slate-400 font-mono flex items-center gap-1 mt-2">
+                        <span className="text-[9px] text-slate-400 font-sans flex items-center gap-1 mt-2">
                           Xem chi tiết <ArrowRight size={10} className="transition-transform group-hover:translate-x-1" />
                         </span>
                       </div>

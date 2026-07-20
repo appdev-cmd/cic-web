@@ -222,27 +222,10 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
   return (
     <div className="pt-24 pb-20 relative z-10 min-h-screen bg-slate-50/70">
       <div className="max-w-7xl mx-auto px-6">
-        
-        {/* BREADCRUMB */}
-        <nav className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 mb-8 font-mono">
-          <button 
-            onClick={() => {
-              if (onNavigateHome) onNavigateHome();
-            }} 
-            className="hover:text-orange-600 transition-colors"
-          >
-            Trang chủ
-          </button>
-          <ChevronRight size={12} />
-          <span className="text-slate-800">Liên hệ</span>
-        </nav>
 
         {/* HERO TITLE AREA */}
         <div className="border-b border-slate-200 pb-8 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="text-xs font-black uppercase tracking-widest text-orange-600 block mb-2 font-mono">
-              Liên hệ với chúng tôi
-            </span>
             <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-950">
               Kết nối chuyên gia CIC
             </h1>
@@ -306,12 +289,12 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold text-slate-600">
                       
                       <div className="space-y-1 bg-slate-50 border border-slate-100 p-4">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-mono">Địa chỉ văn phòng</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Địa chỉ văn phòng</span>
                         <p className="text-slate-800 leading-relaxed font-bold">{branches[activeBranch].address}</p>
                       </div>
 
                       <div className="space-y-1.5 bg-slate-50 border border-slate-100 p-4">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-mono">Liên hệ nhanh</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Liên hệ nhanh</span>
                         <div className="space-y-1 text-slate-800">
                           <p className="flex items-center gap-2">
                             <Phone className="text-orange-600 shrink-0" size={14} /> 
@@ -328,7 +311,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       </div>
 
                       <div className="md:col-span-2 space-y-1 bg-slate-50 border border-slate-100 p-4">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-mono">Thời gian làm việc</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Thời gian làm việc</span>
                         <p className="text-slate-800 flex items-center gap-2">
                           <Clock className="text-orange-600" size={14} /> {branches[activeBranch].workingHours}
                         </p>
@@ -340,7 +323,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   {/* MAP CONTAINER */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-black">
-                      <span className="uppercase tracking-wider text-slate-400 font-mono">Bản đồ vệ tinh Google Maps</span>
+                      <span className="uppercase tracking-wider text-slate-400 font-sans">Bản đồ vệ tinh Google Maps</span>
                       <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branches[activeBranch].searchQuery)}`}
                         target="_blank"
@@ -392,7 +375,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       <h4 className="text-xs font-black text-slate-900 leading-snug">{dept.name}</h4>
                       <a 
                         href={`mailto:${dept.email}`} 
-                        className="text-[11px] font-mono font-bold text-orange-600 hover:underline flex items-center gap-1"
+                        className="text-[11px] font-sans font-bold text-orange-600 hover:underline flex items-center gap-1"
                       >
                         {dept.email} <ChevronRight size={10} />
                       </a>
@@ -412,7 +395,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
               
               {/* Form header */}
               <div className="border-b border-slate-100 pb-4">
-                <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 font-mono flex items-center gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 font-sans flex items-center gap-1.5">
                   <Sparkles size={12} className="animate-pulse text-orange-500" /> Hệ thống liên hệ thông minh
                 </span>
                 <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight mt-1">Gửi phiếu yêu cầu tư vấn</h3>
@@ -431,7 +414,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       <CheckCircle className="text-emerald-500 shrink-0" size={24} />
                       <div>
                         <h4 className="font-black text-sm uppercase tracking-tight">Gửi Yêu Cầu Thành Công!</h4>
-                        <p className="text-[10px] font-mono font-bold text-slate-500 mt-0.5">ID Lead: {successLead.id}</p>
+                        <p className="text-[10px] font-sans font-bold text-slate-500 mt-0.5">ID Lead: {successLead.id}</p>
                       </div>
                     </div>
 
@@ -443,7 +426,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         <ShieldCheck className="text-emerald-500" size={16} />
                         <div>
                           <span className="block font-black text-slate-900 text-[11px]">{successLead.department}</span>
-                          <span className="block text-[10px] font-mono text-orange-600 font-bold underline">{successLead.departmentEmail}</span>
+                          <span className="block text-[10px] font-sans text-orange-600 font-bold underline">{successLead.departmentEmail}</span>
                         </div>
                       </div>
 
@@ -487,7 +470,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         <ChevronRight size={14} className="rotate-90" />
                       </div>
                     </div>
-                    <p className="text-[10px] font-mono text-slate-400 font-medium">
+                    <p className="text-[10px] font-sans text-slate-400 font-medium">
                       * Hệ thống tự động định tuyến thư liên hệ đến chính xác hòm thư điện tử của phòng ban được chọn.
                     </p>
                   </div>
@@ -635,9 +618,9 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
 
                   {/* ANTI-SPAM CAPTCHA */}
                   <div className="bg-slate-50 border border-slate-200 p-4 space-y-2.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-mono">Xác thực chống Spam tự động (Anti-Spam)</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Xác thực chống Spam tự động (Anti-Spam)</span>
                     <div className="flex items-center gap-3">
-                      <div className="bg-slate-900 text-white font-mono font-black text-sm px-4 py-2 border border-white/10 select-none tracking-widest">
+                      <div className="bg-slate-900 text-white font-sans font-black text-sm px-4 py-2 border border-white/10 select-none tracking-widest">
                         {captcha.num1} + {captcha.num2} = ?
                       </div>
                       <input
