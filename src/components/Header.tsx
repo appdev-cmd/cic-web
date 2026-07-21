@@ -80,7 +80,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
               onClick={(e) => {
                 e.preventDefault();
                 setCurrentView('home');
-                setActiveLink('Giới thiệu');
+                setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               className="flex items-center group"

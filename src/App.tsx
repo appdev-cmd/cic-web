@@ -33,7 +33,7 @@ export default function App() {
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [preSelectedNewsCategory, setPreSelectedNewsCategory] = useState<string | null>(null);
-  const [activeLink, setActiveLink] = useState('Giới thiệu');
+  const [activeLink, setActiveLink] = useState('');
   const [aboutSubTab, setAboutSubTab] = useState<'overview' | 'structure' | 'experience'>('overview');
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
@@ -110,7 +110,7 @@ export default function App() {
             initialServiceId={activeServiceId} 
             onNavigateHome={() => { 
               setCurrentView('home'); 
-              setActiveLink('Giới thiệu'); 
+              setActiveLink(''); 
             }} 
           />
         ) : currentView === 'projects' ? (
@@ -129,7 +129,7 @@ export default function App() {
             }}
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
             }}
           />
         ) : currentView === 'news' ? (
@@ -137,7 +137,7 @@ export default function App() {
             initialCategory={preSelectedNewsCategory}
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
             }}
             onNavigateToService={(serviceId) => {
               setCurrentView('services');
@@ -155,7 +155,7 @@ export default function App() {
           <EventsView 
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
             }}
             onNavigateToService={(serviceId) => {
               setCurrentView('services');
@@ -173,14 +173,14 @@ export default function App() {
           <ContactView 
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
             }}
           />
         ) : currentView === 'privacy' ? (
           <PrivacyPolicyView 
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
@@ -188,7 +188,7 @@ export default function App() {
           <TermsOfUseView 
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
@@ -220,7 +220,7 @@ export default function App() {
             }}
             onNavigateHome={() => {
               setCurrentView('home');
-              setActiveLink('Giới thiệu');
+              setActiveLink('');
             }}
           />
         ) : (

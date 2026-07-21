@@ -72,7 +72,7 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
           <div className="lg:col-span-2">
             <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Điều hướng</h3>
             <ul className="space-y-4 text-sm font-bold">
-              <li><a href="#home" onClick={() => { setCurrentView('home'); setActiveLink('Giới thiệu'); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Trang chủ</a></li>
+              <li><a href="#home" onClick={() => { setCurrentView('home'); setActiveLink(''); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Trang chủ</a></li>
               <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Sản phẩm</a></li>
               <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dịch vụ</a></li>
               <li><a href="#projects" onClick={(e) => { e.preventDefault(); setCurrentView('projects'); setActiveLink('Dự án'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dự án</a></li>
