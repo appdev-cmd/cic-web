@@ -223,7 +223,7 @@ export function NewsView({
   ];
 
   return (
-    <div className="pt-28 pb-20 relative z-10 bg-slate-50/50">
+    <div className="pt-28 pb-20 relative bg-slate-50/50">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* VIEW 1: NEWS DETAIL VIEW */}

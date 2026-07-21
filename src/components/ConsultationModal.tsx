@@ -113,7 +113,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
             </div>
 
             {/* Content Body */}
-            <div className="p-6 md:p-8 max-h-[75vh] overflow-y-auto">
+            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
               {!isSuccess ? (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <p className="text-xs text-slate-500 leading-relaxed">

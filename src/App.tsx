@@ -93,7 +93,7 @@ export default function App() {
         onOpenConsultation={() => setIsConsultationOpen(true)}
       />
 
-      <main className="relative z-10">
+      <main className="relative">
         {currentView === 'home' ? (
           <HomeView
             setCurrentView={setCurrentView}

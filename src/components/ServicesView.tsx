@@ -99,7 +99,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
   const relatedServices = servicesData.filter(s => s.id !== activeServiceId).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-28 pb-20 z-10 relative">
+    <div className="min-h-screen bg-slate-50/50 pt-28 pb-20 relative">
       {/* Visual Header Decoration */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-slate-900 to-transparent pointer-events-none opacity-[0.03] z-0"></div>
 

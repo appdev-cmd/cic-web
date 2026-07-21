@@ -22,6 +22,72 @@ import { Product } from '../types';
 import { productsData } from '../data/mockData';
 import { ProductDetailView } from './ProductDetailView';
 
+const PROVINCES = [
+  'Hà Nội',
+  'TP. Hồ Chí Minh',
+  'Đà Nẵng',
+  'Hải Phòng',
+  'Cần Thơ',
+  'An Giang',
+  'Bà Rịa - Vũng Tàu',
+  'Bắc Giang',
+  'Bắc Kạn',
+  'Bạc Liêu',
+  'Bắc Ninh',
+  'Bến Tre',
+  'Bình Định',
+  'Bình Dương',
+  'Bình Phước',
+  'Bình Thuận',
+  'Cà Mau',
+  'Cao Bằng',
+  'Đắk Lắk',
+  'Đắk Nông',
+  'Điện Biên',
+  'Đồng Nai',
+  'Đồng Tháp',
+  'Gia Lai',
+  'Hà Giang',
+  'Hà Nam',
+  'Hà Tĩnh',
+  'Hải Dương',
+  'Hậu Giang',
+  'Hòa Bình',
+  'Hưng Yên',
+  'Khánh Hòa',
+  'Kiên Giang',
+  'Kon Tum',
+  'Lai Châu',
+  'Lâm Đồng',
+  'Lạng Sơn',
+  'Lào Cai',
+  'Long An',
+  'Nam Định',
+  'Nghệ An',
+  'Ninh Bình',
+  'Ninh Thuận',
+  'Phú Thọ',
+  'Phú Yên',
+  'Quảng Bình',
+  'Quảng Nam',
+  'Quảng Ngãi',
+  'Quảng Ninh',
+  'Quảng Trị',
+  'Sóc Trăng',
+  'Sơn La',
+  'Tây Ninh',
+  'Thái Bình',
+  'Thái Nguyên',
+  'Thanh Hóa',
+  'Thừa Thiên Huế',
+  'Tiền Giang',
+  'Trà Vinh',
+  'Tuyên Quang',
+  'Vĩnh Long',
+  'Vĩnh Phúc',
+  'Yên Bái'
+];
+
 export function ProductsView() {
   const [search, setSearch] = useState('');
   const [selectedField, setSelectedField] = useState<string | null>(null);
@@ -47,6 +113,39 @@ export function ProductsView() {
   const [downloadFormSubmitted, setDownloadFormSubmitted] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
+
+  // Form input states
+  const [formData, setFormData] = useState({
+    name: '',
+    company: '',
+    address: '',
+    province: '',
+    email: '',
+    phone: '',
+    notes: '',
+    captchaInput: '',
+    version: '',
+  });
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const [captchaValue, setCaptchaValue] = useState(() => {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let res = '';
+    for (let i = 0; i < 5; i++) {
+      res += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return res;
+  });
+
+  const regenerateCaptcha = () => {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let res = '';
+    for (let i = 0; i < 5; i++) {
+      res += chars[Math.floor(Math.random() * chars.length)];
+    }
+    setCaptchaValue(res);
+  };
 
   // Dynamic filter values generated from data
   const fields = useMemo(() => {
@@ -127,10 +226,85 @@ export function ProductsView() {
     setDownloadFormSubmitted(false);
     setDownloading(false);
     setDownloadProgress(0);
+    setFormErrors({});
+    setFormData({
+      name: '',
+      company: '',
+      address: '',
+      province: '',
+      email: '',
+      phone: '',
+      notes: '',
+      captchaInput: '',
+      version: '',
+    });
+    regenerateCaptcha();
+  };
+
+  const triggerContact = (product: Product) => {
+    setActiveProduct(product);
+    setModalType('contact');
+    setFormSubmitted(false);
+    setFormErrors({});
+    setFormData({
+      name: '',
+      company: '',
+      address: '',
+      province: '',
+      email: '',
+      phone: '',
+      notes: '',
+      captchaInput: '',
+      version: '',
+    });
+    regenerateCaptcha();
+  };
+
+  const triggerBuy = (product: Product) => {
+    setActiveProduct(product);
+    setModalType('buy');
+    setFormSubmitted(false);
+    setFormErrors({});
+    setFormData({
+      name: '',
+      company: '',
+      address: '',
+      province: '',
+      email: '',
+      phone: '',
+      notes: '',
+      captchaInput: '',
+      version: '',
+    });
+    regenerateCaptcha();
+  };
+
+  const handleTabSwitch = (type: 'contact' | 'buy' | 'download') => {
+    setModalType(type);
+    setFormSubmitted(false);
+    setFormErrors({});
+    setFormData({
+      name: '',
+      company: '',
+      address: '',
+      province: '',
+      email: '',
+      phone: '',
+      notes: '',
+      captchaInput: '',
+      version: '',
+    });
+    regenerateCaptcha();
+    if (type === 'download') {
+      setDownloadFormSubmitted(false);
+      setDownloading(false);
+      setDownloadProgress(0);
+    }
   };
 
   const handleDownloadFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setDownloadFormSubmitted(true);
     setDownloading(true);
     setDownloadProgress(0);
@@ -147,14 +321,609 @@ export function ProductsView() {
     }, 150);
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) {
+      errors.name = 'Vui lòng nhập họ tên';
+    }
+
+    if (!formData.province) {
+      errors.province = 'Vui lòng chọn tỉnh/thành phố';
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = 'Vui lòng nhập email';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errors.email = 'Địa chỉ email không hợp lệ';
+    }
+
+    if (!formData.phone.trim()) {
+      errors.phone = 'Vui lòng nhập số điện thoại';
+    }
+
+    if (modalType === 'download' && !formData.version) {
+      errors.version = 'Vui lòng chọn phiên bản';
+    }
+
+    if (!formData.captchaInput.trim()) {
+      errors.captchaInput = 'Vui lòng nhập mã bảo mật';
+    } else if (formData.captchaInput.trim().toUpperCase() !== captchaValue.toUpperCase()) {
+      errors.captchaInput = 'Mã bảo mật không chính xác';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setFormSubmitted(true);
     setTimeout(() => {
       setModalType(null);
       setFormSubmitted(false);
       setActiveProduct(null);
+      setFormData({
+        name: '',
+        company: '',
+        address: '',
+        province: '',
+        email: '',
+        phone: '',
+        notes: '',
+        captchaInput: '',
+        version: '',
+      });
+      setFormErrors({});
+      regenerateCaptcha();
     }, 2000);
+  };
+
+  const renderActionModal = () => {
+    if (!modalType || !activeProduct) return null;
+
+    return (
+      <AnimatePresence>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 md:p-8">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setModalType(null)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[-1]"
+          ></motion.div>
+
+          {/* Modal Box */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-none w-full max-w-xl p-5 md:p-6 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] premium-scrollbar"
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setModalType(null)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-30"
+              title="Đóng"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Modal Tabs */}
+            <div className="flex border-b border-slate-200 mb-6 mt-2">
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('contact')}
+                className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
+                  modalType === 'contact'
+                    ? 'border-orange-600 text-orange-600 font-black'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                Yêu cầu tư vấn
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('buy')}
+                className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
+                  modalType === 'buy'
+                    ? 'border-orange-600 text-orange-600 font-black'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                Mua bản quyền
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('download')}
+                className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
+                  modalType === 'download'
+                    ? 'border-orange-600 text-orange-600 font-black'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                Tải phần mềm
+              </button>
+            </div>
+
+            {/* Selected Product Banner */}
+            <div className="p-3 bg-slate-50 border-l-4 border-orange-600 mb-5 flex items-center justify-between gap-4">
+              <div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Sản phẩm đang chọn</span>
+                <span className="text-sm font-black text-slate-800">{activeProduct.name}</span>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-1 bg-orange-50 text-orange-600 border border-orange-100 uppercase tracking-wider hidden sm:inline-block">Chính hãng</span>
+            </div>
+
+            {/* Download Modal Body */}
+            {modalType === 'download' && (
+              <div>
+                {!downloadFormSubmitted ? (
+                  <form className="space-y-3" onSubmit={handleDownloadFormSubmit}>
+                    {/* Row 1: Họ tên & Đơn vị công tác */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Họ tên <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          required 
+                          type="text" 
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Nguyễn Văn A" 
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.name ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        {formErrors.name && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.name}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Đơn vị công tác
+                        </label>
+                        <input 
+                          type="text" 
+                          value={formData.company}
+                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                          placeholder="Trường học, Doanh nghiệp..." 
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Row 2: Địa chỉ & Tỉnh/Thành phố */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Địa chỉ
+                        </label>
+                        <input 
+                          type="text" 
+                          value={formData.address}
+                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                          placeholder="Số nhà, tên đường..." 
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Chọn tỉnh/thành phố <span className="text-red-500">*</span>
+                        </label>
+                        <select 
+                          required
+                          value={formData.province}
+                          onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.province ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 cursor-pointer`}
+                        >
+                          <option value="">-- Chọn tỉnh/TP --</option>
+                          {PROVINCES.map((p) => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
+                        {formErrors.province && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.province}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Row 3: Email & Điện thoại di động */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          required 
+                          type="email" 
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="username@domain.com" 
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.email ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        {formErrors.email && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.email}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Điện thoại di động <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          required 
+                          type="tel" 
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="09xx xxx xxx" 
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.phone ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        {formErrors.phone && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.phone}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Row 4: Chọn phiên bản * */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                        Chọn phiên bản <span className="text-red-500">*</span>
+                      </label>
+                      <select 
+                        required
+                        value={formData.version}
+                        onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.version ? 'border-red-500' : 'border-slate-200'
+                        } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 cursor-pointer`}
+                      >
+                        <option value="">-- Chọn phiên bản tải về --</option>
+                        <option value="v2026-pro">{activeProduct.name} v2026.1 (Professional Edition)</option>
+                        <option value="v2026-std">{activeProduct.name} v2026.1 (Standard Edition)</option>
+                        <option value="v2025-ent">{activeProduct.name} v2025.2 (Enterprise Edition)</option>
+                        <option value="v2024-lts">{activeProduct.name} v2024.4 (LTS Stable Edition)</option>
+                      </select>
+                      {formErrors.version && (
+                        <p className="text-[11px] text-red-500 font-bold">{formErrors.version}</p>
+                      )}
+                    </div>
+
+                    {/* Row 5: Ghi chú */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                        Ghi chú
+                      </label>
+                      <textarea 
+                        rows={2} 
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        placeholder="Ghi chú thêm (nếu có)..." 
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 resize-none"
+                      />
+                    </div>
+
+                    {/* Row 6: Nhập mã bảo mật & captcha Display */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                        Nhập mã bảo mật <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <input 
+                          required 
+                          type="text" 
+                          value={formData.captchaInput}
+                          onChange={(e) => setFormData({ ...formData, captchaInput: e.target.value })}
+                          placeholder="Nhập mã bảo mật" 
+                          className={`flex-1 bg-slate-50 border ${
+                            formErrors.captchaInput ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="bg-slate-100 border border-slate-300 px-4 py-2 font-mono font-black text-lg tracking-[0.2em] text-orange-600 select-none bg-[linear-gradient(45deg,#f8f9fa_25%,transparent_25%),linear-gradient(-45deg,#f8f9fa_25%,transparent_25%)] bg-[size:12px_12px] relative overflow-hidden flex items-center justify-center min-w-[120px] h-[38px] shadow-inner">
+                            <span className="relative z-10 skew-x-12 select-none line-through decoration-slate-400 decoration-2">{captchaValue}</span>
+                            <div className="absolute inset-0 opacity-25 pointer-events-none">
+                              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-orange-600 -rotate-12"></div>
+                              <div className="absolute top-1/3 left-0 w-full h-[1px] bg-slate-900 rotate-12"></div>
+                              <div className="absolute top-2/3 left-0 w-full h-[1px] bg-orange-600 rotate-6"></div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={regenerateCaptcha}
+                            className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors border border-slate-200 flex items-center justify-center h-[38px] w-[38px]"
+                            title="Đổi mã bảo mật"
+                          >
+                            <RefreshCw size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      {formErrors.captchaInput && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.captchaInput}</p>
+                      )}
+                    </div>
+
+                    {/* Note block */}
+                    <p className="text-[11px] text-orange-600 font-bold italic pt-0.5">
+                      *Vui lòng điền đúng thông tin, chúng tôi sẽ liên hệ qua email của bạn
+                    </p>
+
+                    <button 
+                      type="submit" 
+                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
+                    >
+                      Bắt đầu tải phần mềm
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center py-4">
+                    <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
+                      <Download size={32} className={downloading ? 'animate-bounce' : ''} />
+                    </div>
+                    <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
+                      Tải phần mềm {activeProduct.name}
+                    </h3>
+                    
+                    {downloading ? (
+                      <div className="space-y-4">
+                        <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...</p>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
+                          <div 
+                            style={{ width: `${downloadProgress}%` }}
+                            className="h-full bg-orange-600 transition-all duration-150"
+                          ></div>
+                        </div>
+                        <span className="text-xs font-sans font-black text-slate-700">{downloadProgress}%</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
+                          <Check size={16} /> Tải phần mềm thành công!
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                          Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
+                        </p>
+                        <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
+                          Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào địa chỉ email của bạn.
+                        </p>
+                        <button 
+                          onClick={() => setModalType(null)}
+                          className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
+                        >
+                          Đóng cửa sổ
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Contact & Buy Modals Body */}
+            {(modalType === 'contact' || modalType === 'buy') && (
+              <div>
+                {formSubmitted ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-6 space-y-4"
+                  >
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto rounded-none">
+                      <Check size={24} />
+                    </div>
+                    <h4 className="text-lg font-black uppercase text-slate-950 tracking-tight">Gửi thông tin thành công!</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed font-bold">
+                      Cảm ơn bạn đã quan tâm. Đại diện kinh doanh và bộ phận kỹ thuật của chúng tôi sẽ liên hệ lại với bạn trong vòng 1 giờ làm việc.
+                    </p>
+                    <button 
+                      onClick={() => setModalType(null)}
+                      className="mt-2 px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
+                    >
+                      Đóng
+                    </button>
+                  </motion.div>
+                ) : (
+                  <form className="space-y-3" onSubmit={handleFormSubmit}>
+                    {/* Row 1: Họ tên & Đơn vị công tác */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Họ tên <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          required 
+                          type="text" 
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Nguyễn Văn A" 
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.name ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        {formErrors.name && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.name}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Đơn vị công tác
+                        </label>
+                        <input 
+                          type="text" 
+                          value={formData.company}
+                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                          placeholder="Trường học, Doanh nghiệp..." 
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Row 2: Địa chỉ & Tỉnh/Thành phố */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Địa chỉ
+                        </label>
+                        <input 
+                          type="text" 
+                          value={formData.address}
+                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                          placeholder="Số nhà, tên đường..." 
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Chọn tỉnh/thành phố <span className="text-red-500">*</span>
+                        </label>
+                        <select 
+                          required
+                          value={formData.province}
+                          onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.province ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 cursor-pointer`}
+                        >
+                          <option value="">-- Chọn tỉnh/TP --</option>
+                          {PROVINCES.map((p) => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
+                        {formErrors.province && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.province}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Row 3: Email & Điện thoại di động */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          required 
+                          type="email" 
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="username@domain.com" 
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.email ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        {formErrors.email && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.email}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                          Điện thoại di động <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          required 
+                          type="tel" 
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="09xx xxx xxx" 
+                          className={`w-full bg-slate-50 border ${
+                            formErrors.phone ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        {formErrors.phone && (
+                          <p className="text-[11px] text-red-500 font-bold">{formErrors.phone}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Row 4: Ghi chú */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                        Ghi chú
+                      </label>
+                      <textarea 
+                        rows={2} 
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        placeholder={modalType === 'contact' ? "Tôi muốn nhận báo giá chi tiết..." : "Yêu cầu thêm về sản phẩm..."}
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 resize-none"
+                      />
+                    </div>
+
+                    {/* Row 5: Nhập mã bảo mật & captcha Display */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                        Nhập mã bảo mật <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <input 
+                          required 
+                          type="text" 
+                          value={formData.captchaInput}
+                          onChange={(e) => setFormData({ ...formData, captchaInput: e.target.value })}
+                          placeholder="Nhập mã bảo mật" 
+                          className={`flex-1 bg-slate-50 border ${
+                            formErrors.captchaInput ? 'border-red-500' : 'border-slate-200'
+                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
+                        />
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="bg-slate-100 border border-slate-300 px-4 py-2 font-mono font-black text-lg tracking-[0.2em] text-orange-600 select-none bg-[linear-gradient(45deg,#f8f9fa_25%,transparent_25%),linear-gradient(-45deg,#f8f9fa_25%,transparent_25%)] bg-[size:12px_12px] relative overflow-hidden flex items-center justify-center min-w-[120px] h-[38px] shadow-inner">
+                            <span className="relative z-10 skew-x-12 select-none line-through decoration-slate-400 decoration-2">{captchaValue}</span>
+                            <div className="absolute inset-0 opacity-25 pointer-events-none">
+                              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-orange-600 -rotate-12"></div>
+                              <div className="absolute top-1/3 left-0 w-full h-[1px] bg-slate-900 rotate-12"></div>
+                              <div className="absolute top-2/3 left-0 w-full h-[1px] bg-orange-600 rotate-6"></div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={regenerateCaptcha}
+                            className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors border border-slate-200 flex items-center justify-center h-[38px] w-[38px]"
+                            title="Đổi mã bảo mật"
+                          >
+                            <RefreshCw size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      {formErrors.captchaInput && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.captchaInput}</p>
+                      )}
+                    </div>
+
+                    {/* Note block */}
+                    <p className="text-[11px] text-orange-600 font-bold italic pt-0.5">
+                      *Vui lòng điền đúng thông tin, chúng tôi sẽ liên hệ qua email của bạn
+                    </p>
+
+                    <button 
+                      type="submit" 
+                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
+                    >
+                      {modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký bản quyền ngay'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    );
   };
 
   if (selectedProduct) {
@@ -163,281 +932,18 @@ export function ProductsView() {
         <ProductDetailView 
           product={selectedProduct}
           onBack={() => setSelectedProduct(null)}
-          onContact={(prod) => { setActiveProduct(prod); setModalType('contact'); }}
-          onDownload={(prod) => { triggerDownload(prod); }}
-          onBuy={(prod) => { setActiveProduct(prod); setModalType('buy'); }}
+          onContact={triggerContact}
+          onDownload={triggerDownload}
+          onBuy={triggerBuy}
         />
         
-        {/* Interactive Action Modals */}
-        <AnimatePresence>
-          {modalType && activeProduct && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
-              {/* Backdrop */}
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setModalType(null)}
-                className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
-              ></motion.div>
-
-              {/* Modal Box */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-none w-full max-w-lg p-6 md:p-8 relative z-10 text-slate-900 overflow-y-auto max-h-[90vh]"
-              >
-                {/* Close Button */}
-                <button 
-                  onClick={() => setModalType(null)}
-                  className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-30"
-                >
-                  <X size={20} />
-                </button>
-
-                {/* Modal Tabs */}
-                <div className="flex border-b border-slate-200 mb-6 mt-2">
-                  <button
-                    onClick={() => { setModalType('contact'); setFormSubmitted(false); }}
-                    className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                      modalType === 'contact'
-                        ? 'border-orange-600 text-orange-600 font-black'
-                        : 'border-transparent text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    Tư vấn & Báo giá
-                  </button>
-                  <button
-                    onClick={() => { setModalType('buy'); setFormSubmitted(false); }}
-                    className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                      modalType === 'buy'
-                        ? 'border-orange-600 text-orange-600 font-black'
-                        : 'border-transparent text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    Mua bản quyền
-                  </button>
-                  <button
-                    onClick={() => { 
-                      setModalType('download'); 
-                      triggerDownload(activeProduct);
-                    }}
-                    className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                      modalType === 'download'
-                        ? 'border-orange-600 text-orange-600 font-black'
-                        : 'border-transparent text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    Tải phần mềm
-                  </button>
-                </div>
-
-                {/* Interest Product Banner */}
-                <div className="p-4 bg-slate-50 border-l-4 border-orange-600 mb-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Sản phẩm đang chọn</span>
-                  <span className="text-sm font-black text-slate-800">{activeProduct.name}</span>
-                </div>
-
-                {/* Download Modal Mode */}
-                {modalType === 'download' && (
-                  <div>
-                    {!downloadFormSubmitted ? (
-                      <div className="space-y-4">
-                        <div className="text-center pb-2">
-                          <div className="w-12 h-12 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-3 rounded-none">
-                            <Download size={24} />
-                          </div>
-                          <h3 className="text-base font-black uppercase text-slate-950 tracking-tight">
-                            Đăng ký tải bộ cài dùng thử (Trial)
-                          </h3>
-                          <p className="text-xs text-slate-500 mt-1 font-medium">
-                            Vui lòng nhập thông tin để kích hoạt liên kết tải xuống phần mềm {activeProduct.name}.
-                          </p>
-                        </div>
-                        <form className="space-y-4" onSubmit={handleDownloadFormSubmit}>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên *</label>
-                            <input 
-                              required 
-                              type="text" 
-                              placeholder="Nguyễn Văn A" 
-                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                            />
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số điện thoại *</label>
-                              <input 
-                                required 
-                                type="tel" 
-                                placeholder="0912 xxx xxx" 
-                                className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email nhận link tải *</label>
-                              <input 
-                                required 
-                                type="email" 
-                                placeholder="username@domain.com" 
-                                className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn vị / Doanh nghiệp</label>
-                            <input 
-                              type="text" 
-                              placeholder="Công ty Xây dựng XYZ" 
-                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                            />
-                          </div>
-                          
-                          <button 
-                            type="submit" 
-                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
-                          >
-                            Bắt đầu tải phần mềm
-                          </button>
-                        </form>
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
-                          <Download size={32} className={downloading ? 'animate-bounce' : ''} />
-                        </div>
-                        <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
-                          Tải phần mềm {activeProduct.name}
-                        </h3>
-                        
-                        {downloading ? (
-                          <div className="space-y-4">
-                            <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...</p>
-                            <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
-                              <div 
-                                style={{ width: `${downloadProgress}%` }}
-                                className="h-full bg-orange-600 transition-all duration-150"
-                              ></div>
-                            </div>
-                            <span className="text-xs font-sans font-black text-slate-700">{downloadProgress}%</span>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
-                              <Check size={16} /> Tải phần mềm thành công!
-                            </div>
-                            <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                              Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
-                            </p>
-                            <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
-                              Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào địa chỉ email của bạn.
-                            </p>
-                            <button 
-                              onClick={() => setModalType(null)}
-                              className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
-                            >
-                              Đóng cửa sổ
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Form Modes (Contact & Buy Registration) */}
-                {(modalType === 'contact' || modalType === 'buy') && (
-                  <div>
-                    {formSubmitted ? (
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-center py-6 space-y-4"
-                      >
-                        <div className="w-12 h-12 bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto rounded-none">
-                          <Check size={24} />
-                        </div>
-                        <h4 className="text-lg font-black uppercase text-slate-950 tracking-tight">Gửi thông tin thành công!</h4>
-                        <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                          Cảm ơn bạn đã quan tâm. Đại diện kinh doanh và bộ phận kỹ thuật của CIC sẽ liên hệ lại với bạn trong vòng 1 giờ làm việc.
-                        </p>
-                        <button 
-                          onClick={() => setModalType(null)}
-                          className="mt-2 px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
-                        >
-                          Đóng
-                        </button>
-                      </motion.div>
-                    ) : (
-                      <form className="space-y-4" onSubmit={handleFormSubmit}>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên *</label>
-                          <input 
-                            required 
-                            type="text" 
-                            placeholder="Nguyễn Văn A" 
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số điện thoại *</label>
-                            <input 
-                              required 
-                              type="tel" 
-                              placeholder="0912 xxx xxx" 
-                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email nhận thông tin *</label>
-                            <input 
-                              required 
-                              type="email" 
-                              placeholder="username@domain.com" 
-                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn vị / Doanh nghiệp</label>
-                          <input 
-                            type="text" 
-                            placeholder="Công ty Xây dựng XYZ" 
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Yêu cầu cụ thể</label>
-                          <textarea 
-                            required
-                            rows={3} 
-                            placeholder={modalType === 'contact' ? "Tôi muốn nhận báo giá chi tiết và brochure giới thiệu sản phẩm..." : "Tôi muốn đăng ký mua bản quyền chính hãng và nhận tư vấn thủ tục ký kết hợp đồng..."}
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800 resize-none"
-                          ></textarea>
-                        </div>
-                        
-                        <button 
-                          type="submit" 
-                          className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
-                        >
-                          {modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký bản quyền ngay'}
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+        {renderActionModal()}
       </>
     );
   }
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pt-36 pb-24 relative z-10 overflow-hidden">
+    <div className="bg-slate-50/50 min-h-screen pt-36 pb-24 relative overflow-hidden">
       {/* Visual background accents to match main landing page */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-10 w-[600px] h-[600px] bg-orange-600/5 blur-[120px] rounded-none"></div>
@@ -806,268 +1312,7 @@ export function ProductsView() {
       </div>
 
       {/* Interactive Action Modals */}
-      <AnimatePresence>
-        {modalType && activeProduct && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
-            {/* Backdrop */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setModalType(null)}
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
-            ></motion.div>
-
-            {/* Modal Box */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-none w-full max-w-lg p-6 md:p-8 relative z-10 text-slate-900 overflow-y-auto max-h-[90vh]"
-            >
-              {/* Close Button */}
-              <button 
-                onClick={() => setModalType(null)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-30"
-              >
-                <X size={20} />
-              </button>
-
-              {/* Modal Tabs */}
-              <div className="flex border-b border-slate-200 mb-6 mt-2">
-                <button
-                  onClick={() => { setModalType('contact'); setFormSubmitted(false); }}
-                  className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                    modalType === 'contact'
-                      ? 'border-orange-600 text-orange-600 font-black'
-                      : 'border-transparent text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  Tư vấn & Báo giá
-                </button>
-                <button
-                  onClick={() => { setModalType('buy'); setFormSubmitted(false); }}
-                  className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                    modalType === 'buy'
-                      ? 'border-orange-600 text-orange-600 font-black'
-                      : 'border-transparent text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  Mua bản quyền
-                </button>
-                <button
-                  onClick={() => { 
-                    setModalType('download'); 
-                    triggerDownload(activeProduct);
-                  }}
-                  className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                    modalType === 'download'
-                      ? 'border-orange-600 text-orange-600 font-black'
-                      : 'border-transparent text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  Tải phần mềm
-                </button>
-              </div>
-
-              {/* Interest Product Banner */}
-              <div className="p-4 bg-slate-50 border-l-4 border-orange-600 mb-6">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Sản phẩm đang chọn</span>
-                <span className="text-sm font-black text-slate-800">{activeProduct.name}</span>
-              </div>
-
-              {/* Download Modal Mode */}
-              {modalType === 'download' && (
-                <div>
-                  {!downloadFormSubmitted ? (
-                    <div className="space-y-4">
-                      <div className="text-center pb-2">
-                        <div className="w-12 h-12 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-3 rounded-none">
-                          <Download size={24} />
-                        </div>
-                        <h3 className="text-base font-black uppercase text-slate-950 tracking-tight">
-                          Đăng ký tải bộ cài dùng thử (Trial)
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-1 font-medium">
-                          Vui lòng nhập thông tin để kích hoạt liên kết tải xuống phần mềm {activeProduct.name}.
-                        </p>
-                      </div>
-                      <form className="space-y-4" onSubmit={handleDownloadFormSubmit}>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên *</label>
-                          <input 
-                            required 
-                            type="text" 
-                            placeholder="Nguyễn Văn A" 
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số điện thoại *</label>
-                            <input 
-                              required 
-                              type="tel" 
-                              placeholder="0912 xxx xxx" 
-                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email nhận link tải *</label>
-                            <input 
-                              required 
-                              type="email" 
-                              placeholder="username@domain.com" 
-                              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn vị / Doanh nghiệp</label>
-                          <input 
-                            type="text" 
-                            placeholder="Công ty Xây dựng XYZ" 
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                          />
-                        </div>
-                        
-                        <button 
-                          type="submit" 
-                          className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
-                        >
-                          Bắt đầu tải phần mềm
-                        </button>
-                      </form>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4">
-                      <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
-                        <Download size={32} className={downloading ? 'animate-bounce' : ''} />
-                      </div>
-                      <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
-                        Tải phần mềm {activeProduct.name}
-                      </h3>
-                      
-                      {downloading ? (
-                        <div className="space-y-4">
-                          <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...</p>
-                          <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
-                            <div 
-                              style={{ width: `${downloadProgress}%` }}
-                              className="h-full bg-orange-600 transition-all duration-150"
-                            ></div>
-                          </div>
-                          <span className="text-xs font-sans font-black text-slate-700">{downloadProgress}%</span>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
-                            <Check size={16} /> Tải phần mềm thành công!
-                          </div>
-                          <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                            Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
-                          </p>
-                          <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
-                            Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào địa chỉ email của bạn.
-                          </p>
-                          <button 
-                            onClick={() => setModalType(null)}
-                            className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
-                          >
-                            Đóng cửa sổ
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Form Modes (Contact & Buy Registration) */}
-              {(modalType === 'contact' || modalType === 'buy') && (
-                <div>
-                  {formSubmitted ? (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-center py-6 space-y-4"
-                    >
-                      <div className="w-12 h-12 bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto rounded-none">
-                        <Check size={24} />
-                      </div>
-                      <h4 className="text-lg font-black uppercase text-slate-950 tracking-tight">Gửi thông tin thành công!</h4>
-                      <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                        Cảm ơn bạn đã quan tâm. Đại diện kinh doanh và bộ phận kỹ thuật của CIC sẽ liên hệ lại với bạn trong vòng 1 giờ làm việc.
-                      </p>
-                      <button 
-                        onClick={() => setModalType(null)}
-                        className="mt-2 px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
-                      >
-                        Đóng
-                      </button>
-                    </motion.div>
-                  ) : (
-                    <form className="space-y-4" onSubmit={handleFormSubmit}>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Họ và tên *</label>
-                        <input 
-                          required 
-                          type="text" 
-                          placeholder="Nguyễn Văn A" 
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số điện thoại *</label>
-                          <input 
-                            required 
-                            type="tel" 
-                            placeholder="0912 xxx xxx" 
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email nhận thông tin *</label>
-                          <input 
-                            required 
-                            type="email" 
-                            placeholder="username@domain.com" 
-                            className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn vị / Doanh nghiệp</label>
-                        <input 
-                          type="text" 
-                          placeholder="Công ty Xây dựng XYZ" 
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Yêu cầu cụ thể</label>
-                        <textarea 
-                          rows={3} 
-                          placeholder={modalType === 'contact' ? "Tôi muốn nhận báo giá chi tiết và brochure giới thiệu sản phẩm..." : "Tôi muốn đăng ký mua bản quyền chính hãng và nhận tư vấn thủ tục ký kết hợp đồng..."}
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 text-sm font-bold text-slate-800 resize-none"
-                        ></textarea>
-                      </div>
-                      
-                      <button 
-                        type="submit" 
-                        className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
-                      >
-                        {modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký bản quyền ngay'}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {renderActionModal()}
     </div>
   );
 }

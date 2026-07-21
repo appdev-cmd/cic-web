@@ -234,7 +234,7 @@ export const EventsView = ({
   };
 
   return (
-    <div className="pt-24 pb-20 relative z-10 min-h-screen bg-slate-50/70">
+    <div className="pt-24 pb-20 relative min-h-screen bg-slate-50/70">
       <div className="max-w-7xl mx-auto px-6">
 
         <AnimatePresence mode="wait">
@@ -888,7 +888,15 @@ export const EventsView = ({
       {/* --- HIGH FIDELITY EVENT REGISTRATION FORM (MODAL overlay) --- */}
       <AnimatePresence>
         {showRegisterForm && registerEvent && (
-          <div className="fixed inset-0 bg-slate-950/80 z-[150] flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm">
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 overflow-y-auto">
+            {/* Backdrop */}
+            <div 
+              onClick={() => {
+                setShowRegisterForm(false);
+                setRegistrationResult(null);
+              }}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[-1]"
+            />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
