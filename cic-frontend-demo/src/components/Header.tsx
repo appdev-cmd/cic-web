@@ -91,6 +91,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                 className={`h-10 md:h-12 w-auto transition-all duration-500 ${
                   isHeaderWhite ? 'brightness-100' : 'brightness-0 invert'
                 } group-hover:scale-105`}
+                style={isHeaderWhite ? { filter: 'hue-rotate(25deg) saturate(1.5) brightness(1.2)' } : undefined}
               />
             </a>
           </div>

@@ -32,6 +32,7 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
                 src="logo.png" 
                 alt="CIC Logo Small" 
                 className="h-20 w-auto mb-4"
+                style={{ filter: 'hue-rotate(25deg) saturate(1.5) brightness(1.2)' }}
               />
             </div>
             <p className="text-white font-black text-lg mb-4 leading-tight">
