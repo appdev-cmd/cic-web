@@ -140,7 +140,7 @@ export const HomeView = ({
   return (
     <>
       {/* Hero Section */}
-      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950/90 z-10">
+      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.img 
@@ -148,13 +148,13 @@ export const HomeView = ({
               src={heroSlides[currentSlide].img} 
               alt="Slide" 
               initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 0.4, scale: 1 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover animate-none"
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-transparent mix-blend-multiply"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 via-60% to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-16 items-center relative z-10 w-full mb-4">
