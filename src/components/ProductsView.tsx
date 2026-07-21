@@ -437,7 +437,7 @@ export function ProductsView() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-36 pb-24 relative overflow-hidden">
+    <div className="bg-slate-50/50 min-h-screen pt-36 pb-24 relative z-10 overflow-hidden">
       {/* Visual background accents to match main landing page */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-10 w-[600px] h-[600px] bg-orange-600/5 blur-[120px] rounded-none"></div>

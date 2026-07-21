@@ -134,7 +134,7 @@ export const TermsOfUseView = ({ onNavigateHome }: TermsOfUseViewProps) => {
   ];
 
   return (
-    <div id="terms-of-use-view-root" className="pt-28 pb-24 relative z-10 min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-slate-100/50">
+    <div id="terms-of-use-view-root" className="pt-28 pb-24 relative z-10 min-h-screen bg-gradient-to-b from-slate-50/50 via-white/70 to-slate-100/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* BREADCRUMB */}

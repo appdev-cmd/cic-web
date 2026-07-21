@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { Phone, MessageCircle } from 'lucide-react';
 
 import { Constellation } from './components/Constellation';
+import { TechAboutBackground } from './components/TechAboutBackground';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ZaloIcon } from './components/shared/Icons';
@@ -38,14 +39,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-orange-500 selection:text-white relative">
-      {/* Interactive Constellation Background */}
+      {/* Interactive Background Engine */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-100">
-        <Constellation 
-          density={9000} 
-          lineDistance={200} 
-          particleColor="rgba(234, 88, 12, 0.5)" 
-          lineColor="rgba(234, 88, 12, " 
-        />
+        {currentView === 'about' ? (
+          <TechAboutBackground />
+        ) : (
+          <Constellation 
+            density={9000} 
+            lineDistance={200} 
+            particleColor="rgba(234, 88, 12, 0.5)" 
+            lineColor="rgba(234, 88, 12, " 
+          />
+        )}
       </div>
 
       {/* Floating Contact Bar */}
@@ -88,138 +93,140 @@ export default function App() {
         onOpenConsultation={() => setIsConsultationOpen(true)}
       />
 
-      {currentView === 'home' ? (
-        <HomeView
-          setCurrentView={setCurrentView}
-          setActiveLink={setActiveLink}
-          setActiveServiceId={setActiveServiceId}
-          setActiveProjectId={setActiveProjectId}
-          setPreSelectedNewsCategory={setPreSelectedNewsCategory}
-          setAboutSubTab={setAboutSubTab}
-        />
-      ) : currentView === 'about' ? (
-        <AboutView activeTab={aboutSubTab} setActiveTab={setAboutSubTab} />
-      ) : currentView === 'services' ? (
-        <ServicesView 
-          initialServiceId={activeServiceId} 
-          onNavigateHome={() => { 
-            setCurrentView('home'); 
-            setActiveLink('Giới thiệu'); 
-          }} 
-        />
-      ) : currentView === 'projects' ? (
-        <ProjectsView 
-          initialProjectId={activeProjectId} 
-          onNavigateToService={(serviceId) => {
-            setCurrentView('services');
-            setActiveLink('Dịch vụ');
-            setActiveServiceId(serviceId);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateToProduct={() => {
-            setCurrentView('products');
-            setActiveLink('Sản phẩm');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-          }}
-        />
-      ) : currentView === 'news' ? (
-        <NewsView 
-          initialCategory={preSelectedNewsCategory}
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-          }}
-          onNavigateToService={(serviceId) => {
-            setCurrentView('services');
-            setActiveLink('Dịch vụ');
-            setActiveServiceId(serviceId);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateToProduct={() => {
-            setCurrentView('products');
-            setActiveLink('Sản phẩm');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
-      ) : currentView === 'events' ? (
-        <EventsView 
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-          }}
-          onNavigateToService={(serviceId) => {
-            setCurrentView('services');
-            setActiveLink('Dịch vụ');
-            setActiveServiceId(serviceId);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateToProduct={() => {
-            setCurrentView('products');
-            setActiveLink('Sản phẩm');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
-      ) : currentView === 'contact' ? (
-        <ContactView 
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-          }}
-        />
-      ) : currentView === 'privacy' ? (
-        <PrivacyPolicyView 
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
-      ) : currentView === 'terms' ? (
-        <TermsOfUseView 
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-        />
-      ) : currentView === 'search' ? (
-        <SearchView
-          initialQuery={globalSearchQuery}
-          onNavigateToProduct={() => {
-            setCurrentView('products');
-            setActiveLink('Sản phẩm');
-          }}
-          onNavigateToProject={(projectId) => {
-            setCurrentView('projects');
-            setActiveLink('Dự án');
-            setActiveProjectId(projectId);
-          }}
-          onNavigateToService={(serviceId) => {
-            setCurrentView('services');
-            setActiveLink('Dịch vụ');
-            setActiveServiceId(serviceId);
-          }}
-          onNavigateToNews={(category) => {
-            setCurrentView('news');
-            setActiveLink('Tin tức');
-            setPreSelectedNewsCategory(category);
-          }}
-          onNavigateToEvent={() => {
-            setCurrentView('events');
-            setActiveLink('Sự kiện');
-          }}
-          onNavigateHome={() => {
-            setCurrentView('home');
-            setActiveLink('Giới thiệu');
-          }}
-        />
-      ) : (
-        <ProductsView />
-      )}
+      <main className="relative z-10">
+        {currentView === 'home' ? (
+          <HomeView
+            setCurrentView={setCurrentView}
+            setActiveLink={setActiveLink}
+            setActiveServiceId={setActiveServiceId}
+            setActiveProjectId={setActiveProjectId}
+            setPreSelectedNewsCategory={setPreSelectedNewsCategory}
+            setAboutSubTab={setAboutSubTab}
+          />
+        ) : currentView === 'about' ? (
+          <AboutView activeTab={aboutSubTab} setActiveTab={setAboutSubTab} />
+        ) : currentView === 'services' ? (
+          <ServicesView 
+            initialServiceId={activeServiceId} 
+            onNavigateHome={() => { 
+              setCurrentView('home'); 
+              setActiveLink('Giới thiệu'); 
+            }} 
+          />
+        ) : currentView === 'projects' ? (
+          <ProjectsView 
+            initialProjectId={activeProjectId} 
+            onNavigateToService={(serviceId) => {
+              setCurrentView('services');
+              setActiveLink('Dịch vụ');
+              setActiveServiceId(serviceId);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onNavigateToProduct={() => {
+              setCurrentView('products');
+              setActiveLink('Sản phẩm');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+            }}
+          />
+        ) : currentView === 'news' ? (
+          <NewsView 
+            initialCategory={preSelectedNewsCategory}
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+            }}
+            onNavigateToService={(serviceId) => {
+              setCurrentView('services');
+              setActiveLink('Dịch vụ');
+              setActiveServiceId(serviceId);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onNavigateToProduct={() => {
+              setCurrentView('products');
+              setActiveLink('Sản phẩm');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : currentView === 'events' ? (
+          <EventsView 
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+            }}
+            onNavigateToService={(serviceId) => {
+              setCurrentView('services');
+              setActiveLink('Dịch vụ');
+              setActiveServiceId(serviceId);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onNavigateToProduct={() => {
+              setCurrentView('products');
+              setActiveLink('Sản phẩm');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : currentView === 'contact' ? (
+          <ContactView 
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+            }}
+          />
+        ) : currentView === 'privacy' ? (
+          <PrivacyPolicyView 
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : currentView === 'terms' ? (
+          <TermsOfUseView 
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : currentView === 'search' ? (
+          <SearchView
+            initialQuery={globalSearchQuery}
+            onNavigateToProduct={() => {
+              setCurrentView('products');
+              setActiveLink('Sản phẩm');
+            }}
+            onNavigateToProject={(projectId) => {
+              setCurrentView('projects');
+              setActiveLink('Dự án');
+              setActiveProjectId(projectId);
+            }}
+            onNavigateToService={(serviceId) => {
+              setCurrentView('services');
+              setActiveLink('Dịch vụ');
+              setActiveServiceId(serviceId);
+            }}
+            onNavigateToNews={(category) => {
+              setCurrentView('news');
+              setActiveLink('Tin tức');
+              setPreSelectedNewsCategory(category);
+            }}
+            onNavigateToEvent={() => {
+              setCurrentView('events');
+              setActiveLink('Sự kiện');
+            }}
+            onNavigateHome={() => {
+              setCurrentView('home');
+              setActiveLink('Giới thiệu');
+            }}
+          />
+        ) : (
+          <ProductsView />
+        )}
+      </main>
 
       {/* Reusable Clean Footer Component */}
       <Footer 

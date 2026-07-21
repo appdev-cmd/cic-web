@@ -20,7 +20,12 @@ import {
   Users,
   Bell,
   Search,
-  X
+  X,
+  Calendar,
+  MapPin,
+  Globe,
+  Award,
+  Menu
 } from 'lucide-react';
 
 import { Counter } from './shared/Counter';
@@ -64,7 +69,7 @@ export const HomeView = ({
 }: HomeViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
-  const [activeProjectTab, setActiveProjectTab] = useState('software');
+  const [activeProjectTab, setActiveProjectTab] = useState('all');
   const [activeNewsCategory, setActiveNewsCategory] = useState('all');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectSearchQuery, setProjectSearchQuery] = useState('');
@@ -77,6 +82,12 @@ export const HomeView = ({
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    // Preload hero slide images for instant loading
+    heroSlides.forEach((slide) => {
+      const img = new Image();
+      img.src = slide.img;
+    });
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
@@ -129,7 +140,7 @@ export const HomeView = ({
   return (
     <>
       {/* Hero Section */}
-      <section id="home" className="relative pt-32 pb-32 overflow-hidden bg-slate-950/90 z-10">
+      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950/90 z-10">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.img 
@@ -146,7 +157,7 @@ export const HomeView = ({
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-transparent mix-blend-multiply"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-16 items-center relative z-10 w-full mb-12">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-16 items-center relative z-10 w-full mb-4">
           <motion.div
             key={currentSlide}
             initial={{ opacity: 0, x: -30 }}
@@ -154,7 +165,7 @@ export const HomeView = ({
             transition={{ duration: 0.8 }}
             className="lg:col-span-8 xl:col-span-9"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-none mb-8 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-none mb-5 backdrop-blur-md">
               <span className="flex h-2 w-2 rounded-none bg-orange-600 animate-pulse"></span>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
                 Leading Innovation since 1990
@@ -162,11 +173,11 @@ export const HomeView = ({
             </div>
             
             <h1 
-              className="text-5xl lg:text-[4.5rem] xl:text-7xl font-black text-white leading-[1.1] mb-8 tracking-tighter"
+              className="text-5xl lg:text-[4.5rem] xl:text-7xl font-black text-white leading-[1.1] mb-4 tracking-tighter"
               dangerouslySetInnerHTML={{ __html: heroSlides[currentSlide].title }}
             />
             
-            <p className="text-xl text-slate-300 mb-12 max-w-xl leading-relaxed font-medium">
+            <p className="text-xl text-slate-300 mb-8 max-w-xl leading-relaxed font-medium">
               {heroSlides[currentSlide].sub}
             </p>
 
@@ -191,7 +202,7 @@ export const HomeView = ({
           </motion.div>
         </div>
 
-        <div className="absolute bottom-16 lg:bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-30">
+        <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-40">
           {heroSlides.map((_, i) => (
             <button 
               key={i} 
@@ -344,382 +355,446 @@ export const HomeView = ({
       </section>
 
       {/* Ecosystem Section */}
-      <section id="solutions" className="py-12 bg-slate-50/40 text-slate-950 relative overflow-hidden z-10">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <SectionHeader 
-            title="Hệ sinh thái Công nghệ CIC" 
-            sub="Phần mềm, thiết bị, AI, BIM, Digital Twins & Tư vấn đào tạo" 
-          />
+      <section id="solutions" className="py-24 bg-slate-950 text-white relative overflow-hidden z-10">
+        {/* Background Effects */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-600/5 rounded-full blur-[100px] pointer-events-none translate-x-1/3 -translate-y-1/3"></div>
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none -translate-x-1/3 translate-y-1/3"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00MCAwaC0xdjQwaDFWMHoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPgo8cGF0aCBkPSJNMCAzOWg0MHYxSDB2LTF6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+')] opacity-30 mix-blend-overlay"></div>
+        </div>
 
-          <div className="flex justify-center -mt-2 mb-8">
-            <div className="w-full max-w-[280px] relative">
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm giải pháp..." 
-                onClick={() => {
-                  setCurrentView('search');
-                  setActiveLink('');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                readOnly
-                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 cursor-pointer shadow-sm transition-all rounded-md text-sm font-medium" 
-              />
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-end mb-16">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full mb-6">
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">Hệ sinh thái cốt lõi</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tighter">Lĩnh vực kinh doanh</h2>
             </div>
+            <p className="text-slate-400 max-w-md text-sm md:text-base text-right border-l-2 border-orange-500/30 pl-4 py-1">
+              Phát triển toàn diện hệ sinh thái công nghệ, từ phần mềm chuyên ngành đến thiết bị hiện đại và dịch vụ chuyển đổi số sâu rộng.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
-            {/* AI & Smart Tech - Large Feature */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* Box 1: Phát triển phần mềm - Lớn */}
             <motion.div 
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              whileHover={{ y: -8, scale: 1.01 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
               onClick={() => {
-                setCurrentView('services');
-                setActiveLink('Dịch vụ');
-                setActiveServiceId('chuyen-doi-so');
+                setCurrentView('products');
+                setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-8 group relative p-6 md:p-8 rounded-lg bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-xl"
+              className="md:col-span-8 group relative rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-orange-500/50 transition-colors cursor-pointer"
             >
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-all duration-500 transform group-hover:rotate-12 text-slate-900">
-                <BIMIcon />
-              </div>
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-600 rounded-md text-[10px] font-black text-white uppercase tracking-widest mb-8">
-                  <div className="w-2 h-2 bg-slate-50 rounded-full animate-pulse"></div>
-                  Advanced Technology
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              
+              <div className="flex flex-col md:flex-row h-full">
+                <div className="p-8 md:w-1/2 flex flex-col justify-center relative z-10">
+                  <div className="w-14 h-14 bg-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(234,88,12,0.2)]">
+                    <BIMIcon />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-white">Phát triển phần mềm</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                    Nghiên cứu, phát triển các giải pháp phần mềm chuyên ngành xây dựng, giao thông, thủy lợi. Tiên phong ứng dụng AI & Dữ liệu lớn vào phân tích.
+                  </p>
+                  <div className="mt-auto flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-wider group-hover:gap-4 transition-all cursor-pointer">
+                    Tìm hiểu thêm <ArrowRight size={14} />
+                  </div>
                 </div>
-                <h3 className="text-3xl font-black mb-4 group-hover:text-orange-600 transition-colors">AI & Công nghệ thông minh</h3>
-                <p className="text-base text-slate-500 max-w-2xl leading-relaxed mb-10 font-medium">
-                  Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình, kiểm soát rủi ro tức thời và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.
-                </p>
-                <div className="flex gap-4">
-                  <button className="flex items-center gap-2 text-xs font-black uppercase text-orange-600 tracking-wider">
-                    Xem chi tiết <ArrowRight size={14} />
-                  </button>
+                <div className="md:w-1/2 relative min-h-[250px] bg-slate-950/50 overflow-hidden border-l border-slate-800 flex items-center justify-center">
+                   {/* Abstract Tech Graphic */}
+                   <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                   <motion.div 
+                     animate={{ rotate: 360 }}
+                     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                     className="w-48 h-48 rounded-full border border-dashed border-orange-500/30 flex items-center justify-center relative z-10"
+                   >
+                      <div className="w-32 h-32 rounded-full border border-orange-500/20 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-orange-500/10 blur-md"></div>
+                      </div>
+                   </motion.div>
                 </div>
               </div>
             </motion.div>
 
-            {/* BIM Consultancy */}
+            {/* Box 2: Phân phối phần mềm nhập khẩu */}
             <motion.div 
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              whileHover={{ y: -8, scale: 1.01 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.1 }}
               onClick={() => {
-                setCurrentView('services');
-                setActiveLink('Dịch vụ');
-                setActiveServiceId('tu-van-bim');
+                setCurrentView('products');
+                setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-4 group relative p-6 md:p-8 rounded-lg bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-xl"
+              className="md:col-span-4 group relative rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-blue-500/50 transition-colors flex flex-col cursor-pointer"
             >
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="w-12 h-12 rounded-lg bg-orange-600/10 text-orange-600 flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                  <BIMIcon />
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="p-8 relative z-10 flex-1">
+                <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <ShieldCheck size={24} />
                 </div>
-                <h3 className="text-xl font-black mb-3 group-hover:text-orange-600 transition-colors">Tư vấn BIM & Digital Twins</h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                  Chuyển giao giải pháp CDE, thiết lập mô hình quản lý thông tin công trình, hỗ trợ lập quy trình vận hành và ứng dụng công nghệ bản sao số vào đại dự án.
+                <h3 className="text-xl font-bold mb-3 text-white">Phần mềm bản quyền</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                  Đại diện phân phối chính thức các hãng lớn: Autodesk, Plaxis, CSI, Bentley, Trimble...
                 </p>
-                <div className="mt-auto">
-                  <button className="text-[10px] font-black uppercase tracking-wider text-orange-600 flex items-center gap-1.5">
-                    Tìm hiểu thêm <ChevronRight size={14} />
-                  </button>
+                <div className="absolute bottom-8 right-8 text-blue-500 opacity-20 group-hover:opacity-50 transition-opacity">
+                  <Globe size={80} strokeWidth={1} />
                 </div>
               </div>
             </motion.div>
 
-            {/* Home Solutions List */}
-            {homeSolutionsList.map((sol, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.8, delay: i * 0.1 }}
-                whileHover={{ y: -8, scale: 1.01 }}
-                onClick={() => {
-                  if (i === 0) {
-                    setCurrentView('products');
-                    setActiveLink('Sản phẩm');
-                  } else if (i === 1) {
-                    setCurrentView('products');
-                    setActiveLink('Sản phẩm');
-                  } else {
-                    setCurrentView('services');
-                    setActiveLink('Dịch vụ');
-                    setActiveServiceId('dao-tao-chuyen-giao');
-                  }
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="lg:col-span-4 group relative p-6 md:p-8 rounded-lg bg-white shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-xl hover:border-orange-100"
-              >
-                <div className="w-12 h-12 rounded-lg bg-orange-600/10 text-orange-600 flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                  {solutionIcons[i]}
+            {/* Box 3: Phân phối thiết bị */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              onClick={() => {
+                setCurrentView('products');
+                setActiveLink('Sản phẩm');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="md:col-span-6 lg:col-span-7 group relative rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-emerald-500/50 transition-colors flex flex-col md:flex-row cursor-pointer"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="p-8 md:w-2/3 relative z-10">
+                <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Award size={24} />
                 </div>
-                <h3 className="text-xl font-black mb-3 group-hover:text-orange-600 transition-colors">{sol.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                  {sol.desc}
+                <h3 className="text-xl font-bold mb-3 text-white">Phân phối thiết bị công nghệ</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Cung cấp thiết bị khảo sát, đo đạc, kiểm định công trình hiện đại (UAV, LiDAR, GPR) từ các thương hiệu uy tín hàng đầu.
                 </p>
-                <button className="text-[10px] font-black uppercase tracking-wider text-orange-600 flex items-center gap-1.5">
-                  Xem danh mục <ChevronRight size={14} />
-                </button>
-              </motion.div>
-            ))}
+              </div>
+              <div className="md:w-1/3 relative min-h-[150px] bg-slate-950/50 border-l border-slate-800 flex items-center justify-center overflow-hidden">
+                <motion.div 
+                   animate={{ y: [-10, 10, -10] }}
+                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                   className="w-16 h-1 bg-emerald-500/50 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.8)]"
+                ></motion.div>
+                <div className="absolute inset-x-0 top-1/2 h-px bg-emerald-500/20"></div>
+              </div>
+            </motion.div>
+
+            {/* Box 4: Đào tạo tư vấn */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              onClick={() => {
+                setCurrentView('services');
+                setActiveLink('Dịch vụ');
+                setActiveServiceId('dao-tao-chuyen-giao');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="md:col-span-6 lg:col-span-5 group relative rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-purple-500/50 transition-colors flex flex-col cursor-pointer"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tl from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="p-8 relative z-10 flex-1">
+                <div className="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Menu size={24} />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">Đào tạo & Tư vấn</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                  Đồng hành chuyển đổi số doanh nghiệp, triển khai BIM. Tư vấn lộ trình Net Zero, kiểm kê phát thải.
+                </p>
+                <div className="flex gap-2">
+                  <span className="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-300 font-bold">BIM</span>
+                  <span className="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-300 font-bold">Net Zero</span>
+                  <span className="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-300 font-bold">Digital</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Projects Bento Grid */}
-      <section id="projects" className="py-20 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
+      {/* Featured Projects - Bento Grid */}
+      <section id="projects" className="py-12 bg-white/40 relative overflow-hidden border-t border-slate-100 z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
-            title="Dự án tiêu biểu" 
-            sub="Đồng hành kiến tạo những công trình tầm cỡ" 
+             title="Dự án tiêu biểu" 
+             sub="Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện" 
           />
-
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 border-b border-slate-200 pb-6">
-            <div className="flex flex-wrap gap-2">
+          
+          {/* Project Tabs and Search */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap justify-center gap-2">
               {[
-                { id: 'software', label: 'Mô phỏng & Thiết kế' },
-                { id: 'equipment', label: 'Cảm biến & Thiết bị' },
-                { id: 'services', label: 'Tư vấn & Chuyển giao' }
+                { id: 'all', label: 'Tất cả' },
+                { id: 'software', label: 'Phần mềm' },
+                { id: 'equipment', label: 'Thiết bị' },
+                { id: 'services', label: 'Dịch vụ' }
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    setActiveProjectTab(tab.id);
-                  }}
-                  className={`px-4 py-2 text-xs font-black uppercase tracking-wider border-b-2 transition-all duration-300 ${
-                    activeProjectTab === tab.id 
-                      ? 'border-orange-600 text-orange-600' 
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  onClick={() => setActiveProjectTab(tab.id)}
+                  className={`px-8 py-2.5 rounded-none font-black text-xs uppercase tracking-widest transition-all ${
+                    activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-xl' : 'bg-white text-slate-500 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
-            
-            <div className="w-full md:max-w-xs relative">
-              <input 
-                type="text" 
+            <div className="relative w-full md:w-auto min-w-[280px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder="Tìm kiếm dự án..."
                 value={projectSearchQuery}
                 onChange={(e) => setProjectSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm dự án..." 
-                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 shadow-sm transition-all rounded-md text-sm font-medium" 
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-none font-medium text-sm text-slate-900 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 transition-all"
               />
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 items-start">
-            {filteredProjects.map((proj, idx) => {
-              const sizeClass = proj.size === 'wide' 
-                ? 'lg:col-span-8' 
-                : proj.size === 'tall' 
-                  ? 'lg:col-span-4' 
-                  : 'lg:col-span-4';
-              return (
-                <motion.div
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 min-h-[600px]">
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((proj, i) => (
+                <motion.div 
                   key={proj.id}
-                  layoutId={`project-card-${proj.id}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
+                  layoutId={`project-${proj.id}`}
+                  initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.8, delay: (i % 3) * 0.1, ease: [0.21, 1.11, 0.81, 0.99] }}
+                  viewport={{ once: true, margin: "-50px" }}
                   onClick={() => setSelectedProject(proj)}
-                  className={`${sizeClass} group relative aspect-[1.4] lg:aspect-auto lg:h-[350px] overflow-hidden shadow-sm border border-slate-200 cursor-pointer`}
+                  className={`group relative overflow-hidden rounded-none cursor-pointer shadow-2xl border border-white/10
+                    ${proj.size === 'wide' ? 'md:col-span-2 lg:col-span-8' : ''}
+                    ${proj.size === 'tall' ? 'md:col-span-2 lg:col-span-4 lg:row-span-2' : ''}
+                    ${proj.size === 'small' ? 'md:col-span-2 lg:col-span-4' : ''}
+                  `}
                 >
+                  {/* Static Image (Dimmed) */}
                   <img 
                     src={proj.img} 
                     alt={proj.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                    className="w-full h-full object-cover transition-all duration-1000 grayscale-[40%] brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-110" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-6">
-                    <span className="text-[10px] font-black tracking-widest text-orange-500 uppercase mb-2">{proj.location}</span>
-                    <h3 className="text-xl font-black text-white mb-4 group-hover:text-orange-500 transition-colors leading-tight">{proj.name}</h3>
-                    <div className="flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {proj.tags.map((tag) => (
-                        <span key={tag} className="px-2.5 py-0.5 bg-white/15 text-white text-[9px] font-black uppercase tracking-wider">{tag}</span>
-                      ))}
+                  
+                  {/* Static Overlay (Dim) */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
+                  
+                  {/* Static Title (Bottom Left) */}
+                  <div className="absolute bottom-10 left-10 transition-all duration-500 group-hover:translate-x-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="text-orange-600 text-[10px] font-black uppercase tracking-[0.2em]">{proj.location}</div>
+                      <div className="w-1 h-1 bg-white/30 rounded-none"></div>
+                      <div className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em]">
+                        {proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn'}
+                      </div>
                     </div>
+                    <h3 className="text-2xl font-black text-white leading-tight max-w-xs">{proj.name}</h3>
                   </div>
-                  <div className="absolute top-4 right-4 w-10 h-10 bg-orange-600 text-white flex items-center justify-center rounded-none opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                    <ArrowUpRight size={18} />
+
+                  {/* Hover UI (Tags) */}
+                  <div className="absolute top-10 left-10 flex flex-wrap gap-2 pr-20">
+                    {proj.tags.map((tag, idx) => (
+                      <motion.span 
+                        key={tag}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileHover={{ scale: 1.1 }}
+                        animate={{ 
+                          opacity: 1,
+                          x: 0 
+                        }}
+                        className="px-4 py-2.5 bg-orange-600 text-white text-[10px] font-black rounded-none uppercase tracking-widest shadow-[0_10px_20px_rgba(234,88,12,0.3)] opacity-0 transform -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500"
+                        style={{ transitionDelay: `${idx * 100}ms` }}
+                      >
+                        {tag}
+                      </motion.span>
+                    ))}
+                  </div>
+
+                  {/* Hover Icon (Top Right) */}
+                  <div className="absolute top-10 right-10 w-12 h-12 bg-white text-orange-600 rounded-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0 duration-500 shadow-2xl">
+                    <ArrowUpRight size={24} />
                   </div>
                 </motion.div>
-              );
-            })}
+              ))
+            ) : (
+              <div className="col-span-1 md:col-span-4 lg:col-span-12 flex flex-col items-center justify-center py-12 text-slate-500 font-medium">
+                Không tìm thấy dự án nào phù hợp với từ khóa tìm kiếm.
+              </div>
+            )}
+          </div>
+
+          <div className="text-center mt-10">
+            <button 
+              onClick={() => {
+                setCurrentView('projects');
+                setActiveLink('Dự án');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-5 py-2 bg-slate-950 text-white rounded-none font-black uppercase tracking-widest text-sm transition-all group btn-modern-interaction"
+            >
+              Xem tất cả dự án <ChevronRight className="inline-block ml-2 group-hover:translate-x-2 transition-transform" />
+            </button>
           </div>
         </div>
-      </section>
 
-      {/* Project Details Modal */}
-      <AnimatePresence>
-        {selectedProject && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        {/* Project Detail Backdrop (Page Transition Simulation) */}
+        <AnimatePresence>
+          {selectedProject && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedProject(null)}
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
-            ></motion.div>
-            
-            <motion.div 
-              layoutId={`project-card-${selectedProject.id}`}
-              className="bg-white text-slate-900 w-full max-w-2xl relative z-10 border border-slate-200 shadow-2xl flex flex-col"
+              className="fixed inset-0 z-[200] bg-white p-6 md:p-20 overflow-y-auto"
             >
-              <button 
-                onClick={() => setSelectedProject(null)}
-                className="absolute top-4 right-4 w-10 h-10 bg-slate-900 text-white flex items-center justify-center hover:bg-orange-600 transition-colors z-20"
-              >
-                <X size={20} />
-              </button>
-              <div className="h-64 sm:h-80 overflow-hidden relative">
-                <img src={selectedProject.img} alt={selectedProject.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
-              </div>
-              <div className="p-8">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="px-2.5 py-0.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest">{selectedProject.location}</span>
-                  <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">{selectedProject.type}</span>
-                </div>
-                <h3 className="text-2xl font-black text-slate-950 mb-4">{selectedProject.name}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed mb-6 font-medium">
-                  Dự án tiêu biểu do CIC cung cấp giải pháp chuyển đổi số toàn diện, tối ưu năng lực vận hành kỹ thuật và tiết kiệm tối đa tài nguyên đầu tư cho đối tác.
-                </p>
-                <div className="flex gap-4 mb-6">
-                  <button 
-                    onClick={() => {
-                      setSelectedProject(null);
-                      setCurrentView('projects');
-                      setActiveLink('Dự án');
-                      setActiveProjectId(selectedProject.id.toString());
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="px-5 py-2.5 bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2"
+              <div className="max-w-7xl mx-auto">
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="mb-12 flex items-center gap-3 text-slate-500 font-black uppercase tracking-widest hover:text-orange-600 transition-colors"
+                >
+                  <ChevronLeft size={24} /> Quay lại danh sách
+                </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                  <motion.div layoutId={`project-${selectedProject.id}`}>
+                     <img src={selectedProject.img} className="w-full rounded-none shadow-2xl" alt="" />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
                   >
-                    Xem chi tiết dự án <ArrowRight size={14} />
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProject.tags.map((tag) => (
-                    <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">{tag}</span>
-                  ))}
+                    <div className="text-orange-600 text-sm font-black uppercase tracking-widest mb-4">{selectedProject.location}</div>
+                    <h2 className="text-5xl md:text-6xl font-black text-slate-950 mb-8 leading-tight">{selectedProject.name}</h2>
+                    <div className="space-y-8 text-lg text-slate-600 leading-relaxed">
+                       <p>Mô tả chi tiết dự án: Dự án triển khai hạ tầng số với quy mô lớn, ứng dụng các giải pháp tiên tiến nhất từ đối tác Bentley Systems và giải pháp AI do CIC phát triển.</p>
+                       <div className="flex gap-4">
+                         {selectedProject.tags.map((tag: string) => (
+                           <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-950 font-black rounded-none uppercase text-xs tracking-widest">{tag}</span>
+                         ))}
+                       </div>
+                    </div>
+                    <button className="mt-12 px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-widest shadow-xl hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all active:scale-95 btn-modern-interaction">
+                      Tải Portfolio Dự án
+                    </button>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
+          )}
+        </AnimatePresence>
+      </section>
       {/* Events Section */}
-      <section id="events" className="py-20 bg-slate-50/40 relative overflow-hidden z-10 border-t border-slate-200">
+      <section id="events" className="py-12 bg-slate-950/90 text-white relative overflow-hidden border-t border-white/5 z-10">
+        <div className="absolute inset-0 bg-tech-grid opacity-10 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
             title="Sự kiện & Hội thảo" 
-            sub="Kết nối tri thức - Đồng hành phát triển" 
+            sub="Kết nối chuyên gia - Chia sẻ tri thức công nghệ" 
+            dark
           />
-
-          <div className="flex justify-center mb-12">
-            <div className="flex p-1 bg-slate-100 rounded-none border border-slate-200/50">
-              <button 
-                onClick={() => setActiveEventTab('upcoming')}
-                className={`px-6 py-2 text-xs font-black uppercase tracking-wider transition-all ${
-                  activeEventTab === 'upcoming' 
-                    ? 'bg-orange-600 text-white shadow-md' 
-                    : 'text-slate-600 hover:text-slate-950'
+          
+          {/* Event Tabs */}
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            {[
+              { id: 'upcoming', label: 'Sắp diễn ra' },
+              { id: 'ongoing', label: 'Đang diễn ra' },
+              { id: 'featured', label: 'Sự kiện nổi bật' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveEventTab(tab.id)}
+                className={`px-6 py-2 rounded-none font-bold text-sm transition-all ${
+                  activeEventTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-800 border border-slate-800'
                 }`}
               >
-                Sự kiện Sắp diễn ra
+                {tab.label}
               </button>
-              <button 
-                onClick={() => setActiveEventTab('past')}
-                className={`px-6 py-2 text-xs font-black uppercase tracking-wider transition-all ${
-                  activeEventTab === 'past' 
-                    ? 'bg-orange-600 text-white shadow-md' 
-                    : 'text-slate-600 hover:text-slate-950'
-                }`}
-              >
-                Sự kiện Đã tổ chức
-              </button>
-            </div>
+            ))}
           </div>
 
-          {activeEventTab === 'upcoming' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {upcomingHomeEvents.map((evt, i) => (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="lg:col-span-7 bg-slate-900/40 rounded-none overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group"
+            >
+              <div className="h-[400px] overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" alt="Special Event" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-none text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
+                {/* Logo Overlay */}
+                <div className="absolute bottom-6 right-6 w-32 md:w-40 opacity-80 group-hover:opacity-100 transition-all pointer-events-none drop-shadow-2xl">
+                  <img src="logo.png" alt="CIC Logo" className="w-full h-auto brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </div>
+              <div className="p-10">
+                <h3 className="text-3xl font-black text-white mb-4 group-hover:text-orange-600 transition-colors">[Sự kiện tháng 4] Bentley Innovation Day 2026 tại TP. Hồ Chí Minh</h3>
+                <p className="text-slate-400 mb-8 leading-relaxed text-lg">
+                  Định hình tương lai số cho hạ tầng Việt Nam. Khám phá các công nghệ quản lý tài sản, BIM và Digital Twins tiên tiến nhất từ Bentley Systems.
+                </p>
+                <div className="flex flex-wrap gap-8 text-slate-300 mb-8">
+                  <div className="flex items-center gap-3 font-bold"><Calendar size={20} className="text-orange-600" /> Tháng 04/2026</div>
+                  <div className="flex items-center gap-3 font-bold"><MapPin size={20} className="text-orange-600" /> TP. Hồ Chí Minh</div>
+                </div>
+                <button className="px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-wide hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all shadow-xl active:scale-95 btn-modern-interaction">
+                  Đăng ký tham dự ngay
+                </button>
+              </div>
+            </motion.div>
+
+            <div className="lg:col-span-5 space-y-6">
+              {[
+                { title: 'Tư vấn Chuyển đổi số & BIM cho Doanh nghiệp', date: '20/05', loc: 'TP. Hồ Chí Minh', img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop' },
+                { title: 'Hội thảo Lộ trình Net Zero và Tín chỉ Carbon', date: '08/06', loc: 'Hà Nội', img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop' },
+                { title: 'Workshop: Ứng dụng AI trong Giám sát Công trình', date: '15/06', loc: 'Online (Zoom)', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop' },
+              ].map((ev, i) => (
                 <motion.div 
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
+                  whileHover={{ x: 10, backgroundColor: 'rgba(30, 41, 59, 0.5)' }}
                   onClick={() => {
                     setCurrentView('events');
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="bg-white border border-slate-200 p-8 flex flex-col md:flex-row gap-6 relative group hover:border-orange-600 hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                  className="flex gap-6 p-4 rounded-none border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left"
                 >
-                  <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex flex-col items-center justify-center font-black uppercase tracking-wider shrink-0 rounded-none">
-                    <span className="text-2xl leading-none">{evt.date.substring(0, 2)}</span>
-                    <span className="text-[10px]">Th{parseInt(evt.date.substring(3, 5))}</span>
-                  </div>
-                  <div className="space-y-4 flex-1">
-                    <h3 className="text-lg font-black text-slate-950 group-hover:text-orange-600 transition-colors leading-snug">{evt.title}</h3>
-                    <div className="grid grid-cols-2 gap-4 text-xs font-bold text-slate-500">
-                      <div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">Thời gian</span>
-                        <span>{evt.time}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">Địa điểm</span>
-                        <span className="line-clamp-2">{evt.loc}</span>
-                      </div>
+                  <div className="w-28 h-28 rounded-none overflow-hidden shadow-inner flex-shrink-0 relative">
+                    <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                    {/* Watermark */}
+                    <div className="absolute bottom-2 right-2 opacity-10 group-hover:opacity-40 transition-all w-8">
+                       <img src="logo.png" alt="" className="w-full invert" />
                     </div>
-                    <button className="text-[10px] font-black uppercase tracking-wider text-orange-600 flex items-center gap-1">
-                      Đăng ký tham dự <ArrowRight size={12} />
-                    </button>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <h4 className="font-black text-white mb-2 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">{ev.title}</h4>
+                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">{ev.date} • {ev.loc}</div>
+                    <div className="flex items-center gap-1 text-orange-600 text-[10px] font-black uppercase tracking-tighter">Chi tiết <ChevronRight size={12} /></div>
                   </div>
                 </motion.div>
               ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {pastHomeEvents.map((evt, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+              
+              <div className="pt-12">
+                <button 
                   onClick={() => {
                     setCurrentView('events');
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="bg-white border border-slate-200 p-6 flex flex-col justify-between group hover:border-orange-600 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                  className="w-full py-2.5 border-2 border-orange-600/20 text-orange-600 rounded-none font-bold text-sm hover:bg-orange-600 hover:text-white transition-all uppercase tracking-widest shadow-sm btn-modern-interaction"
                 >
-                  <div className="space-y-3">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{evt.date}</span>
-                    <h3 className="text-base font-black text-slate-950 group-hover:text-orange-600 transition-colors leading-tight">{evt.title}</h3>
-                    <p className="text-xs text-slate-500 font-medium">{evt.attendees}</p>
-                  </div>
-                  <button className="text-[10px] font-black uppercase tracking-wider text-orange-600 flex items-center gap-1 mt-6">
-                    Xem hình ảnh sự kiện <ChevronRight size={12} />
-                  </button>
-                </motion.div>
-              ))}
+                  Xem tất cả sự kiện
+                </button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </section>
 

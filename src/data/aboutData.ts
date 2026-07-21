@@ -46,7 +46,7 @@ export const coreValues = [
   {
     title: "Khích lệ - hài hoà",
     icon: Sparkles,
-    desc: "CIC luôn đảm bảo các chính sách ưu đãi và chăm lo cho tất cả cán bộ nhân viên của mình thông qua các chính sách ưu đãi, hỗ trợ, tạo điều kiện, đồng thời có cơ chế khen thưởng để khích lệ CBNV phát huy hết năng lực của bản thân. CBNV của CIC cũng đặt lợi ích của mình hài hoà với lợi ích của doanh nghiệp và các cổ đông. Bên cạnh đó, đặc tính hài hoà thể hiện ở việc xây dựng môi trường làm việc, vui chơi lành mạnh, nếp sống yêu thương, tôn trọng và giúp đỡ lẫn nhau."
+    desc: "CIC luôn đảm bảo các chính sách ưu đãi và chăm lo cho tất cả cán bộ nhân viên của mình thông qua các chính sách ưu đãi, hỗ trợ, tạo điều kiện, đồng thời có cơ chế khen thưởng để khích lệ CBNV phát huy hết năng lực của bản thân. CBNV của CIC cũng đặt lợi ích của mình hài hoà với lợi ích của doanh nghiệp và các cổ đông. Bên cạnh đó, đặc tính hài hoà của CIC thể hiện ở việc xây dựng môi trường làm việc, vui chơi lành mạnh, nếp sống yêu thương, tôn trọng và giúp đỡ lẫn nhau, một nét văn hóa đậm đà bản sắc riêng và phát huy những giá trị truyền thống của con người Việt Nam."
   }
 ];
 

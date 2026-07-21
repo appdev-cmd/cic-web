@@ -236,7 +236,7 @@ export function SearchView({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 pb-24 font-sans">
+    <div className="min-h-screen bg-slate-50/50 pt-32 pb-24 font-sans relative z-10">
       <div className="max-w-5xl mx-auto px-6">
         {/* Breadcrumb Navigation */}
         <nav id="search-breadcrumb" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-8">

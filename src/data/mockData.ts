@@ -7,22 +7,22 @@ import { Product, Project, NewsItem, Partner, HeroSlide, NavLink } from '../type
 
 export const heroSlides: HeroSlide[] = [
   {
-    img: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&q=80",
+    img: "https://lh3.googleusercontent.com/d/1H8bS9iqTzQ5_6IamPr4rKYGF662j5dNn",
     title: 'Đối tác công nghệ <span class="text-orange-600 whitespace-nowrap">chiến lược</span>',
     sub: "Hơn 35 năm tiên phong thúc đẩy số hóa toàn diện."
   },
   {
-    img: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80",
+    img: "https://lh3.googleusercontent.com/d/1f5GORf6xYOYY_3zWzLh_0eg3YBNDY312",
     title: 'Hệ sinh thái <span class="text-orange-600 whitespace-nowrap">giải pháp số</span>',
     sub: "Ứng dụng AI, BIM và Digital Twins vào quy trình vận hành, giúp tối ưu hóa hiệu suất và tiết kiệm tài nguyên cho doanh nghiệp."
   },
   {
-    img: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&q=80",
+    img: "https://lh3.googleusercontent.com/d/1B-8fM_57gGrnA-CKxTqjuV4143KNEkYQ",
     title: 'Dẫn đầu <span class="text-orange-600 whitespace-nowrap">chuyển đổi số</span>',
     sub: "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới mang lại những giải pháp đột phá cho tương lai hạ tầng Việt Nam."
   },
   {
-    img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80",
+    img: "https://lh3.googleusercontent.com/d/1azMCNyms6J-stRLCInP6w1fcuI-3GoYf",
     title: 'Phần mềm bản quyền <span class="text-orange-600 whitespace-nowrap">chính hãng</span>',
     sub: "Cung cấp hệ thống phần mềm bản quyền chính hãng, hỗ trợ kỹ thuật tận tâm, đảm bảo an toàn thông tin và tuân thủ pháp lý."
   }
