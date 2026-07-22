@@ -90,8 +90,8 @@ export const Header = ({
       <header 
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isHeaderWhite 
-            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-0 md:py-0.5 border-b border-slate-100' 
-            : 'bg-transparent py-0.5 md:py-1'
+            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-3 md:py-4 border-b border-slate-100' 
+            : 'bg-transparent py-4 md:py-5'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -107,10 +107,9 @@ export const Header = ({
               className="flex items-center group"
             >
               <img 
-                src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" 
+                src="/logo.png" 
                 alt="CIC Logo" 
-                referrerPolicy="no-referrer"
-                className={`h-14 md:h-16 w-auto transition-all duration-500 ${
+                className={`h-10 md:h-12 w-auto transition-all duration-500 ${
                   isHeaderWhite ? 'brightness-100' : 'brightness-0 invert'
                 } group-hover:scale-105`}
                 style={isHeaderWhite ? { filter: 'hue-rotate(25deg) saturate(1.5) brightness(1.2)' } : undefined}

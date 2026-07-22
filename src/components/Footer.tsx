@@ -42,10 +42,9 @@ export const Footer = ({
           <div className="lg:col-span-4">
             <div className="mb-8">
               <img 
-                src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" 
+                src="/logo.png" 
                 alt="CIC Logo Small" 
-                referrerPolicy="no-referrer"
-                className="h-22 sm:h-28 w-auto mb-4"
+                className="h-18 sm:h-20 w-auto mb-4"
               />
             </div>
             <p className="text-white font-black text-lg mb-4 leading-tight whitespace-nowrap">

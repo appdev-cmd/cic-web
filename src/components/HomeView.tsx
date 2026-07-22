@@ -791,7 +791,7 @@ export const HomeView = ({
                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-none text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
                 {/* Logo Overlay */}
                 <div className="absolute bottom-6 right-6 w-32 md:w-40 opacity-80 group-hover:opacity-100 transition-all pointer-events-none drop-shadow-2xl">
-                  <img src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" alt="CIC Logo" referrerPolicy="no-referrer" className="w-full h-auto brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <img src="/logo.png" alt="CIC Logo" className="w-full h-auto brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
               <div className="p-10">
@@ -845,7 +845,7 @@ export const HomeView = ({
                     <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
                     {/* Watermark */}
                     <div className="absolute bottom-2 right-2 opacity-10 group-hover:opacity-40 transition-all w-8">
-                       <img src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" alt="" referrerPolicy="no-referrer" className="w-full invert" />
+                       <img src="/logo.png" alt="" className="w-full invert" />
                     </div>
                   </div>
                   <div className="flex flex-col justify-center">
@@ -921,7 +921,7 @@ export const HomeView = ({
                   
                   {/* Watermark */}
                   <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-20 transition-all w-10">
-                    <img src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" alt="" referrerPolicy="no-referrer" className="w-full invert" />
+                    <img src="/logo.png" alt="" className="w-full invert" />
                   </div>
 
                   <div className="absolute top-4 left-4 px-3 py-1 bg-orange-600 text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-lg">
