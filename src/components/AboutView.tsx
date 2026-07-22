@@ -93,31 +93,31 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
   return (
     <div className="pt-24 bg-transparent min-h-screen">
       {/* Visual Top Hero Banner */}
-      <section className="relative py-24 bg-slate-950 overflow-hidden text-white border-b border-slate-900">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80" 
-            alt="CIC Banner" 
-            className="w-full h-full object-cover opacity-15"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-transparent"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 text-orange-500 font-bold uppercase tracking-widest text-[10px]">
-              Về chúng tôi
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none text-white">
-              CÔNG TY CỔ PHẦN <br />
-              <span className="text-orange-500">CÔNG NGHỆ VÀ TƯ VẤN CIC</span>
-            </h1>
-            <p className="text-base md:text-lg text-slate-300 font-medium leading-relaxed max-w-2xl">
-              Thành lập từ năm 1990, tiền thân là Trung tâm Tin học thuộc Bộ Xây dựng. Hơn 35 năm tiên phong thúc đẩy chuyển đổi số và phát triển khoa học công nghệ cho các ngành kỹ thuật tại Việt Nam.
-            </p>
+              <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-16 overflow-hidden bg-slate-950 z-10 border-b border-slate-800">
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline 
+              className="w-full h-full object-cover opacity-30 mix-blend-screen scale-105"
+              src="https://cdn.pixabay.com/video/2020/01/31/31755-388274351_large.mp4" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/40"></div>
           </div>
-        </div>
-      </section>
+          <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-none mb-4 lg:mb-6 backdrop-blur-md">
+              <span className="flex h-2 w-2 rounded-none bg-orange-600 animate-pulse"></span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
+                Về chúng tôi
+              </span>
+            </div>
+            
+            <h1 className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-4 lg:mb-6 tracking-tighter max-w-full mx-auto whitespace-nowrap">
+              HƠN 35 NĂM NHỊP BƯỚC <span className="text-orange-500">CÙNG CÔNG NGHỆ</span>
+            </h1>
+          </div>
+        </section>
 
       {/* Modern Tab Menu Bar */}
       <div className="bg-white border-b border-slate-200 z-30 relative shadow-sm">
@@ -171,18 +171,31 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             className="space-y-24"
           >
             {/* 1. History & Introduction Block */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-              <div className="lg:col-span-7 space-y-6">
-                <div className="border-l-4 border-orange-600 pl-4">
-                  <span className="text-[10px] text-orange-600 font-sans font-black uppercase tracking-widest block">GIỚI THIỆU CHUNG</span>
-                  <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight mt-0.5">
-                    QUÁ TRÌNH PHÁT TRIỂN & VỊ THẾ DOANH NGHIỆP
-                  </h2>
+            <div className="space-y-12">
+              {/* Centered Top Header for Overview Tab */}
+              <div className="text-center max-w-3xl mx-auto space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-50 border border-orange-200/80 text-orange-700 font-black uppercase tracking-widest text-[10px]">
+                  <Building2 size={13} className="text-orange-600" />
+                  <span>TỔNG QUAN DOANH NGHIỆP</span>
                 </div>
-                
-                <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
-                  Công ty Cổ phần Công nghệ và Tư vấn CIC, tiền thân là Trung tâm Tin học thuộc Bộ Xây Dựng chính thức thành lập vào ngày 27/11/1990.
+                <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
+                  QUÁ TRÌNH PHÁT TRIỂN & VỊ THẾ DOANH NGHIỆP
+                </h2>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-orange-600"></div>
+                  <div className="w-12 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-xs md:text-sm font-bold uppercase tracking-wider" style={{ color: '#fc5115' }}>
+                  35 năm nhịp bước cùng công nghệ & khẳng định vị thế khoa học kỹ thuật
                 </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                <div className="lg:col-span-7 space-y-6">
+                  <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
+                    Công ty Cổ phần Công nghệ và Tư vấn CIC, tiền thân là Trung tâm Tin học thuộc Bộ Xây Dựng chính thức thành lập vào ngày 27/11/1990.
+                  </p>
                 <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
                   Ra đời trong thời kỳ đất nước đang chuyển mình và hội nhập với quá trình bùng nổ công nghệ thông tin trên toàn thế giới, bên cạnh yếu tố thuận lợi khách quan CIC đã không ngừng nỗ lực vượt khó, vươn lên và khẳng định vị thế của mình trong lĩnh vực khoa học công nghệ.
                 </p>
@@ -215,13 +228,24 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </div>
               </div>
             </div>
-
-            {/* 4. Các lĩnh vực hoạt động chủ yếu của công ty (FULL 10 mảng hoạt động nòng cốt) */}
-            <div className="space-y-8 pt-4 border-t border-slate-100">
-              <div className="border-l-4 border-orange-600 pl-4">
-                <span className="text-[10px] text-orange-600 font-sans font-black uppercase tracking-widest block">DANH MỤC LĨNH VỰC</span>
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mt-0.5">CÁC LĨNH VỰC HOẠT ĐỘNG CHỦ YẾU CỦA CÔNG TY</h3>
-                <p className="text-xs text-slate-500 font-medium">Toàn bộ 10 mảng kinh doanh & tư vấn nòng cốt tạo nên vị thế dẫn đầu công nghệ kỹ thuật của CIC</p>
+            </div>
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Cpu size={13} className="text-orange-600" />
+                  <span>DANH MỤC LĨNH VỰC HOẠT ĐỘNG</span>
+                </div>
+                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
+                  CÁC LĨNH VỰC HOẠT ĐỘNG CHỦ YẾU CỦA CÔNG TY
+                </h3>
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  10 mảng nghiệp vụ kinh doanh & tư vấn nòng cốt dẫn đầu thị trường
+                </p>
               </div>
 
               {/* Danh sách 10 mảng nghiệp vụ nòng cốt */}
@@ -310,12 +334,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                             className="py-5 px-3 md:px-6 hover:bg-orange-50/30 transition-all duration-300 border-l-4 border-l-transparent hover:border-l-orange-600 group bg-white"
                           >
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-                              {/* Number & Icon */}
-                              <div className="md:col-span-1 flex items-center gap-2">
-                                <span className="font-sans text-base md:text-lg font-black text-orange-600">
-                                  {item.id}.
-                                </span>
-                                <ItemIcon size={16} className="text-slate-400 group-hover:text-orange-600 transition-colors hidden md:block" />
+                              {/* Icon */}
+                              <div className="md:col-span-1 flex items-center justify-center">
+                                <ItemIcon size={18} className="text-orange-600 group-hover:scale-110 transition-transform" />
                               </div>
 
                               {/* Title & Tag */}
@@ -345,12 +366,21 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
 
             {/* 6. GIÁ TRỊ CỐT LÕI (Interactive & Beautifully polished) */}
-            <div className="space-y-8 pt-4 border-t border-slate-100">
-              <div className="text-center max-w-2xl mx-auto space-y-2">
-                <span className="text-xs text-orange-600 font-bold uppercase tracking-widest block">GIÁ TRỊ DOANH NGHIỆP</span>
-                <h2 className="text-3xl font-black text-slate-950 uppercase tracking-tight">HỆ THỐNG GIÁ TRỊ CỐT LÕI</h2>
-                <p className="text-xs text-slate-400 font-bold uppercase mt-1">Không gian văn hóa đặc sắc và bệ đỡ phát triển bền bỉ của tập thể CIC</p>
-                <div className="w-12 h-1 bg-orange-600 mx-auto mt-2"></div>
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Target size={13} className="text-orange-600" />
+                  <span>GIÁ TRỊ DOANH NGHIỆP</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">HỆ THỐNG GIÁ TRỊ CỐT LÕI</h2>
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  Văn hóa đặc sắc - Bệ đỡ phát triển bền vững - Kết nối vươn tầm
+                </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
@@ -563,29 +593,258 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="space-y-16"
+            className="space-y-12"
           >
             {/* Structural Banner */}
-            <div className="border-l-4 border-orange-600 pl-4">
-              <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-50 border border-orange-200/80 text-orange-700 font-black uppercase tracking-widest text-[10px]">
+                <Users size={13} className="text-orange-600" />
+                <span>MÔ HÌNH QUẢN TRỊ DOANH NGHIỆP</span>
+              </div>
+              <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
                 SƠ ĐỒ CƠ CẤU TỔ CHỨC DOANH NGHIỆP
               </h2>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Hệ thống quản trị chuyên nghiệp - Linh hoạt - Kết nối liên thông</p>
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-orange-600"></div>
+                <div className="w-12 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+              </div>
+              <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                Hệ thống quản trị chuyên nghiệp - Linh hoạt - Kết nối liên thông
+              </p>
             </div>
 
-            <p className="text-slate-600 text-sm leading-relaxed max-w-4xl text-justify font-medium">
-              Cơ cấu tổ chức của Công ty Cổ phần Công nghệ và Tư vấn CIC được thiết kế theo mô hình quản trị công ty cổ phần hiện đại, bảo đảm tính minh bạch, độc lập giám sát và vận hành thông suốt giữa các bộ phận chuyên môn. Đội ngũ hơn 100 CBCNV có trình độ cao được dẫn dắt bởi ban lãnh đạo bản lĩnh và nhiệt huyết.
-            </p>
+            {/* Sơ đồ cơ cấu tổ chức chuẩn xác theo sơ đồ gốc CIC - Tự động co giãn full chiều ngang không kéo scrollbar trên PC */}
+            <div className="w-full overflow-x-auto lg:overflow-x-visible py-2">
+              <div className="w-full max-w-7xl mx-auto">
+                <svg 
+                  viewBox="0 0 1600 560" 
+                  className="w-full h-auto select-none font-sans"
+                  style={{ textRendering: 'geometricPrecision' }}
+                >
+                  <defs>
+                    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.08" />
+                    </filter>
+                    <style>{`
+                      .org-node {
+                        cursor: pointer;
+                        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                      }
+                      .org-node:hover {
+                        transform: translateY(-3px);
+                      }
+                      .org-node:hover rect {
+                        stroke: #ea580c !important;
+                        stroke-width: 2.5px !important;
+                        filter: drop-shadow(0 6px 12px rgba(234, 88, 12, 0.22));
+                      }
+                      .org-node.white-node:hover text {
+                        fill: #ea580c !important;
+                      }
+                      .org-node.dark-node:hover rect {
+                        fill: #1e293b !important;
+                        stroke: #ea580c !important;
+                      }
+                      .org-node.dark-node:hover text {
+                        fill: #ffedd5 !important;
+                      }
+                      .org-node.orange-node:hover rect {
+                        fill: #c2410c !important;
+                        stroke: #0f172a !important;
+                      }
+                    `}</style>
+                  </defs>
 
-            {/* Sơ đồ cơ cấu tổ chức chính thức */}
-            <div className="w-full overflow-x-auto flex justify-center py-4 mt-6">
-              <div className="min-w-[800px] lg:min-w-0 max-w-5xl w-full">
-                <img 
-                  src="https://www.cic.com.vn/upload_images/images/2026/CIC%20chung/SO_D%E1%BB%92_T%E1%BB%94_CH%E1%BB%A8C-02.png" 
-                  alt="Sơ đồ cơ cấu tổ chức CIC" 
-                  className="w-full h-auto object-contain select-none pointer-events-none mix-blend-multiply"
-                  referrerPolicy="no-referrer"
-                />
+                  {/* ================= CONNECTING LINES ================= */}
+                  {/* Vertical Spine: Đại hội đồng cổ đông -> HĐQT -> Tổng Giám Đốc */}
+                  <line x1="800" y1="65" x2="800" y2="95" stroke="#334155" strokeWidth="2" />
+                  <line x1="800" y1="141" x2="800" y2="175" stroke="#334155" strokeWidth="2" />
+
+                  {/* HĐQT -> Ban Kiểm Soát */}
+                  <line x1="950" y1="118" x2="1210" y2="118" stroke="#334155" strokeWidth="2" />
+
+                  {/* 1. Branch Sang Trái: TGĐ -> PTGĐ Left */}
+                  <line x1="650" y1="198" x2="260" y2="198" stroke="#334155" strokeWidth="2" />
+                  <line x1="260" y1="221" x2="260" y2="335" stroke="#334155" strokeWidth="2" />
+
+                  {/* 2. Branch Sang Phải: TGĐ -> PTGĐ Right */}
+                  <line x1="950" y1="198" x2="1340" y2="198" stroke="#334155" strokeWidth="2" />
+                  <line x1="1340" y1="221" x2="1340" y2="320" stroke="#334155" strokeWidth="2" />
+                  {/* Fork under PTGĐ Right */}
+                  <line x1="1220" y1="320" x2="1460" y2="320" stroke="#334155" strokeWidth="2" />
+                  <line x1="1220" y1="320" x2="1220" y2="335" stroke="#334155" strokeWidth="2" />
+                  <line x1="1460" y1="320" x2="1460" y2="335" stroke="#334155" strokeWidth="2" />
+
+                  {/* 3. Branch Xuống Giữa (Ngắn hơn): TGĐ -> P. Tổng hợp & P. Tài chính kế toán */}
+                  <line x1="800" y1="221" x2="800" y2="248" stroke="#334155" strokeWidth="2" />
+                  <line x1="630" y1="248" x2="970" y2="248" stroke="#334155" strokeWidth="2" />
+                  <line x1="630" y1="248" x2="630" y2="260" stroke="#334155" strokeWidth="2" />
+                  <line x1="970" y1="248" x2="970" y2="260" stroke="#334155" strokeWidth="2" />
+
+                  {/* 4. Center Main Line straight down to Bottom Row Bus */}
+                  <line x1="800" y1="221" x2="800" y2="425" stroke="#334155" strokeWidth="2" />
+                  {/* Horizontal Bus Line spanning bottom row */}
+                  <line x1="180" y1="425" x2="1420" y2="425" stroke="#334155" strokeWidth="2" />
+
+                  {/* Connectors to Bottom Units */}
+                  {/* Unit 1: CN TP. HCM (Connected) */}
+                  <line x1="180" y1="425" x2="180" y2="460" stroke="#334155" strokeWidth="2" />
+                  {/* Unit 2: TTGP Phần mềm & Thiết bị (NO connector as in original) */}
+                  {/* Unit 3: TT Tư vấn Dự án (Connected) */}
+                  <line x1="800" y1="425" x2="800" y2="460" stroke="#334155" strokeWidth="2" />
+                  {/* Unit 4: TT Phần mềm Xây dựng (Connected) */}
+                  <line x1="1110" y1="425" x2="1110" y2="460" stroke="#334155" strokeWidth="2" />
+                  {/* Unit 5: TT Tư vấn PTPBV & GP CNKT (Connected) */}
+                  <line x1="1420" y1="425" x2="1420" y2="460" stroke="#334155" strokeWidth="2" />
+
+
+                  {/* ================= BOX NODES ================= */}
+                  {/* LEVEL 1: ĐẠI HỘI ĐỒNG CỔ ĐÔNG */}
+                  <g filter="url(#shadow)" className="org-node dark-node">
+                    <rect x="650" y="20" width="300" height="45" rx="4" fill="#0f172a" stroke="#0f172a" strokeWidth="1.5" />
+                    <text x="800" y="48" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
+                      ĐẠI HỘI ĐỒNG CỔ ĐÔNG
+                    </text>
+                  </g>
+
+                  {/* BAN KIỂM SOÁT */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="1210" y="95" width="260" height="46" rx="4" fill="#ffffff" stroke="#475569" strokeWidth="2" />
+                    <text x="1340" y="123" fill="#0f172a" fontSize="13" fontWeight="900" textAnchor="middle">
+                      BAN KIỂM SOÁT
+                    </text>
+                  </g>
+
+                  {/* LEVEL 2: HỘI ĐỒNG QUẢN TRỊ */}
+                  <g filter="url(#shadow)" className="org-node orange-node">
+                    <rect x="650" y="95" width="300" height="46" rx="4" fill="#ea580c" stroke="#c2410c" strokeWidth="1.5" />
+                    <text x="800" y="123" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
+                      HỘI ĐỒNG QUẢN TRỊ
+                    </text>
+                  </g>
+
+                  {/* LEVEL 3: TỔNG GIÁM ĐỐC */}
+                  <g filter="url(#shadow)" className="org-node dark-node">
+                    <rect x="650" y="175" width="300" height="46" rx="4" fill="#0f172a" stroke="#0f172a" strokeWidth="1.5" />
+                    <text x="800" y="203" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
+                      TỔNG GIÁM ĐỐC
+                    </text>
+                  </g>
+
+                  {/* LEFT: PHÓ TỔNG GIÁM ĐỐC */}
+                  <g filter="url(#shadow)" className="org-node dark-node">
+                    <rect x="130" y="177" width="260" height="44" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="1.5" />
+                    <text x="260" y="204" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
+                      PHÓ TỔNG GIÁM ĐỐC
+                    </text>
+                  </g>
+
+                  {/* RIGHT: PHÓ TỔNG GIÁM ĐỐC */}
+                  <g filter="url(#shadow)" className="org-node dark-node">
+                    <rect x="1210" y="177" width="260" height="44" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="1.5" />
+                    <text x="1340" y="204" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
+                      PHÓ TỔNG GIÁM ĐỐC
+                    </text>
+                  </g>
+
+                  {/* MIDDLE LEVEL SUB-UNITS */}
+                  {/* Middle-Left (Trực thuộc TGĐ - Nhánh ngắn): P. TỔNG HỢP */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="530" y="260" width="200" height="54" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="630" y="293" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      P. TỔNG HỢP
+                    </text>
+                  </g>
+
+                  {/* Middle-Right (Trực thuộc TGĐ - Nhánh ngắn): P. TÀI CHÍNH KẾ TOÁN */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="870" y="260" width="200" height="54" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="970" y="293" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      P. TÀI CHÍNH KẾ TOÁN
+                    </text>
+                  </g>
+
+                  {/* Left sub-unit (Trực thuộc PTGĐ - Nhánh dài hơn): TT. TƯ VẤN THIẾT KẾ XÂY DỰNG */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="120" y="335" width="280" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="260" y="362" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      TT. TƯ VẤN THIẾT KẾ
+                    </text>
+                    <text x="260" y="378" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      XÂY DỰNG
+                    </text>
+                  </g>
+
+                  {/* Right sub-unit 1 (Trực thuộc PTGĐ - Nhánh dài hơn): TTGP. PHẦN MỀM NHẬP KHẨU TRONG XD */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="1115" y="335" width="210" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="1220" y="362" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      TTGP. PHẦN MỀM NHẬP KHẨU
+                    </text>
+                    <text x="1220" y="378" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      TRONG XD
+                    </text>
+                  </g>
+
+                  {/* Right sub-unit 2 (Trực thuộc PTGĐ - Nhánh dài hơn): TT. TƯ VẤN BIM SỐ HÓA CÔNG TRÌNH */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="1355" y="335" width="210" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="1460" y="362" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      TT. TƯ VẤN BIM &amp;
+                    </text>
+                    <text x="1460" y="378" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      SỐ HÓA CÔNG TRÌNH
+                    </text>
+                  </g>
+
+                  {/* ================= BOTTOM ROW UNITS ================= */}
+                  {/* 1. CN. TP HỒ CHÍ MINH */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="70" y="460" width="220" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="180" y="499" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      CN. TP HỒ CHÍ MINH
+                    </text>
+                  </g>
+
+                  {/* 2. TTGP. PHẦN MỀM & THIẾT BỊ CÔNG NGHỆ (Unconnected as specified) */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="375" y="460" width="230" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="490" y="491" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      TTGP. PHẦN MỀM &amp;
+                    </text>
+                    <text x="490" y="509" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      THIẾT BỊ CÔNG NGHỆ
+                    </text>
+                  </g>
+
+                  {/* 3. TT. TƯ VẤN DỰ ÁN */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="690" y="460" width="220" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="800" y="499" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      TT. TƯ VẤN DỰ ÁN
+                    </text>
+                  </g>
+
+                  {/* 4. TT. PHẦN MỀM XÂY DỰNG */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="1000" y="460" width="220" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="1110" y="499" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                      TT. PHẦN MỀM XÂY DỰNG
+                    </text>
+                  </g>
+
+                  {/* 5. TT. TƯ VẤN PTPBV & GIẢI PHÁP CNKT */}
+                  <g filter="url(#shadow)" className="org-node white-node">
+                    <rect x="1300" y="460" width="240" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
+                    <text x="1420" y="491" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      TT. TƯ VẤN PTPBV &amp;
+                    </text>
+                    <text x="1420" y="509" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                      GIẢI PHÁP CNKT
+                    </text>
+                  </g>
+                </svg>
               </div>
             </div>
           </motion.div>
@@ -599,25 +858,24 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             transition={{ duration: 0.5 }}
             className="space-y-20"
           >
-            {/* Experience Banner */}
-            <div className="border-l-4 border-orange-600 pl-4 animate-fadeIn">
-              <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-                NĂNG LỰC KỸ THUẬT & HỒ SƠ KINH NGHIỆM
-              </h2>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Được chứng minh vững chắc qua chặng đường hơn 35 năm phục vụ thị trường kỹ thuật Việt Nam</p>
-            </div>
-
             {/* Section I: THÔNG TIN PHÁP LÝ & ĐƠN VỊ */}
             <div className="space-y-8">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-4">
-                <div className="border-l-4 border-slate-950 pl-4">
-                  <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">
-                    I. TÊN ĐƠN VỊ: CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ TƯ VẤN CIC
-                  </h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                    Thông tin pháp lý chính thức và địa chỉ giao dịch của CIC
-                  </p>
+              <div className="text-center max-w-3xl mx-auto space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-50 border border-orange-200/80 text-orange-700 font-black uppercase tracking-widest text-[10px]">
+                  <Award size={13} className="text-orange-600" />
+                  <span>NĂNG LỰC & KINH NGHIỆM</span>
                 </div>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
+                  HỒ SƠ NĂNG LỰC & THÔNG TIN PHÁP LÝ
+                </h2>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-orange-600"></div>
+                  <div className="w-12 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  Pháp lý minh bạch - Đơn vị thành viên tập đoàn tư vấn xây dựng Việt Nam (VC Group)
+                </p>
               </div>
 
               {/* Twin Office Locations Grid */}
@@ -808,13 +1066,22 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
 
             {/* Section II: GIỚI THIỆU VỀ CÔNG TY VÀ QUÁ TRÌNH PHÁT TRIỂN */}
-            <div className="space-y-8 pt-8 border-t border-slate-100">
-              <div className="border-l-4 border-slate-950 pl-4">
-                <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">
-                  II. GIỚI THIỆU VỀ CÔNG TY VÀ QUÁ TRÌNH PHÁT TRIỂN
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Clock size={13} className="text-orange-600" />
+                  <span>QUÁ TRÌNH THÀNH LẬP</span>
+                </div>
+                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
+                  LỊCH SỬ HÌNH THÀNH & TẦM NHÌN SỨ MỆNH
                 </h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                  Chặng đường phát triển công nghệ xuất sắc của CIC
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  35 năm trưởng thành - Đồng hành cùng nền kỹ thuật & công nghệ Việt Nam
                 </p>
               </div>
 
@@ -840,13 +1107,22 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
 
             {/* Section II: CÁC LĨNH VỰC KINH DOANH CHỦ YẾU */}
-            <div className="space-y-8 pt-8 border-t border-slate-100">
-              <div className="border-l-4 border-slate-950 pl-4">
-                <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">
-                  II. CÁC LĨNH VỰC KINH DOANH CHỦ YẾU CỦA CÔNG TY
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Layers size={13} className="text-orange-600" />
+                  <span>PHÂN NHÓM CHUYÊN MÔN</span>
+                </div>
+                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
+                  CÁC LĨNH VỰC KINH DOANH NÒNG CỐT
                 </h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                  Mảng kinh doanh nòng cốt thúc đẩy hiện đại hóa ngành kỹ thuật Việt Nam
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  Giải pháp tổng thể - Tư vấn tiên phong - Bứt phá công nghệ
                 </p>
               </div>
 
@@ -905,11 +1181,6 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                         }`}
                       >
                         <div className="flex items-center gap-3 pr-2">
-                          <span className={`text-xs font-black font-sans shrink-0 px-2 py-0.5 ${
-                            isSelected ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-orange-100 group-hover:text-orange-600'
-                          }`}>
-                            {fieldObj.id}
-                          </span>
                           <span className="text-xs md:text-sm font-bold leading-snug line-clamp-1">
                             {fieldObj.title}
                           </span>
@@ -925,7 +1196,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                   <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div className="flex items-center gap-3">
                       <span className="bg-orange-600 text-white text-xs font-sans font-black px-2.5 py-1">
-                        LĨNH VỰC {businessFields[activeFieldIndex].id} / 10
+                        LĨNH VỰC CHUYÊN MÔN
                       </span>
                       <span className="text-[11px] text-orange-400 font-bold uppercase tracking-wider">
                         {businessPillars[activePillarIndex].title}
@@ -981,13 +1252,22 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
 
             {/* HỒ SƠ KINH NGHIỆM THEO SỐ NĂM TÍCH LŨY */}
-            <div className="space-y-6 pt-8 border-t border-slate-100">
-              <div className="border-l-4 border-orange-600 pl-4">
-                <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Trophy size={13} className="text-orange-600" />
+                  <span>TÍCH LŨY THỰC CHIẾN</span>
+                </div>
+                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
                   HỒ SƠ KINH NGHIỆM THEO SỐ NĂM HOẠT ĐỘNG
                 </h3>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">
-                  Kinh nghiệm tích lũy chuyên môn vững vàng của CIC theo từng loại hình công việc
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  Chuyên môn vững vàng - Dự án trọng điểm - Uy tín tích lũy từ năm 1990
                 </p>
               </div>
 
@@ -1026,11 +1306,24 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
               </div>
             </div>
 
-            {/* BẢNG CƠ CẤU NHÂN SỰ CHI TIẾT THEO PHÒNG BAN (Transferred from Structure Tab) */}
-            <div className="space-y-6 pt-8 border-t border-slate-100">
-              <div className="border-l-4 border-orange-600 pl-4">
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">BẢNG CƠ CẤU NHÂN SỰ CHI TIẾT THEO PHÒNG BAN</h3>
-                <p className="text-xs text-slate-500">Tổng quy mô nhân sự: 106 cán bộ (Trình độ: Đại học chiếm 70.7%, Trên Đại học chiếm 17.9%)</p>
+            {/* BẢNG CƠ CẤU NHÂN SỰ CHI TIẾT THEO PHÒNG BAN */}
+            <div className="space-y-6 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Users size={13} className="text-orange-600" />
+                  <span>QUY MÔ NHÂN SỰ</span>
+                </div>
+                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
+                  BẢNG CƠ CẤU NHÂN SỰ CHI TIẾT THEO PHÒNG BAN
+                </h3>
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  Đội ngũ 100+ chuyên gia trình độ cao - 88.6% trình độ đại học & trên đại học
+                </p>
               </div>
 
               <div className="overflow-x-auto border border-slate-200 shadow-sm">
@@ -1057,9 +1350,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                           key={idx} 
                           onMouseEnter={() => setHoveredDeptId(dept.stt)}
                           onMouseLeave={() => setHoveredDeptId(null)}
-                          className={`transition-all duration-300 ${
+                          className={`transition-colors duration-150 ${
                             isHovered 
-                              ? 'bg-orange-50 border-l-4 border-l-orange-500' 
+                              ? 'bg-orange-50/80' 
                               : 'hover:bg-slate-50'
                           }`}
                         >
@@ -1120,11 +1413,21 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
 
             {/* REDESIGNED: BỨC TƯỜNG ĐỐI TÁC TOÀN CẦU (Global Partnership Hall of Fame) */}
-            <div className="space-y-8 pt-8 border-t border-slate-100">
-              <div className="text-center max-w-2xl mx-auto space-y-2">
-                <h2 className="text-3xl font-black text-slate-950 uppercase tracking-tight">BỨC TƯỜNG ĐỐI TÁC TOÀN CẦU</h2>
-                <p className="text-xs text-orange-600 font-bold uppercase tracking-widest">Đại diện ủy quyền & Nhà phân phối chính hãng từ các tập đoàn hàng đầu thế giới</p>
-                <div className="w-12 h-1 bg-orange-600 mx-auto mt-2"></div>
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <Globe size={13} className="text-orange-600" />
+                  <span>HỢP TÁC QUỐC TẾ</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">BỨC TƯỜNG ĐỐI TÁC TOÀN CẦU</h2>
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-xs md:text-sm text-orange-600 font-bold uppercase tracking-wider max-w-2xl mx-auto">
+                  Đại diện ủy quyền & Nhà phân phối chính hãng từ các tập đoàn công nghệ hàng đầu thế giới
+                </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -1189,11 +1492,21 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
 
             {/* SEARCHABLE & FILTERABLE CONTRACT REGISTRY (BẢNG HỒ SƠ HỢP ĐỒNG KINH NGHIỆM) */}
-            <div className="space-y-8 pt-8 border-t border-slate-100">
-              <div className="text-center max-w-2xl mx-auto space-y-2">
-                <h2 className="text-3xl font-black text-slate-950 uppercase tracking-tight font-sans">DANH MỤC HỢP ĐỒNG TIÊU BIỂU</h2>
-                <p className="text-xs text-orange-600 font-bold uppercase tracking-widest">Hệ thống tra cứu hồ sơ năng lực & kinh nghiệm thực thi thực tế của CIC</p>
-                <div className="w-12 h-1 bg-orange-600 mx-auto mt-2"></div>
+            <div className="space-y-8 pt-6 border-t border-slate-200">
+              <div className="text-center max-w-3xl mx-auto space-y-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
+                  <FileText size={13} className="text-orange-600" />
+                  <span>TRA CỨU HỒ SƠ NĂNG LỰC</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight font-sans">DANH MỤC HỢP ĐỒNG TIÊU BIỂU</h2>
+                <div className="flex items-center justify-center gap-2 pt-0.5">
+                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
+                </div>
+                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
+                  Minh bạch năng lực thực thi - Tra cứu hồ sơ dự án tiêu biểu theo chuyên ngành
+                </p>
               </div>
 
               {/* Redesigned Filter Controls with robust Layout & Scrollable Tabs */}

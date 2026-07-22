@@ -394,7 +394,7 @@ export const HomeView = ({
       {/* Stats Section */}
       <section className="py-20 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-12 gap-x-8 md:divide-x divide-slate-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 md:divide-x divide-slate-200">
             {homeStats.map((stat, i) => (
               <motion.div 
                 key={i}
@@ -405,11 +405,7 @@ export const HomeView = ({
                 className="text-center group"
               >
                 <div className="text-5xl md:text-6xl font-black text-slate-800 mb-4 tracking-tighter flex items-center justify-center h-16 group-hover:scale-110 group-hover:text-orange-500 transition-all duration-500">
-                  {stat.isIcon ? (
-                    <ShieldCheck size={44} className="mx-auto text-orange-600" />
-                  ) : (
-                    <Counter value={stat.val!} suffix={stat.suffix!} />
-                  )}
+                  <Counter value={stat.val!} suffix={stat.suffix!} />
                 </div>
                 <div className="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">{stat.label}</div>
               </motion.div>
@@ -425,7 +421,7 @@ export const HomeView = ({
             title="Thành tựu & Giải thưởng" 
             sub="Minh chứng cho nỗ lực không ngừng nghỉ" 
           />
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mt-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 mt-8">
             {homeAwards.map((award, i) => (
               <motion.div 
                 key={i}
@@ -514,18 +510,18 @@ export const HomeView = ({
               <div className="w-16 h-16 bg-slate-50 rounded-lg flex items-center justify-center mb-8 border border-slate-100 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 text-slate-400 transition-all">
                 <BIMIcon />
               </div>
-              <h3 className="text-xl font-black mb-4 group-hover:text-orange-600 transition-colors">BIM, Digital Twins & CDE</h3>
+              <h3 className="text-xl font-black mb-4 group-hover:text-orange-600 transition-colors">BIM & Digital Twins</h3>
               <p className="text-slate-500 leading-relaxed mb-6">
-                Tư vấn, đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.
+                Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.
               </p>
               <div className="mt-8 h-1 w-12 bg-slate-200 group-hover:w-full group-hover:bg-orange-600 transition-all duration-500 rounded-full"></div>
             </motion.div>
 
             {/* Row 2 */}
             {[
-              { title: 'Phần mềm kỹ thuật', desc: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng, năng lượng do CIC phát triển & phân phối.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
-              { title: 'Thiết bị Khoa học', desc: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR, GPR phục vụ ngành kỹ thuật.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
-              { title: 'Net Zero & Bền vững', desc: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và lộ trình Net Zero.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'tu-van-chuyen-doi-so' },
+              { title: 'Phần mềm kỹ thuật bản quyền', desc: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng, năng lượng do CIC phát triển & phân phối.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
+              { title: 'Thiết bị công nghệ', desc: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR, GPR phục vụ ngành kỹ thuật.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
+              { title: 'Netzero và phát triển bền vững', desc: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và lộ trình Net Zero.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'tu-van-chuyen-doi-so' },
               { title: 'Tư vấn & Đào tạo', desc: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'dao-tao-chuyen-giao' },
             ].map((item, i) => (
               <motion.div 
@@ -581,7 +577,7 @@ export const HomeView = ({
       </section>
 
       {/* Featured Projects - Bento Grid */}
-      <section id="projects" className="py-12 bg-white/40 relative overflow-hidden border-t border-slate-100 z-10">
+      <section id="projects" className="py-12 bg-white/40  relative overflow-hidden border-t border-slate-100 z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
              title="Dự án tiêu biểu" 
@@ -667,7 +663,7 @@ export const HomeView = ({
                         initial={{ opacity: 0, x: -10 }}
                         whileHover={{ scale: 1.1 }}
                         animate={{ 
-                          opacity: 1,
+                          opacity: 1, // Visible on container hover via CSS? No, let's use motion more purely
                           x: 0 
                         }}
                         className="px-4 py-2.5 bg-orange-600 text-white text-[10px] font-black rounded-none uppercase tracking-widest shadow-[0_10px_20px_rgba(234,88,12,0.3)] opacity-0 transform -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500"
@@ -712,7 +708,7 @@ export const HomeView = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[200] bg-white p-6 md:p-20 overflow-y-auto custom-scrollbar"
+              className="fixed inset-0 z-[200] bg-white p-6 md:p-20 overflow-y-auto"
             >
               <div className="max-w-7xl mx-auto">
                 <button 
@@ -1087,9 +1083,9 @@ export const HomeView = ({
                     onChange={(e) => setInterestService(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold appearance-none"
                   >
-                    <option>Phần mềm kỹ thuật</option>
+                    <option>Phần mềm kỹ thuật bản quyền</option>
                     <option>Thiết bị & IoT</option>
-                    <option>Tư vấn BIM/Digital Twins</option>
+                    <option>BIM/Digital Twins</option>
                     <option>Chuyển đổi số & Net Zero</option>
                   </select>
                 </div>

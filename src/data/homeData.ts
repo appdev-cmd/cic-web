@@ -48,14 +48,21 @@ export const homeStats = [
   { val: 35, suffix: '+', label: 'Năm kinh nghiệm' },
   { val: 300, suffix: '+', label: 'Giải pháp công nghệ' },
   { val: 5000, suffix: '+', label: 'Dự án thành công' },
-  { val: 100, suffix: '+', label: 'Đối tác toàn cầu' },
-  { isIcon: true, label: 'Phần mềm bản quyền' }
+  { val: 100, suffix: '+', label: 'Đối tác toàn cầu' }
 ];
 
 export const homeAwards = [
   { 
+    name: 'Huân chương Lao động hạng 3', 
+    img: 'https://www.cic.com.vn/images/banners/original/huan-chuong-lao-dong-hang-3_1582012829.jpg' 
+  },
+  { 
     name: 'Giải thưởng Sao Khuê 2014', 
     img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2014_1582012560.jpg' 
+  },
+  { 
+    name: 'Cúp CNTT năm 2003', 
+    img: 'https://www.cic.com.vn/images/banners/original/cup-cntt-nam-2004_1582012378.jpg' 
   },
   { 
     name: 'Giải thưởng Sao Khuê 2015', 
@@ -63,15 +70,11 @@ export const homeAwards = [
   },
   { 
     name: 'Cúp CNTT năm 2004', 
-    img: 'https://www.cic.com.vn/images/banners/original/cup-cntt-nam-2004_1582012378.jpg' 
+    img: 'https://www.cic.com.vn/images/banners/original/cup-cntt-nam-2004_1582012378_1583307621.jpg' 
   },
   { 
     name: 'Giải thưởng VIFOTEC', 
     img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-vifotec_1582012769.jpg' 
-  },
-  { 
-    name: 'Huân chương Lao động hạng 3', 
-    img: 'https://www.cic.com.vn/images/banners/original/huan-chuong-lao-dong-hang-3_1582012829.jpg' 
   }
 ];
 

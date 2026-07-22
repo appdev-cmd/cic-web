@@ -129,7 +129,7 @@ export const Footer = ({
                 <p className="leading-relaxed">Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam</p>
                 <div className="flex flex-col gap-2">
                   <a href="tel:02439761381" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
-                    <Phone size={14} className="text-orange-600" /> 024 3976 1381 - 024 3976 1381
+                    <Phone size={14} className="text-orange-600" /> 024 3976 1381
                   </a>
                   <a href="mailto:info@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Mail size={14} className="text-orange-600" /> info@cic.com.vn
