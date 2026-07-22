@@ -90,8 +90,8 @@ export const Header = ({
       <header 
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isHeaderWhite 
-            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-3 md:py-4 border-b border-slate-100' 
-            : 'bg-transparent py-4 md:py-5'
+            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-2 border-b border-slate-100' 
+            : 'bg-transparent py-2'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
