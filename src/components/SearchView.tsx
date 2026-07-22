@@ -250,10 +250,6 @@ export function SearchView({
           <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-50 pointer-events-none" />
           <div className="relative z-10 space-y-6">
             <div className="space-y-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 flex items-center gap-1.5">
-                <Sparkles size={12} />
-                Hệ thống tra cứu thông minh
-              </span>
               <h1 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
                 TRA CỨU THÔNG TIN
               </h1>

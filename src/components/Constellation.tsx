@@ -41,8 +41,20 @@ export const Constellation: React.FC<{
       my = -1000;
     };
     
+    let lastClickTime = 0;
+
     const handleClick = (e: MouseEvent) => {
-      for (let i = 0; i < 15; i++) {
+      const now = Date.now();
+      // Throttle clicks to at most once every 250ms
+      if (now - lastClickTime < 250) return;
+      lastClickTime = now;
+
+      // Count current burst particles and cap them to max 15 active
+      const currentBurstCount = particles.filter(p => p.isBurst).length;
+      if (currentBurstCount >= 15) return;
+
+      const burstToAdd = Math.min(6, 15 - currentBurstCount);
+      for (let i = 0; i < burstToAdd; i++) {
         particles.push(new Particle(mx, my, true));
       }
     };
@@ -89,8 +101,8 @@ export const Constellation: React.FC<{
         if (this.y < 0 || this.y > h) this.vy *= -1;
 
         if (this.isBurst) {
-          this.life -= 0.015;
-          this.size *= 0.95;
+          this.life -= 0.035;
+          this.size *= 0.92;
         } else if (isHovering) {
           const dx = mx - this.x;
           const dy = my - this.y;
@@ -140,7 +152,7 @@ export const Constellation: React.FC<{
 
     const init = () => {
       particles = [];
-      const numParticles = Math.floor((w * h) / density); 
+      const numParticles = Math.min(90, Math.floor((w * h) / density)); 
       for (let i = 0; i < numParticles; i++) {
         particles.push(new Particle(Math.random() * w, Math.random() * h));
       }

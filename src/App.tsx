@@ -75,9 +75,9 @@ export default function App() {
           <TechAboutBackground />
         ) : (
           <Constellation 
-            density={9000} 
-            lineDistance={200} 
-            particleColor="rgba(234, 88, 12, 0.5)" 
+            density={16000} 
+            lineDistance={160} 
+            particleColor="rgba(234, 88, 12, 0.4)" 
             lineColor="rgba(234, 88, 12, " 
           />
         )}
@@ -148,7 +148,15 @@ export default function App() {
             setAboutSubTab={setAboutSubTab}
           />
         ) : currentView === 'about' ? (
-          <AboutView activeTab={aboutSubTab} setActiveTab={setAboutSubTab} />
+          <AboutView 
+            activeTab={aboutSubTab} 
+            setActiveTab={setAboutSubTab} 
+            onNavigateToContact={() => {
+              setCurrentView('contact');
+              setActiveLink('Liên hệ');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         ) : currentView === 'services' ? (
           <ServicesView 
             key={`services-${servicesResetKey}`}

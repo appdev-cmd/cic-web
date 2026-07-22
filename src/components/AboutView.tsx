@@ -13,7 +13,6 @@ import {
   Users, 
   Activity, 
   CheckCircle2, 
-  Heart, 
   MapPin, 
   Phone, 
   Mail, 
@@ -58,9 +57,10 @@ import {
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';
   setActiveTab: (tab: 'overview' | 'structure' | 'experience') => void;
+  onNavigateToContact?: () => void;
 }
 
-export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
+export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: AboutViewProps) => {
   // Interactive active states for redesigned sections
   const [activeCoreIndex, setActiveCoreIndex] = useState(0);
   const [activeFieldIndex, setActiveFieldIndex] = useState(0);
@@ -180,24 +180,20 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
                   </h2>
                 </div>
                 
-                <p className="text-slate-800 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
-                  Công ty Cổ phần Công nghệ và Tư vấn CIC, tiền thân là Trung tâm Tin học thuộc Bộ Xây Dựng chính thức thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.
-                </p>
-
                 <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
-                  Ra đời trong thời kỳ đất nước đang chuyển mình và hội nhập với quá trình bùng nổ công nghệ thông tin trên toàn thế giới, bên cạnh yếu tố thuận lợi khách quan CIC đã không ngừng nỗ lực vượt khó, vươn lên và khẳng định vị thế của mình trong lĩnh vực khoa học công nghệ cho các ngành kỹ thuật tại Việt Nam nói chung, cũng như công nghệ thông tin ngành xây dựng nói riêng. Đến nay, CIC là 1 trong 10 thành viên chính thức của Tổ hợp Tư vấn Xây dựng Việt Nam (VC Group), một tổ hợp hàng đầu về tư vấn xây dựng trong nước.
+                  Công ty Cổ phần Công nghệ và Tư vấn CIC, tiền thân là Trung tâm Tin học thuộc Bộ Xây Dựng chính thức thành lập vào ngày 27/11/1990.
                 </p>
-
+                <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
+                  Ra đời trong thời kỳ đất nước đang chuyển mình và hội nhập với quá trình bùng nổ công nghệ thông tin trên toàn thế giới, bên cạnh yếu tố thuận lợi khách quan CIC đã không ngừng nỗ lực vượt khó, vươn lên và khẳng định vị thế của mình trong lĩnh vực khoa học công nghệ.
+                </p>
                 <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
                   Từ số lượng CBCNV cơ bản lúc đầu chưa đến chục người, đến nay, sau 35 năm hình thành và phát triển CIC đã có một đội ngũ cán bộ quản lý bản lĩnh vững vàng, quyết đoán và năng động cùng một tập thể CBCNV hơn 100 người có trình độ chuyên môn, sáng tạo, nhiều tâm huyết gắn bó với công ty.
                 </p>
-
-                <p className="text-orange-600 text-sm md:text-[15px] font-bold leading-relaxed text-justify pl-4 border-l-2 border-orange-500 my-4">
-                  Sứ mệnh: “Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ công nghệ thông tin hiện đại, có tính ứng dụng cao để hỗ trợ các kỹ sư, doanh nghiệp, cơ quan nghiên cứu, các nhà quản lý trong công tác nghiên cứu, sản xuất, điều hành tại Việt Nam và các nước trong khu vực; đồng thời không ngừng phát triển nhằm góp phần vào sự hội nhập và phát triển chung của đất nước, đem lại thu nhập cao ổn định cho cán bộ công nhân viên cũng như hài hoà với lợi ích của cổ đông”.
-                </p>
-
                 <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
                   Bên cạnh các dòng sản phẩm phần mềm truyền thống tự mình phát triển trong lĩnh vực xây dựng, quản lý, quy hoạch đã đem lại thương hiệu cho CIC như KPW, Escon, RDW, stCAD, VinaSAS, Sumac, MapPro, ESPA, Conna… CIC còn phát triển thành công phần mềm vẽ kỹ thuật enjiCAD với chất lượng rất cao và giá cả cạnh tranh hơn nhiều so với phần mềm CAD nổi tiếng khác trên thế giới. Bên cạnh đó CIC cũng là đối tác chính thức của Microsoft, Autodesk, CSI, Cubicost, Risa, Marin, DHI, Alma, DNV GL, Prokon… hay các thiết bị công nghệ mang hàm lượng khoa học cao của các hãng như Piletest, Tecknotrove, ZXLidars, A.P.Van den Berg, AQ System, Sewer Robotics, RadioDetection, Pearpoint, DJI, …
+                </p>
+                <p className="text-slate-700 text-sm md:text-[15px] leading-relaxed text-justify font-medium">
+                  Với tầm nhìn “Trở thành nhà cung cấp hàng đầu về các giải pháp ứng dụng công nghệ ICT và khoa học công nghệ khác cho các ngành kỹ thuật tại Việt Nam và các nước trong khu vực”, chúng tôi liên tục nâng cao chất lượng và mở rộng các mảng sản phẩm, dịch vụ của mình nhằm đáp ứng tốt nhất nhu cầu của khách hàng.
                 </p>
               </div>
 
@@ -205,9 +201,9 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-orange-600 to-amber-500 blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative bg-white border border-slate-200 p-2.5 shadow-2xl">
                   <img 
-                    src="https://www.cic.com.vn/upload_images/images/2019/08/19/gioi-thieu.png" 
-                    alt="Engineering Infrastructure" 
-                    className="w-full h-80 object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-500"
+                    src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1600&q=80" 
+                    alt="Công nghệ & Kỹ thuật CIC" 
+                    className="w-full h-80 object-cover group-hover:scale-105 transition-all duration-500"
                     referrerPolicy="no-referrer"
                   />
                   <div className="p-5 bg-slate-950 text-white flex flex-col justify-center items-center text-center">
@@ -220,207 +216,132 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
               </div>
             </div>
 
-            {/* 3. Strategic Objectives, Mission & Vision Bento */}
-            <div className="space-y-8 pt-4">
-              <div className="border-l-4 border-orange-600 pl-4">
-                <span className="text-[10px] text-orange-600 font-sans font-black uppercase tracking-widest block">CHIẾN LƯỢC PHÁT TRIỂN</span>
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mt-0.5">SỨ MỆNH - TẦM NHÌN - MỤC TIÊU PHÁT TRIỂN</h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="bg-slate-50 border border-slate-200 p-8 space-y-4 relative overflow-hidden group hover:border-orange-500 hover:bg-white transition-all duration-300 shadow-md">
-                  <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                    <Target size={24} />
-                  </div>
-                  <h4 className="text-base font-black text-slate-950 uppercase tracking-tight">SỨ MỆNH CHIẾN LƯỢC</h4>
-                  <p className="text-slate-600 text-xs md:text-sm leading-relaxed text-justify font-medium">
-                    “Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ công nghệ thông tin hiện đại, có tính ứng dụng cao để hỗ trợ các kỹ sư, doanh nghiệp, cơ quan nghiên cứu, các nhà quản lý trong công tác nghiên cứu, sản xuất, điều hành tại Việt Nam và các nước trong khu vực; đồng thời không ngừng phát triển nhằm góp phần vào sự hội nhập và phát triển chung của đất nước, đem lại thu nhập cao ổn định cho cán bộ công nhân viên cũng như hài hoà với lợi ích của cổ đông”.
-                  </p>
-                  <div className="absolute right-0 bottom-0 w-24 h-24 bg-orange-600/5 blur-xl pointer-events-none group-hover:bg-orange-600/10 transition-colors"></div>
-                </div>
-
-                 <div className="bg-slate-50 border border-slate-200 p-8 space-y-4 relative overflow-hidden group hover:border-orange-500 hover:bg-white transition-all duration-300 shadow-md">
-                   <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                     <Eye size={24} />
-                   </div>
-                   <h4 className="text-base font-black text-slate-950 uppercase tracking-tight">TẦM NHÌN PHÁT TRIỂN</h4>
-                   <p className="text-slate-600 text-xs md:text-sm leading-relaxed text-justify font-medium">
-                     Với tầm nhìn “Trở thành nhà cung cấp hàng đầu về các giải pháp ứng dụng công nghệ ICT và khoa học công nghệ khác cho các ngành kỹ thuật tại Việt Nam và các nước trong khu vực”, chúng tôi liên tục nâng cao chất lượng và mở rộng các mảng sản phẩm, dịch vụ của mình nhằm đáp ứng tốt nhất nhu cầu của khách hàng.
-                   </p>
-                   <div className="absolute right-0 bottom-0 w-24 h-24 bg-orange-600/5 blur-xl pointer-events-none group-hover:bg-orange-600/10 transition-colors"></div>
-                 </div>
- 
-                 <div className="bg-slate-50 border border-slate-200 p-8 space-y-4 relative overflow-hidden group hover:border-orange-500 hover:bg-white transition-all duration-300 shadow-md">
-                   <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                     <TrendingUp size={24} />
-                   </div>
-                   <h4 className="text-base font-black text-slate-950 uppercase tracking-tight">MỤC TIÊU DOANH NGHIỆP</h4>
-                   <p className="text-slate-600 text-xs md:text-sm leading-relaxed text-justify font-medium">
-                     Đem lại lợi nhuận cao nhất cho các cổ đông, tạo việc làm ổn định và nâng cao thu nhập vượt trội cho người lao động, thực hiện đầy đủ nghĩa vụ đóng góp cho Ngân sách Nhà nước, nâng cấp quy mô doanh nghiệp ngày càng lớn mạnh, góp phần phát triển chuyên ngành Tin học và Tư vấn xây dựng nước nhà ngang tầm trình độ khu vực và quốc tế.
-                   </p>
-                   <div className="absolute right-0 bottom-0 w-24 h-24 bg-orange-600/5 blur-xl pointer-events-none group-hover:bg-orange-600/10 transition-colors"></div>
-                 </div>
-               </div>
-             </div>
- 
-             {/* 4. Các lĩnh vực hoạt động chủ yếu của công ty (FULL 10 mảng hoạt động nòng cốt) */}
-             <div className="space-y-8 pt-4 border-t border-slate-100">
-               <div className="border-l-4 border-orange-600 pl-4">
-                 <span className="text-[10px] text-orange-600 font-sans font-black uppercase tracking-widest block">DANH MỤC LĨNH VỰC</span>
-                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mt-0.5">CÁC LĨNH VỰC HOẠT ĐỘNG CHỦ YẾU CỦA CÔNG TY</h3>
-                 <p className="text-xs text-slate-500 font-medium">Toàn bộ 10 mảng kinh doanh & tư vấn nòng cốt tạo nên vị thế dẫn đầu công nghệ kỹ thuật của CIC</p>
-               </div>
- 
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 {[
-                   {
-                     title: "Phát triển phần mềm chuyên dụng",
-                     desc: "Phát triển phần mềm xây dựng, phần mềm quản lý, phần mềm quy hoạch,... và các phần mềm đặc thù theo nhu cầu của khách hàng.",
-                     highlights: "enjiCAD, ESCON, RDW, stCAD, VinaSAS, Sumac, MapPro, ESPA, Conna..."
-                   },
-                   {
-                     title: "Phân phối phần mềm nhập khẩu",
-                     desc: "Phân phối phần mềm nhập khẩu trong: xây dựng, nội thất, giao thông, đô thị, môi trường, thuỷ lợi, khai khoáng, ngành điện, giáo dục,... và các ngành kỹ thuật nói chung.",
-                     highlights: "Microsoft, Autodesk, CSI (SAP2000, ETABS), Cubicost, Risa, Marin, DHI, Alma, DNV GL, Prokon..."
-                   },
-                   {
-                     title: "Phân phối thiết bị khoa học công nghệ",
-                     desc: "Phân phối các giải pháp máy móc thiết bị khoa học công nghệ trong: xây dựng, nội thất, giao thông, đô thị, môi trường, thuỷ lợi, khai khoáng, ngành điện, giáo dục,... và các ngành kỹ thuật nói chung.",
-                     highlights: "Piletest, Tecknotrove, ZXLidars, A.P.Van den Berg, AQ System, Sewer Robotics, RadioDetection, Pearpoint, DJI..."
-                   },
-                   {
-                     title: "Phân phối các sản phẩm vật liệu mới",
-                     desc: "Phân phối các sản phẩm vật liệu mới chất lượng cao phục vụ các công trình hiện đại và dự án hạ tầng kỹ thuật tiên tiến.",
-                     highlights: "Vật liệu thông minh, sợi carbon cường độ cao, chất chống thấm đặc thù"
-                   },
-                   {
-                     title: "Giải pháp tích hợp hệ thống",
-                     desc: "Triển khai các giải pháp tích hợp hệ thống công nghệ thông tin, bảo mật hạ tầng mạng và lưu trữ cơ sở dữ liệu chuyên sâu.",
-                     highlights: "Hạ tầng Datacenter, Enterprise Server, giải pháp bảo mật nhiều lớp"
-                   },
-                   {
-                     title: "Tư vấn thiết kế xây dựng & quy hoạch",
-                     desc: "Tư vấn thiết kế xây dựng, quy hoạch chi tiết đô thị và hạ tầng kỹ thuật cho các dự án quy mô lớn.",
-                     highlights: "Khảo sát địa chất, lập báo cáo tiền khả thi, thiết kế kỹ thuật & lập dự toán"
-                   },
-                   {
-                     title: "Tư vấn triển khai BIM & số hoá công trình",
-                     desc: "Tư vấn triển khai BIM; số hoá công trình: xây dựng, nhà máy, hạ tầng kỹ thuật từ mô phỏng đến hiện thực hóa.",
-                     highlights: "Scan-to-BIM, point cloud 3D, quy trình chuẩn hóa ISO 19650"
-                   },
-                   {
-                     title: "Quản lý vận hành trên BIM / Digital twin",
-                     desc: "Tư vấn triển khai giải pháp quản lý vận hành công trình, nhà máy, hạ tầng kỹ thuật... trên mô hình BIM/Digital twin.",
-                     highlights: "Asset Management, IoT Integration, bản sao số Digital Twin"
-                   },
-                   {
-                     title: "Tư vấn dự án & giải pháp CNTT",
-                     desc: "Tư vấn dự án, tư vấn giải pháp CNTT toàn diện cho các tổ chức, bộ ban ngành và doanh nghiệp trong nước.",
-                     highlights: "Tư vấn thiết kế kỹ thuật, lập tổng dự toán CNTT, thẩm tra giải pháp"
-                   },
-                   {
-                     title: "Phát triển bền vững & Net Zero",
-                     desc: "Cung cấp dịch vụ và giải pháp phần mềm về phát triển bền vững, kiểm kê và giảm phát thải khí nhà kính; Chứng nhận môi trường cho sản phẩm, công trình....",
-                     highlights: "Báo cáo ESG, kiểm kê khí nhà kính, tư vấn đạt chứng nhận LEED, LOTUS"
-                   }
-                 ].map((item, idx) => (
-                   <div key={idx} className="bg-white border border-slate-200 p-6 flex flex-col justify-between hover:border-orange-500 hover:shadow-xl transition-all duration-300 relative group">
-                     <div className="space-y-3">
-                       <span className="font-sans text-[9px] font-black text-slate-400 block uppercase tracking-wider">MẢNG HOẠT ĐỘNG {(idx + 1).toString().padStart(2, '0')}</span>
-                       <h4 className="font-black text-sm uppercase tracking-tight text-slate-900 group-hover:text-orange-600 transition-colors leading-snug">{item.title}</h4>
-                       <div className="w-8 h-[1px] bg-orange-500 group-hover:w-16 transition-all duration-300"></div>
-                       <p className="text-slate-600 text-xs leading-relaxed text-justify font-medium pt-1">{item.desc}</p>
-                     </div>
-                     <div className="pt-4 mt-6 border-t border-slate-100 bg-slate-50/50 p-3">
-                       <span className="text-[9px] text-orange-600 font-sans font-black uppercase tracking-widest block">Công cụ & Công nghệ đại diện:</span>
-                       <p className="text-slate-800 text-[11px] font-bold mt-1 font-sans leading-relaxed text-justify">{item.highlights}</p>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             </div>
-
-            {/* 5. Các hoạt động và nhiệm vụ đăng ký pháp lý chính của công ty (FULL 11 items) */}
+            {/* 4. Các lĩnh vực hoạt động chủ yếu của công ty (FULL 10 mảng hoạt động nòng cốt) */}
             <div className="space-y-8 pt-4 border-t border-slate-100">
               <div className="border-l-4 border-orange-600 pl-4">
-                <span className="text-[10px] text-orange-600 font-sans font-black uppercase tracking-widest block">HOẠT ĐỘNG PHÁP LÝ</span>
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mt-0.5">CÁC HOẠT ĐỘNG & NHIỆM VỤ ĐĂNG KÝ PHÁP LÝ CHÍNH</h3>
-                <p className="text-xs text-slate-500">Hệ thống danh mục 11 nhóm hoạt động nghiệp vụ được đăng ký chính thức của Công ty Cổ phần Công nghệ và Tư vấn CIC</p>
+                <span className="text-[10px] text-orange-600 font-sans font-black uppercase tracking-widest block">DANH MỤC LĨNH VỰC</span>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mt-0.5">CÁC LĨNH VỰC HOẠT ĐỘNG CHỦ YẾU CỦA CÔNG TY</h3>
+                <p className="text-xs text-slate-500 font-medium">Toàn bộ 10 mảng kinh doanh & tư vấn nòng cốt tạo nên vị thế dẫn đầu công nghệ kỹ thuật của CIC</p>
               </div>
 
-              <div className="space-y-4 pl-5 border-l-2 border-slate-200/60 ml-0.5 w-full">
-                {[
+              {/* Danh sách 10 mảng nghiệp vụ nòng cốt */}
+              {(() => {
+                const domains = [
                   {
-                    act: "Sản xuất, phát triển, khai thác và cung cấp các sản phẩm phần mềm và các dịch vụ công nghệ thông tin phục vụ quản lý, kinh tế, kỹ thuật;",
-                    theme: "Phần mềm & Dịch vụ CNTT"
+                    id: "01",
+                    title: "Phát triển phần mềm chuyên dụng",
+                    desc: "Phát triển phần mềm xây dựng, phần mềm quản lý, phần mềm quy hoạch,... và các phần mềm đặc thù theo nhu cầu của khách hàng.",
+                    tag: "Phần mềm nòng cốt",
+                    icon: Cpu
                   },
                   {
-                    act: "Sản xuất, lắp ráp, xuất nhập khẩu, đại lý và cung cấp thiết bị tin học - viễn thông, thiết bị thí nghiệm và các thiết bị công nghệ khác;",
-                    theme: "Thiết bị & Công nghệ cao"
+                    id: "02",
+                    title: "Phân phối phần mềm nhập khẩu",
+                    desc: "Phân phối phần mềm nhập khẩu trong: xây dựng, nội thất, giao thông, đô thị, môi trường, thuỷ lợi, khai khoáng, ngành điện, giáo dục,... và các ngành kỹ thuật nói chung.",
+                    tag: "Giải pháp quốc tế",
+                    icon: Globe
                   },
                   {
-                    act: "Tổ chức đào tạo, bồi dưỡng về công nghệ thông tin và các ứng dụng công nghệ khác;",
-                    theme: "Đào tạo & Chuyển giao CNTT"
+                    id: "03",
+                    title: "Phân phối thiết bị khoa học công nghệ",
+                    desc: "Phân phối các giải pháp máy móc thiết bị khoa học công nghệ trong: xây dựng, nội thất, giao thông, đô thị, môi trường, thuỷ lợi, khai khoáng, ngành điện, giáo dục,... và các ngành kỹ thuật nói chung.",
+                    tag: "Thiết bị kỹ thuật",
+                    icon: Zap
                   },
                   {
-                    act: "Tổ chức đào tạo về tư vấn xây dựng;",
-                    theme: "Đào tạo Tư vấn Xây dựng"
+                    id: "04",
+                    title: "Phân phối các sản phẩm vật liệu mới",
+                    desc: "Phân phối các sản phẩm vật liệu mới chất lượng cao phục vụ các công trình hiện đại và dự án hạ tầng kỹ thuật tiên tiến.",
+                    tag: "Vật liệu tiên tiến",
+                    icon: Sparkles
                   },
                   {
-                    act: "Thi công lắp đặt các hệ thống thiết bị tin học, bưu chính viễn thông, điện lạnh, hệ thống điểu khiển trong công trình xây dựng dân dụng, công nghiệp, hạ tầng kỹ thuật, công nghệ thông tin, bưu chính viễn thông và bảo vệ môi trường;",
-                    theme: "Thi công Cơ điện & Viễn thông"
+                    id: "05",
+                    title: "Giải pháp tích hợp hệ thống",
+                    desc: "Triển khai các giải pháp tích hợp hệ thống công nghệ thông tin, bảo mật hạ tầng mạng và lưu trữ cơ sở dữ liệu chuyên sâu.",
+                    tag: "Hạ tầng & Security",
+                    icon: Briefcase
                   },
                   {
-                    act: "Lập dự án đầu tư; thiết kế kỹ thuật và lập tổng dự toán; thẩm tra và quản lý chất lượng dự án đầu tư về công nghệ thông tin và bưu chính viễn thông;",
-                    theme: "Tư vấn Thiết kế & Đầu tư ICT"
+                    id: "06",
+                    title: "Tư vấn thiết kế xây dựng & quy hoạch",
+                    desc: "Tư vấn thiết kế xây dựng, quy hoạch chi tiết đô thị và hạ tầng kỹ thuật cho các dự án quy mô lớn.",
+                    tag: "Tư vấn quy hoạch",
+                    icon: Building2
                   },
                   {
-                    act: "Tư vấn xây dựng các công trình xây dựng dân dụng; công trình công nghiệp, công trình hạ tầng kỹ thuật và bảo vệ môi trường gồm: Lập và thẩm tra dự án đầu tư, khảo sát địa hình, địa chất và đo đạc; quy hoạch khu dân cư, khu chức năng đô thị và khu công nghiệp; thiết kế xây dựng công trình; thẩm tra thiết kế kỹ thuật, thiết kế bản vẽ thi công; lập và thẩm tra dự toán và tổng dự toán công trình; lập hồ sơ mời thầu và phân tích đánh giá hồ sơ về lựa chọn nhà thầu tư vấn, nhà thầu thi công, thiết kế, nhà thầu cung cấp thiết bị, thi tuyển phương án kiến trúc; giám sát thi công xây dựng, lắp đặt thiết bị; tổng thầu tư vấn; quản lý dự án; kiểm định, kiểm tra và chứng nhận sự phù hợp về chất lượng các công trình xây dựng;",
-                    theme: "Tư vấn Thiết kế & Giám sát"
+                    id: "07",
+                    title: "Tư vấn triển khai BIM & số hoá công trình",
+                    desc: "Tư vấn triển khai BIM; số hoá công trình: xây dựng, nhà máy, hạ tầng kỹ thuật từ mô phỏng đến hiện thực hóa.",
+                    tag: "BIM & Scan-to-BIM",
+                    icon: Layers
                   },
                   {
-                    act: "Thi công xây dựng các công trình dân dụng, công trình công nghệ thông tin, công trình bảo vệ môi trường;",
-                    theme: "Thi công Xây lắp & Môi trường"
+                    id: "08",
+                    title: "Quản lý vận hành trên BIM / Digital twin",
+                    desc: "Tư vấn triển khai giải pháp quản lý vận hành công trình, nhà máy, hạ tầng kỹ thuật... trên mô hình BIM/Digital twin.",
+                    tag: "Digital Twin & IoT",
+                    icon: Activity
                   },
                   {
-                    act: "Liên doanh liên kết với các đơn vị trong và ngoài nước để phát triển, ứng dụng và đầu tư công nghệ;",
-                    theme: "Hợp tác & Liên doanh Công nghệ"
+                    id: "09",
+                    title: "Tư vấn dự án & giải pháp CNTT",
+                    desc: "Tư vấn dự án, tư vấn giải pháp CNTT toàn diện cho các tổ chức, bộ ban ngành và doanh nghiệp trong nước.",
+                    tag: "Tư vấn chuyển đổi số",
+                    icon: TrendingUp
                   },
                   {
-                    act: "Đầu tư kinh doanh bất động sản, dịch vụ cho thuê nhà và văn phòng làm việc;",
-                    theme: "Bất động sản & Cho thuê văn phòng"
-                  },
-                  {
-                    act: "Đầu tư và xây dựng dự án khu đô thị, khu công nghiệp, khu du lịch;",
-                    theme: "Đầu tư & Phát triển Hạ tầng"
+                    id: "10",
+                    title: "Phát triển bền vững & Net Zero",
+                    desc: "Cung cấp dịch vụ và giải pháp phần mềm về phát triển bền vững, kiểm kê và giảm phát thải khí nhà kính; Chứng nhận môi trường cho sản phẩm, công trình....",
+                    tag: "Net Zero & ESG",
+                    icon: CheckCircle2
                   }
-                ].map((item, index) => (
-                  <div 
-                    key={index} 
-                    className="flex flex-col md:flex-row items-start md:items-center gap-4 p-5 bg-white border border-slate-200/80 border-l-4 border-l-slate-400 hover:border-l-orange-600 hover:border-slate-300 hover:shadow-md hover:bg-slate-50/10 transition-all duration-300 relative group animate-fade-in w-full"
-                  >
-                    {/* Index & Theme */}
-                    <div className="flex items-center gap-3 shrink-0 w-full md:w-64">
-                      <span className="font-mono text-xs font-black text-slate-400 group-hover:text-orange-600 transition-colors">
-                        {(index + 1).toString().padStart(2, '0')}.
-                      </span>
-                      <span className="text-xs font-black uppercase tracking-wider text-slate-700 group-hover:text-slate-950 transition-colors">
-                        {item.theme}
-                      </span>
-                    </div>
+                ];
 
-                    {/* Connecting line on desktop */}
-                    <div className="hidden md:block h-6 w-[1px] bg-slate-200 self-stretch my-1"></div>
+                return (
+                  <div className="space-y-4">
+                    <div className="divide-y divide-slate-200 border-t border-b border-slate-200">
+                      {domains.map((item) => {
+                        const ItemIcon = item.icon;
+                        return (
+                          <div 
+                            key={item.id} 
+                            className="py-5 px-3 md:px-6 hover:bg-orange-50/30 transition-all duration-300 border-l-4 border-l-transparent hover:border-l-orange-600 group bg-white"
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                              {/* Number & Icon */}
+                              <div className="md:col-span-1 flex items-center gap-2">
+                                <span className="font-sans text-base md:text-lg font-black text-orange-600">
+                                  {item.id}.
+                                </span>
+                                <ItemIcon size={16} className="text-slate-400 group-hover:text-orange-600 transition-colors hidden md:block" />
+                              </div>
 
-                    {/* Legal text content */}
-                    <div className="grow pl-0 md:pl-2">
-                      <p className="text-slate-700 text-xs md:text-[13px] font-semibold leading-relaxed text-justify">
-                        {item.act}
-                      </p>
+                              {/* Title & Tag */}
+                              <div className="md:col-span-4 space-y-1">
+                                <span className="text-[9px] font-sans font-black uppercase tracking-wider text-orange-600/80 block">
+                                  {item.tag}
+                                </span>
+                                <h5 className="font-black text-sm uppercase text-slate-900 group-hover:text-orange-600 transition-colors leading-snug">
+                                  {item.title}
+                                </h5>
+                              </div>
+
+                              {/* Description */}
+                              <div className="md:col-span-7">
+                                <p className="text-slate-600 text-xs md:text-[13px] font-medium leading-relaxed text-justify">
+                                  {item.desc}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
 
             {/* 6. GIÁ TRỊ CỐT LÕI (Interactive & Beautifully polished) */}
@@ -517,7 +438,6 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
             {/* Global Contact & Official Legal Profile Section (Moved into Overview Tab only) */}
             <div id="contact" className="space-y-8 pt-12 border-t border-slate-200 mt-16">
               <div className="bg-slate-50 border border-slate-200 p-8 text-center max-w-4xl mx-auto space-y-4">
-                <Heart className="text-orange-600 mx-auto w-8 h-8 animate-pulse" />
                 <p className="text-slate-700 text-sm md:text-base font-semibold italic leading-relaxed">
                   "Với tinh thần trân trọng, lắng nghe và phục vụ, chúng tôi luôn sẵn sàng tiếp nhận và biết ơn mọi sự góp ý của khách hàng."
                 </p>
@@ -567,7 +487,7 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
 
                       <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
                         <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Email:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5 font-mono">
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
                           <Mail size={14} className="text-slate-500 shrink-0" />
                           <a href="mailto:info@cic.com.vn" className="hover:text-orange-600 transition-colors">info@cic.com.vn</a>
                         </p>
@@ -624,7 +544,7 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
 
                       <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
                         <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Email:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5 font-mono">
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
                           <Mail size={14} className="text-slate-500 shrink-0" />
                           <a href="mailto:cichcm@cic.com.vn" className="hover:text-orange-600 transition-colors">cichcm@cic.com.vn</a>
                         </p>
@@ -700,149 +620,186 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Trụ sở chính */}
-                <div className="bg-white border border-slate-200 p-6 md:p-8 space-y-6 shadow-sm hover:border-orange-500 hover:shadow-md transition-all duration-300">
-                  <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                    <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                      <Building2 size={24} />
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-orange-600 font-sans font-black tracking-widest uppercase block">ĐƠN VỊ ĐIỀU HÀNH CHÍNH</span>
-                      <h4 className="font-black text-base uppercase text-slate-900 tracking-tight">TRỤ SỞ CHÍNH HÀ NỘI</h4>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Trụ sở chính :</span>
-                      <p className="text-slate-950 font-bold flex items-start gap-2.5">
-                        <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
-                        <span>37 Lê Đại Hành - Quận Hai Bà Trưng - HN</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Quyết định thành lập số:</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <FileText size={14} className="text-slate-500 shrink-0" />
-                        <span>1765/QĐ-BXD ngày 21/12/2006.</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Đăng ký kinh doanh số:</span>
-                      <p className="text-slate-950 font-bold flex items-start gap-2.5">
-                        <CheckCircle2 size={14} className="text-slate-500 shrink-0 mt-0.5" />
-                        <span>0100775353 ngày 29/05/2013 (thay đổi lần 3) do Phòng đăng ký kinh doanh Sở KHĐT HN cấp.</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Mã số thuế    :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5 font-mono">
-                        <ShieldAlert size={14} className="text-slate-500 shrink-0" />
-                        <span>01 0077 5353</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Tài khoản      :</span>
-                      <div className="space-y-1">
-                        <p className="text-slate-950 font-bold flex items-start gap-2.5 font-mono">
-                          <DollarSign size={14} className="text-slate-500 shrink-0 mt-0.5" />
-                          <span>120.10.00.001477.7</span>
-                        </p>
-                        <p className="text-slate-500 text-xs italic pl-6">
-                          Tại Sở giao dịch Ngân hàng đầu tư và phát triển Việt Nam
-                        </p>
+              {/* Twin Office Locations Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                {/* Trụ sở chính Hà Nội */}
+                <div className="bg-white border border-slate-200 p-6 md:p-8 flex flex-col justify-between space-y-6 shadow-sm hover:border-orange-500 hover:shadow-md transition-all duration-300">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+                      <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                        <Building2 size={24} />
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-orange-600 font-sans font-black tracking-widest uppercase block">ĐƠN VỊ ĐIỀU HÀNH CHÍNH</span>
+                        <h4 className="font-black text-base uppercase text-slate-900 tracking-tight">TRỤ SỞ CHÍNH HÀ NỘI</h4>
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Điện thoại:</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <Phone size={14} className="text-slate-500 shrink-0" />
-                        <span>84.4.39.781 /39.741.313</span>
-                      </p>
-                    </div>
+                    <div className="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Địa chỉ trụ sở:</span>
+                        <p className="text-slate-950 font-bold flex items-start gap-2.5">
+                          <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
+                          <span>37 Lê Đại Hành - Quận Hai Bà Trưng - Hà Nội</span>
+                        </p>
+                      </div>
 
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Fax                :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <Phone size={14} className="text-slate-400 shrink-0" />
-                        <span>84.4.38.216.793</span>
-                      </p>
-                    </div>
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Quyết định thành lập số:</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <FileText size={14} className="text-slate-500 shrink-0" />
+                          <span>1765/QĐ-BXD ngày 21/12/2006 (Bộ Xây Dựng)</span>
+                        </p>
+                      </div>
 
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Email             :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5 font-mono">
-                        <Mail size={14} className="text-slate-500 shrink-0" />
-                        <a href="mailto:info@cic.com.vn" className="hover:text-orange-600 transition-colors">info@cic.com.vn</a>
-                      </p>
-                    </div>
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Điện thoại liên hệ:</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Phone size={14} className="text-slate-500 shrink-0" />
+                          <span>84.4.39.781 / 39.741.313</span>
+                        </p>
+                      </div>
 
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Website         :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <Globe size={14} className="text-slate-500 shrink-0" />
-                        <a href="http://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">www.cic.com.vn</a>
-                      </p>
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Số Fax:</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Phone size={14} className="text-slate-400 shrink-0" />
+                          <span>84.4.38.216.793</span>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Thư điện tử (Email):</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Mail size={14} className="text-slate-500 shrink-0" />
+                          <a href="mailto:info@cic.com.vn" className="hover:text-orange-600 transition-colors">info@cic.com.vn</a>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Trang tin điện tử (Website):</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Globe size={14} className="text-slate-500 shrink-0" />
+                          <a href="http://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">www.cic.com.vn</a>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Chi nhánh TP. Hồ Chí Minh */}
-                <div className="bg-white border border-slate-200 p-6 md:p-8 space-y-6 shadow-sm hover:border-orange-500 hover:shadow-md transition-all duration-300">
-                  <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                    <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                      <MapPin size={24} />
+                <div className="bg-white border border-slate-200 p-6 md:p-8 flex flex-col justify-between space-y-6 shadow-sm hover:border-orange-500 hover:shadow-md transition-all duration-300">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+                      <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                        <MapPin size={24} />
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-orange-600 font-sans font-black tracking-widest uppercase block">KHU VỰC PHÁT TRIỂN PHÍA NAM</span>
+                        <h4 className="font-black text-base uppercase text-slate-900 tracking-tight">CHI NHÁNH TP. HỒ CHÍ MINH</h4>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-[9px] text-orange-600 font-sans font-black tracking-widest uppercase block">KHU VỰC PHÁT TRIỂN PHÍA NAM</span>
-                      <h4 className="font-black text-base uppercase text-slate-900 tracking-tight">CHI NHÁNH TP. HỒ CHÍ MINH</h4>
+
+                    <div className="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Địa chỉ chi nhánh:</span>
+                        <p className="text-slate-950 font-bold flex items-start gap-2.5">
+                          <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
+                          <span>36 Nguyễn Huy Lượng - P.14 - Q.Bình Thạnh - TP.HCM</span>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Quyết định thành lập số:</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <FileText size={14} className="text-slate-500 shrink-0" />
+                          <span>939/QĐ-BXD ngày 13/07/2000 (Bộ Xây Dựng)</span>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Điện thoại liên hệ:</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Phone size={14} className="text-slate-500 shrink-0" />
+                          <span>84.8.628.99.022 – 628.99.033</span>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Số Fax:</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Phone size={14} className="text-slate-400 shrink-0" />
+                          <span>84.8.628.99.033</span>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Thư điện tử (Email):</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Mail size={14} className="text-slate-500 shrink-0" />
+                          <a href="mailto:cichcm@cic.com.vn" className="hover:text-orange-600 transition-colors">cichcm@cic.com.vn</a>
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
+                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Trang tin điện tử (Website):</span>
+                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
+                          <Globe size={14} className="text-slate-500 shrink-0" />
+                          <a href="http://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">www.cic.com.vn</a>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Core Legal & Banking Card */}
+              <div className="bg-slate-900 text-white p-6 md:p-8 space-y-6 shadow-md border-l-4 border-orange-600">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                  <div>
+                    <span className="text-[10px] text-orange-400 font-sans font-black tracking-widest uppercase block mb-1">
+                      HỒ SƠ ĐĂNG KÝ DOANH NGHIỆP & TÀI KHOẢN GIAO DỊCH
+                    </span>
+                    <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">
+                      CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ TƯ VẤN CIC
+                    </h4>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/80 px-3 py-1.5 self-start sm:self-auto">
+                    <ShieldAlert size={16} className="text-orange-500 shrink-0" />
+                    <span className="text-xs text-slate-300 font-bold">MST: <strong className="text-white font-extrabold">01 0077 5353</strong></span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs md:text-sm">
+                  {/* Left Column: Legal Registration */}
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase tracking-wider">Đăng ký kinh doanh số:</span>
+                      <p className="text-slate-100 font-medium flex items-start gap-2.5">
+                        <CheckCircle2 size={16} className="text-orange-500 shrink-0 mt-0.5" />
+                        <span>0100775353 ngày 29/05/2013 (thay đổi lần 3) do Phòng đăng ký kinh doanh - Sở KHĐT Hà Nội cấp</span>
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-slate-800/80 pt-3">
+                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase tracking-wider">Mã số thuế doanh nghiệp:</span>
+                      <p className="text-slate-100 font-bold flex items-center gap-2.5">
+                        <ShieldAlert size={16} className="text-orange-500 shrink-0" />
+                        <span>01 0077 5353</span>
+                      </p>
                     </div>
                   </div>
 
-                  <div className="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase font-mono">Chi nhánh tại Tp.HCM:</span>
-                      <p className="text-slate-950 font-bold flex items-start gap-2.5">
-                        <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
-                        <span>36 Nguyễn Huy Lượng - P.14 - Q.Bình Thạnh - Tp HCM</span>
+                  {/* Right Column: Bank Account Details */}
+                  <div className="space-y-4 md:border-l md:border-slate-800 md:pl-6">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase tracking-wider">Tài khoản ngân hàng giao dịch:</span>
+                      <p className="text-white font-extrabold text-sm md:text-base flex items-center gap-2.5 text-orange-400">
+                        <DollarSign size={18} className="text-orange-500 shrink-0" />
+                        <span>120.10.00.001477.7</span>
                       </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Quyết định thành lập số:</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <FileText size={14} className="text-slate-500 shrink-0" />
-                        <span>939/QĐ-BXD ngày 13/07/2000.</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Điện thoại     :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <Phone size={14} className="text-slate-500 shrink-0" />
-                        <span>84.8.628.99.022 – 628.99.033</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Fax                :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                        <Phone size={14} className="text-slate-400 shrink-0" />
-                        <span>84.8.628.99.033</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Email             :</span>
-                      <p className="text-slate-950 font-bold flex items-center gap-2.5 font-mono">
-                        <Mail size={14} className="text-slate-500 shrink-0" />
-                        <a href="mailto:cichcm@cic.com.vn" className="hover:text-orange-600 transition-colors">cichcm@cic.com.vn</a>
+                      <p className="text-slate-400 text-xs italic pl-7">
+                        Tại Sở giao dịch Ngân hàng Đầu tư và Phát triển Việt Nam (BIDV)
                       </p>
                     </div>
                   </div>
@@ -879,119 +836,162 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
                   </div>
                 </div>
 
-                {/* Các hoạt động đăng ký chính */}
-                <div className="space-y-4 pt-6 border-t border-slate-200">
-                  <h4 className="font-black text-xs md:text-sm uppercase text-slate-900 tracking-tight">CÁC HOẠT ĐỘNG VÀ NHIỆM VỤ ĐĂNG KÝ PHÁP LÝ CHÍNH CỦA CÔNG TY</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      "Sản xuất, phát triển, khai thác và cung cấp các sản phẩm phần mềm và các dịch vụ công nghệ thông tin phục vụ quản lý, kinh tế, kỹ thuật;",
-                      "Sản xuất, lắp ráp, xuất nhập khẩu, đại lý và cung cấp thiết bị tin học - viễn thông, thiết bị thí nghiệm và các thiết bị công nghệ khác;",
-                      "Tổ chức đào tạo, bồi dưỡng về công nghệ thông tin và các ứng dụng công nghệ khác;",
-                      "Tổ chức đào tạo về tư vấn xây dựng;",
-                      "Thi công lắp đặt các hệ thống thiết bị tin học, bưu chính viễn thông, điện lạnh, hệ thống điểu khiển trong công trình xây dựng dân dụng, công nghiệp, hạ tầng kỹ thuật, công nghệ thông tin, bưu chính viễn thông và bảo vệ môi trường;",
-                      "Lập dự án đầu tư; thiết kế kỹ thuật và lập tổng dự toán; thẩm tra và quản lý chất lượng dự án đầu tư về công nghệ thông tin và bưu chính viễn thông;",
-                      "Tư vấn xây dựng các công trình xây dựng dân dụng; công trình công nghiệp, công trình hạ tầng kỹ thuật và bảo vệ môi trường gồm: Lập và thẩm tra dự án đầu tư, khảo sát địa hình, địa chất và đo đạc; quy hoạch khu dân cư, khu chức năng đô thị và khu công nghiệp; thiết kế xây dựng công trình; thẩm tra thiết kế kỹ thuật, thiết kế bản vẽ thi công; lập và thẩm tra dự toán và tổng dự toán công trình; lập hồ sơ mời thầu và phân tích đánh giá hồ sơ về lựa chọn nhà thầu tư vấn, nhà thầu thi công, thiết kế, nhà thầu cung cấp thiết bị, thi tuyển phương án kiến trúc; giám sát thi công xây dựng, lắp đặt thiết bị; tổng thầu tư vấn; quản lý dự án; kiểm định, kiểm tra và chứng nhận sự phù hợp về chất lượng các công trình xây dựng;",
-                      "Thi công xây dựng các công trình dân dụng, công trình công nghệ thông tin, công trình bảo vệ môi trường;",
-                      "Liên doanh liên kết với các đơn vị trong và ngoài nước để phát triển, ứng dụng và đầu tư công nghệ;",
-                      "Đầu tư kinh doanh bất động sản, dịch vụ cho thuê nhà và văn phòng làm việc;",
-                      "Đầu tư và xây dựng dự án khu đô thị, khu công nghiệp, khu du lịch."
-                    ].map((act, index) => (
-                      <div key={index} className="flex gap-3 bg-white border border-slate-200 p-4 hover:border-orange-600/30 transition-all">
-                        <span className="font-sans font-black text-orange-600 text-xs md:text-sm shrink-0">{(index + 1).toString().padStart(2, '0')}</span>
-                        <p className="text-slate-600 text-[11px] md:text-xs font-semibold leading-relaxed text-justify">{act}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
 
-            {/* Section III: CÁC LĨNH VỰC KINH DOANH CHỦ YẾU */}
+            {/* Section II: CÁC LĨNH VỰC KINH DOANH CHỦ YẾU */}
             <div className="space-y-8 pt-8 border-t border-slate-100">
               <div className="border-l-4 border-slate-950 pl-4">
                 <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">
-                  III. CÁC LĨNH VỰC KINH DOANH CHỦ YẾU CỦA CÔNG TY
+                  II. CÁC LĨNH VỰC KINH DOANH CHỦ YẾU CỦA CÔNG TY
                 </h3>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
                   Mảng kinh doanh nòng cốt thúc đẩy hiện đại hóa ngành kỹ thuật Việt Nam
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "Phát triển phần mềm xây dựng",
-                    desc: "Nghiên cứu, xây dựng các phần mềm và các chương trình hỗ trợ tự động hoá công tác tư vấn thiết kế xây dựng.",
-                    highlights: "MBW, MDW, MCW, VINASAS, KPW, SBTW, SUMAC, ESCON, stCAD..."
-                  },
-                  {
-                    title: "Phát triển phần mềm quản lý xây dựng",
-                    desc: "Nghiên cứu, xây dựng các phần mềm chuyên ngành phục vụ công tác quản lý kế toán, quản lý nhân sự tiền lương, ... cho các doanh nghiệp xây dựng, các cơ quan hành chính sự nghiệp.",
-                    highlights: "Quản lý tài chính kế toán, Nhân sự, Tiền lương chuyên biệt"
-                  },
-                  {
-                    title: "Phát triển phần mềm quy hoạch và hạ tầng kỹ thuật",
-                    desc: "Áp dụng các công nghệ tiên tiến trên thế giới, xây dựng các phần mềm ứng dụng cho quản lý của các đơn vị trong lĩnh vực quy hoạch và hạ tầng kỹ thuật.",
-                    highlights: "MaPPro, ESPA, MA"
-                  },
-                  {
-                    title: "Phân phối thiết bị công nghệ cao nhập khẩu",
-                    desc: "Nghiên cứu, phân phối, chuyển giao các thiết bị công nghệ cao, đặc thù của các nước phát triển cho ngành xây dựng Việt Nam. Các thiết bị tập trung trong một số nhóm chính như: thiết bị kiểm tra không phá huỷ, thiết bị địa kỹ thuật, thiết bị địa vật lý, thiết bị & giải pháp công nghệ cho ngành nước...",
-                    highlights: "Piletest, James Instruments, LRM, IDS, ELE, A.P.Van den Berg, Instantel, PASI, Casio, Seba KMT, ROMDAS..."
-                  },
-                  {
-                    title: "Phân phối phần mềm xây dựng nhập khẩu",
-                    desc: "Nghiên cứu, phân phối, chuyển giao các phần mềm xây dựng nhập khẩu có bản quyền của các hãng nổi tiếng trên thế giới.",
-                    highlights: "Autodesk, SAP, ETABS, ADAPT, Bentley, GEO SLOPE, PLAXIS..."
-                  },
-                  {
-                    title: "Phân phối phần mềm giao thông, đô thị và môi trường",
-                    desc: "Nghiên cứu, phân phối và chuyển giao các giải pháp công nghệ và phần mềm cho các lĩnh vực giao thông, đô thị và môi trường.",
-                    highlights: "PTV, TRL, Kritikal, ASA, LakeEnvironmental, DHI, D3D, Vectuel..."
-                  },
-                  {
-                    title: "Các giải pháp công nghệ thông minh",
-                    desc: "Nghiên cứu, chuyển giao các giải pháp và thiết bị công nghệ thông minh mang tính tự động hoá cao.",
-                    highlights: "Giao thông thông minh (ITS), quản lý tòa nhà và căn hộ (BMS), tiết kiệm năng lượng"
-                  },
-                  {
-                    title: "Tư vấn các dự án",
-                    desc: "Cung cấp các dịch vụ tư vấn dự án công nghệ thông tin, dự án đầu tư xây dựng và triển khai thực hiện các dự án công nghệ thông tin cho các tổ chức và doanh nghiệp, thi công lắp đặt các hệ thống trang thiết bị tin học, bưu chính viễn thông, hạ tầng kỹ thuật, hệ thống điều khiển các công trình xây dựng dân dụng.",
-                    highlights: "Tư vấn đầu tư ICT, Giám sát lắp đặt phần cứng viễn thông, điện nhẹ"
-                  },
-                  {
-                    title: "Tư vấn thiết kế xây dựng",
-                    desc: "Cung cấp các dịch vụ về khảo sát, lập dự án đầu tư, thiết kế và tư vấn xây dựng, ... cho các công trình dân dụng, công nghiệp, giao thông, thuỷ lợi, ... với yêu cầu cao.",
-                    highlights: "Khảo sát địa hình địa chất, quy hoạch đô thị, lập dự án và tổng dự toán"
-                  }
-                ].map((item, idx) => (
-                  <div key={idx} className="bg-white border border-slate-200 p-6 flex flex-col justify-between hover:border-orange-600 hover:shadow-md transition-all duration-300 relative group">
-                    <div className="space-y-3">
-                      <span className="font-sans text-[9px] font-black text-slate-400 block uppercase tracking-wider">LĨNH VỰC 0{idx + 1}</span>
-                      <h4 className="font-black text-xs md:text-sm uppercase tracking-tight text-slate-900 group-hover:text-orange-600 transition-colors leading-snug">{item.title}</h4>
-                      <p className="text-slate-500 text-[11px] md:text-xs leading-relaxed text-justify font-medium">{item.desc}</p>
+              {/* 3 Pillar Header Navigation Pills */}
+              <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-4">
+                <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider mr-2">Nhóm mảng:</span>
+                {businessPillars.map((pillar, pIdx) => {
+                  const isActive = activePillarIndex === pIdx;
+                  const Icon = pillar.icon;
+                  return (
+                    <button
+                      key={pIdx}
+                      onClick={() => {
+                        setActivePillarIndex(pIdx);
+                        const firstFieldId = pillar.fieldIds[0];
+                        const foundIdx = businessFields.findIndex(f => f.id === firstFieldId);
+                        if (foundIdx !== -1) setActiveFieldIndex(foundIdx);
+                      }}
+                      className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold transition-all duration-200 border cursor-pointer ${
+                        isActive
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'
+                      }`}
+                    >
+                      <Icon size={14} className={isActive ? 'text-orange-400' : 'text-slate-500'} />
+                      <span>{pillar.title}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 font-sans font-black ${isActive ? 'bg-slate-800 text-orange-400' : 'bg-slate-100 text-slate-500'}`}>
+                        {pillar.fieldIds.length}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Master-Detail Interactive Layout (No Boxed Grid!) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left side list of fields in current active pillar */}
+                <div className="lg:col-span-5 space-y-1.5">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 mb-2">
+                    Danh mục Lĩnh vực ({businessPillars[activePillarIndex].fieldIds.length} mảng)
+                  </div>
+                  {businessPillars[activePillarIndex].fieldIds.map((fId) => {
+                    const fieldObj = businessFields.find(f => f.id === fId);
+                    if (!fieldObj) return null;
+                    const realIdx = businessFields.findIndex(f => f.id === fId);
+                    const isSelected = activeFieldIndex === realIdx;
+
+                    return (
+                      <button
+                        key={fId}
+                        onClick={() => setActiveFieldIndex(realIdx)}
+                        className={`w-full text-left p-3.5 transition-all duration-200 flex items-center justify-between group cursor-pointer border-l-4 ${
+                          isSelected
+                            ? 'bg-slate-900 text-white border-orange-500 shadow-md pl-4'
+                            : 'bg-white hover:bg-slate-100/80 text-slate-800 border-transparent border-b border-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 pr-2">
+                          <span className={`text-xs font-black font-sans shrink-0 px-2 py-0.5 ${
+                            isSelected ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-orange-100 group-hover:text-orange-600'
+                          }`}>
+                            {fieldObj.id}
+                          </span>
+                          <span className="text-xs md:text-sm font-bold leading-snug line-clamp-1">
+                            {fieldObj.title}
+                          </span>
+                        </div>
+                        <ChevronRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-orange-400 translate-x-1' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Right side Spotlight Detail Canvas */}
+                <div className="lg:col-span-7 bg-slate-900 text-white p-6 md:p-8 border-l-4 border-orange-500 shadow-lg space-y-6 relative overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="bg-orange-600 text-white text-xs font-sans font-black px-2.5 py-1">
+                        LĨNH VỰC {businessFields[activeFieldIndex].id} / 10
+                      </span>
+                      <span className="text-[11px] text-orange-400 font-bold uppercase tracking-wider">
+                        {businessPillars[activePillarIndex].title}
+                      </span>
                     </div>
-                    <div className="pt-4 mt-4 border-t border-slate-100">
-                      <span className="text-[9px] text-orange-600 font-black uppercase tracking-widest block">Công cụ & Công nghệ cốt lõi:</span>
-                      <p className="text-slate-800 text-[11px] font-bold mt-1.5 font-sans leading-relaxed">{item.highlights}</p>
+                    {(() => {
+                      const ActiveIcon = businessFields[activeFieldIndex].icon;
+                      return <ActiveIcon size={24} className="text-orange-500" />;
+                    })()}
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="text-lg md:text-xl font-black uppercase text-white tracking-tight leading-snug">
+                      {businessFields[activeFieldIndex].title}
+                    </h4>
+                    <p className="text-slate-300 text-xs md:text-sm leading-relaxed font-medium text-justify">
+                      {businessFields[activeFieldIndex].desc}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 pt-4 border-t border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-orange-400" />
+                      <span className="text-[11px] font-black uppercase text-orange-400 tracking-wider">
+                        CÔNG CỤ & CÔNG NGHỆ CỐT LÕI HỢP TÁC / CHUYỂN GIAO:
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {businessFields[activeFieldIndex].techs.map((tech, tIdx) => (
+                        <span 
+                          key={tIdx} 
+                          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold px-3 py-1 hover:border-orange-500 transition-colors"
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                ))}
+
+                  {onNavigateToContact && (
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        onClick={onNavigateToContact}
+                        className="bg-orange-600 hover:bg-orange-500 text-white text-xs font-black uppercase px-4 py-2.5 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <span>Tư vấn mảng này</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* HỒ SƠ KINH NGHIỆM THEO SỐ NĂM TÍCH LŨY */}
-            <div className="space-y-8 pt-8 border-t border-slate-100">
-              <div className="border-l-4 border-slate-950 pl-4">
-                <h3 className="text-xl font-black text-slate-950 uppercase tracking-tight">
+            <div className="space-y-6 pt-8 border-t border-slate-100">
+              <div className="border-l-4 border-orange-600 pl-4">
+                <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">
                   HỒ SƠ KINH NGHIỆM THEO SỐ NĂM HOẠT ĐỘNG
                 </h3>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mt-1">
                   Kinh nghiệm tích lũy chuyên môn vững vàng của CIC theo từng loại hình công việc
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {[
                   { title: "Tư vấn các giải pháp tổng thể về hệ thống thiết bị tin học, viễn thông.", years: 35 },
                   { title: "Nghiên cứu ứng dụng và chuyển giao các giải pháp công nghệ thông tin.", years: 35 },
@@ -1003,19 +1003,23 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
                   { title: "Liên doanh, liên kết, hợp tác với các đơn vị trong và ngoài nước để phát triển và đầu tư công nghệ.", years: 30 },
                   { title: "Phân phối các thiết bị đặc thù và phần mềm nhập khẩu chuyên ngành xây dựng.", years: 29 }
                 ].map((item, idx) => (
-                  <div key={idx} className="bg-white border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-orange-500/50 transition-all">
-                    <div className="flex items-center gap-4">
-                      <span className="w-10 h-10 bg-slate-950 text-white font-sans font-black flex items-center justify-center text-xs shrink-0">
-                        0{idx + 1}
+                  <div 
+                    key={idx} 
+                    className="bg-white border border-slate-200/90 hover:border-orange-400 p-4 md:p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all duration-200 group hover:shadow-xs"
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <span className="w-8 h-8 rounded bg-orange-50 text-orange-600 font-sans font-bold flex items-center justify-center text-xs shrink-0 border border-orange-200/80 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                        {(idx + 1).toString().padStart(2, '0')}
                       </span>
-                      <div>
-                        <p className="text-slate-900 text-xs md:text-sm font-black leading-relaxed">{item.title}</p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Lực lượng năng lực CIC</p>
-                      </div>
+                      <p className="text-slate-800 text-xs md:text-sm font-medium leading-relaxed group-hover:text-slate-950 transition-colors">
+                        {item.title}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto bg-orange-50 border border-orange-200 px-4 py-2">
-                      <Clock size={14} className="text-orange-600" />
-                      <span className="font-sans font-black text-sm text-orange-600 whitespace-nowrap">{item.years} NĂM KINH NGHIỆM</span>
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto bg-slate-50 group-hover:bg-orange-50 border border-slate-200 group-hover:border-orange-200 px-3 py-1.5 transition-colors">
+                      <Clock size={13} className="text-orange-500" />
+                      <span className="font-sans font-bold text-xs text-slate-700 group-hover:text-orange-700 whitespace-nowrap">
+                        {item.years} NĂM KINH NGHIỆM
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1297,10 +1301,14 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
                 </div>
                 <button 
                   onClick={() => {
-                    const el = document.getElementById('contact');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    if (onNavigateToContact) {
+                      onNavigateToContact();
+                    } else {
+                      const el = document.getElementById('contact');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
-                  className="px-6 py-3 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black uppercase tracking-wider rounded-none shrink-0 transition-all active:scale-95 shadow-xl border-2 border-slate-950"
+                  className="px-6 py-3 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black uppercase tracking-wider rounded-none shrink-0 transition-all active:scale-95 shadow-xl border-2 border-slate-950 cursor-pointer"
                 >
                   Kết nối ngay
                 </button>

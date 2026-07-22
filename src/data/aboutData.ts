@@ -30,7 +30,7 @@ export const coreValues = [
   },
   {
     title: "Tận tụy với khách hàng",
-    icon: Heart,
+    icon: UserCheck,
     desc: "Luôn đặt mục tiêu và lợi ích của khách hàng lên hàng đầu và nỗ lực thực hiện những cam kết với khách hàng vì mục tiêu phát triển của khách hàng và của CIC."
   },
   {

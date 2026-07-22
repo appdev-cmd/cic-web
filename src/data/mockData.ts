@@ -22,7 +22,7 @@ export const heroSlides: HeroSlide[] = [
     sub: "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới mang lại những giải pháp đột phá cho tương lai hạ tầng Việt Nam."
   },
   {
-    img: "/banner_hero/Phan_mem_ban_quyen_chinh_hang.png",
+    img: "/banner_hero/Phan_mem_ban_quyen_chinh_hang.jpg",
     title: 'Phần mềm bản quyền <br /><span class="text-orange-600 whitespace-nowrap">chính hãng</span>',
     sub: "Cung cấp hệ thống phần mềm bản quyền chính hãng, hỗ trợ kỹ thuật tận tâm, đảm bảo an toàn thông tin và tuân thủ pháp lý."
   }
