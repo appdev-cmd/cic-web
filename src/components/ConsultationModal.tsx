@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Send, Phone, Mail, User, Building, MessageSquare, CheckCircle2, HelpCircle } from 'lucide-react';
+import { X, Send, Phone, Mail, User, MessageSquare, CheckCircle2, HelpCircle } from 'lucide-react';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -17,8 +17,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
     name: '',
     phone: '',
     email: '',
-    company: '',
-    service: 'Phần mềm enjiCAD / CAD bản quyền',
+    service: 'Phần mềm kỹ thuật',
     message: ''
   });
 
@@ -27,13 +26,10 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
   const [isSuccess, setIsSuccess] = useState(false);
 
   const servicesList = [
-    'Phần mềm enjiCAD / CAD bản quyền chính hãng',
-    'Phần mềm Thiết kế & Phân tích kết cấu (CSI, Bentley...)',
-    'Phần mềm Quản lý & Lập dự toán xây dựng (ESCON...)',
-    'Giải pháp BIM & Digital Twins chuyên sâu',
-    'Thiết bị khoa học công nghệ cao & Đo đạc nhập khẩu',
-    'Dịch vụ Đào tạo & Chuyển giao công nghệ',
-    'Yêu cầu tư vấn tổng hợp khác'
+    'Phần mềm kỹ thuật',
+    'Thiết bị & IOT',
+    'Tư vấn BIM/Digital Twins',
+    'Chuyển đổi số & Net Zero'
   ];
 
   const validateForm = () => {
@@ -66,8 +62,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
         name: '',
         phone: '',
         email: '',
-        company: '',
-        service: 'Phần mềm enjiCAD / CAD bản quyền chính hãng',
+        service: 'Phần mềm kỹ thuật',
         message: ''
       });
     }, 1200);
@@ -113,7 +108,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
             </div>
 
             {/* Content Body */}
-            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
+            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto custom-scrollbar">
               {!isSuccess ? (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <p className="text-xs text-slate-500 leading-relaxed">
@@ -124,7 +119,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     {/* Full Name */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                        Họ và tên <span className="text-red-500">*</span>
+                        Họ tên <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -166,51 +161,32 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Email */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                        Địa chỉ Email
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="email@congty.com.vn"
-                          className={`w-full bg-slate-50 border ${
-                            errors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium`}
-                        />
-                      </div>
-                      {errors.email && (
-                        <p className="text-xs text-red-500 font-bold">{errors.email}</p>
-                      )}
+                  {/* Email Address */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                      Địa chỉ email
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="email@congty.com.vn"
+                        className={`w-full bg-slate-50 border ${
+                          errors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium`}
+                      />
                     </div>
-
-                    {/* Company */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                        Doanh nghiệp / Tổ chức
-                      </label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                          type="text"
-                          value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          placeholder="Công ty CP Tư vấn Thiết kế Xây dựng ABC"
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium"
-                        />
-                      </div>
-                    </div>
+                    {errors.email && (
+                      <p className="text-xs text-red-500 font-bold">{errors.email}</p>
+                    )}
                   </div>
 
                   {/* Service Of Interest */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Giải pháp / Dịch vụ bạn quan tâm <span className="text-red-500">*</span>
+                      Dịch vụ quan tâm <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <select
@@ -230,17 +206,17 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     </div>
                   </div>
 
-                  {/* Message */}
+                  {/* Message / Nội dung */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Yêu cầu tư vấn cụ thể (Không bắt buộc)
+                      Nội dung
                     </label>
                     <div className="relative">
                       <MessageSquare className="absolute left-3 top-3 text-slate-400" size={16} />
                       <textarea
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        placeholder="Mô tả cụ thể nhu cầu của bạn để chúng tôi chuẩn bị hồ sơ tài liệu tư vấn tối ưu nhất..."
+                        placeholder="Mô tả cụ thể nhu cầu của bạn..."
                         rows={3}
                         className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium resize-none"
                       />

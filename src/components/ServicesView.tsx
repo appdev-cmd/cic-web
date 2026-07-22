@@ -29,6 +29,7 @@ import {
 import { servicesData, ServiceDetail } from '../data/servicesData';
 
 interface ServicesViewProps {
+  key?: string | number;
   initialServiceId?: string | null;
   onNavigateHome?: () => void;
 }
@@ -40,7 +41,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     fullname: '',
     phone: '',
     email: '',
-    company: '',
+    service: 'Phần mềm kỹ thuật',
     notes: ''
   });
 
@@ -86,7 +87,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
-      setFormData({ fullname: '', phone: '', email: '', company: '', notes: '' });
+      setFormData({ fullname: '', phone: '', email: '', service: 'Phần mềm kỹ thuật', notes: '' });
     }, 5000);
   };
 
@@ -556,7 +557,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         <form className="space-y-5" onSubmit={handleFormSubmit}>
                           
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Họ và tên *</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Họ tên *</label>
                             <div className="relative">
                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
                               <input 
@@ -586,7 +587,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Email liên hệ</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Địa chỉ email</label>
                             <div className="relative">
                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
                               <input 
@@ -600,26 +601,28 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Doanh nghiệp / Tổ chức</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Dịch vụ quan tâm</label>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Building2 size={14} /></span>
-                              <input 
-                                type="text"
-                                value={formData.company}
-                                onChange={(e) => setFormData({...formData, company: e.target.value})}
-                                placeholder="Ví dụ: Công ty Tư vấn xây dựng A" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
-                              />
+                              <select 
+                                value={formData.service}
+                                onChange={(e) => setFormData({...formData, service: e.target.value})}
+                                className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold appearance-none"
+                              >
+                                <option>Phần mềm kỹ thuật</option>
+                                <option>Thiết bị & IOT</option>
+                                <option>Tư vấn BIM/Digital Twins</option>
+                                <option>Chuyển đổi số & Net Zero</option>
+                              </select>
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Yêu cầu cụ thể</label>
+                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Nội dung</label>
                             <textarea 
                               rows={3}
                               value={formData.notes}
                               onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                              placeholder="Mô tả ngắn yêu cầu để chúng tôi chuẩn bị hồ sơ tư vấn tốt nhất..." 
+                              placeholder="Mô tả cụ thể nhu cầu của bạn..." 
                               className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold resize-none"
                             ></textarea>
                           </div>

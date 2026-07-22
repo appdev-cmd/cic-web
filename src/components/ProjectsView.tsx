@@ -27,6 +27,7 @@ import {
 import { projectsData, DetailedProject } from '../data/projectsData';
 
 interface ProjectsViewProps {
+  key?: string | number;
   initialProjectId: string | null;
   onNavigateToService: (serviceId: string) => void;
   onNavigateToProduct: (productId: number) => void;

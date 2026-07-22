@@ -1248,7 +1248,7 @@ export const AboutView = ({ activeTab, setActiveTab }: AboutViewProps) => {
 
               {/* Data registry listing table */}
               <div className="border border-slate-200 overflow-hidden shadow-sm">
-                <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
+                <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-left text-xs border-collapse relative">
                     <thead className="sticky top-0 bg-slate-900 text-white font-black uppercase tracking-wider text-[10px] z-10">
                       <tr>

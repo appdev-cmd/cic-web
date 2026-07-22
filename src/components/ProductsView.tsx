@@ -88,7 +88,11 @@ const PROVINCES = [
   'Yên Bái'
 ];
 
-export function ProductsView() {
+interface ProductsViewProps {
+  key?: string | number;
+}
+
+export function ProductsView(_props?: ProductsViewProps) {
   const [search, setSearch] = useState('');
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -953,18 +957,6 @@ export function ProductsView() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Banner Section */}
         <div className="text-center mb-16">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600/10 border border-orange-600/20 mb-4"
-          >
-            <span className="h-2 w-2 bg-orange-600"></span>
-            <span className="text-[10px] font-sans font-black uppercase tracking-[0.25em] text-orange-600">
-              CIC Technology Catalog
-            </span>
-          </motion.div>
-          
           <motion.h1 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}

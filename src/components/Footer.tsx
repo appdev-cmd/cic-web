@@ -18,24 +18,37 @@ import { ZaloIcon } from './shared/Icons';
 interface FooterProps {
   setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms') => void;
   setActiveLink: (link: string) => void;
+  onResetProducts?: () => void;
+  onResetServices?: () => void;
+  onResetProjects?: () => void;
+  onResetNews?: () => void;
+  onResetEvents?: () => void;
 }
 
-export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
+export const Footer = ({ 
+  setCurrentView, 
+  setActiveLink,
+  onResetProducts,
+  onResetServices,
+  onResetProjects,
+  onResetNews,
+  onResetEvents
+}: FooterProps) => {
   return (
-    <footer id="contact" className="bg-slate-950 text-slate-400 py-16 border-t border-white/5 relative z-10">
+    <footer id="contact" className="bg-slate-950 text-slate-400 py-8 border-t border-white/5 relative z-10">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-8">
           {/* Company Info */}
           <div className="lg:col-span-4">
-            <div className="mb-6">
+            <div className="mb-8">
               <img 
-                src="logo.png" 
+                src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" 
                 alt="CIC Logo Small" 
-                className="h-20 w-auto mb-4"
-                style={{ filter: 'hue-rotate(25deg) saturate(1.5) brightness(1.2)' }}
+                referrerPolicy="no-referrer"
+                className="h-22 sm:h-28 w-auto mb-4"
               />
             </div>
-            <p className="text-white font-black text-lg mb-4 leading-tight">
+            <p className="text-white font-black text-lg mb-4 leading-tight whitespace-nowrap">
               Công ty cổ phần Công nghệ và Tư vấn CIC
             </p>
             <div className="mb-8">
@@ -49,7 +62,7 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
                 <button className="px-4 py-2 bg-orange-600 text-white text-xs font-black uppercase rounded-none hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>
               </form>
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 mb-8">
               <a href="https://www.facebook.com/cic.com.vn" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-none border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
                 <Facebook size={20} className="group-hover:scale-110 transition-transform" />
               </a>
@@ -73,25 +86,26 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
             <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Điều hướng</h3>
             <ul className="space-y-4 text-sm font-bold">
               <li><a href="#home" onClick={() => { setCurrentView('home'); setActiveLink(''); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Trang chủ</a></li>
-              <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Sản phẩm</a></li>
-              <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dịch vụ</a></li>
-              <li><a href="#projects" onClick={(e) => { e.preventDefault(); setCurrentView('projects'); setActiveLink('Dự án'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dự án</a></li>
-              <li><a href="#events" onClick={(e) => { e.preventDefault(); setCurrentView('events'); setActiveLink('Sự kiện'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Sự kiện</a></li>
-              <li><a href="#news" onClick={(e) => { e.preventDefault(); setCurrentView('news'); setActiveLink('Tin tức'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Tin tức</a></li>
+              <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); if (onResetProducts) onResetProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Giải pháp</a></li>
+              <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); if (onResetServices) onResetServices(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dịch vụ</a></li>
+              <li><a href="#projects" onClick={(e) => { e.preventDefault(); setCurrentView('projects'); setActiveLink('Dự án'); if (onResetProjects) onResetProjects(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dự án</a></li>
+              <li><a href="#events" onClick={(e) => { e.preventDefault(); setCurrentView('events'); setActiveLink('Sự kiện'); if (onResetEvents) onResetEvents(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Sự kiện</a></li>
+              <li><a href="#news" onClick={(e) => { e.preventDefault(); setCurrentView('news'); setActiveLink('Tin tức'); if (onResetNews) onResetNews(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Tin tức</a></li>
               <li><a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentView('contact'); setActiveLink('Liên hệ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Liên hệ</a></li>
             </ul>
           </div>
 
           <div className="lg:col-span-3">
-            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Sản phẩm & Dịch vụ</h3>
+            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Giải pháp & Dịch vụ</h3>
             <div className="grid grid-cols-1 gap-6">
               <div>
-                <h4 className="text-white/60 text-xs font-black uppercase mb-4 tracking-tighter">Sản phẩm</h4>
+                <h4 className="text-white/60 text-xs font-black uppercase mb-4 tracking-tighter">Giải pháp</h4>
                 <ul className="space-y-3 text-xs font-bold">
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Phần mềm CAD & BIM</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Mô phỏng & Dự báo</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Thiết bị quan trắc</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Kiểm định chất lượng</a></li>
+                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">AI & Công nghệ thông minh</a></li>
+                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">BIM, Digital Twins & CDE</a></li>
+                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Phần mềm kỹ thuật</a></li>
+                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Thiết bị khoa học</a></li>
+                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Net Zero & Bền vững</a></li>
                 </ul>
               </div>
               <div>
@@ -113,15 +127,15 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
                 <MapPin size={18} className="text-orange-600" /> Trụ sở chính
               </h3>
               <div className="space-y-4 text-sm">
-                <p className="leading-relaxed text-slate-400">Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam</p>
+                <p className="leading-relaxed">Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam</p>
                 <div className="flex flex-col gap-2">
-                  <a href="tel:02439761381" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold text-slate-300">
+                  <a href="tel:02439761381" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Phone size={14} className="text-orange-600" /> 024 3976 1381 - 024 3976 1381
                   </a>
-                  <a href="mailto:info@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold text-slate-300">
+                  <a href="mailto:info@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Mail size={14} className="text-orange-600" /> info@cic.com.vn
                   </a>
-                  <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold text-slate-300">
+                  <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <ExternalLink size={14} className="text-orange-600" /> www.cic.com.vn
                   </a>
                 </div>
@@ -133,12 +147,12 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
                 <MapPin size={18} className="text-orange-600" /> Chi nhánh Tp HCM
               </h3>
               <div className="space-y-4 text-sm">
-                <p className="leading-relaxed text-slate-400">Số 36 Nguyễn Huy Lượng, P. Bình Thạnh, TP. Hồ Chí Minh</p>
+                <p className="leading-relaxed">Số 36 Nguyễn Huy Lượng, P. Bình Thạnh, TP. Hồ Chí Minh</p>
                 <div className="flex flex-col gap-2">
-                  <a href="tel:0886452020" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold text-slate-300">
+                  <a href="tel:0886452020" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Phone size={14} className="text-orange-600" /> 088 645 2020 - 028 628 99022 - 028 628 99033
                   </a>
-                  <a href="mailto:cichcm@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold text-slate-300">
+                  <a href="mailto:cichcm@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Mail size={14} className="text-orange-600" /> cichcm@cic.com.vn
                   </a>
                 </div>
@@ -147,7 +161,7 @@ export const Footer = ({ setCurrentView, setActiveLink }: FooterProps) => {
           </div>
         </div>
 
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs uppercase tracking-widest font-black text-slate-500">
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs uppercase tracking-widest font-black">
           <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-10">
             <a 

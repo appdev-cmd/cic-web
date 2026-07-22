@@ -28,11 +28,32 @@ interface HeaderProps {
   onSelectService?: (id: string | null) => void;
   onSelectProject?: (id: string | null) => void;
   onSelectNewsCategory?: (category: string | null) => void;
+  onResetProducts?: () => void;
+  onResetServices?: () => void;
+  onResetProjects?: () => void;
+  onResetNews?: () => void;
+  onResetEvents?: () => void;
   onSearch?: (query: string) => void;
   onOpenConsultation?: () => void;
 }
 
-export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink, setAboutSubTab, onSelectService, onSelectProject, onSelectNewsCategory, onSearch, onOpenConsultation }: HeaderProps) => {
+export const Header = ({ 
+  currentView, 
+  setCurrentView, 
+  activeLink, 
+  setActiveLink, 
+  setAboutSubTab, 
+  onSelectService, 
+  onSelectProject, 
+  onSelectNewsCategory, 
+  onResetProducts,
+  onResetServices,
+  onResetProjects,
+  onResetNews,
+  onResetEvents,
+  onSearch, 
+  onOpenConsultation 
+}: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
@@ -69,8 +90,8 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
       <header 
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isHeaderWhite 
-            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-2 border-b border-slate-100' 
-            : 'bg-transparent py-4'
+            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-0 md:py-0.5 border-b border-slate-100' 
+            : 'bg-transparent py-0.5 md:py-1'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -86,9 +107,10 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
               className="flex items-center group"
             >
               <img 
-                src="logo.png" 
+                src="https://lh3.googleusercontent.com/d/1jNJvhVJuYdvse4GRtrrEAF8ZwB_WBEXE" 
                 alt="CIC Logo" 
-                className={`h-10 md:h-12 w-auto transition-all duration-500 ${
+                referrerPolicy="no-referrer"
+                className={`h-14 md:h-16 w-auto transition-all duration-500 ${
                   isHeaderWhite ? 'brightness-100' : 'brightness-0 invert'
                 } group-hover:scale-105`}
                 style={isHeaderWhite ? { filter: 'hue-rotate(25deg) saturate(1.5) brightness(1.2)' } : undefined}
@@ -108,7 +130,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                                (currentView === 'contact' && link.name === 'Liên hệ') ||
                                (currentView === 'home' && activeLink === link.name);
               return (
-                <div key={link.name} className="relative group py-2">
+                <div key={link.name} className="relative group py-1">
                   <a 
                     href={link.href}
                     onClick={(e) => {
@@ -116,6 +138,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                         e.preventDefault();
                         setCurrentView('products');
                         setActiveLink('Sản phẩm');
+                        if (onResetProducts) onResetProducts();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       } else if (link.name === 'Giới thiệu') {
                         e.preventDefault();
@@ -128,23 +151,27 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                         setCurrentView('services');
                         setActiveLink('Dịch vụ');
                         if (onSelectService) onSelectService(null);
+                        if (onResetServices) onResetServices();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       } else if (link.name === 'Dự án') {
                         e.preventDefault();
                         setCurrentView('projects');
                         setActiveLink('Dự án');
                         if (onSelectProject) onSelectProject(null);
+                        if (onResetProjects) onResetProjects();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       } else if (link.name === 'Tin tức') {
                         e.preventDefault();
                         setCurrentView('news');
                         setActiveLink('Tin tức');
                         if (onSelectNewsCategory) onSelectNewsCategory('all');
+                        if (onResetNews) onResetNews();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       } else if (link.name === 'Sự kiện') {
                         e.preventDefault();
                         setCurrentView('events');
                         setActiveLink('Sự kiện');
+                        if (onResetEvents) onResetEvents();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       } else if (link.name === 'Liên hệ') {
                         e.preventDefault();
@@ -337,7 +364,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                 <X size={32} />
               </button>
             </div>
-            <nav className="flex flex-col gap-4 overflow-y-auto max-h-[70vh] pr-2">
+            <nav className="flex flex-col gap-4 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
               {navLinks.map((link) => {
                 const hasDropdown = !!link.dropdown;
                 const isExpanded = expandedMobileMenu === link.name;
@@ -363,6 +390,7 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                              e.preventDefault();
                              setCurrentView('products');
                              setActiveLink('Sản phẩm');
+                             if (onResetProducts) onResetProducts();
                              window.scrollTo({ top: 0, behavior: 'smooth' });
                            } else if (link.name === 'Giới thiệu') {
                              e.preventDefault();
@@ -375,17 +403,27 @@ export const Header = ({ currentView, setCurrentView, activeLink, setActiveLink,
                              setCurrentView('services');
                              setActiveLink('Dịch vụ');
                              if (onSelectService) onSelectService(null);
+                             if (onResetServices) onResetServices();
                              window.scrollTo({ top: 0, behavior: 'smooth' });
                            } else if (link.name === 'Dự án') {
                              e.preventDefault();
                              setCurrentView('projects');
                              setActiveLink('Dự án');
                              if (onSelectProject) onSelectProject(null);
+                             if (onResetProjects) onResetProjects();
+                             window.scrollTo({ top: 0, behavior: 'smooth' });
+                           } else if (link.name === 'Tin tức') {
+                             e.preventDefault();
+                             setCurrentView('news');
+                             setActiveLink('Tin tức');
+                             if (onSelectNewsCategory) onSelectNewsCategory('all');
+                             if (onResetNews) onResetNews();
                              window.scrollTo({ top: 0, behavior: 'smooth' });
                            } else if (link.name === 'Sự kiện') {
                              e.preventDefault();
                              setCurrentView('events');
                              setActiveLink('Sự kiện');
+                             if (onResetEvents) onResetEvents();
                              window.scrollTo({ top: 0, behavior: 'smooth' });
                            } else if (link.name === 'Liên hệ') {
                              e.preventDefault();

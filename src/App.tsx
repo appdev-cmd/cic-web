@@ -37,6 +37,36 @@ export default function App() {
   const [aboutSubTab, setAboutSubTab] = useState<'overview' | 'structure' | 'experience'>('overview');
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
+  // View reset keys to ensure clicking header/footer menu returns from detail pages back to list pages
+  const [productsResetKey, setProductsResetKey] = useState(0);
+  const [servicesResetKey, setServicesResetKey] = useState(0);
+  const [projectsResetKey, setProjectsResetKey] = useState(0);
+  const [newsResetKey, setNewsResetKey] = useState(0);
+  const [eventsResetKey, setEventsResetKey] = useState(0);
+
+  const handleResetProducts = () => {
+    setProductsResetKey(prev => prev + 1);
+  };
+
+  const handleResetServices = () => {
+    setActiveServiceId(null);
+    setServicesResetKey(prev => prev + 1);
+  };
+
+  const handleResetProjects = () => {
+    setActiveProjectId(null);
+    setProjectsResetKey(prev => prev + 1);
+  };
+
+  const handleResetNews = () => {
+    setPreSelectedNewsCategory('all');
+    setNewsResetKey(prev => prev + 1);
+  };
+
+  const handleResetEvents = () => {
+    setEventsResetKey(prev => prev + 1);
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-orange-500 selection:text-white relative">
       {/* Interactive Background Engine */}
@@ -86,9 +116,23 @@ export default function App() {
         activeLink={activeLink}
         setActiveLink={setActiveLink}
         setAboutSubTab={setAboutSubTab}
-        onSelectService={setActiveServiceId}
-        onSelectProject={setActiveProjectId}
-        onSelectNewsCategory={setPreSelectedNewsCategory}
+        onSelectService={(id) => {
+          setActiveServiceId(id);
+          setServicesResetKey(prev => prev + 1);
+        }}
+        onSelectProject={(id) => {
+          setActiveProjectId(id);
+          setProjectsResetKey(prev => prev + 1);
+        }}
+        onSelectNewsCategory={(cat) => {
+          setPreSelectedNewsCategory(cat);
+          setNewsResetKey(prev => prev + 1);
+        }}
+        onResetProducts={handleResetProducts}
+        onResetServices={handleResetServices}
+        onResetProjects={handleResetProjects}
+        onResetNews={handleResetNews}
+        onResetEvents={handleResetEvents}
         onSearch={(query) => setGlobalSearchQuery(query)}
         onOpenConsultation={() => setIsConsultationOpen(true)}
       />
@@ -107,6 +151,7 @@ export default function App() {
           <AboutView activeTab={aboutSubTab} setActiveTab={setAboutSubTab} />
         ) : currentView === 'services' ? (
           <ServicesView 
+            key={`services-${servicesResetKey}`}
             initialServiceId={activeServiceId} 
             onNavigateHome={() => { 
               setCurrentView('home'); 
@@ -115,16 +160,19 @@ export default function App() {
           />
         ) : currentView === 'projects' ? (
           <ProjectsView 
+            key={`projects-${projectsResetKey}`}
             initialProjectId={activeProjectId} 
             onNavigateToService={(serviceId) => {
               setCurrentView('services');
               setActiveLink('Dịch vụ');
               setActiveServiceId(serviceId);
+              setServicesResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onNavigateToProduct={() => {
               setCurrentView('products');
               setActiveLink('Sản phẩm');
+              setProductsResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onNavigateHome={() => {
@@ -134,6 +182,7 @@ export default function App() {
           />
         ) : currentView === 'news' ? (
           <NewsView 
+            key={`news-${newsResetKey}`}
             initialCategory={preSelectedNewsCategory}
             onNavigateHome={() => {
               setCurrentView('home');
@@ -143,16 +192,19 @@ export default function App() {
               setCurrentView('services');
               setActiveLink('Dịch vụ');
               setActiveServiceId(serviceId);
+              setServicesResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onNavigateToProduct={() => {
               setCurrentView('products');
               setActiveLink('Sản phẩm');
+              setProductsResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
         ) : currentView === 'events' ? (
           <EventsView 
+            key={`events-${eventsResetKey}`}
             onNavigateHome={() => {
               setCurrentView('home');
               setActiveLink('');
@@ -161,11 +213,13 @@ export default function App() {
               setCurrentView('services');
               setActiveLink('Dịch vụ');
               setActiveServiceId(serviceId);
+              setServicesResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onNavigateToProduct={() => {
               setCurrentView('products');
               setActiveLink('Sản phẩm');
+              setProductsResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
@@ -198,25 +252,30 @@ export default function App() {
             onNavigateToProduct={() => {
               setCurrentView('products');
               setActiveLink('Sản phẩm');
+              setProductsResetKey(prev => prev + 1);
             }}
             onNavigateToProject={(projectId) => {
               setCurrentView('projects');
               setActiveLink('Dự án');
               setActiveProjectId(projectId);
+              setProjectsResetKey(prev => prev + 1);
             }}
             onNavigateToService={(serviceId) => {
               setCurrentView('services');
               setActiveLink('Dịch vụ');
               setActiveServiceId(serviceId);
+              setServicesResetKey(prev => prev + 1);
             }}
             onNavigateToNews={(category) => {
               setCurrentView('news');
               setActiveLink('Tin tức');
               setPreSelectedNewsCategory(category);
+              setNewsResetKey(prev => prev + 1);
             }}
             onNavigateToEvent={() => {
               setCurrentView('events');
               setActiveLink('Sự kiện');
+              setEventsResetKey(prev => prev + 1);
             }}
             onNavigateHome={() => {
               setCurrentView('home');
@@ -224,7 +283,7 @@ export default function App() {
             }}
           />
         ) : (
-          <ProductsView />
+          <ProductsView key={`products-${productsResetKey}`} />
         )}
       </main>
 
@@ -232,6 +291,11 @@ export default function App() {
       <Footer 
         setCurrentView={setCurrentView}
         setActiveLink={setActiveLink}
+        onResetProducts={handleResetProducts}
+        onResetServices={handleResetServices}
+        onResetProjects={handleResetProjects}
+        onResetNews={handleResetNews}
+        onResetEvents={handleResetEvents}
       />
 
       {/* Modern consultation form modal */}

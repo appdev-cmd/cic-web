@@ -32,6 +32,7 @@ import { eventsData } from '../data/eventsData';
 import { EventItem, EventRegistration } from '../types';
 
 interface EventsViewProps {
+  key?: string | number;
   onNavigateHome?: () => void;
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: string) => void;
@@ -901,14 +902,13 @@ export const EventsView = ({
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="bg-white border border-slate-950 shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col my-8"
+              className="bg-white border border-slate-950 shadow-2xl w-full max-w-3xl overflow-hidden relative flex flex-col my-4 md:my-8"
             >
               
               {/* Modal header */}
-              <div className="bg-slate-950 text-white px-8 py-5 flex items-center justify-between border-b border-white/10">
+              <div className="bg-slate-950 text-white px-6 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/10 shrink-0">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 font-sans">Phiếu Đăng Ký Trực Tuyến</span>
-                  <h3 className="text-base font-black text-white uppercase tracking-tight">Đăng ký tham dự sự kiện</h3>
+                  <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-tight">Đăng ký tham dự sự kiện</h3>
                 </div>
                 <button
                   onClick={() => {
@@ -922,24 +922,24 @@ export const EventsView = ({
               </div>
 
               {/* Modal content body */}
-              <div className="p-8 overflow-y-auto max-h-[80vh] space-y-6">
+              <div className="p-6 sm:p-8 overflow-y-auto max-h-[88vh] space-y-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-orange-600/40 [&::-webkit-scrollbar-track]:bg-slate-100">
                 
                 {/* Event summary banner inside form */}
-                <div className="bg-slate-50 border border-slate-200 p-4 flex gap-4 items-center">
-                  <Calendar className="text-orange-600 shrink-0" size={24} />
+                <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-4 flex gap-4 items-center">
+                  <Calendar className="text-orange-600 shrink-0" size={22} />
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-sans">Sự kiện lựa chọn:</h4>
-                    <span className="font-black text-slate-950 text-sm block leading-snug">{registerEvent.title}</span>
-                    <span className="text-xs text-slate-500 font-medium font-sans">{registerEvent.date} — {registerEvent.location.split(',')[0]}</span>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 font-sans">Sự kiện lựa chọn:</h4>
+                    <span className="font-black text-slate-950 text-xs sm:text-sm block leading-snug">{registerEvent.title}</span>
+                    <span className="text-[11px] sm:text-xs text-slate-500 font-medium font-sans">{registerEvent.date} — {registerEvent.location.split(',')[0]}</span>
                   </div>
                 </div>
 
                 {!registrationResult ? (
                   
                   // --- THE REGISTER FORM INPUTS ---
-                  <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                  <form onSubmit={handleRegisterSubmit} className="space-y-4 sm:space-y-5">
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
                       
                       {/* Name input */}
                       <div className="space-y-1.5">
@@ -1079,15 +1079,7 @@ export const EventsView = ({
                       {formErrors.consent && <p className="text-[10px] font-bold text-red-500 font-sans pl-6">{formErrors.consent}</p>}
                     </div>
 
-                    {/* UTM Parameters Hidden values tracking block (For Transparency / proof of work) */}
-                    <div className="bg-slate-50 border border-slate-200 p-3 text-[10px] font-sans text-slate-400 space-y-1">
-                      <span className="font-bold text-slate-500 uppercase block">UTM Tracking Parameters (Tự động ghi nhận):</span>
-                      <div className="grid grid-cols-3 gap-2">
-                        <span>source: <strong className="text-slate-600">{utmParams.source}</strong></span>
-                        <span>medium: <strong className="text-slate-600">{utmParams.medium}</strong></span>
-                        <span>campaign: <strong className="text-slate-600">{utmParams.campaign}</strong></span>
-                      </div>
-                    </div>
+
 
                     {/* CTA Submit Button */}
                     <button

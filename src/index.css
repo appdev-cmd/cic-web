@@ -66,25 +66,28 @@ input[type="button"],
   cursor: pointer !important;
 }
 
-/* Custom premium slim scrollbar */
-.premium-scrollbar::-webkit-scrollbar {
+/* Custom premium slim scrollbar with orange brand accent */
+.premium-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.premium-scrollbar::-webkit-scrollbar-track {
-  background: #f8fafc; /* slate-50 */
+.premium-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9; /* slate-100 */
+}
+
+.premium-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(234, 88, 12, 0.4); /* orange-600/40 */
   border-radius: 9999px;
 }
 
-.premium-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1; /* slate-300 */
-  border-radius: 9999px;
-  border: 1px solid #f8fafc;
+.premium-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(234, 88, 12, 0.75);
 }
 
-.premium-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; /* slate-400 */
-}
 
 

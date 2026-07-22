@@ -41,6 +41,7 @@ import {
 import { newsData, DetailedNewsItem, CompanyNewsItem, SpecialtyNewsItem, RecruitmentNewsItem, PromotionNewsItem, ShareholderNewsItem } from '../data/newsData';
 
 interface NewsViewProps {
+  key?: string | number;
   initialCategory?: string | null;
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: number) => void;
