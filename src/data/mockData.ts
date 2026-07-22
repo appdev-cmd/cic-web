@@ -180,6 +180,7 @@ export const productsData: Product[] = [
     field: 'Xây dựng & Hạ tầng',
     brand: 'CIC Tech',
     app: 'Thiết kế CAD & BIM',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80'
   },
   {
@@ -190,6 +191,7 @@ export const productsData: Product[] = [
     field: 'Môi trường & Năng lượng',
     brand: 'Bentley Systems',
     app: 'Mô phỏng & Dự báo',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80'
   },
   {
@@ -200,6 +202,7 @@ export const productsData: Product[] = [
     field: 'Xây dựng & Hạ tầng',
     brand: 'Bentley Systems',
     app: 'Thiết kế CAD & BIM',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80'
   },
   {
@@ -210,6 +213,7 @@ export const productsData: Product[] = [
     field: 'Khảo sát & Địa chất',
     brand: 'DMT (Đức)',
     app: 'Kiểm định chất lượng',
+    productType: 'Thiết bị',
     img: 'https://images.unsplash.com/photo-1531747118685-ca8fa6e08806?auto=format&fit=crop&q=80'
   },
   {
@@ -220,6 +224,7 @@ export const productsData: Product[] = [
     field: 'Xây dựng & Hạ tầng',
     brand: 'CIC Tech',
     app: 'Thiết kế CAD & BIM',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80'
   },
   {
@@ -230,6 +235,7 @@ export const productsData: Product[] = [
     field: 'Xây dựng & Hạ tầng',
     brand: 'CIC Tech',
     app: 'Thiết kế CAD & BIM',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80'
   },
   {
@@ -240,6 +246,7 @@ export const productsData: Product[] = [
     field: 'Xây dựng & Hạ tầng',
     brand: 'CIC Tech',
     app: 'Thiết kế CAD & BIM',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80'
   },
   {
@@ -250,6 +257,7 @@ export const productsData: Product[] = [
     field: 'Thiết bị & IoT',
     brand: 'FIFISH',
     app: 'Quản lý & Giám sát',
+    productType: 'Thiết bị',
     img: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80'
   },
   {
@@ -260,6 +268,7 @@ export const productsData: Product[] = [
     field: 'Thiết bị & IoT',
     brand: 'FIFISH',
     app: 'Quản lý & Giám sát',
+    productType: 'Thiết bị',
     img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80'
   },
   {
@@ -270,6 +279,7 @@ export const productsData: Product[] = [
     field: 'Xây dựng & Hạ tầng',
     brand: 'CIC Tech',
     app: 'Thiết kế CAD & BIM',
+    productType: 'Phần mềm',
     img: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&q=80'
   },
   {

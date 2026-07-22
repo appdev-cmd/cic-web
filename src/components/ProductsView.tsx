@@ -16,7 +16,8 @@ import {
   RefreshCw,
   Box,
   Layers,
-  FileText
+  FileText,
+  Tag
 } from 'lucide-react';
 import { Product } from '../types';
 import { productsData } from '../data/mockData';
@@ -92,8 +93,26 @@ interface ProductsViewProps {
   key?: string | number;
 }
 
+const PRODUCT_TYPES = ['Phần mềm', 'Thiết bị', 'Giải pháp tích hợp', 'Khác'];
+
+const getProductType = (product: Product): string => {
+  if (product.productType) return product.productType;
+  const name = product.name.toLowerCase();
+  if (name.includes('rô bốt') || name.includes('thiết bị') || name.includes('máy') || name.includes('cảm biến') || name.includes('chum') || name.includes('pet')) {
+    return 'Thiết bị';
+  }
+  if (name.includes('hệ thống') || name.includes('giải pháp') || name.includes('simulators') || name.includes('vr trainer')) {
+    return 'Giải pháp tích hợp';
+  }
+  if (name.includes('phần mềm') || name.includes('cad') || name.includes('bim') || name.includes('3d') || name.includes('autocad') || name.includes('revit')) {
+    return 'Phần mềm';
+  }
+  return 'Khác';
+};
+
 export function ProductsView(_props?: ProductsViewProps) {
   const [search, setSearch] = useState('');
+  const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
@@ -182,11 +201,13 @@ export function ProductsView(_props?: ProductsViewProps) {
     let result = productsData.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
                             p.description.toLowerCase().includes(search.toLowerCase());
+      const pType = getProductType(p);
+      const matchesProductType = selectedProductType === null || pType === selectedProductType;
       const matchesField = selectedField === null || p.field === selectedField;
       const matchesBrand = selectedBrand === null || p.brand === selectedBrand;
       const matchesApp = selectedApp === null || p.app === selectedApp;
 
-      return matchesSearch && matchesField && matchesBrand && matchesApp;
+      return matchesSearch && matchesProductType && matchesField && matchesBrand && matchesApp;
     });
 
     if (sortBy === 'name-asc') {
@@ -194,11 +215,12 @@ export function ProductsView(_props?: ProductsViewProps) {
     }
 
     return result;
-  }, [search, selectedField, selectedBrand, selectedApp, sortBy]);
+  }, [search, selectedProductType, selectedField, selectedBrand, selectedApp, sortBy]);
 
   // Reset all filters
   const handleResetFilters = () => {
     setSearch('');
+    setSelectedProductType(null);
     setSelectedField(null);
     setSelectedBrand(null);
     setSelectedApp(null);
@@ -987,11 +1009,11 @@ export function ProductsView(_props?: ProductsViewProps) {
             >
               <SlidersHorizontal size={16} className="text-orange-600" />
               {isMobileFilterOpen ? 'Đóng bộ lọc' : 'Bộ lọc tìm kiếm'}
-              {(selectedField !== null || selectedBrand !== null || selectedApp !== null || search) && (
+              {(selectedProductType !== null || selectedField !== null || selectedBrand !== null || selectedApp !== null || search) && (
                 <span className="w-2 h-2 bg-orange-600 rounded-full"></span>
               )}
             </button>
-            {(selectedField !== null || selectedBrand !== null || selectedApp !== null || search) && (
+            {(selectedProductType !== null || selectedField !== null || selectedBrand !== null || selectedApp !== null || search) && (
               <button
                 onClick={handleResetFilters}
                 className="px-4 py-3 bg-slate-100 hover:bg-orange-600 hover:text-white text-slate-700 text-xs font-black uppercase tracking-wider transition-colors flex items-center gap-1"
@@ -1015,7 +1037,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                 <SlidersHorizontal size={16} className="text-orange-600" />
                 Bộ lọc tìm kiếm
               </span>
-              {(search || selectedField !== null || selectedBrand !== null || selectedApp !== null) && (
+              {(search || selectedProductType !== null || selectedField !== null || selectedBrand !== null || selectedApp !== null) && (
                 <button 
                   onClick={handleResetFilters}
                   className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors"
@@ -1111,7 +1133,7 @@ export function ProductsView(_props?: ProductsViewProps) {
             </div>
 
             {/* Application Filter (Ứng dụng) */}
-            <div className="space-y-3">
+            <div className="space-y-3 mb-6">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
                 <FileText size={10} className="text-orange-600" /> Ứng dụng
               </label>
@@ -1139,6 +1161,29 @@ export function ProductsView(_props?: ProductsViewProps) {
                   {isAppsExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
                 </button>
               )}
+            </div>
+
+            {/* Product Type Filter (Loại sản phẩm) */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                <Tag size={10} className="text-orange-600" /> Loại sản phẩm
+              </label>
+              <div className="flex flex-col gap-1 pr-1">
+                {PRODUCT_TYPES.map(type => (
+                  <button
+                    key={type}
+                    onClick={() => { setSelectedProductType(selectedProductType === type ? null : type); setCurrentPage(1); }}
+                    className={`flex items-center justify-between text-left px-3 py-2 text-xs font-bold transition-all ${
+                      selectedProductType === type 
+                        ? 'bg-orange-600 text-white shadow-sm' 
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    <span className="truncate">{type}</span>
+                    {selectedProductType === type && <Check size={12} />}
+                  </button>
+                ))}
+              </div>
             </div>
           </motion.div>
 
@@ -1206,8 +1251,11 @@ export function ProductsView(_props?: ProductsViewProps) {
                     <div className="p-6 flex-1 flex flex-col gap-4">
                       <div className="space-y-1.5">
                         {/* Brand & App badges */}
-                        <div className="flex flex-wrap gap-2">
-                          <span className="text-[9px] font-sans font-black uppercase text-orange-600 tracking-wider">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="px-2 py-0.5 bg-orange-600/10 text-orange-600 text-[9px] font-black uppercase tracking-wider">
+                            {product.productType || getProductType(product)}
+                          </span>
+                          <span className="text-[9px] font-sans font-black uppercase text-slate-600 tracking-wider">
                             {product.brand}
                           </span>
                           <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">

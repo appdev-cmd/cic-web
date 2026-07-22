@@ -14,6 +14,7 @@ export interface Product {
   brand: string;
   app: string;
   img: string;
+  productType?: string;
 }
 
 export interface Project {
