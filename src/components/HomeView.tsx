@@ -596,9 +596,9 @@ export const HomeView = ({
                 setActiveLink('Dự án');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-5 py-2 bg-slate-950 text-white rounded-none font-black uppercase tracking-widest text-sm transition-all group btn-modern-interaction"
+              className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-none font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-md inline-flex items-center gap-1.5"
             >
-              Xem tất cả dự án <ChevronRight className="inline-block ml-2 group-hover:translate-x-2 transition-transform" />
+              Xem tất cả dự án <ChevronRight className="inline-block group-hover:translate-x-1.5 transition-transform" />
             </button>
           </div>
         </div>
@@ -792,7 +792,7 @@ export const HomeView = ({
                 key={cat.id}
                 onClick={() => setActiveNewsCategory(cat.id)}
                 className={`flex-shrink-0 px-6 py-2 rounded-none font-bold text-xs uppercase tracking-tighter shadow-sm border transition-all ${
-                  activeNewsCategory === cat.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-orange-600 hover:text-orange-600'
+                  activeNewsCategory === cat.id ? 'bg-orange-600 text-white border-orange-600 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-orange-600 hover:text-orange-600'
                 }`}
               >
                 {cat.label}

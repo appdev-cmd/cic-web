@@ -597,21 +597,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
           >
             {/* Structural Banner */}
             <div className="text-center max-w-3xl mx-auto space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-50 border border-orange-200/80 text-orange-700 font-black uppercase tracking-widest text-[10px]">
-                <Users size={13} className="text-orange-600" />
-                <span>MÔ HÌNH QUẢN TRỊ DOANH NGHIỆP</span>
-              </div>
               <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
-                SƠ ĐỒ CƠ CẤU TỔ CHỨC DOANH NGHIỆP
+                SƠ ĐỒ TỔ CHỨC
               </h2>
               <div className="flex items-center justify-center gap-2 pt-1">
                 <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
                 <div className="w-2.5 h-2.5 rounded-full bg-orange-600"></div>
                 <div className="w-12 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
               </div>
-              <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                Hệ thống quản trị chuyên nghiệp - Linh hoạt - Kết nối liên thông
-              </p>
             </div>
 
             {/* Sơ đồ cơ cấu tổ chức chuẩn xác theo sơ đồ gốc CIC - Tự động co giãn full chiều ngang không kéo scrollbar trên PC */}
@@ -624,7 +617,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 >
                   <defs>
                     <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.08" />
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#ea580c" floodOpacity="0.15" />
                     </filter>
                     <style>{`
                       .org-node {
@@ -635,114 +628,101 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                         transform: translateY(-3px);
                       }
                       .org-node:hover rect {
-                        stroke: #ea580c !important;
-                        stroke-width: 2.5px !important;
-                        filter: drop-shadow(0 6px 12px rgba(234, 88, 12, 0.22));
-                      }
-                      .org-node.white-node:hover text {
-                        fill: #ea580c !important;
-                      }
-                      .org-node.dark-node:hover rect {
-                        fill: #1e293b !important;
-                        stroke: #ea580c !important;
-                      }
-                      .org-node.dark-node:hover text {
-                        fill: #ffedd5 !important;
-                      }
-                      .org-node.orange-node:hover rect {
-                        fill: #c2410c !important;
-                        stroke: #0f172a !important;
+                        fill: #d93800 !important;
+                        stroke: #b82d00 !important;
+                        stroke-width: 2px !important;
+                        filter: drop-shadow(0 6px 14px rgba(252, 81, 21, 0.4));
                       }
                     `}</style>
                   </defs>
 
                   {/* ================= CONNECTING LINES ================= */}
                   {/* Vertical Spine: Đại hội đồng cổ đông -> HĐQT -> Tổng Giám Đốc */}
-                  <line x1="800" y1="65" x2="800" y2="95" stroke="#334155" strokeWidth="2" />
-                  <line x1="800" y1="141" x2="800" y2="175" stroke="#334155" strokeWidth="2" />
+                  <line x1="800" y1="65" x2="800" y2="95" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="800" y1="141" x2="800" y2="175" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
                   {/* HĐQT -> Ban Kiểm Soát */}
-                  <line x1="950" y1="118" x2="1210" y2="118" stroke="#334155" strokeWidth="2" />
+                  <line x1="950" y1="118" x2="1210" y2="118" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
                   {/* 1. Branch Sang Trái: TGĐ -> PTGĐ Left */}
-                  <line x1="650" y1="198" x2="260" y2="198" stroke="#334155" strokeWidth="2" />
-                  <line x1="260" y1="221" x2="260" y2="335" stroke="#334155" strokeWidth="2" />
+                  <line x1="650" y1="198" x2="260" y2="198" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="260" y1="221" x2="260" y2="335" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
                   {/* 2. Branch Sang Phải: TGĐ -> PTGĐ Right */}
-                  <line x1="950" y1="198" x2="1340" y2="198" stroke="#334155" strokeWidth="2" />
-                  <line x1="1340" y1="221" x2="1340" y2="320" stroke="#334155" strokeWidth="2" />
+                  <line x1="950" y1="198" x2="1340" y2="198" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="1340" y1="221" x2="1340" y2="320" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
                   {/* Fork under PTGĐ Right */}
-                  <line x1="1220" y1="320" x2="1460" y2="320" stroke="#334155" strokeWidth="2" />
-                  <line x1="1220" y1="320" x2="1220" y2="335" stroke="#334155" strokeWidth="2" />
-                  <line x1="1460" y1="320" x2="1460" y2="335" stroke="#334155" strokeWidth="2" />
+                  <line x1="1220" y1="320" x2="1460" y2="320" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="1220" y1="320" x2="1220" y2="335" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="1460" y1="320" x2="1460" y2="335" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
                   {/* 3. Branch Xuống Giữa (Ngắn hơn): TGĐ -> P. Tổng hợp & P. Tài chính kế toán */}
-                  <line x1="800" y1="221" x2="800" y2="248" stroke="#334155" strokeWidth="2" />
-                  <line x1="630" y1="248" x2="970" y2="248" stroke="#334155" strokeWidth="2" />
-                  <line x1="630" y1="248" x2="630" y2="260" stroke="#334155" strokeWidth="2" />
-                  <line x1="970" y1="248" x2="970" y2="260" stroke="#334155" strokeWidth="2" />
+                  <line x1="800" y1="221" x2="800" y2="248" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="630" y1="248" x2="970" y2="248" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="630" y1="248" x2="630" y2="260" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="970" y1="248" x2="970" y2="260" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
                   {/* 4. Center Main Line straight down to Bottom Row Bus */}
-                  <line x1="800" y1="221" x2="800" y2="425" stroke="#334155" strokeWidth="2" />
+                  <line x1="800" y1="221" x2="800" y2="425" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
                   {/* Horizontal Bus Line spanning bottom row */}
-                  <line x1="180" y1="425" x2="1420" y2="425" stroke="#334155" strokeWidth="2" />
+                  <line x1="180" y1="425" x2="1420" y2="425" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
                   {/* Connectors to Bottom Units */}
                   {/* Unit 1: CN TP. HCM (Connected) */}
-                  <line x1="180" y1="425" x2="180" y2="460" stroke="#334155" strokeWidth="2" />
+                  <line x1="180" y1="425" x2="180" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
                   {/* Unit 2: TTGP Phần mềm & Thiết bị (NO connector as in original) */}
                   {/* Unit 3: TT Tư vấn Dự án (Connected) */}
-                  <line x1="800" y1="425" x2="800" y2="460" stroke="#334155" strokeWidth="2" />
+                  <line x1="800" y1="425" x2="800" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
                   {/* Unit 4: TT Phần mềm Xây dựng (Connected) */}
-                  <line x1="1110" y1="425" x2="1110" y2="460" stroke="#334155" strokeWidth="2" />
+                  <line x1="1110" y1="425" x2="1110" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
                   {/* Unit 5: TT Tư vấn PTPBV & GP CNKT (Connected) */}
-                  <line x1="1420" y1="425" x2="1420" y2="460" stroke="#334155" strokeWidth="2" />
+                  <line x1="1420" y1="425" x2="1420" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
 
 
-                  {/* ================= BOX NODES ================= */}
+                  {/* ================= BOX NODES (ORANGE THEME) ================= */}
                   {/* LEVEL 1: ĐẠI HỘI ĐỒNG CỔ ĐÔNG */}
-                  <g filter="url(#shadow)" className="org-node dark-node">
-                    <rect x="650" y="20" width="300" height="45" rx="4" fill="#0f172a" stroke="#0f172a" strokeWidth="1.5" />
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="650" y="20" width="300" height="45" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
                     <text x="800" y="48" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
                       ĐẠI HỘI ĐỒNG CỔ ĐÔNG
                     </text>
                   </g>
 
                   {/* BAN KIỂM SOÁT */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="1210" y="95" width="260" height="46" rx="4" fill="#ffffff" stroke="#475569" strokeWidth="2" />
-                    <text x="1340" y="123" fill="#0f172a" fontSize="13" fontWeight="900" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="1210" y="95" width="260" height="46" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="1340" y="123" fill="#ffffff" fontSize="13" fontWeight="900" textAnchor="middle">
                       BAN KIỂM SOÁT
                     </text>
                   </g>
 
                   {/* LEVEL 2: HỘI ĐỒNG QUẢN TRỊ */}
-                  <g filter="url(#shadow)" className="org-node orange-node">
-                    <rect x="650" y="95" width="300" height="46" rx="4" fill="#ea580c" stroke="#c2410c" strokeWidth="1.5" />
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="650" y="95" width="300" height="46" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
                     <text x="800" y="123" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
                       HỘI ĐỒNG QUẢN TRỊ
                     </text>
                   </g>
 
                   {/* LEVEL 3: TỔNG GIÁM ĐỐC */}
-                  <g filter="url(#shadow)" className="org-node dark-node">
-                    <rect x="650" y="175" width="300" height="46" rx="4" fill="#0f172a" stroke="#0f172a" strokeWidth="1.5" />
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="650" y="175" width="300" height="46" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
                     <text x="800" y="203" fill="#ffffff" fontSize="14" fontWeight="900" textAnchor="middle" letterSpacing="0.5">
                       TỔNG GIÁM ĐỐC
                     </text>
                   </g>
 
                   {/* LEFT: PHÓ TỔNG GIÁM ĐỐC */}
-                  <g filter="url(#shadow)" className="org-node dark-node">
-                    <rect x="130" y="177" width="260" height="44" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="1.5" />
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="130" y="177" width="260" height="44" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
                     <text x="260" y="204" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
                       PHÓ TỔNG GIÁM ĐỐC
                     </text>
                   </g>
 
                   {/* RIGHT: PHÓ TỔNG GIÁM ĐỐC */}
-                  <g filter="url(#shadow)" className="org-node dark-node">
-                    <rect x="1210" y="177" width="260" height="44" rx="4" fill="#334155" stroke="#1e293b" strokeWidth="1.5" />
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="1210" y="177" width="260" height="44" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
                     <text x="1340" y="204" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
                       PHÓ TỔNG GIÁM ĐỐC
                     </text>
@@ -750,97 +730,97 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
 
                   {/* MIDDLE LEVEL SUB-UNITS */}
                   {/* Middle-Left (Trực thuộc TGĐ - Nhánh ngắn): P. TỔNG HỢP */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="530" y="260" width="200" height="54" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="630" y="293" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="530" y="260" width="200" height="54" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="630" y="293" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       P. TỔNG HỢP
                     </text>
                   </g>
 
                   {/* Middle-Right (Trực thuộc TGĐ - Nhánh ngắn): P. TÀI CHÍNH KẾ TOÁN */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="870" y="260" width="200" height="54" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="970" y="293" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="870" y="260" width="200" height="54" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="970" y="293" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       P. TÀI CHÍNH KẾ TOÁN
                     </text>
                   </g>
 
                   {/* Left sub-unit (Trực thuộc PTGĐ - Nhánh dài hơn): TT. TƯ VẤN THIẾT KẾ XÂY DỰNG */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="120" y="335" width="280" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="260" y="362" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="120" y="335" width="280" height="58" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="260" y="362" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       TT. TƯ VẤN THIẾT KẾ
                     </text>
-                    <text x="260" y="378" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                    <text x="260" y="378" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       XÂY DỰNG
                     </text>
                   </g>
 
                   {/* Right sub-unit 1 (Trực thuộc PTGĐ - Nhánh dài hơn): TTGP. PHẦN MỀM NHẬP KHẨU TRONG XD */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="1115" y="335" width="210" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="1220" y="362" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="1115" y="335" width="210" height="58" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="1220" y="362" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       TTGP. PHẦN MỀM NHẬP KHẨU
                     </text>
-                    <text x="1220" y="378" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                    <text x="1220" y="378" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       TRONG XD
                     </text>
                   </g>
 
                   {/* Right sub-unit 2 (Trực thuộc PTGĐ - Nhánh dài hơn): TT. TƯ VẤN BIM SỐ HÓA CÔNG TRÌNH */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="1355" y="335" width="210" height="58" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="1460" y="362" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="1355" y="335" width="210" height="58" rx="4" fill="#fc6435" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="1460" y="362" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       TT. TƯ VẤN BIM &amp;
                     </text>
-                    <text x="1460" y="378" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                    <text x="1460" y="378" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       SỐ HÓA CÔNG TRÌNH
                     </text>
                   </g>
 
                   {/* ================= BOTTOM ROW UNITS ================= */}
                   {/* 1. CN. TP HỒ CHÍ MINH */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="70" y="460" width="220" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="180" y="499" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="70" y="460" width="220" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="180" y="499" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       CN. TP HỒ CHÍ MINH
                     </text>
                   </g>
 
                   {/* 2. TTGP. PHẦN MỀM & THIẾT BỊ CÔNG NGHỆ (Unconnected as specified) */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="375" y="460" width="230" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="490" y="491" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="375" y="460" width="230" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="490" y="491" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       TTGP. PHẦN MỀM &amp;
                     </text>
-                    <text x="490" y="509" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                    <text x="490" y="509" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       THIẾT BỊ CÔNG NGHỆ
                     </text>
                   </g>
 
                   {/* 3. TT. TƯ VẤN DỰ ÁN */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="690" y="460" width="220" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="800" y="499" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="690" y="460" width="220" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="800" y="499" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       TT. TƯ VẤN DỰ ÁN
                     </text>
                   </g>
 
                   {/* 4. TT. PHẦN MỀM XÂY DỰNG */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="1000" y="460" width="220" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="1110" y="499" fill="#0f172a" fontSize="12" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="1000" y="460" width="220" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="1110" y="499" fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle">
                       TT. PHẦN MỀM XÂY DỰNG
                     </text>
                   </g>
 
                   {/* 5. TT. TƯ VẤN PTPBV & GIẢI PHÁP CNKT */}
-                  <g filter="url(#shadow)" className="org-node white-node">
-                    <rect x="1300" y="460" width="240" height="68" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="2" />
-                    <text x="1420" y="491" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                  <g filter="url(#shadow)" className="org-node">
+                    <rect x="1300" y="460" width="240" height="68" rx="4" fill="#fc5115" stroke="#d93800" strokeWidth="1.5" />
+                    <text x="1420" y="491" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       TT. TƯ VẤN PTPBV &amp;
                     </text>
-                    <text x="1420" y="509" fill="#0f172a" fontSize="11.5" fontWeight="800" textAnchor="middle">
+                    <text x="1420" y="509" fill="#ffffff" fontSize="11.5" fontWeight="800" textAnchor="middle">
                       GIẢI PHÁP CNKT
                     </text>
                   </g>

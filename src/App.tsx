@@ -73,19 +73,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-orange-500 selection:text-white relative">
-      {/* Interactive Background Engine */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-100">
-        {currentView === 'about' ? (
-          <TechAboutBackground />
-        ) : (
+      {/* Interactive Background Engine (Chỉ hiển thị tại Trang Chủ) */}
+      {currentView === 'home' && (
+        <div className="fixed inset-0 z-0 pointer-events-none opacity-100">
           <Constellation 
             density={16000} 
             lineDistance={160} 
             particleColor="rgba(234, 88, 12, 0.4)" 
             lineColor="rgba(234, 88, 12, " 
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Floating Contact Bar */}
       <div className="fixed right-4 sm:right-6 bottom-6 z-[100] flex flex-col gap-3.5">

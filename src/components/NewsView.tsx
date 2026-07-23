@@ -474,7 +474,7 @@ export function NewsView({
                     {/* Share Button with Link Copied notification */}
                     <button
                       onClick={handleShareClick}
-                      className="w-full py-3 bg-slate-950 hover:bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-2 shadow-sm"
                     >
                       {copiedLink ? (
                         <>
@@ -582,7 +582,7 @@ export function NewsView({
                     }}
                     className={`px-5 py-3 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 rounded-none border ${
                       isSelected 
-                        ? 'bg-slate-950 border-slate-950 text-white shadow-md' 
+                        ? 'bg-orange-600 border-orange-600 text-white shadow-md' 
                         : 'bg-white border-transparent text-slate-600 hover:text-orange-600 hover:bg-slate-50'
                     }`}
                   >
@@ -795,7 +795,7 @@ export function NewsView({
                     setShareholderYear('Tất cả');
                     setShareholderDocType('Tất cả');
                   }}
-                  className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all rounded-none"
+                  className="px-6 py-2.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all rounded-none shadow-sm"
                 >
                   Đặt lại tất cả bộ lọc
                 </button>
@@ -888,7 +888,7 @@ export function NewsView({
                         
                         {/* Tags / category pill on top */}
                         <div className="absolute top-4 left-4 flex gap-1.5 items-center">
-                          <span className="px-2.5 py-0.5 bg-slate-900 text-white font-sans text-[8px] font-black uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 bg-orange-600 text-white font-sans text-[8px] font-black uppercase tracking-wider shadow-sm">
                             {categoriesList.find(c => c.id === news.category)?.label}
                           </span>
                           {typeBadge}
@@ -916,7 +916,7 @@ export function NewsView({
 
                         <button
                           onClick={() => handleSelectNews(news.id)}
-                          className="w-full py-2 bg-slate-900 hover:bg-orange-600 text-white text-[9px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-1.5"
+                          className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-[9px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-1.5 shadow-sm"
                         >
                           Đọc chi tiết tin bài <ArrowRight size={12} />
                         </button>

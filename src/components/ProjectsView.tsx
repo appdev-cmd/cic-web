@@ -331,7 +331,7 @@ export function ProjectsView({
                     setSelectedSolution('Tất cả');
                     setSelectedCustomer('Tất cả');
                   }}
-                  className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all rounded-none"
+                  className="px-6 py-2.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all rounded-none shadow-sm"
                 >
                   Đặt lại bộ lọc
                 </button>
@@ -355,7 +355,7 @@ export function ProjectsView({
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 to-transparent"></div>
-                      <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-slate-900/95 border border-white/10 text-white font-sans text-[8px] font-black uppercase tracking-wider">
+                      <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-orange-600 text-white font-sans text-[8px] font-black uppercase tracking-wider shadow-sm">
                         {project.sector}
                       </span>
                     </div>
@@ -388,7 +388,7 @@ export function ProjectsView({
 
                       <button
                         onClick={() => handleSelectProject(project.id)}
-                        className="w-full py-2 bg-slate-900 hover:bg-orange-600 hover:text-white text-white text-[9px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-1.5"
+                        className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-[9px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-1.5 shadow-sm"
                       >
                         Chi tiết dự án <ArrowRight size={12} />
                       </button>
@@ -670,7 +670,7 @@ export function ProjectsView({
                           className={`w-full py-2 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-wider transition-all border rounded-none ${
                             pdfDownloaded
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-600 cursor-default'
-                              : 'bg-slate-900 hover:bg-orange-600 hover:border-orange-600 text-white border-slate-950'
+                              : 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shadow-sm'
                           }`}
                         >
                           {pdfDownloaded ? (
