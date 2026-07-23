@@ -300,17 +300,18 @@ export const Header = ({
           </div>
         </div>
 
-        {/* Dropdown Search Bar underneath the header without pushing header row items */}
+        {/* Floating Search Bar Overlay underneath header without affecting header layout or height */}
         <AnimatePresence>
           {isSearchOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0, y: -10 }}
-              animate={{ opacity: 1, height: 'auto', y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -10 }}
-              className="bg-white border-t border-slate-100 shadow-[0_15px_30px_rgba(0,0,0,0.1)] py-4 px-6 overflow-hidden"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 right-0 w-full bg-white border-b border-slate-200 shadow-2xl py-4 px-4 sm:px-8 z-50"
             >
-              <div className="max-w-4xl mx-auto flex items-center gap-3">
-                <Search className="text-slate-400 shrink-0" size={18} />
+              <div className="max-w-4xl mx-auto flex items-center gap-2 sm:gap-3">
+                <Search className="text-orange-600 shrink-0" size={20} />
                 <input
                   type="text"
                   value={localSearchQuery}
@@ -321,20 +322,21 @@ export const Header = ({
                     }
                   }}
                   placeholder="Nhập từ khóa tìm kiếm sản phẩm, dịch vụ, dự án, tin tức..."
-                  className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-none font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-none font-bold"
                   autoFocus
                 />
                 <button
                   onClick={handleGlobalSearch}
-                  className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs tracking-wider transition-colors shrink-0"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs tracking-wider transition-colors shrink-0"
                 >
                   Tìm kiếm
                 </button>
                 <button
                   onClick={() => setIsSearchOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
+                  title="Đóng tìm kiếm"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
             </motion.div>

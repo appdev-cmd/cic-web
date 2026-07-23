@@ -10,6 +10,8 @@ import {
   Download, 
   ChevronLeft, 
   ChevronRight, 
+  ChevronDown,
+  ChevronUp,
   X, 
   Check, 
   SlidersHorizontal,
@@ -112,21 +114,42 @@ const getProductType = (product: Product): string => {
 
 export function ProductsView(_props?: ProductsViewProps) {
   const [search, setSearch] = useState('');
-  const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
-  const [selectedField, setSelectedField] = useState<string | null>(null);
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(15); // Default to 15 (as requested by user)
   const [sortBy, setSortBy] = useState<'default' | 'name-asc'>('default');
 
-  // Filter expand states
+  // Filter section collapse states (Accordion)
+  const [isFieldsOpen, setIsFieldsOpen] = useState(true);
+  const [isBrandsOpen, setIsBrandsOpen] = useState(true);
+  const [isAppsOpen, setIsAppsOpen] = useState(true);
+  const [isTypesOpen, setIsTypesOpen] = useState(true);
+
+  // Filter expand states (Show more / Show less)
   const [isFieldsExpanded, setIsFieldsExpanded] = useState(false);
   const [isBrandsExpanded, setIsBrandsExpanded] = useState(false);
   const [isAppsExpanded, setIsAppsExpanded] = useState(false);
 
   // Mobile filter menu state
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // Helper function to toggle items in multi-select filters
+  const toggleFilterItem = (currentList: string[], setList: (val: string[]) => void, item: string) => {
+    if (currentList.includes(item)) {
+      setList(currentList.filter(i => i !== item));
+    } else {
+      setList([...currentList, item]);
+    }
+    setCurrentPage(1);
+  };
+
+  // Active filters count
+  const activeFiltersCount = useMemo(() => {
+    return selectedProductTypes.length + selectedFields.length + selectedBrands.length + selectedApps.length + (search.trim() ? 1 : 0);
+  }, [selectedProductTypes, selectedFields, selectedBrands, selectedApps, search]);
 
   // Interactive UI states
   const [modalType, setModalType] = useState<'contact' | 'buy' | 'download' | null>(null);
@@ -199,13 +222,14 @@ export function ProductsView(_props?: ProductsViewProps) {
   // Filter and Sort logic
   const filteredProducts = useMemo(() => {
     let result = productsData.filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
+      const matchesSearch = !search.trim() || 
+                            p.name.toLowerCase().includes(search.toLowerCase()) || 
                             p.description.toLowerCase().includes(search.toLowerCase());
       const pType = getProductType(p);
-      const matchesProductType = selectedProductType === null || pType === selectedProductType;
-      const matchesField = selectedField === null || p.field === selectedField;
-      const matchesBrand = selectedBrand === null || p.brand === selectedBrand;
-      const matchesApp = selectedApp === null || p.app === selectedApp;
+      const matchesProductType = selectedProductTypes.length === 0 || selectedProductTypes.includes(pType);
+      const matchesField = selectedFields.length === 0 || selectedFields.includes(p.field);
+      const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(p.brand);
+      const matchesApp = selectedApps.length === 0 || selectedApps.includes(p.app);
 
       return matchesSearch && matchesProductType && matchesField && matchesBrand && matchesApp;
     });
@@ -215,15 +239,15 @@ export function ProductsView(_props?: ProductsViewProps) {
     }
 
     return result;
-  }, [search, selectedProductType, selectedField, selectedBrand, selectedApp, sortBy]);
+  }, [search, selectedProductTypes, selectedFields, selectedBrands, selectedApps, sortBy]);
 
   // Reset all filters
   const handleResetFilters = () => {
     setSearch('');
-    setSelectedProductType(null);
-    setSelectedField(null);
-    setSelectedBrand(null);
-    setSelectedApp(null);
+    setSelectedProductTypes([]);
+    setSelectedFields([]);
+    setSelectedBrands([]);
+    setSelectedApps([]);
     setSortBy('default');
     setIsFieldsExpanded(false);
     setIsBrandsExpanded(false);
@@ -1005,22 +1029,16 @@ export function ProductsView(_props?: ProductsViewProps) {
           <div className="lg:hidden flex gap-2 w-full mb-2">
             <button
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-800 text-sm font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600"
             >
-              <SlidersHorizontal size={16} className="text-orange-600" />
+              <SlidersHorizontal size={14} className="text-orange-600" />
               {isMobileFilterOpen ? 'Đóng bộ lọc' : 'Bộ lọc tìm kiếm'}
-              {(selectedProductType !== null || selectedField !== null || selectedBrand !== null || selectedApp !== null || search) && (
-                <span className="w-2 h-2 bg-orange-600 rounded-full"></span>
+              {activeFiltersCount > 0 && (
+                <span className="px-2 py-0.5 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                  {activeFiltersCount}
+                </span>
               )}
             </button>
-            {(selectedProductType !== null || selectedField !== null || selectedBrand !== null || selectedApp !== null || search) && (
-              <button
-                onClick={handleResetFilters}
-                className="px-4 py-3 bg-slate-100 hover:bg-orange-600 hover:text-white text-slate-700 text-xs font-black uppercase tracking-wider transition-colors flex items-center gap-1"
-              >
-                <RefreshCw size={12} /> Đặt lại
-              </button>
-            )}
           </div>
 
           {/* Filters Sidebar */}
@@ -1028,167 +1046,427 @@ export function ProductsView(_props?: ProductsViewProps) {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className={`w-full lg:col-span-3 bg-white border border-slate-200 p-6 shadow-sm sticky top-28 ${
+            className={`w-full lg:col-span-3 bg-white border border-slate-200 p-5 shadow-xs sticky top-28 ${
               isMobileFilterOpen ? 'block' : 'hidden lg:block'
             }`}
           >
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-              <span className="flex items-center gap-2 font-black uppercase tracking-wider text-sm text-slate-950">
-                <SlidersHorizontal size={16} className="text-orange-600" />
+            {/* Sidebar Title */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-5">
+              <span className="flex items-center gap-2 font-bold uppercase tracking-wider text-xs text-slate-900">
+                <SlidersHorizontal size={15} className="text-orange-600" />
                 Bộ lọc tìm kiếm
               </span>
-              {(search || selectedProductType !== null || selectedField !== null || selectedBrand !== null || selectedApp !== null) && (
-                <button 
-                  onClick={handleResetFilters}
-                  className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors"
-                >
-                  <RefreshCw size={10} /> Đặt lại
-                </button>
+              {activeFiltersCount > 0 && (
+                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded-full">
+                  Đã chọn {activeFiltersCount}
+                </span>
               )}
             </div>
 
-            {/* Search Input */}
-            <div className="space-y-2 mb-6">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Từ khóa</label>
+            {/* Compact Search Input */}
+            <div className="mb-5">
+              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">Từ khóa</label>
               <div className="relative">
                 <input 
                   type="text" 
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                   placeholder="Nhập tên sản phẩm..."
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-4 py-3 pl-10 text-sm font-bold text-slate-800 transition-all placeholder:text-slate-400"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 text-xs font-medium text-slate-800 transition-all placeholder:text-slate-400"
                 />
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 {search && (
                   <button 
                     onClick={() => setSearch('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
-                    <X size={14} />
+                    <X size={12} />
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Field Filter (Lĩnh vực) */}
-            <div className="space-y-3 mb-6">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-                <Layers size={10} className="text-orange-600" /> Lĩnh vực
-              </label>
-              <div className="flex flex-col gap-1 pr-1">
-                {displayedFields.map(field => (
-                  <button
-                    key={field}
-                    onClick={() => { setSelectedField(selectedField === field ? null : field); setCurrentPage(1); }}
-                    className={`flex items-center justify-between text-left px-3 py-2 text-xs font-bold transition-all ${
-                      selectedField === field 
-                        ? 'bg-orange-600 text-white shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <span className="truncate">{field}</span>
-                    {selectedField === field && <Check size={12} />}
-                  </button>
-                ))}
+            {/* Accordion Filter 1: Field (Lĩnh vực) */}
+            <div className="border-b border-slate-100 pb-3 mb-3">
+              <div 
+                onClick={() => setIsFieldsOpen(!isFieldsOpen)}
+                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Layers size={13} className="text-orange-600" />
+                  Lĩnh vực
+                  {selectedFields.length > 0 && (
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                      {selectedFields.length}
+                    </span>
+                  )}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {selectedFields.length > 0 && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedFields([]); }} 
+                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      title="Xóa bộ lọc lĩnh vực"
+                    >
+                      Xóa
+                    </button>
+                  )}
+                  {isFieldsOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                </div>
               </div>
-              {fields.length > 10 && (
-                <button
-                  onClick={() => setIsFieldsExpanded(!isFieldsExpanded)}
-                  className="text-[11px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors mt-1.5 px-3 flex items-center gap-1"
+
+              {isFieldsOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 space-y-1"
                 >
-                  {isFieldsExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
-                </button>
+                  {displayedFields.map(field => {
+                    const isSelected = selectedFields.includes(field);
+                    const count = productsData.filter(p => p.field === field).length;
+                    return (
+                      <button
+                        key={field}
+                        onClick={() => toggleFilterItem(selectedFields, setSelectedFields, field)}
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                          isSelected 
+                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
+                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
+                          }`}>
+                            {isSelected && <Check size={10} strokeWidth={3} />}
+                          </div>
+                          <span className="truncate">{field}</span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                      </button>
+                    );
+                  })}
+                  {fields.length > 10 && (
+                    <button
+                      onClick={() => setIsFieldsExpanded(!isFieldsExpanded)}
+                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
+                    >
+                      {isFieldsExpanded ? 'Thu gọn ▲' : `Xem thêm (${fields.length - 10}) ▼`}
+                    </button>
+                  )}
+                </motion.div>
               )}
             </div>
 
-            {/* Brand Filter (Hãng) */}
-            <div className="space-y-3 mb-6">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-                <Box size={10} className="text-orange-600" /> Hãng phát triển
-              </label>
-              <div className="flex flex-col gap-1 pr-1">
-                {displayedBrands.map(brand => (
-                  <button
-                    key={brand}
-                    onClick={() => { setSelectedBrand(selectedBrand === brand ? null : brand); setCurrentPage(1); }}
-                    className={`flex items-center justify-between text-left px-3 py-2 text-xs font-bold transition-all ${
-                      selectedBrand === brand 
-                        ? 'bg-orange-600 text-white shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <span className="truncate">{brand}</span>
-                    {selectedBrand === brand && <Check size={12} />}
-                  </button>
-                ))}
+            {/* Accordion Filter 2: Brand (Hãng phát triển) */}
+            <div className="border-b border-slate-100 pb-3 mb-3">
+              <div 
+                onClick={() => setIsBrandsOpen(!isBrandsOpen)}
+                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Box size={13} className="text-orange-600" />
+                  Hãng phát triển
+                  {selectedBrands.length > 0 && (
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                      {selectedBrands.length}
+                    </span>
+                  )}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {selectedBrands.length > 0 && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedBrands([]); }} 
+                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      title="Xóa bộ lọc hãng phát triển"
+                    >
+                      Xóa
+                    </button>
+                  )}
+                  {isBrandsOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                </div>
               </div>
-              {brands.length > 10 && (
-                <button
-                  onClick={() => setIsBrandsExpanded(!isBrandsExpanded)}
-                  className="text-[11px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors mt-1.5 px-3 flex items-center gap-1"
+
+              {isBrandsOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 space-y-1"
                 >
-                  {isBrandsExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
-                </button>
+                  {displayedBrands.map(brand => {
+                    const isSelected = selectedBrands.includes(brand);
+                    const count = productsData.filter(p => p.brand === brand).length;
+                    return (
+                      <button
+                        key={brand}
+                        onClick={() => toggleFilterItem(selectedBrands, setSelectedBrands, brand)}
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                          isSelected 
+                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
+                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
+                          }`}>
+                            {isSelected && <Check size={10} strokeWidth={3} />}
+                          </div>
+                          <span className="truncate">{brand}</span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                      </button>
+                    );
+                  })}
+                  {brands.length > 10 && (
+                    <button
+                      onClick={() => setIsBrandsExpanded(!isBrandsExpanded)}
+                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
+                    >
+                      {isBrandsExpanded ? 'Thu gọn ▲' : `Xem thêm (${brands.length - 10}) ▼`}
+                    </button>
+                  )}
+                </motion.div>
               )}
             </div>
 
-            {/* Application Filter (Ứng dụng) */}
-            <div className="space-y-3 mb-6">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-                <FileText size={10} className="text-orange-600" /> Ứng dụng
-              </label>
-              <div className="flex flex-col gap-1 pr-1">
-                {displayedApps.map(app => (
-                  <button
-                    key={app}
-                    onClick={() => { setSelectedApp(selectedApp === app ? null : app); setCurrentPage(1); }}
-                    className={`flex items-center justify-between text-left px-3 py-2 text-xs font-bold transition-all ${
-                      selectedApp === app 
-                        ? 'bg-orange-600 text-white shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <span className="truncate">{app}</span>
-                    {selectedApp === app && <Check size={12} />}
-                  </button>
-                ))}
+            {/* Accordion Filter 3: Application (Ứng dụng) */}
+            <div className="border-b border-slate-100 pb-3 mb-3">
+              <div 
+                onClick={() => setIsAppsOpen(!isAppsOpen)}
+                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+              >
+                <span className="flex items-center gap-1.5">
+                  <FileText size={13} className="text-orange-600" />
+                  Ứng dụng
+                  {selectedApps.length > 0 && (
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                      {selectedApps.length}
+                    </span>
+                  )}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {selectedApps.length > 0 && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedApps([]); }} 
+                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      title="Xóa bộ lọc ứng dụng"
+                    >
+                      Xóa
+                    </button>
+                  )}
+                  {isAppsOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                </div>
               </div>
-              {apps.length > 10 && (
-                <button
-                  onClick={() => setIsAppsExpanded(!isAppsExpanded)}
-                  className="text-[11px] font-black uppercase tracking-wider text-orange-600 hover:text-orange-700 transition-colors mt-1.5 px-3 flex items-center gap-1"
+
+              {isAppsOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 space-y-1"
                 >
-                  {isAppsExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
-                </button>
+                  {displayedApps.map(app => {
+                    const isSelected = selectedApps.includes(app);
+                    const count = productsData.filter(p => p.app === app).length;
+                    return (
+                      <button
+                        key={app}
+                        onClick={() => toggleFilterItem(selectedApps, setSelectedApps, app)}
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                          isSelected 
+                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
+                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
+                          }`}>
+                            {isSelected && <Check size={10} strokeWidth={3} />}
+                          </div>
+                          <span className="truncate">{app}</span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                      </button>
+                    );
+                  })}
+                  {apps.length > 10 && (
+                    <button
+                      onClick={() => setIsAppsExpanded(!isAppsExpanded)}
+                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
+                    >
+                      {isAppsExpanded ? 'Thu gọn ▲' : `Xem thêm (${apps.length - 10}) ▼`}
+                    </button>
+                  )}
+                </motion.div>
               )}
             </div>
 
-            {/* Product Type Filter (Loại sản phẩm) */}
-            <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-                <Tag size={10} className="text-orange-600" /> Loại sản phẩm
-              </label>
-              <div className="flex flex-col gap-1 pr-1">
-                {PRODUCT_TYPES.map(type => (
-                  <button
-                    key={type}
-                    onClick={() => { setSelectedProductType(selectedProductType === type ? null : type); setCurrentPage(1); }}
-                    className={`flex items-center justify-between text-left px-3 py-2 text-xs font-bold transition-all ${
-                      selectedProductType === type 
-                        ? 'bg-orange-600 text-white shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <span className="truncate">{type}</span>
-                    {selectedProductType === type && <Check size={12} />}
-                  </button>
-                ))}
+            {/* Accordion Filter 4: Product Type (Loại sản phẩm) */}
+            <div>
+              <div 
+                onClick={() => setIsTypesOpen(!isTypesOpen)}
+                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Tag size={13} className="text-orange-600" />
+                  Loại sản phẩm
+                  {selectedProductTypes.length > 0 && (
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                      {selectedProductTypes.length}
+                    </span>
+                  )}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {selectedProductTypes.length > 0 && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedProductTypes([]); }} 
+                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      title="Xóa bộ lọc loại sản phẩm"
+                    >
+                      Xóa
+                    </button>
+                  )}
+                  {isTypesOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                </div>
               </div>
+
+              {isTypesOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 space-y-1"
+                >
+                  {PRODUCT_TYPES.map(type => {
+                    const isSelected = selectedProductTypes.includes(type);
+                    const count = productsData.filter(p => getProductType(p) === type).length;
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => toggleFilterItem(selectedProductTypes, setSelectedProductTypes, type)}
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                          isSelected 
+                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
+                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
+                          }`}>
+                            {isSelected && <Check size={10} strokeWidth={3} />}
+                          </div>
+                          <span className="truncate">{type}</span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
             </div>
           </motion.div>
 
           {/* Catalog Listing Area */}
-          <div className="lg:col-span-9 flex flex-col gap-8">
+          <div className="lg:col-span-9 flex flex-col gap-6">
+            
+            {/* Active Filters Bar (Displays clear tags for currently selected criteria) */}
+            {activeFiltersCount > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-orange-50/80 border border-orange-200/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-black uppercase text-orange-950 tracking-wider flex items-center gap-1.5 mr-1">
+                    <SlidersHorizontal size={13} className="text-orange-600" />
+                    Đang lọc ({activeFiltersCount}):
+                  </span>
+
+                  {/* Search Chip */}
+                  {search.trim() && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                      <span className="text-slate-400 font-normal">Từ khóa:</span> "{search}"
+                      <button 
+                        onClick={() => { setSearch(''); setCurrentPage(1); }}
+                        className="text-slate-400 hover:text-red-600 transition-colors ml-0.5"
+                        title="Xóa lọc từ khóa"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  )}
+
+                  {/* Fields Chips */}
+                  {selectedFields.map(f => (
+                    <span key={`chip-f-${f}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                      <span className="text-orange-600 font-normal">Lĩnh vực:</span> {f}
+                      <button 
+                        onClick={() => toggleFilterItem(selectedFields, setSelectedFields, f)}
+                        className="text-slate-400 hover:text-red-600 transition-colors ml-0.5"
+                        title={`Bỏ chọn ${f}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+
+                  {/* Brands Chips */}
+                  {selectedBrands.map(b => (
+                    <span key={`chip-b-${b}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                      <span className="text-orange-600 font-normal">Hãng:</span> {b}
+                      <button 
+                        onClick={() => toggleFilterItem(selectedBrands, setSelectedBrands, b)}
+                        className="text-slate-400 hover:text-red-600 transition-colors ml-0.5"
+                        title={`Bỏ chọn ${b}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+
+                  {/* Apps Chips */}
+                  {selectedApps.map(a => (
+                    <span key={`chip-a-${a}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                      <span className="text-orange-600 font-normal">Ứng dụng:</span> {a}
+                      <button 
+                        onClick={() => toggleFilterItem(selectedApps, setSelectedApps, a)}
+                        className="text-slate-400 hover:text-red-600 transition-colors ml-0.5"
+                        title={`Bỏ chọn ${a}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+
+                  {/* Product Types Chips */}
+                  {selectedProductTypes.map(pt => (
+                    <span key={`chip-pt-${pt}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                      <span className="text-orange-600 font-normal">Loại:</span> {pt}
+                      <button 
+                        onClick={() => toggleFilterItem(selectedProductTypes, setSelectedProductTypes, pt)}
+                        className="text-slate-400 hover:text-red-600 transition-colors ml-0.5"
+                        title={`Bỏ chọn ${pt}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-red-600 hover:text-red-700 bg-white hover:bg-red-50 border border-red-200 px-3 py-1.5 transition-colors shrink-0 self-start sm:self-auto shadow-2xs"
+                >
+                  <RefreshCw size={11} /> Xóa tất cả bộ lọc
+                </button>
+              </motion.div>
+            )}
+
             {/* Listing Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 gap-4">
               <span className="text-sm font-black uppercase tracking-wider text-slate-950 flex items-center gap-2">
