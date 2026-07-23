@@ -88,14 +88,14 @@ export const Header = ({
   return (
     <>
       <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+        className={`fixed top-0 w-full z-50 h-18 transition-all duration-300 flex items-center ${
           isHeaderWhite 
-            ? 'bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-2 border-b border-slate-100' 
-            : 'bg-transparent py-2'
+            ? 'bg-white shadow-[0_4px_25px_rgba(0,0,0,0.06)] border-b border-slate-100' 
+            : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between h-full">
+          <div className="flex items-center gap-2 h-full">
             <a 
               href="#home" 
               onClick={(e) => {
@@ -104,15 +104,12 @@ export const Header = ({
                 setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="flex items-center group"
+              className="flex items-center group h-full"
             >
               <img 
-                src="/logo.png" 
+                src="/LOGO - 1990-08.png" 
                 alt="CIC Logo" 
-                className={`h-10 md:h-12 w-auto transition-all duration-500 ${
-                  isHeaderWhite ? 'brightness-100' : 'brightness-0 invert'
-                } group-hover:scale-105`}
-                style={isHeaderWhite ? { filter: 'hue-rotate(25deg) saturate(1.5) brightness(1.2)' } : undefined}
+                className="h-16 md:h-18 max-h-18 w-auto object-contain transition-all duration-300 group-hover:scale-105"
               />
             </a>
           </div>

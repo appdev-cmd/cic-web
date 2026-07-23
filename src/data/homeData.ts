@@ -75,6 +75,14 @@ export const homeAwards = [
   { 
     name: 'Giải thưởng VIFOTEC', 
     img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-vifotec_1582012769.jpg' 
+  },
+  {
+    name: 'Bằng khen Bộ Xây Dựng',
+    img: 'https://www.cic.com.vn/images/banners/original/huan-chuong-lao-dong-hang-3_1582012829.jpg'
+  },
+  {
+    name: 'Bằng khen Hiệp hội VINASA',
+    img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2015_1582012665.jpg'
   }
 ];
 

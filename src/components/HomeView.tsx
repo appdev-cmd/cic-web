@@ -36,6 +36,7 @@ import {
 
 import { Counter } from './shared/Counter';
 import { BIMIcon } from './shared/Icons';
+import { AwardsSlider } from './AwardsSlider';
 
 // Import mock data
 import { 
@@ -380,10 +381,10 @@ export const HomeView = ({
               />
               <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-all flex items-center justify-center">
                 <div className="relative">
-                  <div className="relative w-24 h-24 bg-orange-600 text-white rounded-none flex items-center justify-center shadow-2xl group-hover:scale-125 transition-all duration-500">
-                    <Play size={36} fill="white" />
+                  <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-none flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
+                    <Play size={22} fill="white" className="ml-0.5" />
                   </div>
-                  <div className="absolute inset-0 w-24 h-24 bg-orange-600 rounded-none animate-ping opacity-20"></div>
+                  <div className="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-orange-600 rounded-none animate-ping opacity-20"></div>
                 </div>
               </div>
             </motion.div>
@@ -415,30 +416,14 @@ export const HomeView = ({
       </section>
 
       {/* Awards Section */}
-      <section className="py-20 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
+      <section className="py-16 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
             title="Thành tựu & Giải thưởng" 
             sub="Minh chứng cho nỗ lực không ngừng nghỉ" 
           />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 mt-8">
-            {homeAwards.map((award, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white p-6 shadow-sm border border-slate-100 flex flex-col items-center group hover:shadow-2xl hover:-translate-y-1 hover:border-orange-200 transition-all duration-300"
-              >
-                <div className="h-28 flex items-center justify-center overflow-hidden mb-6 w-full">
-                  <img src={award.img} alt={award.name} className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <h3 className="text-[11px] font-black text-slate-800 text-center uppercase tracking-wider group-hover:text-orange-600 transition-colors">
-                  {award.name}
-                </h3>
-              </motion.div>
-            ))}
+          <div className="mt-6">
+            <AwardsSlider awards={homeAwards} />
           </div>
         </div>
       </section>
@@ -786,8 +771,8 @@ export const HomeView = ({
                 <img src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" alt="Special Event" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-none text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
                 {/* Logo Overlay */}
-                <div className="absolute bottom-6 right-6 w-32 md:w-40 opacity-80 group-hover:opacity-100 transition-all pointer-events-none drop-shadow-2xl">
-                  <img src="/logo.png" alt="CIC Logo" className="w-full h-auto brightness-0 invert opacity-60 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-6 right-6 z-10 transition-all duration-300 group-hover:scale-105">
+                  <img src="/logo.png" alt="CIC Logo" className="h-10 md:h-14 w-auto object-contain drop-shadow-xl" />
                 </div>
               </div>
               <div className="p-10">
