@@ -47,7 +47,7 @@ export function ProjectsView({
   const [selectedSolution, setSelectedSolution] = useState('Tất cả');
   const [selectedCustomer, setSelectedCustomer] = useState('Tất cả');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4; // 4 projects per page showcases pagination nicely with our 8 items
+  const itemsPerPage = 6; // 6 items per page creates a rich portfolio rhythm (Hero + 2 cols + Full + 2 cols)
 
   // Featured projects
   const featuredProjects = projectsData.filter(p => p.featured);
@@ -142,7 +142,7 @@ export function ProjectsView({
         
         {/* VIEW 1: PROJECTS LIST VIEW */}
         {!activeProject ? (
-          <div className="space-y-16">
+          <div className="space-y-12">
             
             {/* Header section */}
             <div className="border-l-4 border-orange-600 pl-6 space-y-2">
@@ -154,176 +154,98 @@ export function ProjectsView({
               </p>
             </div>
 
-            {/* FEATURED PROJECTS CAROUSEL (Dự án nổi bật) */}
-            {featuredProjects.length > 0 && (
-              <div className="bg-slate-900 text-white border-2 border-slate-800 relative overflow-hidden group shadow-2xl">
-                <div className="absolute top-0 left-0 bg-orange-600 text-white px-4 py-1.5 text-[10px] font-black uppercase tracking-widest z-10">
-                  Dự Án Nổi Bật
-                </div>
-
-                <div className="relative h-[480px] lg:h-[400px]">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentFeaturedIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.8 }}
-                      className="absolute inset-0 grid grid-cols-1 lg:grid-cols-12 h-full"
-                    >
-                      {/* Image side */}
-                      <div className="lg:col-span-7 h-64 lg:h-full relative overflow-hidden">
-                        <img 
-                          src={featuredProjects[currentFeaturedIndex].img} 
-                          alt={featuredProjects[currentFeaturedIndex].name}
-                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-slate-950 via-slate-950/20 to-transparent"></div>
-                      </div>
-
-                      {/* Content side */}
-                      <div className="lg:col-span-5 p-8 lg:p-12 flex flex-col justify-center space-y-6 bg-slate-950">
-                        <div className="space-y-3">
-                          <span className="inline-block px-2.5 py-0.5 bg-orange-600/20 border border-orange-600/40 text-orange-400 text-[9px] font-sans font-black uppercase tracking-widest">
-                            {featuredProjects[currentFeaturedIndex].sector}
-                          </span>
-                          <h2 className="text-xl lg:text-2xl font-black uppercase tracking-tight text-white leading-tight">
-                            {featuredProjects[currentFeaturedIndex].name}
-                          </h2>
-                          <p className="text-xs text-orange-400 font-bold italic">
-                            "{featuredProjects[currentFeaturedIndex].tagline}"
-                          </p>
-                          <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 font-medium">
-                            {featuredProjects[currentFeaturedIndex].shortDesc}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-y-2 gap-x-4 text-[10px] text-slate-400 font-sans">
-                          <span className="flex items-center gap-1"><MapPin size={12} className="text-orange-500" /> {featuredProjects[currentFeaturedIndex].location}</span>
-                          <span className="flex items-center gap-1"><Calendar size={12} className="text-orange-500" /> {featuredProjects[currentFeaturedIndex].time}</span>
-                          <span className="flex items-center gap-1"><User size={12} className="text-orange-500" /> {featuredProjects[currentFeaturedIndex].customer}</span>
-                        </div>
-
-                        <div>
-                          <button
-                            onClick={() => handleSelectProject(featuredProjects[currentFeaturedIndex].id)}
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest transition-all rounded-none"
-                          >
-                            Khám phá chi tiết <ArrowRight size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* Manual Arrow Controls */}
-                  <div className="absolute right-6 bottom-6 flex gap-1 z-20">
+            {/* SLEEK FILTER & CATEGORY TABS */}
+            <div className="space-y-6 pt-2 border-t border-slate-200/80">
+              {/* Sector Category Pill Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                {sectors.map((sec) => {
+                  const isActive = selectedSector === sec;
+                  return (
                     <button
-                      onClick={() => setCurrentFeaturedIndex((prev) => (prev - 1 + featuredProjects.length) % featuredProjects.length)}
-                      className="w-10 h-10 bg-slate-900 border border-slate-800 hover:border-orange-600 hover:bg-orange-600 flex items-center justify-center text-white transition-all"
+                      key={sec}
+                      onClick={() => setSelectedSector(sec)}
+                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
+                        isActive
+                          ? 'bg-[#FC5115] text-white shadow-md'
+                          : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
+                      }`}
                     >
-                      <ChevronLeft size={16} />
+                      {sec}
                     </button>
-                    <button
-                      onClick={() => setCurrentFeaturedIndex((prev) => (prev + 1) % featuredProjects.length)}
-                      className="w-10 h-10 bg-slate-900 border border-slate-800 hover:border-orange-600 hover:bg-orange-600 flex items-center justify-center text-white transition-all"
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* FILTER ENGINE & SEARCH (Phần Lọc lĩnh vực; giải pháp; khách hàng) */}
-            <div className="bg-white border border-slate-200 p-6 lg:p-8 space-y-6 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-900 pb-2 border-b border-slate-100">
-                <Filter size={18} className="text-orange-600" />
-                <h3 className="text-xs font-black uppercase tracking-wider">Bộ lọc tìm kiếm thông minh</h3>
+                  );
+                })}
               </div>
 
-              {/* Grid of inputs and filters */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
+              {/* Secondary Filter Controls Bar (Search + Solution + Customer) */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4">
                 {/* Search Bar */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Tìm kiếm</label>
-                  <div className="relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Nhập tên dự án, địa điểm..."
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white pl-10 pr-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-bold rounded-none"
-                    />
-                  </div>
+                <div className="md:col-span-5 relative">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Tìm tên dự án, chủ đầu tư, địa điểm..."
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-none"
+                  />
                 </div>
 
-                {/* Sector (Lĩnh vực) Filter */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Lĩnh vực</label>
-                  <select
-                    value={selectedSector}
-                    onChange={(e) => setSelectedSector(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
-                  >
-                    {sectors.map(sec => <option key={sec} value={sec}>{sec}</option>)}
-                  </select>
-                </div>
-
-                {/* Solution (Giải pháp) Filter */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Giải pháp công nghệ</label>
+                {/* Solution Dropdown */}
+                <div className="md:col-span-3">
                   <select
                     value={selectedSolution}
                     onChange={(e) => setSelectedSolution(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                   >
-                    {solutions.map(sol => <option key={sol} value={sol}>{sol}</option>)}
+                    <option value="Tất cả">Giải pháp: Tất cả</option>
+                    {solutions.filter(s => s !== 'Tất cả').map(sol => (
+                      <option key={sol} value={sol}>{sol}</option>
+                    ))}
                   </select>
                 </div>
 
-                {/* Customer (Khách hàng) Filter */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Chủ đầu tư / Khách hàng</label>
+                {/* Customer Dropdown */}
+                <div className="md:col-span-3">
                   <select
                     value={selectedCustomer}
                     onChange={(e) => setSelectedCustomer(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                   >
-                    {customers.map(cust => <option key={cust} value={cust}>{cust}</option>)}
+                    <option value="Tất cả">Chủ đầu tư: Tất cả</option>
+                    {customers.filter(c => c !== 'Tất cả').map(cust => (
+                      <option key={cust} value={cust}>{cust}</option>
+                    ))}
                   </select>
                 </div>
 
+                {/* Reset Filters */}
+                <div className="md:col-span-1 flex justify-end">
+                  {(searchQuery || selectedSector !== 'Tất cả' || selectedSolution !== 'Tất cả' || selectedCustomer !== 'Tất cả') && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSelectedSector('Tất cả');
+                        setSelectedSolution('Tất cả');
+                        setSelectedCustomer('Tất cả');
+                      }}
+                      className="px-3 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap"
+                    >
+                      Xóa lọc
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Filter Reset & Results Stats */}
-              <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-slate-100 gap-4">
-                <span className="text-xs font-bold text-slate-500 font-sans">
-                  Tìm thấy <span className="text-orange-600 font-black">{totalItems}</span> kết quả phù hợp.
-                </span>
-                {(searchQuery || selectedSector !== 'Tất cả' || selectedSolution !== 'Tất cả' || selectedCustomer !== 'Tất cả') && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedSector('Tất cả');
-                      setSelectedSolution('Tất cả');
-                      setSelectedCustomer('Tất cả');
-                    }}
-                    className="px-4 py-2 border border-slate-200 hover:border-orange-600 hover:bg-orange-50 text-slate-600 hover:text-orange-600 text-[10px] font-black uppercase tracking-wider transition-all rounded-none"
-                  >
-                    Xóa tất cả bộ lọc
-                  </button>
-                )}
+              {/* Found count indicator */}
+              <div className="flex justify-between items-center text-xs font-medium text-slate-500">
+                <span>Hiển thị <strong className="text-slate-900 font-bold">{totalItems}</strong> dự án thực tế</span>
               </div>
             </div>
 
-            {/* PROJECTS GRID / CARDS WITH SHORT SUMMARY */}
+            {/* FULL IMAGE SHOWCASE GRID (STUDIO PORTFOLIO - ASYMMETRIC RHYTHM & HOVER OVERLAY) */}
             {paginatedProjects.length === 0 ? (
-              <div className="text-center py-20 bg-white border border-slate-200/80 space-y-4">
-                <p className="text-slate-400 font-bold text-sm">Không có dữ liệu dự án nào phù hợp với bộ lọc hiện tại.</p>
+              <div className="text-center py-20 border border-dashed border-slate-300 space-y-4">
+                <p className="text-slate-500 font-medium text-sm">Không tìm thấy dự án nào phù hợp với bộ lọc hiện tại.</p>
                 <button
                   onClick={() => {
                     setSearchQuery('');
@@ -331,70 +253,108 @@ export function ProjectsView({
                     setSelectedSolution('Tất cả');
                     setSelectedCustomer('Tất cả');
                   }}
-                  className="px-6 py-2.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 transition-all rounded-none shadow-sm"
+                  className="px-6 py-2.5 bg-[#FC5115] text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-700 transition-all rounded-none shadow-sm"
                 >
-                  Đặt lại bộ lọc
+                  Đặt lại tất cả bộ lọc
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {paginatedProjects.map((project, idx) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05, duration: 0.6 }}
-                    className="bg-white border border-slate-200/80 hover:border-orange-500 group flex flex-col md:flex-row hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500 rounded-none overflow-hidden"
-                  >
-                    {/* Left side: Image */}
-                    <div className="h-48 md:h-full md:w-2/5 overflow-hidden relative min-h-[220px]">
-                      <img 
-                        src={project.img} 
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 group/grid">
+                {paginatedProjects.map((project, idx) => {
+                  // Asymmetric Portfolio Grid Layout Rhythm
+                  const mod = idx % 6;
+                  let spanClass = 'col-span-12 md:col-span-6 h-[380px] lg:h-[440px]';
+                  if (mod === 0) {
+                    spanClass = 'col-span-12 h-[450px] lg:h-[520px]'; // Hero full width
+                  } else if (mod === 1) {
+                    spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // 7 cols
+                  } else if (mod === 2) {
+                    spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // 5 cols
+                  } else if (mod === 3) {
+                    spanClass = 'col-span-12 h-[420px] lg:h-[480px]'; // Full width showcase
+                  } else if (mod === 4) {
+                    spanClass = 'col-span-12 md:col-span-6 h-[380px] lg:h-[440px]';
+                  } else if (mod === 5) {
+                    spanClass = 'col-span-12 md:col-span-6 h-[380px] lg:h-[440px]';
+                  }
+
+                  return (
+                    <motion.div
+                      key={project.id}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.08, duration: 0.6 }}
+                      onClick={() => handleSelectProject(project.id)}
+                      className={`relative overflow-hidden cursor-pointer group rounded-none bg-slate-900 transition-all duration-500 group-hover/grid:opacity-50 hover:!opacity-100 ${spanClass}`}
+                    >
+                      {/* 1. Full Image background */}
+                      <img
+                        src={project.img}
                         alt={project.name}
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
                         referrerPolicy="no-referrer"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 to-transparent"></div>
-                      <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-orange-600 text-white font-sans text-[8px] font-black uppercase tracking-wider shadow-sm">
-                        {project.sector}
-                      </span>
-                    </div>
 
-                    {/* Right side: Content */}
-                    <div className="p-6 md:w-3/5 flex flex-col justify-between space-y-4">
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-sans font-black uppercase tracking-wider text-orange-600 block">
-                          {project.solution}
-                        </span>
-                        <h3 
-                          onClick={() => handleSelectProject(project.id)}
-                          className="text-sm font-black text-slate-950 leading-tight group-hover:text-orange-600 transition-colors uppercase line-clamp-2 cursor-pointer"
-                        >
+                      {/* 2. Default subtle bottom gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent transition-opacity duration-500 group-hover:opacity-0" />
+
+                      {/* Default state title badge at bottom */}
+                      <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="px-2.5 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider">
+                            {project.sector}
+                          </span>
+                          <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">
+                            {project.time}
+                          </span>
+                        </div>
+                        <h3 className="text-base lg:text-lg font-bold text-white leading-snug line-clamp-1">
                           {project.name}
                         </h3>
-                        <p className="text-xs text-slate-500 font-bold italic line-clamp-1">
-                          "{project.tagline}"
-                        </p>
-                        <p className="text-xs text-slate-400 line-clamp-3 font-medium leading-relaxed">
-                          {project.shortDesc}
-                        </p>
                       </div>
 
-                      {/* Horizontal Meta Specs */}
-                      <div className="border-t border-slate-100 pt-4 flex flex-col gap-1 text-[9px] text-slate-400 font-sans">
-                        <span className="flex items-center gap-1"><User size={10} className="text-orange-500" /> KH: {project.customer}</span>
-                        <span className="flex items-center gap-1"><MapPin size={10} className="text-orange-500" /> ĐĐ: {project.location}</span>
-                      </div>
+                      {/* 3. Full Hover Overlay - Smooth slide-up with dark backdrop blur & orange accents */}
+                      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 lg:p-8 flex flex-col justify-end">
+                        <div className="transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-3">
+                          
+                          {/* Accent orange horizontal line */}
+                          <div className="w-8 h-0.5 bg-[#FC5115]" />
 
-                      <button
-                        onClick={() => handleSelectProject(project.id)}
-                        className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white text-[9px] font-black uppercase tracking-widest transition-all rounded-none flex items-center justify-center gap-1.5 shadow-sm"
-                      >
-                        Chi tiết dự án <ArrowRight size={12} />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
+                          {/* Project Title - Refined font size and line clamping for long titles */}
+                          <h3 className="text-base lg:text-xl font-bold text-white leading-snug line-clamp-2">
+                            {project.name}
+                          </h3>
+
+                          {/* 1-Line Description */}
+                          <p className="text-xs lg:text-sm text-slate-200 line-clamp-2 font-medium leading-relaxed max-w-3xl">
+                            {project.shortDesc}
+                          </p>
+
+                          {/* Tag pills (White 15% opacity + backdrop blur) */}
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider">
+                              {project.sector}
+                            </span>
+                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider">
+                              {project.solution}
+                            </span>
+                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider">
+                              {project.customer}
+                            </span>
+                          </div>
+
+                          {/* Orange Accent CTA with arrow */}
+                          <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115]">
+                            <span>Xem chi tiết dự án</span>
+                            <ArrowRight size={16} className="transform group-hover:translate-x-2 transition-transform duration-300" />
+                          </div>
+
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
 
@@ -407,7 +367,7 @@ export function ProjectsView({
                   className={`inline-flex items-center gap-1 px-3 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
                     currentPage === 1
                       ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
+                      : 'border-slate-200 text-slate-700 hover:text-[#FC5115] hover:border-[#FC5115]'
                   }`}
                 >
                   <ChevronLeft size={14} /> Trước
@@ -422,8 +382,8 @@ export function ProjectsView({
                         onClick={() => setCurrentPage(page)}
                         className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-all border rounded-none ${
                           isCurrent
-                            ? 'bg-orange-600 border-orange-600 text-white'
-                            : 'bg-white border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
+                            ? 'bg-[#FC5115] border-[#FC5115] text-white'
+                            : 'bg-white border-slate-200 text-slate-700 hover:text-[#FC5115] hover:border-[#FC5115]'
                         }`}
                       >
                         {page}
@@ -438,7 +398,7 @@ export function ProjectsView({
                   className={`inline-flex items-center gap-1 px-3 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
                     currentPage === totalPages
                       ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
+                      : 'border-slate-200 text-slate-700 hover:text-[#FC5115] hover:border-[#FC5115]'
                   }`}
                 >
                   Sau <ChevronRight size={14} />

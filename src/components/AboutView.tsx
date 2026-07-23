@@ -638,45 +638,45 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
 
                   {/* ================= CONNECTING LINES ================= */}
                   {/* Vertical Spine: Đại hội đồng cổ đông -> HĐQT -> Tổng Giám Đốc */}
-                  <line x1="800" y1="65" x2="800" y2="95" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="800" y1="141" x2="800" y2="175" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="800" y1="65" x2="800" y2="95" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="800" y1="141" x2="800" y2="175" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
 
                   {/* HĐQT -> Ban Kiểm Soát */}
-                  <line x1="950" y1="118" x2="1210" y2="118" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="950" y1="118" x2="1210" y2="118" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
 
                   {/* 1. Branch Sang Trái: TGĐ -> PTGĐ Left */}
-                  <line x1="650" y1="198" x2="260" y2="198" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="260" y1="221" x2="260" y2="335" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="650" y1="198" x2="260" y2="198" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="260" y1="221" x2="260" y2="335" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
 
                   {/* 2. Branch Sang Phải: TGĐ -> PTGĐ Right */}
-                  <line x1="950" y1="198" x2="1340" y2="198" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="1340" y1="221" x2="1340" y2="320" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="950" y1="198" x2="1340" y2="198" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="1340" y1="221" x2="1340" y2="320" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
                   {/* Fork under PTGĐ Right */}
-                  <line x1="1220" y1="320" x2="1460" y2="320" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="1220" y1="320" x2="1220" y2="335" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="1460" y1="320" x2="1460" y2="335" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="1220" y1="320" x2="1460" y2="320" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="1220" y1="320" x2="1220" y2="335" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="1460" y1="320" x2="1460" y2="335" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
 
                   {/* 3. Branch Xuống Giữa (Ngắn hơn): TGĐ -> P. Tổng hợp & P. Tài chính kế toán */}
-                  <line x1="800" y1="221" x2="800" y2="248" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="630" y1="248" x2="970" y2="248" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="630" y1="248" x2="630" y2="260" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="970" y1="248" x2="970" y2="260" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="800" y1="221" x2="800" y2="248" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="630" y1="248" x2="970" y2="248" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="630" y1="248" x2="630" y2="260" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
+                  <line x1="970" y1="248" x2="970" y2="260" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
 
                   {/* 4. Center Main Line straight down to Bottom Row Bus */}
-                  <line x1="800" y1="221" x2="800" y2="425" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="800" y1="221" x2="800" y2="425" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
                   {/* Horizontal Bus Line spanning bottom row */}
-                  <line x1="180" y1="425" x2="1420" y2="425" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="180" y1="425" x2="1420" y2="425" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
 
                   {/* Connectors to Bottom Units */}
                   {/* Unit 1: CN TP. HCM (Connected) */}
-                  <line x1="180" y1="425" x2="180" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="180" y1="425" x2="180" y2="460" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
                   {/* Unit 2: TTGP Phần mềm & Thiết bị (NO connector as in original) */}
                   {/* Unit 3: TT Tư vấn Dự án (Connected) */}
-                  <line x1="800" y1="425" x2="800" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="800" y1="425" x2="800" y2="460" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
                   {/* Unit 4: TT Phần mềm Xây dựng (Connected) */}
-                  <line x1="1110" y1="425" x2="1110" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="1110" y1="425" x2="1110" y2="460" stroke="#334155" strokeWidth="1" strokeLinecap="round" />
                   {/* Unit 5: TT Tư vấn PTPBV & GP CNKT (Connected) */}
-                  <line x1="1420" y1="425" x2="1420" y2="460" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="1420" y1="425" x2="1420" y2="460" stroke="#334155" strokeWidth="1" strokeLinecap="round" strokeDasharray="" />
 
 
                   {/* ================= BOX NODES (ORANGE THEME) ================= */}

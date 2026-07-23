@@ -36,7 +36,7 @@ export const projects: Project[] = [
     location: 'Hồ Chí Minh', 
     name: 'Landmark 81 - BIM Management', 
     tags: ['BIM', 'Digital Twins', 'CDE'], 
-    size: 'wide' 
+    size: 'full' 
   },
   { 
     id: 2, 
@@ -45,7 +45,7 @@ export const projects: Project[] = [
     location: 'Toàn quốc', 
     name: 'Trạm Quan Trắc Tự Động', 
     tags: ['IoT', 'Monitoring'], 
-    size: 'tall' 
+    size: 'small' 
   },
   { 
     id: 3, 
@@ -142,8 +142,7 @@ export const navLinks: NavLink[] = [
       { name: 'Tư vấn dự án', href: 'tu-van-du-an' },
       { name: 'Tư vấn giải pháp ngành thép', href: 'tu-van-giai-phap-nganh-thep' },
       { name: 'Web 360 tương tác thông minh', href: 'web-360-tuong-tac-thong-minh' },
-      { name: 'Tư vấn Kiểm kê Khí nhà kính', href: 'tu-van-kiem-ke-khi-nha-kinh' },
-      { name: 'Hồ sơ năng lực Trung tâm BIM', href: 'ho-so-nang-luc-trung-tam-bim' }
+      { name: 'Tư vấn Kiểm kê Khí nhà kính', href: 'tu-van-kiem-ke-khi-nha-kinh' }
     ]
   },
   { 

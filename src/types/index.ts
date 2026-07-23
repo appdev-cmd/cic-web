@@ -24,7 +24,7 @@ export interface Project {
   location: string;
   name: string;
   tags: string[];
-  size?: 'wide' | 'tall' | 'small';
+  size?: 'wide' | 'tall' | 'small' | 'full';
 }
 
 export interface NewsItem {

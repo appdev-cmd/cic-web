@@ -518,70 +518,71 @@ export const HomeView = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 min-h-[600px]">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[500px]">
             {filteredProjects.length > 0 ? (
-              filteredProjects.map((proj, i) => (
-                <motion.div 
-                  key={proj.id}
-                  layoutId={`project-${proj.id}`}
-                  initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.8, delay: (i % 3) * 0.1, ease: [0.21, 1.11, 0.81, 0.99] }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  onClick={() => setSelectedProject(proj)}
-                  className={`group relative overflow-hidden rounded-none cursor-pointer shadow-2xl border border-white/10
-                    ${proj.size === 'wide' ? 'md:col-span-2 lg:col-span-8' : ''}
-                    ${proj.size === 'tall' ? 'md:col-span-2 lg:col-span-4 lg:row-span-2' : ''}
-                    ${proj.size === 'small' ? 'md:col-span-2 lg:col-span-4' : ''}
-                  `}
-                >
-                  {/* Static Image (Dimmed) */}
-                  <img 
-                    src={proj.img} 
-                    alt={proj.name} 
-                    className="w-full h-full object-cover transition-all duration-1000 grayscale-[40%] brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-110" 
-                  />
-                  
-                  {/* Static Overlay (Dim) */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
-                  
-                  {/* Static Title (Bottom Left) */}
-                  <div className="absolute bottom-10 left-10 transition-all duration-500 group-hover:translate-x-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="text-orange-600 text-[10px] font-black uppercase tracking-[0.2em]">{proj.location}</div>
-                      <div className="w-1 h-1 bg-white/30 rounded-none"></div>
-                      <div className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em]">
-                        {proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn'}
+              filteredProjects.map((proj, i) => {
+                const isFullWidth = proj.size === 'full' || proj.id === 1;
+                return (
+                  <motion.div 
+                    key={proj.id}
+                    layoutId={`project-${proj.id}`}
+                    initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.8, delay: (i % 3) * 0.1, ease: [0.21, 1.11, 0.81, 0.99] }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    onClick={() => setSelectedProject(proj)}
+                    className={`group relative overflow-hidden rounded-none cursor-pointer shadow-2xl border border-white/10
+                      ${isFullWidth ? 'col-span-12 h-[320px] md:h-[380px]' : 'col-span-12 md:col-span-4 lg:col-span-4 h-[260px] md:h-[280px]'}
+                    `}
+                  >
+                    {/* Static Image (Dimmed) */}
+                    <img 
+                      src={proj.img} 
+                      alt={proj.name} 
+                      className="w-full h-full object-cover transition-all duration-1000 grayscale-[40%] brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-110" 
+                    />
+                    
+                    {/* Static Overlay (Dim) */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
+                    
+                    {/* Static Title (Bottom Left) */}
+                    <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 transition-all duration-500 group-hover:translate-x-2">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className="text-orange-600 text-[10px] font-black uppercase tracking-[0.15em]">{proj.location}</div>
+                        <div className="w-1 h-1 bg-white/30 rounded-none"></div>
+                        <div className="text-white/60 text-[10px] font-black uppercase tracking-[0.15em]">
+                          {proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn'}
+                        </div>
                       </div>
+                      <h3 className={`font-black text-white leading-tight ${isFullWidth ? 'text-lg md:text-xl lg:text-2xl max-w-xl' : 'text-base md:text-lg max-w-xs'}`}>{proj.name}</h3>
                     </div>
-                    <h3 className="text-2xl font-black text-white leading-tight max-w-xs">{proj.name}</h3>
-                  </div>
 
-                  {/* Hover UI (Tags) */}
-                  <div className="absolute top-10 left-10 flex flex-wrap gap-2 pr-20">
-                    {proj.tags.map((tag, idx) => (
-                      <motion.span 
-                        key={tag}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileHover={{ scale: 1.1 }}
-                        animate={{ 
-                          opacity: 1, // Visible on container hover via CSS? No, let's use motion more purely
-                          x: 0 
-                        }}
-                        className="px-4 py-2.5 bg-orange-600 text-white text-[10px] font-black rounded-none uppercase tracking-widest shadow-[0_10px_20px_rgba(234,88,12,0.3)] opacity-0 transform -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500"
-                        style={{ transitionDelay: `${idx * 100}ms` }}
-                      >
-                        {tag}
-                      </motion.span>
-                    ))}
-                  </div>
+                    {/* Hover UI (Tags) */}
+                    <div className="absolute top-5 left-5 md:top-6 md:left-6 flex flex-wrap gap-1.5 pr-16">
+                      {proj.tags.map((tag, idx) => (
+                        <motion.span 
+                          key={tag}
+                          initial={{ opacity: 0, x: -10 }}
+                          whileHover={{ scale: 1.05 }}
+                          animate={{ 
+                            opacity: 1, 
+                            x: 0 
+                          }}
+                          className="px-2.5 py-1 bg-orange-600 text-white text-[9px] font-black rounded-none uppercase tracking-widest shadow-[0_10px_20px_rgba(234,88,12,0.3)] opacity-0 transform -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500"
+                          style={{ transitionDelay: `${idx * 80}ms` }}
+                        >
+                          {tag}
+                        </motion.span>
+                      ))}
+                    </div>
 
-                  {/* Hover Icon (Top Right) */}
-                  <div className="absolute top-10 right-10 w-12 h-12 bg-white text-orange-600 rounded-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0 duration-500 shadow-2xl">
-                    <ArrowUpRight size={24} />
-                  </div>
-                </motion.div>
-              ))
+                    {/* Hover Icon (Top Right) */}
+                    <div className="absolute top-6 right-6 md:top-8 md:right-8 w-10 h-10 md:w-12 md:h-12 bg-white text-orange-600 rounded-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0 duration-500 shadow-2xl">
+                      <ArrowUpRight size={24} />
+                    </div>
+                  </motion.div>
+                );
+              })
             ) : (
               <div className="col-span-1 md:col-span-4 lg:col-span-12 flex flex-col items-center justify-center py-12 text-slate-500 font-medium">
                 Không tìm thấy dự án nào phù hợp với từ khóa tìm kiếm.
@@ -677,29 +678,29 @@ export const HomeView = ({
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="lg:col-span-7 bg-slate-900/40 rounded-none overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group"
             >
-              <div className="h-[400px] overflow-hidden relative">
+              <div className="h-[360px] md:h-[400px] overflow-hidden relative">
                 <img src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" alt="Special Event" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-none text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
                 {/* Logo Overlay */}
                 <div className="absolute top-6 right-6 z-10 transition-all duration-300 group-hover:scale-105">
-                  <img src="/logo.png" alt="CIC Logo" className="h-10 md:h-14 w-auto object-contain drop-shadow-xl" />
+                  <img src="/logo.png" alt="CIC Logo" className="h-6 md:h-8 w-auto object-contain drop-shadow-xl" />
                 </div>
               </div>
-              <div className="p-10">
-                <h3 className="text-3xl font-black text-white mb-4 group-hover:text-orange-600 transition-colors">[Sự kiện tháng 4] Bentley Innovation Day 2026 tại TP. Hồ Chí Minh</h3>
-                <p className="text-slate-400 mb-8 leading-relaxed text-lg">
+              <div className="p-6 md:p-8">
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-3 group-hover:text-orange-600 transition-colors">[Sự kiện tháng 4] Bentley Innovation Day 2026 tại TP. Hồ Chí Minh</h3>
+                <p className="text-slate-400 mb-5 leading-relaxed text-base">
                   Định hình tương lai số cho hạ tầng Việt Nam. Khám phá các công nghệ quản lý tài sản, BIM và Digital Twins tiên tiến nhất từ Bentley Systems.
                 </p>
-                <div className="flex flex-wrap gap-8 text-slate-300 mb-8">
-                  <div className="flex items-center gap-3 font-bold"><Calendar size={20} className="text-orange-600" /> Tháng 04/2026</div>
-                  <div className="flex items-center gap-3 font-bold"><MapPin size={20} className="text-orange-600" /> TP. Hồ Chí Minh</div>
+                <div className="flex flex-wrap gap-6 text-slate-300 mb-6">
+                  <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><Calendar size={18} className="text-orange-600" /> Tháng 04/2026</div>
+                  <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><MapPin size={18} className="text-orange-600" /> TP. Hồ Chí Minh</div>
                 </div>
                 <button 
                   onClick={() => {
@@ -711,14 +712,14 @@ export const HomeView = ({
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-wide hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all shadow-xl active:scale-95 btn-modern-interaction"
+                  className="px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-wide hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all shadow-xl active:scale-95 btn-modern-interaction text-sm"
                 >
                   Đăng ký tham dự ngay
                 </button>
               </div>
             </motion.div>
 
-            <div className="lg:col-span-5 space-y-6">
+            <div className="lg:col-span-5 space-y-2.5 flex flex-col">
               {[
                 { title: 'Tư vấn Chuyển đổi số & BIM cho Doanh nghiệp', date: '20/05', loc: 'TP. Hồ Chí Minh', img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop' },
                 { title: 'Hội thảo Lộ trình Net Zero và Tín chỉ Carbon', date: '08/06', loc: 'Hà Nội', img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop' },
@@ -730,30 +731,30 @@ export const HomeView = ({
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  whileHover={{ x: 10, backgroundColor: 'rgba(30, 41, 59, 0.5)' }}
+                  whileHover={{ x: 6, backgroundColor: 'rgba(30, 41, 59, 0.5)' }}
                   onClick={() => {
                     setCurrentView('events');
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="flex gap-6 p-4 rounded-none border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left"
+                  className="flex gap-4 p-4 md:p-4.5 rounded-none border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left bg-slate-900/20"
                 >
-                  <div className="w-28 h-28 rounded-none overflow-hidden shadow-inner flex-shrink-0 relative">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-none overflow-hidden shadow-inner flex-shrink-0 relative">
                     <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
                     {/* Watermark */}
-                    <div className="absolute bottom-2 right-2 opacity-10 group-hover:opacity-40 transition-all w-8">
+                    <div className="absolute bottom-2 right-2 opacity-10 group-hover:opacity-40 transition-all w-7">
                        <img src="/logo.png" alt="" className="w-full invert" />
                     </div>
                   </div>
                   <div className="flex flex-col justify-center">
-                    <h4 className="font-black text-white mb-2 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">{ev.title}</h4>
-                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">{ev.date} • {ev.loc}</div>
-                    <div className="flex items-center gap-1 text-orange-600 text-[10px] font-black uppercase tracking-tighter">Chi tiết <ChevronRight size={12} /></div>
+                    <h4 className="font-black text-white mb-1.5 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 text-sm md:text-base">{ev.title}</h4>
+                    <div className="text-[11px] text-slate-400 font-black uppercase tracking-widest mb-1.5">{ev.date} • {ev.loc}</div>
+                    <div className="flex items-center gap-1 text-orange-600 text-[11px] font-black uppercase tracking-tighter">Chi tiết <ChevronRight size={12} /></div>
                   </div>
                 </motion.div>
               ))}
               
-              <div className="pt-12">
+              <div className="pt-10">
                 <button 
                   onClick={() => {
                     setCurrentView('events');

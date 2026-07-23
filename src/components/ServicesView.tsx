@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -24,9 +24,18 @@ import {
   Search,
   X,
   ChevronLeft,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Box,
+  ExternalLink,
+  Tag,
+  Layers,
+  Info,
+  Package,
+  ShoppingCart
 } from 'lucide-react';
 import { servicesData, ServiceDetail } from '../data/servicesData';
+import { productsData } from '../data/mockData';
+import { Product } from '../types';
 
 interface ServicesViewProps {
   key?: string | number;
@@ -77,6 +86,29 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
   }, [initialServiceId]);
 
   const activeService = servicesData.find(s => s.id === activeServiceId);
+
+  // Related products modal state & selector
+  const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
+
+  const currentRelatedProducts = useMemo(() => {
+    if (!activeService) return [];
+    if (activeService.relatedProductIds && activeService.relatedProductIds.length > 0) {
+      return productsData.filter(p => activeService.relatedProductIds!.includes(p.id));
+    }
+    return productsData.slice(0, 4);
+  }, [activeService]);
+
+  const handleSelectProductForConsultation = (prod: Product) => {
+    setFormData(prev => ({
+      ...prev,
+      service: prod.productType || prev.service,
+      notes: `[Yêu cầu tư vấn sản phẩm]: ${prod.name} (${prod.brand || 'CIC'})`
+    }));
+    const formElement = document.getElementById('consultation-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -522,11 +554,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                 </div>
 
-                {/* Column Right: Custom Consultation Form */}
+                {/* Column Right: Related Products & Custom Consultation Form */}
                 <div className="lg:col-span-4 space-y-8">
                   
                   {/* Modern Form Card */}
-                  <div className="bg-white text-slate-900 p-8 border border-slate-200 shadow-xl relative">
+                  <div id="consultation-form" className="bg-white text-slate-900 p-8 border border-slate-200 shadow-xl relative scroll-mt-32">
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-slate-950">
                       <Briefcase size={80} />
                     </div>
@@ -666,6 +698,45 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     </div>
                   </div>
 
+                  {/* Related Products Widget (Minimal & Clean) */}
+                  {currentRelatedProducts.length > 0 && (
+                    <div className="bg-white border border-slate-200 p-5 space-y-3">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 border-b border-slate-100 pb-2.5">
+                        SẢN PHẨM LIÊN QUAN
+                      </h4>
+
+                      <div className="divide-y divide-slate-100">
+                        {currentRelatedProducts.map((prod) => (
+                          <div 
+                            key={prod.id} 
+                            onClick={() => setSelectedProductModal(prod)}
+                            className="py-2.5 first:pt-0 last:pb-0 flex gap-3 items-center group cursor-pointer hover:bg-slate-50/80 transition-colors p-1"
+                          >
+                            {/* Thumbnail */}
+                            <div className="w-14 h-14 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative">
+                              <img 
+                                src={prod.img} 
+                                alt={prod.name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+
+                            {/* Details */}
+                            <div className="flex-1 min-w-0 space-y-0.5">
+                              <h5 className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
+                                {prod.name}
+                              </h5>
+                              <p className="text-[10px] text-slate-400 font-medium">
+                                {prod.brand || 'CIC Tech'} {prod.productType ? `• ${prod.productType}` : ''}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                 </div>
 
               </div>
@@ -694,6 +765,112 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               </div>
 
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Product Quick Specs Modal */}
+        <AnimatePresence>
+          {selectedProductModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white border border-slate-200 w-full max-w-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col"
+              >
+                {/* Header */}
+                <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b-2 border-orange-600 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Box size={20} className="text-orange-500" />
+                    <span className="text-xs font-black uppercase tracking-widest text-orange-400">
+                      THÔNG SỐ SẢN PHẨM / PHẦN MỀM
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedProductModal(null)}
+                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-6 overflow-y-auto flex-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start">
+                    <div className="sm:col-span-5 space-y-3">
+                      <div className="h-48 w-full bg-slate-900 border border-slate-200 overflow-hidden relative">
+                        <img 
+                          src={selectedProductModal.img} 
+                          alt={selectedProductModal.name} 
+                          className="w-full h-full object-cover" 
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="p-3 bg-slate-50 border border-slate-100 space-y-1.5 text-xs font-medium">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Thương hiệu:</span>
+                          <span className="font-bold text-slate-800">{selectedProductModal.brand || 'CIC Tech'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Lĩnh vực:</span>
+                          <span className="font-bold text-slate-800">{selectedProductModal.field || 'Xây dựng'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Phân loại:</span>
+                          <span className="font-bold text-orange-600">{selectedProductModal.productType || 'Phần mềm'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-7 space-y-4">
+                      <h3 className="text-lg font-black text-slate-950 uppercase leading-snug">
+                        {selectedProductModal.name}
+                      </h3>
+
+                      <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 border border-orange-200 text-xs font-black">
+                        Mức giá đề xuất: {selectedProductModal.price}
+                      </div>
+
+                      <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                        {selectedProductModal.description}
+                      </p>
+
+                      <div className="space-y-2 border-t border-slate-100 pt-3 text-xs font-medium">
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <CheckCircle2 size={14} className="text-orange-500 shrink-0" />
+                          <span>Bản quyền chính hãng & Hỗ trợ chuyển giao 100%</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <CheckCircle2 size={14} className="text-orange-500 shrink-0" />
+                          <span>Đội ngũ kỹ sư tư vấn chuyên môn sâu từ CIC</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="bg-slate-50 border-t border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                  <button
+                    onClick={() => setSelectedProductModal(null)}
+                    className="px-4 py-2 border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-bold uppercase tracking-wider"
+                  >
+                    Đóng
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const prod = selectedProductModal;
+                      setSelectedProductModal(null);
+                      handleSelectProductForConsultation(prod);
+                    }}
+                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md"
+                  >
+                    Thêm vào form tư vấn <Send size={14} />
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>

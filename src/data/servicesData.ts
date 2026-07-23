@@ -48,6 +48,7 @@ export interface ServiceDetail {
     desc: string;
     img?: string;
   };
+  relatedProductIds?: number[];
 }
 
 export const servicesData: ServiceDetail[] = [
@@ -152,7 +153,8 @@ export const servicesData: ServiceDetail[] = [
     intlCollaboration: {
       title: "Hợp tác quốc tế – Định hướng phát triển bền vững",
       desc: "Với mục tiêu nâng cao chất lượng dịch vụ, CIC đã ký kết thỏa thuận hợp tác chiến lược với BIMAGE Consulting – công ty tư vấn BIM hàng đầu Singapore, giúp tiếp cận công nghệ và chuyển giao quy trình chuẩn quốc tế cho các dự án quy mô lớn tại Việt Nam."
-    }
+    },
+    relatedProductIds: [1, 3, 5, 12]
   },
   {
     id: "tu-van-lap-don-gia-chi-so-gia",
@@ -192,7 +194,8 @@ export const servicesData: ServiceDetail[] = [
       "Tối ưu hóa đến 15% tổng chi phí dự toán nhờ cập nhật sát sườn giá thị trường thực tế.",
       "Được thực hiện bởi các chuyên gia kinh tế xây dựng hàng đầu có kinh nghiệm thẩm tra dự án quốc gia."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [12, 1, 5, 7]
   },
   {
     id: "danh-gia-san-luong-dien-gio",
@@ -233,7 +236,8 @@ export const servicesData: ServiceDetail[] = [
       "Xác định tối ưu tọa độ đặt turbine giúp nâng cao hiệu suất phát điện trung bình từ 5-8%.",
       "Giảm thiểu rủi ro đầu tư dài hạn cho các cổ đông sáng lập dự án."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [2, 4, 8, 14]
   },
   {
     id: "tu-van-xay-dung",
@@ -273,7 +277,8 @@ export const servicesData: ServiceDetail[] = [
       "Bảo đảm an toàn tuyệt đối cho các công trình lân cận trong suốt quá trình đào hố móng sâu.",
       "Nhận được sự đồng hành từ đơn vị uy tín của Bộ Xây dựng có chứng chỉ hoạt động hạng 1."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [14, 4, 6, 10]
   },
   {
     id: "tu-van-du-an",
@@ -313,7 +318,8 @@ export const servicesData: ServiceDetail[] = [
       "Tối ưu chi phí mua sắm thiết bị nhờ năng lực đàm phán hợp đồng thương mại xuất sắc.",
       "Chủ đầu tư rảnh tay tập trung vào kinh doanh và phát triển quỹ đất dự án mới."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [1, 3, 6, 12]
   },
   {
     id: "tu-van-giai-phap-nganh-thep",
@@ -353,7 +359,8 @@ export const servicesData: ServiceDetail[] = [
       "Giảm thiểu lỗi lắp dựng lệch lỗ bulông tại công trường về mức tiệm cận 0%.",
       "Nâng cao vị thế thương hiệu khi tham thầu các dự án FDI khắt khe của Nhật, Mỹ."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [3, 6, 5, 1]
   },
   {
     id: "web-360-tuong-tac-thong-minh",
@@ -393,7 +400,8 @@ export const servicesData: ServiceDetail[] = [
       "Tiết kiệm chi phí đi lại thực địa cho đối tác quốc tế trong giai đoạn khảo sát sơ bộ.",
       "Tạo ấn tượng công nghệ vượt trội, khẳng định vị thế dẫn đầu xu hướng số hóa của doanh nghiệp."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [8, 9, 11, 1]
   },
   {
     id: "tu-van-kiem-ke-khi-nha-kinh",
@@ -433,7 +441,8 @@ export const servicesData: ServiceDetail[] = [
       "Tiết kiệm chi phí hóa đơn tiền điện trung bình từ 10-15% nhờ tìm ra nguồn hao phí lãng phí năng lượng.",
       "Mở rộng cơ hội tiếp cận dòng vốn tín dụng xanh với lãi suất ưu đãi cực tốt từ các ngân hàng."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [2, 4, 8]
   },
   {
     id: "ho-so-nang-luc-trung-tam-bim",
@@ -473,6 +482,7 @@ export const servicesData: ServiceDetail[] = [
       "Tối ưu hóa chi phí đầu tư công nghệ nhờ các gói combo phần mềm và tư vấn tích hợp độc quyền.",
       "Được hỗ trợ đào tạo liên tục, cập nhật nâng cấp tính năng phần mềm hoàn toàn miễn phí định kỳ."
     ],
-    media: []
+    media: [],
+    relatedProductIds: [1, 3, 5, 8]
   }
 ];

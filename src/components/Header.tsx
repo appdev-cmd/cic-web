@@ -196,8 +196,8 @@ export const Header = ({
                   <div className={`absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full ${isActive ? 'w-full' : ''}`}></div>
                   
                   {hasDropdown && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50 min-w-[240px]">
-                      <div className="bg-white border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-md py-2.5 text-slate-800 font-medium">
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50 w-max min-w-[170px] max-w-[90vw]">
+                      <div className="bg-white border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-md py-2 text-slate-800">
                         {link.dropdown?.map((subItem) => (
                           <a
                             key={subItem.name}
@@ -238,7 +238,7 @@ export const Header = ({
                                 setActiveLink(link.name);
                               }
                             }}
-                            className="block px-5 py-2.5 text-xs font-black text-slate-700 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap uppercase tracking-wider"
+                            className="block px-4 py-2 text-[15px] font-semibold text-slate-800 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap"
                           >
                             {subItem.name}
                           </a>
@@ -457,7 +457,7 @@ export const Header = ({
                           <a
                             key={subItem.name}
                             href={subItem.href}
-                            className="text-lg font-bold text-slate-300 hover:text-orange-500 transition-colors py-1"
+                            className="text-base font-semibold text-slate-200 hover:text-orange-500 transition-colors py-1.5"
                              onClick={(e) => {
                               setMobileMenuOpen(false);
                               if (link.name === 'Giới thiệu') {
