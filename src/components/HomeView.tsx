@@ -64,6 +64,8 @@ interface HomeViewProps {
   setActiveProjectId: (id: string | null) => void;
   setPreSelectedNewsCategory: (category: string | null) => void;
   setAboutSubTab: (tab: 'overview' | 'structure' | 'experience') => void;
+  setActiveEventId?: (id: string | null) => void;
+  setIsRegisteringEvent?: (isReg: boolean) => void;
 }
 
 export const HomeView = ({
@@ -72,7 +74,9 @@ export const HomeView = ({
   setActiveServiceId,
   setActiveProjectId,
   setPreSelectedNewsCategory,
-  setAboutSubTab
+  setAboutSubTab,
+  setActiveEventId,
+  setIsRegisteringEvent
 }: HomeViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
@@ -87,93 +91,6 @@ export const HomeView = ({
   const [phoneNumber, setPhoneNumber] = useState('');
   const [interestService, setInterestService] = useState('Phần mềm kỹ thuật');
   const [message, setMessage] = useState('');
-
-  // Event registration modal states
-  const [showRegisterForm, setShowRegisterForm] = useState(false);
-  const [registerEvent, setRegisterEvent] = useState<{ id: string; title: string; date: string; location: string } | null>(null);
-  const [eventFormData, setEventFormData] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    company: '',
-    position: '',
-    attendeesCount: 1,
-    note: '',
-    consent: false
-  });
-  const [eventFormErrors, setEventFormErrors] = useState<Record<string, string>>({});
-  const [isEventSubmitting, setIsEventSubmitting] = useState(false);
-  const [eventRegistrationResult, setEventRegistrationResult] = useState<{
-    eventId: string;
-    eventTitle: string;
-    fullName: string;
-    company: string;
-    position: string;
-    email: string;
-    phone: string;
-    attendeesCount: number;
-    registeredAt: string;
-  } | null>(null);
-
-  const validateEventForm = () => {
-    const errors: Record<string, string> = {};
-    if (!eventFormData.fullName.trim()) errors.fullName = 'Vui lòng nhập họ và tên';
-    if (!eventFormData.company.trim()) errors.company = 'Vui lòng nhập tên đơn vị/công ty';
-    if (!eventFormData.position.trim()) errors.position = 'Vui lòng nhập chức vụ của bạn';
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!eventFormData.email.trim()) {
-      errors.email = 'Vui lòng nhập email';
-    } else if (!emailRegex.test(eventFormData.email)) {
-      errors.email = 'Email không đúng định dạng';
-    }
-
-    const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/;
-    if (!eventFormData.phone.trim()) {
-      errors.phone = 'Vui lòng nhập số điện thoại';
-    } else if (!phoneRegex.test(eventFormData.phone.replace(/\s+/g, ''))) {
-      errors.phone = 'Số điện thoại không hợp lệ (10 số)';
-    }
-
-    if (eventFormData.attendeesCount < 1) errors.attendeesCount = 'Số lượng tối thiểu là 1';
-    if (!eventFormData.consent) errors.consent = 'Bạn cần đồng ý với chính sách của chúng tôi';
-
-    setEventFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleEventRegisterSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!validateEventForm() || !registerEvent) return;
-
-    setIsEventSubmitting(true);
-
-    setTimeout(() => {
-      setEventRegistrationResult({
-        eventId: registerEvent.id,
-        eventTitle: registerEvent.title,
-        fullName: eventFormData.fullName,
-        company: eventFormData.company,
-        position: eventFormData.position,
-        email: eventFormData.email,
-        phone: eventFormData.phone,
-        attendeesCount: eventFormData.attendeesCount,
-        registeredAt: new Date().toISOString()
-      });
-      setIsEventSubmitting(false);
-      setEventFormData({
-        fullName: '',
-        phone: '',
-        email: '',
-        company: '',
-        position: '',
-        attendeesCount: 1,
-        note: '',
-        consent: false
-      });
-      setEventFormErrors({});
-    }, 1200);
-  };
 
   useEffect(() => {
     // Preload hero slide images for instant loading
@@ -786,14 +703,13 @@ export const HomeView = ({
                 </div>
                 <button 
                   onClick={() => {
-                    setRegisterEvent({
-                      id: 'bentley-day-2026',
-                      title: '[Sự kiện tháng 4] Bentley Innovation Day 2026 tại TP. Hồ Chí Minh',
-                      date: 'Tháng 04/2026',
-                      location: 'TP. Hồ Chí Minh'
-                    });
-                    setShowRegisterForm(true);
-                    setEventRegistrationResult(null);
+                    if (setActiveEventId && setIsRegisteringEvent) {
+                      setActiveEventId('bim-digital-twins-2026');
+                      setIsRegisteringEvent(true);
+                    }
+                    setCurrentView('events');
+                    setActiveLink('Sự kiện');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className="px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-wide hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all shadow-xl active:scale-95 btn-modern-interaction"
                 >
@@ -1066,7 +982,7 @@ export const HomeView = ({
                   <select 
                     value={interestService}
                     onChange={(e) => setInterestService(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold appearance-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold cursor-pointer"
                   >
                     <option>Phần mềm kỹ thuật bản quyền</option>
                     <option>Thiết bị & IoT</option>
@@ -1092,286 +1008,6 @@ export const HomeView = ({
           </div>
         </div>
       </section>
-      {/* Event Registration Modal */}
-      <AnimatePresence>
-        {showRegisterForm && registerEvent && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 overflow-y-auto">
-            {/* Backdrop */}
-            <div 
-              onClick={() => {
-                setShowRegisterForm(false);
-                setEventRegistrationResult(null);
-              }}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[-1]"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="bg-white border border-slate-950 shadow-2xl w-full max-w-3xl overflow-hidden relative flex flex-col my-4 md:my-8"
-            >
-              
-              {/* Modal header */}
-              <div className="bg-slate-950 text-white px-6 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/10 shrink-0">
-                <div>
-                  <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-tight">Đăng ký tham dự sự kiện</h3>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowRegisterForm(false);
-                    setEventRegistrationResult(null);
-                  }}
-                  className="w-8 h-8 rounded-none border border-white/10 flex items-center justify-center hover:bg-orange-600 hover:border-orange-600 text-white transition-all font-bold"
-                >
-                  X
-                </button>
-              </div>
-
-              {/* Modal content body */}
-              <div className="p-6 sm:p-8 overflow-y-auto max-h-[88vh] space-y-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-orange-600/40 [&::-webkit-scrollbar-track]:bg-slate-100">
-                
-                {/* Event summary banner inside form */}
-                <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-4 flex gap-4 items-center">
-                  <Calendar className="text-orange-600 shrink-0" size={22} />
-                  <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 font-sans">Sự kiện lựa chọn:</h4>
-                    <span className="font-black text-slate-950 text-xs sm:text-sm block leading-snug">{registerEvent.title}</span>
-                    <span className="text-[11px] sm:text-xs text-slate-500 font-medium font-sans">{registerEvent.date} — {registerEvent.location}</span>
-                  </div>
-                </div>
-
-                {!eventRegistrationResult ? (
-                  
-                  // --- THE REGISTER FORM INPUTS ---
-                  <form onSubmit={handleEventRegisterSubmit} className="space-y-4 sm:space-y-5">
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-                      
-                      {/* Name input */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <User size={14} className="text-orange-600" /> Họ và tên <span className="text-orange-600">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Ví dụ: Nguyễn Văn A"
-                          value={eventFormData.fullName}
-                          onChange={(e) => setEventFormData({ ...eventFormData, fullName: e.target.value })}
-                          className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
-                            eventFormErrors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
-                          }`}
-                        />
-                        {eventFormErrors.fullName && <p className="text-[10px] font-bold text-red-500 font-sans">{eventFormErrors.fullName}</p>}
-                      </div>
-
-                      {/* Phone input */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <Phone size={14} className="text-orange-600" /> Số điện thoại <span className="text-orange-600">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          placeholder="Ví dụ: 0912345678"
-                          value={eventFormData.phone}
-                          onChange={(e) => setEventFormData({ ...eventFormData, phone: e.target.value })}
-                          className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
-                            eventFormErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
-                          }`}
-                        />
-                        {eventFormErrors.phone && <p className="text-[10px] font-bold text-red-500 font-sans">{eventFormErrors.phone}</p>}
-                      </div>
-
-                      {/* Email input */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <Mail size={14} className="text-orange-600" /> Địa chỉ Email <span className="text-orange-600">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="Ví dụ: email@domain.com"
-                          value={eventFormData.email}
-                          onChange={(e) => setEventFormData({ ...eventFormData, email: e.target.value })}
-                          className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
-                            eventFormErrors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
-                          }`}
-                        />
-                        {eventFormErrors.email && <p className="text-[10px] font-bold text-red-500 font-sans">{eventFormErrors.email}</p>}
-                      </div>
-
-                      {/* Company input */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <Building size={14} className="text-orange-600" /> Đơn vị công tác <span className="text-orange-600">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Ví dụ: Công ty TNHH Xây Dựng ABC"
-                          value={eventFormData.company}
-                          onChange={(e) => setEventFormData({ ...eventFormData, company: e.target.value })}
-                          className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
-                            eventFormErrors.company ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
-                          }`}
-                        />
-                        {eventFormErrors.company && <p className="text-[10px] font-bold text-red-500 font-sans">{eventFormErrors.company}</p>}
-                      </div>
-
-                      {/* Position input */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <Briefcase size={14} className="text-orange-600" /> Chức vụ <span className="text-orange-600">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Ví dụ: Kỹ sư kết cấu, Trưởng phòng Kỹ thuật"
-                          value={eventFormData.position}
-                          onChange={(e) => setEventFormData({ ...eventFormData, position: e.target.value })}
-                          className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
-                            eventFormErrors.position ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
-                          }`}
-                        />
-                        {eventFormErrors.position && <p className="text-[10px] font-bold text-red-500 font-sans">{eventFormErrors.position}</p>}
-                      </div>
-
-                      {/* Number of attendees */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                          <Users size={14} className="text-orange-600" /> Số người tham dự <span className="text-orange-600">*</span>
-                        </label>
-                        <select
-                          value={eventFormData.attendeesCount}
-                          onChange={(e) => setEventFormData({ ...eventFormData, attendeesCount: Number(e.target.value) })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600"
-                        >
-                          {[1, 2, 3, 4, 5, 10].map((num) => (
-                            <option key={num} value={num}>{num} người</option>
-                          ))}
-                        </select>
-                      </div>
-
-                    </div>
-
-                    {/* Note text field */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
-                        Ghi chú thêm (Câu hỏi cho diễn giả, yêu cầu đặc biệt)
-                      </label>
-                      <textarea
-                        placeholder="Nhập ghi chú hoặc câu hỏi của bạn tại đây..."
-                        rows={3}
-                        value={eventFormData.note}
-                        onChange={(e) => setEventFormData({ ...eventFormData, note: e.target.value })}
-                        className="w-full p-2.5 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600"
-                      />
-                    </div>
-
-                    {/* Consent checkbox */}
-                    <div className="space-y-2 pt-2">
-                      <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={eventFormData.consent}
-                          onChange={(e) => setEventFormData({ ...eventFormData, consent: e.target.checked })}
-                          className="mt-0.5 border-slate-300 text-orange-600 focus:ring-orange-500 focus:ring-0 w-4 h-4"
-                        />
-                        <span className="text-xs font-medium text-slate-500 leading-normal">
-                          Tôi đồng ý cung cấp thông tin phục vụ công tác tổ chức sự kiện và nhận các tài liệu công nghệ, giải pháp hữu ích từ CIC Tech qua các kênh Email/SMS. <span className="text-orange-600">*</span>
-                        </span>
-                      </label>
-                      {eventFormErrors.consent && <p className="text-[10px] font-bold text-red-500 font-sans pl-6">{eventFormErrors.consent}</p>}
-                    </div>
-
-                    {/* CTA Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={isEventSubmitting}
-                      className="w-full bg-slate-950 hover:bg-orange-600 text-white hover:text-white py-3.5 text-xs font-black uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2"
-                    >
-                      {isEventSubmitting ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Đang xử lý hồ sơ...
-                        </>
-                      ) : (
-                        <>
-                          Xác nhận đăng ký giữ chỗ <Send size={14} />
-                        </>
-                      )}
-                    </button>
-
-                  </form>
-                ) : (
-                  
-                  // --- REGISTRATION SUCCESS SCREEN ---
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="space-y-6 text-center py-6"
-                  >
-                    <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 flex items-center justify-center rounded-none mx-auto">
-                      <CheckCircle className="text-emerald-500" size={32} />
-                    </div>
-
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-black uppercase text-slate-950">Đăng ký tham dự thành công!</h3>
-                      <p className="text-slate-500 text-sm max-w-md mx-auto">
-                        Cảm ơn quý khách <strong className="text-slate-800">{eventRegistrationResult.fullName}</strong>. Mã vé điện tử của bạn đã được khởi tạo và ghi nhận trong hệ thống.
-                      </p>
-                    </div>
-
-                    {/* MOCK SMTP EMAIL NOTIFICATION BOX */}
-                    <div className="bg-emerald-50 border border-emerald-200/60 p-4 max-w-md mx-auto text-left space-y-2.5">
-                      <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs font-sans uppercase">
-                        <Check size={16} className="bg-emerald-600 text-white rounded-full p-0.5" />
-                        <span>Mô phỏng Email xác nhận đã gửi</span>
-                      </div>
-                      <p className="text-slate-600 text-xs leading-relaxed font-medium">
-                        Hệ thống tự động đã gửi email hướng dẫn tham dự cùng mã QR check-in tới địa chỉ: <strong className="text-slate-900">{eventRegistrationResult.email}</strong>. Vui lòng kiểm tra hòm thư chính hoặc mục quảng cáo/spam của bạn.
-                      </p>
-                    </div>
-
-                    {/* REGISTRATION ID DETAILS */}
-                    <div className="bg-slate-50 border border-slate-200 p-6 max-w-md mx-auto text-left font-sans space-y-3">
-                      <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Thông tin vé điện tử</h4>
-                      <div className="grid grid-cols-2 gap-y-1.5 text-xs">
-                        <span className="text-slate-400">Mã đăng ký:</span>
-                        <strong className="text-slate-900 text-right">CIC-{eventRegistrationResult.eventId.toUpperCase().slice(0, 5)}-{Math.floor(1000 + Math.random() * 9000)}</strong>
-                        
-                        <span className="text-slate-400">Họ tên:</span>
-                        <span className="text-slate-800 text-right">{eventRegistrationResult.fullName}</span>
-                        
-                        <span className="text-slate-400">Đơn vị:</span>
-                        <span className="text-slate-800 text-right truncate max-w-[180px]">{eventRegistrationResult.company}</span>
-
-                        <span className="text-slate-400">Số lượng:</span>
-                        <span className="text-slate-800 text-right">{eventRegistrationResult.attendeesCount} người</span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setShowRegisterForm(false);
-                        setEventRegistrationResult(null);
-                      }}
-                      className="bg-slate-900 hover:bg-orange-600 text-white px-8 py-3 text-xs font-black uppercase tracking-widest transition-all"
-                    >
-                      Đóng cửa sổ
-                    </button>
-                  </motion.div>
-                )}
-
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </>
   );
 };

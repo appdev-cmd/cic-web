@@ -188,22 +188,17 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                       Dịch vụ quan tâm <span className="text-red-500">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        value={formData.service}
-                        onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:bg-white rounded-none appearance-none font-bold cursor-pointer"
-                      >
-                        {servicesList.map((srv) => (
-                          <option key={srv} value={srv}>
-                            {srv}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                        <HelpCircle size={16} />
-                      </div>
-                    </div>
+                    <select
+                      value={formData.service}
+                      onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:bg-white rounded-none font-bold cursor-pointer"
+                    >
+                      {servicesList.map((srv) => (
+                        <option key={srv} value={srv}>
+                          {srv}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Message / Nội dung */}

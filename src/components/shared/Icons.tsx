@@ -28,14 +28,25 @@ export const ZaloIcon: React.FC<{ size?: number; className?: string }> = ({ size
     width={size} 
     height={size} 
     className={className} 
-    viewBox="0 0 24 24" 
+    viewBox="0 0 100 100" 
     fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
+    xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-    <path d="M8 12h.01M12 12h.01M16 12h.01" />
+    <path 
+      d="M50 8C26.8 8 8 23.8 8 43.3c0 8.7 3.7 16.7 9.8 22.7L12 86l18.1-7.8c6.2 3.1 13.2 4.8 20.6 4.8 23.2 0 42-15.8 42-35.3S73.2 8 50 8z" 
+      fill="#FFFFFF" 
+    />
+    <text 
+      x="50" 
+      y="54" 
+      fill="#0068FF" 
+      fontSize="28" 
+      fontWeight="900" 
+      fontFamily="Arial, Helvetica, sans-serif" 
+      textAnchor="middle" 
+      letterSpacing="-1"
+    >
+      zalo
+    </text>
   </svg>
 );

@@ -602,18 +602,16 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                           <div className="space-y-1.5">
                             <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Dịch vụ quan tâm</label>
-                            <div className="relative">
-                              <select 
-                                value={formData.service}
-                                onChange={(e) => setFormData({...formData, service: e.target.value})}
-                                className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold appearance-none"
-                              >
-                                <option>Phần mềm kỹ thuật</option>
-                                <option>Thiết bị & IOT</option>
-                                <option>Tư vấn BIM/Digital Twins</option>
-                                <option>Chuyển đổi số & Net Zero</option>
-                              </select>
-                            </div>
+                            <select 
+                              value={formData.service}
+                              onChange={(e) => setFormData({...formData, service: e.target.value})}
+                              className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold cursor-pointer"
+                            >
+                              <option>Phần mềm kỹ thuật</option>
+                              <option>Thiết bị & IOT</option>
+                              <option>Tư vấn BIM/Digital Twins</option>
+                              <option>Chuyển đổi số & Net Zero</option>
+                            </select>
                           </div>
 
                           <div className="space-y-1.5">

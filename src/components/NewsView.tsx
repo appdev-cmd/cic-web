@@ -656,7 +656,7 @@ export function NewsView({
                     <select
                       value={companySubType}
                       onChange={(e: any) => setCompanySubType(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                     >
                       {['Tất cả', 'Hoạt động CIC', 'Thông báo', 'Văn hóa doanh nghiệp'].map(st => (
                         <option key={st} value={st}>{st}</option>
@@ -671,7 +671,7 @@ export function NewsView({
                     <select
                       value={specialtySubType}
                       onChange={(e: any) => setSpecialtySubType(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                     >
                       {['Tất cả', 'Kiến thức', 'Cập nhật công nghệ', 'Chính sách', 'Giải pháp'].map(st => (
                         <option key={st} value={st}>{st}</option>
@@ -687,7 +687,7 @@ export function NewsView({
                       <select
                         value={recruitmentDept}
                         onChange={(e) => setRecruitmentDept(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                       >
                         {depts.map(d => <option key={d} value={d}>{d}</option>)}
                       </select>
@@ -698,7 +698,7 @@ export function NewsView({
                       <select
                         value={recruitmentLoc}
                         onChange={(e) => setRecruitmentLoc(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                       >
                         {locs.map(l => <option key={l} value={l}>{l}</option>)}
                       </select>
@@ -709,7 +709,7 @@ export function NewsView({
                       <select
                         value={recruitmentStatus}
                         onChange={(e) => setRecruitmentStatus(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                       >
                         {rStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
@@ -723,7 +723,7 @@ export function NewsView({
                     <select
                       value={promotionStatus}
                       onChange={(e) => setPromotionStatus(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                     >
                       {pStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -737,7 +737,7 @@ export function NewsView({
                       <select
                         value={shareholderYear}
                         onChange={(e) => setShareholderYear(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                       >
                         {shYears.map(y => <option key={y} value={y}>{y}</option>)}
                       </select>
@@ -748,7 +748,7 @@ export function NewsView({
                       <select
                         value={shareholderDocType}
                         onChange={(e) => setShareholderDocType(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                        className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                       >
                         {shDocTypes.map(d => <option key={d} value={d}>{d}</option>)}
                       </select>

@@ -32,12 +32,16 @@ import { EventItem, EventRegistration } from '../types';
 
 interface EventsViewProps {
   key?: string | number;
+  initialEventId?: string | null;
+  initialIsRegistering?: boolean;
   onNavigateHome?: () => void;
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: string) => void;
 }
 
 export const EventsView = ({ 
+  initialEventId,
+  initialIsRegistering,
   onNavigateHome, 
   onNavigateToService, 
   onNavigateToProduct 
@@ -56,6 +60,21 @@ export const EventsView = ({
 
   // Registration page state
   const [registerEvent, setRegisterEvent] = useState<EventItem | null>(null);
+
+  // Handle initial event selection / registration view routing
+  useEffect(() => {
+    if (initialEventId) {
+      const found = eventsData.find(e => e.id === initialEventId);
+      if (found) {
+        if (initialIsRegistering) {
+          setRegisterEvent(found);
+          setSelectedEvent(found);
+        } else {
+          setSelectedEvent(found);
+        }
+      }
+    }
+  }, [initialEventId, initialIsRegistering]);
   
   // Form submission state
   const [formData, setFormData] = useState({

@@ -267,7 +267,7 @@ export function ProjectsView({
                   <select
                     value={selectedSector}
                     onChange={(e) => setSelectedSector(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                   >
                     {sectors.map(sec => <option key={sec} value={sec}>{sec}</option>)}
                   </select>
@@ -279,7 +279,7 @@ export function ProjectsView({
                   <select
                     value={selectedSolution}
                     onChange={(e) => setSelectedSolution(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                   >
                     {solutions.map(sol => <option key={sol} value={sol}>{sol}</option>)}
                   </select>
@@ -291,7 +291,7 @@ export function ProjectsView({
                   <select
                     value={selectedCustomer}
                     onChange={(e) => setSelectedCustomer(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none appearance-none"
+                    className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-600 focus:bg-white px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
                   >
                     {customers.map(cust => <option key={cust} value={cust}>{cust}</option>)}
                   </select>

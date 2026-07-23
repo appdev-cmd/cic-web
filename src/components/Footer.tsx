@@ -187,7 +187,6 @@ export const Footer = ({
             >
               ĐIỀU KHOẢN SỬ DỤNG
             </a>
-            <a href="#" className="hover:text-white transition-all">SƠ ĐỒ TRANG WEB</a>
           </div>
         </div>
       </div>
