@@ -25,6 +25,11 @@ export interface BaseNewsItem {
     size: string;
     url: string;
   }[];
+  // CMS Linked Content (Chủ động gắn bởi biên tập viên)
+  relatedProductIds?: number[];
+  relatedProjectIds?: string[];
+  relatedEventIds?: string[];
+  relatedArticleIds?: string[];
   // SEO Metadata
   seoTitle?: string;
   seoDesc?: string;
@@ -33,16 +38,19 @@ export interface BaseNewsItem {
 
 // 1. Company News Extra Details
 export interface CompanyNewsItem extends BaseNewsItem {
+  category: 'company';
   subType: 'Hoạt động CIC' | 'Thông báo' | 'Văn hóa doanh nghiệp';
 }
 
 // 2. Specialty News Extra Details
 export interface SpecialtyNewsItem extends BaseNewsItem {
+  category: 'specialty';
   subType: 'Kiến thức' | 'Cập nhật công nghệ' | 'Chính sách' | 'Giải pháp';
 }
 
 // 3. Recruitment News Extra Details
 export interface RecruitmentNewsItem extends BaseNewsItem {
+  category: 'recruitment';
   position: string; // Vị trí tuyển dụng
   department: 'Khối Kỹ thuật' | 'Khối Kinh doanh' | 'Khối Hỗ trợ' | 'Khối Nghiên cứu & Phát triển'; // Phòng ban
   location: 'Hà Nội' | 'TP. Hồ Chí Minh' | 'Đà Nẵng'; // Địa điểm
@@ -54,6 +62,7 @@ export interface RecruitmentNewsItem extends BaseNewsItem {
 
 // 4. Promotion News Extra Details
 export interface PromotionNewsItem extends BaseNewsItem {
+  category: 'promotion';
   programName: string; // Chương trình khuyến mại
   timeFrame: string; // Thời gian diễn ra
   appliedTargets: string[]; // Sản phẩm/dịch vụ áp dụng
@@ -62,6 +71,7 @@ export interface PromotionNewsItem extends BaseNewsItem {
 
 // 5. Shareholder News Extra Details
 export interface ShareholderNewsItem extends BaseNewsItem {
+  category: 'shareholder';
   docType: 'Thông báo' | 'Báo cáo' | 'Nghị quyết' | 'Tài liệu cổ đông'; // Loại tài liệu cổ đông
   year: number; // Năm tài chính / công bố
   pdfUrl?: string; // Link file PDF
@@ -69,11 +79,11 @@ export interface ShareholderNewsItem extends BaseNewsItem {
 }
 
 export type DetailedNewsItem = 
-  | ({ category: 'company' } & CompanyNewsItem)
-  | ({ category: 'specialty' } & SpecialtyNewsItem)
-  | ({ category: 'recruitment' } & RecruitmentNewsItem)
-  | ({ category: 'promotion' } & PromotionNewsItem)
-  | ({ category: 'shareholder' } & ShareholderNewsItem);
+  | CompanyNewsItem
+  | SpecialtyNewsItem
+  | RecruitmentNewsItem
+  | PromotionNewsItem
+  | ShareholderNewsItem;
 
 export const newsData: DetailedNewsItem[] = [
   // --- TIN TỨC CÔNG TY ---
@@ -107,6 +117,7 @@ Vào ngày 15 tháng 7 năm 2026, tại trụ sở **Công ty Cổ phần Công 
       embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
       thumbnail: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'
     },
+    relatedEventIds: ['bim-digital-twins-2026'],
     seoTitle: 'Hợp tác chiến lược CIC & Bentley Systems về an toàn thông tin hạ tầng số',
     seoDesc: 'CIC Tech phối hợp cùng Bentley Systems chuẩn hóa quy trình an ninh dữ liệu và bản sao số bảo mật cao cấp cho các doanh nghiệp hạ tầng tại Việt Nam.',
     seoKeywords: ['CIC Tech', 'Bentley Systems', 'An toàn thông tin', 'BIM', 'Digital Twins']
@@ -198,6 +209,9 @@ Mô hình 3D truyền thống chỉ hiển thị cấu trúc hình học tĩnh c
 
 #### 3. Công nghệ triển khai phổ biến hiện nay
 Hiện nay, CIC Tech đang đồng hành cùng các đơn vị giao thông ứng dụng nền tảng **Bentley iTwin** và **GIS Esri** để xây dựng các bản sao số chuẩn xác, mang lại giá trị quản trị to lớn vượt ngoài mong đợi của các chủ đầu tư.`,
+    relatedProductIds: [1, 2],
+    relatedProjectIds: ['landmark-81-bim'],
+    relatedEventIds: ['bim-digital-twins-2026'],
     seoTitle: 'Bản sao số Digital Twin trong quản lý hạ tầng giao thông thông minh',
     seoDesc: 'Tìm hiểu chi tiết về công nghệ Bản sao số (Digital Twins), sự khác biệt với BIM tĩnh và ứng dụng thực tế trong quản lý bảo trì đường bộ hiện đại.',
     seoKeywords: ['Digital Twin', 'Bản sao số', 'iTwin Bentley', 'Quản lý đường cao tốc', 'IoT']
@@ -227,7 +241,8 @@ Là giải pháp phần mềm CAD bản quyền Việt Nam hàng đầu, **enjiC
 Đặc biệt, enjiCAD 2026 được số hóa chữ ký bảo mật số từ VeriSign, cam kết không chứa bất kỳ mã độc gián điệp, giúp doanh nghiệp yên tâm vượt qua các đợt kiểm toán khắt khe từ các khách hàng nước ngoài.`,
     attachments: [
       { title: 'Brochure giới thiệu tính năng chi tiết enjiCAD 2026.pdf', size: '3.5 MB', url: '#' }
-    ]
+    ],
+    relatedProductIds: [1]
   },
   {
     id: 'chinh-sach-lo-trinh-ap-dung-bim-viet-nam',
@@ -253,7 +268,10 @@ Chính phủ Việt Nam đã chính thức phê duyệt sửa đổi bổ sung v
 Với hơn 10 năm kinh nghiệm tư vấn BIM chuyên sâu và là đơn vị đại diện phân phối chính hãng các giải pháp CDE của Autodesk, Bentley Systems, **CIC Tech** tự hào cung cấp dịch vụ trọn gói giúp các Ban Quản lý dự án xây dựng lộ trình đào tạo, xây dựng tiêu chuẩn BIM của đơn vị (EIR, BEP) phù hợp hoàn toàn với quy chuẩn pháp lý mới nhất.`,
     attachments: [
       { title: 'Tài liệu hướng dẫn triển khai BEP chuẩn Bộ Xây dựng.pdf', size: '4.8 MB', url: '#' }
-    ]
+    ],
+    relatedProductIds: [1],
+    relatedProjectIds: ['landmark-81-bim'],
+    relatedEventIds: ['bim-digital-twins-2026']
   },
 
   // --- TIN TUYỂN DỤNG ---
@@ -346,6 +364,7 @@ Bạn đam mê công nghệ và mong muốn nâng tầm kỹ năng bán hàng tr
     appliedTargets: ['enjiCAD Professional 2D/3D', 'Hỗ trợ nâng cấp phần cứng'],
     status: 'Đang diễn ra',
     author: 'Phòng Phát triển Thị trường',
+    relatedProductIds: [1],
     views: 1650,
     tags: ['Khuyến mại', 'enjiCAD Pro', 'Bản quyền vĩnh viễn', 'Ưu đãi hè 2026'],
     contentMarkdown: `### CHƯƠNG TRÌNH KHUYẾN MẠI LỚN NHẤT 2026: MUA 3 TẶNG 1 ENJICAD
@@ -456,5 +475,459 @@ Hội đồng quản trị Công ty Cổ phần Công nghệ và Tư vấn CIC x
 * **Số lượng phát hành dự kiến**: **250.000 cổ phần** (Tương đương 2.5% tổng số cổ phần đang lưu hành).
 * **Giá bán ưu đãi**: 10.000đ / cổ phần.
 * **Thời gian hạn chế chuyển nhượng**: 02 năm kể từ ngày hoàn tất đợt phát hành.`
+  },
+
+  // --- TIN TỨC CÔNG TY (BỔ SUNG ĐỦ 7 TIN) ---
+  {
+    id: 'cic-chuc-mung-35-nam-thanh-lap-2026',
+    category: 'company',
+    subType: 'Hoạt động CIC',
+    title: 'Lễ kỷ niệm 35 năm thành lập CIC Tech: Vững vàng nền tảng - Sáng tạo tương lai',
+    date: '18/05/2026',
+    shortDesc: 'Hành trình 35 năm hình thành và phát triển của CIC Tech đánh dấu vị thế đơn vị tiên phong trong lĩnh vực phần mềm kỹ thuật, tư vấn BIM và giải pháp chuyển đổi số hạ tầng.',
+    img: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80',
+    author: 'Ban Truyền thông CIC',
+    views: 2100,
+    tags: ['35 Năm CIC', 'Kỷ niệm thành lập', 'Lịch sử CIC'],
+    contentMarkdown: `### 35 NĂM HÀNH TRÌNH KIẾN TẠO VÀ PHÁT TRIỂN
+
+Ngày 18/05/2026, Công ty Cổ phần Công nghệ và Tư vấn CIC đã trọng thể tổ chức **Lễ Kỷ niệm 35 năm thành lập (1991 - 2026)**. Sự kiện có sự tham dự của đại diện lãnh đạo Bộ Xây dựng, các hội nghề nghiệp, đối tác chiến lược quốc tế cùng toàn thể cán bộ nhân viên CIC qua các thời kỳ.
+
+#### Những cột mốc tự hào:
+* **1991**: Thành lập Trung tâm Tin học Xây dựng - tiền thân của CIC ngày nay.
+* **2005**: Tiên phong mang các giải pháp CAD/BIM bản quyền thế giới về thị trường Việt Nam.
+* **2020**: Nghiên cứu và thương mại hóa thành công phần mềm **enjiCAD** - niềm tự hào phần mềm kỹ thuật Việt.
+* **2026**: Khẳng định vị thế dẫn đầu trong hệ sinh thái giải pháp Bản sao số (Digital Twins) và Môi trường dữ liệu chung CDE.
+
+Tổng Giám đốc CIC nhấn mạnh: *"35 năm là bước đệm vững chắc để CIC tiếp tục bứt phá trong kỷ nguyên số, mang công nghệ Việt vươn tầm khu vực."*`
+  },
+  {
+    id: 'cic-khai-truong-van-phong-da-nang-2026',
+    category: 'company',
+    subType: 'Hoạt động CIC',
+    title: 'CIC Tech chính thức khai trương văn phòng đại diện mới tại trung tâm TP. Đà Nẵng',
+    date: '05/04/2026',
+    shortDesc: 'Nhằm nâng cao chất lượng dịch vụ hỗ trợ kỹ thuật tại khu vực Miền Trung - Tây Nguyên, CIC Tech đã chính thức khánh thành chi nhánh văn phòng hiện đại tại Hải Châu, Đà Nẵng.',
+    img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80',
+    author: 'Phòng Hành chính Nhân sự',
+    views: 1350,
+    tags: ['Chi nhánh Đà Nẵng', 'Mở rộng thị trường', 'CIC Miền Trung'],
+    contentMarkdown: `### MỞ RỘNG MẠNG LƯỚI HỖ TRỢ KỸ THUẬT TẠI MIỀN TRUNG
+
+Đà Nẵng đang vươn lên thành trung tâm công nghệ và đô thị thông minh hàng đầu Miền Trung. Để đáp ứng nhu cầu tư vấn BIM, GIS và cung cấp phần mềm bản quyền gia tăng nhanh chóng, **CIC Tech** đã đầu tư mở rộng văn phòng chi nhánh mới quy mô hơn 300m2 tại quận Hải Châu.
+
+#### Chức năng trọng tâm của Chi nhánh Đà Nẵng:
+1. **Trung tâm Đào tạo BIM/CAD**: Độc quyền tổ chức các khóa huấn luyện chuyên sâu cho kỹ sư khu vực miền Trung.
+2. **Hỗ trợ Kỹ thuật On-site**: Đội ngũ chuyên gia ứng trực 24/7 hỗ trợ các dự án hạ tầng lớn như Sân bay, Cảng biển và Cao tốc Bắc - Nam.
+3. **Showroom Công nghệ quan trắc**: Trưng bày trải nghiệm thực tế các thiết bị cảm biến quan trắc tự động GEO-CIC.`
+  },
+  {
+    id: 'thong-bao-nang-cap-he-thong-cde-2026',
+    category: 'company',
+    subType: 'Thông báo',
+    title: 'Thông báo bảo trì nâng cấp hạ tầng Môi trường Dữ liệu Chung CDE Quý III/2026',
+    date: '20/07/2026',
+    shortDesc: 'Thông báo lịch tạm ngưng dịch vụ ngắn hạn để nâng cấp cụm máy chủ CDE Cloud Server nhằm tăng tốc độ truyền tải file mô hình BIM 3D lên 50%.',
+    img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80',
+    author: 'Ban Quản trị Hạ tầng IT',
+    views: 920,
+    tags: ['Bảo trì CDE', 'Thông báo hạ tầng', 'Nâng cấp máy chủ'],
+    contentMarkdown: `### THÔNG BÁO NÂNG CẤP HẠ TẦNG CDE CLOUD
+
+Kính gửi Quý Khách hàng đang sử dụng dịch vụ lưu trữ dữ liệu dự án trên hệ thống **CIC-CDE Cloud**,
+
+Nhằm cải thiện hiệu năng và mở rộng dung lượng băng thông phục vụ các dự án quy mô siêu lớn, CIC Tech xin thông báo lịch bảo trì nâng cấp định kỳ như sau:
+
+* **Thời gian bảo trì**: Từ **23:00 thứ Bảy ngày 25/07/2026** đến **04:00 Chủ Nhật ngày 26/07/2026**.
+* **Phạm vi ảnh hưởng**: Dịch vụ đồng bộ file trên ứng dụng CDE Desktop và Web portal sẽ tạm gián đoạn trong khoảng thời gian trên.
+* **Lợi ích sau nâng cấp**: Tốc độ tải lên/tải xuống file bản vẽ DWG và mô hình Revit IFC sẽ tăng thêm 50%, bảo mật mã hóa SSL 256-bit mới nhất.`
+  },
+  {
+    id: 'vinh-danh-top-10-doanh-nghiep-cntt-2026',
+    category: 'company',
+    subType: 'Văn hóa doanh nghiệp',
+    title: 'CIC Tech tự hào nhận giải thưởng Top 10 Doanh nghiệp Công nghệ Xây dựng xuất sắc 2026',
+    date: '10/03/2026',
+    shortDesc: 'Giải thưởng ghi nhận những đóng góp vượt bậc của CIC Tech trong việc phát triển phần mềm nội enjiCAD và tư vấn chuyển đổi số cho ngành xây dựng Việt Nam.',
+    img: 'https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&q=80',
+    author: 'Ban Văn thể mỹ CIC',
+    views: 1680,
+    tags: ['Giải thưởng 2026', 'Top 10 Doanh nghiệp', 'Tự hào CIC'],
+    contentMarkdown: `### VINH DANH TOP 10 DOANH NGHIỆP CÔNG NGHỆ XÂY DỰNG
+
+Tại Lễ trao giải thưởng Công nghệ Quốc gia 2026, **Công ty Cổ phần Công nghệ và Tư vấn CIC** đã vinh dự được xướng tên trong danh sách **Top 10 Doanh nghiệp Công nghệ Xây dựng & Hạ tầng xuất sắc nhất**.
+
+Đây là phần thưởng cao quý ghi nhận hành trình nỗ lực không ngừng của tập thể hơn 150 kỹ sư, chuyên gia công nghệ tại CIC trong suốt năm qua. Các giải pháp nổi bật như enjiCAD, phần mềm kiểm kê Carbon, giải pháp CDE đã và đang đóng góp trực tiếp vào mục tiêu chuyển đổi số xanh của đất nước.`
+  },
+
+  // --- TIN CHUYÊN NGÀNH (BỔ SUNG ĐỦ 7 TIN) ---
+  {
+    id: 'giai-phap-gis-3d-quan-ly-do-thi-thong-minh',
+    category: 'specialty',
+    subType: 'Giải pháp',
+    title: 'Tích hợp 3D GIS & BIM trong quản lý quy hoạch đô thị thông minh hiện đại',
+    date: '22/07/2026',
+    shortDesc: 'Ứng dụng kết hợp giữa dữ liệu không gian 3D GIS và chi tiết công trình BIM giúp các nhà quản lý đô thị có cái nhìn toàn cảnh từ vĩ mô đến vi mô.',
+    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
+    author: 'ThS. Nguyễn Văn Hùng - Chuyên gia BIM/GIS CIC',
+    views: 2890,
+    tags: ['GIS 3D', 'BIM-GIS', 'Đô thị thông minh', 'Quy hoạch'],
+    contentMarkdown: `### SỰ KẾT HỢP HOÀN HẢO GIỮA BIM VÀ 3D GIS
+
+Nếu như **BIM** tập trung vào chi tiết hình học và thông tin phi hình học bên trong một công trình đơn lẻ, thì **GIS** lại cung cấp bối cảnh không gian địa lý bao quát toàn bộ đô thị xung quanh.
+
+#### Lợi ích khi tích hợp BIM - GIS 3D:
+1. **Mô phỏng ngập lụt đô thị**: Đặt mô hình 3D công trình vào không gian GIS để giả lập các kịch bản triều cường, mưa lớn và đưa ra phương án thoát nước tự động.
+2. **Quản lý hạ tầng ngầm**: Số hóa toàn bộ mạng lưới đường ống cấp thoát nước, cáp điện ngầm dưới lòng đất bằng tọa độ VN-2000 chuẩn xác.
+3. **Cấp phép xây dựng tự động**: Giúp cơ quan quản lý nhà nước tự động kiểm tra chiều cao tầng, mật độ xây dựng của file BIM nộp lên portal so với quy hoạch chung.`
+  },
+  {
+    id: 'huong-dan-toi-uu-hoa-ban-ve-cad-lon',
+    category: 'specialty',
+    subType: 'Kiến thức',
+    title: '10 Mẹo tối ưu hóa bản vẽ CAD dung lượng lớn giúp tăng tốc độ thiết kế gấp 3 lần',
+    date: '05/06/2026',
+    shortDesc: 'Tổng hợp các câu lệnh dọn dẹp bộ nhớ purge, audit, xref và thiết lập bộ đệm giúp bản vẽ CAD chạy mượt mà không lo giật lag.',
+    img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80',
+    author: 'Đội ngũ Kỹ thuật enjiCAD',
+    views: 3500,
+    tags: ['Mẹo CAD', 'Tối ưu bản vẽ', 'enjiCAD', 'AutoCAD'],
+    contentMarkdown: `### BÍ QUYẾT TỐI ƯU BẢN VẼ CAD DUNG LƯỢNG LỚN
+
+Các kỹ sư thiết kế thường xuyên gặp phải tình trạng bản vẽ CAD bị chậm, đơ hoặc dung lượng phình to bất thường lên tới hàng trăm MB. Dưới đây là 10 mẹo kỹ thuật được tổng hợp bởi các chuyên gia enjiCAD:
+
+1. **Sử dụng lệnh PURGE (PU)**: Xóa bỏ toàn bộ các Layer, Block, TextStyle rác không sử dụng.
+2. **Kiểm tra lỗi bằng AUDIT**: Sửa chữa các lỗi thực thể hỏng trong cấu trúc file DWG.
+3. **Quản lý XREF thông minh**: Chuyển các bản vẽ tham chiếu sang dạng Overlay thay vì Attach.
+4. **Giảm mật độ nét đứt và Hatch**: Tùy chỉnh HPMAXARRAY và LTSCALE hợp lý.
+5. **Chuyển sang enjiCAD Pro 2026**: Tận dụng động cơ Multi-Core để xử lý mượt mà không lo hết RAM.`
+  },
+  {
+    id: 'xu-huong-green-bim-khi-nha-kinh-2026',
+    category: 'specialty',
+    subType: 'Cập nhật công nghệ',
+    title: 'Green BIM và xu hướng kiểm kê phát thải carbon tự động trong công trình xanh',
+    date: '14/05/2026',
+    shortDesc: 'Khám phá cách thức mô hình BIM hỗ trợ tính toán năng lượng tiêu thụ, dấu chân carbon của vật liệu xây dựng ngay từ giai đoạn ý tưởng.',
+    img: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&q=80',
+    author: 'Viện Nghiên cứu Chuyển đổi Xanh CIC',
+    views: 1950,
+    tags: ['Green BIM', 'Công trình xanh', 'Kiểm kê Carbon', 'Net Zero'],
+    contentMarkdown: `### GREEN BIM: CÔNG CỤ ĐẮC LỰC CHO MỤC TIÊU NET ZERO
+
+Hướng tới cam kết Net Zero vào năm 2050, ngành xây dựng đang ráo riết ứng dụng **Green BIM** - giải pháp tích hợp dữ liệu môi trường vào mô hình thông tin công trình.
+
+#### Ứng dụng nổi bật của Green BIM:
+* **Mô phỏng ánh sáng & gió tự nhiên**: Tối ưu hóa hướng nhà và vị trí cửa sổ để giảm 30% chi phí điện điều hòa.
+* **Đo lường Carbon tiềm ẩn (Embodied Carbon)**: Tự động xuất báo cáo tổng lượng khí thải từ quá trình sản xuất xi măng, thép, kính dựa trên khối lượng vật liệu trong mô hình BIM.`
+  },
+  {
+    id: 'thong-tu-moi-chuan-dinh-dang-cde-2026',
+    category: 'specialty',
+    subType: 'Chính sách',
+    title: 'Hướng dẫn thực thi chuẩn trao đổi dữ liệu CDE theo Bộ Tiêu chuẩn Quốc gia TCVN ISO 19650',
+    date: '28/02/2026',
+    shortDesc: 'Phân tích quy trình quản lý thông tin công trình TCVN ISO 19650 và các trạng thái dữ liệu WIP, Shared, Published, Archived trong môi trường CDE.',
+    img: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80',
+    author: 'Ban Tư vấn Pháp lý & BIM CIC',
+    views: 2300,
+    tags: ['ISO 19650', 'TCVN ISO', 'CDE', 'Chuẩn quản lý dữ liệu'],
+    contentMarkdown: `### QUẢN LÝ DỮ LIỆU CÔNG TRÌNH THEO TCVN ISO 19650
+
+Tiêu chuẩn ISO 19650 đã chính thức trở thành bộ quy chuẩn quốc gia TCVN tại Việt Nam. Việc tuân thủ quy trình quản lý thông tin trong Môi trường dữ liệu chung (CDE) là yêu cầu bắt buộc đối với tất cả các bên tham gia dự án.
+
+#### 4 Trạng thái dữ liệu bắt buộc trong CDE:
+1. **WIP (Work In Progress)**: Dữ liệu đang khởi tạo của từng bộ môn (Kiến trúc, Kết cấu, MEP).
+2. **SHARED**: Dữ liệu đã kiểm tra và chia sẻ phối hợp giữa các bên.
+3. **PUBLISHED**: Dữ liệu phê duyệt chính thức dùng để thi công hoặc nghiệm thu.
+4. **ARCHIVED**: Dữ liệu lưu trữ lịch sử dự án phục vụ công tác vận hành bảo trì.`
+  },
+
+  // --- TIN TUYỂN DỤNG (BỔ SUNG ĐỦ 7 TIN) ---
+  {
+    id: 'tuyen-dung-chuyen-vien-tu-van-gis-2026',
+    category: 'recruitment',
+    title: 'Tuyển dụng Chuyên viên Tư vấn & Triển khai GIS 3D đô thị',
+    date: '10/07/2026',
+    shortDesc: 'CIC Đà Nẵng tuyển dụng 02 Chuyên viên GIS giàu kinh nghiệm làm việc trong các dự án quy hoạch đô thị thông minh và bản đồ số địa hình.',
+    img: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80',
+    position: 'Chuyên viên Tư vấn GIS 3D',
+    department: 'Khối Kỹ thuật',
+    location: 'Đà Nẵng',
+    deadline: '15/09/2026',
+    salary: '15 - 25 triệu VNĐ',
+    jobType: 'Toàn thời gian',
+    status: 'Đang tuyển',
+    author: 'Phòng Nhân sự CIC',
+    views: 890,
+    tags: ['Tuyển dụng GIS', 'Việc làm Đà Nẵng', 'Bản đồ số'],
+    contentMarkdown: `### TUYỂN DỤNG CHUYÊN VIÊN GIS 3D
+* **Địa điểm**: Văn phòng CIC Đà Nẵng.
+* **Yêu cầu**: Thành thạo ArcGIS, QGIS, có khả năng xử lý dữ liệu ảnh vệ tinh và mô hình 3D Mesh.
+* **Quyền lợi**: Lương 15-25 triệu + Thưởng dự án, tham gia các khóa đào tạo quốc tế.`
+  },
+  {
+    id: 'tuyen-dung-lap-trinh-vien-fullstack-2026',
+    category: 'recruitment',
+    title: 'Tuyển dụng Kỹ sư Lập trình Fullstack (React / Node.js / Python)',
+    date: '05/07/2026',
+    shortDesc: 'Tìm kiếm 03 Kỹ sư phần mềm xuất sắc tham gia phát triển core engine cho phần mềm enjiCAD và nền tảng CDE Cloud thế hệ mới.',
+    img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80',
+    position: 'Kỹ sư Lập trình Fullstack',
+    department: 'Khối Nghiên cứu & Phát triển',
+    location: 'Hà Nội',
+    deadline: '20/09/2026',
+    salary: '20 - 35 triệu VNĐ',
+    jobType: 'Toàn thời gian',
+    status: 'Đang tuyển',
+    author: 'Phòng Tuyển dụng CIC',
+    views: 1450,
+    tags: ['Lập trình viên', 'ReactJS', 'NodeJS', 'Việc làm Hà Nội'],
+    contentMarkdown: `### TUYỂN DỤNG KỸ SƯ FULLSTACK R&D
+* **Vị trí**: Kỹ sư Lập trình Fullstack R&D.
+* **Mô tả**: Phát triển giao diện web portal CDE, tích hợp bộ đọc viewer 3D BIM/CAD trên trình duyệt.
+* **Yêu cầu**: Nắm vững TypeScript, React, Node.js, WebGL/Three.js là điểm cộng lớn.
+* **Thu nhập**: 20 - 35 triệu VNĐ/tháng.`
+  },
+  {
+    id: 'tuyen-dung-truong-nhom-marketing-digital',
+    category: 'recruitment',
+    title: 'Tuyển dụng Trưởng nhóm Digital Marketing phần mềm công nghệ B2B',
+    date: '28/06/2026',
+    shortDesc: 'CIC Tech tuyển dụng 01 Leader Marketing sáng tạo phụ trách chiến dịch quảng bá enjiCAD, phần mềm kết cấu và chuỗi hội thảo công nghệ BIM.',
+    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
+    position: 'Trưởng nhóm Digital Marketing',
+    department: 'Khối Hỗ trợ',
+    location: 'Hà Nội',
+    deadline: '30/08/2026',
+    salary: '18 - 25 triệu VNĐ',
+    jobType: 'Toàn thời gian',
+    status: 'Đang tuyển',
+    author: 'Phòng Nhân sự CIC',
+    views: 1120,
+    tags: ['Marketing B2B', 'Leader Marketing', 'Công nghệ'],
+    contentMarkdown: `### TUYỂN DỤNG TRƯỞNG NHÓM DIGITAL MARKETING
+* **Mô tả**: Lập kế hoạch Marketing B2B, quản lý kênh Google Ads, Facebook Ads, SEO website và sự kiện Webinar.
+* **Yêu cầu**: 2 năm kinh nghiệm Leader Marketing trong mảng công nghệ/B2B.`
+  },
+  {
+    id: 'tuyen-dung-thuc-tap-sinh-ky-thuat-cad-bim',
+    category: 'recruitment',
+    title: 'Tuyển dụng Thực tập sinh Kỹ thuật BIM / CAD (Có hỗ trợ trợ cấp)',
+    date: '15/06/2026',
+    shortDesc: 'Cơ hội tuyệt vời cho sinh viên năm cuối ngành Xây dựng, Kiến trúc, Cơ điện thực tập thực tế trên các dự án lớn dưới sự dẫn dắt của chuyên gia CIC.',
+    img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
+    position: 'Thực tập sinh BIM/CAD',
+    department: 'Khối Kỹ thuật',
+    location: 'TP. Hồ Chí Minh',
+    deadline: '10/10/2026',
+    salary: '4 - 7 triệu VNĐ',
+    jobType: 'Thực tập',
+    status: 'Đang tuyển',
+    author: 'Phòng Tuyển dụng CIC',
+    views: 1680,
+    tags: ['Thực tập sinh', 'BIM CAD', 'Việc làm sinh viên'],
+    contentMarkdown: `### CHƯƠNG TRÌNH THỰC TẬP TÀI NĂNG CIC 2026
+* **Đối tượng**: Sinh viên năm 3, 4 các trường ĐH Bách Khoa, Kiến Trúc, Xây Dựng.
+* **Quyền lợi**: Trợ cấp 4-7 triệu/tháng, đào tạo enjiCAD & Revit chuẩn quốc tế, cơ hội trở thành nhân viên chính thức.`
+  },
+  {
+    id: 'tuyen-dung-chuyen-vien-cham-soc-khach-hang-software',
+    category: 'recruitment',
+    title: 'Tuyển dụng Chuyên viên Hỗ trợ Kỹ thuật & Chăm sóc Khách hàng phần mềm',
+    date: '01/06/2026',
+    shortDesc: 'Tuyển 02 Chuyên viên tư vấn giải đáp thắc mắc bản quyền, hướng dẫn kích hoạt phần mềm enjiCAD và hỗ trợ khách hàng doanh nghiệp.',
+    img: 'https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80',
+    position: 'Chuyên viên Hỗ trợ Kỹ thuật',
+    department: 'Khối Hỗ trợ',
+    location: 'Hà Nội',
+    deadline: '05/09/2026',
+    salary: '12 - 16 triệu VNĐ',
+    jobType: 'Toàn thời gian',
+    status: 'Đang tuyển',
+    author: 'Phòng Nhân sự CIC',
+    views: 790,
+    tags: ['Chăm sóc khách hàng', 'Support phần mềm', 'Việc làm Văn phòng'],
+    contentMarkdown: `### TUYỂN DỤNG CHUYÊN VIÊN SUPPORT PHẦN MỀM
+* **Mô tả**: Tiếp nhận hotline, hỗ trợ khách hàng cài đặt và kích hoạt bản quyền enjiCAD, GstarCAD qua Remote.
+* **Yêu cầu**: Giao tiếp tốt, kiên nhẫn, sử dụng thành thạo máy tính.`
+  },
+
+  // --- TIN KHUYẾN MẠI (BỔ SUNG ĐỦ 7 TIN) ---
+  {
+    id: 'uu-dai-tri-an-khach-hang-than-thiet-2026',
+    category: 'promotion',
+    title: 'Ưu đãi tri ân: Giảm 30% chi phí nâng cấp lên enjiCAD Professional 2026',
+    date: '01/07/2026',
+    shortDesc: 'Chương trình tri ân dành riêng cho các khách hàng đang sở hữu bản quyền enjiCAD các phiên bản cũ đổi mới lên bản 2026 với động cơ đa nhân.',
+    img: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80',
+    programName: 'Tri ân Nâng cấp enjiCAD 2026',
+    timeFrame: '01/07/2026 - 30/09/2026',
+    appliedTargets: ['Khách hàng cũ nâng cấp enjiCAD 2026'],
+    status: 'Đang diễn ra',
+    author: 'Phòng Phát triển Thị trường',
+    views: 1120,
+    tags: ['Tri ân khách hàng', 'Giảm 30%', 'enjiCAD Pro 2026'],
+    contentMarkdown: `### CHƯƠNG TRÌNH TRI ÂN NÂNG CẤP ENJICAD 2026
+* **Nội dung**: Giảm trực tiếp 30% chi phí chuyển đổi giấy phép bản quyền cũ lên phiên bản enjiCAD 2026.
+* **Quà tặng**: Đổi mới khóa cứng USB bản quyền miễn phí, tặng gói hỗ trợ kỹ thuật 24/7 trong 12 tháng.`
+  },
+  {
+    id: 'tro-gia-giao-duc-truong-dai-hoc-2026',
+    category: 'promotion',
+    title: 'Chương trình Tài trợ 100% Bản quyền enjiCAD Edu cho các Trường Đại học',
+    date: '15/06/2026',
+    shortDesc: 'CIC Tech cam kết đồng hành cùng ngành giáo dục, tài trợ bản quyền phần mềm kỹ thuật cho các phòng máy tính thực hành của sinh viên.',
+    img: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80',
+    programName: 'CIC Edu Care 2026',
+    timeFrame: '15/06/2026 - 31/12/2026',
+    appliedTargets: ['Các Trường Đại học, Cao đẳng Xây dựng & Kiến trúc'],
+    status: 'Đang diễn ra',
+    author: 'Ban Dự án Giáo dục CIC',
+    views: 1420,
+    tags: ['Tài trợ giáo dục', 'enjiCAD Edu', 'Bản quyền sinh viên'],
+    contentMarkdown: `### CHƯƠNG TRÌNH TÀI TRỢ BẢN QUYỀN GIÁO DỤC CIC EDU CARE
+* **Đối tượng**: Phòng máy tính giảng dạy thuộc các Trường ĐH Xây dựng, Bách khoa, Kiến trúc toàn quốc.
+* **Hình thức**: Cấp giấy phép sử dụng enjiCAD Edu phiên bản giảng dạy miễn phí 100%.`
+  },
+  {
+    id: 'combo-phan-mem-bim-gis-do-thi',
+    category: 'promotion',
+    title: 'Gói Combo Chuyển đổi số BIM & GIS: Tiết kiệm ngay 40 triệu đồng cho Doanh nghiệp',
+    date: '20/05/2026',
+    shortDesc: 'Ưu đãi trọn gói bao gồm phần mềm thiết kế enjiCAD Pro, giải pháp CDE Cloud và tư vấn chuẩn hóa ISO 19650.',
+    img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+    programName: 'Combo Chuyển đổi số BIM-GIS 2026',
+    timeFrame: '01/05/2026 - 31/08/2026',
+    appliedTargets: ['Gói bản quyền enjiCAD Pro + CDE Server'],
+    status: 'Đang diễn ra',
+    author: 'Phòng Kinh doanh B2B',
+    views: 1300,
+    tags: ['Combo giá rẻ', 'BIM GIS', 'Chuyển đổi số'],
+    contentMarkdown: `### GÓI COMBO CHUYỂN ĐỔI SỐ BẮT BỘC CHO DOANH NGHIỆP
+* **Nội dung**: Đăng ký trọn gói giải pháp phần mềm và tư vấn tiêu chuẩn BIM giúp doanh nghiệp sẵn sàng đấu thầu các dự án đầu tư công.`
+  },
+  {
+    id: 'uu-dai-gstarcad-phien-ban-2026',
+    category: 'promotion',
+    title: 'Chương trình Đặt hàng sớm GstarCAD 2026 - Chiết khấu 20% bản quyền vĩnh viễn',
+    date: '10/04/2026',
+    shortDesc: 'Chương trình đặt mua trước phần mềm GstarCAD 2026 dành cho các nhà thầu cơ khí và xây dựng với mức giá ưu đãi đặc biệt.',
+    img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80',
+    programName: 'Pre-order GstarCAD 2026',
+    timeFrame: '10/04/2026 - 31/05/2026',
+    appliedTargets: ['GstarCAD 2026 Standard & Professional'],
+    status: 'Đã kết thúc',
+    author: 'Phòng Phát triển Thị trường',
+    views: 950,
+    tags: ['GstarCAD 2026', 'Giảm 20%', 'Đã kết thúc'],
+    contentMarkdown: `### ĐẶT HÀNG SỚM GSTARCAD 2026
+* Chương trình đã khép lại thành công với hơn 200 doanh nghiệp đăng ký đặt mua trước.`
+  },
+  {
+    id: 'uu-dai-prokon-phan-tich-ket-cau',
+    category: 'promotion',
+    title: 'Tuần lễ Vàng Prokon: Tặng 1 năm bảo trì và bộ thư viện mẫu kết cấu bê tông cốt thép',
+    date: '15/03/2026',
+    shortDesc: 'Khuyến mại dành cho kỹ sư kết cấu khi mua bản quyền phần mềm phân tích Prokon chính hãng từ CIC Tech.',
+    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80',
+    programName: 'Tuần lễ Prokon 2026',
+    timeFrame: '15/03/2026 - 31/03/2026',
+    appliedTargets: ['Phần mềm phân tích kết cấu Prokon'],
+    status: 'Đã kết thúc',
+    author: 'Phòng Kinh doanh B2B',
+    views: 870,
+    tags: ['Prokon', 'Khuyến mại kết cấu', 'Đã kết thúc'],
+    contentMarkdown: `### TẶNG 1 NĂM BẢO TRÌ PROKON CHÍNH HÃNG
+* Khuyến mại đã kết thúc vào ngày 31/03/2026.`
+  },
+  {
+    id: 'khuyen-mai-thiet-bi-quan-trac-tu-dong',
+    category: 'promotion',
+    title: 'Tài trợ 100% chi phí kiểm định thiết bị quan trắc đập thủy điện GEO-CIC',
+    date: '01/02/2026',
+    shortDesc: 'Ưu đãi cho các ban quản lý thủy điện và công trình cầu đường khi trang bị hệ thống quan trắc tự động.',
+    img: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80',
+    programName: 'Đồng hành An toàn Công trình GEO-CIC',
+    timeFrame: '01/02/2026 - 30/04/2026',
+    appliedTargets: ['Cảm biến quan trắc nghiêng, lún GEO-CIC'],
+    status: 'Đã kết thúc',
+    author: 'Khối Dịch vụ Quan trắc',
+    views: 1050,
+    tags: ['GEO-CIC', 'Quan trắc tự động', 'Đã kết thúc'],
+    contentMarkdown: `### TÀI TRỢ KIỂM ĐỊNH THIẾT BỊ QUAN TRẮC GEO-CIC
+* Chương trình ưu đãi kiểm định thiết bị quan trắc đã kết thúc.`
+  },
+
+  // --- QUAN HỆ CỔ ĐÔNG (BỔ SUNG ĐỦ 7 TIN) ---
+  {
+    id: 'bao-cao-thuong-nien-2025-cic',
+    category: 'shareholder',
+    title: 'Báo cáo Thường niên năm 2025: Nâng tầm vị thế chuyển đổi số hạ tầng',
+    date: '10/04/2026',
+    shortDesc: 'Báo cáo tổng kết toàn bộ hoạt động quản trị, tài chính và định hướng chiến lược phát triển bền vững của CIC Tech.',
+    img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
+    docType: 'Báo cáo',
+    year: 2025,
+    pdfUrl: '#',
+    pdfSize: '8.5 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 980,
+    tags: ['Báo cáo thường niên 2025', 'Tài liệu cổ đông', 'CIC Tech'],
+    contentMarkdown: `### BÁO CÁO THƯỜNG NIÊN 2025
+* Kính gửi Quý cổ đông tài liệu Báo cáo Thường niên năm tài chính 2025. Chi tiết xem tệp đính kèm.`
+  },
+  {
+    id: 'thong-bao-chot-danh-sach-co-dong-nhan-co-tuc-2026',
+    category: 'shareholder',
+    title: 'Thông báo chốt danh sách cổ đông hưởng quyền nhận cổ tức năm 2025 bằng tiền mặt',
+    date: '01/07/2026',
+    shortDesc: 'Thông báo ngày đăng ký cuối cùng để thực hiện quyền nhận cổ tức tỷ lệ 15% bằng tiền mặt năm 2025.',
+    img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80',
+    docType: 'Thông báo',
+    year: 2026,
+    pdfUrl: '#',
+    pdfSize: '1.1 MB',
+    author: 'Ban Quan hệ Cổ đông CIC',
+    views: 1250,
+    tags: ['Chốt danh sách cổ đông', 'Cổ tức 15%', 'Thông báo'],
+    contentMarkdown: `### THÔNG BÁO CHỐT DANH SÁCH CỔ ĐÔNG NHẬN CỔ TỨC
+* **Ngày đăng ký cuối cùng**: 15/08/2026.
+* **Tỷ lệ thực hiện**: 15%/cổ phiếu (1.500 VNĐ/cổ phiếu).
+* **Ngày thanh toán dự kiến**: 05/09/2026.`
+  },
+  {
+    id: 'tai-lieu-hop-dai-hoi-dong-co-dong-bat-thuong-2026',
+    category: 'shareholder',
+    title: 'Tài liệu họp Đại hội đồng Cổ đông bất thường năm 2026 thông qua dự án Trụ sở mới',
+    date: '15/02/2026',
+    shortDesc: 'Tờ trình và dự thảo Nghị quyết Đại hội cổ đông bất thường về việc phê duyệt phương án đầu tư xây dựng Tòa nhà Văn phòng CIC Tech.',
+    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
+    docType: 'Tài liệu cổ đông',
+    year: 2026,
+    pdfUrl: '#',
+    pdfSize: '3.4 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 840,
+    tags: ['ĐHĐCĐ bất thường', 'Tài liệu họp', 'Trụ sở CIC'],
+    contentMarkdown: `### TÀI LIỆU HỌP ĐẠI HỘI CỔ ĐÔNG BẤT THƯỜNG 2026
+* Kính gửi Quý cổ đông bộ tài liệu phục vụ Đại hội đồng cổ đông bất thường năm 2026.`
+  },
+  {
+    id: 'nghi-quyet-hdqt-phe-duyet-hop-tac-quoc-te',
+    category: 'shareholder',
+    title: 'Nghị quyết Hội đồng Quản trị về việc phê duyệt hợp tác liên doanh công nghệ quốc tế',
+    date: '20/01/2026',
+    shortDesc: 'Thông qua việc ký kết hợp tác thành lập liên doanh nghiên cứu phần mềm kiểm kê khí nhà kính tự động.',
+    img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
+    docType: 'Nghị quyết',
+    year: 2026,
+    pdfUrl: '#',
+    pdfSize: '1.8 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 910,
+    tags: ['Nghị quyết HĐQT', 'Hợp tác quốc tế', 'Liên doanh công nghệ'],
+    contentMarkdown: `### NGHỊ QUYẾT HỘI ĐỒNG QUẢN TRỊ VỀ HỢP TÁC LIÊN DOANH
+* Phê duyệt phương án thành lập Liên doanh Công nghệ Xanh cùng đối tác Châu Âu.`
   }
 ];
