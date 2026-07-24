@@ -337,7 +337,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
               </div>
 
               {/* Form Body or Confirmation State */}
-              <div className="bg-white border border-slate-200 p-6 sm:p-8 shadow-sm">
+              <div className="bg-white border border-slate-200 p-6 sm:p-8 shadow-sm rounded-[10px]">
                 {!registrationResult ? (
                   <form onSubmit={handleRegisterSubmit} className="space-y-6">
                     <div className="border-b border-slate-100 pb-4">
@@ -361,7 +361,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           placeholder="Ví dụ: Nguyễn Văn A"
                           value={formData.fullName}
                           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
+                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
                             formErrors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
@@ -379,7 +379,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           placeholder="Ví dụ: 0912345678"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
+                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
                             formErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
@@ -397,7 +397,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           placeholder="Ví dụ: email@domain.com"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
+                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
                             formErrors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
@@ -415,7 +415,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           placeholder="Ví dụ: Tổng công ty Tư vấn Thiết kế Giao thông"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
+                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
                             formErrors.company ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
@@ -433,7 +433,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           placeholder="Ví dụ: Kỹ sư trưởng, BIM Manager"
                           value={formData.position}
                           onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 ${
+                          className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
                             formErrors.position ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
                           }`}
                         />
@@ -448,7 +448,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         <select
                           value={formData.attendeesCount}
                           onChange={(e) => setFormData({ ...formData, attendeesCount: Number(e.target.value) })}
-                          className="w-full p-3 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600"
+                          className="w-full p-3 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600 rounded-[8px]"
                         >
                           {[1, 2, 3, 4, 5, 10].map((num) => (
                             <option key={num} value={num}>{num} người</option>
@@ -467,7 +467,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         rows={3}
                         value={formData.note}
                         onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                        className="w-full p-3 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600"
+                        className="w-full p-3 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600 rounded-[8px]"
                       />
                     </div>
 
@@ -478,7 +478,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           type="checkbox"
                           checked={formData.consent}
                           onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
-                          className="mt-0.5 border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4"
+                          className="mt-0.5 border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4 rounded-[4px]"
                         />
                         <span className="text-xs font-medium text-slate-600 leading-normal">
                           Tôi đồng ý cung cấp thông tin phục vụ công tác tổ chức sự kiện và nhận các thông tin giải pháp công nghệ mới nhất từ CIC Tech qua Email/SMS. <span className="text-orange-600">*</span>
@@ -496,7 +496,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           setRegistrationResult(null);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="w-full sm:w-auto px-6 py-3 border border-slate-200 hover:border-slate-900 text-slate-700 text-xs font-black uppercase tracking-widest transition-all text-center"
+                        className="w-full sm:w-auto px-6 py-3 border border-slate-200 hover:border-slate-900 text-slate-700 text-xs font-black uppercase tracking-widest transition-all text-center rounded-[8px]"
                       >
                         Hủy bỏ
                       </button>
@@ -504,7 +504,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-8 py-3.5 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                        className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-8 py-3.5 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg rounded-[8px]"
                       >
                         {isSubmitting ? (
                           <>
@@ -675,7 +675,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                       {/* Countdown widget if upcoming */}
                       {(selectedEvent.status === 'upcoming' || selectedEvent.status === 'ongoing') && (
-                        <div className="bg-slate-950 text-white p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="bg-slate-950 text-white p-6 flex flex-col md:flex-row items-center justify-between gap-6 rounded-[10px]">
                           <div className="flex items-center gap-3">
                             <Timer className="text-orange-500 shrink-0" size={32} />
                             <div>
@@ -692,7 +692,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               { value: timeLeft.minutes, label: 'PHÚT' },
                               { value: timeLeft.seconds, label: 'GIÂY' }
                             ].map((unit, i) => (
-                              <div key={i} className="bg-slate-900 border border-white/10 p-2.5 min-w-[65px]">
+                              <div key={i} className="bg-slate-900 border border-white/10 p-2.5 min-w-[65px] rounded-[8px]">
                                 <span className="block text-2xl font-black text-orange-500 leading-none">
                                   {String(unit.value).padStart(2, '0')}
                                 </span>
@@ -708,9 +708,9 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   </div>
 
                   {/* LONG FORM DESCRIPTION */}
-                  <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6">
+                  <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
                     <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                      <span className="w-1.5 h-6 bg-orange-600"></span> Giới thiệu chương trình
+                      <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Giới thiệu chương trình
                     </h2>
                     <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line">
                       {selectedEvent.longDesc}
@@ -719,13 +719,13 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                   {/* AUDIENCE / TARGET GROUP */}
                   {selectedEvent.targetAudience && selectedEvent.targetAudience.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6">
+                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
                       <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600"></span> Đối tượng tham dự phù hợp
+                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Đối tượng tham dự phù hợp
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                         {selectedEvent.targetAudience.map((aud, i) => (
-                          <div key={i} className="flex gap-3 items-start bg-slate-50 border border-slate-100 p-4">
+                          <div key={i} className="flex gap-3 items-start bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
                             <CheckCircle size={18} className="text-orange-600 shrink-0 mt-0.5" />
                             <span className="text-xs font-bold text-slate-700 leading-relaxed">{aud}</span>
                           </div>
@@ -736,9 +736,9 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                   {/* AGENDA TIMELINE */}
                   {selectedEvent.agenda && selectedEvent.agenda.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6">
+                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
                       <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600"></span> Agenda chi tiết chương trình
+                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Agenda chi tiết chương trình
                       </h2>
                       
                       <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-8 py-2">
@@ -746,11 +746,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           <div key={i} className="relative group">
                             
                             {/* Timeline point */}
-                            <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-white border-2 border-orange-600 rounded-none group-hover:bg-orange-600 transition-all"></div>
+                            <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-white border-2 border-orange-600 rounded-full group-hover:bg-orange-600 transition-all"></div>
                             
                             <div className="space-y-1">
                               <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                <span className="px-2.5 py-1 bg-slate-950 text-white font-sans text-[10px] font-black uppercase tracking-wider shrink-0 w-fit">
+                                <span className="px-2.5 py-1 bg-slate-950 text-white font-sans text-[10px] font-black uppercase tracking-wider shrink-0 w-fit rounded-[6px]">
                                   {item.time}
                                 </span>
                                 {item.speaker && (
@@ -772,17 +772,17 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                   {/* SPEAKERS / PRESENTERS */}
                   {selectedEvent.speakers && selectedEvent.speakers.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6">
+                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
                       <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600"></span> Ban diễn giả & Chuyên gia
+                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Ban diễn giả & Chuyên gia
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {selectedEvent.speakers.map((speaker, i) => (
-                          <div key={i} className="border border-slate-200 bg-slate-50 p-6 flex flex-col md:flex-row gap-4 items-start">
+                          <div key={i} className="border border-slate-200 bg-slate-50 p-6 flex flex-col md:flex-row gap-4 items-start rounded-[10px]">
                             <img 
                               src={speaker.avatar} 
                               alt={speaker.name}
-                              className="w-16 h-16 object-cover border border-slate-300 shrink-0"
+                              className="w-16 h-16 object-cover border border-slate-300 shrink-0 rounded-[10px]"
                             />
                             <div className="space-y-2">
                               <div>
@@ -804,19 +804,19 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                   {/* LOCATION VISUAL MAP & GOOGLE MAPS SIMULATION */}
                   {selectedEvent.address && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6">
+                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
                       <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600"></span> Bản đồ địa điểm sự kiện
+                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Bản đồ địa điểm sự kiện
                       </h2>
                       
                       <div className="space-y-3">
-                        <p className="text-xs text-slate-500 leading-relaxed font-bold flex items-start gap-1.5 bg-slate-50 p-3.5 border-l-2 border-orange-600">
+                        <p className="text-xs text-slate-500 leading-relaxed font-bold flex items-start gap-1.5 bg-slate-50 p-3.5 border-l-2 border-orange-600 rounded-[8px]">
                           <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
                           <span>{selectedEvent.address}</span>
                         </p>
 
                         {/* Map graphic mock */}
-                        <div className="h-64 bg-slate-900 relative border border-slate-200 overflow-hidden flex items-center justify-center">
+                        <div className="h-64 bg-slate-900 relative border border-slate-200 overflow-hidden flex items-center justify-center rounded-[10px]">
                           <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
                           
                           <div className="text-center z-10 px-6 space-y-3">
@@ -829,7 +829,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedEvent.address)}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 transition-all"
+                              className="inline-flex items-center gap-1 bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 transition-all rounded-[8px]"
                             >
                               Mở Google Maps <ExternalLink size={12} />
                             </a>
@@ -845,14 +845,14 @@ export const EventsView: React.FC<EventsViewProps> = ({
                 <div className="lg:col-span-4 space-y-8">
                   
                   {/* QUICK CTA BOX */}
-                  <div className="bg-white border border-slate-950 p-6 shadow-sm space-y-6 sticky top-24">
+                  <div className="bg-white border border-slate-950 p-6 shadow-sm space-y-6 sticky top-24 rounded-[10px]">
                     <div className="text-center pb-4 border-b border-slate-100">
                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">Đăng ký tham dự</span>
                       <h3 className="text-base font-black text-slate-950 uppercase">Giữ chỗ sự kiện</h3>
                     </div>
 
                     <div className="space-y-4">
-                      <div className="bg-slate-50 p-4 border border-slate-200">
+                      <div className="bg-slate-50 p-4 border border-slate-200 rounded-[8px]">
                         <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 font-sans">Trạng thái</span>
                         <div className="flex items-center gap-2">
                           <span className={`w-2.5 h-2.5 ${selectedEvent.isOpenRegistration ? 'bg-emerald-500' : 'bg-slate-400 animate-none'} rounded-full animate-pulse`}></span>
@@ -883,14 +883,14 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setRegisterEvent(selectedEvent);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs font-black uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2 shadow-sm"
+                          className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs font-black uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2 shadow-sm rounded-[8px]"
                         >
                           Đăng ký ngay tại đây <ArrowRight size={14} />
                         </button>
                       ) : (
                         <button
                           disabled
-                          className="w-full bg-slate-200 text-slate-400 py-3.5 text-xs font-black uppercase tracking-widest text-center cursor-not-allowed"
+                          className="w-full bg-slate-200 text-slate-400 py-3.5 text-xs font-black uppercase tracking-widest text-center cursor-not-allowed rounded-[8px]"
                         >
                           Đã đóng đăng ký
                         </button>
@@ -910,7 +910,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                                 e.preventDefault();
                                 alert(`Đã bắt đầu tải file: ${doc.name}`);
                               }}
-                              className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 hover:border-orange-600 text-xs font-bold text-slate-700 hover:text-orange-600 transition-all"
+                              className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 hover:border-orange-600 text-xs font-bold text-slate-700 hover:text-orange-600 transition-all rounded-[8px]"
                             >
                               <span className="truncate max-w-[200px]">{doc.name}</span>
                               <span className="text-[9px] text-slate-400 shrink-0 flex items-center gap-1">
@@ -928,7 +928,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         setSelectedEvent(null);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="w-full text-center border border-slate-200 hover:border-slate-950 text-xs font-black uppercase tracking-widest text-slate-600 hover:text-slate-950 py-2.5 transition-all"
+                      className="w-full text-center border border-slate-200 hover:border-slate-950 text-xs font-black uppercase tracking-widest text-slate-600 hover:text-slate-950 py-2.5 transition-all rounded-[8px]"
                     >
                       Quay về danh sách
                     </button>

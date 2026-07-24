@@ -696,14 +696,14 @@ export function NewsView({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
               {/* CENTER COLUMN (col-span-8): Rich Article Details - EXPANDED */}
-              <main className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-6 sm:p-10 lg:p-12 shadow-sm">
+              <main className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-6 sm:p-10 lg:p-12 shadow-sm rounded-[10px]">
                 
                 {/* Featured Hero Banner Image */}
-                <div className="h-72 sm:h-[460px] lg:h-[500px] w-full border border-slate-200 relative overflow-hidden group">
+                <div className="h-72 sm:h-[460px] lg:h-[500px] w-full relative overflow-hidden group rounded-[10px]">
                   <img 
                     src={selectedItem.img} 
                     alt={selectedItem.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-[10px]"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
@@ -1001,7 +1001,7 @@ export function NewsView({
 
                 {/* Consultation Form Widget - Clean Orange Framed Theme */}
                 {selectedItem.category !== 'recruitment' && (
-                  <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-6 md:p-8 space-y-4 my-6 shadow-2xs">
+                  <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-6 md:p-8 space-y-4 my-6 shadow-2xs rounded-[10px]">
                     <div className="space-y-1">
                       <h3 className="text-base font-bold uppercase tracking-tight text-slate-900 flex items-center gap-2">
                         <Send size={16} className="text-orange-600" />
@@ -1013,7 +1013,7 @@ export function NewsView({
                     </div>
 
                     {consultSubmitted ? (
-                      <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                      <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 rounded-[8px]">
                         <Check size={18} className="text-emerald-600 shrink-0" />
                         <span>Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công. CIC Tech sẽ liên hệ lại trong thời gian sớm nhất.</span>
                       </div>
@@ -1028,7 +1028,7 @@ export function NewsView({
                               value={consultName}
                               onChange={(e) => setConsultName(e.target.value)}
                               placeholder="Nguyễn Văn A"
-                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors"
+                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
                             />
                           </div>
 
@@ -1040,7 +1040,7 @@ export function NewsView({
                               value={consultEmail}
                               onChange={(e) => setConsultEmail(e.target.value)}
                               placeholder="email@congty.com"
-                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors"
+                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
                             />
                           </div>
                         </div>
@@ -1052,14 +1052,14 @@ export function NewsView({
                             value={consultMessage}
                             onChange={(e) => setConsultMessage(e.target.value)}
                             placeholder="Tôi muốn nhận thông tin tư vấn giải pháp..."
-                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white resize-none transition-colors"
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white resize-none transition-colors rounded-[8px]"
                           />
                         </div>
 
                         <button
                           type="submit"
                           disabled={isConsultSubmitting}
-                          className="w-full py-3 bg-[#FC5115] hover:bg-orange-600 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
+                          className="w-full py-3 bg-[#FC5115] hover:bg-orange-600 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 rounded-[8px]"
                         >
                           {isConsultSubmitting ? (
                             <span>Đang gửi thông tin...</span>
@@ -1103,7 +1103,7 @@ export function NewsView({
                 
                 {/* 1. Collapsible Table of Contents */}
                 {showTOC && tocItems.length > 0 && (
-                  <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden transition-all">
+                  <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden transition-all rounded-[10px]">
                     <div 
                       onClick={() => setIsTocOpen(!isTocOpen)}
                       className="p-3.5 px-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/80 select-none transition-colors border-b border-slate-100"
@@ -1111,14 +1111,14 @@ export function NewsView({
                       <h3 className="text-xs font-black uppercase tracking-wider text-orange-600 flex items-center gap-1.5">
                         <ListOrdered size={15} />
                         <span>Mục lục bài viết</span>
-                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 ml-1">
+                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 ml-1 rounded-[6px]">
                           {tocItems.length} mục
                         </span>
                       </h3>
                       <button 
                         type="button"
                         aria-label={isTocOpen ? "Thu gọn mục lục" : "Mở rộng mục lục"}
-                        className="text-slate-400 hover:text-orange-600 transition-colors p-0.5"
+                        className="text-slate-400 hover:text-orange-600 transition-colors p-0.5 rounded-[6px]"
                       >
                         {isTocOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
@@ -1139,7 +1139,7 @@ export function NewsView({
                                 key={idx}
                                 onClick={() => scrollToSection(item.id)}
                                 title={item.fullTitle}
-                                className={`block text-left w-full text-xs font-medium transition-colors py-1.5 px-2 border-b border-slate-50 last:border-0 ${
+                                className={`block text-left w-full text-xs font-medium transition-colors py-1.5 px-2 border-b border-slate-50 last:border-0 rounded-[6px] ${
                                   activeTocId === item.id
                                     ? 'text-orange-600 font-bold bg-orange-50/80 border-orange-200'
                                     : 'text-slate-700 hover:text-orange-600 hover:bg-slate-50'
@@ -1158,7 +1158,7 @@ export function NewsView({
 
                 {/* Linked Products / Solutions Block */}
                 {effectiveLinkedProducts.length > 0 && (
-                  <div className="bg-white border border-slate-200/80 shadow-2xs p-5 space-y-3">
+                  <div className="bg-white border border-slate-200/80 shadow-2xs p-5 space-y-3 rounded-[10px]">
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-100 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Box size={16} className="text-orange-600" />
@@ -1173,12 +1173,12 @@ export function NewsView({
                           onClick={() => {
                             if (onNavigateToProduct) onNavigateToProduct(prod.id);
                           }}
-                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs"
+                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs rounded-[8px]"
                         >
                           <img 
                             src={prod.img} 
                             alt={prod.name} 
-                            className="w-11 h-11 object-cover border border-slate-200 shrink-0" 
+                            className="w-11 h-11 object-cover border border-slate-200 shrink-0 rounded-[6px]" 
                           />
                           <div className="min-w-0 flex-1">
                             <h4 className="text-xs font-bold text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-1">
@@ -1197,7 +1197,7 @@ export function NewsView({
 
                 {/* Related Articles (Tin tức liên quan) */}
                 {relatedArticles.length > 0 && (
-                  <div className="bg-white border border-slate-200/80 shadow-2xs p-5 space-y-3">
+                  <div className="bg-white border border-slate-200/80 shadow-2xs p-5 space-y-3 rounded-[10px]">
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-100 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FileText size={16} className="text-orange-600" />
@@ -1211,12 +1211,12 @@ export function NewsView({
                         <div
                           key={article.id}
                           onClick={() => handleSelectNews(article.id)}
-                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs"
+                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs rounded-[8px]"
                         >
                           <img 
                             src={article.img} 
                             alt={article.title} 
-                            className="w-14 h-14 object-cover border border-slate-200 shrink-0" 
+                            className="w-14 h-14 object-cover border border-slate-200 shrink-0 rounded-[6px]" 
                             referrerPolicy="no-referrer"
                           />
                           <div className="min-w-0 flex-1">

@@ -1504,7 +1504,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.05 }}
                     onClick={() => { setSelectedProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="bg-white border border-slate-200/90 hover:border-orange-600/40 p-3 shadow-2xs hover:shadow-[0_20px_40px_rgba(234,88,12,0.1)] hover:-translate-y-1 transition-all duration-300 rounded-[10px] group flex flex-col overflow-hidden relative cursor-pointer"
+                    className="bg-white border border-slate-200/90 hover:border-orange-500 p-3 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 rounded-[10px] group flex flex-col overflow-hidden relative cursor-pointer"
                   >
                     {/* Field badge in top corner */}
                     <div className="absolute top-5 left-5 z-10">
@@ -1526,8 +1526,8 @@ export function ProductsView(_props?: ProductsViewProps) {
                     </div>
 
                     {/* Card Body */}
-                    <div className="p-4 sm:p-5 flex-1 flex flex-col gap-4">
-                      <div className="space-y-2">
+                    <div className="p-4 sm:p-5 flex-1 flex flex-col gap-2.5">
+                      <div className="space-y-1.5">
                         {/* Brand & App badges */}
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="px-2 py-0.5 bg-orange-600/10 text-orange-600 text-[9px] font-black uppercase tracking-wider rounded-[8px]">
@@ -1542,7 +1542,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 min-h-[2.6rem]">
+                        <h3 className="text-base font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
                           {product.name}
                         </h3>
                       </div>
@@ -1556,7 +1556,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                       <div className="flex-1"></div>
 
                       {/* Price Section */}
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Giá bán:</span>
                         <span className="text-sm font-black text-orange-600 tracking-tight">
                           {product.price === 'Liên hệ' ? 'Liên hệ' : product.price}

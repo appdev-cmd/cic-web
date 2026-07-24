@@ -96,7 +96,8 @@ export function ProductDetailView({
           
           {/* Left Column: Interactive Image Slider */}
           <div className="lg:col-span-6 space-y-4">
-            <div className="bg-white border border-slate-200 p-2 shadow-sm relative overflow-hidden group aspect-[4/3] rounded-[10px]">
+            {/* Feature Image */}
+            <div className="bg-white p-2 shadow-sm relative overflow-hidden group aspect-[4/3] rounded-[10px]">
               
               {/* Slideshow image container */}
               <div className="w-full h-full bg-slate-100 relative overflow-hidden rounded-[8px]">
@@ -283,7 +284,7 @@ export function ProductDetailView({
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                     <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-none bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                         <Check size={16} />
                       </div>
                       <div>
@@ -293,7 +294,7 @@ export function ProductDetailView({
                     </div>
 
                     <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-none bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                         <ShieldCheck size={16} />
                       </div>
                       <div>
@@ -303,7 +304,7 @@ export function ProductDetailView({
                     </div>
 
                     <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-none bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                         <Cpu size={16} />
                       </div>
                       <div>
@@ -313,7 +314,7 @@ export function ProductDetailView({
                     </div>
 
                     <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-none bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                         <Sparkles size={16} />
                       </div>
                       <div>
@@ -355,14 +356,14 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-4 text-center"
                 >
-                  <div className="relative aspect-video bg-slate-900 border border-slate-200 flex items-center justify-center group overflow-hidden cursor-pointer">
+                  <div className="relative aspect-video bg-slate-900 flex items-center justify-center group overflow-hidden cursor-pointer rounded-[10px]">
                     <img 
                       src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80" 
                       alt="video thumbnail" 
-                      className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" 
+                      className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700 rounded-[10px]" 
                     />
                     <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center">
-                      <div className="w-20 h-20 bg-orange-600 text-white flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-2xl">
+                      <div className="w-20 h-20 bg-orange-600 text-white flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-2xl rounded-[10px]">
                         <Play size={28} fill="white" />
                       </div>
                     </div>
@@ -387,10 +388,10 @@ export function ProductDetailView({
                     <div 
                       key={idx}
                       onClick={() => onDownload(product)}
-                      className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group"
+                      className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">
+                        <div className="w-10 h-10 bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors rounded-[8px]">
                           {doc.type}
                         </div>
                         <div>
@@ -411,12 +412,12 @@ export function ProductDetailView({
           <div className="lg:col-span-4 space-y-6">
             
             {/* Contact Widget - Cohesive Light Slate Design */}
-            <div className="bg-white text-slate-900 border border-slate-200 p-6 md:p-8 space-y-6 relative overflow-hidden shadow-sm">
+            <div className="bg-white text-slate-900 border border-slate-200 p-6 md:p-8 space-y-6 relative overflow-hidden shadow-sm rounded-[10px]">
               {/* Subtle visual decoration to match the landing page theme */}
               <div className="absolute right-0 top-0 w-24 h-24 bg-orange-600/5 blur-xl pointer-events-none"></div>
               
               <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div className="w-8 h-8 rounded-none bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                   <Phone size={16} />
                 </div>
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-950">HỖ TRỢ TRỰC TUYẾN</h3>
@@ -548,11 +549,11 @@ export function ProductDetailView({
                     onBack();
                   }, 100);
                 }}
-                className="bg-white border border-slate-200 group flex flex-col hover:border-orange-600 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+                className="bg-white border border-slate-200 group flex flex-col hover:border-orange-600 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer rounded-[10px]"
               >
                 {/* Image */}
-                <div className="h-44 bg-slate-100 overflow-hidden relative">
-                  <img src={rel.img} alt={rel.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="h-44 bg-slate-100 overflow-hidden relative rounded-t-[10px]">
+                  <img src={rel.img} alt={rel.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-t-[10px]" />
                   <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-950/80 text-white text-[9px] font-black uppercase tracking-widest">{rel.field}</span>
                 </div>
                 {/* Info */}

@@ -261,21 +261,19 @@ export function ProjectsView({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 group/grid">
                 {paginatedProjects.map((project, idx) => {
-                  // Asymmetric Portfolio Grid Layout Rhythm
-                  const mod = idx % 6;
-                  let spanClass = 'col-span-12 md:col-span-6 h-[380px] lg:h-[440px]';
+                  // Asymmetric Alternating Grid Layout: 2 items per row
+                  // Row 1: Big (7 cols) - Small (5 cols)
+                  // Row 2: Small (5 cols) - Big (7 cols)
+                  const mod = idx % 4;
+                  let spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]';
                   if (mod === 0) {
-                    spanClass = 'col-span-12 h-[450px] lg:h-[520px]'; // Hero full width
+                    spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // Row 1: Big
                   } else if (mod === 1) {
-                    spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // 7 cols
+                    spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // Row 1: Small
                   } else if (mod === 2) {
-                    spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // 5 cols
+                    spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // Row 2: Small
                   } else if (mod === 3) {
-                    spanClass = 'col-span-12 h-[420px] lg:h-[480px]'; // Full width showcase
-                  } else if (mod === 4) {
-                    spanClass = 'col-span-12 md:col-span-6 h-[380px] lg:h-[440px]';
-                  } else if (mod === 5) {
-                    spanClass = 'col-span-12 md:col-span-6 h-[380px] lg:h-[440px]';
+                    spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // Row 2: Big
                   }
 
                   return (
@@ -314,8 +312,8 @@ export function ProjectsView({
                         </h3>
                       </div>
 
-                      {/* 3. Full Hover Overlay - Smooth slide-up with dark backdrop blur & orange accents */}
-                      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 lg:p-8 flex flex-col justify-end">
+                      {/* 3. Full Hover Overlay - Smooth slide-up with dark backdrop & orange accents */}
+                      <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 lg:p-8 flex flex-col justify-end">
                         <div className="transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-3">
                           
                           {/* Accent orange horizontal line */}
@@ -331,15 +329,15 @@ export function ProjectsView({
                             {project.shortDesc}
                           </p>
 
-                          {/* Tag pills (White 15% opacity + backdrop blur) */}
+                          {/* Tag pills */}
                           <div className="flex flex-wrap gap-2 pt-1">
-                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                               {project.sector}
                             </span>
-                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                               {project.solution}
                             </span>
-                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                               {project.customer}
                             </span>
                           </div>
@@ -476,7 +474,7 @@ export function ProjectsView({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
               
               {/* Left Column: Scope of Work */}
-              <div className="bg-white border border-slate-200/80 p-6 space-y-4">
+              <div className="bg-white border border-slate-200/80 p-6 space-y-4 rounded-[10px]">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
                   <FileText className="text-orange-600" size={18} />
                   <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">Phạm vi công việc thực hiện</h3>
@@ -492,7 +490,7 @@ export function ProjectsView({
               </div>
 
               {/* Right Column: Results & Benefits */}
-              <div className="bg-orange-50/50 border border-orange-200 p-6 space-y-4">
+              <div className="bg-orange-50/50 border border-orange-200 p-6 space-y-4 rounded-[10px]">
                 <div className="flex items-center gap-2 border-b border-orange-200 pb-3">
                   <FileCheck className="text-orange-600" size={18} />
                   <h3 className="text-xs font-black uppercase tracking-wider text-orange-900">Kết quả đạt được thực tế</h3>
@@ -500,7 +498,7 @@ export function ProjectsView({
                 <ul className="space-y-3">
                   {activeProject.results.map((result, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-slate-700 font-bold">
-                      <div className="h-5 w-5 bg-orange-600 text-white rounded-none flex items-center justify-center shrink-0 text-[10px] font-black mt-0.5">
+                      <div className="h-5 w-5 bg-orange-600 text-white rounded-[4px] flex items-center justify-center shrink-0 text-[10px] font-black mt-0.5">
                         {i + 1}
                       </div>
                       <span className="leading-tight">{result}</span>
@@ -527,14 +525,14 @@ export function ProjectsView({
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hình ảnh dự án thực tế</h4>
                   
                   {/* Main Display Image */}
-                  <div className="h-96 w-full border border-slate-200 bg-slate-100 overflow-hidden relative">
+                  <div className="h-96 w-full bg-slate-100 overflow-hidden relative rounded-[10px]">
                     <img
                       src={activeProject.gallery[activeGalleryIndex]}
                       alt="Project detail view"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-[10px]"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute bottom-4 right-4 bg-black/75 text-white text-[9px] font-sans px-2 py-1 uppercase tracking-wider">
+                    <div className="absolute bottom-4 right-4 bg-black/75 text-white text-[9px] font-sans px-2 py-1 uppercase tracking-wider rounded-[8px]">
                       Hình {activeGalleryIndex + 1} / {activeProject.gallery.length}
                     </div>
                   </div>
@@ -547,11 +545,11 @@ export function ProjectsView({
                         <button
                           key={idx}
                           onClick={() => setActiveGalleryIndex(idx)}
-                          className={`w-24 h-16 border-2 shrink-0 overflow-hidden transition-all ${
+                          className={`w-24 h-16 border-2 shrink-0 overflow-hidden transition-all rounded-[8px] ${
                             isSelected ? 'border-orange-600 scale-95 shadow-sm' : 'border-slate-200 hover:border-slate-400'
                           }`}
                         >
-                          <img src={imgUrl} alt="Thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          <img src={imgUrl} alt="Thumbnail" className="w-full h-full object-cover rounded-[6px]" referrerPolicy="no-referrer" />
                         </button>
                       );
                     })}
@@ -567,7 +565,7 @@ export function ProjectsView({
                       <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
                         <Video size={14} className="text-orange-600" /> Video Mô phỏng giải pháp
                       </h4>
-                      <div className="bg-slate-900 border border-slate-800 relative overflow-hidden h-44 flex flex-col justify-center items-center">
+                      <div className="bg-slate-900 relative overflow-hidden h-44 flex flex-col justify-center items-center rounded-[10px]">
                         {!isVideoPlaying ? (
                           <>
                             <img 
@@ -604,9 +602,9 @@ export function ProjectsView({
                   {activeProject.pdf ? (
                     <div className="space-y-2">
                       <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tài liệu kỹ thuật / Bản vẽ PDF</h4>
-                      <div className="bg-white border border-slate-200 p-4 space-y-3 shadow-sm">
+                      <div className="bg-white border border-slate-200 p-4 space-y-3 shadow-sm rounded-[10px]">
                         <div className="flex gap-3 items-start">
-                          <div className="h-10 w-10 bg-red-100 border border-red-200 text-red-600 flex items-center justify-center shrink-0">
+                          <div className="h-10 w-10 bg-red-100 border border-red-200 text-red-600 flex items-center justify-center shrink-0 rounded-[8px]">
                             <FileText size={20} />
                           </div>
                           <div className="space-y-0.5">
@@ -619,7 +617,7 @@ export function ProjectsView({
 
                         {/* Progress Bar of Download simulation */}
                         {downloadProgress > 0 && downloadProgress < 100 && (
-                          <div className="w-full bg-slate-100 h-1.5 rounded-none overflow-hidden">
+                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                             <div className="bg-orange-600 h-full transition-all" style={{ width: `${downloadProgress}%` }}></div>
                           </div>
                         )}
@@ -627,7 +625,7 @@ export function ProjectsView({
                         <button
                           onClick={() => handleDownloadPDF(activeProject.pdf!.title)}
                           disabled={pdfDownloaded}
-                          className={`w-full py-2 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-wider transition-all border rounded-none ${
+                          className={`w-full py-2 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-wider transition-all border rounded-[8px] ${
                             pdfDownloaded
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-600 cursor-default'
                               : 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shadow-sm'
@@ -652,7 +650,7 @@ export function ProjectsView({
             </div>
 
             {/* Technological Solutions Applied (badges with deep-link triggers) */}
-            <div className="bg-white border border-slate-200 p-6 space-y-4">
+            <div className="bg-white border border-slate-200 p-6 space-y-4 rounded-[10px]">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-100 pb-2">
                 Công nghệ & Giải pháp phần mềm áp dụng
               </h4>
@@ -660,7 +658,7 @@ export function ProjectsView({
                 {activeProject.appliedSolutions.map((sol, idx) => (
                   <span
                     key={idx}
-                    className="px-3.5 py-1.5 bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-700 tracking-wide hover:border-orange-500 hover:text-orange-600 transition-colors cursor-default"
+                    className="px-3.5 py-1.5 bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-700 tracking-wide hover:border-orange-500 hover:text-orange-600 transition-colors cursor-default rounded-[6px]"
                   >
                     {sol}
                   </span>
@@ -670,7 +668,7 @@ export function ProjectsView({
 
             {/* Connected Products & Services deep-link links */}
             {activeProject.relatedLinks && activeProject.relatedLinks.length > 0 && (
-              <div className="bg-orange-50/30 border border-orange-500/20 p-6 space-y-4">
+              <div className="bg-orange-50/30 border border-orange-500/20 p-6 space-y-4 rounded-[10px]">
                 <div className="flex items-center gap-2">
                   <ExternalLink size={16} className="text-orange-600" />
                   <h4 className="text-xs font-black uppercase tracking-wider text-slate-950">
@@ -681,7 +679,7 @@ export function ProjectsView({
                   {activeProject.relatedLinks.map((link, idx) => (
                     <div 
                       key={idx}
-                      className="bg-white border border-slate-200 p-4 flex justify-between items-center group/link hover:border-orange-500 transition-all shadow-sm"
+                      className="bg-white border border-slate-200 p-4 flex justify-between items-center group/link hover:border-orange-500 transition-all shadow-sm rounded-[8px]"
                     >
                       <div className="space-y-0.5">
                         <span className="text-[8px] font-sans font-black uppercase text-slate-400 tracking-wider">
@@ -699,7 +697,7 @@ export function ProjectsView({
                             onNavigateToService(String(link.id));
                           }
                         }}
-                        className="p-2 border border-slate-100 group-hover/link:bg-orange-600 group-hover/link:text-white group-hover/link:border-orange-500 text-slate-500 transition-all rounded-none"
+                        className="p-2 border border-slate-100 group-hover/link:bg-orange-600 group-hover/link:text-white group-hover/link:border-orange-500 text-slate-500 transition-all rounded-[6px]"
                       >
                         <ArrowRight size={14} />
                       </button>
@@ -723,11 +721,11 @@ export function ProjectsView({
                     <div
                       key={proj.id}
                       onClick={() => handleSelectProject(proj.id)}
-                      className="bg-white border border-slate-200/80 hover:border-orange-500 group cursor-pointer flex flex-col hover:shadow-md transition-all duration-300"
+                      className="bg-white border border-slate-200/80 hover:border-orange-500 group cursor-pointer flex flex-col hover:shadow-md transition-all duration-300 rounded-[10px] overflow-hidden"
                     >
                       <div className="h-40 overflow-hidden relative">
                         <img src={proj.img} alt={proj.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
-                        <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-900/90 text-white font-sans text-[8px] font-black uppercase tracking-wider">
+                        <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-900/90 text-white font-sans text-[8px] font-black uppercase tracking-wider rounded-[4px]">
                           {proj.location}
                         </span>
                       </div>

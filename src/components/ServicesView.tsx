@@ -364,11 +364,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
                 {/* Column Left: Main description & scope & process */}
-                <div className="lg:col-span-8 space-y-12 bg-white border border-slate-200/80 p-8 sm:p-10">
+                <div className="lg:col-span-8 space-y-12 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
                   
                   {/* Title & Tagline */}
                   <div className="space-y-4">
-                    <span className="font-sans text-[9px] font-black text-orange-600 uppercase tracking-widest bg-orange-50 px-2 py-1 border border-orange-100">
+                    <span className="font-sans text-[9px] font-black text-orange-600 uppercase tracking-widest bg-orange-50 px-2 py-1 border border-orange-100 rounded-[8px]">
                       {activeService?.category}
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-950 uppercase tracking-tighter leading-snug">
@@ -380,11 +380,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   </div>
 
                   {/* Feature Image */}
-                  <div className="h-[280px] sm:h-[380px] w-full overflow-hidden relative border border-slate-100">
+                  <div className="h-[280px] sm:h-[380px] w-full overflow-hidden relative rounded-[10px]">
                     <img 
                       src={activeService?.image} 
                       alt={activeService?.title} 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover rounded-[10px]" 
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent"></div>
@@ -399,7 +399,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {/* Why Need (Tại sao cần) */}
                   {activeService?.whyNeed && activeService.whyNeed.length > 0 && (
-                    <div className="space-y-6 bg-slate-50 border border-slate-200/50 p-6 sm:p-8">
+                    <div className="space-y-6 bg-slate-50 border border-slate-200/50 p-6 sm:p-8 rounded-[10px]">
                       <h3 className="text-base font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
                         <span className="w-2 h-4 bg-orange-600 inline-block"></span>
                         {activeService.whyNeedTitle || "Tại sao cần dịch vụ này?"}
@@ -424,7 +424,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                     <div className="space-y-6">
                       {activeService?.scope.map((item, i) => (
-                        <div key={i} className="border border-slate-100 hover:border-slate-200 p-6 space-y-4 transition-all">
+                        <div key={i} className="border border-slate-100 hover:border-slate-200 p-6 space-y-4 transition-all rounded-[10px]">
                           <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 pb-2">
                             <span>{item.title}</span>
                             <span className="text-[10px] text-orange-600 font-sans">#0{i+1}</span>
@@ -445,8 +445,8 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                             </ul>
                           )}
                           {item.img && (
-                            <div className="mt-4 h-48 w-full overflow-hidden border border-slate-100">
-                              <img src={item.img} alt={item.title} className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500" referrerPolicy="referrer" />
+                            <div className="mt-4 h-48 w-full overflow-hidden rounded-[10px]">
+                              <img src={item.img} alt={item.title} className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500 rounded-[10px]" referrerPolicy="no-referrer" />
                             </div>
                           )}
                         </div>
@@ -558,7 +558,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 <div className="lg:col-span-4 space-y-8">
                   
                   {/* Modern Form Card */}
-                  <div id="consultation-form" className="bg-white text-slate-900 p-8 border border-slate-200 shadow-xl relative scroll-mt-32">
+                  <div id="consultation-form" className="bg-white text-slate-900 p-8 border border-slate-200 shadow-xl relative scroll-mt-32 rounded-[10px]">
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-slate-950">
                       <Briefcase size={80} />
                     </div>
@@ -577,7 +577,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         <motion.div 
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="bg-orange-600 p-6 text-center space-y-3"
+                          className="bg-orange-600 p-6 text-center space-y-3 rounded-[8px]"
                         >
                           <CheckCircle2 size={36} className="mx-auto text-white animate-bounce" />
                           <h4 className="text-sm font-black uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG</h4>
@@ -598,7 +598,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 value={formData.fullname}
                                 onChange={(e) => setFormData({...formData, fullname: e.target.value})}
                                 placeholder="Ví dụ: Nguyễn Đức Anh" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold rounded-[8px]"
                               />
                             </div>
                           </div>
@@ -613,7 +613,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 value={formData.phone}
                                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                 placeholder="Ví dụ: 0868934576" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold rounded-[8px]"
                               />
                             </div>
                           </div>
@@ -627,7 +627,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 placeholder="Ví dụ: anh.nguyen@company.com" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold rounded-[8px]"
                               />
                             </div>
                           </div>
@@ -637,7 +637,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                             <select 
                               value={formData.service}
                               onChange={(e) => setFormData({...formData, service: e.target.value})}
-                              className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold cursor-pointer"
+                              className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold cursor-pointer rounded-[8px]"
                             >
                               <option>Phần mềm kỹ thuật</option>
                               <option>Thiết bị & IOT</option>
@@ -653,7 +653,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                               value={formData.notes}
                               onChange={(e) => setFormData({...formData, notes: e.target.value})}
                               placeholder="Mô tả cụ thể nhu cầu của bạn..." 
-                              className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold resize-none"
+                              className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold resize-none rounded-[8px]"
                             ></textarea>
                           </div>
 
@@ -663,7 +663,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                           <button 
                             type="submit"
-                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-none font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
                           >
                             Gửi yêu cầu tư vấn <Send size={14} />
                           </button>
@@ -674,7 +674,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   </div>
 
                   {/* Hotlines & Support Contacts matching exact inputs */}
-                  <div className="bg-white border border-slate-200 p-6 space-y-4">
+                  <div className="bg-white border border-slate-200 p-6 space-y-4 rounded-[10px]">
                     <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 border-b border-slate-100 pb-2">HỖ TRỢ TRỰC TIẾP 24/7</h4>
                     <div className="space-y-3">
                       <div className="flex gap-3 items-center">
@@ -700,7 +700,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {/* Related Products Widget (Minimal & Clean) */}
                   {currentRelatedProducts.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-5 space-y-3">
+                    <div className="bg-white border border-slate-200 p-5 space-y-3 rounded-[10px]">
                       <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 border-b border-slate-100 pb-2.5">
                         SẢN PHẨM LIÊN QUAN
                       </h4>
@@ -710,10 +710,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           <div 
                             key={prod.id} 
                             onClick={() => setSelectedProductModal(prod)}
-                            className="py-2.5 first:pt-0 last:pb-0 flex gap-3 items-center group cursor-pointer hover:bg-slate-50/80 transition-colors p-1"
+                            className="py-2.5 first:pt-0 last:pb-0 flex gap-3 items-center group cursor-pointer hover:bg-slate-50/80 transition-colors p-1 rounded-[8px]"
                           >
                             {/* Thumbnail */}
-                            <div className="w-14 h-14 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative">
+                            <div className="w-14 h-14 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative rounded-[8px]">
                               <img 
                                 src={prod.img} 
                                 alt={prod.name} 
@@ -753,7 +753,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     <div 
                       key={rSrv.id} 
                       onClick={() => handleServiceSelect(rSrv.id)}
-                      className="bg-white border border-slate-200 p-5 space-y-3 hover:border-orange-500 hover:shadow-lg cursor-pointer transition-all duration-300"
+                      className="bg-white border border-slate-200 p-5 space-y-3 hover:border-orange-500 hover:shadow-lg cursor-pointer transition-all duration-300 rounded-[10px]"
                     >
                       <span className="text-[9px] font-bold text-orange-600 uppercase tracking-widest">{rSrv.category}</span>
                       <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide group-hover:text-orange-600 line-clamp-1">{rSrv.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}</h4>
@@ -776,7 +776,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white border border-slate-200 w-full max-w-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col"
+                className="bg-white border border-slate-200 w-full max-w-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col rounded-[12px]"
               >
                 {/* Header */}
                 <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b-2 border-orange-600 shrink-0">
@@ -788,7 +788,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   </div>
                   <button
                     onClick={() => setSelectedProductModal(null)}
-                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors rounded-[6px]"
                   >
                     <X size={18} />
                   </button>
@@ -798,7 +798,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 <div className="p-6 space-y-6 overflow-y-auto flex-1">
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start">
                     <div className="sm:col-span-5 space-y-3">
-                      <div className="h-48 w-full bg-slate-900 border border-slate-200 overflow-hidden relative">
+                      <div className="h-48 w-full bg-slate-900 border border-slate-200 overflow-hidden relative rounded-[10px]">
                         <img 
                           src={selectedProductModal.img} 
                           alt={selectedProductModal.name} 
@@ -806,7 +806,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <div className="p-3 bg-slate-50 border border-slate-100 space-y-1.5 text-xs font-medium">
+                      <div className="p-3 bg-slate-50 border border-slate-100 space-y-1.5 text-xs font-medium rounded-[8px]">
                         <div className="flex justify-between">
                           <span className="text-slate-400">Thương hiệu:</span>
                           <span className="font-bold text-slate-800">{selectedProductModal.brand || 'CIC Tech'}</span>
@@ -827,7 +827,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         {selectedProductModal.name}
                       </h3>
 
-                      <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 border border-orange-200 text-xs font-black">
+                      <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 border border-orange-200 text-xs font-black rounded-[6px]">
                         Mức giá đề xuất: {selectedProductModal.price}
                       </div>
 
@@ -853,7 +853,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 <div className="bg-slate-50 border-t border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
                   <button
                     onClick={() => setSelectedProductModal(null)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-bold uppercase tracking-wider"
+                    className="px-4 py-2 border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-bold uppercase tracking-wider rounded-[8px]"
                   >
                     Đóng
                   </button>
@@ -864,7 +864,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       setSelectedProductModal(null);
                       handleSelectProductForConsultation(prod);
                     }}
-                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md"
+                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md rounded-[8px]"
                   >
                     Thêm vào form tư vấn <Send size={14} />
                   </button>
