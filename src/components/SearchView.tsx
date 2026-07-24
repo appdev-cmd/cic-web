@@ -96,7 +96,7 @@ export function SearchView({
           type: 'product',
           title: item.name,
           description: item.description,
-          img: item.img,
+          img: item.icon || item.img,
           meta: `Hãng: ${item.brand} | Giá: ${item.price}`,
           tags: [item.field, item.app],
           original: item

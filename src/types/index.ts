@@ -14,7 +14,13 @@ export interface Product {
   brand: string;
   app: string;
   img: string;
+  icon?: string;
   productType?: string;
+  slides?: string[];
+  overviewHtml?: string;
+  featuresHtml?: string;
+  videoUrl?: string;
+  documents?: { name: string; size?: string; url: string }[];
 }
 
 export interface Project {

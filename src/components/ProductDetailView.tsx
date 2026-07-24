@@ -46,15 +46,18 @@ export function ProductDetailView({
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'video' | 'documents'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Fake product slideshow images
+  // Product slideshow images
   const slideImages = useMemo(() => {
+    if (product.slides && product.slides.length > 0) {
+      return product.slides;
+    }
     return [
       product.img,
       'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80'
     ];
-  }, [product.img]);
+  }, [product.slides, product.img]);
 
   // Next / Prev slide handlers
   const handleNextSlide = () => {
@@ -97,56 +100,60 @@ export function ProductDetailView({
           {/* Left Column: Interactive Image Slider */}
           <div className="lg:col-span-6 space-y-4">
             {/* Feature Image */}
-            <div className="bg-white p-2 shadow-sm relative overflow-hidden group aspect-[4/3] rounded-[10px]">
+            <div className="bg-white p-2 border border-slate-200 shadow-sm relative overflow-hidden group aspect-[4/3] rounded-[10px]">
               
               {/* Slideshow image container */}
-              <div className="w-full h-full bg-slate-100 relative overflow-hidden rounded-[8px]">
+              <div className="w-full h-full bg-slate-50 relative overflow-hidden rounded-[8px] flex items-center justify-center p-3">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={currentSlide}
                     src={slideImages[currentSlide]}
                     alt={`${product.name} slide ${currentSlide}`}
-                    initial={{ opacity: 0, scale: 1.02 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ duration: 0.3 }}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </AnimatePresence>
 
-                {/* Left/Right Arrows */}
-                <button
-                  onClick={handlePrevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button
-                  onClick={handleNextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
-                >
-                  <ChevronRight size={20} />
-                </button>
+                {/* Left/Right Arrows & Indicator - Only if multiple slides */}
+                {slideImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevSlide}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={handleNextSlide}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
 
-                {/* Indicator Overlay */}
-                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-[8px]">
-                  Slide {currentSlide + 1} / {slideImages.length}
-                </div>
+                    {/* Indicator Overlay */}
+                    <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-[8px]">
+                      Slide {currentSlide + 1} / {slideImages.length}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Thumbnail Navigation */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="flex flex-wrap gap-2">
               {slideImages.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`aspect-[4/3] border-2 transition-all p-0.5 overflow-hidden bg-white rounded-[8px] ${
-                    currentSlide === idx ? 'border-orange-600' : 'border-slate-200 hover:border-slate-400'
+                  className={`w-20 sm:w-24 aspect-[4/3] border-2 transition-all p-1 overflow-hidden bg-white rounded-[8px] flex items-center justify-center ${
+                    currentSlide === idx ? 'border-orange-600 ring-2 ring-orange-500/20' : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt="thumbnail" referrerPolicy="no-referrer" className="w-full h-full object-cover rounded-[6px]" />
+                  <img src={img} alt={`thumbnail ${idx + 1}`} referrerPolicy="no-referrer" className="w-full h-full object-contain rounded-[4px]" />
                 </button>
               ))}
             </div>
@@ -270,59 +277,68 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-6 text-slate-600 text-sm leading-relaxed"
                 >
-                  <p className="font-semibold text-slate-800 text-justify text-base">
-                    Hệ thống phần mềm và giải pháp kỹ thuật <strong>{product.name}</strong> đại diện cho bước tiến vượt trội về năng suất lao động cho đội ngũ kỹ sư Việt Nam. Giải pháp giải quyết triệt để các bài toán kỹ thuật phức tạp từ khâu khảo sát thực địa, lập mô hình 3D, phân tích kết cấu chịu lực chuyên sâu cho tới lập dự toán tối ưu hóa tài nguyên.
-                  </p>
-                  
-                  <p className="text-justify">
-                    Phần mềm chuyên sâu <strong>{product.name}</strong> phát triển bởi hãng <strong>{product.brand}</strong> là giải pháp tiêu chuẩn công nghệ hàng đầu được tin dùng rộng rãi bởi các viện thiết kế, tập đoàn xây dựng và kỹ sư chuyên nghiệp tại Việt Nam. Được tinh chỉnh tối ưu cho lĩnh vực <strong>{product.field}</strong>, giải pháp cung cấp một hệ thống tính toán kết cấu toàn diện, phân tích phần tử hữu hạn nâng cao cùng khả năng tự động hóa 100% quy trình xuất bản vẽ kỹ thuật chi tiết theo đúng hệ tiêu chuẩn TCVN và Eurocode hiện hành.
-                  </p>
+                  {product.overviewHtml ? (
+                    <div 
+                      className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
+                      dangerouslySetInnerHTML={{ __html: product.overviewHtml }} 
+                    />
+                  ) : (
+                    <>
+                      <p className="font-semibold text-slate-800 text-justify text-base">
+                        Hệ thống phần mềm và giải pháp kỹ thuật <strong>{product.name}</strong> đại diện cho bước tiến vượt trội về năng suất lao động cho đội ngũ kỹ sư Việt Nam. Giải pháp giải quyết triệt để các bài toán kỹ thuật phức tạp từ khâu khảo sát thực địa, lập mô hình 3D, phân tích kết cấu chịu lực chuyên sâu cho tới lập dự toán tối ưu hóa tài nguyên.
+                      </p>
+                      
+                      <p className="text-justify">
+                        Phần mềm chuyên sâu <strong>{product.name}</strong> phát triển bởi hãng <strong>{product.brand}</strong> là giải pháp tiêu chuẩn công nghệ hàng đầu được tin dùng rộng rãi bởi các viện thiết kế, tập đoàn xây dựng và kỹ sư chuyên nghiệp tại Việt Nam. Được tinh chỉnh tối ưu cho lĩnh vực <strong>{product.field}</strong>, giải pháp cung cấp một hệ thống tính toán kết cấu toàn diện, phân tích phần tử hữu hạn nâng cao cùng khả năng tự động hóa 100% quy trình xuất bản vẽ kỹ thuật chi tiết theo đúng hệ tiêu chuẩn TCVN và Eurocode hiện hành.
+                      </p>
 
-                  <p className="text-justify">
-                    Với tính năng thiết lập mô hình tham số động trực quan và khả năng kết nối dữ liệu liên thông hoàn hảo với các hệ sinh thái BIM phổ biến (AutoCAD, Revit, Tekla, SAP2000), phần mềm <strong>{product.name}</strong> không chỉ hỗ trợ tối ưu hóa tới 35% hàm lượng vật liệu thép mà còn rút ngắn thời gian thiết kế lên đến 60%. Đây chính là công cụ đắc lực giúp nâng cao vị thế công nghệ, gia tăng tính cạnh tranh và bảo đảm an toàn tuyệt đối cho mọi công trình xây dựng hiện đại.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                        <Check size={16} />
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Độ chính xác tuyệt đối</h4>
-                        <p className="text-xs">Giải thuật mô phỏng chuẩn quốc tế, kiểm chứng qua hàng ngàn công trình thực tế.</p>
-                      </div>
-                    </div>
+                      <p className="text-justify">
+                        Với tính năng thiết lập mô hình tham số động trực quan và khả năng kết nối dữ liệu liên thông hoàn hảo với các hệ sinh thái BIM phổ biến (AutoCAD, Revit, Tekla, SAP2000), phần mềm <strong>{product.name}</strong> không chỉ hỗ trợ tối ưu hóa tới 35% hàm lượng vật liệu thép mà còn rút ngắn thời gian thiết kế lên đến 60%. Đây chính là công cụ đắc lực giúp nâng cao vị thế công nghệ, gia tăng tính cạnh tranh và bảo đảm an toàn tuyệt đối cho mọi công trình xây dựng hiện đại.
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                        <div className="flex gap-3 items-start">
+                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                            <Check size={16} />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Độ chính xác tuyệt đối</h4>
+                            <p className="text-xs">Giải thuật mô phỏng chuẩn quốc tế, kiểm chứng qua hàng ngàn công trình thực tế.</p>
+                          </div>
+                        </div>
 
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                        <ShieldCheck size={16} />
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Bản quyền vĩnh viễn</h4>
-                        <p className="text-xs">Cam kết pháp lý 100% chính hãng, hỗ trợ kiểm toán bản quyền phần mềm doanh nghiệp.</p>
-                      </div>
-                    </div>
+                        <div className="flex gap-3 items-start">
+                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                            <ShieldCheck size={16} />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Bản quyền vĩnh viễn</h4>
+                            <p className="text-xs">Cam kết pháp lý 100% chính hãng, hỗ trợ kiểm toán bản quyền phần mềm doanh nghiệp.</p>
+                          </div>
+                        </div>
 
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                        <Cpu size={16} />
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Tự động hóa tối đa</h4>
-                        <p className="text-xs">Tích hợp AI đẩy nhanh thời gian xuất bản vẽ thiết kế kỹ thuật gấp 5 lần thông thường.</p>
-                      </div>
-                    </div>
+                        <div className="flex gap-3 items-start">
+                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                            <Cpu size={16} />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Tự động hóa tối đa</h4>
+                            <p className="text-xs">Tích hợp AI đẩy nhanh thời gian xuất bản vẽ thiết kế kỹ thuật gấp 5 lần thông thường.</p>
+                          </div>
+                        </div>
 
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                        <Sparkles size={16} />
+                        <div className="flex gap-3 items-start">
+                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                            <Sparkles size={16} />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Hỗ trợ kỹ thuật 24/7</h4>
+                            <p className="text-xs">Chuyên gia CIC giàu kinh nghiệm trực tiếp chuyển giao công nghệ và xử lý sự cố tại dự án.</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Hỗ trợ kỹ thuật 24/7</h4>
-                        <p className="text-xs">Chuyên gia CIC giàu kinh nghiệm trực tiếp chuyển giao công nghệ và xử lý sự cố tại dự án.</p>
-                      </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </motion.div>
               )}
 
@@ -332,21 +348,30 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-4"
                 >
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-950 mb-4">Các tính năng kỹ thuật nổi bật:</h3>
-                  <ul className="space-y-3">
-                    {[
-                      'Hỗ trợ đầy đủ các tính năng phân tích kết cấu dầm, khung, móng, cọc phức tạp theo các Tiêu chuẩn Việt Nam (TCVN 5574:2018, TCVN 2737...).',
-                      'Khả năng đọc và lưu các tệp tin kỹ thuật dạng mở rộng tốc độ cao, tương thích hoàn toàn với nền tảng AutoCAD, Revit, Tekla, SAP2000.',
-                      'Thiết lập mô hình tham số động linh hoạt, tự động nhận diện liên kết và tối ưu hóa hàm lượng cốt thép cốt thép chịu tải.',
-                      'Công cụ bóc tách tiên lượng tự động, liên kết dữ liệu trực quan phục vụ công tác lập hồ sơ dự toán công trình nhanh chóng.',
-                      'Tích hợp Module kết nối cảm biến IoT hỗ trợ giám sát sức khỏe công trình và truyền tín hiệu cảnh báo hư hại tức thời.'
-                    ].map((feat, i) => (
-                      <li key={i} className="flex gap-3 items-start text-sm text-slate-600">
-                        <span className="w-1.5 h-1.5 bg-orange-600 mt-2 shrink-0"></span>
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {product.featuresHtml ? (
+                    <div 
+                      className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
+                      dangerouslySetInnerHTML={{ __html: product.featuresHtml }} 
+                    />
+                  ) : (
+                    <>
+                      <h3 className="text-sm font-black uppercase tracking-wider text-slate-950 mb-4">Các tính năng kỹ thuật nổi bật:</h3>
+                      <ul className="space-y-3">
+                        {[
+                          'Hỗ trợ đầy đủ các tính năng phân tích kết cấu dầm, khung, móng, cọc phức tạp theo các Tiêu chuẩn Việt Nam (TCVN 5574:2018, TCVN 2737...).',
+                          'Khả năng đọc và lưu các tệp tin kỹ thuật dạng mở rộng tốc độ cao, tương thích hoàn toàn với nền tảng AutoCAD, Revit, Tekla, SAP2000.',
+                          'Thiết lập mô hình tham số động linh hoạt, tự động nhận diện liên kết và tối ưu hóa hàm lượng cốt thép cốt thép chịu tải.',
+                          'Công cụ bóc tách tiên lượng tự động, liên kết dữ liệu trực quan phục vụ công tác lập hồ sơ dự toán công trình nhanh chóng.',
+                          'Tích hợp Module kết nối cảm biến IoT hỗ trợ giám sát sức khỏe công trình và truyền tín hiệu cảnh báo hư hại tức thời.'
+                        ].map((feat, i) => (
+                          <li key={i} className="flex gap-3 items-start text-sm text-slate-600">
+                            <span className="w-1.5 h-1.5 bg-orange-600 mt-2 shrink-0"></span>
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </motion.div>
               )}
 
@@ -356,18 +381,30 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-4 text-center"
                 >
-                  <div className="relative aspect-video bg-slate-900 flex items-center justify-center group overflow-hidden cursor-pointer rounded-[10px]">
-                    <img 
-                      src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80" 
-                      alt="video thumbnail" 
-                      className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700 rounded-[10px]" 
-                    />
-                    <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center">
-                      <div className="w-20 h-20 bg-orange-600 text-white flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-2xl rounded-[10px]">
-                        <Play size={28} fill="white" />
+                  {product.videoUrl ? (
+                    <div className="aspect-video w-full rounded-[10px] overflow-hidden bg-slate-900 shadow-md">
+                      <iframe
+                        src={product.videoUrl}
+                        title={`${product.name} Video`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative aspect-video bg-slate-900 flex items-center justify-center group overflow-hidden cursor-pointer rounded-[10px]">
+                      <img 
+                        src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80" 
+                        alt="video thumbnail" 
+                        className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700 rounded-[10px]" 
+                      />
+                      <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center">
+                        <div className="w-20 h-20 bg-orange-600 text-white flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-2xl rounded-[10px]">
+                          <Play size={28} fill="white" />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                   <p className="text-xs text-slate-500 font-medium">Video giới thiệu tính năng thực tế, hướng dẫn cài đặt và ứng dụng của {product.name}</p>
                 </motion.div>
               )}
@@ -379,29 +416,52 @@ export function ProductDetailView({
                   className="space-y-3"
                 >
                   <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">Đăng ký nhận liên kết tải bộ cài dùng thử & tài liệu hướng dẫn sử dụng chuyên sâu:</span>
-                  {[
-                    { title: `Brochure giới thiệu chi tiết sản phẩm ${product.name}`, size: '4.5 MB', type: 'PDF' },
-                    { title: `Hướng dẫn cài đặt & Cấu hình hệ thống đề nghị`, size: '2.8 MB', type: 'PDF' },
-                    { title: `Tài liệu hướng dẫn sử dụng nhanh dành cho Kỹ sư`, size: '12.4 MB', type: 'PDF' },
-                    { title: `Bản dùng thử (Trial) cập nhật phiên bản mới nhất`, size: '185.0 MB', type: 'ZIP' }
-                  ].map((doc, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => onDownload(product)}
-                      className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors rounded-[8px]">
-                          {doc.type}
+                  {product.documents && product.documents.length > 0 ? (
+                    product.documents.map((doc, idx) => (
+                      <a 
+                        key={idx}
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs rounded-[8px]">
+                            EXE
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.name}</h4>
+                            {doc.size && <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>}
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.title}</h4>
-                          <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>
+                        <Download size={16} className="text-orange-600 group-hover:scale-110 transition-transform" />
+                      </a>
+                    ))
+                  ) : (
+                    [
+                      { title: `Brochure giới thiệu chi tiết sản phẩm ${product.name}`, size: '4.5 MB', type: 'PDF' },
+                      { title: `Hướng dẫn cài đặt & Cấu hình hệ thống đề nghị`, size: '2.8 MB', type: 'PDF' },
+                      { title: `Tài liệu hướng dẫn sử dụng nhanh dành cho Kỹ sư`, size: '12.4 MB', type: 'PDF' },
+                      { title: `Bản dùng thử (Trial) cập nhật phiên bản mới nhất`, size: '185.0 MB', type: 'ZIP' }
+                    ].map((doc, idx) => (
+                      <div 
+                        key={idx}
+                        onClick={() => onDownload(product)}
+                        className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors rounded-[8px]">
+                            {doc.type}
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.title}</h4>
+                            <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>
+                          </div>
                         </div>
+                        <Download size={16} className="text-slate-400 group-hover:text-orange-600 transition-colors" />
                       </div>
-                      <Download size={16} className="text-slate-400 group-hover:text-orange-600 transition-colors" />
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </motion.div>
               )}
             </div>
@@ -535,9 +595,14 @@ export function ProductDetailView({
                 className="bg-white border border-slate-200 group flex flex-col hover:border-orange-600 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer rounded-[10px]"
               >
                 {/* Image */}
-                <div className="h-44 bg-slate-100 overflow-hidden relative rounded-t-[10px]">
-                  <img src={rel.img} alt={rel.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-t-[10px]" />
-                  <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-950/80 text-white text-xs font-bold uppercase tracking-wider">{rel.field}</span>
+                <div className="h-40 bg-white border-b border-slate-100 overflow-hidden relative rounded-t-[10px] p-3 flex items-center justify-center">
+                  <img 
+                    src={rel.icon || rel.img} 
+                    alt={rel.name} 
+                    referrerPolicy="no-referrer" 
+                    className={`w-full h-full ${rel.icon ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-500`} 
+                  />
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-slate-950/80 text-white text-[9px] font-bold uppercase tracking-wider rounded-[4px]">{rel.field}</span>
                 </div>
                 {/* Info */}
                 <div className="p-4 flex-1 flex flex-col justify-between gap-3">

@@ -64,6 +64,25 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     setCurrentPage(1);
   }, [searchQuery, selectedCategory]);
 
+  const activeService = servicesData.find(s => s.id === activeServiceId);
+
+  // Handle fallback images for broken image URLs in htmlContent
+  useEffect(() => {
+    if (activeService) {
+      const timer = setTimeout(() => {
+        const images = document.querySelectorAll('.service-cms-content img');
+        images.forEach((img) => {
+          const htmlImg = img as HTMLImageElement;
+          htmlImg.onerror = () => {
+            htmlImg.onerror = null;
+            htmlImg.src = activeService.image || "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80";
+          };
+        });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [activeService]);
+
   const categories = ['Tất cả', ...Array.from(new Set(servicesData.map(s => s.category)))];
 
   const filteredServices = servicesData.filter(service => {
@@ -71,7 +90,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     const matchesSearch = 
       service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       service.shortDesc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.tagline.toLowerCase().includes(searchQuery.toLowerCase());
+      (service.tagline || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -84,8 +103,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
   useEffect(() => {
     setActiveServiceId(initialServiceId);
   }, [initialServiceId]);
-
-  const activeService = servicesData.find(s => s.id === activeServiceId);
 
   // Related products modal state & selector
   const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
@@ -363,10 +380,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               {/* Main Detail Content Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
-                {/* Column Left: Main description & scope & process */}
-                <div className="lg:col-span-8 space-y-12 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
+                {/* Column Left: Main description & rich HTML content */}
+                <div className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
                   
-                  {/* Title & Tagline */}
+                  {/* Category & Title */}
                   <div className="space-y-4">
                     <span className="text-xs font-bold text-orange-600 uppercase tracking-wider bg-orange-50 px-2.5 py-1 border border-orange-100 rounded-[8px]">
                       {activeService?.category}
@@ -374,182 +391,14 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-snug">
                       {activeService?.title}
                     </h2>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wide leading-relaxed border-l-2 border-orange-500 pl-4">
-                      {activeService?.tagline}
-                    </p>
                   </div>
 
-                  {/* Feature Image */}
-                  <div className="h-[280px] sm:h-[380px] w-full overflow-hidden relative rounded-[10px]">
-                    <img 
-                      src={activeService?.image} 
-                      alt={activeService?.title} 
-                      className="w-full h-full object-cover rounded-[10px]" 
-                      referrerPolicy="no-referrer"
+                  {/* Rich HTML Content Area */}
+                  {activeService?.htmlContent && (
+                    <div 
+                      className="service-cms-content pt-2"
+                      dangerouslySetInnerHTML={{ __html: activeService.htmlContent }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent"></div>
-                  </div>
-
-                  {/* Overview Introduction */}
-                  <div className="space-y-4">
-                    <p className="text-slate-600 text-sm leading-relaxed font-normal text-justify">
-                      {activeService?.shortDesc}
-                    </p>
-                  </div>
-
-                  {/* Why Need (Tại sao cần) */}
-                  {activeService?.whyNeed && activeService.whyNeed.length > 0 && (
-                    <div className="space-y-6 bg-slate-50 border border-slate-200/50 p-6 sm:p-8 rounded-[10px]">
-                      <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                        <span className="w-2 h-4 bg-orange-600 inline-block"></span>
-                        {activeService.whyNeedTitle || "Tại sao cần dịch vụ này?"}
-                      </h3>
-                      <div className="grid grid-cols-1 gap-4">
-                        {activeService.whyNeed.map((why, i) => (
-                          <div key={i} className="flex gap-3 items-start text-xs text-slate-600 leading-relaxed font-normal">
-                            <CheckCircle2 size={16} className="text-orange-500 shrink-0 mt-0.5" />
-                            <span>{why}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Scope of Services (Phạm vi dịch vụ) */}
-                  <div className="space-y-8">
-                    <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                      <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
-                      {activeService?.scopeTitle || "Phạm vi & Các nội dung thực thi"}
-                    </h3>
-
-                    <div className="space-y-6">
-                      {activeService?.scope.map((item, i) => (
-                        <div key={i} className="border border-slate-100 hover:border-slate-200 p-6 space-y-4 transition-all rounded-[10px]">
-                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 pb-2">
-                            <span>{item.title}</span>
-                            <span className="text-xs text-orange-600 font-bold">#0{i+1}</span>
-                          </h4>
-                          {item.desc && (
-                            <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                              {item.desc}
-                            </p>
-                          )}
-                          {item.list && item.list.length > 0 && (
-                            <ul className="grid grid-cols-1 gap-2.5 pl-2">
-                              {item.list.map((listItem, listIdx) => (
-                                <li key={listIdx} className="flex gap-2 items-start text-xs text-slate-600 leading-relaxed font-normal">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 mt-1.5"></span>
-                                  <span>{listItem}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                          {item.img && (
-                            <div className="mt-4 h-48 w-full overflow-hidden rounded-[10px]">
-                              <img src={item.img} alt={item.title} className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-all duration-500 rounded-[10px]" referrerPolicy="no-referrer" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Detailed Process (Quy trình triển khai) */}
-                  {activeService?.process && activeService.process.length > 0 && (
-                    <div className="space-y-8">
-                      <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                        <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
-                        Quy trình triển khai khoa học
-                      </h3>
-
-                      <div className="grid grid-cols-1 gap-6 relative pl-6 border-l-2 border-slate-200">
-                        {activeService.process.map((step, i) => (
-                          <div key={i} className="relative group space-y-2">
-                            {/* Circle Pin */}
-                            <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-200 border-2 border-white group-hover:bg-orange-600 transition-colors"></div>
-                            
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 border border-orange-100">BƯỚC {step.step}</span>
-                              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{step.title}</span>
-                            </div>
-                            <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                              {step.desc}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Benefits (Lợi ích mang lại) */}
-                  {activeService?.benefits && activeService.benefits.length > 0 && (
-                    <div className="space-y-6">
-                      <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                        <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
-                        Giá trị & Lợi ích bền vững
-                      </h3>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {activeService.benefits.map((benefit, i) => (
-                          <div key={i} className="p-4 border border-slate-100 bg-slate-50/50 flex gap-3 items-start rounded-none hover:border-orange-200 hover:bg-orange-50/20 transition-all">
-                            <div className="w-6 h-6 bg-orange-100 text-orange-600 flex items-center justify-center rounded-full shrink-0">
-                              <Check size={14} />
-                            </div>
-                            <span className="text-xs text-slate-700 leading-relaxed font-normal">{benefit}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* State & Intl Collaborations (Media details matching input) */}
-                  {activeService?.stateCollaboration && (
-                    <div className="space-y-6 border-t border-slate-200 pt-8">
-                      <h3 className="text-base font-bold text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                        <Building2 size={18} className="text-orange-600" />
-                        {activeService.stateCollaboration.title}
-                      </h3>
-                      <div className="grid grid-cols-1 gap-6">
-                        {activeService.stateCollaboration.items.map((collab, i) => (
-                          <div key={i} className="bg-slate-50 p-6 space-y-2 border border-slate-200/50">
-                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">{collab.title}</h4>
-                            <p className="text-xs text-slate-600 leading-relaxed font-normal">{collab.desc}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {activeService?.intlCollaboration && (
-                    <div className="space-y-4 border-t border-slate-200 pt-8 bg-orange-50/20 p-6 border border-orange-100">
-                      <h3 className="text-base font-bold text-orange-800 uppercase tracking-tight flex items-center gap-2">
-                        <Globe size={18} className="text-orange-600" />
-                        {activeService.intlCollaboration.title}
-                      </h3>
-                      <p className="text-xs text-slate-700 leading-relaxed font-normal">{activeService.intlCollaboration.desc}</p>
-                    </div>
-                  )}
-
-                  {/* Special Media Highlights */}
-                  {activeService?.media && activeService.media.length > 0 && (
-                    <div className="space-y-6 border-t border-slate-200 pt-8">
-                      <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                        <FileText size={18} className="text-orange-600 animate-pulse" />
-                        Hình ảnh & Ghi nhận từ sự kiện
-                      </h3>
-                      {activeService.media.map((med, i) => (
-                        <div key={i} className="space-y-3 bg-slate-50 p-6 border border-slate-200/50">
-                          {med.title && <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide leading-snug">{med.title}</h4>}
-                          {med.content && <p className="text-xs text-slate-600 leading-relaxed font-normal italic">{med.content}</p>}
-                          {med.url && (
-                            <div className="h-48 sm:h-64 w-full overflow-hidden border border-slate-200">
-                              <img src={med.url} alt={med.caption || ""} className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                          {med.caption && <span className="text-xs text-slate-400 block text-center font-bold uppercase tracking-wider">{med.caption}</span>}
-                        </div>
-                      ))}
-                    </div>
                   )}
 
                 </div>

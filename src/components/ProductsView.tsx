@@ -1514,15 +1514,14 @@ export function ProductsView(_props?: ProductsViewProps) {
                     </div>
 
                     {/* Image Area */}
-                    <div className="h-60 overflow-hidden bg-slate-100 relative rounded-[10px]">
+                    <div className="h-52 overflow-hidden bg-white border border-slate-100 relative rounded-[10px] p-4 flex items-center justify-center">
                       <img 
-                        src={product.img} 
+                        src={product.img || product.icon} 
                         alt={product.name}
                         loading="lazy"
                         referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent"></div>
                     </div>
 
                     {/* Card Body */}
