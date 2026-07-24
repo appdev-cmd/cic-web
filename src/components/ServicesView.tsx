@@ -151,11 +151,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               className="space-y-12"
             >
               {/* Heading */}
-              <div className="text-center max-w-3xl mx-auto space-y-4">
-                <h1 className="text-4xl md:text-5xl font-black text-slate-950 uppercase tracking-tighter leading-none">
-                  GIẢI PHÁP & <span className="text-orange-600">DỊCH VỤ</span> KỸ THUẬT SỐ
+              <div className="text-center max-w-4xl mx-auto space-y-4">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-950 uppercase tracking-tight leading-tight sm:whitespace-nowrap">
+                  GIẢI PHÁP & <span className="text-orange-600">DỊCH VỤ</span> <span className="whitespace-nowrap">KỸ THUẬT SỐ</span>
                 </h1>
-                <p className="text-slate-500 font-medium text-sm leading-relaxed">
+                <p className="text-slate-500 font-normal text-sm leading-relaxed max-w-3xl mx-auto">
                   CIC đồng hành cùng cơ quan Nhà nước, Chủ đầu tư và các Nhà thầu hàng đầu xây dựng chuỗi giải pháp Tư vấn BIM, Chuyển đổi số xây dựng, Năng lượng tái tạo và Kiểm kê phát thải tiên tiến bậc nhất.
                 </p>
               </div>
@@ -172,7 +172,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-bold rounded-[8px]"
+                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
                     />
                     {searchQuery && (
                       <button 
@@ -185,7 +185,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   </div>
 
                   {/* Filter stats */}
-                  <div className="flex items-center justify-end text-xs font-bold text-slate-500 gap-2 font-sans">
+                  <div className="flex items-center justify-end text-xs font-bold text-slate-500 gap-2">
                     <SlidersHorizontal size={14} className="text-slate-400" />
                     Hiển thị {filteredServices.length} trên tổng số {servicesData.length} dịch vụ
                   </div>
@@ -195,7 +195,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 {/* Category filtering pills */}
                 <div className="border-t border-slate-100 pt-4">
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2">Phân loại:</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2">Phân loại:</span>
                     <div className="flex flex-wrap gap-1.5">
                       {categories.map((cat) => {
                         const isSelected = selectedCategory === cat;
@@ -203,7 +203,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all border rounded-[8px] ${
+                            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all border rounded-[8px] ${
                               isSelected
                                 ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
                                 : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -228,7 +228,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       setSearchQuery('');
                       setSelectedCategory('Tất cả');
                     }}
-                    className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all rounded-[8px]"
+                    className="px-6 py-2.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px]"
                   >
                     Xóa bộ lọc tìm kiếm
                   </button>
@@ -253,7 +253,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
-                        <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-slate-900/90 text-white font-sans text-[9px] font-black uppercase tracking-widest border border-white/10 rounded-[8px]">
+                        <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-slate-900/90 text-white text-xs font-bold uppercase tracking-wider border border-white/10 rounded-[8px]">
                           {service.category}
                         </span>
                       </div>
@@ -261,10 +261,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       {/* Content Area */}
                       <div className="p-4 flex-1 flex flex-col justify-between space-y-6">
                         <div className="space-y-3">
-                          <h3 className="text-base font-black text-slate-950 leading-tight group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
+                          <h3 className="text-base font-bold text-slate-950 leading-tight group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
                             {service.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}
                           </h3>
-                          <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-3">
+                          <p className="text-xs text-slate-500 leading-relaxed font-normal line-clamp-3">
                             {service.shortDesc}
                           </p>
                         </div>
@@ -272,7 +272,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         {/* CTA Link */}
                         <button 
                           onClick={() => handleServiceSelect(service.id)}
-                          className="w-full py-2.5 border border-slate-200 hover:border-orange-600 hover:bg-orange-600 hover:text-white transition-all text-xs font-black uppercase tracking-widest text-slate-700 flex items-center justify-center gap-2 group-hover:shadow-md rounded-[8px]"
+                          className="w-full py-2.5 border border-slate-200 hover:border-orange-600 hover:bg-orange-600 hover:text-white transition-all text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-center gap-2 group-hover:shadow-md rounded-[8px]"
                         >
                           Xem chi tiết dịch vụ <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                         </button>
@@ -346,7 +346,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
                 <button
                   onClick={() => setActiveServiceId(null)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500 text-xs font-black uppercase tracking-widest transition-all rounded-none"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px]"
                 >
                   <ArrowLeft size={14} /> Trở về danh mục dịch vụ
                 </button>
@@ -368,13 +368,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   
                   {/* Title & Tagline */}
                   <div className="space-y-4">
-                    <span className="font-sans text-[9px] font-black text-orange-600 uppercase tracking-widest bg-orange-50 px-2 py-1 border border-orange-100 rounded-[8px]">
+                    <span className="text-xs font-bold text-orange-600 uppercase tracking-wider bg-orange-50 px-2.5 py-1 border border-orange-100 rounded-[8px]">
                       {activeService?.category}
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-950 uppercase tracking-tighter leading-snug">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-snug">
                       {activeService?.title}
                     </h2>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wide leading-relaxed border-l-2 border-orange-500 pl-4">
+                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wide leading-relaxed border-l-2 border-orange-500 pl-4">
                       {activeService?.tagline}
                     </p>
                   </div>
@@ -392,7 +392,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {/* Overview Introduction */}
                   <div className="space-y-4">
-                    <p className="text-slate-600 text-sm leading-relaxed font-medium text-justify">
+                    <p className="text-slate-600 text-sm leading-relaxed font-normal text-justify">
                       {activeService?.shortDesc}
                     </p>
                   </div>
@@ -400,13 +400,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   {/* Why Need (Tại sao cần) */}
                   {activeService?.whyNeed && activeService.whyNeed.length > 0 && (
                     <div className="space-y-6 bg-slate-50 border border-slate-200/50 p-6 sm:p-8 rounded-[10px]">
-                      <h3 className="text-base font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                      <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight flex items-center gap-2">
                         <span className="w-2 h-4 bg-orange-600 inline-block"></span>
                         {activeService.whyNeedTitle || "Tại sao cần dịch vụ này?"}
                       </h3>
                       <div className="grid grid-cols-1 gap-4">
                         {activeService.whyNeed.map((why, i) => (
-                          <div key={i} className="flex gap-3 items-start text-xs text-slate-600 leading-relaxed font-medium">
+                          <div key={i} className="flex gap-3 items-start text-xs text-slate-600 leading-relaxed font-normal">
                             <CheckCircle2 size={16} className="text-orange-500 shrink-0 mt-0.5" />
                             <span>{why}</span>
                           </div>
@@ -417,7 +417,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {/* Scope of Services (Phạm vi dịch vụ) */}
                   <div className="space-y-8">
-                    <h3 className="text-lg font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
+                    <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
                       <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
                       {activeService?.scopeTitle || "Phạm vi & Các nội dung thực thi"}
                     </h3>
@@ -425,19 +425,19 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     <div className="space-y-6">
                       {activeService?.scope.map((item, i) => (
                         <div key={i} className="border border-slate-100 hover:border-slate-200 p-6 space-y-4 transition-all rounded-[10px]">
-                          <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 pb-2">
+                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 pb-2">
                             <span>{item.title}</span>
-                            <span className="text-[10px] text-orange-600 font-sans">#0{i+1}</span>
+                            <span className="text-xs text-orange-600 font-bold">#0{i+1}</span>
                           </h4>
                           {item.desc && (
-                            <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                            <p className="text-xs text-slate-600 leading-relaxed font-normal">
                               {item.desc}
                             </p>
                           )}
                           {item.list && item.list.length > 0 && (
                             <ul className="grid grid-cols-1 gap-2.5 pl-2">
                               {item.list.map((listItem, listIdx) => (
-                                <li key={listIdx} className="flex gap-2 items-start text-xs text-slate-600 leading-relaxed">
+                                <li key={listIdx} className="flex gap-2 items-start text-xs text-slate-600 leading-relaxed font-normal">
                                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 mt-1.5"></span>
                                   <span>{listItem}</span>
                                 </li>
@@ -446,7 +446,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           )}
                           {item.img && (
                             <div className="mt-4 h-48 w-full overflow-hidden rounded-[10px]">
-                              <img src={item.img} alt={item.title} className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500 rounded-[10px]" referrerPolicy="no-referrer" />
+                              <img src={item.img} alt={item.title} className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-all duration-500 rounded-[10px]" referrerPolicy="no-referrer" />
                             </div>
                           )}
                         </div>
@@ -457,7 +457,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   {/* Detailed Process (Quy trình triển khai) */}
                   {activeService?.process && activeService.process.length > 0 && (
                     <div className="space-y-8">
-                      <h3 className="text-lg font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
+                      <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
                         <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
                         Quy trình triển khai khoa học
                       </h3>
@@ -468,11 +468,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                             {/* Circle Pin */}
                             <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-200 border-2 border-white group-hover:bg-orange-600 transition-colors"></div>
                             
-                            <div className="flex items-center gap-2 font-sans">
-                              <span className="text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-0.5 border border-orange-100">BƯỚC {step.step}</span>
-                              <span className="text-xs font-black text-slate-800 uppercase tracking-wider">{step.title}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 border border-orange-100">BƯỚC {step.step}</span>
+                              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{step.title}</span>
                             </div>
-                            <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                            <p className="text-xs text-slate-600 leading-relaxed font-normal">
                               {step.desc}
                             </p>
                           </div>
@@ -484,7 +484,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   {/* Benefits (Lợi ích mang lại) */}
                   {activeService?.benefits && activeService.benefits.length > 0 && (
                     <div className="space-y-6">
-                      <h3 className="text-lg font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
+                      <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
                         <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
                         Giá trị & Lợi ích bền vững
                       </h3>
@@ -495,7 +495,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                             <div className="w-6 h-6 bg-orange-100 text-orange-600 flex items-center justify-center rounded-full shrink-0">
                               <Check size={14} />
                             </div>
-                            <span className="text-xs text-slate-700 leading-relaxed font-medium">{benefit}</span>
+                            <span className="text-xs text-slate-700 leading-relaxed font-normal">{benefit}</span>
                           </div>
                         ))}
                       </div>
@@ -505,15 +505,15 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   {/* State & Intl Collaborations (Media details matching input) */}
                   {activeService?.stateCollaboration && (
                     <div className="space-y-6 border-t border-slate-200 pt-8">
-                      <h3 className="text-base font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
+                      <h3 className="text-base font-bold text-slate-950 uppercase tracking-tight flex items-center gap-2">
                         <Building2 size={18} className="text-orange-600" />
                         {activeService.stateCollaboration.title}
                       </h3>
                       <div className="grid grid-cols-1 gap-6">
                         {activeService.stateCollaboration.items.map((collab, i) => (
                           <div key={i} className="bg-slate-50 p-6 space-y-2 border border-slate-200/50">
-                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">{collab.title}</h4>
-                            <p className="text-xs text-slate-500 leading-relaxed font-medium">{collab.desc}</p>
+                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">{collab.title}</h4>
+                            <p className="text-xs text-slate-600 leading-relaxed font-normal">{collab.desc}</p>
                           </div>
                         ))}
                       </div>
@@ -522,31 +522,31 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {activeService?.intlCollaboration && (
                     <div className="space-y-4 border-t border-slate-200 pt-8 bg-orange-50/20 p-6 border border-orange-100">
-                      <h3 className="text-base font-black text-orange-800 uppercase tracking-tight flex items-center gap-2">
+                      <h3 className="text-base font-bold text-orange-800 uppercase tracking-tight flex items-center gap-2">
                         <Globe size={18} className="text-orange-600" />
                         {activeService.intlCollaboration.title}
                       </h3>
-                      <p className="text-xs text-slate-700 leading-relaxed font-medium">{activeService.intlCollaboration.desc}</p>
+                      <p className="text-xs text-slate-700 leading-relaxed font-normal">{activeService.intlCollaboration.desc}</p>
                     </div>
                   )}
 
                   {/* Special Media Highlights */}
                   {activeService?.media && activeService.media.length > 0 && (
                     <div className="space-y-6 border-t border-slate-200 pt-8">
-                      <h3 className="text-base font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                      <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight flex items-center gap-2">
                         <FileText size={18} className="text-orange-600 animate-pulse" />
                         Hình ảnh & Ghi nhận từ sự kiện
                       </h3>
                       {activeService.media.map((med, i) => (
                         <div key={i} className="space-y-3 bg-slate-50 p-6 border border-slate-200/50">
-                          {med.title && <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide leading-snug">{med.title}</h4>}
-                          {med.content && <p className="text-xs text-slate-500 leading-relaxed font-medium italic">{med.content}</p>}
+                          {med.title && <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide leading-snug">{med.title}</h4>}
+                          {med.content && <p className="text-xs text-slate-600 leading-relaxed font-normal italic">{med.content}</p>}
                           {med.url && (
                             <div className="h-48 sm:h-64 w-full overflow-hidden border border-slate-200">
                               <img src={med.url} alt={med.caption || ""} className="w-full h-full object-cover" />
                             </div>
                           )}
-                          {med.caption && <span className="text-[10px] text-slate-400 block text-center font-bold uppercase tracking-wider">{med.caption}</span>}
+                          {med.caption && <span className="text-xs text-slate-400 block text-center font-bold uppercase tracking-wider">{med.caption}</span>}
                         </div>
                       ))}
                     </div>
@@ -564,10 +564,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     </div>
 
                     <div className="space-y-4 relative z-10">
-                      <h3 className="text-lg font-black uppercase tracking-tight text-slate-950 leading-tight">
+                      <h3 className="text-lg font-bold uppercase tracking-tight text-slate-950 leading-tight">
                         Tư Vấn Giải Pháp Thích Hợp
                       </h3>
-                      <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                      <p className="text-xs text-slate-500 leading-relaxed font-normal">
                         Điền nhanh thông tin dưới đây, Đội ngũ chuyên gia Trung tâm dịch vụ CIC sẽ kết nối tư vấn miễn phí trong 15 phút.
                       </p>
 
@@ -580,8 +580,8 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           className="bg-orange-600 p-6 text-center space-y-3 rounded-[8px]"
                         >
                           <CheckCircle2 size={36} className="mx-auto text-white animate-bounce" />
-                          <h4 className="text-sm font-black uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG</h4>
-                          <p className="text-[11px] text-white/90 leading-relaxed font-medium">
+                          <h4 className="text-sm font-bold uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG</h4>
+                          <p className="text-xs text-white/90 leading-relaxed font-normal">
                             Hệ thống đã ghi nhận nhu cầu tư vấn. Chúng tôi sẽ gọi lại ngay cho bạn qua số điện thoại đã cung cấp. Xin cảm ơn!
                           </p>
                         </motion.div>
@@ -589,7 +589,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         <form className="space-y-5" onSubmit={handleFormSubmit}>
                           
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Họ tên *</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Họ tên *</label>
                             <div className="relative">
                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
                               <input 
@@ -598,13 +598,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 value={formData.fullname}
                                 onChange={(e) => setFormData({...formData, fullname: e.target.value})}
                                 placeholder="Ví dụ: Nguyễn Đức Anh" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold rounded-[8px]"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal rounded-[8px]"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Số điện thoại *</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Số điện thoại *</label>
                             <div className="relative">
                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={14} /></span>
                               <input 
@@ -613,13 +613,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 value={formData.phone}
                                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                 placeholder="Ví dụ: 0868934576" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold rounded-[8px]"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal rounded-[8px]"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Địa chỉ email</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Địa chỉ email</label>
                             <div className="relative">
                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
                               <input 
@@ -627,17 +627,17 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 placeholder="Ví dụ: anh.nguyen@company.com" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold rounded-[8px]"
+                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal rounded-[8px]"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Dịch vụ quan tâm</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Dịch vụ quan tâm</label>
                             <select 
                               value={formData.service}
                               onChange={(e) => setFormData({...formData, service: e.target.value})}
-                              className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold cursor-pointer rounded-[8px]"
+                              className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal cursor-pointer rounded-[8px]"
                             >
                               <option>Phần mềm kỹ thuật</option>
                               <option>Thiết bị & IOT</option>
@@ -647,23 +647,23 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 block">Nội dung</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Nội dung</label>
                             <textarea 
                               rows={3}
                               value={formData.notes}
                               onChange={(e) => setFormData({...formData, notes: e.target.value})}
                               placeholder="Mô tả cụ thể nhu cầu của bạn..." 
-                              className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-bold resize-none rounded-[8px]"
+                              className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal resize-none rounded-[8px]"
                             ></textarea>
                           </div>
 
-                          <div className="text-[11px] text-slate-600 font-bold leading-relaxed">
+                          <div className="text-xs text-slate-500 font-normal leading-relaxed">
                             Bằng cách đăng ký, bạn đồng ý với chính sách bảo mật và cam kết bảo vệ thông tin doanh nghiệp của CIC.
                           </div>
 
                           <button 
                             type="submit"
-                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
                           >
                             Gửi yêu cầu tư vấn <Send size={14} />
                           </button>
@@ -675,15 +675,15 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {/* Hotlines & Support Contacts matching exact inputs */}
                   <div className="bg-white border border-slate-200 p-6 space-y-4 rounded-[10px]">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 border-b border-slate-100 pb-2">HỖ TRỢ TRỰC TIẾP 24/7</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">HỖ TRỢ TRỰC TIẾP 24/7</h4>
                     <div className="space-y-3">
                       <div className="flex gap-3 items-center">
                         <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
                           <Phone size={14} />
                         </div>
                         <div>
-                          <span className="text-[9px] font-bold text-slate-400 block uppercase">Hà Nội & Miền Bắc</span>
-                          <span className="text-xs font-black text-slate-800">086 893 4576 / 024 3976 1381</span>
+                          <span className="text-xs font-bold text-slate-400 block uppercase">Hà Nội & Miền Bắc</span>
+                          <span className="text-xs font-bold text-slate-800">086 893 4576 / 024 3976 1381</span>
                         </div>
                       </div>
                       <div className="flex gap-3 items-center">
@@ -691,8 +691,8 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           <Mail size={14} />
                         </div>
                         <div>
-                          <span className="text-[9px] font-bold text-slate-400 block uppercase">Hộp thư điện tử</span>
-                          <span className="text-xs font-black text-slate-800">info@cic.com.vn</span>
+                          <span className="text-xs font-bold text-slate-400 block uppercase">Hộp thư điện tử</span>
+                          <span className="text-xs font-bold text-slate-800">info@cic.com.vn</span>
                         </div>
                       </div>
                     </div>
@@ -701,7 +701,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   {/* Related Products Widget (Minimal & Clean) */}
                   {currentRelatedProducts.length > 0 && (
                     <div className="bg-white border border-slate-200 p-5 space-y-3 rounded-[10px]">
-                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 border-b border-slate-100 pb-2.5">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2.5">
                         SẢN PHẨM LIÊN QUAN
                       </h4>
 
@@ -727,7 +727,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                               <h5 className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
                                 {prod.name}
                               </h5>
-                              <p className="text-[10px] text-slate-400 font-medium">
+                              <p className="text-xs text-slate-400 font-normal">
                                 {prod.brand || 'CIC Tech'} {prod.productType ? `• ${prod.productType}` : ''}
                               </p>
                             </div>
@@ -743,7 +743,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
               {/* Related Services List (Dịch vụ liên quan) */}
               <div className="space-y-6 border-t border-slate-200 pt-10">
-                <h3 className="text-lg font-black text-slate-950 uppercase tracking-tight flex items-center gap-2">
+                <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
                   <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
                   Dịch vụ liên quan & Hệ giải pháp số
                 </h3>
@@ -755,10 +755,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       onClick={() => handleServiceSelect(rSrv.id)}
                       className="bg-white border border-slate-200 p-5 space-y-3 hover:border-orange-500 hover:shadow-lg cursor-pointer transition-all duration-300 rounded-[10px]"
                     >
-                      <span className="text-[9px] font-bold text-orange-600 uppercase tracking-widest">{rSrv.category}</span>
-                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide group-hover:text-orange-600 line-clamp-1">{rSrv.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}</h4>
-                      <p className="text-[11px] text-slate-500 leading-relaxed font-medium line-clamp-2">{rSrv.shortDesc}</p>
-                      <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-orange-600 tracking-wider">Tìm hiểu thêm <ChevronRight size={12} /></span>
+                      <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">{rSrv.category}</span>
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide group-hover:text-orange-600 line-clamp-1">{rSrv.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed font-normal line-clamp-2">{rSrv.shortDesc}</p>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase text-orange-600 tracking-wider">Tìm hiểu thêm <ChevronRight size={12} /></span>
                     </div>
                   ))}
                 </div>
@@ -782,7 +782,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b-2 border-orange-600 shrink-0">
                   <div className="flex items-center gap-2">
                     <Box size={20} className="text-orange-500" />
-                    <span className="text-xs font-black uppercase tracking-widest text-orange-400">
+                    <span className="text-xs font-bold uppercase tracking-wider text-orange-400">
                       THÔNG SỐ SẢN PHẨM / PHẦN MỀM
                     </span>
                   </div>
@@ -806,7 +806,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <div className="p-3 bg-slate-50 border border-slate-100 space-y-1.5 text-xs font-medium rounded-[8px]">
+                      <div className="p-3 bg-slate-50 border border-slate-100 space-y-1.5 text-xs rounded-[8px]">
                         <div className="flex justify-between">
                           <span className="text-slate-400">Thương hiệu:</span>
                           <span className="font-bold text-slate-800">{selectedProductModal.brand || 'CIC Tech'}</span>
@@ -823,19 +823,19 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     </div>
 
                     <div className="sm:col-span-7 space-y-4">
-                      <h3 className="text-lg font-black text-slate-950 uppercase leading-snug">
+                      <h3 className="text-lg font-bold text-slate-950 uppercase leading-snug">
                         {selectedProductModal.name}
                       </h3>
 
-                      <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 border border-orange-200 text-xs font-black rounded-[6px]">
+                      <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 border border-orange-200 text-xs font-bold rounded-[6px]">
                         Mức giá đề xuất: {selectedProductModal.price}
                       </div>
 
-                      <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                      <p className="text-xs text-slate-600 leading-relaxed font-normal">
                         {selectedProductModal.description}
                       </p>
 
-                      <div className="space-y-2 border-t border-slate-100 pt-3 text-xs font-medium">
+                      <div className="space-y-2 border-t border-slate-100 pt-3 text-xs font-normal">
                         <div className="flex items-center gap-2 text-slate-700">
                           <CheckCircle2 size={14} className="text-orange-500 shrink-0" />
                           <span>Bản quyền chính hãng & Hỗ trợ chuyển giao 100%</span>
@@ -864,7 +864,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       setSelectedProductModal(null);
                       handleSelectProductForConsultation(prod);
                     }}
-                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md rounded-[8px]"
+                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md rounded-[8px]"
                   >
                     Thêm vào form tư vấn <Send size={14} />
                   </button>

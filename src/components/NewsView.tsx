@@ -37,8 +37,6 @@ import {
   CornerDownRight,
   Check,
   Copy,
-  Bookmark,
-  BookmarkCheck,
   ListOrdered,
   List,
   Facebook,
@@ -263,32 +261,9 @@ export function NewsView({
     }
   ];
 
-  // Bookmark & TOC States
-  const [savedBookmarks, setSavedBookmarks] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('cic_saved_news');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  // TOC States
   const [activeTocId, setActiveTocId] = useState<string | null>(null);
   const [isTocOpen, setIsTocOpen] = useState(true);
-
-  const toggleBookmark = (id: string) => {
-    let updated: string[];
-    if (savedBookmarks.includes(id)) {
-      updated = savedBookmarks.filter(bId => bId !== id);
-    } else {
-      updated = [...savedBookmarks, id];
-    }
-    setSavedBookmarks(updated);
-    try {
-      localStorage.setItem('cic_saved_news', JSON.stringify(updated));
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const handleSharePlatform = (platform: 'facebook' | 'linkedin' | 'twitter' | 'zalo') => {
     const currentUrl = window.location.href;
@@ -544,9 +519,9 @@ export function NewsView({
   return (
     <div className="pt-28 pb-20 relative bg-slate-50/50">
       
-      {/* Top Reading Progress Bar */}
+      {/* Top Reading Progress Bar (Positioned under Header at top-[72px]) */}
       {selectedItem && (
-        <div className="fixed top-0 left-0 w-full h-1 bg-slate-200 z-[60]">
+        <div className="fixed top-[72px] left-0 w-full h-1 bg-slate-200/80 z-[45]">
           <div
             className="h-full bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 transition-all duration-150"
             style={{ width: `${readingProgress}%` }}
@@ -659,25 +634,6 @@ export function NewsView({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleBookmark(selectedItem.id)}
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider transition-all border ${
-                        savedBookmarks.includes(selectedItem.id)
-                          ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
-                          : 'bg-white border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-600'
-                      }`}
-                    >
-                      {savedBookmarks.includes(selectedItem.id) ? (
-                        <>
-                          <BookmarkCheck size={14} className="text-white" /> Đã lưu bài viết
-                        </>
-                      ) : (
-                        <>
-                          <Bookmark size={14} /> Lưu bài viết
-                        </>
-                      )}
-                    </button>
-
                     <button
                       onClick={handleExportPDF}
                       disabled={isExportingPDF}
@@ -968,7 +924,7 @@ export function NewsView({
                                       <h5 className="text-[11px] font-black text-slate-950 line-clamp-2 uppercase">
                                         {file.title}
                                       </h5>
-                                      <p className="text-[9px] font-sans text-slate-400">{file.size}</p>
+                                      <p className="text-xs text-slate-400">{file.size}</p>
                                     </div>
                                   </div>
 
@@ -1084,7 +1040,7 @@ export function NewsView({
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-slate-900">{selectedItem.author}</h4>
-                        <p className="text-[10px] text-slate-400 font-sans">Ban biên tập tin tức CIC Tech</p>
+                        <p className="text-xs text-slate-400 font-medium">Ban biên tập tin tức CIC Tech</p>
                       </div>
                     </div>
                     <button

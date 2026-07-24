@@ -130,7 +130,7 @@ export function ProductDetailView({
                 </button>
 
                 {/* Indicator Overlay */}
-                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-[8px]">
                   Slide {currentSlide + 1} / {slideImages.length}
                 </div>
               </div>
@@ -157,16 +157,16 @@ export function ProductDetailView({
             
             {/* Badges and Field */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="px-3 py-1 bg-slate-950 text-white text-[10px] font-black uppercase tracking-widest rounded-[8px]">
+              <span className="px-3 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-[8px]">
                 {product.field}
               </span>
-              <span className="text-orange-600 text-xs font-sans font-black uppercase tracking-widest">
+              <span className="text-orange-600 text-xs font-bold uppercase tracking-wider">
                 Hãng: {product.brand}
               </span>
             </div>
 
             {/* Name */}
-            <h1 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight leading-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-tight">
               {product.name}
             </h1>
 
@@ -175,8 +175,8 @@ export function ProductDetailView({
 
             {/* Price */}
             <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px] rounded-[10px]">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Giá bán bản quyền</span>
-              <span className="text-2xl font-black text-orange-600 tracking-tight">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Giá bán bản quyền</span>
+              <span className="text-2xl font-extrabold text-orange-600 tracking-tight">
                 {product.price}
               </span>
             </div>
@@ -188,17 +188,17 @@ export function ProductDetailView({
 
             {/* Tags section */}
             <div className="pt-4 border-t border-slate-200 space-y-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Thông tin phân loại:</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">Thông tin phân loại:</span>
               <div className="flex flex-wrap gap-2">
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
+                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
                   <Layers size={12} className="text-orange-600" />
                   {product.field}
                 </div>
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
+                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
                   <Box size={12} className="text-orange-600" />
                   {product.brand}
                 </div>
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
+                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
                   <FileText size={12} className="text-orange-600" />
                   {product.app}
                 </div>
@@ -209,7 +209,7 @@ export function ProductDetailView({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
               <button
                 onClick={() => onContact(product)}
-                className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-wider text-[11px] transition-all shadow-lg shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-lg shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
               >
                 <MessageSquare size={16} />
                 Yêu cầu tư vấn
@@ -217,7 +217,7 @@ export function ProductDetailView({
               
               <button
                 onClick={() => onDownload(product)}
-                className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
               >
                 <Download size={16} />
                 Tải phần mềm
@@ -225,7 +225,7 @@ export function ProductDetailView({
 
               <button
                 onClick={() => onBuy(product)}
-                className="w-full py-4 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                className="w-full py-4 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
               >
                 Đăng ký mua
               </button>
@@ -420,7 +420,7 @@ export function ProductDetailView({
                 <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                   <Phone size={16} />
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-950">HỖ TRỢ TRỰC TUYẾN</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-950">HỖ TRỢ TRỰC TUYẾN</h3>
               </div>
 
               {/* Contact numbers detail requested by the user */}
@@ -428,76 +428,76 @@ export function ProductDetailView({
                 
                 {/* 1. Hotlines */}
                 <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-orange-600">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Đại diện Kinh doanh
                   </div>
                   <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-700">Đinh Trần Tuấn</span>
-                      <a href="tel:0859999698" className="font-sans font-black text-orange-600 hover:text-orange-700 hover:underline">085 999 9698</a>
+                      <a href="tel:0859999698" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">085 999 9698</a>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-bold text-slate-700">Miền Nam</span>
-                      <a href="tel:0913347960" className="font-sans font-black text-orange-600 hover:text-orange-700 hover:underline">0913 34 79 60</a>
+                      <a href="tel:0913347960" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">0913 34 79 60</a>
                     </div>
                   </div>
                 </div>
 
                 {/* 2. Technical Support Group */}
                 <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-orange-600">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Hỗ trợ kỹ thuật
                   </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-sans text-xs">
+                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 text-xs">
                     <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700 font-sans">Chí Chung</span>
-                      <a href="tel:0945285978" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0945 285 978</a>
+                      <span className="font-bold text-slate-700">Chí Chung</span>
+                      <a href="tel:0945285978" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0945 285 978</a>
                     </div>
                     <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700 font-sans">Huỳnh Thái</span>
-                      <a href="tel:0939261463" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0939 261 463</a>
+                      <span className="font-bold text-slate-700">Huỳnh Thái</span>
+                      <a href="tel:0939261463" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0939 261 463</a>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-slate-700 font-sans">Trọng Tiến</span>
-                      <a href="tel:0329271885" className="font-black text-slate-900 hover:text-orange-600 hover:underline">032 927 1885</a>
+                      <span className="font-bold text-slate-700">Trọng Tiến</span>
+                      <a href="tel:0329271885" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">032 927 1885</a>
                     </div>
                   </div>
                 </div>
 
                 {/* 3. Business North */}
                 <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-orange-600">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Kinh doanh Miền Bắc
                   </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-sans text-xs">
+                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 text-xs">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-700 font-sans">Tổng đài MB</span>
-                      <a href="tel:0886462020" className="font-black text-orange-600 hover:text-orange-700 hover:underline">088 646 2020</a>
+                      <span className="font-bold text-slate-700">Tổng đài MB</span>
+                      <a href="tel:0886462020" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">088 646 2020</a>
                     </div>
                   </div>
                 </div>
 
                 {/* 4. Business South */}
                 <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-orange-600">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
                     <span className="w-1.5 h-1.5 bg-orange-600"></span>
                     Kinh doanh Miền Nam
                   </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 font-sans text-xs">
+                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 text-xs">
                     <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700 font-sans">Hoàng Yến</span>
-                      <a href="tel:0934045088" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0934 045 088</a>
+                      <span className="font-bold text-slate-700">Hoàng Yến</span>
+                      <a href="tel:0934045088" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0934 045 088</a>
                     </div>
                     <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700 font-sans">Thanh Ngân</span>
-                      <a href="tel:0938721256" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0938 721 256</a>
+                      <span className="font-bold text-slate-700">Thanh Ngân</span>
+                      <a href="tel:0938721256" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0938 721 256</a>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-700 font-sans">Mỹ Khanh</span>
-                      <a href="tel:0907550037" className="font-black text-slate-900 hover:text-orange-600 hover:underline">0907 550 037</a>
+                      <span className="font-bold text-slate-700">Mỹ Khanh</span>
+                      <a href="tel:0907550037" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0907 550 037</a>
                     </div>
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export function ProductDetailView({
 
               {/* Extra Support Advice */}
               <div className="pt-4 border-t border-slate-100 text-center space-y-2">
-                <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                <p className="text-xs text-slate-400 font-medium leading-relaxed">
                   Quý khách vui lòng liên hệ trực tiếp số hotline hoặc gửi yêu cầu để đại diện kỹ thuật CIC hỗ trợ tức thời trong 1 giờ làm việc.
                 </p>
               </div>
@@ -520,51 +520,34 @@ export function ProductDetailView({
         {/* Related Products Carousel (Sản phẩm liên quan) */}
         <div className="pt-16 border-t border-slate-200 mt-16 space-y-8">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-black uppercase tracking-tight text-slate-950">Sản phẩm liên quan</h3>
-            <span className="text-xs font-sans font-bold uppercase tracking-wider text-orange-600">Được đề xuất nhiều nhất</span>
+            <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-950">Sản phẩm liên quan</h3>
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-600">Được đề xuất nhiều nhất</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {relatedProducts.map((rel, idx) => (
+            {relatedProducts.map((rel) => (
               <div
                 key={rel.id}
                 onClick={() => {
-                  // Simply change path to show related item
                   window.scrollTo({ top: 0, behavior: 'smooth' });
-                  // Simulate reloading with the same component
-                  // Let's trigger a force state update by clicking rel. Since product is bound to prop, this will dynamically refresh details
-                  // To let parent know, we will trigger a reselect in parent list by passing a custom selection callback or re-setting
-                  // We can replace the detail view state in parent cleanly! Let's pass an optional prop to handle related selection.
-                  // Since we are going to integrate this component, let's allow it to click and view its own state.
-                  // We'll define an action to handle it.
-                  window.location.hash = `#solutions`;
-                  // To make it look beautiful, we'll implement selection reloading. We'll handle this smoothly.
-                  // The parent will pass the set state handle directly! We can just call it or reload.
-                  onBack(); // Go back momentarily
-                  setTimeout(() => {
-                    // Let's make sure clicking on related works.
-                    // We can pass a callback onRelClick or we can simply trigger onBack then set select!
-                    // Let's update props to include onProductChange or use local routing. 
-                    // Let's add onSelect to handle related product clicking instantly!
-                    onBack();
-                  }, 100);
+                  onBack();
                 }}
                 className="bg-white border border-slate-200 group flex flex-col hover:border-orange-600 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer rounded-[10px]"
               >
                 {/* Image */}
                 <div className="h-44 bg-slate-100 overflow-hidden relative rounded-t-[10px]">
                   <img src={rel.img} alt={rel.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-t-[10px]" />
-                  <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-950/80 text-white text-[9px] font-black uppercase tracking-widest">{rel.field}</span>
+                  <span className="absolute top-3 left-3 px-2 py-0.5 bg-slate-950/80 text-white text-xs font-bold uppercase tracking-wider">{rel.field}</span>
                 </div>
                 {/* Info */}
                 <div className="p-4 flex-1 flex flex-col justify-between gap-3">
                   <div className="space-y-1">
-                    <span className="text-[9px] font-sans font-black uppercase text-orange-600">{rel.brand}</span>
-                    <h4 className="text-xs font-black text-slate-950 group-hover:text-orange-600 line-clamp-2 leading-snug">{rel.name}</h4>
+                    <span className="text-xs font-bold uppercase text-orange-600">{rel.brand}</span>
+                    <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 line-clamp-2 leading-snug">{rel.name}</h4>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-[10px] font-bold">
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs font-bold">
                     <span className="text-slate-400 uppercase">Giá bán:</span>
-                    <span className="text-orange-600 font-black font-sans">{rel.price}</span>
+                    <span className="text-orange-600 font-bold">{rel.price}</span>
                   </div>
                 </div>
               </div>
