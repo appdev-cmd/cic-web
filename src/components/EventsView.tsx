@@ -950,7 +950,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setSelectedEvent(item);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="bg-[#F7F8FA] hover:bg-white rounded-xl border border-transparent p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group space-y-2.5"
+                          className="bg-white hover:bg-white rounded-xl border border-slate-200/80 p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group space-y-2.5"
                         >
                           <div className="aspect-[16/9] bg-slate-100 overflow-hidden rounded-lg">
                             <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" />
@@ -1020,7 +1020,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   TẦNG 1: HERO EVENT (SỰ KIỆN GẦN NHẤT / NỔI BẬT)
                  ========================================================= */}
               {heroEvent && statusFilter === 'all' && !searchTerm && (
-                <section className="bg-[#F7F8FA] hover:bg-white rounded-[12px] border border-transparent hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 overflow-hidden group p-2.5 sm:p-3">
+                <section className="bg-white rounded-[12px] border border-slate-200/90 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 overflow-hidden group p-2.5 sm:p-3">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
                     
                     {/* Left: Image Hero Banner */}
@@ -1195,7 +1195,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               setSelectedEvent(event);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
-                            className="bg-[#F7F8FA] hover:bg-white rounded-[10px] border border-transparent p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
+                            className="bg-white rounded-[10px] border border-slate-200/90 p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
                           >
                             <div>
                               {/* Thumbnail Image */}

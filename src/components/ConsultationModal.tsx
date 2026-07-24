@@ -86,7 +86,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-100 overflow-hidden z-10"
+            className="relative w-full max-w-2xl bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-100 overflow-hidden z-10 rounded-[10px]"
           >
             {/* Design accents */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-600 to-amber-500" />
@@ -101,7 +101,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors rounded-none focus:outline-none"
+                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors rounded-[8px] focus:outline-none"
               >
                 <X size={20} />
               </button>
@@ -130,7 +130,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                           placeholder="Nguyễn Văn A"
                           className={`w-full bg-slate-50 border ${
                             errors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium`}
+                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
                         />
                       </div>
                       {errors.name && (
@@ -152,7 +152,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                           placeholder="0912xxxxxx"
                           className={`w-full bg-slate-50 border ${
                             errors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium`}
+                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
                         />
                       </div>
                       {errors.phone && (
@@ -175,7 +175,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                         placeholder="email@congty.com.vn"
                         className={`w-full bg-slate-50 border ${
                           errors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium`}
+                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
                       />
                     </div>
                     {errors.email && (
@@ -191,7 +191,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     <select
                       value={formData.service}
                       onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:bg-white rounded-none font-bold cursor-pointer"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:bg-white rounded-[8px] font-bold cursor-pointer"
                     >
                       {servicesList.map((srv) => (
                         <option key={srv} value={srv}>
@@ -213,7 +213,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         placeholder="Mô tả cụ thể nhu cầu của bạn..."
                         rows={3}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-none transition-all font-medium resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium resize-none"
                       />
                     </div>
                   </div>
@@ -223,14 +223,14 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-wider"
+                      className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-wider rounded-[8px]"
                     >
                       Đóng lại
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-50"
+                      className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-50 rounded-[8px]"
                     >
                       {isSubmitting ? (
                         <>

@@ -1496,7 +1496,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
             {/* Products Grid */}
             {paginatedProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-4">
                 {paginatedProducts.map((product, idx) => (
                   <motion.div
                     key={product.id}
@@ -1504,17 +1504,17 @@ export function ProductsView(_props?: ProductsViewProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.05 }}
                     onClick={() => { setSelectedProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="bg-[#F7F8FA] hover:bg-white border border-transparent p-2.5 hover:border-orange-600/30 rounded-[10px] group flex flex-col hover:shadow-[0_20px_40px_rgba(234,88,12,0.06)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative cursor-pointer"
+                    className="bg-white border border-slate-200/90 hover:border-orange-600/40 p-3 shadow-2xs hover:shadow-[0_20px_40px_rgba(234,88,12,0.1)] hover:-translate-y-1 transition-all duration-300 rounded-[10px] group flex flex-col overflow-hidden relative cursor-pointer"
                   >
                     {/* Field badge in top corner */}
-                    <div className="absolute top-4 left-4 z-10">
-                      <span className="px-3 py-1 bg-slate-950/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-[8px]">
+                    <div className="absolute top-5 left-5 z-10">
+                      <span className="px-3 py-1 bg-slate-950 text-white text-[9px] font-black uppercase tracking-widest rounded-[8px]">
                         {product.field}
                       </span>
                     </div>
 
                     {/* Image Area */}
-                    <div className="h-56 overflow-hidden bg-slate-100 relative rounded-[8px]">
+                    <div className="h-60 overflow-hidden bg-slate-100 relative rounded-[10px]">
                       <img 
                         src={product.img} 
                         alt={product.name}
@@ -1526,8 +1526,8 @@ export function ProductsView(_props?: ProductsViewProps) {
                     </div>
 
                     {/* Card Body */}
-                    <div className="p-4 flex-1 flex flex-col gap-4">
-                      <div className="space-y-1.5">
+                    <div className="p-4 sm:p-5 flex-1 flex flex-col gap-4">
+                      <div className="space-y-2">
                         {/* Brand & App badges */}
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="px-2 py-0.5 bg-orange-600/10 text-orange-600 text-[9px] font-black uppercase tracking-wider rounded-[8px]">
@@ -1542,7 +1542,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base font-black text-slate-950 leading-tight group-hover:text-orange-600 transition-colors min-h-[48px] flex items-start">
+                        <h3 className="text-base font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 min-h-[2.6rem]">
                           {product.name}
                         </h3>
                       </div>

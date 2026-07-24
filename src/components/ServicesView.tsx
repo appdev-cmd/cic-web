@@ -242,10 +242,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05, duration: 0.6 }}
                       whileHover={{ y: -6 }}
-                      className="bg-[#F7F8FA] hover:bg-white border border-transparent p-2.5 hover:border-orange-500/30 group flex flex-col hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-all duration-300 relative rounded-[10px] overflow-hidden cursor-pointer"
+                      className="bg-white border border-slate-200/90 hover:border-orange-500/40 p-3 group flex flex-col shadow-2xs hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] transition-all duration-300 relative rounded-[10px] overflow-hidden cursor-pointer"
                     >
                       {/* Image Area */}
-                      <div className="h-56 w-full overflow-hidden relative rounded-[8px]">
+                      <div className="h-56 w-full overflow-hidden relative rounded-[10px]">
                         <img 
                           src={service.image} 
                           alt={service.title} 

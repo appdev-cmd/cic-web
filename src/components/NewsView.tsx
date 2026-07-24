@@ -1173,7 +1173,7 @@ export function NewsView({
                           onClick={() => {
                             if (onNavigateToProduct) onNavigateToProduct(prod.id);
                           }}
-                          className="group cursor-pointer p-2.5 bg-slate-50/80 border border-slate-200/80 hover:border-orange-500 hover:bg-white transition-all flex items-center gap-3 shadow-2xs"
+                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs"
                         >
                           <img 
                             src={prod.img} 
@@ -1211,7 +1211,7 @@ export function NewsView({
                         <div
                           key={article.id}
                           onClick={() => handleSelectNews(article.id)}
-                          className="group cursor-pointer p-2.5 bg-slate-50/80 border border-slate-200/80 hover:border-orange-500 hover:bg-white transition-all flex items-center gap-3 shadow-2xs"
+                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs"
                         >
                           <img 
                             src={article.img} 
@@ -1293,7 +1293,7 @@ export function NewsView({
                 {/* HERO MAIN ARTICLE (7 cols) */}
                 <div 
                   onClick={() => handleSelectNews(filteredNews[0].id)}
-                  className="lg:col-span-7 group cursor-pointer relative overflow-hidden bg-slate-950 min-h-[460px] lg:min-h-[520px] flex flex-col justify-end"
+                  className="lg:col-span-7 group cursor-pointer relative overflow-hidden bg-slate-950 min-h-[460px] lg:min-h-[520px] flex flex-col justify-end rounded-[12px]"
                 >
                   <img 
                     src={filteredNews[0].img} 
@@ -1305,7 +1305,7 @@ export function NewsView({
                   
                   <div className="relative z-10 p-6 lg:p-10 space-y-3">
                     <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 bg-[#FC5115] text-white text-[10px] font-black uppercase tracking-wider">
+                      <span className="px-3 py-1 bg-[#FC5115] text-white text-[10px] font-black uppercase tracking-wider rounded-[8px]">
                         Tin Nổi Bật
                       </span>
                       <span className="text-xs text-slate-300 font-semibold flex items-center gap-1">
@@ -1339,17 +1339,17 @@ export function NewsView({
                     <div 
                       key={sideItem.id}
                       onClick={() => handleSelectNews(sideItem.id)}
-                      className="group cursor-pointer flex gap-4 items-center p-3 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 hover:border-slate-300 transition-all shadow-sm hover:shadow"
+                      className="group cursor-pointer flex gap-4 items-center p-3 bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-all shadow-2xs hover:shadow rounded-[10px] overflow-hidden"
                     >
                       {/* Larger Thumbnail Image */}
-                      <div className="w-36 sm:w-40 lg:w-44 h-28 lg:h-32 shrink-0 overflow-hidden relative bg-slate-900">
+                      <div className="w-36 sm:w-40 lg:w-44 h-28 lg:h-32 shrink-0 overflow-hidden relative bg-slate-900 rounded-[10px]">
                         <img 
                           src={sideItem.img} 
                           alt={sideItem.title} 
                           className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                           referrerPolicy="no-referrer"
                         />
-                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#FC5115] text-white text-[9px] font-black uppercase tracking-wider shadow">
+                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#FC5115] text-white text-[9px] font-black uppercase tracking-wider shadow rounded-[8px]">
                           {categoriesList.find(c => c.id === sideItem.category)?.label}
                         </span>
                       </div>
@@ -1591,10 +1591,10 @@ export function NewsView({
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.05, duration: 0.4 }}
                       onClick={() => handleSelectNews(news.id)}
-                      className="group cursor-pointer bg-[#F7F8FA] hover:bg-white border border-transparent p-2.5 hover:border-orange-500/30 transition-all duration-300 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden rounded-[10px]"
+                      className="group cursor-pointer bg-white border border-slate-200/90 p-3 hover:border-orange-500/40 transition-all duration-300 shadow-2xs hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden rounded-[10px]"
                     >
                       {/* Top: Image Container */}
-                      <div className="w-full h-48 lg:h-52 shrink-0 relative overflow-hidden bg-slate-900 rounded-[8px]">
+                      <div className="w-full h-48 lg:h-52 shrink-0 relative overflow-hidden bg-slate-900 rounded-[10px]">
                         <img 
                           src={news.img} 
                           alt={news.title}
