@@ -1,265 +1,677 @@
 import { EventItem } from '../types';
 
 export const eventsData: EventItem[] = [
+  // =========================================================================
+  // UPCOMING EVENTS (7 SỰ KIỆN SẮP DIỄN RA)
+  // =========================================================================
+  {
+    id: 'ai-infrastructure-design-2026',
+    title: 'Webinar: Ứng dụng AI & Generative Design trong Thiết kế Hạ tầng Xây dựng 2026',
+    shortDesc: 'Khám phá sức mạnh của Trí tuệ nhân tạo (AI) và Generative Design trong việc tự động hóa tính toán kết cấu, tối ưu hóa tuyến đường giao thông và cắt giảm 35% thời gian lập dự toán.',
+    longDesc: 'Trí tuệ nhân tạo (AI) đang tạo nên bước ngoặt lớn trong ngành Xây dựng và Hạ tầng kỹ thuật. Thông qua Generative Design và các thuật toán học máy, các kỹ sư hiện nay có thể tạo ra hàng nghìn phương án thiết kế tối ưu chỉ trong vài phút, đồng thời kiểm tra xung đột hạ tầng và tự động tính toán khối lượng vật liệu với độ chính xác tuyệt đối.\n\nWebinar trực tuyến do CIC tổ chức sẽ mang đến cho quý khán giả những góc nhìn thực tế nhất về xu hướng ứng dụng AI trong quy trình BIM/CAD 2026, từ khâu khảo sát địa chất, quy hoạch tuyến đường cho đến mô phỏng độ bền kết cấu công trình.',
+    img: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80',
+    date: '15/08/2026',
+    startDate: '2026-08-15T08:30:00',
+    location: 'Trực tuyến qua Zoom & Livestream Fanpage CIC',
+    address: 'Nền tảng Zoom Meeting Trực tuyến - CIC Tech Portal',
+    eventType: 'Webinar Trực tuyến',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: true,
+    targetAudience: [
+      'Lãnh đạo các Ban Quản lý Dự án, Chủ đầu tư Bất động sản',
+      'Giám đốc Kỹ thuật, Kỹ sư trưởng, Kiến trúc sư',
+      'Chuyên gia BIM Manager, BIM Coordinator, Kỹ sư Kết cấu & Hạ tầng'
+    ],
+    agenda: [
+      { time: '08:30 - 08:45', title: 'Check-in phòng Zoom & Phát biểu khai mạc', description: 'Chào mừng quý đại biểu và giới thiệu chương trình.' },
+      { time: '08:45 - 09:45', title: 'Xu hướng Generative Design & AI trong Quy hoạch Hạ tầng', description: 'Tối ưu hóa tuyến đường và cân bằng đào đắp bằng AI.', speaker: 'TS. Nguyễn Minh Triết' },
+      { time: '09:45 - 10:45', title: 'Demo tự động hóa vẽ CAD & Lập dự toán bằng AI Assistant', description: 'Trải nghiệm tích hợp AI Assistant trên enjiCAD.', speaker: 'ThS. Trần Hoàng Nam' }
+    ],
+    speakers: [
+      { name: 'TS. Nguyễn Minh Triết', role: 'Giám đốc Công nghệ (CTO)', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Hơn 15 năm kinh nghiệm triển khai AI & BIM.' }
+    ],
+    media: { gallery: ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Báo cáo Ứng dụng AI Hạ tầng 2026.pdf', size: '3.2 MB', url: '#' }]
+  },
   {
     id: 'bim-digital-twins-2026',
     title: 'Hội thảo: Ứng dụng BIM & Digital Twins trong Quản lý Vận hành Đô thị thông minh',
-    shortDesc: 'Hội thảo chia sẻ giải pháp công nghệ tiên phong của CIC kết hợp cùng Bentley Systems giúp tối ưu hóa chi phí vận hành đô thị và hạ tầng giao thông quy mô lớn.',
-    longDesc: 'Trong bối cảnh đô thị hóa diễn ra mạnh mẽ, việc tối ưu hóa quản lý và vận hành hạ tầng kỹ thuật trở thành bài toán cấp thiết đối với mọi chính quyền đô thị và doanh nghiệp bất động sản. Mô hình thông tin công trình (BIM) kết hợp cùng công nghệ bản sao số (Digital Twins) đang tạo nên một cuộc cách mạng thực sự, cho phép số hóa toàn diện và giám sát thời gian thực các công trình xây dựng.\n\nHội thảo chuyên đề do CIC tổ chức phối hợp cùng đối tác chiến lược Bentley Systems sẽ mang đến cái nhìn toàn cảnh về xu hướng Digital Twins toàn cầu, giới thiệu các giải pháp đột phá giúp cắt giảm tới 25% chi phí bảo dưỡng vận hành, tối ưu hóa mức tiêu thụ năng lượng và tăng cường khả năng ứng phó với thiên tai, sự cố.\n\nĐến với hội thảo, quý khách hàng sẽ có cơ hội được trải nghiệm trực quan các công nghệ tương tác 3D WebGIS, hệ sinh thái CDE quản lý dự án tập trung, đồng thời kết nối trực tiếp với đội ngũ chuyên gia hàng đầu trong và ngoài nước.',
+    shortDesc: 'Chia sẻ giải pháp công nghệ tiên phong giúp kết hợp BIM & Digital Twins tối ưu hóa chi phí vận hành đô thị và hạ tầng giao thông quy mô lớn.',
+    longDesc: 'Hội thảo chuyên đề do CIC tổ chức phối hợp cùng đối tác chiến lược Bentley Systems mang đến cái nhìn toàn cảnh về xu hướng Digital Twins toàn cầu, giải pháp cắt giảm tới 25% chi phí bảo dưỡng vận hành đô thị.',
     img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
-    date: '22/07/2026',
-    startDate: '2026-07-22T08:30:00',
-    location: 'Hội trường Lớn, Khách sạn Sheraton, 88 Đồng Khởi, Quận 1, TP. Hồ Chí Minh',
-    address: '88 Đồng Khởi, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh, Việt Nam',
+    date: '22/08/2026',
+    startDate: '2026-08-22T08:30:00',
+    location: 'Hội trường Lớn, Khách sạn Sheraton, Quận 1, TP. Hồ Chí Minh',
+    address: '88 Đồng Khởi, Bến Nghé, Quận 1, TP. Hồ Chí Minh',
+    eventType: 'Hội thảo Chuyên đề',
     status: 'upcoming',
     isOpenRegistration: true,
-    targetAudience: [
-      'Chủ đầu tư các dự án bất động sản, khu đô thị',
-      'Ban Quản lý Dự án Đầu tư Xây dựng công trình hạ tầng',
-      'Giám đốc Kỹ thuật, Kỹ sư trưởng, Kiến trúc sư trưởng',
-      'Các đơn vị tư vấn thiết kế, nhà thầu xây dựng hạ tầng giao thông',
-      'Cán bộ chuyên trách quy hoạch đô thị và quản lý tài nguyên môi trường'
-    ],
+    isFeatured: false,
+    targetAudience: ['Chủ đầu tư bất động sản', 'Ban Quản lý dự án', 'Kỹ sư BIM/GIS'],
     agenda: [
-      {
-        time: '08:30 - 09:00',
-        title: 'Đón tiếp đại biểu và Teabreak giao lưu',
-        description: 'Đại biểu check-in nhận tài liệu, thưởng thức trà/cà phê và tham quan gian hàng trưng bày giải pháp số của CIC.'
-      },
-      {
-        time: '09:00 - 09:15',
-        title: 'Phát biểu khai mạc từ Đại diện Lãnh đạo CIC',
-        description: 'Tuyên bố lý do, chào mừng các vị khách quý và chia sẻ định hướng thúc đẩy chuyển đổi số hạ tầng của CIC.'
-      },
-      {
-        time: '09:15 - 10:15',
-        title: 'Chuyên đề: Digital Twins - Xu hướng tất yếu của đô thị thông minh thế giới',
-        description: 'Phân tích các mô hình thành công tại Singapore, London; cách xây dựng dữ liệu nền tảng 3DGIS kết hợp mô hình BIM.',
-        speaker: 'TS. Nguyễn Minh Triết'
-      },
-      {
-        time: '10:15 - 11:15',
-        title: 'Demo thực tế: Quản lý vận hành hạ tầng bằng giải pháp Bentley Digital Twins',
-        description: 'Trải nghiệm vận hành thử nghiệm trên bản sao số của hệ thống cầu đường và mạng lưới cấp thoát nước thực tế, kiểm soát rủi ro bằng AI.',
-        speaker: 'ThS. Trần Hoàng Nam'
-      },
-      {
-        time: '11:15 - 11:45',
-        title: 'Tọa đàm bàn tròn & Giải đáp thắc mắc (Q&A)',
-        description: 'Trao đổi thẳng thắn giữa chuyên gia và các khách mời về rào cản chi phí, nguồn nhân lực và tính tương thích pháp lý tại Việt Nam.'
-      },
-      {
-        time: '11:45 - 12:00',
-        title: 'Bế mạc, chụp hình lưu niệm & Trao quà tri ân',
-        description: 'Đại diện Ban tổ chức phát biểu cảm ơn, khảo sát lấy ý kiến phản hồi và trao các phần quà công nghệ ý nghĩa.'
-      }
+      { time: '08:30 - 09:00', title: 'Đón tiếp đại biểu', description: 'Check-in và trải nghiệm gian hàng giải pháp số.' },
+      { time: '09:00 - 10:30', title: 'Báo cáo Digital Twins Đô thị', description: 'Ứng dụng mô hình bản sao số nâng cao.', speaker: 'TS. Nguyễn Minh Triết' }
     ],
-    speakers: [
-      {
-        name: 'TS. Nguyễn Minh Triết',
-        role: 'Giám đốc Công nghệ (CTO)',
-        company: 'CIC Tech',
-        avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80',
-        bio: 'Hơn 15 năm nghiên cứu và triển khai thực tế các hệ thống thông tin địa lý GIS, mô hình BIM cho các siêu dự án đô thị tại Singapore và Việt Nam. Thành viên Hội đồng Khoa học Chuyển đổi số quốc gia.'
-      },
-      {
-        name: 'ThS. Trần Hoàng Nam',
-        role: 'Trưởng phòng Giải pháp Hạ tầng',
-        company: 'Bentley Systems Việt Nam',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80',
-        bio: 'Chuyên gia tư vấn chuyển đổi số cao cấp được chứng nhận toàn cầu bởi Bentley Systems. Đã hỗ trợ thành công hơn 50 doanh nghiệp xây dựng lớn tối ưu hóa quy trình quản lý dự án bằng phần mềm CDE.'
-      }
-    ],
-    media: {
-      gallery: [
-        'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80'
-      ],
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    documents: [
-      {
-        name: 'Brochure Tổng quan Hội thảo BIM & Digital Twins 2026.pdf',
-        size: '2.4 MB',
-        url: '#'
-      },
-      {
-        name: 'Tài liệu Giải pháp Đô thị thông minh Bentley OpenCities.pdf',
-        size: '4.8 MB',
-        url: '#'
-      }
-    ]
+    speakers: [{ name: 'TS. Nguyễn Minh Triết', role: 'CTO', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Chuyên gia GIS & BIM.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Brochure Digital Twins 2026.pdf', size: '2.4 MB', url: '#' }]
   },
   {
     id: 'enjicad-training-2026',
-    title: 'Khóa đào tạo chuyên sâu: Ứng dụng enjiCAD trong thiết kế xây dựng tiêu chuẩn Việt Nam',
-    shortDesc: 'Khóa học miễn phí giúp các kỹ sư xây dựng làm chủ công cụ vẽ CAD chuyên nghiệp enjiCAD, tối ưu tốc độ triển khai bản vẽ và tự động hóa bóc tách tiên lượng.',
-    longDesc: 'Nhằm hỗ trợ cộng đồng kỹ sư xây dựng tối ưu hóa chi phí bản quyền phần mềm thiết kế mà vẫn đảm bảo tính năng vẽ kỹ thuật mạnh mẽ, CIC tổ chức khóa đào tạo chuyên sâu hướng dẫn sử dụng phần mềm enjiCAD.\n\nenjiCAD là giải pháp thiết kế CAD hàng đầu hiện nay với bản quyền vĩnh viễn, giao diện tiếng Việt thân thiện và tốc độ xử lý bản vẽ 2D/3D cực nhanh. Đặc biệt, khóa học này sẽ chia sẻ bí quyết kết hợp enjiCAD cùng phần mềm stCAD để tự động hóa toàn bộ quy trình bóc tách tiên lượng dầm, cột, sàn và lập bảng dự toán xây dựng chuẩn TCVN.\n\nKhóa đào tạo hoàn toàn miễn phí, được dẫn dắt trực tiếp bởi chuyên gia đào tạo kỹ thuật có hơn 10 năm kinh nghiệm thực chiến. Học viên tham dự trực tiếp tại văn phòng CIC hoặc online qua Zoom đều được hỗ trợ cài đặt phiên bản bản quyền dùng thử và cấp chứng nhận hoàn thành khóa đào tạo.',
+    title: 'Workshop Kỹ thuật: Làm chủ enjiCAD & Tự động hóa Bóc tách Khối lượng chuẩn TCVN',
+    shortDesc: 'Khóa học miễn phí giúp các kỹ sư xây dựng làm chủ enjiCAD, tối ưu tốc độ triển khai bản vẽ và tự động bóc tách tiên lượng.',
+    longDesc: 'CIC tổ chức khóa đào tạo thực hành chuyên sâu giúp kỹ sư kết cấu và thi công nắm vững bộ công cụ vẽ CAD bản quyền tối ưu.',
     img: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80',
-    date: '05/08/2026',
-    startDate: '2026-08-05T13:30:00',
-    location: 'Trung tâm Đào tạo Kỹ thuật CIC, 37 Lê Đại Hành, Quận Hai Bà Trưng, Hà Nội',
-    address: '37 Lê Đại Hành, Lê Đại Hành, Hai Bà Trưng, Hà Nội, Việt Nam',
+    date: '05/09/2026',
+    startDate: '2026-09-05T13:30:00',
+    location: 'Trung tâm Đào tạo Kỹ thuật CIC, 37 Lê Đại Hành, Hà Nội',
+    address: '37 Lê Đại Hành, Hai Bà Trưng, Hà Nội',
+    eventType: 'Workshop Kỹ thuật',
     status: 'upcoming',
     isOpenRegistration: true,
-    targetAudience: [
-      'Kỹ sư xây dựng kết cấu, kỹ sư cầu đường',
-      'Kiến trúc sư, nhà thiết kế kỹ thuật',
-      'Kỹ sư QS/đo đạc, lập dự toán công trình',
-      'Học viên, sinh viên ngành Kỹ thuật Xây dựng tại các trường Đại học'
-    ],
+    isFeatured: false,
+    targetAudience: ['Kỹ sư xây dựng', 'Kỹ sư QS/dự toán', 'Kiến trúc sư'],
     agenda: [
-      {
-        time: '13:30 - 14:00',
-        title: 'Đăng ký & Nhận bộ cài đặt dùng thử bản quyền',
-        description: 'Học viên ổn định vị trí, kỹ thuật viên hỗ trợ cài đặt enjiCAD bản quyền và bộ công cụ stCAD lên máy tính cá nhân.'
-      },
-      {
-        time: '14:00 - 15:00',
-        title: 'Phần 1: Làm quen giao diện và tối ưu cài đặt bản vẽ trên enjiCAD',
-        description: 'Hướng dẫn thiết lập phím tắt quen thuộc, làm việc với các định dạng file DWG/DXF phức tạp, sử dụng tính năng tối ưu bộ nhớ khi mở file nặng.',
-        speaker: 'KS. Lê Văn Bình'
-      },
-      {
-        time: '15:00 - 15:30',
-        title: 'Thực hành 1: Thiết kế kết cấu & Áp dụng thư viện cấu kiện TCVN',
-        description: 'Học viên trực tiếp triển khai bản vẽ dầm bê tông cốt thép bằng các công cụ thông minh, chèn ghi chú kỹ thuật tự động.',
-        speaker: 'KS. Lê Văn Bình'
-      },
-      {
-        time: '15:30 - 15:45',
-        title: 'Nghỉ giải lao & Thưởng thức trà chiều (Teabreak)',
-        description: 'Teabreak nhẹ nhàng để học viên trao đổi, kết nối và nghỉ ngơi giữa giờ.'
-      },
-      {
-        time: '15:45 - 16:45',
-        title: 'Phần 2: Tự động hóa bóc tách tiên lượng và xuất dự toán với stCAD',
-        description: 'Liên kết bản vẽ thiết kế trên enjiCAD với stCAD để tự động tính toán khối lượng sắt, bê tông dầm, xuất bảng thống kê chuẩn xác 100%.',
-        speaker: 'KS. Lê Văn Bình'
-      },
-      {
-        time: '16:45 - 17:15',
-        title: 'Hỏi đáp & Trao chứng nhận tham dự khóa đào tạo',
-        description: 'Giải quyết các vấn đề lỗi bản vẽ học viên gặp phải, trao tặng chứng nhận giấy và quà tặng lưu niệm từ CIC Tech.'
-      }
+      { time: '13:30 - 14:00', title: 'Cài đặt bản quyền dùng thử', description: 'Kỹ thuật viên hỗ trợ cài đặt.' },
+      { time: '14:00 - 16:30', title: 'Thực hành Vẽ & Bóc tách trên enjiCAD', description: 'Triển khai chi tiết bê tông cốt thép.', speaker: 'KS. Lê Văn Bình' }
     ],
-    speakers: [
-      {
-        name: 'KS. Lê Văn Bình',
-        role: 'Chuyên gia Kỹ thuật Phần mềm CAD/BIM',
-        company: 'CIC Tech',
-        avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80',
-        bio: 'Hơn 10 năm kinh nghiệm tư vấn kỹ thuật và đào tạo chuyển giao công nghệ cho các tổng công ty xây dựng lớn tại Việt Nam như Coteccons, Hoa Binh Group, CDC. Am hiểu sâu sắc hệ tiêu chuẩn kỹ thuật Việt Nam.'
-      }
-    ],
-    media: {
-      gallery: [
-        'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'
-      ],
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    documents: [
-      {
-        name: 'Sách hướng dẫn sử dụng nhanh enjiCAD 2026.pdf',
-        size: '5.6 MB',
-        url: '#'
-      },
-      {
-        name: 'Bản vẽ dầm cột mẫu thực hành (.dwg).zip',
-        size: '8.4 MB',
-        url: '#'
-      }
-    ]
+    speakers: [{ name: 'KS. Lê Văn Bình', role: 'Trưởng phòng CAD/BIM', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80', bio: 'Hơn 10 năm kinh nghiệm.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Hướng dẫn enjiCAD 2026.pdf', size: '5.6 MB', url: '#' }]
   },
+  {
+    id: 'plaxis-geotechnical-masterclass-2026',
+    title: 'Masterclass: Mô phỏng Địa kỹ thuật & Xử lý Nền móng Sâu bằng PLAXIS 2D/3D',
+    shortDesc: 'Chương trình đào tạo nâng cao về mô phỏng ứng suất - biến dạng đất nền, bài toán đào hố móng sâu và ổn định mái dốc công trình giao thông.',
+    longDesc: 'Chương trình Masterclass chuyên sâu tổ chức bởi CIC dành riêng cho các kỹ sư địa kỹ thuật, công trình ngầm và thủy lợi nhằm áp dụng tiêu chuẩn tính toán tiên tiến nhất với PLAXIS 2D & 3D.',
+    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80',
+    date: '12/09/2026',
+    startDate: '2026-09-12T08:30:00',
+    location: 'Khách sạn Pan Pacific, Số 1 Thanh Niên, Ba Đình, Hà Nội',
+    address: '1 Thanh Niên, Trúc Bạch, Ba Đình, Hà Nội',
+    eventType: 'Đào tạo Chuyên sâu',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư Địa kỹ thuật', 'Kỹ sư Công trình ngầm', 'Tư vấn Thiết kế móng'],
+    agenda: [
+      { time: '08:30 - 10:00', title: 'Phương pháp mô phỏng đất nền trong PLAXIS 3D', description: 'Thiết lập tham số bài toán móng cọc.', speaker: 'TS. Phạm Hoàng Minh' },
+      { time: '10:15 - 12:00', title: 'Thực hành tính toán hố móng sâu đô thị', description: 'Phân tích ổn định tường vằn và chuyển vị.', speaker: 'ThS. Trần Hoàng Nam' }
+    ],
+    speakers: [{ name: 'TS. Phạm Hoàng Minh', role: 'Chuyên gia Chuyên sâu Địa kỹ thuật', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Giảng viên Đại học Xây dựng.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Tài liệu PLAXIS Geotechnical 2026.pdf', size: '4.8 MB', url: '#' }]
+  },
+  {
+    id: 'gis-urban-planning-forum-2026',
+    title: 'Diễn đàng Công nghệ GIS & Cơ sở Dữ liệu Đất đai trong Quy hoạch Đô thị 2026',
+    shortDesc: 'Diễn đàng quy tụ các nhà quản lý, doanh nghiệp công nghệ GIS giới thiệu hạ tầng không gian địa lý, quản lý đất đai và thông tin quy hoạch xây dựng.',
+    longDesc: 'Sự kiện mang đến bức tranh tổng thể về tích hợp CSDL đất đai quốc gia với mô hình GIS 3D, hỗ trợ chính quyền địa phương và nhà đầu tư trong công tác quản lý quy hoạch.',
+    img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+    date: '28/09/2026',
+    startDate: '2026-09-28T09:00:00',
+    location: 'Trung tâm Hội nghị GEM Center, 8 Nguyễn Bỉnh Khiêm, Quận 1, TP. HCM',
+    address: '8 Nguyễn Bỉnh Khiêm, Đa Kao, Quận 1, TP. HCM',
+    eventType: 'Diễn đàn Công nghệ',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Cán bộ quản lý quy hoạch', 'Doanh nghiệp Bất động sản', 'Chuyên gia GIS'],
+    agenda: [
+      { time: '09:00 - 10:30', title: 'Chiến lược Số hóa CSDL Đất đai', description: 'Liên thông dữ liệu GIS và BIM.', speaker: 'TS. Nguyễn Minh Triết' },
+      { time: '10:45 - 12:00', title: 'Tự động hóa tra cứu quy hoạch trên Nền tảng WebGIS', description: 'Trải nghiệm giải pháp ArcGIS & CIC GIS.', speaker: 'KS. Vũ Thanh Tùng' }
+    ],
+    speakers: [{ name: 'TS. Nguyễn Minh Triết', role: 'CTO', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Chuyên gia GIS & Đô thị thông minh.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Kỷ yếu Diễn đàn GIS 2026.pdf', size: '6.2 MB', url: '#' }]
+  },
+  {
+    id: 'smart-bridge-monitoring-2026',
+    title: 'Hội thảo Kỹ thuật: Giải pháp Khảo sát & Giám sát Sức khỏe Cầu Lớn SHM (Bridge Health Monitoring)',
+    shortDesc: 'Giới thiệu công nghệ cảm biến không dây IoT kết hợp phần mềm phân tích biến dạng, dự báo tuổi thọ dầm cầu bê tông cốt thép & cầu dây văng.',
+    longDesc: 'Hệ thống SHM do CIC cung cấp tích hợp cảm biến gia tốc, độ võng, nhiệt độ để gửi dữ liệu liên tục về trung tâm điều hành, phát hiện sớm nguy cơ nứt gãy.',
+    img: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&q=80',
+    date: '10/10/2026',
+    startDate: '2026-10-10T08:30:00',
+    location: 'Khách sạn Muống Thanh Luxury, Đà Nẵng',
+    address: '270 Võ Nguyên Giáp, Ngũ Hành Sơn, Đà Nẵng',
+    eventType: 'Hội thảo Chuyên đề',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Ban Quản lý dự án Cầu đường', 'Kỹ sư kiểm định công trình', 'Sở GTVT các tỉnh'],
+    agenda: [
+      { time: '08:30 - 10:00', title: 'Tổng quan công nghệ SHM Cầu dây văng', description: 'Lắp đặt cảm biến và truyền dữ liệu 5G.', speaker: 'ThS. Trần Hoàng Nam' },
+      { time: '10:15 - 11:30', title: 'Trải nghiệm phần mềm xử lý tín hiệu đo', description: 'Phát hiện cảnh báo nứt dầm.', speaker: 'KS. Nguyễn Thành Vinh' }
+    ],
+    speakers: [{ name: 'ThS. Trần Hoàng Nam', role: 'Trưởng phòng Kỹ thuật', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Chuyên gia thiết bị kiểm định cầu.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Giải pháp SHM Bridge 2026.pdf', size: '3.9 MB', url: '#' }]
+  },
+  {
+    id: 'enscape-realtime-rendering-2026',
+    title: 'Workshop: Quy trình Diễn họa Kiến trúc Real-time & Thực tế ảo VR với Enscape 4.0',
+    shortDesc: 'Trải nghiệm các tính năng渲染 mới nhất của Enscape 4.0, kết hợp Revit, SketchUp, Rhino để xuất phim kiến trúc chỉ trong vài phút.',
+    longDesc: 'Dành cho các kiến trúc sư và nhà thiết kế nội ngoại thất muốn nâng cao năng suất diễn họa thực tế ảo, xuất ảnh photorealistic sắc nét mà không tốn nhiều giờ render.',
+    img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80',
+    date: '24/10/2026',
+    startDate: '2026-10-24T14:00:00',
+    location: 'Showroom Công nghệ CIC, 37 Lê Đại Hành, Hà Nội',
+    address: '37 Lê Đại Hành, Hai Bà Trưng, Hà Nội',
+    eventType: 'Workshop Thực hành',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Kiến trúc sư', 'Diễn họa viên 3D', 'Sinh viên ngành Kiến trúc'],
+    agenda: [
+      { time: '14:00 - 15:30', title: 'Tính năng mới trong Enscape 4.0 Real-time', description: 'Chiếu sáng tự nhiên và thư viện vật liệu mới.', speaker: 'KTS. Lê Thị Mai' },
+      { time: '15:45 - 17:00', title: 'Thực hành kết nối Kính VR Oculus/HTC Vive', description: 'Trải nghiệm đi lại trực tiếp trong không gian thiết kế.', speaker: 'KTS. Lê Thị Mai' }
+    ],
+    speakers: [{ name: 'KTS. Lê Thị Mai', role: 'Chuyên gia Diễn họa', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80', bio: 'Chuyên gia Enscape & Revit certified.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Ebook Enscape Master Tips.pdf', size: '7.1 MB', url: '#' }]
+  },
+  {
+    id: 'structural-engineering-forum-2026',
+    title: 'Hội thảo Quốc tế: Tối ưu hóa Kết cấu Nhà cao tầng & Siêu cao tầng vượt khổ',
+    shortDesc: 'Ứng dụng thuật toán phân tích kết cấu tiên tiến và vật liệu mới trong thiết kế nhà cao tầng chống gió bão, động đất.',
+    longDesc: 'Hội thảo quy tụ các giáo sư, chuyên gia kết cấu hàng đầu Châu Á - Thái Bình Dương trình bày các công trình biểu tượng.',
+    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
+    date: '10/11/2026',
+    startDate: '2026-11-10T08:30:00',
+    location: 'Khách sạn Landmark 81, TP. Hồ Chí Minh',
+    address: '720A Điện Biên Phủ, Phường 22, Bình Thạnh, TP. HCM',
+    eventType: 'Hội thảo Quốc tế',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư kết cấu', 'Kiến trúc sư', 'Chủ đầu tư'],
+    agenda: [
+      { time: '08:30 - 11:30', title: 'Thiết kế kháng chấn nhà siêu cao tầng', description: 'Trình bày giải pháp mô phỏng STAAD/SAP2000.', speaker: 'TS. Nguyễn Minh Triết' }
+    ],
+    speakers: [{ name: 'TS. Nguyễn Minh Triết', role: 'CTO', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Chuyên gia kết cấu.' }],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+  {
+    id: 'green-building-bim-2026',
+    title: 'Workshop: Tích hợp BIM & Phân tích Năng lượng Công trình Xanh LEED / LOTUS',
+    shortDesc: 'Hướng dẫn ứng dụng phần mềm phân tích trường nhiệt, thông gió tự nhiên và chiếu sáng mô phỏng trực tiếp từ mô hình Revit.',
+    longDesc: 'Mô phỏng hiệu năng công trình giúp giảm chi phí vận hành điều hòa không khí và đạt các chứng chỉ công trình xanh.',
+    img: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&q=80',
+    date: '20/11/2026',
+    startDate: '2026-11-20T13:30:00',
+    location: 'Trung tâm Đào tạo CIC, 37 Lê Đại Hành, Hà Nội',
+    address: '37 Lê Đại Hành, Hai Bà Trưng, Hà Nội',
+    eventType: 'Workshop Thực hành',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư M&E', 'Chuyên gia Công trình xanh', 'Kiến trúc sư'],
+    agenda: [
+      { time: '13:30 - 16:30', title: 'Mô phỏng năng lượng với Autodesk Insight & IES VE', description: 'Thực hành tính toán tải lạnh.' }
+    ],
+    speakers: [{ name: 'ThS. Trần Hoàng Nam', role: 'Chuyên gia M&E', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Chuyên gia mô phỏng năng lượng.' }],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+  {
+    id: 'cad-cam-infrastructure-2026',
+    title: 'Hội thảo Chuyên đề: Tự động hóa Thiết kế Mạng lưới Đô thị & Cấp thoát nước',
+    shortDesc: 'Ứng dụng bộ công cụ enjiCAD Civil & Bentley OpenFlows trong tính toán thủy lực, tối ưu đường ống cấp thoát nước đô thị.',
+    longDesc: 'Giải pháp tính toán thủy lực tự động giúp phát hiện xung đột mạng lưới hạ tầng kỹ thuật ngầm.',
+    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80',
+    date: '05/12/2026',
+    startDate: '2026-12-05T08:30:00',
+    location: 'Khách sạn Novotel, Đà Nẵng',
+    address: '36 Bạch Đằng, Hải Châu, Đà Nẵng',
+    eventType: 'Hội thảo Chuyên đề',
+    status: 'upcoming',
+    isOpenRegistration: true,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư Cấp thoát nước', 'Ban QLDA Hạ tầng'],
+    agenda: [
+      { time: '08:30 - 11:30', title: 'Tính toán mô phỏng mạng lưới đường ống', description: 'Tích hợp GIS & CAD.' }
+    ],
+    speakers: [{ name: 'KS. Lê Văn Bình', role: 'Kỹ sư Hạ tầng', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80', bio: 'Kỹ sư tư vấn.' }],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+
+  // =========================================================================
+  // ONGOING EVENTS (7 SỰ KIỆN ĐANG DIỄN RA)
+  // =========================================================================
+  {
+    id: 'vietbuild-hanoi-2026',
+    title: 'Triển lãm Quốc tế VIETBUILD Hà Nội 2026 - Gian hàng Công nghệ & Phần mềm Bản quyền CIC',
+    shortDesc: 'CIC tham gia triển lãm VietBuild 2026 với chuỗi trải nghiệm thực tế giải pháp CDE, phần mềm bản quyền Bentley, Enscape, ZWCAD, enjiCAD và tư vấn chuyển đổi số.',
+    longDesc: 'Triển lãm Quốc tế VIETBUILD Hà Nội 2026 thu hút đông đảo các chủ đầu tư, kiến trúc sư và nhà thầu xây dựng. Gian hàng CIC mang đến những trải nghiệm tương tác cao.',
+    img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80',
+    date: '23/07/2026',
+    startDate: '2026-07-23T08:00:00',
+    location: 'Gian hàng 102-108, Cung Triển lãm Quy hoạch Quốc gia, Hà Nội',
+    address: 'Số 1 Đỗ Đức Dục, Nam Từ Liêm, Hà Nội',
+    eventType: 'Triển lãm Quốc tế',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Toàn thể khách tham quan triển lãm VietBuild'],
+    agenda: [
+      { time: '08:00 - 17:30', title: 'Trải nghiệm Demo Trực tiếp', description: 'Mở cửa chào đón khách tham quan trải nghiệm thực tế ảo VR.' }
+    ],
+    speakers: [{ name: 'Đội ngũ Chuyên gia CIC', role: 'Tư vấn Kỹ thuật', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80', bio: 'Đội ngũ kỹ sư tư vấn nhiệt tình.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Brochure VietBuild 2026.pdf', size: '6.1 MB', url: '#' }]
+  },
+  {
+    id: 'summit-x-one-demo-tour-2026',
+    title: 'Chuỗi Demo Thực địa: Thiết bị Đo Địa chấn Đa kênh Summit X One tại Miền Trung',
+    shortDesc: 'Chuỗi khảo sát thực địa đo địa chấn đa kênh, thăm dò cấu trúc địa chất công trình ngầm và dò tìm tai biến địa chất tại các tỉnh miền Trung.',
+    longDesc: 'CIC triển khai chuỗi sự kiện khảo sát thực địa bằng thiết bị Summit X One nhập khẩu từ Đức, chứng minh độ chính xác trong điều kiện địa hình phức tạp.',
+    img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80',
+    date: '20/07 - 25/07/2026',
+    startDate: '2026-07-20T08:00:00',
+    location: 'Công trường Khảo sát Dự án Đường cao tốc Bắc - Nam, Thừa Thiên Huế',
+    address: 'Huyện Phú Lộc, Tỉnh Thừa Thiên Huế',
+    eventType: 'Demo Thực địa',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư địa chất', 'Các nhà thầu khảo sát công trình'],
+    agenda: [
+      { time: 'Cả ngày', title: 'Đo thử nghiệm thực địa & Xử lý số liệu địa chấn', description: 'Trình diễn thu thập sóng MASW và Refraction.' }
+    ],
+    speakers: [{ name: 'KS. Nguyễn Thành Vinh', role: 'Chuyên gia Thiết bị Địa chất', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80', bio: 'Chuyên gia đo đạc địa chấn.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Kỹ thuật Đo địa chấn Summit X One.pdf', size: '2.8 MB', url: '#' }]
+  },
+  {
+    id: 'zwcad-enterprise-roadshow-2026',
+    title: 'Roadshow Doanh nghiệp: Chuyển đổi Phần mềm Bản quyền ZWCAD 2026 cho Doanh nghiệp Xây dựng',
+    shortDesc: 'Chương trình làm việc trực tiếp cùng hơn 50 Tập đoàn và Tổng công ty Xây dựng hàng đầu nhằm tối ưu chi phí bản quyền phần mềm CAD.',
+    longDesc: 'Trong suốt tuần lễ công nghệ, đoàn tư vấn CIC đến thăm và làm việc trực tiếp tại trụ sở các tổng công ty xây dựng để hỗ trợ thử nghiệm ZWCAD 2026.',
+    img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80',
+    date: '21/07 - 27/07/2026',
+    startDate: '2026-07-21T09:00:00',
+    location: 'Trụ sở các Doanh nghiệp tại TP. Hà Nội & TP. Hồ Chí Minh',
+    address: 'Các Khu Văn phòng Doanh nghiệp Xây dựng',
+    eventType: 'Roadshow Doanh nghiệp',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Ban Giám đốc', 'Trưởng phòng IT', 'Kỹ sư trưởng'],
+    agenda: [
+      { time: 'Theo lịch đặt', title: 'Tư vấn Chuyển đổi Bản quyền CAD', description: 'Đánh giá số lượng máy và cấp giấp phép bản quyền thử nghiệm.' }
+    ],
+    speakers: [{ name: 'Đội ngũ Tư vấn CIC', role: 'Chuyên viên Tư vấn Bản quyền', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80', bio: 'Đội ngũ tư vấn giải pháp bản quyền CAD.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Chính sách Ưu đãi ZWCAD 2026.pdf', size: '1.9 MB', url: '#' }]
+  },
+  {
+    id: 'cic-innovation-hackathon-2026',
+    title: 'Cuộc thi CIC Tech Innovation Hackathon 2026: Phát triển Plugin CAD/BIM cho Kỹ sư Việt',
+    shortDesc: 'Vòng Chung kết cuộc thi sáng tạo công nghệ phần mềm xây dựng với sự tham gia của 20 đội thi xuất sắc nhất toàn quốc.',
+    longDesc: 'Sự kiện thu hút các lập trình viên và kỹ sư xây dựng trẻ cùng phát triển các tiện ích tự động hóa trên nền enjiCAD và Revit API.',
+    img: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80',
+    date: '22/07 - 26/07/2026',
+    startDate: '2026-07-22T08:00:00',
+    location: 'Trung tâm Đổi mới Sáng tạo Quốc gia NIC, Cầu Giấy, Hà Nội',
+    address: 'Số 7 Tôn Thất Thuyết, Cầu Giấy, Hà Nội',
+    eventType: 'Cuộc thi Sáng tạo',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Lập trình viên', 'Kỹ sư BIM', 'Sinh viên các trường kỹ thuật'],
+    agenda: [
+      { time: '08:00 - 18:00', title: 'Lập trình liên tục & Chấm điểm Demo', description: 'Thí sinh hoàn thiện sản phẩm và thuyết trình trước Ban giám khảo.' }
+    ],
+    speakers: [{ name: 'TS. Nguyễn Minh Triết', role: 'Trưởng Ban Giám khảo', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Trưởng ban giám khảo Hackathon 2026.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Thể lệ Cuộc thi Hackathon 2026.pdf', size: '1.5 MB', url: '#' }]
+  },
+  {
+    id: 'bentley-seismic-webinar-series',
+    title: 'Chuỗi Trực tuyến: Khảo sát & Tính toán Kháng chấn Công trình Hạ tầng theo TCVN 9386',
+    shortDesc: 'Chuỗi 3 buổi đào tạo chuyên sâu trực tuyến hướng dẫn mô hình hóa tải trọng động đất bằng STAAD.Pro và SAP2000.',
+    longDesc: 'Hỗ trợ kỹ sư kết cấu nắm chắc phương pháp phân tích phổ phản ứng và phân tích theo thời gian thực để thiết kế công trình an toàn động đất.',
+    img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80',
+    date: '22/07 - 24/07/2026',
+    startDate: '2026-07-22T19:30:00',
+    location: 'Nền tảng Trực tuyến Microsoft Teams - CIC Academy',
+    address: 'Nền tảng Trực tuyến Microsoft Teams',
+    eventType: 'Đào tạo Trực tuyến',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư kết cấu', 'Tư vấn thẩm tra công trình'],
+    agenda: [
+      { time: '19:30 - 21:00', title: 'Buổi 2: Thiết lập phổ gia tốc nền và tải trọng động đất', description: 'Thực hành khai báo trên phần mềm STAAD.Pro.' }
+    ],
+    speakers: [{ name: 'ThS. Trần Hoàng Nam', role: 'Chuyên gia Kết cấu', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Chuyên gia tính toán kết cấu.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Tài liệu TCVN 9386 Kháng chấn.pdf', size: '3.1 MB', url: '#' }]
+  },
+  {
+    id: 'survey-equipment-exhibition-hcm',
+    title: 'Triển lãm Thiết bị Đo đạc & Trắc địa Hiện đại 2026 tại Thành phố Hồ Chí Minh',
+    shortDesc: 'Trưng bày trải nghiệm máy Toàn đạc điện tử, máy GNSS RTK, LiDAR quét 3D Laser scanner cầm tay và máy bay UAV trắc địa.',
+    longDesc: 'Sự kiện dành riêng cho cộng đồng đo đạc trắc địa, giúp cập nhật công nghệ thu thập dữ liệu đám mây điểm Point Cloud siêu nhanh.',
+    img: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80',
+    date: '23/07 - 25/07/2026',
+    startDate: '2026-07-23T08:30:00',
+    location: 'Trung tâm Triển lãm SECC, Quận 7, TP. Hồ Chí Minh',
+    address: '799 Nguyễn Văn Linh, Tân Phú, Quận 7, TP. HCM',
+    eventType: 'Triển lãm Thiết bị',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư trắc địa', 'Công ty đo đạc bản đồ', 'Đơn vị thi công giao thông'],
+    agenda: [
+      { time: '08:30 - 17:00', title: 'Trình diễn quét Laser 3D trực tiếp', description: 'Số hóa mô hình 3D công trình trong 5 phút.' }
+    ],
+    speakers: [{ name: 'KS. Trịnh Quốc Bảo', role: 'Trưởng phòng Trắc địa', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80', bio: 'Chuyên gia thiết bị đo đạc.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Catalogue Thiết bị Trắc địa CIC 2026.pdf', size: '5.2 MB', url: '#' }]
+  },
+  {
+    id: 'cde-bim-cloud-testing-month',
+    title: 'Tháng Trải nghiệm Nền tảng Môi trường Dữ liệu Chung CDE Cloud cho Ban QLDA',
+    shortDesc: 'Chương trình cấp tài khoản CDE Cloud miễn phí 30 ngày cho các Ban Quản lý dự án xây dựng nhằm chuẩn hóa quản lý hồ sơ bản vẽ.',
+    longDesc: 'Giải pháp giúp số hóa quy trình trình duyệt bản vẽ, quản lý RFI và kiểm soát tiến độ công trình theo chuẩn ISO 19650.',
+    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
+    date: '01/07 - 31/07/2026',
+    startDate: '2026-07-01T08:00:00',
+    location: 'Trực tuyến trên Cổng Nền tảng CDE Cloud CIC',
+    address: 'Hệ thống CDE Cloud - CIC Portal',
+    eventType: 'Trải nghiệm Công nghệ',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Ban Quản lý dự án', 'Chủ đầu tư', 'Đơn vị tư vấn giám sát'],
+    agenda: [
+      { time: 'Toàn thời gian', title: 'Hỗ trợ kỹ thuật 24/7 & Cấu hình luồng duyệt bản vẽ', description: 'Đội ngũ chuyên gia CIC đồng hành setup quy trình.' }
+    ],
+    speakers: [{ name: 'ThS. Trần Hoàng Nam', role: 'Trưởng phòng Chuyển đổi số', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Chuyên gia tư vấn ISO 19650.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Sổ tay Vận hành CDE ISO 19650.pdf', size: '4.1 MB', url: '#' }]
+  },
+  {
+    id: 'geotechnical-site-investigation-2026',
+    title: 'Khảo sát Thực địa: Đo Địa chấn Nông Phương pháp MASW cho Tuyến Metro',
+    shortDesc: 'Chuỗi đo địa chấn mặt đất đánh giá chiều dày tầng đất yếu và chiều sâu đá gốc phục vụ thiết kế tuyến đường sắt đô thị.',
+    longDesc: 'Thực hiện khảo sát trực tiếp tại hiện trường tuyến Metro với thiết bị Summit X One hiện đại.',
+    img: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&q=80',
+    date: '15/07 - 30/07/2026',
+    startDate: '2026-07-15T08:00:00',
+    location: 'Công trường Tuyến Metro Số 2, TP. Hồ Chí Minh',
+    address: 'Bến Thành - Tham Lương, TP. HCM',
+    eventType: 'Demo Thực địa',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư địa chất', 'Tư vấn giám sát'],
+    agenda: [],
+    speakers: [],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+  {
+    id: 'bim-edu-certification-2026',
+    title: 'Khóa Đào tạo Quốc tế: Chứng chỉ BIM Manager chuẩn buildingSMART Khóa 18',
+    shortDesc: 'Chương trình cấp chứng chỉ BIM quốc tế cho 40 chuyên gia quản lý BIM hàng đầu từ các chủ đầu tư BĐS.',
+    longDesc: 'Khóa học kết hợp lý thuyết và bài tập tình huống thực tế triển khai CDE.',
+    img: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80',
+    date: '10/07 - 10/08/2026',
+    startDate: '2026-07-10T18:00:00',
+    location: 'Trung tâm Đào tạo Kỹ thuật CIC, Hà Nội',
+    address: '37 Lê Đại Hành, Hà Nội',
+    eventType: 'Khóa Đào tạo',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['BIM Coordinator', 'BIM Manager'],
+    agenda: [],
+    speakers: [],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+  {
+    id: 'gis-3d-cadastral-mapping-trial',
+    title: 'Dự án Thử nghiệm: Số hóa CSDL Đất đai 3D WebGIS cho Đô thị Thông minh',
+    shortDesc: 'Thử nghiệm liên thông dữ liệu tài sản công và bản đồ địa chính 3D trên nền tảng ArcGIS Online & CIC GIS.',
+    longDesc: 'Trình diễn khả năng tra cứu thửa đất, ranh giới hành chính và quy hoạch không gian 3D.',
+    img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+    date: '01/07 - 15/08/2026',
+    startDate: '2026-07-01T08:00:00',
+    location: 'Sở Tài nguyên & Môi trường Tỉnh Quảng Ninh',
+    address: 'TP. Hạ Long, Quảng Ninh',
+    eventType: 'Dự án Thử nghiệm',
+    status: 'ongoing',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Cán bộ quản lý GIS'],
+    agenda: [],
+    speakers: [],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+
+  // =========================================================================
+  // PAST EVENTS (7 SỰ KIỆN ĐÃ KẾT THÚC)
+  // =========================================================================
   {
     id: 'signing-ceremony-dmt-germany',
     title: 'Lễ ký kết hợp tác chiến lược giữa CIC và Tập đoàn Công nghệ DMT (Cộng hòa Liên bang Đức)',
-    shortDesc: 'Sự kiện đánh dấu bước tiến quan trọng của CIC trong việc trở thành nhà phân phối độc quyền thiết bị đo địa chấn đa kênh Summit X One tại thị trường Việt Nam.',
-    longDesc: 'Ngày 10 tháng 06 vừa qua, tại Trung tâm Hội nghị Quốc gia Hà Nội đã diễn ra Lễ ký kết biên bản hợp tác chiến lược (MOU) toàn diện giữa Công ty Cổ phần Công nghệ và Tư vấn CIC và Tập đoàn Công nghệ DMT GmbH & Co. KG - nhà cung cấp các dịch vụ địa chất và khai khoáng hàng đầu từ Cộng hòa Liên bang Đức.\n\nTheo nội dung thỏa thuận ký kết, CIC chính thức trở thành đơn vị nhập khẩu và phân phối độc quyền thiết bị địa chấn đa kênh thế hệ mới Summit X One tại thị trường Việt Nam, Lào và Campuchia. Đồng thời, DMT cam kết chuyển giao toàn bộ công nghệ vận hành, phần mềm xử lý dữ liệu chuyên sâu và hỗ trợ CIC đào tạo đội ngũ kỹ sư bảo dưỡng đạt chuẩn quốc tế.\n\nSự kiện ký kết này đánh dấu cột mốc 35 năm hình thành phát triển của CIC, tiếp tục khẳng định sứ mệnh đem các giải pháp phần cứng và phần mềm đo đạc tiên tiến bậc nhất thế giới về phục vụ công cuộc xây dựng hạ tầng bền vững tại Việt Nam.',
+    shortDesc: 'Sự kiện đánh dấu bước tiến quan trọng của CIC trong việc trở thành nhà phân phối độc quyền thiết bị đo địa chấn đa kênh Summit X One tại Việt Nam.',
+    longDesc: 'Sự kiện ký kết biên bản hợp tác chiến lược (MOU) toàn diện giữa CIC và DMT Germany - tập đoàn địa chất hàng đầu thế giới.',
     img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
     date: '10/06/2026',
     startDate: '2026-06-10T09:00:00',
-    location: 'Phòng VIP 3, Trung tâm Hội nghị Quốc gia, Đại lộ Thăng Long, Mễ Trì, Nam Từ Liêm, Hà Nội',
-    address: 'Đại lộ Thăng Long, Mễ Trì, Nam Từ Liêm, Hà Nội, Việt Nam',
+    location: 'Trung tâm Hội nghị Quốc gia, Đại lộ Thăng Long, Hà Nội',
+    address: 'Đại lộ Thăng Long, Mễ Trì, Nam Từ Liêm, Hà Nội',
+    eventType: 'Lễ ký kết & Báo chí',
     status: 'past',
     isOpenRegistration: false,
-    targetAudience: [
-      'Đại diện Bộ Tài nguyên và Môi trường, Bộ Xây dựng',
-      'Phóng viên báo chí, truyền hình chuyên ngành kỹ thuật xây dựng',
-      'Các đối tác chiến lược và khách hàng truyền thống lâu năm của CIC',
-      'Đội ngũ cán bộ quản lý cấp cao và kỹ sư nòng cốt của CIC Group'
-    ],
+    isFeatured: false,
+    targetAudience: ['Đại diện Bộ TN&MT, Bộ Xây dựng', 'Phóng viên báo chí'],
     agenda: [
-      {
-        time: '09:00 - 09:30',
-        title: 'Đón tiếp đại biểu cấp cao và cơ quan thông tấn báo chí',
-        description: 'Đón khách, chụp hình check-in lưu niệm tại photobooth chính của buổi lễ và thưởng thức hòa tấu nhạc cụ dân tộc.'
-      },
-      {
-        time: '09:30 - 09:45',
-        title: 'Tuyên bố lý do & Giới thiệu đại biểu tham dự',
-        description: 'Trình chiếu phim tư liệu ngắn giới thiệu hành trình hợp tác 3 năm qua giữa hai tập đoàn CIC và DMT.'
-      },
-      {
-        time: '09:45 - 10:15',
-        title: 'Phát biểu định hướng hợp tác lâu dài của Lãnh đạo hai Tập đoàn',
-        description: 'Đại diện CIC chia sẻ về tầm quan trọng của việc làm chủ công nghệ địa chấn sâu trong khảo sát địa chất hầm và đập thủy điện; Đại diện DMT cam kết hỗ trợ tối đa kỹ thuật.'
-      },
-      {
-        time: '10:15 - 10:30',
-        title: 'Nghi thức Ký kết biên bản ghi nhớ hợp tác chiến lược (MOU)',
-        description: 'Lãnh đạo hai bên tiến hành ký kết biên bản dưới sự chứng kiến của đại diện các cơ quan quản lý nhà nước.'
-      },
-      {
-        time: '10:30 - 11:15',
-        title: 'Họp báo trao đổi thông tin & Trải nghiệm thực tế thiết bị Summit X One',
-        description: 'Giải đáp câu hỏi của báo chí về giá thành, tính ứng dụng tại vùng địa chất phức tạp miền Trung Việt Nam và chế độ bảo hành chuyên hãng.'
-      },
-      {
-        time: '11:15 - 11:30',
-        title: 'Tiệc rượu champagne khai xuân & Chúc mừng thành công',
-        description: 'Tiệc đứng buffet nhẹ nhàng kết thúc thành công tốt đẹp lễ ký kết.'
-      }
+      { time: '09:00 - 11:30', title: 'Lễ Ký kết MOU Hợp tác Chiến lược', description: 'Nghi thức ký kết chính thức hai bên.' }
     ],
-    speakers: [
-      {
-        name: 'TS. Nguyễn Ngọc Long',
-        role: 'Chủ tịch Hội đồng Quản trị',
-        company: 'CIC Group',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80',
-        bio: 'Nhà sáng lập CIC Group với hơn 35 năm định hướng chiến lược đưa doanh nghiệp trở thành cầu nối công nghệ uy tín nhất Việt Nam trong mảng xây dựng hạ tầng, giao thông và tài nguyên.'
-      },
-      {
-        name: 'Mr. Dieter Schmidt',
-        role: 'Giám đốc Phát triển Thị trường Toàn cầu',
-        company: 'DMT GmbH & Co. KG (Đức)',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80',
-        bio: 'Hơn 20 năm điều hành các chương trình hợp tác quốc tế của Tập đoàn DMT Đức, chuyên gia hàng đầu châu Âu trong lĩnh vực phát triển thiết bị thăm dò khoáng sản và kỹ thuật an toàn mỏ.'
-      }
+    speakers: [{ name: 'TS. Nguyễn Ngọc Long', role: 'Chủ tịch HĐQT', company: 'CIC Group', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80', bio: 'Nhà sáng lập CIC Group.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Thông cáo báo chí CIC & DMT Germany.pdf', size: '1.2 MB', url: '#' }]
+  },
+  {
+    id: 'bentley-user-day-2026',
+    title: 'Bentley User Day 2026: Giải pháp Tính toán Kết cấu & Mô phỏng Công trình Giao thông',
+    shortDesc: 'Ngày hội người dùng phần mềm Bentley quy tụ hơn 200 chuyên gia kỹ thuật chia sẻ kinh nghiệm sử dụng STAAD.Pro, PLAXIS, MicroStation.',
+    longDesc: 'Chương trình Bentley User Day 2026 diễn ra thành công rực rỡ với nhiều báo cáo chất lượng cao về hạ tầng giao thông trọng điểm.',
+    img: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80',
+    date: '18/05/2026',
+    startDate: '2026-05-18T08:30:00',
+    location: 'Khách sạn Pullman, 40 Cát Linh, Đống Đa, Hà Nội',
+    address: '40 Cát Linh, Đống Đa, Hà Nội',
+    eventType: 'Hội thảo Toàn quốc',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư tư vấn thiết kế cầu đường, thủy lợi'],
+    agenda: [
+      { time: '08:30 - 11:30', title: 'Chuyên đề STAAD.Pro & PLAXIS 3D', description: 'Chia sẻ từ các chuyên gia hàng đầu.' }
     ],
-    media: {
-      gallery: [
-        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&q=80'
-      ],
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    documents: [
-      {
-        name: 'Thông cáo báo chí Lễ ký kết chiến lược CIC & DMT Germany.pdf',
-        size: '1.2 MB',
-        url: '#'
-      },
-      {
-        name: 'Brochure giới thiệu thiết bị địa chấn đa kênh Summit X One (DMT).pdf',
-        size: '3.5 MB',
-        url: '#'
-      }
-    ]
+    speakers: [{ name: 'ThS. Trần Hoàng Nam', role: 'Trưởng phòng Kỹ thuật', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Chuyên gia Bentley certified.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Slide Tổng quan Bentley User Day 2026.pdf', size: '8.1 MB', url: '#' }]
+  },
+  {
+    id: 'stcad-structural-seminar-2026',
+    title: 'Hội thảo Chuyển giao: Phần mềm Tính toán & Triển khai Kết cấu stCAD cho Kỹ sư Việt',
+    shortDesc: 'Giới thiệu phiên bản nâng cấp stCAD v2026 tự động tính toán dầm, cột, sàn, móng theo tiêu chuẩn TCVN 5574:2018.',
+    longDesc: 'Hội thảo thu hút hơn 150 kỹ sư kết cấu tại Hà Nội, mang lại giải pháp làm chủ bản quyền phần mềm thiết kế nội địa hóa chất lượng cao.',
+    img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80',
+    date: '25/04/2026',
+    startDate: '2026-04-25T08:30:00',
+    location: 'Hội Kiến trúc sư Việt Nam, 40 Tăng Bạt Hổ, Hai Bà Trưng, Hà Nội',
+    address: '40 Tăng Bạt Hổ, Hai Bà Trưng, Hà Nội',
+    eventType: 'Hội thảo Kỹ thuật',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư kết cấu', 'Công ty tư vấn thiết kế nhà dân dụng và công nghiệp'],
+    agenda: [
+      { time: '08:30 - 11:00', title: 'Trình diễn tính năng mới stCAD 2026', description: 'Xuất bản vẽ kết cấu tự động ra AutoCAD & enjiCAD.' }
+    ],
+    speakers: [{ name: 'KS. Lê Văn Bình', role: 'Kỹ sư Trưởng stCAD', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80', bio: 'Đội ngũ phát triển phần mềm stCAD.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Tổng quan Tính năng stCAD 2026.pdf', size: '3.4 MB', url: '#' }]
+  },
+  {
+    id: 'cde-iso19650-workshop-2026',
+    title: 'Tọa đàm: Áp dụng Tiêu chuẩn ISO 19650 trong Quản lý Thông tin BIM Dự án Xây dựng',
+    shortDesc: 'Buổi chia sẻ thực tế từ các chuyên gia CDE về lộ trình xây dựng quy trình quản lý thông tin dự án đạt tiêu chuẩn quốc tế ISO 19650.',
+    longDesc: 'Chương trình thảo luận sâu sắc về các thách thức khi triển khai quy trình CDE tại các chủ đầu tư và ban quản lý dự án lớn.',
+    img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
+    date: '12/03/2026',
+    startDate: '2026-03-12T13:30:00',
+    location: 'Trung tâm Đào tạo CIC, 37 Lê Đại Hành, Hà Nội',
+    address: '37 Lê Đại Hành, Hai Bà Trưng, Hà Nội',
+    eventType: 'Tọa đàm Chuyên đề',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['BIM Manager', 'Giám đốc Dự án', 'Đơn vị Tư vấn Quản lý'],
+    agenda: [
+      { time: '13:30 - 16:30', title: 'Phân tích khung quy chuẩn ISO 19650-1 & 19650-2', description: 'Ứng dụng trong thực tế quản lý dự án xây dựng tại Việt Nam.' }
+    ],
+    speakers: [{ name: 'ThS. Trần Hoàng Nam', role: 'Chuyên gia CDE', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Chuyên gia BIM & ISO 19650.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Tài liệu Tọa đàm ISO 19650.pdf', size: '2.9 MB', url: '#' }]
+  },
+  {
+    id: 'geotechnical-monitoring-hcm-2026',
+    title: 'Hội thảo: Công nghệ Trắc địa & Quan trắc Biến dạng Công trình Nhà cao tầng TP. HCM',
+    shortDesc: 'Báo cáo tổng kết ứng dụng hệ thống robot quan trắc tự động Leica/Geomax trong theo dõi độ nghiêng, lún nhà cao tầng.',
+    longDesc: 'Hội thảo giúp các kỹ sư trắc địa cập nhật các thuật toán lọc nhiễu dữ liệu quan trắc thời gian thực.',
+    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
+    date: '20/02/2026',
+    startDate: '2026-02-20T08:30:00',
+    location: 'Khách sạn Majestic, 1 Đồng Khởi, Quận 1, TP. HCM',
+    address: '1 Đồng Khởi, Bến Nghé, Quận 1, TP. HCM',
+    eventType: 'Hội thảo Chuyên ngành',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư quan trắc', 'Chủ đầu tư cao tầng'],
+    agenda: [
+      { time: '08:30 - 11:30', title: 'Mô hình tự động hóa quan trắc lún nhà cao tầng', description: 'Cảnh báo tự động qua tin nhắn SMS/Email.' }
+    ],
+    speakers: [{ name: 'KS. Trịnh Quốc Bảo', role: 'Trưởng phòng Trắc địa', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80', bio: 'Chuyên gia thiết bị quan trắc.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Báo cáo Quan trắc Lún Công trình.pdf', size: '4.5 MB', url: '#' }]
+  },
+  {
+    id: 'zwcad-2026-launch-event',
+    title: 'Lễ ra mắt Chính thức Phần mềm Thiết kế CAD Thế hệ mới ZWCAD 2026',
+    shortDesc: 'Sự kiện công bố phiên bản ZWCAD 2026 với tốc độ mở file DWG dung lượng lớn nhanh gấp 2 lần, tích hợp công nghệ AI Point Cloud.',
+    longDesc: 'Buổi lễ ra mắt thu hút hơn 300 đối tác và doanh nghiệp công nghệ xây dựng, chứng minh bước tiến vượt bậc của ZWCAD.',
+    img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
+    date: '15/01/2026',
+    startDate: '2026-01-15T14:00:00',
+    location: 'Trung tâm Hội nghị JW Marriott, Nam Từ Liêm, Hà Nội',
+    address: 'Số 8 Đỗ Đức Dục, Nam Từ Liêm, Hà Nội',
+    eventType: 'Lễ Ra mắt Sản phẩm',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Khách hàng doanh nghiệp', 'Đại lý phân phối', 'Kỹ sư CAD'],
+    agenda: [
+      { time: '14:00 - 17:00', title: 'Trình diễn tính năng đột phá ZWCAD 2026', description: 'Đố vui nhận quà tặng bản quyền vĩnh viễn.' }
+    ],
+    speakers: [{ name: 'TS. Nguyễn Minh Triết', role: 'CTO', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Chuyên gia công nghệ CAD.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Sổ tay Tính năng ZWCAD 2026.pdf', size: '5.0 MB', url: '#' }]
+  },
+  {
+    id: 'cic-year-end-tech-forum-2025',
+    title: 'Diễn đàng Tổng kết Công nghệ & vinh danh Đối tác Chuyển đổi số Xuất sắc năm 2025',
+    shortDesc: 'Sự kiện tri ân khách hàng và vinh danh các Doanh nghiệp Xây dựng đi đầu trong ứng dụng BIM & CDE tiêu biểu năm 2025.',
+    longDesc: 'Buổi gala trao giải vinh danh các tập đoàn và công ty tư vấn đạt thành tích chuyển đổi số ấn tượng cùng sự đồng hành của CIC.',
+    img: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80',
+    date: '20/12/2025',
+    startDate: '2025-12-20T18:00:00',
+    location: 'Trung tâm Hội nghị Almaz Convention Center, Vinhomes Riverside, Hà Nội',
+    address: 'Hoa Lan, Vinhomes Riverside, Long Biên, Hà Nội',
+    eventType: 'Gala & Tri ân',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Đại diện các Doanh nghiệp đối tác', 'Ban Lãnh đạo CIC Group'],
+    agenda: [
+      { time: '18:00 - 21:00', title: 'Gala Tri ân & Trao giải Chuyển đổi số 2025', description: 'Lễ vinh danh các đơn vị xuất sắc.' }
+    ],
+    speakers: [{ name: 'TS. Nguyễn Ngọc Long', role: 'Chủ tịch HĐQT', company: 'CIC Group', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80', bio: 'Chủ tịch CIC Group.' }],
+    media: { gallery: ['https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    documents: [{ name: 'Báo cáo Chuyển đổi số CIC 2025.pdf', size: '6.8 MB', url: '#' }]
+  },
+  {
+    id: 'roadshow-infrastructure-software-2025',
+    title: 'Roadshow Công nghệ: Chuyển giao Phần mềm Thiết kế Đường ô tô & Hạ tầng Giao thông',
+    shortDesc: 'Chuỗi hội thảo giới thiệu giải pháp thiết kế đường giao thông kết hợp tính năng xuất khối lượng đào đắp tự động.',
+    longDesc: 'Hội thảo giúp các đơn vị tư vấn giao thông nâng cao chất lượng hồ sơ thiết kế.',
+    img: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&q=80',
+    date: '10/11/2025',
+    startDate: '2025-11-10T08:30:00',
+    location: 'Khách sạn Sài Gòn - Cần Thơ',
+    address: '55 Phan Đình Phùng, Tân An, Ninh Kiều, Cần Thơ',
+    eventType: 'Roadshow Công nghệ',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư giao thông'],
+    agenda: [],
+    speakers: [],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+  {
+    id: 'smart-city-gis-forum-2025',
+    title: 'Diễn đàn Đô thị Thông minh 2025: Xây dựng CSDL Hạ tầng Kỹ thuật Số',
+    shortDesc: 'Chia sẻ các mô hình thành công trong triển khai GIS quản lý chiếu sáng đô thị, cấp thoát nước và cây xanh.',
+    longDesc: 'Quy tụ các nhà khoa học và lãnh đạo quản lý đô thị.',
+    img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+    date: '15/10/2025',
+    startDate: '2025-10-15T09:00:00',
+    location: 'Trung tâm Hội nghị Ariyana, Đà Nẵng',
+    address: '107 Võ Nguyên Giáp, Khuê Mỹ, Ngũ Hành Sơn, Đà Nẵng',
+    eventType: 'Diễn đàn Đô thị',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Chuyên gia GIS'],
+    agenda: [],
+    speakers: [],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
+  },
+  {
+    id: 'bentley-staadpro-masterclass-2025',
+    title: 'Khóa Đào tạo Chuyên sâu: Tính toán Kết cấu Thép Công nghiệp với STAAD.Pro Advanced',
+    shortDesc: 'Hướng dẫn tính toán khung nhà xưởng công nghiệp khẩu độ lớn và liên kết thép theo tiêu chuẩn TCVN & AISC.',
+    longDesc: 'Đào tạo kỹ sư kết cấu làm chủ STAAD.Pro.',
+    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80',
+    date: '05/09/2025',
+    startDate: '2025-09-05T08:30:00',
+    location: 'Trung tâm Đào tạo CIC, Hà Nội',
+    address: '37 Lê Đại Hành, Hai Bà Trưng, Hà Nội',
+    eventType: 'Khóa Đào tạo',
+    status: 'past',
+    isOpenRegistration: false,
+    isFeatured: false,
+    targetAudience: ['Kỹ sư kết cấu thép'],
+    agenda: [],
+    speakers: [],
+    media: { gallery: [], videoUrl: '' },
+    documents: []
   }
 ];

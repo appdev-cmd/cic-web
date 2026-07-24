@@ -76,8 +76,11 @@ export interface EventItem {
   img: string;
   date: string; // e.g. "15/08/2026"
   startDate: string; // ISO string "2026-08-15"
+  endDate?: string;
   location: string;
   address?: string;
+  eventType?: string; // e.g. "Webinar", "Workshop", "Hội thảo", "Triển lãm", "Lễ ký kết"
+  isFeatured?: boolean; // Highlight for Hero Event
   status: 'upcoming' | 'ongoing' | 'past'; // upcoming = Sắp diễn ra, ongoing = Đang diễn ra, past = Đã diễn ra
   isOpenRegistration: boolean; // Đang mở đăng ký
   targetAudience: string[];

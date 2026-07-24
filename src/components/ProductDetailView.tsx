@@ -85,7 +85,7 @@ export function ProductDetailView({
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 mb-8 shadow-sm cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 mb-8 shadow-sm cursor-pointer rounded-[8px]"
         >
           <ChevronLeft size={16} />
           Quay lại danh sách
@@ -96,10 +96,10 @@ export function ProductDetailView({
           
           {/* Left Column: Interactive Image Slider */}
           <div className="lg:col-span-6 space-y-4">
-            <div className="bg-white border border-slate-200 p-2 shadow-sm relative overflow-hidden group aspect-[4/3]">
+            <div className="bg-white border border-slate-200 p-2 shadow-sm relative overflow-hidden group aspect-[4/3] rounded-[10px]">
               
               {/* Slideshow image container */}
-              <div className="w-full h-full bg-slate-100 relative overflow-hidden">
+              <div className="w-full h-full bg-slate-100 relative overflow-hidden rounded-[8px]">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={currentSlide}
@@ -117,19 +117,19 @@ export function ProductDetailView({
                 {/* Left/Right Arrows */}
                 <button
                   onClick={handlePrevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={handleNextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
                 >
                   <ChevronRight size={20} />
                 </button>
 
                 {/* Indicator Overlay */}
-                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-wider">
+                <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                   Slide {currentSlide + 1} / {slideImages.length}
                 </div>
               </div>
@@ -141,11 +141,11 @@ export function ProductDetailView({
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`aspect-[4/3] border-2 transition-all p-0.5 overflow-hidden bg-white ${
+                  className={`aspect-[4/3] border-2 transition-all p-0.5 overflow-hidden bg-white rounded-[8px] ${
                     currentSlide === idx ? 'border-orange-600' : 'border-slate-200 hover:border-slate-400'
                   }`}
                 >
-                  <img src={img} alt="thumbnail" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                  <img src={img} alt="thumbnail" referrerPolicy="no-referrer" className="w-full h-full object-cover rounded-[6px]" />
                 </button>
               ))}
             </div>
@@ -156,7 +156,7 @@ export function ProductDetailView({
             
             {/* Badges and Field */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="px-3 py-1 bg-slate-950 text-white text-[10px] font-black uppercase tracking-widest">
+              <span className="px-3 py-1 bg-slate-950 text-white text-[10px] font-black uppercase tracking-widest rounded-[8px]">
                 {product.field}
               </span>
               <span className="text-orange-600 text-xs font-sans font-black uppercase tracking-widest">
@@ -170,10 +170,10 @@ export function ProductDetailView({
             </h1>
 
             {/* Divider */}
-            <div className="w-16 h-1.5 bg-orange-600"></div>
+            <div className="w-16 h-1.5 bg-orange-600 rounded-[8px]"></div>
 
             {/* Price */}
-            <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px]">
+            <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px] rounded-[10px]">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Giá bán bản quyền</span>
               <span className="text-2xl font-black text-orange-600 tracking-tight">
                 {product.price}
@@ -189,15 +189,15 @@ export function ProductDetailView({
             <div className="pt-4 border-t border-slate-200 space-y-2">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Thông tin phân loại:</span>
               <div className="flex flex-wrap gap-2">
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
                   <Layers size={12} className="text-orange-600" />
                   {product.field}
                 </div>
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
                   <Box size={12} className="text-orange-600" />
                   {product.brand}
                 </div>
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
                   <FileText size={12} className="text-orange-600" />
                   {product.app}
                 </div>
@@ -208,7 +208,7 @@ export function ProductDetailView({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
               <button
                 onClick={() => onContact(product)}
-                className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-wider text-[11px] transition-all shadow-lg shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction"
+                className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-wider text-[11px] transition-all shadow-lg shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
               >
                 <MessageSquare size={16} />
                 Yêu cầu tư vấn
@@ -216,7 +216,7 @@ export function ProductDetailView({
               
               <button
                 onClick={() => onDownload(product)}
-                className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction"
+                className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
               >
                 <Download size={16} />
                 Tải phần mềm
@@ -224,7 +224,7 @@ export function ProductDetailView({
 
               <button
                 onClick={() => onBuy(product)}
-                className="w-full py-4 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction"
+                className="w-full py-4 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-black uppercase tracking-wider text-[11px] transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
               >
                 Đăng ký mua
               </button>
@@ -237,7 +237,7 @@ export function ProductDetailView({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start pt-8">
           
           {/* Left Block: Switchable Tabs (col-span-8) */}
-          <div className="lg:col-span-8 bg-white border border-slate-200 shadow-sm p-6 md:p-8 space-y-8">
+          <div className="lg:col-span-8 bg-white border border-slate-200 shadow-sm p-6 md:p-8 space-y-8 rounded-[10px]">
             
             {/* Tabs Header */}
             <div className="flex border-b border-slate-200 overflow-x-auto gap-1">
@@ -250,7 +250,7 @@ export function ProductDetailView({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-5 py-3 text-xs font-black uppercase tracking-wider border-b-2 whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-5 py-3 text-xs font-black uppercase tracking-wider border-b-2 whitespace-nowrap transition-all cursor-pointer rounded-t-[8px] ${
                     activeTab === tab.id
                       ? 'border-orange-600 text-orange-600 font-black bg-orange-600/5'
                       : 'border-transparent text-slate-500 hover:text-slate-800'

@@ -1383,7 +1383,7 @@ export function NewsView({
                     <button
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id as any)}
-                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-none flex items-center gap-2 ${
+                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] flex items-center gap-2 ${
                         isSelected 
                           ? 'bg-[#FC5115] text-white shadow-md' 
                           : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
@@ -1397,7 +1397,7 @@ export function NewsView({
               </div>
 
               {/* SECONDARY FILTER ENGINE BAR */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4 rounded-[10px]">
                 {/* Search Input */}
                 <div className="md:col-span-6 relative">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
@@ -1406,7 +1406,7 @@ export function NewsView({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm kiếm nội dung, thông báo, mã tài liệu..."
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
                   />
                 </div>
 
@@ -1416,7 +1416,7 @@ export function NewsView({
                     <select
                       value={companySubType}
                       onChange={(e: any) => setCompanySubType(e.target.value)}
-                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                     >
                       {['Tất cả', 'Hoạt động CIC', 'Thông báo', 'Văn hóa doanh nghiệp'].map(st => (
                         <option key={st} value={st}>{st}</option>
@@ -1430,7 +1430,7 @@ export function NewsView({
                     <select
                       value={specialtySubType}
                       onChange={(e: any) => setSpecialtySubType(e.target.value)}
-                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                     >
                       {['Tất cả', 'Kiến thức', 'Cập nhật công nghệ', 'Chính sách', 'Giải pháp'].map(st => (
                         <option key={st} value={st}>{st}</option>
@@ -1445,7 +1445,7 @@ export function NewsView({
                       <select
                         value={recruitmentDept}
                         onChange={(e) => setRecruitmentDept(e.target.value)}
-                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                       >
                         {depts.map(d => <option key={d} value={d}>PB: {d}</option>)}
                       </select>
@@ -1454,7 +1454,7 @@ export function NewsView({
                       <select
                         value={recruitmentLoc}
                         onChange={(e) => setRecruitmentLoc(e.target.value)}
-                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                       >
                         {locs.map(l => <option key={l} value={l}>ĐĐ: {l}</option>)}
                       </select>
@@ -1467,7 +1467,7 @@ export function NewsView({
                     <select
                       value={promotionStatus}
                       onChange={(e) => setPromotionStatus(e.target.value)}
-                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                     >
                       {pStatuses.map(s => <option key={s} value={s}>Trạng thái: {s}</option>)}
                     </select>
@@ -1480,7 +1480,7 @@ export function NewsView({
                       <select
                         value={shareholderYear}
                         onChange={(e) => setShareholderYear(e.target.value)}
-                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                       >
                         {shYears.map(y => <option key={y} value={y}>Năm: {y}</option>)}
                       </select>
@@ -1489,7 +1489,7 @@ export function NewsView({
                       <select
                         value={shareholderDocType}
                         onChange={(e) => setShareholderDocType(e.target.value)}
-                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                       >
                         {shDocTypes.map(d => <option key={d} value={d}>Loại: {d}</option>)}
                       </select>
@@ -1511,7 +1511,7 @@ export function NewsView({
                       setShareholderYear('Tất cả');
                       setShareholderDocType('Tất cả');
                     }}
-                    className="w-full py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors text-center"
+                    className="w-full py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors text-center rounded-[8px]"
                   >
                     Xóa lọc
                   </button>
@@ -1521,7 +1521,7 @@ export function NewsView({
 
             {/* EDITORIAL LIST SHOWCASE (APPLE / NVIDIA NEWSROOM STYLE - NO CARDS / NO BOXES) */}
             {paginatedNews.length === 0 ? (
-              <div className="text-center py-20 border border-dashed border-slate-300 space-y-4">
+              <div className="text-center py-20 border border-dashed border-slate-300 space-y-4 rounded-[10px]">
                 <p className="text-slate-500 font-medium text-sm">Không tìm thấy tin tức hay văn bản nào phù hợp với bộ lọc.</p>
                 <button
                   onClick={() => {
@@ -1535,7 +1535,7 @@ export function NewsView({
                     setShareholderYear('Tất cả');
                     setShareholderDocType('Tất cả');
                   }}
-                  className="px-6 py-2.5 bg-[#FC5115] text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-700 transition-all rounded-none shadow-sm"
+                  className="px-6 py-2.5 bg-[#FC5115] text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-700 transition-all rounded-[8px] shadow-sm"
                 >
                   Đặt lại tất cả bộ lọc
                 </button>
@@ -1549,35 +1549,35 @@ export function NewsView({
                   if (news.category === 'recruitment') {
                     const r = news as RecruitmentNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800">
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 rounded-[8px]">
                         {r.position} • {r.location}
                       </span>
                     );
                   } else if (news.category === 'promotion') {
                     const p = news as PromotionNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-orange-100 text-orange-800">
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-orange-100 text-orange-800 rounded-[8px]">
                         {p.status}
                       </span>
                     );
                   } else if (news.category === 'shareholder') {
                     const s = news as ShareholderNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-indigo-100 text-indigo-800">
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-indigo-100 text-indigo-800 rounded-[8px]">
                         {s.docType} ({s.year})
                       </span>
                     );
                   } else if (news.category === 'company') {
                     const c = news as CompanyNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-amber-100 text-amber-800">
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-amber-100 text-amber-800 rounded-[8px]">
                         {c.subType}
                       </span>
                     );
                   } else if (news.category === 'specialty') {
                     const sp = news as SpecialtyNewsItem;
                     typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-sky-100 text-sky-800">
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-sky-100 text-sky-800 rounded-[8px]">
                         {sp.subType}
                       </span>
                     );
@@ -1591,10 +1591,10 @@ export function NewsView({
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.05, duration: 0.4 }}
                       onClick={() => handleSelectNews(news.id)}
-                      className="group cursor-pointer bg-white border border-slate-200/90 hover:border-orange-500 transition-all duration-300 shadow-2xs hover:shadow-md flex flex-col overflow-hidden"
+                      className="group cursor-pointer bg-[#F7F8FA] hover:bg-white border border-transparent p-2.5 hover:border-orange-500/30 transition-all duration-300 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden rounded-[10px]"
                     >
                       {/* Top: Image Container */}
-                      <div className="w-full h-48 lg:h-52 shrink-0 relative overflow-hidden bg-slate-900">
+                      <div className="w-full h-48 lg:h-52 shrink-0 relative overflow-hidden bg-slate-900 rounded-[8px]">
                         <img 
                           src={news.img} 
                           alt={news.title}
@@ -1602,14 +1602,14 @@ export function NewsView({
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute top-3 left-3 flex gap-2">
-                          <span className="px-2.5 py-1 bg-[#FC5115] text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
+                          <span className="px-2.5 py-1 bg-[#FC5115] text-white text-[9px] font-black uppercase tracking-wider shadow-sm rounded-[8px]">
                             {categoriesList.find(c => c.id === news.category)?.label}
                           </span>
                         </div>
                       </div>
 
                       {/* Bottom: Card Content */}
-                      <div className="p-5 flex flex-col flex-1 space-y-3">
+                      <div className="p-4 flex flex-col flex-1 space-y-3">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
                             <Clock size={12} className="text-[#FC5115]" /> {news.date}

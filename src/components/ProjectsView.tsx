@@ -164,7 +164,7 @@ export function ProjectsView({
                     <button
                       key={sec}
                       onClick={() => setSelectedSector(sec)}
-                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
+                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
                         isActive
                           ? 'bg-[#FC5115] text-white shadow-md'
                           : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
@@ -177,7 +177,7 @@ export function ProjectsView({
               </div>
 
               {/* Secondary Filter Controls Bar (Search + Solution + Customer) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4 rounded-[10px]">
                 {/* Search Bar */}
                 <div className="md:col-span-5 relative">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
@@ -186,7 +186,7 @@ export function ProjectsView({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm tên dự án, chủ đầu tư, địa điểm..."
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-none"
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
                   />
                 </div>
 
@@ -195,7 +195,7 @@ export function ProjectsView({
                   <select
                     value={selectedSolution}
                     onChange={(e) => setSelectedSolution(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                   >
                     <option value="Tất cả">Giải pháp: Tất cả</option>
                     {solutions.filter(s => s !== 'Tất cả').map(sol => (
@@ -209,7 +209,7 @@ export function ProjectsView({
                   <select
                     value={selectedCustomer}
                     onChange={(e) => setSelectedCustomer(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-none cursor-pointer"
+                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                   >
                     <option value="Tất cả">Chủ đầu tư: Tất cả</option>
                     {customers.filter(c => c !== 'Tất cả').map(cust => (
@@ -228,7 +228,7 @@ export function ProjectsView({
                         setSelectedSolution('Tất cả');
                         setSelectedCustomer('Tất cả');
                       }}
-                      className="px-3 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap"
+                      className="px-3 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap rounded-[8px]"
                     >
                       Xóa lọc
                     </button>
@@ -244,7 +244,7 @@ export function ProjectsView({
 
             {/* FULL IMAGE SHOWCASE GRID (STUDIO PORTFOLIO - ASYMMETRIC RHYTHM & HOVER OVERLAY) */}
             {paginatedProjects.length === 0 ? (
-              <div className="text-center py-20 border border-dashed border-slate-300 space-y-4">
+              <div className="text-center py-20 border border-dashed border-slate-300 space-y-4 rounded-[10px]">
                 <p className="text-slate-500 font-medium text-sm">Không tìm thấy dự án nào phù hợp với bộ lọc hiện tại.</p>
                 <button
                   onClick={() => {
@@ -253,7 +253,7 @@ export function ProjectsView({
                     setSelectedSolution('Tất cả');
                     setSelectedCustomer('Tất cả');
                   }}
-                  className="px-6 py-2.5 bg-[#FC5115] text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-700 transition-all rounded-none shadow-sm"
+                  className="px-6 py-2.5 bg-[#FC5115] text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-700 transition-all rounded-[8px] shadow-sm"
                 >
                   Đặt lại tất cả bộ lọc
                 </button>
@@ -286,7 +286,7 @@ export function ProjectsView({
                       viewport={{ once: true }}
                       transition={{ delay: idx * 0.08, duration: 0.6 }}
                       onClick={() => handleSelectProject(project.id)}
-                      className={`relative overflow-hidden cursor-pointer group rounded-none bg-slate-900 transition-all duration-500 group-hover/grid:opacity-50 hover:!opacity-100 ${spanClass}`}
+                      className={`relative overflow-hidden cursor-pointer group rounded-[10px] bg-slate-900 transition-all duration-500 group-hover/grid:opacity-50 hover:!opacity-100 ${spanClass}`}
                     >
                       {/* 1. Full Image background */}
                       <img
@@ -302,7 +302,7 @@ export function ProjectsView({
                       {/* Default state title badge at bottom */}
                       <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-4">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="px-2.5 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider rounded-[8px]">
                             {project.sector}
                           </span>
                           <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">
@@ -319,7 +319,7 @@ export function ProjectsView({
                         <div className="transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-3">
                           
                           {/* Accent orange horizontal line */}
-                          <div className="w-8 h-0.5 bg-[#FC5115]" />
+                          <div className="w-8 h-0.5 bg-[#FC5115] rounded-[8px]" />
 
                           {/* Project Title - Refined font size and line clamping for long titles */}
                           <h3 className="text-base lg:text-xl font-bold text-white leading-snug line-clamp-2">
@@ -333,13 +333,13 @@ export function ProjectsView({
 
                           {/* Tag pills (White 15% opacity + backdrop blur) */}
                           <div className="flex flex-wrap gap-2 pt-1">
-                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider">
+                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                               {project.sector}
                             </span>
-                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider">
+                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                               {project.solution}
                             </span>
-                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider">
+                            <span className="px-3 py-1 bg-white/15 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
                               {project.customer}
                             </span>
                           </div>

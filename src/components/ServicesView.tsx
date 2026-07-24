@@ -161,7 +161,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               </div>
 
               {/* Search & Filter Controls */}
-              <div className="bg-white border border-slate-200/80 p-6 space-y-6">
+              <div className="bg-white border border-slate-200/80 p-6 space-y-6 rounded-[10px]">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                   
                   {/* Search input */}
@@ -172,7 +172,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-bold rounded-none"
+                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-bold rounded-[8px]"
                     />
                     {searchQuery && (
                       <button 
@@ -203,7 +203,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all border rounded-none ${
+                            className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all border rounded-[8px] ${
                               isSelected
                                 ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
                                 : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -221,14 +221,14 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
               {/* Service Cards Grid / Empty State */}
               {paginatedServices.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-slate-200/80 space-y-4">
+                <div className="text-center py-16 bg-white border border-slate-200/80 space-y-4 rounded-[10px]">
                   <p className="text-slate-400 font-bold text-sm">Không tìm thấy dịch vụ nào phù hợp với điều kiện tìm kiếm.</p>
                   <button
                     onClick={() => {
                       setSearchQuery('');
                       setSelectedCategory('Tất cả');
                     }}
-                    className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all rounded-none"
+                    className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all rounded-[8px]"
                   >
                     Xóa bộ lọc tìm kiếm
                   </button>
@@ -241,11 +241,11 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05, duration: 0.6 }}
-                      whileHover={{ y: -8 }}
-                      className="bg-white border border-slate-200/80 hover:border-orange-500 group flex flex-col hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500 relative rounded-none overflow-hidden"
+                      whileHover={{ y: -6 }}
+                      className="bg-[#F7F8FA] hover:bg-white border border-transparent p-2.5 hover:border-orange-500/30 group flex flex-col hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-all duration-300 relative rounded-[10px] overflow-hidden cursor-pointer"
                     >
                       {/* Image Area */}
-                      <div className="h-56 w-full overflow-hidden relative">
+                      <div className="h-56 w-full overflow-hidden relative rounded-[8px]">
                         <img 
                           src={service.image} 
                           alt={service.title} 
@@ -253,13 +253,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
-                        <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-slate-900/90 text-white font-sans text-[9px] font-black uppercase tracking-widest border border-white/10">
+                        <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-slate-900/90 text-white font-sans text-[9px] font-black uppercase tracking-widest border border-white/10 rounded-[8px]">
                           {service.category}
                         </span>
                       </div>
 
                       {/* Content Area */}
-                      <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
+                      <div className="p-4 flex-1 flex flex-col justify-between space-y-6">
                         <div className="space-y-3">
                           <h3 className="text-base font-black text-slate-950 leading-tight group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
                             {service.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}
@@ -272,7 +272,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         {/* CTA Link */}
                         <button 
                           onClick={() => handleServiceSelect(service.id)}
-                          className="w-full py-2.5 border border-slate-200 hover:border-orange-600 hover:bg-orange-600 hover:text-white transition-all text-xs font-black uppercase tracking-widest text-slate-700 flex items-center justify-center gap-2 group-hover:shadow-md"
+                          className="w-full py-2.5 border border-slate-200 hover:border-orange-600 hover:bg-orange-600 hover:text-white transition-all text-xs font-black uppercase tracking-widest text-slate-700 flex items-center justify-center gap-2 group-hover:shadow-md rounded-[8px]"
                         >
                           Xem chi tiết dịch vụ <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                         </button>

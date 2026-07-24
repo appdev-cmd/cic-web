@@ -450,7 +450,7 @@ export function ProductsView(_props?: ProductsViewProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-none w-full max-w-xl p-5 md:p-6 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] premium-scrollbar"
+            className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-[10px] w-full max-w-xl p-5 md:p-6 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] premium-scrollbar"
           >
             {/* Close Button */}
             <button 
@@ -1029,12 +1029,12 @@ export function ProductsView(_props?: ProductsViewProps) {
           <div className="lg:hidden flex gap-2 w-full mb-2">
             <button
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 rounded-[8px]"
             >
               <SlidersHorizontal size={14} className="text-orange-600" />
               {isMobileFilterOpen ? 'Đóng bộ lọc' : 'Bộ lọc tìm kiếm'}
               {activeFiltersCount > 0 && (
-                <span className="px-2 py-0.5 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                <span className="px-2 py-0.5 bg-orange-600 text-white text-[10px] font-bold rounded-[8px]">
                   {activeFiltersCount}
                 </span>
               )}
@@ -1046,7 +1046,7 @@ export function ProductsView(_props?: ProductsViewProps) {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className={`w-full lg:col-span-3 bg-white border border-slate-200 p-5 shadow-xs sticky top-28 ${
+            className={`w-full lg:col-span-3 bg-white border border-slate-200 p-5 shadow-xs sticky top-28 rounded-[10px] ${
               isMobileFilterOpen ? 'block' : 'hidden lg:block'
             }`}
           >
@@ -1057,7 +1057,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                 Bộ lọc tìm kiếm
               </span>
               {activeFiltersCount > 0 && (
-                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded-full">
+                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded-[8px]">
                   Đã chọn {activeFiltersCount}
                 </span>
               )}
@@ -1072,7 +1072,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                   placeholder="Nhập tên sản phẩm..."
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 text-xs font-medium text-slate-800 transition-all placeholder:text-slate-400"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 text-xs font-medium text-slate-800 transition-all placeholder:text-slate-400 rounded-[8px]"
                 />
                 <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 {search && (
@@ -1379,7 +1379,7 @@ export function ProductsView(_props?: ProductsViewProps) {
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-orange-50/80 border border-orange-200/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                className="bg-orange-50/80 border border-orange-200/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs rounded-[10px]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[11px] font-black uppercase text-orange-950 tracking-wider flex items-center gap-1.5 mr-1">
@@ -1389,7 +1389,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
                   {/* Search Chip */}
                   {search.trim() && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
                       <span className="text-slate-400 font-normal">Từ khóa:</span> "{search}"
                       <button 
                         onClick={() => { setSearch(''); setCurrentPage(1); }}
@@ -1403,7 +1403,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
                   {/* Fields Chips */}
                   {selectedFields.map(f => (
-                    <span key={`chip-f-${f}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                    <span key={`chip-f-${f}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
                       <span className="text-orange-600 font-normal">Lĩnh vực:</span> {f}
                       <button 
                         onClick={() => toggleFilterItem(selectedFields, setSelectedFields, f)}
@@ -1417,7 +1417,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
                   {/* Brands Chips */}
                   {selectedBrands.map(b => (
-                    <span key={`chip-b-${b}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                    <span key={`chip-b-${b}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
                       <span className="text-orange-600 font-normal">Hãng:</span> {b}
                       <button 
                         onClick={() => toggleFilterItem(selectedBrands, setSelectedBrands, b)}
@@ -1431,7 +1431,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
                   {/* Apps Chips */}
                   {selectedApps.map(a => (
-                    <span key={`chip-a-${a}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                    <span key={`chip-a-${a}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
                       <span className="text-orange-600 font-normal">Ứng dụng:</span> {a}
                       <button 
                         onClick={() => toggleFilterItem(selectedApps, setSelectedApps, a)}
@@ -1445,7 +1445,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
                   {/* Product Types Chips */}
                   {selectedProductTypes.map(pt => (
-                    <span key={`chip-pt-${pt}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs">
+                    <span key={`chip-pt-${pt}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
                       <span className="text-orange-600 font-normal">Loại:</span> {pt}
                       <button 
                         onClick={() => toggleFilterItem(selectedProductTypes, setSelectedProductTypes, pt)}
@@ -1460,7 +1460,7 @@ export function ProductsView(_props?: ProductsViewProps) {
 
                 <button
                   onClick={handleResetFilters}
-                  className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-red-600 hover:text-red-700 bg-white hover:bg-red-50 border border-red-200 px-3 py-1.5 transition-colors shrink-0 self-start sm:self-auto shadow-2xs"
+                  className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-red-600 hover:text-red-700 bg-white hover:bg-red-50 border border-red-200 px-3 py-1.5 transition-colors shrink-0 self-start sm:self-auto shadow-2xs rounded-[8px]"
                 >
                   <RefreshCw size={11} /> Xóa tất cả bộ lọc
                 </button>
@@ -1471,7 +1471,7 @@ export function ProductsView(_props?: ProductsViewProps) {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 gap-4">
               <span className="text-sm font-black uppercase tracking-wider text-slate-950 flex items-center gap-2">
                 Danh sách sản phẩm 
-                <span className="px-2.5 py-0.5 bg-orange-600/10 text-orange-600 text-xs font-black">
+                <span className="px-2.5 py-0.5 bg-orange-600/10 text-orange-600 text-xs font-black rounded-[8px]">
                   {filteredProducts.length} Kết quả
                 </span>
               </span>
@@ -1483,7 +1483,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                     setSortBy(sortBy === 'name-asc' ? 'default' : 'name-asc');
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 text-xs font-black border uppercase tracking-wider transition-all flex items-center gap-2 ${
+                  className={`px-4 py-2 text-xs font-black border uppercase tracking-wider transition-all flex items-center gap-2 rounded-[8px] ${
                     sortBy === 'name-asc'
                       ? 'bg-orange-600 text-white border-orange-600 shadow-sm'
                       : 'bg-white text-slate-700 border-slate-200 hover:border-orange-600 hover:text-orange-600'
@@ -1504,17 +1504,17 @@ export function ProductsView(_props?: ProductsViewProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.05 }}
                     onClick={() => { setSelectedProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="bg-white border border-slate-200 group flex flex-col hover:border-orange-600 hover:shadow-[0_20px_40px_rgba(234,88,12,0.06)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative cursor-pointer"
+                    className="bg-[#F7F8FA] hover:bg-white border border-transparent p-2.5 hover:border-orange-600/30 rounded-[10px] group flex flex-col hover:shadow-[0_20px_40px_rgba(234,88,12,0.06)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative cursor-pointer"
                   >
                     {/* Field badge in top corner */}
                     <div className="absolute top-4 left-4 z-10">
-                      <span className="px-3 py-1 bg-slate-950/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest">
+                      <span className="px-3 py-1 bg-slate-950/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-[8px]">
                         {product.field}
                       </span>
                     </div>
 
                     {/* Image Area */}
-                    <div className="h-56 overflow-hidden bg-slate-100 relative">
+                    <div className="h-56 overflow-hidden bg-slate-100 relative rounded-[8px]">
                       <img 
                         src={product.img} 
                         alt={product.name}
@@ -1526,11 +1526,11 @@ export function ProductsView(_props?: ProductsViewProps) {
                     </div>
 
                     {/* Card Body */}
-                    <div className="p-6 flex-1 flex flex-col gap-4">
+                    <div className="p-4 flex-1 flex flex-col gap-4">
                       <div className="space-y-1.5">
                         {/* Brand & App badges */}
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="px-2 py-0.5 bg-orange-600/10 text-orange-600 text-[9px] font-black uppercase tracking-wider">
+                          <span className="px-2 py-0.5 bg-orange-600/10 text-orange-600 text-[9px] font-black uppercase tracking-wider rounded-[8px]">
                             {product.productType || getProductType(product)}
                           </span>
                           <span className="text-[9px] font-sans font-black uppercase text-slate-600 tracking-wider">
@@ -1594,7 +1594,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700"
+                  className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px]"
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -1605,7 +1605,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                     <button
                       key={pNum}
                       onClick={() => handlePageChange(pNum)}
-                      className={`w-10 h-10 border flex items-center justify-center text-xs font-black transition-all ${
+                      className={`w-10 h-10 border flex items-center justify-center text-xs font-black transition-all rounded-[8px] ${
                         currentPage === pNum
                           ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-orange-600 hover:text-orange-600'
