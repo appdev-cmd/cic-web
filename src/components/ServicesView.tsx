@@ -618,10 +618,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
                 {/* Column Left: Main description & rich HTML content */}
-                <div className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
+                <div className="lg:col-span-8 space-y-5 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
                   
                   {/* Title & Tagline */}
-                  <div className="space-y-3 border-b border-slate-100 pb-5">
+                  <div className="space-y-3 border-b border-slate-100 pb-4">
                     {activeService?.category && (
                       <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider rounded-md">
                         {activeService.category}
@@ -640,7 +640,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                   {/* Rich HTML Content Area */}
                   {activeService?.htmlContent && (
                     <div 
-                      className="service-cms-content pt-2"
+                      className="service-cms-content pt-0"
                       dangerouslySetInnerHTML={{ __html: activeService.htmlContent }}
                     />
                   )}

@@ -449,10 +449,10 @@ export function ProjectsView({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
               {/* LEFT COLUMN: Main Article Body */}
-              <div className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-6 sm:p-10 rounded-[12px] shadow-xs">
+              <div className="lg:col-span-8 space-y-5 bg-white border border-slate-200/80 p-6 sm:p-10 rounded-[12px] shadow-xs">
                 
                 {/* Title & Tagline Header */}
-                <div className="space-y-3 border-b border-slate-100 pb-5">
+                <div className="space-y-3 border-b border-slate-100 pb-4">
                   <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider rounded-md">
                     {activeProject.sector}
                   </span>

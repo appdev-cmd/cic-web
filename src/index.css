@@ -132,6 +132,13 @@ input[type="button"],
 }
 
 /* Service CMS Content styling */
+.service-cms-content > *:first-child,
+.service-cms-content > div:first-child > *:first-child,
+.service-cms-content .title_head {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
 .service-cms-content h1,
 .service-cms-content h2 {
   font-size: 1.5rem;
