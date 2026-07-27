@@ -20,6 +20,21 @@ export default defineConfig(({mode}) => {
       port: 3000,
       allowedHosts: true,
       hmr: process.env.DISABLE_HMR !== 'true',
+      proxy: {
+        '/api/chat': {
+          target: 'http://10.0.0.51:5678',
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/api\/chat/, '/webhook/cic/chat'),
+          configure: (proxy) => {
+            proxy.on('error', (err, _req, res) => {
+              if (res && 'writeHead' in res && !res.headersSent) {
+                res.writeHead(502, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Webhook proxy target unreachable', details: err.message }));
+              }
+            });
+          }
+        },
+      },
     },
   };
 });

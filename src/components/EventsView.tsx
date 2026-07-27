@@ -1334,7 +1334,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
               {/* =========================================================
                   TẦNG 4: FOOTER EMAIL NOTIFICATION CALLOUT
                  ========================================================= */}
-              <section className="bg-white text-slate-900 p-8 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden">
+              <section className="bg-white text-slate-900 p-8 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden rounded-2xl">
                 <div className="max-w-3xl mx-auto text-center space-y-6 relative z-10">
                   <div className="space-y-2">
                     <h2 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight text-slate-950">
@@ -1353,12 +1353,12 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         placeholder="Nhập địa chỉ email của bạn..."
                         value={subscriberEmail}
                         onChange={(e) => setSubscriberEmail(e.target.value)}
-                        className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 text-xs px-4 py-3 placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white"
+                        className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 text-xs px-4 py-3 rounded-xl placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white transition-all"
                       />
 
                       <button
                         type="submit"
-                        className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all shrink-0 shadow-sm"
+                        className="bg-orange-600 hover:bg-orange-700 active:scale-95 text-white px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all shrink-0 shadow-sm rounded-xl cursor-pointer"
                       >
                         Đăng ký nhận tin
                       </button>
@@ -1367,7 +1367,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="bg-orange-50 border border-orange-200 p-4 text-orange-950 text-xs font-bold text-center max-w-lg mx-auto"
+                      className="bg-orange-50 border border-orange-200 p-4 text-orange-950 text-xs font-bold text-center max-w-lg mx-auto rounded-xl"
                     >
                       Cảm ơn bạn! Đã ghi nhận email đăng ký nhận thông báo sự kiện CIC.
                     </motion.div>
