@@ -26,7 +26,8 @@ import {
   Quote,
   Building2,
   Sparkles,
-  Cpu
+  Cpu,
+  MessageSquare
 } from 'lucide-react';
 import { projectsData, DetailedProject } from '../data/projectsData';
 
@@ -36,13 +37,15 @@ interface ProjectsViewProps {
   onNavigateToService: (serviceId: string) => void;
   onNavigateToProduct: (productId: number) => void;
   onNavigateHome: () => void;
+  onOpenConsultation?: () => void;
 }
 
 export function ProjectsView({ 
   initialProjectId, 
   onNavigateToService, 
   onNavigateToProduct, 
-  onNavigateHome 
+  onNavigateHome,
+  onOpenConsultation
 }: ProjectsViewProps) {
   
   const [activeProjectId, setActiveProjectId] = useState<string | null>(initialProjectId);
@@ -414,299 +417,297 @@ export function ProjectsView({
           </div>
         ) : (
           
-          /* VIEW 2: PROJECT DETAIL VIEW - CINEMATIC & TECH HYPER-REFINED DESIGN */
+          /* VIEW 2: PROJECT DETAIL VIEW - CLEAN ARTICLE LAYOUT (LIKE SERVICES VIEW) */
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-12"
+            className="space-y-8"
           >
-            {/* Top Back Navigation Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+            {/* Top Back Navigation / Breadcrumbs */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
               <button
                 onClick={() => {
                   setActiveProjectId(null);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-orange-600 transition-colors py-1 group"
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-orange-600 transition-colors py-1 group cursor-pointer"
               >
                 <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> Quay lại danh sách dự án
               </button>
-              <div className="text-xs font-bold tracking-wider uppercase text-slate-400 flex items-center gap-2">
-                <span className="text-orange-600">CIC DỰ ÁN</span> / <span>{activeProject.sector.toUpperCase()}</span> / <span className="text-slate-800">{activeProject.name.toUpperCase()}</span>
+              
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                <span className="hover:text-orange-600 cursor-pointer" onClick={() => onNavigateHome?.()}>Trang chủ</span>
+                <ChevronRight size={12} />
+                <span className="hover:text-orange-600 cursor-pointer" onClick={() => setActiveProjectId(null)}>Dự án</span>
+                <ChevronRight size={12} />
+                <span className="text-slate-700 truncate max-w-[200px] font-semibold">{activeProject.name}</span>
               </div>
             </div>
 
-            {/* Hero Banner Section */}
-            <section className="relative h-[60vh] min-h-[400px] max-h-[560px] rounded-[20px] sm:rounded-[28px] overflow-hidden shadow-2xl group">
-              <div className="absolute inset-0 z-0">
-                <img 
-                  src={activeProject.img} 
-                  alt={activeProject.name} 
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                  referrerPolicy="no-referrer" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent"></div>
-              </div>
-
-              <div className="relative z-10 h-full max-w-7xl mx-auto px-6 sm:px-12 flex flex-col justify-end pb-10 sm:pb-14 space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-1 bg-orange-600 text-white text-xs font-bold uppercase tracking-wider rounded-[6px] shadow-md">
+            {/* Main Grid Layout: Left Article (8 cols) + Right Factsheet Sidebar (4 cols) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* LEFT COLUMN: Main Article Body */}
+              <div className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-6 sm:p-10 rounded-[12px] shadow-xs">
+                
+                {/* Title & Tagline Header */}
+                <div className="space-y-3 border-b border-slate-100 pb-5">
+                  <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider rounded-md">
                     {activeProject.sector}
                   </span>
-                  <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white border border-white/30 text-xs font-bold uppercase tracking-wider rounded-[6px]">
-                    {activeProject.solution}
-                  </span>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-snug">
+                    {activeProject.name}
+                  </h1>
+                  {activeProject.tagline && (
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium italic leading-relaxed border-l-2 border-orange-500 pl-3">
+                      "{activeProject.tagline}"
+                    </p>
+                  )}
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-4xl">
-                  {activeProject.name}
-                </h1>
-
-                {activeProject.tagline && (
-                  <p className="text-orange-300 font-normal text-sm sm:text-base max-w-3xl border-l-2 border-orange-500 pl-3 italic">
-                    "{activeProject.tagline}"
-                  </p>
-                )}
-              </div>
-            </section>
-
-            {/* Main Content Grid: Left 8 Cols (Overview, Scope, Results, Media), Right 4 Cols (Sidebar Facts) */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-              
-              {/* LEFT COLUMN */}
-              <div className="lg:col-span-8 space-y-12">
-                
-                {/* 1. Project Challenges & Overview */}
-                <div className="space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight">
-                    Thách thức & Tổng quan Dự án
-                  </h2>
-                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal bg-slate-50 p-6 sm:p-8 rounded-[16px] border border-slate-200/80">
-                    {activeProject.shortDesc}
-                  </p>
-                </div>
-
-                {/* 2. Project Gallery & Media View */}
-                <div className="space-y-6">
-                  <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight flex items-center justify-between">
-                    <span>Thư viện Ảnh & Mô hình Kỹ thuật</span>
-                    <span className="text-xs text-slate-400 font-normal">Hình {activeGalleryIndex + 1} / {activeProject.gallery.length}</span>
-                  </h3>
-
-                  {/* Main Display Image */}
-                  <div className="h-[360px] sm:h-[440px] w-full bg-slate-900 overflow-hidden relative rounded-[16px] border border-slate-200 shadow-md">
-                    <img
-                      src={activeProject.gallery[activeGalleryIndex]}
-                      alt="Project gallery view"
-                      className="w-full h-full object-cover transition-all duration-500"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute bottom-4 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 uppercase tracking-wider rounded-[8px]">
-                      {activeGalleryIndex + 1} / {activeProject.gallery.length}
-                    </div>
-                  </div>
-
-                  {/* Thumbnail Selector */}
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                    {activeProject.gallery.map((imgUrl, idx) => {
-                      const isSelected = idx === activeGalleryIndex;
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => setActiveGalleryIndex(idx)}
-                          className={`w-28 h-18 border-2 shrink-0 overflow-hidden transition-all rounded-[10px] relative ${
-                            isSelected ? 'border-orange-600 scale-95 shadow-md ring-2 ring-orange-600/30' : 'border-slate-200 hover:border-slate-400 opacity-70 hover:opacity-100'
-                          }`}
-                        >
-                          <img src={imgUrl} alt="Thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 3. Video Showcase (If Available) */}
-                {activeProject.video && (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-extrabold text-slate-950 tracking-tight flex items-center gap-2">
-                      <Video size={20} className="text-orange-600" /> Video Mô phỏng & Trực quan hóa
-                    </h3>
-                    <div className="bg-slate-950 relative overflow-hidden h-64 sm:h-80 flex flex-col justify-center items-center rounded-[18px] border border-slate-800 shadow-lg">
-                      {!isVideoPlaying ? (
-                        <>
-                          <img 
-                            src={activeProject.video.thumbnail} 
-                            alt="Video thumbnail" 
-                            className="absolute inset-0 w-full h-full object-cover opacity-50"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="absolute inset-0 bg-slate-950/40"></div>
-                          <button
-                            onClick={() => setIsVideoPlaying(true)}
-                            className="w-16 h-16 bg-orange-600 hover:bg-orange-700 hover:scale-110 text-white flex items-center justify-center rounded-full z-10 shadow-2xl transition-all"
-                          >
-                            <Play size={28} className="ml-1" />
-                          </button>
-                          <span className="absolute bottom-4 left-4 text-xs font-bold text-white z-10 uppercase tracking-wider bg-slate-950/90 px-3 py-1 rounded-[6px]">
-                            {activeProject.video.title}
-                          </span>
-                        </>
-                      ) : (
-                        <iframe
-                          title="Project Video Player"
-                          src={activeProject.video.embedUrl + "?autoplay=1"}
-                          className="w-full h-full border-0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* 4. Technical Solutions & Scope of Work */}
-                <div className="space-y-6">
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight">
-                    Giải pháp Kỹ thuật & Phạm vi Công việc
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {activeProject.scope.map((item, i) => (
-                      <div key={i} className="p-6 bg-slate-50 rounded-[14px] border border-slate-200/80 hover:border-orange-500/40 transition-all flex items-start gap-3.5 shadow-2xs">
-                        <div className="p-2 bg-orange-600/10 text-orange-600 rounded-[8px] shrink-0 mt-0.5">
-                          <CheckCircle2 size={18} />
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-xs font-bold uppercase text-slate-400 tracking-wider">Hạng mục {i + 1}</span>
-                          <p className="text-xs sm:text-sm font-normal text-slate-700 leading-snug">{item}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 5. Results & Impact Section (Clean White Theme) */}
-                <div className="bg-white border border-slate-200/90 text-slate-950 p-8 sm:p-10 rounded-[24px] space-y-8 shadow-2xs relative overflow-hidden">
-                  <div className="border-b border-slate-100 pb-4">
-                    <span className="text-orange-600 font-bold text-xs uppercase tracking-wider block mb-1">Hiệu quả triển khai</span>
-                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-950">Tác động & Kết quả đạt được</h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {activeProject.results.map((result, i) => (
-                      <div key={i} className="bg-slate-50 border border-slate-200/80 p-5 rounded-[16px] space-y-2 shadow-2xs hover:border-orange-500 transition-all">
-                        <div className="text-3xl font-extrabold text-orange-600">0{i + 1}</div>
-                        <p className="text-xs sm:text-sm text-slate-700 font-normal leading-relaxed">{result}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 6. Technical PDF Documents Block */}
-                {activeProject.pdf && (
-                  <div className="bg-white border border-slate-200 p-6 rounded-[16px] space-y-4 shadow-sm">
-                    <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                      <FileText className="text-red-600" size={20} />
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
-                        Tài liệu kỹ thuật / Hồ sơ bản vẽ PDF
-                      </h4>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-[12px] border border-slate-200/80">
-                      <div className="space-y-1">
-                        <h5 className="text-xs font-bold text-slate-900">{activeProject.pdf.title}</h5>
-                        <span className="text-xs font-normal text-slate-400">Định dạng PDF &bull; Dung lượng: {activeProject.pdf.size}</span>
-                      </div>
-
-                      <button
-                        onClick={() => handleDownloadPDF(activeProject.pdf!.title)}
-                        disabled={pdfDownloaded}
-                        className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 rounded-[8px] shrink-0 ${
-                          pdfDownloaded
-                            ? 'bg-emerald-600 text-white cursor-default'
-                            : 'bg-orange-600 hover:bg-orange-700 text-white shadow-sm'
-                        }`}
-                      >
-                        {pdfDownloaded ? (
-                          <>Đã tải xuống thành công</>
-                        ) : (
-                          <>
-                            <Download size={14} /> Tải hồ sơ kỹ thuật
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {downloadProgress > 0 && downloadProgress < 100 && (
-                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div className="bg-orange-600 h-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
+                {/* Main Article Body */}
+                {activeProject.htmlContent ? (
+                  <div 
+                    className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-img:rounded-[10px] prose-img:border prose-img:border-slate-200"
+                    dangerouslySetInnerHTML={{ __html: activeProject.htmlContent }}
+                  />
+                ) : (
+                  <>
+                    {/* Main Feature Image */}
+                    {activeProject.img && (
+                      <div className="rounded-[10px] overflow-hidden border border-slate-200/80 bg-slate-900 h-[280px] sm:h-[360px] relative shadow-2xs mb-6">
+                        <img 
+                          src={activeProject.img} 
+                          alt={activeProject.name} 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
                       </div>
                     )}
-                  </div>
+
+                    {/* Article Section 1: Overview & Challenges */}
+                    <div className="space-y-3">
+                      <h2 className="text-base sm:text-lg font-bold text-slate-950 uppercase tracking-tight pb-2 border-b border-slate-100">
+                        Tổng quan & Thách thức Dự án
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
+                        {activeProject.shortDesc}
+                      </p>
+                    </div>
+
+                    {/* Article Section 2: Scope & Technical Solutions */}
+                    {activeProject.scope && activeProject.scope.length > 0 && (
+                      <div className="space-y-3">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-950 uppercase tracking-tight pb-2 border-b border-slate-100">
+                          Phạm vi triển khai & Giải pháp kỹ thuật
+                        </h2>
+                        <ul className="space-y-2.5 pt-1">
+                          {activeProject.scope.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                              <CheckCircle2 size={16} className="text-orange-600 shrink-0 mt-0.5" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Article Section 3: Results & Achievements */}
+                    {activeProject.results && activeProject.results.length > 0 && (
+                      <div className="space-y-3">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-950 uppercase tracking-tight pb-2 border-b border-slate-100">
+                          Hiệu quả & Kết quả đạt được
+                        </h2>
+                        <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-[10px] space-y-2.5">
+                          {activeProject.results.map((result, idx) => (
+                            <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
+                              <span className="font-bold text-orange-600 shrink-0">0{idx + 1}.</span>
+                              <span>{result}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Article Section 4: Image Gallery (If multiple images exist) */}
+                    {activeProject.gallery && activeProject.gallery.length > 1 && (
+                      <div className="space-y-4">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-950 uppercase tracking-tight pb-2 border-b border-slate-100">
+                          Hình ảnh thực tế dự án
+                        </h2>
+                        <div className="space-y-3">
+                          <div className="h-[320px] sm:h-[380px] w-full bg-slate-900 overflow-hidden relative rounded-[10px] border border-slate-200">
+                            <img
+                              src={activeProject.gallery[activeGalleryIndex]}
+                              alt="Project gallery view"
+                              className="w-full h-full object-cover transition-all duration-300"
+                              referrerPolicy="no-referrer"
+                            />
+                          </div>
+                          <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+                            {activeProject.gallery.map((imgUrl, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => setActiveGalleryIndex(idx)}
+                                className={`w-24 h-16 border-2 shrink-0 overflow-hidden rounded-[8px] transition-all relative ${
+                                  idx === activeGalleryIndex ? 'border-orange-600 shadow-xs' : 'border-slate-200 opacity-60 hover:opacity-100'
+                                }`}
+                              >
+                                <img src={imgUrl} alt="Thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Article Section 5: Video (If available) */}
+                    {activeProject.video && (
+                      <div className="space-y-3">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-950 uppercase tracking-tight pb-2 border-b border-slate-100 flex items-center gap-2">
+                          <Video size={18} className="text-orange-600" /> Video mô phỏng
+                        </h2>
+                        <div className="bg-slate-950 relative overflow-hidden h-60 sm:h-72 flex flex-col justify-center items-center rounded-[10px] border border-slate-800">
+                          {!isVideoPlaying ? (
+                            <>
+                              <img 
+                                src={activeProject.video.thumbnail} 
+                                alt="Video thumbnail" 
+                                className="absolute inset-0 w-full h-full object-cover opacity-50"
+                                referrerPolicy="no-referrer"
+                              />
+                              <button
+                                onClick={() => setIsVideoPlaying(true)}
+                                className="w-14 h-14 bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center rounded-full z-10 shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                              >
+                                <Play size={24} className="ml-0.5" />
+                              </button>
+                              <span className="absolute bottom-3 left-3 text-xs font-bold text-white z-10 uppercase bg-slate-950/80 px-2.5 py-1 rounded-md">
+                                {activeProject.video.title}
+                              </span>
+                            </>
+                          ) : (
+                            <iframe
+                              title="Project Video Player"
+                              src={activeProject.video.embedUrl + "?autoplay=1"}
+                              className="w-full h-full border-0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Article Section 6: Technical PDF Download (If available) */}
+                    {activeProject.pdf && (
+                      <div className="bg-slate-50 border border-slate-200/80 p-5 rounded-[10px] space-y-3">
+                        <div className="flex items-center gap-2 border-b border-slate-200/60 pb-2.5">
+                          <FileText className="text-red-600" size={18} />
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                            Hồ sơ tài liệu kỹ thuật
+                          </h3>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+                          <div className="space-y-0.5">
+                            <h4 className="text-xs font-bold text-slate-900">{activeProject.pdf.title}</h4>
+                            <span className="text-[11px] font-normal text-slate-500">Định dạng PDF &bull; Dung lượng: {activeProject.pdf.size}</span>
+                          </div>
+
+                          <button
+                            onClick={() => handleDownloadPDF(activeProject.pdf!.title)}
+                            disabled={pdfDownloaded}
+                            className={`px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 rounded-[8px] shrink-0 cursor-pointer ${
+                              pdfDownloaded
+                                ? 'bg-emerald-600 text-white cursor-default'
+                                : 'bg-orange-600 hover:bg-orange-700 text-white shadow-xs'
+                            }`}
+                          >
+                            {pdfDownloaded ? (
+                              <>Đã tải xuống</>
+                            ) : (
+                              <>
+                                <Download size={13} /> Tải tài liệu
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {downloadProgress > 0 && downloadProgress < 100 && (
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-orange-600 h-full transition-all duration-300" style={{ width: `${downloadProgress}%` }}></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
 
               </div>
 
-              {/* RIGHT SIDEBAR: Project Facts */}
-              <aside className="lg:col-span-4 space-y-8">
-                <div className="p-6 sm:p-8 bg-white border border-slate-200 rounded-[24px] space-y-8 shadow-sm">
+              {/* RIGHT COLUMN: Factsheet & Sidebar */}
+              <aside className="lg:col-span-4 space-y-6">
+                <div className="p-6 bg-white border border-slate-200/80 rounded-[12px] space-y-6 shadow-xs">
                   
                   {/* Client */}
-                  <div className="border-b border-slate-100 pb-4">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 block">Khách hàng / Chủ đầu tư</span>
-                    <p className="text-base font-bold text-slate-900">{activeProject.customer}</p>
+                  <div className="border-b border-slate-100 pb-3.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">Chủ đầu tư / Khách hàng</span>
+                    <p className="text-sm font-bold text-slate-900">{activeProject.customer}</p>
                   </div>
 
                   {/* Location */}
-                  <div className="border-b border-slate-100 pb-4">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 block">Địa điểm thực hiện</span>
-                    <p className="text-sm sm:text-base font-normal text-slate-800 flex items-center gap-1.5">
-                      <MapPin size={16} className="text-orange-600 shrink-0" />
+                  <div className="border-b border-slate-100 pb-3.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">Địa điểm thực hiện</span>
+                    <p className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-1.5">
+                      <MapPin size={15} className="text-orange-600 shrink-0" />
                       {activeProject.location}
                     </p>
                   </div>
 
                   {/* Timeline */}
-                  <div className="border-b border-slate-100 pb-4">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 block">Thời gian triển khai</span>
-                    <p className="text-sm sm:text-base font-normal text-slate-800 flex items-center gap-1.5">
-                      <Calendar size={16} className="text-orange-600 shrink-0" />
+                  <div className="border-b border-slate-100 pb-3.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">Thời gian triển khai</span>
+                    <p className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-1.5">
+                      <Calendar size={15} className="text-orange-600 shrink-0" />
                       {activeProject.time}
                     </p>
                   </div>
 
                   {/* Sector & Solution */}
-                  <div className="border-b border-slate-100 pb-4 space-y-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">Lĩnh vực & Dịch vụ</span>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-orange-600/10 text-orange-600 rounded-full text-xs font-bold">
+                  <div className="border-b border-slate-100 pb-3.5 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Lĩnh vực & Dịch vụ</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-0.5 bg-orange-50 border border-orange-100 text-orange-600 rounded-md text-[11px] font-bold">
                         {activeProject.sector}
                       </span>
-                      <span className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full text-xs font-bold">
+                      <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold">
                         {activeProject.solution}
                       </span>
                     </div>
                   </div>
 
                   {/* Applied Technologies */}
-                  <div className="space-y-3 border-b border-slate-100 pb-4">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">Công nghệ & Công cụ áp dụng</span>
-                    <ul className="space-y-2.5">
-                      {activeProject.appliedSolutions.map((tech, idx) => (
-                        <li key={idx} className="flex items-center gap-2.5 text-xs font-normal text-slate-700">
-                          <CheckCircle2 size={16} className="text-orange-600 shrink-0" />
-                          <span>{tech}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {activeProject.appliedSolutions && activeProject.appliedSolutions.length > 0 && (
+                    <div className="space-y-2 border-b border-slate-100 pb-3.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Công nghệ áp dụng</span>
+                      <ul className="space-y-1.5">
+                        {activeProject.appliedSolutions.map((tech, idx) => (
+                          <li key={idx} className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                            <CheckCircle2 size={14} className="text-orange-600 shrink-0" />
+                            <span>{tech}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                  {/* Connected Services / Products Links */}
+                  {/* Related Links */}
                   {activeProject.relatedLinks && activeProject.relatedLinks.length > 0 && (
-                    <div className="space-y-3">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">GIẢI PHÁP & SẢN PHẨM LIÊN QUAN</span>
-                      <div className="space-y-2">
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Giải pháp / Sản phẩm liên quan</span>
+                      <div className="space-y-1.5">
                         {activeProject.relatedLinks.map((link, idx) => (
                           <div
                             key={idx}
@@ -717,28 +718,36 @@ export function ProjectsView({
                                 onNavigateToService(String(link.id));
                               }
                             }}
-                            className="p-3 bg-slate-50 border border-slate-200 hover:border-orange-500 rounded-[10px] flex items-center justify-between group cursor-pointer transition-all"
+                            className="p-2.5 bg-slate-50 border border-slate-200/80 hover:border-orange-500 rounded-[8px] flex items-center justify-between group cursor-pointer transition-all"
                           >
                             <div className="space-y-0.5">
-                              <span className="text-xs font-bold uppercase text-orange-600 block">{link.view === 'products' ? 'Sản Phẩm Phần Mềm' : 'Dịch Vụ Tư Vấn'}</span>
+                              <span className="text-[10px] font-bold uppercase text-orange-600 block">{link.view === 'products' ? 'Sản Phẩm' : 'Dịch Vụ'}</span>
                               <p className="text-xs font-bold text-slate-900 group-hover:text-orange-600 transition-colors">{link.label}</p>
                             </div>
-                            <ArrowRight size={14} className="text-slate-400 group-hover:text-orange-600 transition-transform group-hover:translate-x-1" />
+                            <ArrowRight size={13} className="text-slate-400 group-hover:text-orange-600 transition-transform group-hover:translate-x-1" />
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
+                  {/* Consultation Button */}
+                  <button
+                    onClick={() => onOpenConsultation?.()}
+                    className="w-full py-3 px-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider rounded-[8px] shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <MessageSquare size={15} /> Yêu cầu tư vấn ngay
+                  </button>
+
                 </div>
               </aside>
 
-            </section>
+            </div>
 
             {/* Testimonial Quote Section */}
-            <section className="py-12 bg-orange-50/60 border border-orange-200/80 rounded-[24px] text-center space-y-6 max-w-5xl mx-auto px-6 sm:px-12 my-12">
-              <Quote className="mx-auto text-orange-600 opacity-40" size={48} />
-              <blockquote className="text-lg sm:text-xl font-normal text-slate-800 italic leading-snug">
+            <section className="py-8 px-6 sm:px-10 bg-orange-50/60 border border-orange-200/80 rounded-[12px] text-center space-y-4 my-8">
+              <Quote className="mx-auto text-orange-600 opacity-30" size={36} />
+              <blockquote className="text-sm sm:text-base font-normal text-slate-800 italic leading-snug max-w-3xl mx-auto">
                 "Sự đồng hành của CIC Technology đã mang lại hiệu quả vượt trội trong việc tối ưu hóa quy trình kỹ thuật, số hóa và quản lý chất lượng cho dự án."
               </blockquote>
               <div className="text-center space-y-0.5">
@@ -749,35 +758,35 @@ export function ProjectsView({
 
             {/* Related Projects Section */}
             {relatedProjects.length > 0 && (
-              <section className="space-y-8 pt-8 border-t border-slate-200">
+              <section className="space-y-6 pt-6 border-t border-slate-200/80">
                 <div className="flex justify-between items-end">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-orange-600 block">Dự án khác</span>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-slate-950 mt-1">Dự án tiêu biểu</h3>
+                    <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 mt-1">Dự án tiêu biểu</h3>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {relatedProjects.map((proj) => (
                     <div
                       key={proj.id}
                       onClick={() => handleSelectProject(proj.id)}
-                      className="bg-white border border-slate-200 hover:border-orange-500 group cursor-pointer flex flex-col hover:shadow-lg transition-all duration-300 rounded-[14px] overflow-hidden"
+                      className="bg-white border border-slate-200 hover:border-orange-500 group cursor-pointer flex flex-col hover:shadow-md transition-all duration-300 rounded-[10px] overflow-hidden"
                     >
-                      <div className="h-44 overflow-hidden relative">
-                        <img src={proj.img} alt={proj.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" referrerPolicy="no-referrer" />
-                        <span className="absolute top-3 left-3 px-2.5 py-1 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-[6px]">
+                      <div className="h-40 overflow-hidden relative">
+                        <img src={proj.img} alt={proj.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
+                        <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-md">
                           {proj.location}
                         </span>
                       </div>
-                      <div className="p-5 space-y-2 flex-1 flex flex-col justify-between">
+                      <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
                         <div className="space-y-1">
-                          <span className="text-xs font-bold uppercase tracking-wider text-orange-600 block">{proj.solution}</span>
-                          <h4 className="text-sm font-bold uppercase text-slate-950 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 block">{proj.solution}</span>
+                          <h4 className="text-xs font-bold uppercase text-slate-950 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
                             {proj.name}
                           </h4>
                         </div>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 pt-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 pt-2">
                           Xem chi tiết <ArrowRight size={12} className="transition-transform group-hover:translate-x-1 text-orange-600" />
                         </span>
                       </div>
@@ -788,24 +797,24 @@ export function ProjectsView({
             )}
 
             {/* CTA Section */}
-            <section className="py-16 px-8 sm:px-12 rounded-[28px] bg-gradient-to-br from-orange-600 via-amber-600 to-orange-700 text-white text-center relative overflow-hidden shadow-xl space-y-6">
-              <div className="relative z-10 max-w-3xl mx-auto space-y-4">
-                <h2 className="text-2xl sm:text-3xl font-extrabold leading-tight">
+            <section className="py-12 px-6 sm:px-10 rounded-[12px] bg-gradient-to-br from-orange-600 via-amber-600 to-orange-700 text-white text-center relative overflow-hidden shadow-md space-y-5">
+              <div className="relative z-10 max-w-2xl mx-auto space-y-3">
+                <h2 className="text-xl sm:text-2xl font-extrabold leading-tight">
                   Sẵn sàng khởi đầu hành trình số hóa dự án của bạn?
                 </h2>
-                <p className="text-white/90 text-sm sm:text-base font-normal leading-relaxed">
+                <p className="text-white/90 text-xs sm:text-sm font-normal leading-relaxed">
                   Hãy để đội ngũ chuyên gia CIC Technology hỗ trợ bạn tối ưu hóa thiết kế, ứng dụng mô hình BIM và chuyển đổi số quy trình quản lý hạ tầng ngay hôm nay.
                 </p>
-                <div className="flex flex-wrap justify-center gap-4 pt-4">
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
                   <button
-                    onClick={() => onNavigateToService('1')}
-                    className="bg-white text-orange-600 hover:bg-slate-100 px-8 py-3.5 rounded-[12px] font-bold text-xs uppercase tracking-wider shadow-xl transition-all hover:scale-105"
+                    onClick={() => onOpenConsultation?.()}
+                    className="bg-white text-orange-600 hover:bg-slate-100 px-6 py-3 rounded-[8px] font-bold text-xs uppercase tracking-wider shadow-md transition-all hover:scale-105 cursor-pointer"
                   >
                     Yêu cầu tư vấn ngay
                   </button>
                   <button
                     onClick={() => setActiveProjectId(null)}
-                    className="border-2 border-white/60 hover:border-white text-white px-8 py-3.5 rounded-[12px] font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-all"
+                    className="border border-white/60 hover:border-white text-white px-6 py-3 rounded-[8px] font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-all cursor-pointer"
                   >
                     Khám phá tất cả dự án
                   </button>

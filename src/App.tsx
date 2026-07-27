@@ -200,6 +200,7 @@ export default function App() {
               setCurrentView('home'); 
               setActiveLink(''); 
             }} 
+            onOpenConsultation={() => setIsConsultationOpen(true)}
           />
         ) : currentView === 'projects' ? (
           <ProjectsView 
@@ -222,6 +223,7 @@ export default function App() {
               setCurrentView('home');
               setActiveLink('');
             }}
+            onOpenConsultation={() => setIsConsultationOpen(true)}
           />
         ) : currentView === 'news' ? (
           <NewsView 

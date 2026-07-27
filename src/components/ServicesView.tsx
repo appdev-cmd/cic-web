@@ -31,7 +31,8 @@ import {
   Layers,
   Info,
   Package,
-  ShoppingCart
+  ShoppingCart,
+  MessageSquare
 } from 'lucide-react';
 import { servicesData, ServiceDetail } from '../data/servicesData';
 import { productsData } from '../data/mockData';
@@ -41,9 +42,29 @@ interface ServicesViewProps {
   key?: string | number;
   initialServiceId?: string | null;
   onNavigateHome?: () => void;
+  onOpenConsultation?: () => void;
 }
 
-export const ServicesView = ({ initialServiceId = null, onNavigateHome }: ServicesViewProps) => {
+const getServiceExcerpt = (service: ServiceDetail): string => {
+  if (service.shortDesc && service.shortDesc.trim().length > 15) {
+    return service.shortDesc.trim();
+  }
+  if (service.htmlContent) {
+    const cleanText = service.htmlContent
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (cleanText.length > 20) {
+      return cleanText.slice(0, 160) + '...';
+    }
+  }
+  return service.tagline || service.title;
+};
+
+export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenConsultation }: ServicesViewProps) => {
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -236,66 +257,282 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
               </div>
 
-              {/* Service Cards Grid / Empty State */}
+              {/* Service Cards Bento Grid / Empty State */}
               {paginatedServices.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-slate-200/80 space-y-4 rounded-[10px]">
+                <div className="text-center py-16 bg-white border border-slate-200/80 space-y-4 rounded-[12px]">
                   <p className="text-slate-400 font-bold text-sm">Không tìm thấy dịch vụ nào phù hợp với điều kiện tìm kiếm.</p>
                   <button
                     onClick={() => {
                       setSearchQuery('');
                       setSelectedCategory('Tất cả');
                     }}
-                    className="px-6 py-2.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px]"
+                    className="px-6 py-2.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
                   >
                     Xóa bộ lọc tìm kiếm
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {paginatedServices.map((service, idx) => (
-                    <motion.div
-                      key={service.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05, duration: 0.6 }}
-                      whileHover={{ y: -6 }}
-                      className="bg-white border border-slate-200/90 hover:border-orange-500/40 p-3 group flex flex-col shadow-2xs hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] transition-all duration-300 relative rounded-[10px] overflow-hidden cursor-pointer"
-                    >
-                      {/* Image Area */}
-                      <div className="h-56 w-full overflow-hidden relative rounded-[10px]">
-                        <img 
-                          src={service.image} 
-                          alt={service.title} 
-                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
-                        <span className="absolute top-4 left-4 px-2.5 py-0.5 bg-slate-900/90 text-white text-xs font-bold uppercase tracking-wider border border-white/10 rounded-[8px]">
-                          {service.category}
-                        </span>
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedServices.map((service, idx) => {
+                    const isHero = idx === 0;
+                    const isDarkCard = idx === 1;
+                    const isWideCard = idx === 3;
 
-                      {/* Content Area */}
-                      <div className="p-4 flex-1 flex flex-col justify-between space-y-6">
-                        <div className="space-y-3">
-                          <h3 className="text-base font-bold text-slate-950 leading-tight group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
-                            {service.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}
-                          </h3>
-                          <p className="text-xs text-slate-500 leading-relaxed font-normal line-clamp-3">
-                            {service.shortDesc}
-                          </p>
+                    const cleanTitle = service.title
+                      .replace("Dịch Vụ ", "")
+                      .replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "");
+
+                    // 1. HERO BENTO CARD (Index 0: Spans 2 columns on lg)
+                    if (isHero) {
+                      return (
+                        <motion.div
+                          key={service.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.05, duration: 0.6 }}
+                          onClick={() => handleServiceSelect(service.id)}
+                          className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white border border-slate-800 hover:border-orange-500/60 p-6 md:p-8 group flex flex-col md:flex-row gap-6 shadow-xl hover:shadow-2xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                        >
+                          {/* Background Glow */}
+                          <div className="absolute top-0 right-0 w-80 h-80 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                          {/* Image Container */}
+                          <div className="md:w-1/2 h-64 md:h-auto overflow-hidden relative rounded-[12px] shrink-0 border border-white/10">
+                            <img 
+                              src={service.image} 
+                              alt={service.title} 
+                              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                              referrerPolicy="no-referrer"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
+                            
+                            <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                              <span className="px-3 py-1 bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
+                                Nổi Bật
+                              </span>
+                              <span className="px-3 py-1 bg-slate-900/90 text-slate-200 text-[10px] font-bold uppercase tracking-wider border border-white/10 rounded-full backdrop-blur-md">
+                                {service.category}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="md:w-1/2 flex flex-col justify-between space-y-5 relative z-10">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-orange-400 text-xs font-bold uppercase tracking-wider">
+                                <Sparkles size={14} /> Giải Pháp Trọng Tâm
+                              </div>
+                              <h3 className="text-xl md:text-2xl font-black text-white leading-tight group-hover:text-orange-400 transition-colors uppercase">
+                                {cleanTitle}
+                              </h3>
+                              <p className="text-xs text-slate-300 leading-relaxed font-normal line-clamp-3">
+                                {getServiceExcerpt(service)}
+                              </p>
+
+                              {/* Highlight Badges */}
+                              <div className="pt-2 flex flex-wrap gap-2">
+                                {['Chuẩn TCVN & ISO', 'Tối Ưu Chi Phí 35%', 'Tích Hợp AI / BIM'].map((chip, cIdx) => (
+                                  <span key={cIdx} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 text-[11px] font-medium text-slate-300 rounded-md">
+                                    <Check size={12} className="text-orange-400" /> {chip}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            <button 
+                              className="w-full sm:w-auto self-start px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-[10px] shadow-lg group-hover:translate-x-1 cursor-pointer"
+                            >
+                              Khám phá giải pháp chi tiết <ArrowRight size={14} />
+                            </button>
+                          </div>
+                        </motion.div>
+                      );
+                    }
+
+                    // 2. DARK ACCENT BENTO CARD (Index 1)
+                    if (isDarkCard) {
+                      return (
+                        <motion.div
+                          key={service.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1, duration: 0.6 }}
+                          onClick={() => handleServiceSelect(service.id)}
+                          className="bg-slate-900 border border-slate-800 hover:border-orange-500/50 p-6 group flex flex-col justify-between shadow-lg hover:shadow-xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                        >
+                          <div className="space-y-4">
+                            {/* Top Badge & Icon */}
+                            <div className="flex items-center justify-between">
+                              <span className="px-3 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                                {service.category}
+                              </span>
+                              <div className="w-8 h-8 rounded-full bg-slate-800 text-orange-400 flex items-center justify-center">
+                                <Building2 size={16} />
+                              </div>
+                            </div>
+
+                            <div className="h-40 w-full overflow-hidden relative rounded-[10px] border border-slate-800">
+                              <img 
+                                src={service.image} 
+                                alt={service.title} 
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <h3 className="text-base font-bold text-white group-hover:text-orange-400 transition-colors uppercase line-clamp-2">
+                                {cleanTitle}
+                              </h3>
+                              <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                                {getServiceExcerpt(service)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-orange-400 group-hover:text-orange-300">
+                            <span>Xem chi tiết dịch vụ</span>
+                            <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                          </div>
+                        </motion.div>
+                      );
+                    }
+
+                    // 3. WIDE HORIZONTAL BENTO CARD (Index 3: Spans 2 columns on lg)
+                    if (isWideCard) {
+                      return (
+                        <motion.div
+                          key={service.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2, duration: 0.6 }}
+                          onClick={() => handleServiceSelect(service.id)}
+                          className="md:col-span-2 lg:col-span-2 bg-white border border-slate-200 hover:border-orange-500/50 p-6 group flex flex-col md:flex-row gap-6 shadow-sm hover:shadow-xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                        >
+                          <div className="md:w-5/12 h-52 md:h-auto overflow-hidden relative rounded-[12px] shrink-0">
+                            <img 
+                              src={service.image} 
+                              alt={service.title} 
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                              referrerPolicy="no-referrer"
+                            />
+                            <span className="absolute top-3 left-3 px-3 py-1 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
+                              {service.category}
+                            </span>
+                          </div>
+
+                          <div className="md:w-7/12 flex flex-col justify-between space-y-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <Box size={14} className="text-orange-600" /> Giải pháp chuyên sâu
+                              </div>
+                              <h3 className="text-lg font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2">
+                                {cleanTitle}
+                              </h3>
+                              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                                {getServiceExcerpt(service)}
+                              </p>
+                              
+                              <div className="space-y-1.5 pt-1">
+                                {[
+                                  'Quy trình chuẩn hóa, dễ dàng triển khai cho mọi quy mô công trình',
+                                  'Tư vấn trực tiếp bởi đội ngũ chuyên gia giàu kinh nghiệm thực chiến'
+                                ].map((bullet, bIdx) => (
+                                  <div key={bIdx} className="flex items-center gap-2 text-xs text-slate-700 font-medium">
+                                    <CheckCircle2 size={14} className="text-orange-600 shrink-0" />
+                                    <span>{bullet}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <button 
+                              className="w-full py-2.5 bg-slate-50 hover:bg-orange-600 hover:text-white border border-slate-200 hover:border-orange-600 transition-all text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center justify-center gap-2 rounded-[8px] cursor-pointer"
+                            >
+                              Xem chi tiết <ArrowRight size={14} />
+                            </button>
+                          </div>
+                        </motion.div>
+                      );
+                    }
+
+                    // 4. STANDARD MODERN BENTO CARD (Index 2, 4, 5, etc.)
+                    return (
+                      <motion.div
+                        key={service.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.6 }}
+                        onClick={() => handleServiceSelect(service.id)}
+                        className="bg-white border border-slate-200/90 hover:border-orange-500/50 p-5 group flex flex-col justify-between shadow-2xs hover:shadow-xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                      >
+                        <div className="space-y-4">
+                          <div className="h-44 w-full overflow-hidden relative rounded-[10px]">
+                            <img 
+                              src={service.image} 
+                              alt={service.title} 
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                              referrerPolicy="no-referrer"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
+                            <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-[6px]">
+                              {service.category}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <h3 className="text-sm font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
+                              {cleanTitle}
+                            </h3>
+                            <p className="text-xs text-slate-500 leading-relaxed font-normal line-clamp-3">
+                              {getServiceExcerpt(service)}
+                            </p>
+                          </div>
                         </div>
 
-                        {/* CTA Link */}
-                        <button 
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="w-full py-2.5 border border-slate-200 hover:border-orange-600 hover:bg-orange-600 hover:text-white transition-all text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-center gap-2 group-hover:shadow-md rounded-[8px]"
+                        <div className="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-700 group-hover:text-orange-600 transition-colors">
+                          <span>Khám phá dịch vụ</span>
+                          <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+
+                  {/* EMBEDDED BENTO HIGHLIGHT WIDGET (Appears dynamically to complete the Bento Grid balance) */}
+                  {paginatedServices.length >= 3 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25, duration: 0.6 }}
+                      className="bg-gradient-to-br from-orange-600 via-orange-600 to-amber-700 text-white p-6 rounded-[16px] flex flex-col justify-between shadow-lg relative overflow-hidden"
+                    >
+                      <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+
+                      <div className="space-y-3 relative z-10">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 text-white text-[10px] font-black uppercase tracking-wider rounded-full backdrop-blur-md">
+                          <Building2 size={12} /> Hợp Tác Kỹ Thuật
+                        </div>
+                        <h3 className="text-lg font-black uppercase tracking-tight text-white leading-tight">
+                          CIC - 35+ NĂM DẪN ĐẦU CHUYỂN ĐỔI SỐ
+                        </h3>
+                        <p className="text-xs text-white/90 leading-relaxed">
+                          Cung cấp hệ sinh thái toàn diện từ phần mềm bản quyền, dịch vụ tư vấn BIM, đo đạc 3D đến Net Zero.
+                        </p>
+                      </div>
+
+                      <div className="pt-4 relative z-10 border-t border-white/20 flex flex-wrap gap-2 items-center justify-between">
+                        <span className="text-[11px] font-bold text-white/90">Tư vấn giải pháp trực tiếp</span>
+                        <button
+                          type="button"
+                          onClick={() => onOpenConsultation?.()}
+                          className="px-3.5 py-1.5 bg-white text-orange-600 hover:bg-slate-100 text-xs font-bold uppercase tracking-wider rounded-[8px] transition-all shadow-md inline-flex items-center gap-1.5 cursor-pointer hover:shadow-lg"
                         >
-                          Xem chi tiết dịch vụ <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                          <MessageSquare size={13} /> Yêu cầu tư vấn ngay
                         </button>
                       </div>
                     </motion.div>
-                  ))}
+                  )}
                 </div>
               )}
 
@@ -373,7 +610,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   <ChevronRight size={12} />
                   <span className="hover:text-orange-600 cursor-pointer" onClick={() => setActiveServiceId(null)}>Dịch vụ</span>
                   <ChevronRight size={12} />
-                  <span className="text-slate-600 truncate max-w-[200px]">{activeService?.title.slice(0, 30)}...</span>
+                  <span className="text-slate-700 truncate max-w-[200px]">{activeService?.title.slice(0, 30)}...</span>
                 </div>
               </div>
 
@@ -383,14 +620,21 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 {/* Column Left: Main description & rich HTML content */}
                 <div className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
                   
-                  {/* Category & Title */}
-                  <div className="space-y-4">
-                    <span className="text-xs font-bold text-orange-600 uppercase tracking-wider bg-orange-50 px-2.5 py-1 border border-orange-100 rounded-[8px]">
-                      {activeService?.category}
-                    </span>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-snug">
+                  {/* Title & Tagline */}
+                  <div className="space-y-3 border-b border-slate-100 pb-5">
+                    {activeService?.category && (
+                      <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider rounded-md">
+                        {activeService.category}
+                      </span>
+                    )}
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-snug">
                       {activeService?.title}
-                    </h2>
+                    </h1>
+                    {activeService?.tagline && (
+                      <p className="text-xs sm:text-sm text-slate-500 font-medium italic leading-relaxed border-l-2 border-orange-500 pl-3">
+                        "{activeService.tagline}"
+                      </p>
+                    )}
                   </div>
 
                   {/* Rich HTML Content Area */}

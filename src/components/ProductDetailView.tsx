@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, 
   ChevronRight, 
+  ChevronDown,
+  ChevronUp,
   Phone, 
   Download, 
   Check, 
@@ -36,6 +38,91 @@ interface ProductDetailViewProps {
   onBuy: (product: Product) => void;
 }
 
+function CollapsibleContent({ 
+  children, 
+  maxHeight = 450 
+}: { 
+  children: React.ReactNode; 
+  maxHeight?: number;
+  key?: React.Key;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [shouldShowButton, setShouldShowButton] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+
+    const checkHeight = () => {
+      if (el.scrollHeight > maxHeight + 30) {
+        setShouldShowButton(true);
+      } else {
+        setShouldShowButton(false);
+      }
+    };
+
+    checkHeight();
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkHeight();
+    });
+
+    resizeObserver.observe(el);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [children, maxHeight]);
+
+  const toggleExpand = () => {
+    if (isExpanded && contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <div className="relative">
+      <div
+        ref={contentRef}
+        style={{
+          maxHeight: isExpanded ? 'none' : `${maxHeight}px`,
+        }}
+        className="transition-all duration-300 overflow-hidden relative"
+      >
+        {children}
+
+        {!isExpanded && shouldShowButton && (
+          <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
+        )}
+      </div>
+
+      {shouldShowButton && (
+        <div className="mt-4 text-center relative z-10">
+          <button
+            type="button"
+            onClick={toggleExpand}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-orange-50 hover:text-orange-600 text-slate-800 text-xs font-bold rounded-full border border-slate-200 hover:border-orange-300 transition-all shadow-sm cursor-pointer"
+          >
+            {isExpanded ? (
+              <>
+                <span>Rút gọn nội dung</span>
+                <ChevronUp size={16} />
+              </>
+            ) : (
+              <>
+                <span>Xem thêm nội dung</span>
+                <ChevronDown size={16} />
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ProductDetailView({ 
   product, 
   onBack, 
@@ -51,12 +138,7 @@ export function ProductDetailView({
     if (product.slides && product.slides.length > 0) {
       return product.slides;
     }
-    return [
-      product.img,
-      'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80'
-    ];
+    return [product.img];
   }, [product.slides, product.img]);
 
   // Next / Prev slide handlers
@@ -277,68 +359,23 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-6 text-slate-600 text-sm leading-relaxed"
                 >
-                  {product.overviewHtml ? (
-                    <div 
-                      className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
-                      dangerouslySetInnerHTML={{ __html: product.overviewHtml }} 
-                    />
-                  ) : (
-                    <>
-                      <p className="font-semibold text-slate-800 text-justify text-base">
-                        Hệ thống phần mềm và giải pháp kỹ thuật <strong>{product.name}</strong> đại diện cho bước tiến vượt trội về năng suất lao động cho đội ngũ kỹ sư Việt Nam. Giải pháp giải quyết triệt để các bài toán kỹ thuật phức tạp từ khâu khảo sát thực địa, lập mô hình 3D, phân tích kết cấu chịu lực chuyên sâu cho tới lập dự toán tối ưu hóa tài nguyên.
+                  <CollapsibleContent key={`${product.id}-overview`} maxHeight={450}>
+                    {product.overviewHtml ? (
+                      <div 
+                        className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
+                        dangerouslySetInnerHTML={{ __html: product.overviewHtml }} 
+                      />
+                    ) : product.description ? (
+                      <p className="text-slate-700 text-justify text-base leading-relaxed">
+                        {product.description}
                       </p>
-                      
-                      <p className="text-justify">
-                        Phần mềm chuyên sâu <strong>{product.name}</strong> phát triển bởi hãng <strong>{product.brand}</strong> là giải pháp tiêu chuẩn công nghệ hàng đầu được tin dùng rộng rãi bởi các viện thiết kế, tập đoàn xây dựng và kỹ sư chuyên nghiệp tại Việt Nam. Được tinh chỉnh tối ưu cho lĩnh vực <strong>{product.field}</strong>, giải pháp cung cấp một hệ thống tính toán kết cấu toàn diện, phân tích phần tử hữu hạn nâng cao cùng khả năng tự động hóa 100% quy trình xuất bản vẽ kỹ thuật chi tiết theo đúng hệ tiêu chuẩn TCVN và Eurocode hiện hành.
-                      </p>
-
-                      <p className="text-justify">
-                        Với tính năng thiết lập mô hình tham số động trực quan và khả năng kết nối dữ liệu liên thông hoàn hảo với các hệ sinh thái BIM phổ biến (AutoCAD, Revit, Tekla, SAP2000), phần mềm <strong>{product.name}</strong> không chỉ hỗ trợ tối ưu hóa tới 35% hàm lượng vật liệu thép mà còn rút ngắn thời gian thiết kế lên đến 60%. Đây chính là công cụ đắc lực giúp nâng cao vị thế công nghệ, gia tăng tính cạnh tranh và bảo đảm an toàn tuyệt đối cho mọi công trình xây dựng hiện đại.
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                        <div className="flex gap-3 items-start">
-                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                            <Check size={16} />
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Độ chính xác tuyệt đối</h4>
-                            <p className="text-xs">Giải thuật mô phỏng chuẩn quốc tế, kiểm chứng qua hàng ngàn công trình thực tế.</p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-3 items-start">
-                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                            <ShieldCheck size={16} />
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Bản quyền vĩnh viễn</h4>
-                            <p className="text-xs">Cam kết pháp lý 100% chính hãng, hỗ trợ kiểm toán bản quyền phần mềm doanh nghiệp.</p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-3 items-start">
-                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                            <Cpu size={16} />
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Tự động hóa tối đa</h4>
-                            <p className="text-xs">Tích hợp AI đẩy nhanh thời gian xuất bản vẽ thiết kế kỹ thuật gấp 5 lần thông thường.</p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-3 items-start">
-                          <div className="w-8 h-8 rounded-[8px] bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                            <Sparkles size={16} />
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider mb-1">Hỗ trợ kỹ thuật 24/7</h4>
-                            <p className="text-xs">Chuyên gia CIC giàu kinh nghiệm trực tiếp chuyển giao công nghệ và xử lý sự cố tại dự án.</p>
-                          </div>
-                        </div>
+                    ) : (
+                      <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
+                        <FileText size={32} className="mx-auto text-slate-400 mb-2" />
+                        <p className="text-slate-500 text-sm font-medium">Chưa có thông tin tổng quan cho sản phẩm này.</p>
                       </div>
-                    </>
-                  )}
+                    )}
+                  </CollapsibleContent>
                 </motion.div>
               )}
 
@@ -348,30 +385,19 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-4"
                 >
-                  {product.featuresHtml ? (
-                    <div 
-                      className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
-                      dangerouslySetInnerHTML={{ __html: product.featuresHtml }} 
-                    />
-                  ) : (
-                    <>
-                      <h3 className="text-sm font-black uppercase tracking-wider text-slate-950 mb-4">Các tính năng kỹ thuật nổi bật:</h3>
-                      <ul className="space-y-3">
-                        {[
-                          'Hỗ trợ đầy đủ các tính năng phân tích kết cấu dầm, khung, móng, cọc phức tạp theo các Tiêu chuẩn Việt Nam (TCVN 5574:2018, TCVN 2737...).',
-                          'Khả năng đọc và lưu các tệp tin kỹ thuật dạng mở rộng tốc độ cao, tương thích hoàn toàn với nền tảng AutoCAD, Revit, Tekla, SAP2000.',
-                          'Thiết lập mô hình tham số động linh hoạt, tự động nhận diện liên kết và tối ưu hóa hàm lượng cốt thép cốt thép chịu tải.',
-                          'Công cụ bóc tách tiên lượng tự động, liên kết dữ liệu trực quan phục vụ công tác lập hồ sơ dự toán công trình nhanh chóng.',
-                          'Tích hợp Module kết nối cảm biến IoT hỗ trợ giám sát sức khỏe công trình và truyền tín hiệu cảnh báo hư hại tức thời.'
-                        ].map((feat, i) => (
-                          <li key={i} className="flex gap-3 items-start text-sm text-slate-600">
-                            <span className="w-1.5 h-1.5 bg-orange-600 mt-2 shrink-0"></span>
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
+                  <CollapsibleContent key={`${product.id}-features`} maxHeight={450}>
+                    {product.featuresHtml ? (
+                      <div 
+                        className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
+                        dangerouslySetInnerHTML={{ __html: product.featuresHtml }} 
+                      />
+                    ) : (
+                      <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
+                        <Layers size={32} className="mx-auto text-slate-400 mb-2" />
+                        <p className="text-slate-500 text-sm font-medium">Không có thông tin tính năng cho sản phẩm này.</p>
+                      </div>
+                    )}
+                  </CollapsibleContent>
                 </motion.div>
               )}
 
@@ -382,30 +408,24 @@ export function ProductDetailView({
                   className="space-y-4 text-center"
                 >
                   {product.videoUrl ? (
-                    <div className="aspect-video w-full rounded-[10px] overflow-hidden bg-slate-900 shadow-md">
-                      <iframe
-                        src={product.videoUrl}
-                        title={`${product.name} Video`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full border-0"
-                      />
-                    </div>
-                  ) : (
-                    <div className="relative aspect-video bg-slate-900 flex items-center justify-center group overflow-hidden cursor-pointer rounded-[10px]">
-                      <img 
-                        src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80" 
-                        alt="video thumbnail" 
-                        className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700 rounded-[10px]" 
-                      />
-                      <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center">
-                        <div className="w-20 h-20 bg-orange-600 text-white flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-2xl rounded-[10px]">
-                          <Play size={28} fill="white" />
-                        </div>
+                    <>
+                      <div className="aspect-video w-full rounded-[10px] overflow-hidden bg-slate-900 shadow-md">
+                        <iframe
+                          src={product.videoUrl}
+                          title={`${product.name} Video`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full border-0"
+                        />
                       </div>
+                      <p className="text-xs text-slate-500 font-medium">Video giới thiệu tính năng thực tế, hướng dẫn cài đặt và ứng dụng của {product.name}</p>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
+                      <Play size={32} className="mx-auto text-slate-400 mb-2" />
+                      <p className="text-slate-500 text-sm font-medium">Không có video cho sản phẩm này.</p>
                     </div>
                   )}
-                  <p className="text-xs text-slate-500 font-medium">Video giới thiệu tính năng thực tế, hướng dẫn cài đặt và ứng dụng của {product.name}</p>
                 </motion.div>
               )}
 
@@ -415,52 +435,35 @@ export function ProductDetailView({
                   animate={{ opacity: 1 }}
                   className="space-y-3"
                 >
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">Đăng ký nhận liên kết tải bộ cài dùng thử & tài liệu hướng dẫn sử dụng chuyên sâu:</span>
                   {product.documents && product.documents.length > 0 ? (
-                    product.documents.map((doc, idx) => (
-                      <a 
-                        key={idx}
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs rounded-[8px]">
-                            EXE
+                    <>
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">Liên kết tải bộ cài dùng thử & tài liệu hướng dẫn sử dụng:</span>
+                      {product.documents.map((doc, idx) => (
+                        <a 
+                          key={idx}
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs rounded-[8px]">
+                              FILE
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.name}</h4>
+                              {doc.size && <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>}
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.name}</h4>
-                            {doc.size && <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>}
-                          </div>
-                        </div>
-                        <Download size={16} className="text-orange-600 group-hover:scale-110 transition-transform" />
-                      </a>
-                    ))
+                          <Download size={16} className="text-orange-600 group-hover:scale-110 transition-transform" />
+                        </a>
+                      ))}
+                    </>
                   ) : (
-                    [
-                      { title: `Brochure giới thiệu chi tiết sản phẩm ${product.name}`, size: '4.5 MB', type: 'PDF' },
-                      { title: `Hướng dẫn cài đặt & Cấu hình hệ thống đề nghị`, size: '2.8 MB', type: 'PDF' },
-                      { title: `Tài liệu hướng dẫn sử dụng nhanh dành cho Kỹ sư`, size: '12.4 MB', type: 'PDF' },
-                      { title: `Bản dùng thử (Trial) cập nhật phiên bản mới nhất`, size: '185.0 MB', type: 'ZIP' }
-                    ].map((doc, idx) => (
-                      <div 
-                        key={idx}
-                        onClick={() => onDownload(product)}
-                        className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:border-orange-600 transition-colors cursor-pointer group rounded-[8px]"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors rounded-[8px]">
-                            {doc.type}
-                          </div>
-                          <div>
-                            <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{doc.title}</h4>
-                            <span className="text-[10px] font-sans text-slate-400">{doc.size}</span>
-                          </div>
-                        </div>
-                        <Download size={16} className="text-slate-400 group-hover:text-orange-600 transition-colors" />
-                      </div>
-                    ))
+                    <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
+                      <Download size={32} className="mx-auto text-slate-400 mb-2" />
+                      <p className="text-slate-500 text-sm font-medium">Không có file hướng dẫn hoặc tài liệu đính kèm cho sản phẩm này.</p>
+                    </div>
                   )}
                 </motion.div>
               )}

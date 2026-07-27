@@ -308,7 +308,11 @@ export const Header = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 w-full bg-white border-b border-slate-200 shadow-2xl py-4 px-4 sm:px-8 z-50"
+              className={`absolute top-full left-0 right-0 w-full border-b shadow-2xl py-4 px-4 sm:px-8 z-50 transition-colors ${
+                !isHeaderWhite 
+                  ? 'bg-slate-950/95 backdrop-blur-md border-slate-800 text-white shadow-black/50' 
+                  : 'bg-white border-slate-200 text-slate-800'
+              }`}
             >
               <div className="max-w-4xl mx-auto flex items-center gap-2 sm:gap-3">
                 <Search className="text-orange-600 shrink-0" size={20} />
@@ -322,7 +326,11 @@ export const Header = ({
                     }
                   }}
                   placeholder="Nhập từ khóa tìm kiếm sản phẩm, dịch vụ, dự án, tin tức..."
-                  className="w-full bg-slate-50 border border-slate-200 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-none font-bold"
+                  className={`w-full border px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-none font-bold transition-colors ${
+                    !isHeaderWhite
+                      ? 'bg-slate-900 border-slate-700 text-white'
+                      : 'bg-slate-50 border-slate-200 text-slate-800'
+                  }`}
                   autoFocus
                 />
                 <button
@@ -333,7 +341,11 @@ export const Header = ({
                 </button>
                 <button
                   onClick={() => setIsSearchOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
+                  className={`p-2 transition-colors shrink-0 ${
+                    !isHeaderWhite
+                      ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                  }`}
                   title="Đóng tìm kiếm"
                 >
                   <X size={20} />
