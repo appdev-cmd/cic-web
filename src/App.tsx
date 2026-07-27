@@ -40,7 +40,7 @@ export default function App() {
   const [isRegisteringEvent, setIsRegisteringEvent] = useState<boolean>(false);
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const [isFloatingExpanded, setIsFloatingExpanded] = useState(true);
+  const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
 
   // View reset keys to ensure clicking header/footer menu returns from detail pages back to list pages
   const [productsResetKey, setProductsResetKey] = useState(0);
