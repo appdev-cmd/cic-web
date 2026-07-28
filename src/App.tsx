@@ -193,7 +193,7 @@ export default function App() {
                 <X className="w-6 h-6 text-orange-600 transition-colors" />
               </motion.div>
               <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3 py-1.5 bg-white/95 backdrop-blur-md text-slate-800 text-xs font-semibold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap border border-slate-200">
-                Thu gọn 5 tiện ích
+                Thu gọn tiện ích
               </span>
             </div>
           ) : (
@@ -207,15 +207,10 @@ export default function App() {
               >
                 <Headphones className="w-6 h-6" />
               </motion.div>
-              
-              {/* Badge with count */}
-              <span className="absolute -top-1 -right-1 bg-slate-900 text-white text-[10px] font-bold w-5.5 h-5.5 rounded-full border-2 border-white flex items-center justify-center shadow-md animate-pulse">
-                5
-              </span>
 
               {/* Tooltip */}
               <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3.5 py-2 bg-white/95 backdrop-blur-md text-slate-900 text-xs font-bold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap border border-slate-200">
-                Mở tiện ích & AI Chatbot (5)
+                Mở tiện ích & AI Chatbot
               </span>
             </div>
           )}
