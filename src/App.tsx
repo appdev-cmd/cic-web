@@ -184,7 +184,7 @@ export default function App() {
         >
           {isFloatingExpanded ? (
             /* Collapsing Action Trigger */
-            <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white hover:bg-orange-50 text-slate-700 border-2 border-orange-500 shadow-xl shadow-orange-500/10 flex items-center justify-center transition-all">
+            <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-transparent hover:bg-orange-500/10 text-orange-600 border-2 border-orange-500 shadow-lg shadow-orange-500/20 backdrop-blur-md flex items-center justify-center transition-all">
               <motion.div
                 initial={{ rotate: -90, scale: 0.8 }}
                 animate={{ rotate: 0, scale: 1 }}
@@ -192,12 +192,12 @@ export default function App() {
               >
                 <X className="w-6 h-6 text-orange-600 transition-colors" />
               </motion.div>
-              <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3 py-1.5 bg-white/95 backdrop-blur-md text-slate-800 text-xs font-semibold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap border border-slate-200">
+              <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3 py-1.5 bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap border border-slate-700/50">
                 Thu gọn tiện ích
               </span>
             </div>
           ) : (
-            /* Expanding Action Trigger (When Collapsed) */
+            /* Expanding Action Trigger (When Collapsed / Closed) - Original Gradient */
             <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white shadow-xl shadow-orange-500/30 flex items-center justify-center relative transition-all">
               <motion.div
                 initial={{ rotate: 90, scale: 0.8 }}

@@ -42,7 +42,8 @@ import {
   ShieldCheck,
   Box,
   Lightbulb,
-  Leaf
+  Leaf,
+  Download
 } from 'lucide-react';
 
 import { partners } from '../data/mockData';
@@ -178,7 +179,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
       </div>
 
       {/* Main Dynamic View Content */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-6 pt-4 md:pt-6 pb-12 lg:pb-16">
         
         {/* ==================== 1. TỔNG QUAN DOANH NGHIỆP ==================== */}
         {activeTab === 'overview' && (
@@ -188,11 +189,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
-              className="w-full space-y-16"
+              className="w-full space-y-12 lg:space-y-16"
              >
                 {/* 0. Giới Thiệu & Video */}
-                <section className="py-8 lg:py-10 bg-white relative overflow-hidden z-10 border-b border-slate-100">
-                  <div className="max-w-7xl mx-auto px-6 relative z-10">
+                <section className="pb-8 lg:pb-10 bg-white relative overflow-hidden z-10 border-b border-slate-100">
+                  <div className="w-full relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                       <div>
                         <p className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
@@ -479,7 +480,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             {/* Structural Banner */}
             <div className="text-center max-w-3xl mx-auto space-y-3">
               <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
-                SƠ ĐỒ TỔ CHỨC
+                CƠ CẤU TỔ CHỨC
               </h2>
               <div className="flex items-center justify-center gap-2 pt-1">
                 <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
@@ -714,778 +715,95 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
         {/* ==================== 3. NĂNG LỰC & KINH NGHIỆM ==================== */}
         {activeTab === 'experience' && (
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            key="capacity"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-20"
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="w-full space-y-16"
           >
-            {/* Section I: THÔNG TIN PHÁP LÝ & ĐƠN VỊ */}
-            <div className="space-y-8">
-              <div className="text-center max-w-3xl mx-auto space-y-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-50 border border-orange-200/80 text-orange-700 font-black uppercase tracking-widest text-[10px]">
-                  <Award size={13} className="text-orange-600" />
-                  <span>NĂNG LỰC & KINH NGHIỆM</span>
-                </div>
-                <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
-                  HỒ SƠ NĂNG LỰC & THÔNG TIN PHÁP LÝ
-                </h2>
-                <div className="flex items-center justify-center gap-2 pt-1">
-                  <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-orange-600"></div>
-                  <div className="w-12 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                  Pháp lý minh bạch - Đơn vị thành viên tập đoàn tư vấn xây dựng Việt Nam (VC Group)
-                </p>
-              </div>
+            {/* Top Capacity & Scale Overview */}
+            <div className="w-full bg-white">
+              <div className="max-w-7xl mx-auto relative z-10">
+                <div className="flex flex-col items-center text-center">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-100 text-orange-600 rounded-full mb-6">
+                    <span className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Năng lực & Quy mô</span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 mb-6 leading-tight">
+                    Tiềm lực vững vàng, <br/><span className="text-orange-600">vươn tầm quốc tế</span>
+                  </h2>
+                  <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl">
+                    Trải qua 35 năm hình thành và phát triển, CIC đã xây dựng được một đội ngũ nhân sự chất lượng cao, mạng lưới đối tác toàn cầu và danh mục khách hàng rộng khắp, khẳng định vị thế vững chắc trong lĩnh vực công nghệ và xây dựng.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full">
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">150+</div>
+                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Nhân sự chất lượng cao</div>
+                    </div>
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">100+</div>
+                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Đối tác toàn cầu</div>
+                    </div>
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">5.000+</div>
+                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Dự án thành công</div>
+                    </div>
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">35+</div>
+                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Năm kinh nghiệm</div>
+                    </div>
+                  </div>
 
-              {/* Twin Office Locations Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                {/* Trụ sở chính Hà Nội */}
-                <div className="bg-white border border-slate-200 p-6 md:p-8 flex flex-col justify-between space-y-6 shadow-sm hover:border-orange-500 hover:shadow-md transition-all duration-300">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                      <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                        <Building2 size={24} />
+                  <div className="flex flex-col gap-12 lg:gap-16 text-left w-full mb-12">
+                    {/* 1. Phát triển nguồn nhân lực chất lượng cao */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
+                      <div className="rounded-2xl overflow-hidden shadow-md">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80" alt="Phát triển nguồn nhân lực chất lượng cao" className="w-full h-[260px] md:h-[320px] object-cover" />
                       </div>
                       <div>
-                        <span className="text-[9px] text-orange-600 font-sans font-black tracking-widest uppercase block">ĐƠN VỊ ĐIỀU HÀNH CHÍNH</span>
-                        <h4 className="font-black text-base uppercase text-slate-900 tracking-tight">TRỤ SỞ CHÍNH HÀ NỘI</h4>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Địa chỉ trụ sở:</span>
-                        <p className="text-slate-950 font-bold flex items-start gap-2.5">
-                          <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
-                          <span>37 Lê Đại Hành - Quận Hai Bà Trưng - Hà Nội</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Quyết định thành lập số:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <FileText size={14} className="text-slate-500 shrink-0" />
-                          <span>1765/QĐ-BXD ngày 21/12/2006 (Bộ Xây Dựng)</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Điện thoại liên hệ:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Phone size={14} className="text-slate-500 shrink-0" />
-                          <span>84.4.39.781 / 39.741.313</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Số Fax:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Phone size={14} className="text-slate-400 shrink-0" />
-                          <span>84.4.38.216.793</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Thư điện tử (Email):</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Mail size={14} className="text-slate-500 shrink-0" />
-                          <a href="mailto:info@cic.com.vn" className="hover:text-orange-600 transition-colors">info@cic.com.vn</a>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Trang tin điện tử (Website):</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Globe size={14} className="text-slate-500 shrink-0" />
-                          <a href="http://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">www.cic.com.vn</a>
+                        <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Phát triển nguồn nhân lực chất lượng cao</h3>
+                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
+                          Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Chi nhánh TP. Hồ Chí Minh */}
-                <div className="bg-white border border-slate-200 p-6 md:p-8 flex flex-col justify-between space-y-6 shadow-sm hover:border-orange-500 hover:shadow-md transition-all duration-300">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                      <div className="w-12 h-12 bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                        <MapPin size={24} />
+                    {/* 2. Đối tác chiến lược với các hãng công nghệ danh tiếng */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center md:flex-row-reverse">
+                      <div className="order-1 md:order-2 rounded-2xl overflow-hidden shadow-md">
+                        <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80" alt="Đối tác chiến lược" className="w-full h-[260px] md:h-[320px] object-cover" />
+                      </div>
+                      <div className="order-2 md:order-1">
+                        <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Đối tác chiến lược với các hãng công nghệ danh tiếng</h3>
+                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
+                          Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 3. Cập nhật xu hướng công nghệ hàng đầu */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
+                      <div className="rounded-2xl overflow-hidden shadow-md">
+                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80" alt="Xu hướng công nghệ" className="w-full h-[260px] md:h-[320px] object-cover" />
                       </div>
                       <div>
-                        <span className="text-[9px] text-orange-600 font-sans font-black tracking-widest uppercase block">KHU VỰC PHÁT TRIỂN PHÍA NAM</span>
-                        <h4 className="font-black text-base uppercase text-slate-900 tracking-tight">CHI NHÁNH TP. HỒ CHÍ MINH</h4>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs md:text-sm text-slate-700 font-medium">
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Địa chỉ chi nhánh:</span>
-                        <p className="text-slate-950 font-bold flex items-start gap-2.5">
-                          <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
-                          <span>36 Nguyễn Huy Lượng - P.14 - Q.Bình Thạnh - TP.HCM</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Quyết định thành lập số:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <FileText size={14} className="text-slate-500 shrink-0" />
-                          <span>939/QĐ-BXD ngày 13/07/2000 (Bộ Xây Dựng)</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Điện thoại liên hệ:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Phone size={14} className="text-slate-500 shrink-0" />
-                          <span>84.8.628.99.022 – 628.99.033</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Số Fax:</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Phone size={14} className="text-slate-400 shrink-0" />
-                          <span>84.8.628.99.033</span>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Thư điện tử (Email):</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Mail size={14} className="text-slate-500 shrink-0" />
-                          <a href="mailto:cichcm@cic.com.vn" className="hover:text-orange-600 transition-colors">cichcm@cic.com.vn</a>
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-4">
-                        <span className="text-[10px] text-slate-400 font-sans font-black uppercase">Trang tin điện tử (Website):</span>
-                        <p className="text-slate-950 font-bold flex items-center gap-2.5">
-                          <Globe size={14} className="text-slate-500 shrink-0" />
-                          <a href="http://www.cic.com.vn" target="_blank" rel="noreferrer" className="text-orange-600 hover:underline">www.cic.com.vn</a>
+                        <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Cập nhật xu hướng công nghệ hàng đầu</h3>
+                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
+                          Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.
                         </p>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Core Legal & Banking Card */}
-              <div className="bg-slate-900 text-white p-6 md:p-8 space-y-6 shadow-md border-l-4 border-orange-600">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-                  <div>
-                    <span className="text-[10px] text-orange-400 font-sans font-black tracking-widest uppercase block mb-1">
-                      HỒ SƠ ĐĂNG KÝ DOANH NGHIỆP & TÀI KHOẢN GIAO DỊCH
-                    </span>
-                    <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">
-                      CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ TƯ VẤN CIC
-                    </h4>
-                  </div>
-                  <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/80 px-3 py-1.5 self-start sm:self-auto">
-                    <ShieldAlert size={16} className="text-orange-500 shrink-0" />
-                    <span className="text-xs text-slate-300 font-bold">MST: <strong className="text-white font-extrabold">01 0077 5353</strong></span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs md:text-sm">
-                  {/* Left Column: Legal Registration */}
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase tracking-wider">Đăng ký kinh doanh số:</span>
-                      <p className="text-slate-100 font-medium flex items-start gap-2.5">
-                        <CheckCircle2 size={16} className="text-orange-500 shrink-0 mt-0.5" />
-                        <span>0100775353 ngày 29/05/2013 (thay đổi lần 3) do Phòng đăng ký kinh doanh - Sở KHĐT Hà Nội cấp</span>
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1 border-t border-slate-800/80 pt-3">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase tracking-wider">Mã số thuế doanh nghiệp:</span>
-                      <p className="text-slate-100 font-bold flex items-center gap-2.5">
-                        <ShieldAlert size={16} className="text-orange-500 shrink-0" />
-                        <span>01 0077 5353</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Bank Account Details */}
-                  <div className="space-y-4 md:border-l md:border-slate-800 md:pl-6">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] text-slate-400 font-sans font-black uppercase tracking-wider">Tài khoản ngân hàng giao dịch:</span>
-                      <p className="text-white font-extrabold text-sm md:text-base flex items-center gap-2.5 text-orange-400">
-                        <DollarSign size={18} className="text-orange-500 shrink-0" />
-                        <span>120.10.00.001477.7</span>
-                      </p>
-                      <p className="text-slate-400 text-xs italic pl-7">
-                        Tại Sở giao dịch Ngân hàng Đầu tư và Phát triển Việt Nam (BIDV)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Section II: GIỚI THIỆU VỀ CÔNG TY VÀ QUÁ TRÌNH PHÁT TRIỂN */}
-            <div className="space-y-8 pt-6 border-t border-slate-200">
-              <div className="text-center max-w-3xl mx-auto space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
-                  <Clock size={13} className="text-orange-600" />
-                  <span>QUÁ TRÌNH THÀNH LẬP</span>
-                </div>
-                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-                  LỊCH SỬ HÌNH THÀNH & TẦM NHÌN SỨ MỆNH
-                </h3>
-                <div className="flex items-center justify-center gap-2 pt-0.5">
-                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                  35 năm trưởng thành - Đồng hành cùng nền kỹ thuật & công nghệ Việt Nam
-                </p>
-              </div>
-
-              <div className="bg-slate-50 border border-slate-200 p-6 md:p-8 space-y-6">
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <p className="text-slate-700 text-xs md:text-sm leading-relaxed text-justify font-medium">
-                      Công ty Cổ phần Công nghệ và Tư vấn CIC với tên giao dịch là <strong>CIC (CIC Technology & Consultancy Joint - Stock Company)</strong> được thành lập từ 27/11/1990 và trên cơ sở đó chuyển thành Công ty cổ phần theo Quyết định số 1765/QĐ-BXD ngày 21/12/2006 . Qua hơn 35 năm hoạt động cùng với việc được công nhận là 1 trong 10 thành viên chính thức của Tập đoàn Tư vấn Xây dựng Việt Nam (VC Group), một tổ hợp hàng đầu về tư vấn xây dựng trong nước, CIC thực sự khẳng định được vai trò và vị trí của mình.
-                    </p>
-                    <p className="text-slate-700 text-xs md:text-sm leading-relaxed text-justify font-medium">
-                      Với mục tiêu đem lại lợi nhuận cao nhất cho các cổ đông, tạo việc làm ổn định và nâng cao thu nhập cho người lao động, đóng góp cho Ngân sách Nhà nước và phát triển công ty ngày càng lớn mạnh, góp phần phát triển chuyên ngành Tin học và Tư vấn xây dựng đạt trình độ khu vực và quốc tế, CIC cùng với 100 cán bộ có trình độ cao và chuyên môn sâu về tin học cũng như tư vấn xây dựng của mình đã mang lại những lợi ích không nhỏ cho việc đẩy mạnh ứng dụng CNTT nói chung và phát triển phần mềm xây dựng nói riêng.
-                    </p>
-                  </div>
-                  <div className="space-y-4 bg-orange-600/5 border border-orange-600/10 p-6">
-                    <h4 className="font-black text-xs md:text-sm uppercase text-orange-600 tracking-tight">SỨ MỆNH PHÂN PHỐI VÀ CHUYỂN GIAO TOÀN CẦU</h4>
-                    <p className="text-slate-700 text-xs md:text-sm leading-relaxed text-justify font-medium">
-                      Công ty CIC đã, đang và sẽ là nhà phân phối chính thức, có uy tín trong lĩnh vực cung cấp các sản phẩm phần mềm nhập khẩu, thiết bị, các giải pháp công nghệ tiên tiến của thế giới phục vụ nhu cầu chung trong các doanh nghiệp xây dựng, giao thông, thủy lợi, cơ khí và các ngành liên quan khác.
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Section II: CÁC LĨNH VỰC KINH DOANH CHỦ YẾU */}
-            <div className="space-y-8 pt-6 border-t border-slate-200">
-              <div className="text-center max-w-3xl mx-auto space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
-                  <Layers size={13} className="text-orange-600" />
-                  <span>PHÂN NHÓM CHUYÊN MÔN</span>
-                </div>
-                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-                  CÁC LĨNH VỰC KINH DOANH NÒNG CỐT
-                </h3>
-                <div className="flex items-center justify-center gap-2 pt-0.5">
-                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                  Giải pháp tổng thể - Tư vấn tiên phong - Bứt phá công nghệ
-                </p>
-              </div>
-
-              {/* 3 Pillar Header Navigation Pills */}
-              <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-4">
-                <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider mr-2">Nhóm mảng:</span>
-                {businessPillars.map((pillar, pIdx) => {
-                  const isActive = activePillarIndex === pIdx;
-                  const Icon = pillar.icon;
-                  return (
-                    <button
-                      key={pIdx}
-                      onClick={() => {
-                        setActivePillarIndex(pIdx);
-                        const firstFieldId = pillar.fieldIds[0];
-                        const foundIdx = businessFields.findIndex(f => f.id === firstFieldId);
-                        if (foundIdx !== -1) setActiveFieldIndex(foundIdx);
-                      }}
-                      className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold transition-all duration-200 border cursor-pointer ${
-                        isActive
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'
-                      }`}
-                    >
-                      <Icon size={14} className={isActive ? 'text-orange-400' : 'text-slate-500'} />
-                      <span>{pillar.title}</span>
-                      <span className={`text-[10px] px-1.5 py-0.2 font-sans font-black ${isActive ? 'bg-slate-800 text-orange-400' : 'bg-slate-100 text-slate-500'}`}>
-                        {pillar.fieldIds.length}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Master-Detail Interactive Layout (No Boxed Grid!) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* Left side list of fields in current active pillar */}
-                <div className="lg:col-span-5 space-y-1.5">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 mb-2">
-                    Danh mục Lĩnh vực ({businessPillars[activePillarIndex].fieldIds.length} mảng)
-                  </div>
-                  {businessPillars[activePillarIndex].fieldIds.map((fId) => {
-                    const fieldObj = businessFields.find(f => f.id === fId);
-                    if (!fieldObj) return null;
-                    const realIdx = businessFields.findIndex(f => f.id === fId);
-                    const isSelected = activeFieldIndex === realIdx;
-
-                    return (
-                      <button
-                        key={fId}
-                        onClick={() => setActiveFieldIndex(realIdx)}
-                        className={`w-full text-left p-3.5 transition-all duration-200 flex items-center justify-between group cursor-pointer border-l-4 ${
-                          isSelected
-                            ? 'bg-slate-900 text-white border-orange-500 shadow-md pl-4'
-                            : 'bg-white hover:bg-slate-100/80 text-slate-800 border-transparent border-b border-slate-100'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 pr-2">
-                          <span className="text-xs md:text-sm font-bold leading-snug line-clamp-1">
-                            {fieldObj.title}
-                          </span>
-                        </div>
-                        <ChevronRight size={14} className={`shrink-0 transition-transform ${isSelected ? 'text-orange-400 translate-x-1' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Right side Spotlight Detail Canvas */}
-                <div className="lg:col-span-7 bg-slate-900 text-white p-6 md:p-8 border-l-4 border-orange-500 shadow-lg space-y-6 relative overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="bg-orange-600 text-white text-xs font-sans font-black px-2.5 py-1">
-                        LĨNH VỰC CHUYÊN MÔN
-                      </span>
-                      <span className="text-[11px] text-orange-400 font-bold uppercase tracking-wider">
-                        {businessPillars[activePillarIndex].title}
-                      </span>
-                    </div>
-                    {(() => {
-                      const ActiveIcon = businessFields[activeFieldIndex].icon;
-                      return <ActiveIcon size={24} className="text-orange-500" />;
-                    })()}
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="text-lg md:text-xl font-black uppercase text-white tracking-tight leading-snug">
-                      {businessFields[activeFieldIndex].title}
-                    </h4>
-                    <p className="text-slate-300 text-xs md:text-sm leading-relaxed font-medium text-justify">
-                      {businessFields[activeFieldIndex].desc}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 pt-4 border-t border-slate-800">
-                    <div className="flex items-center gap-2">
-                      <Sparkles size={14} className="text-orange-400" />
-                      <span className="text-[11px] font-black uppercase text-orange-400 tracking-wider">
-                        CÔNG CỤ & CÔNG NGHỆ CỐT LÕI HỢP TÁC / CHUYỂN GIAO:
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {businessFields[activeFieldIndex].techs.map((tech, tIdx) => (
-                        <span 
-                          key={tIdx} 
-                          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold px-3 py-1 hover:border-orange-500 transition-colors"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {onNavigateToContact && (
-                    <div className="pt-2 flex justify-end">
-                      <button
-                        onClick={onNavigateToContact}
-                        className="bg-orange-600 hover:bg-orange-500 text-white text-xs font-black uppercase px-4 py-2.5 flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <span>Tư vấn mảng này</span>
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* HỒ SƠ KINH NGHIỆM THEO SỐ NĂM TÍCH LŨY */}
-            <div className="space-y-8 pt-6 border-t border-slate-200">
-              <div className="text-center max-w-3xl mx-auto space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
-                  <Trophy size={13} className="text-orange-600" />
-                  <span>TÍCH LŨY THỰC CHIẾN</span>
-                </div>
-                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-                  HỒ SƠ KINH NGHIỆM THEO SỐ NĂM HOẠT ĐỘNG
-                </h3>
-                <div className="flex items-center justify-center gap-2 pt-0.5">
-                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                  Chuyên môn vững vàng - Dự án trọng điểm - Uy tín tích lũy từ năm 1990
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  { title: "Tư vấn các giải pháp tổng thể về hệ thống thiết bị tin học, viễn thông.", years: 35 },
-                  { title: "Nghiên cứu ứng dụng và chuyển giao các giải pháp công nghệ thông tin.", years: 35 },
-                  { title: "Thực hiện việc lắp đặt các hệ thống thiết bị tin học viễn thông.", years: 35 },
-                  { title: "Nghiên cứu, thiết kế, sản xuất, khai thác phát triển và cung cấp phần mềm về công nghệ thông tin phục vụ quản lý kinh tế, kỹ thuật.", years: 35 },
-                  { title: "Thực hiện các nội dung công tác tư vấn xây dựng đối với các công trình tin học viễn thông, các công trình dân dụng, công nghiệp, công trình kỹ thuật hạ tầng đô thị, khu công nghiệp.", years: 35 },
-                  { title: "Xuất nhập khẩu thiết bị, sản phẩm công nghệ tin học và các ứng dụng công nghệ khác.", years: 35 },
-                  { title: "Tổ chức đào tạo, bồi dưỡng về công nghệ thông tin và các ứng dụng công nghệ khác.", years: 35 },
-                  { title: "Liên doanh, liên kết, hợp tác với các đơn vị trong và ngoài nước để phát triển và đầu tư công nghệ.", years: 30 },
-                  { title: "Phân phối các thiết bị đặc thù và phần mềm nhập khẩu chuyên ngành xây dựng.", years: 29 }
-                ].map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className="bg-white border border-slate-200/90 hover:border-orange-400 p-4 md:p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all duration-200 group hover:shadow-xs"
+                  
+                  <a 
+                    href="mailto:info@cic.com.vn?subject=Yeu%20cau%20ho%20so%20nang%20luc%20CIC" 
+                    className="px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-sm hover:bg-orange-700 transition-colors inline-flex items-center gap-3 rounded-md shadow-lg shadow-orange-600/30 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5">
-                      <span className="w-8 h-8 rounded bg-orange-50 text-orange-600 font-sans font-bold flex items-center justify-center text-xs shrink-0 border border-orange-200/80 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                        {(idx + 1).toString().padStart(2, '0')}
-                      </span>
-                      <p className="text-slate-800 text-xs md:text-sm font-medium leading-relaxed group-hover:text-slate-950 transition-colors">
-                        {item.title}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto bg-slate-50 group-hover:bg-orange-50 border border-slate-200 group-hover:border-orange-200 px-3 py-1.5 transition-colors">
-                      <Clock size={13} className="text-orange-500" />
-                      <span className="font-sans font-bold text-xs text-slate-700 group-hover:text-orange-700 whitespace-nowrap">
-                        {item.years} NĂM KINH NGHIỆM
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* BẢNG CƠ CẤU NHÂN SỰ CHI TIẾT THEO PHÒNG BAN */}
-            <div className="space-y-6 pt-6 border-t border-slate-200">
-              <div className="text-center max-w-3xl mx-auto space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
-                  <Users size={13} className="text-orange-600" />
-                  <span>QUY MÔ NHÂN SỰ</span>
+                    <Download size={20} /> Tải hồ sơ năng lực (Profile)
+                  </a>
                 </div>
-                <h3 className="text-xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">
-                  BẢNG CƠ CẤU NHÂN SỰ CHI TIẾT THEO PHÒNG BAN
-                </h3>
-                <div className="flex items-center justify-center gap-2 pt-0.5">
-                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                  Đội ngũ 100+ chuyên gia trình độ cao - 88.6% trình độ đại học & trên đại học
-                </p>
-              </div>
-
-              <div className="overflow-x-auto border border-slate-200 shadow-sm">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-900 text-white font-black uppercase tracking-wider text-[10px]">
-                      <th className="py-4 px-4 text-center border-b border-slate-800">STT</th>
-                      <th className="py-4 px-5 border-b border-slate-800">Bộ phận / Trung tâm chuyên môn</th>
-                      <th className="py-4 px-4 text-center border-b border-slate-800">Tổng Số người</th>
-                      <th className="py-4 px-4 text-center border-b border-slate-800">Nhân viên / Khác</th>
-                      <th className="py-4 px-4 text-center border-b border-slate-800">Đại học</th>
-                      <th className="py-4 px-4 text-center border-b border-slate-800">Trên Đại học</th>
-                      <th className="py-4 px-6 text-center border-b border-slate-800">Tỷ lệ Trình độ chuyên môn</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                    {hrData.map((dept, idx) => {
-                      const IconComp = dept.icon;
-                      const postPercent = dept.total > 0 ? (dept.postDh / dept.total) * 100 : 0;
-                      const uPercent = dept.total > 0 ? (dept.dh / dept.total) * 100 : 0;
-                      const isHovered = hoveredDeptId === dept.stt;
-                      return (
-                        <tr 
-                          key={idx} 
-                          onMouseEnter={() => setHoveredDeptId(dept.stt)}
-                          onMouseLeave={() => setHoveredDeptId(null)}
-                          className={`transition-colors duration-150 ${
-                            isHovered 
-                              ? 'bg-orange-50/80' 
-                              : 'hover:bg-slate-50'
-                          }`}
-                        >
-                          <td className="py-3.5 px-4 text-center font-sans font-bold text-slate-400">{dept.stt.toString().padStart(2, '0')}</td>
-                          <td className="py-3.5 px-5 font-black text-slate-900 flex items-center gap-2.5">
-                            <span className="p-1 bg-slate-100 text-orange-600 rounded">
-                              <IconComp size={14} />
-                            </span>
-                            <span>{dept.name}</span>
-                          </td>
-                          <td className="py-3.5 px-4 text-center font-bold font-sans text-orange-600 text-sm bg-orange-50/20">{dept.total}</td>
-                          <td className="py-3.5 px-4 text-center font-sans">{dept.nv || '-'}</td>
-                          <td className="py-3.5 px-4 text-center font-sans font-semibold text-slate-900">{dept.dh || '-'}</td>
-                          <td className="py-3.5 px-4 text-center font-sans font-semibold text-orange-600">{dept.postDh || '-'}</td>
-                          <td className="py-3.5 px-6">
-                            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex">
-                              {dept.postDh > 0 && (
-                                <div 
-                                  style={{ width: `${postPercent}%` }} 
-                                  title={`Trên Đại học: ${postPercent.toFixed(0)}%`}
-                                  className="bg-orange-600 h-full"
-                                />
-                              )}
-                              {dept.dh > 0 && (
-                                <div 
-                                  style={{ width: `${uPercent}%` }} 
-                                  title={`Đại học: ${uPercent.toFixed(0)}%`}
-                                  className="bg-slate-950 h-full"
-                                />
-                              )}
-                              {dept.nv > 0 && (
-                                <div 
-                                  style={{ width: `${100 - postPercent - uPercent}%` }} 
-                                  title="Khác"
-                                  className="bg-slate-400 h-full"
-                                />
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                    {/* Grand Total Row */}
-                    <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
-                      <td className="py-4 px-4 text-center"></td>
-                      <td className="py-4 px-5 text-slate-950 text-xs font-black uppercase">TỔNG CỘNG NHÂN SỰ</td>
-                      <td className="py-4 px-4 text-center font-sans text-orange-600 font-black text-base">106</td>
-                      <td className="py-4 px-4 text-center font-sans text-slate-950">01</td>
-                      <td className="py-4 px-4 text-center font-sans text-slate-950">75</td>
-                      <td className="py-4 px-4 text-center font-sans text-orange-600">19</td>
-                      <td className="py-4 px-6 text-slate-400 text-[10px] uppercase font-bold text-center">
-                        75 ĐH (70.7%) | 19 Trên ĐH (17.9%)
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* REDESIGNED: BỨC TƯỜNG ĐỐI TÁC TOÀN CẦU (Global Partnership Hall of Fame) */}
-            <div className="space-y-8 pt-6 border-t border-slate-200">
-              <div className="text-center max-w-3xl mx-auto space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
-                  <Globe size={13} className="text-orange-600" />
-                  <span>HỢP TÁC QUỐC TẾ</span>
-                </div>
-                <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight">BỨC TƯỜNG ĐỐI TÁC TOÀN CẦU</h2>
-                <div className="flex items-center justify-center gap-2 pt-0.5">
-                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-xs md:text-sm text-orange-600 font-bold uppercase tracking-wider max-w-2xl mx-auto">
-                  Đại diện ủy quyền & Nhà phân phối chính hãng từ các tập đoàn công nghệ hàng đầu thế giới
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Software Partners */}
-                <div className="bg-slate-950 text-white p-8 relative overflow-hidden border border-slate-900 shadow-xl">
-                  <div className="absolute right-0 top-0 w-48 h-48 bg-orange-600/10 blur-3xl rounded-full pointer-events-none"></div>
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                      <div className="w-12 h-12 bg-orange-600 text-white flex items-center justify-center shrink-0">
-                        <Layers size={20} />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-black uppercase tracking-wider text-orange-500">ĐỐI TÁC HÃNG PHẦN MỀM KỸ THUẬT</h4>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Đại diện bản quyền quốc tế tại Việt Nam</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 pt-2">
-                      {softwarePartners.map((p, i) => (
-                        <div 
-                          key={i} 
-                          className="bg-white/5 border border-white/10 hover:border-orange-500 hover:bg-orange-600/10 p-2.5 text-center transition-all duration-300 flex items-center justify-center min-h-[50px] group"
-                        >
-                          <span className="text-[10px] sm:text-xs font-black text-slate-300 group-hover:text-white leading-tight">
-                            {p.replace(/ *\([^)]*\) */g, "")}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hardware Partners */}
-                <div className="bg-slate-950 text-white p-8 relative overflow-hidden border border-slate-900 shadow-xl">
-                  <div className="absolute right-0 top-0 w-48 h-48 bg-orange-600/10 blur-3xl rounded-full pointer-events-none"></div>
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                      <div className="w-12 h-12 bg-orange-600 text-white flex items-center justify-center shrink-0">
-                        <Activity size={20} />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-black uppercase tracking-wider text-orange-500">ĐỐI TÁC HÃNG THIẾT BỊ CHUYÊN NGÀNH</h4>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Phân phối thiết bị quan trắc & địa kỹ thuật</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 pt-2">
-                      {hardwarePartners.map((p, i) => (
-                        <div 
-                          key={i} 
-                          className="bg-white/5 border border-white/10 hover:border-orange-500 hover:bg-orange-600/10 p-2.5 text-center transition-all duration-300 flex items-center justify-center min-h-[50px] group"
-                        >
-                          <span className="text-[10px] sm:text-xs font-black text-slate-300 group-hover:text-white leading-tight">
-                            {p.replace(/ *\([^)]*\) */g, "")}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* SEARCHABLE & FILTERABLE CONTRACT REGISTRY (BẢNG HỒ SƠ HỢP ĐỒNG KINH NGHIỆM) */}
-            <div className="space-y-8 pt-6 border-t border-slate-200">
-              <div className="text-center max-w-3xl mx-auto space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 font-black uppercase tracking-widest text-[10px]">
-                  <FileText size={13} className="text-orange-600" />
-                  <span>TRA CỨU HỒ SƠ NĂNG LỰC</span>
-                </div>
-                <h2 className="text-2xl md:text-3xl font-black text-slate-950 uppercase tracking-tight font-sans">DANH MỤC HỢP ĐỒNG TIÊU BIỂU</h2>
-                <div className="flex items-center justify-center gap-2 pt-0.5">
-                  <div className="w-10 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
-                  <div className="w-10 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-                </div>
-                <p className="text-orange-600 text-xs md:text-sm font-bold uppercase tracking-wider">
-                  Minh bạch năng lực thực thi - Tra cứu hồ sơ dự án tiêu biểu theo chuyên ngành
-                </p>
-              </div>
-
-              {/* Redesigned Filter Controls with robust Layout & Scrollable Tabs */}
-              <div className="bg-slate-50 border border-slate-200 p-6 space-y-6">
-                <div className="flex flex-col md:flex-row gap-4 items-stretch justify-between">
-                  {/* Modern Search bar */}
-                  <div className="relative flex-1">
-                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
-                      <Search size={16} />
-                    </span>
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm theo tên hợp đồng, đối tác..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 text-xs font-bold border border-slate-200 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600 rounded-none text-slate-800 transition-all shadow-sm"
-                    />
-                  </div>
-
-                  {/* Clean found results tag */}
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 shrink-0 shadow-sm">
-                    <Filter size={14} className="text-orange-600" />
-                    <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">
-                      Tìm thấy: {filteredContracts.length} Hợp đồng
-                    </span>
-                  </div>
-                </div>
-
-                {/* Horizontal Swipeable Category Tabs (NEVER WRAPS UGLILY) */}
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                    Phân loại theo mảng giải pháp:
-                  </span>
-                  <div className="relative border-b border-slate-200">
-                    <div className="flex space-x-2 overflow-x-auto pb-3 scrollbar-hide -mb-px">
-                      {categories.map((cat) => {
-                        const isActive = selectedCategory === cat.id;
-                        return (
-                          <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`px-4 py-2 text-[10px] md:text-xs font-black uppercase tracking-wider border-b-2 transition-all whitespace-nowrap shrink-0 ${
-                              isActive 
-                                ? 'border-orange-600 text-orange-600 font-black bg-orange-50/50' 
-                                : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
-                            }`}
-                          >
-                            {cat.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Data registry listing table */}
-              <div className="border border-slate-200 overflow-hidden shadow-sm">
-                <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
-                  <table className="w-full text-left text-xs border-collapse relative">
-                    <thead className="sticky top-0 bg-slate-900 text-white font-black uppercase tracking-wider text-[10px] z-10">
-                      <tr>
-                        <th className="py-3 px-4 text-center border-b border-slate-800 w-16">STT</th>
-                        <th className="py-3 px-5 border-b border-slate-800">Tên và nội dung của Hợp đồng</th>
-                        <th className="py-3 px-5 border-b border-slate-800">Tên cơ quan ký hợp đồng / Khách hàng</th>
-                        <th className="py-3 px-4 text-center border-b border-slate-800 w-28">Thời hạn HĐ</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                      {filteredContracts.length > 0 ? (
-                        filteredContracts.map((con, index) => {
-                          return (
-                            <tr key={con.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="py-3 px-4 text-center font-sans font-bold text-slate-400">{(index + 1).toString().padStart(3, '0')}</td>
-                              <td className="py-3 px-5 font-bold text-slate-900 leading-relaxed text-justify">{con.name}</td>
-                              <td className="py-3 px-5 font-semibold text-slate-600">{con.client}</td>
-                              <td className="py-3 px-4 text-center font-sans font-bold text-orange-600 bg-orange-50/10">{con.year}</td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan={4} className="py-12 text-center text-slate-400 font-bold italic">
-                            Không tìm thấy hợp đồng nào phù hợp với từ khóa tìm kiếm.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="bg-slate-50 p-3.5 border-t border-slate-200 flex justify-between items-center text-[10px] font-black uppercase text-slate-400">
-                  <span>Tổng số tìm thấy: {filteredContracts.length} hợp đồng</span>
-                  <span>CIC Technology & Consultancy JSC Registry</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Certification / Quality assurance footer strip */}
-            <div className="bg-orange-600 text-white p-8 relative overflow-hidden shadow-2xl">
-              <div className="absolute right-0 top-0 w-48 h-48 bg-white/10 blur-3xl pointer-events-none"></div>
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-                <div className="space-y-2">
-                  <h4 className="text-lg font-black uppercase tracking-tight">LIÊN HỆ KHẢO SÁT & HỢP TÁC CÔNG NGHỆ</h4>
-                  <p className="text-xs text-orange-100 font-medium">Chúng tôi luôn sẵn lòng hợp tác, lắng nghe ý kiến đóng góp và chuyển giao giải pháp tiên tiến nhất.</p>
-                </div>
-                <button 
-                  onClick={() => {
-                    if (onNavigateToContact) {
-                      onNavigateToContact();
-                    } else {
-                      const el = document.getElementById('contact');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                  className="px-6 py-3 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black uppercase tracking-wider rounded-none shrink-0 transition-all active:scale-95 shadow-xl border-2 border-slate-950 cursor-pointer"
-                >
-                  Kết nối ngay
-                </button>
               </div>
             </div>
           </motion.div>
