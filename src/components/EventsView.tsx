@@ -157,6 +157,19 @@ export const EventsView: React.FC<EventsViewProps> = ({
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
+      if (statusFilter === 'all') {
+        const statusPriority: Record<string, number> = {
+          ongoing: 1,
+          upcoming: 2,
+          past: 3,
+        };
+        const priorityA = statusPriority[a.status] ?? 99;
+        const priorityB = statusPriority[b.status] ?? 99;
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+      }
+
       const dateA = new Date(a.startDate).getTime();
       const dateB = new Date(b.startDate).getTime();
       return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
@@ -871,10 +884,6 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           <span>Hình thức:</span>
                           <span className="text-slate-800">Trực tiếp / Hybrid</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Chứng nhận hoàn thành:</span>
-                          <span className="text-slate-800">Cấp bản cứng & PDF</span>
-                        </div>
                       </div>
 
                       {selectedEvent.isOpenRegistration ? (
@@ -989,7 +998,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3 }}
-              className="space-y-12"
+              className="space-y-8"
             >
               
               {/* PAGE TITLE BANNER */}
@@ -1020,11 +1029,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   TẦNG 1: HERO EVENT (SỰ KIỆN GẦN NHẤT / NỔI BẬT)
                  ========================================================= */}
               {heroEvent && statusFilter === 'all' && !searchTerm && (
-                <section className="bg-white rounded-[12px] border border-slate-200/90 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 overflow-hidden group p-2.5 sm:p-3">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
+                <section className="bg-transparent border-0 p-0 shadow-none transition-all duration-300 overflow-hidden group cursor-pointer">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                     
                     {/* Left: Image Hero Banner */}
-                    <div className="lg:col-span-7 relative bg-slate-950 min-h-[280px] sm:min-h-[360px] overflow-hidden rounded-[10px]">
+                    <div className="lg:col-span-6 relative bg-slate-950 h-64 sm:h-80 lg:h-[340px] overflow-hidden rounded-[14px]">
                       <img 
                         src={heroEvent.img} 
                         alt={heroEvent.title}
@@ -1033,28 +1042,28 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent lg:hidden" />
                       
                       {/* Badge Overlay */}
-                      <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                        <span className="bg-[#FC5115] text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 rounded-[8px]">
+                      <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-2">
+                        <span className="bg-[#FC5115] text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1.5 rounded-[6px]">
                           <Sparkles size={12} /> Sự kiện sắp tới nổi bật
                         </span>
                         {heroEvent.eventType && (
-                          <span className="bg-slate-900/90 text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest border border-slate-700 shadow-md rounded-[8px]">
+                          <span className="bg-slate-900/90 text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider border border-slate-700 shadow-md rounded-[6px]">
                             {heroEvent.eventType}
                           </span>
                         )}
                       </div>
 
-                      {/* Remaining Days Counter (NO fake FOMO) */}
-                      <div className="absolute bottom-4 left-4 bg-slate-950/85 backdrop-blur-md text-white border border-slate-800 px-3.5 py-1.5 text-xs font-bold font-mono shadow-lg flex items-center gap-2 rounded-[8px]">
+                      {/* Remaining Days Counter */}
+                      <div className="absolute bottom-3.5 left-3.5 bg-slate-950/85 backdrop-blur-md text-white border border-slate-800 px-3.5 py-1.5 text-xs font-bold font-mono shadow-lg flex items-center gap-2 rounded-[6px]">
                         <Clock size={14} className="text-orange-500" />
-                        <span>Còn {getDaysRemaining(heroEvent.startDate)} ngày nữa diễn ra</span>
+                        <span>Còn {getDaysRemaining(heroEvent.startDate)} ngày nữa</span>
                       </div>
                     </div>
 
                     {/* Right: Content Details */}
-                    <div className="lg:col-span-5 p-5 sm:p-6 flex flex-col justify-between space-y-6">
-                      <div className="space-y-4">
-                        <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-[#6B7280]">
+                    <div className="lg:col-span-6 py-1 flex flex-col justify-between space-y-4 h-full">
+                      <div className="space-y-3.5">
+                        <div className="flex flex-wrap items-center gap-2.5 text-xs font-bold text-[#6B7280]">
                           <span className="flex items-center gap-1 text-[#FC5115]">
                             <Calendar size={14} /> {heroEvent.date}
                           </span>
@@ -1069,13 +1078,13 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setSelectedEvent(heroEvent);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="text-xl sm:text-2xl font-black text-[#222222] leading-tight uppercase group-hover:text-[#FC5115] cursor-pointer transition-colors"
+                          className="text-xl sm:text-2xl font-black text-[#222222] leading-snug uppercase group-hover:text-[#FC5115] cursor-pointer transition-colors"
                         >
                           {heroEvent.title}
                         </h2>
 
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-700 bg-white/70 p-2.5 border-l-2 border-[#FC5115] rounded-r-[8px]">
-                          <MapPin size={16} className="text-[#FC5115] shrink-0" />
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-700 bg-slate-50/80 p-2.5 border-l-2 border-[#FC5115] rounded-r-[6px]">
+                          <MapPin size={15} className="text-[#FC5115] shrink-0" />
                           <span className="truncate">{heroEvent.location}</span>
                         </div>
 
@@ -1085,16 +1094,16 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       </div>
 
                       {/* CTA Buttons */}
-                      <div className="pt-4 border-t border-slate-200/60 flex flex-wrap sm:flex-nowrap gap-3 items-center">
+                      <div className="pt-3.5 border-t border-slate-200/60 flex flex-wrap sm:flex-nowrap gap-3 items-center">
                         {heroEvent.isOpenRegistration && (
                           <button
                             onClick={() => {
                               setRegisterEvent(heroEvent);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
-                            className="w-full sm:w-auto bg-[#FC5115] hover:bg-orange-700 text-white px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 rounded-[8px]"
+                            className="w-full sm:w-auto bg-white hover:bg-orange-50/80 text-[#FC5115] hover:text-orange-700 border border-orange-500/60 hover:border-orange-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all shadow-2xs flex items-center justify-center gap-2 rounded-[8px] cursor-pointer"
                           >
-                            Đăng ký tham dự <ArrowRight size={14} />
+                            Đăng ký tham dự <ArrowRight size={14} className="text-[#FC5115]" />
                           </button>
                         )}
 
@@ -1103,12 +1112,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setSelectedEvent(heroEvent);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="w-full sm:w-auto border border-slate-300 hover:border-slate-900 text-slate-800 hover:text-slate-950 px-5 py-3 text-xs font-bold uppercase tracking-widest transition-all text-center rounded-[8px]"
+                          className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-200 hover:border-slate-300 px-5 py-2.5 text-xs font-bold uppercase tracking-widest transition-all text-center rounded-[8px] cursor-pointer shadow-2xs"
                         >
                           Xem chi tiết
                         </button>
                       </div>
-
                     </div>
 
                   </div>
@@ -1116,9 +1124,9 @@ export const EventsView: React.FC<EventsViewProps> = ({
               )}
 
               {/* =========================================================
-                  TẦNG 2: TÌM KIẾM + BỘ LỌC TĨNH
+                  TẦNG 2: TÌM KIẾM + BỘ LỌC TĨNH PHẲNG
                  ========================================================= */}
-              <div className="bg-white border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between gap-4 rounded-[10px]">
+              <div className="pt-6 border-t border-slate-200 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between gap-4">
                 
                 {/* Search Field */}
                 <div className="relative w-full lg:max-w-md">
@@ -1128,7 +1136,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                     placeholder="Tìm kiếm sự kiện, địa điểm, chủ đề..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 rounded-[8px]"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FC5115] focus:border-[#FC5115] rounded-[10px] shadow-2xs"
                   />
                 </div>
 
@@ -1136,7 +1144,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                 <div className="flex flex-wrap items-center gap-3 justify-between lg:justify-end w-full lg:w-auto">
                   
                   {/* Status Tabs */}
-                  <div className="flex bg-slate-100 p-1 rounded-[8px] border border-slate-200 text-xs">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
                     {[
                       { key: 'all', label: 'Tất cả' },
                       { key: 'upcoming', label: 'Sắp diễn ra' },
@@ -1146,10 +1154,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <button
                         key={tab.key}
                         onClick={() => setStatusFilter(tab.key as any)}
-                        className={`px-3 py-1.5 font-bold uppercase tracking-wider transition-all rounded-[8px] ${
+                        className={`px-3.5 py-1.5 font-bold uppercase tracking-wider transition-all border rounded-[8px] cursor-pointer ${
                           statusFilter === tab.key
-                            ? 'bg-orange-600 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-slate-950'
+                            ? 'bg-[#FC5115] border-[#FC5115] text-white shadow-2xs'
+                            : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
                         }`}
                       >
                         {tab.label}
@@ -1158,7 +1166,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   </div>
 
                   {/* Sort Select */}
-                  <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 rounded-[8px]">
+                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-600 rounded-[10px] shadow-2xs">
                     <span className="text-slate-400 font-medium hidden sm:inline">Sắp xếp:</span>
                     <select
                       value={sortBy}
@@ -1169,8 +1177,8 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <option value="oldest">Cũ nhất</option>
                     </select>
                   </div>
-
                 </div>
+
               </div>
 
               {/* =========================================================
@@ -1195,11 +1203,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               setSelectedEvent(event);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
-                            className="bg-white rounded-[10px] border border-slate-200/90 p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
+                            className="bg-transparent border-0 p-0 shadow-none transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
                           >
                             <div>
                               {/* Thumbnail Image */}
-                              <div className="aspect-[16/10] bg-slate-950 rounded-[8px] overflow-hidden relative">
+                              <div className="aspect-[16/10] bg-slate-950 rounded-[12px] overflow-hidden relative">
                                 <img 
                                   src={event.img} 
                                   alt={event.title} 
@@ -1236,7 +1244,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               </div>
 
                               {/* Content */}
-                              <div className="p-3.5 space-y-2.5">
+                              <div className="pt-3 pb-1 space-y-2.5">
                                 <div className="flex items-center justify-between text-[11px] text-[#6B7280] font-semibold">
                                   <span className="flex items-center gap-1.5">
                                     <Clock size={12} className="text-[#FC5115] shrink-0" />

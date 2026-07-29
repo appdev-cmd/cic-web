@@ -60,162 +60,200 @@ export const servicesData: ServiceDetail[] = [
     image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80",
     relatedProductIds: [1, 3, 5, 12],
     htmlContent: `
-<div class="title_head margin-top-20 margin-bottom-20">
-<h2 style="text-align: center;"><span style="font-size:13pt"><span style="line-height:150%"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Dịch Vụ Tư Vấn BIM Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng</strong></span></span></span></span></h2>
+<p class="font-medium text-slate-700 mb-3">
+  Doanh nghiệp của bạn đang tìm kiếm giải pháp BIM hiệu quả để tiết kiệm chi phí, tối ưu quy trình và nâng cao năng lực cạnh tranh?
+</p>
 
-<p data-end="567" data-start="257" style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong data-end="373" data-start="257">Doanh nghiệp của bạn&nbsp;đang tìm kiếm giải pháp BIM hiệu quả để tiết kiệm chi phí, tối ưu quy trình và nâng cao năng lực cạnh tranh?</strong></span></span></p>
+<p class="mb-4">
+  CIC – Công ty Công nghệ và Tư vấn hàng đầu Việt Nam với hơn <strong>35 năm kinh nghiệm</strong>, mang đến <strong>dịch vụ tư vấn BIM toàn diện</strong>, giúp doanh nghiệp <strong>chủ động chuyển đổi số – nâng cao năng lực cạnh tranh</strong>.
+</p>
 
-<p data-end="567" data-start="257" style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">CIC – Công ty Công nghệ và Tư vấn hàng đầu Việt Nam với hơn <strong data-end="458" data-start="436">35&nbsp;năm kinh nghiệm</strong>, mang đến <strong data-end="501" data-start="469">dịch vụ tư vấn BIM toàn diện</strong>, giúp doanh nghiệp <strong data-end="566" data-start="521">chủ động chuyển đổi số – nâng cao năng lực cạnh tranh</strong>.</span></span></p>
+<div class="my-6 text-center">
+  <img alt="Ông Đặng Đức Hà phát biểu" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">
+    Ông Đặng Đức Hà – Chủ tịch HĐQT Công ty Cổ phần Công nghệ và Tư vấn CIC (CIC) phát biểu trong một sự kiện chuyển đổi số năm 2024
+  </em>
+</div>
 
-<p style="text-align: center;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM.jpg" style="width: 800px; max-width: 100%; height: auto;" /></p>
+<p class="mb-4">
+  Ra đời trong bối cảnh kỷ nguyên vươn mình của dân tộc Việt Nam, Trung Tâm <strong>BIM & Digital Twins</strong> trực thuộc Công ty Cổ phần Công nghệ và Tư vấn CIC (CIC) tự hào là đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam. Chúng tôi không ngừng đổi mới để mang đến những giải pháp công nghệ tối ưu nhất cho ngành xây dựng, trong đó có dịch vụ tư vấn <strong>BIM (Building Information Modeling - Mô hình thông tin công trình)</strong> chính là thế mạnh hàng đầu.
+</p>
 
-<p style="text-align: center;"><em><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;">Ông Đặng Đức Hà – Chủ tịch HĐQT Công ty Cổ phần Công nghệ và Tư vấn CIC (CIC) phát biểu trong một sự kiện chuyển đổi số năm 2024</span></span></em></p>
+<h3 class="text-slate-900 font-bold text-lg mt-6 mb-3">1. Tại sao doanh nghiệp cần dịch vụ tư vấn BIM của CIC?</h3>
 
-<h2 style="text-align: justify; margin: 0in 0in 0.0001pt;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%">Ra đời trong bối cảnh&nbsp;kỷ nguyên vươn mình của dân tộc Việt Nam, Trung Tâm <strong>BIM &amp; Digital Twins</strong> trực thuộc Công ty Cổ phần Công nghệ và Tư vấn CIC (CIC) tự hào là đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam. Chúng tôi không ngừng đổi mới để mang đến những giải pháp công nghệ tối ưu nhất cho ngành xây dựng, trong đó có&nbsp;dịch vụ tư vấn <strong>BIM (Building Infomation Modeing- Mô hình thông tin công trình)&nbsp;</strong>chính là thế mạnh hàng đầu.</span></span></span></h2>
-
-<h2><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%">Tại sao doanh nghiệp cần dịch vụ tư vấn BIM của CIC?</span></span></span></strong></h2>
-
-<ul>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%">Tăng tốc tiến độ dự án và giảm thiểu sai sót nhờ quản lý toàn bộ vòng đời công trình (từ thiết kế, thi công đến vận hành).</span></span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%">Tiết kiệm chi phí đầu tư và đảm bảo chất lượng theo tiêu chuẩn quốc tế.</span></span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%">Tiếp cận công nghệ BIM mới nhất (BIM 4D, 5D, 6D, Digital Twin).</span></span></span></li>
+<ul class="list-disc pl-5 space-y-2 mb-6 text-slate-600">
+  <li>Tăng tốc tiến độ dự án và giảm thiểu sai sót nhờ quản lý toàn bộ vòng đời công trình (từ thiết kế, thi công đến vận hành).</li>
+  <li>Tiết kiệm chi phí đầu tư và đảm bảo chất lượng theo tiêu chuẩn quốc tế.</li>
+  <li>Tiếp cận công nghệ BIM mới nhất (BIM 4D, 5D, 6D, Digital Twin).</li>
 </ul>
 
-<p style="text-align:justify; margin:0in 0in 0.0001pt"><br />
-&nbsp;</p>
+<div class="my-6 text-center">
+  <img alt="Dịch vụ BIM CIC" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM1.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+</div>
 
-<p style="margin: 0in 0in 0.0001pt; text-align: center;"><span style="font-size:13pt"><span style="line-height:150%"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM1.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></p>
+<h3 class="text-slate-900 font-bold text-lg mt-6 mb-3">2. Các dịch vụ tư vấn BIM của CIC</h3>
 
-<h2 style="text-align: justify; margin: 0in 0in 0.0001pt;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%"><b>2. Các dịch vụ tư vấn BIM của CIC</b></span></span></span></h2>
+<p class="mb-4">
+  CIC cung cấp các giải pháp BIM toàn diện, đáp ứng nhu cầu của doanh nghiệp trong việc triển khai và ứng dụng BIM hiệu quả. Các dịch vụ cụ thể bao gồm:
+</p>
 
-<h2 style="text-align: justify; margin: 0in 0in 0.0001pt;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><span style="line-height:150%">CIC cung cấp các giải pháp BIM toàn diện, đáp ứng nhu cầu của doanh nghiệp trong việc triển khai và ứng dụng BIM hiệu quả. Các dịch vụ cụ thể bao gồm:</span></span></span></h2>
+<h4 class="font-bold text-slate-900 text-base mt-4 mb-2">2.1. Dịch vụ tư vấn BIM dành cho Chủ đầu tư</h4>
 
-<h2 style="text-align: justify; margin: 0in 0in 0.0001pt;"><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><em><span style="line-height:150%">2.1. Dịch vụ tư vấn BIM dành cho Chủ đầu tư</span></em></span></span></strong></h2>
+<div class="my-6 text-center">
+  <img alt="BIM cho Chủ đầu tư" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM2.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+</div>
 
-<p style="text-align: center;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM2.jpg" style="width: 800px; max-width: 100%; height: auto;" /></p>
+<p class="mb-3">
+  <strong>CIC cung cấp dịch vụ tư vấn BIM</strong> chuyên sâu dành cho chủ đầu tư, giúp kiểm soát chất lượng, tiến độ và chi phí dự án một cách chặt chẽ và hiệu quả. Với dịch vụ tư vấn BIM, chủ đầu tư sẽ được:
+</p>
 
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>CIC cung cấp dịch vụ tư vấn BIM</strong> chuyên sâu dành cho chủ đầu tư, giúp kiểm soát chất lượng, tiến độ và chi phí dự án một cách chặt chẽ và hiệu quả.Với dịch vụ tư vấn BIM, chủ đầu tư sẽ được:</span></span></p>
-
-<ul>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đào tạo kiến thức tổng quan về BIM, giúp hiểu rõ các công cụ kiểm soát chất lượng mô hình BIM của đơn vị tư vấn thiết kế và nhà thầu.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thiết lập tiêu chuẩn BIM (EIR), khảo sát quy trình hoạt động của doanh nghiệp và xây dựng bộ tiêu chuẩn phù hợp với quy định tại Việt Nam, đảm bảo chất lượng BIM từ các đơn vị tham gia dự án.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Hỗ trợ trong quá trình đấu thầu, đánh giá kế hoạch thực hiện BIM (BEP) của các nhà thầu, giúp chủ đầu tư lựa chọn đơn vị phù hợp.&nbsp;</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thẩm tra chất lượng của mô hình BIM</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Tư vấn triển khai Môi trường Dữ liệu Chung (CDE), giúp quản lý và kiểm soát toàn bộ quy trình BIM một cách minh bạch và hiệu quả.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Tạo lập mô hình BIM 3D để phục vụ thẩm định theo các yêu cầu của Nhà nước.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Ứng dụng các giải pháp BIM tiên tiến như BIM 4D (mô phỏng tiến độ thi công), BIM 5D (quản lý chi phí) và BIM 6D (quản lý vận hành), giúp chủ đầu tư kiểm soát toàn diện dự án.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Xây dựng mô hình số song sinh (Digital Twins), hỗ trợ giám sát, quản lý và bảo trì công trình sau khi đưa vào vận hành.</span></span></li>
+<ul class="list-disc pl-5 space-y-2 mb-6 text-slate-600">
+  <li>Đào tạo kiến thức tổng quan về BIM, giúp hiểu rõ các công cụ kiểm soát chất lượng mô hình BIM của đơn vị tư vấn thiết kế và nhà thầu.</li>
+  <li>Thiết lập tiêu chuẩn BIM (EIR), khảo sát quy trình hoạt động của doanh nghiệp và xây dựng bộ tiêu chuẩn phù hợp với quy định tại Việt Nam, đảm bảo chất lượng BIM từ các đơn vị tham gia dự án.</li>
+  <li>Hỗ trợ trong quá trình đấu thầu, đánh giá kế hoạch thực hiện BIM (BEP) của các nhà thầu, giúp chủ đầu tư lựa chọn đơn vị phù hợp.</li>
+  <li>Thẩm tra chất lượng của mô hình BIM.</li>
+  <li>Tư vấn triển khai Môi trường Dữ liệu Chung (CDE), giúp quản lý và kiểm soát toàn bộ quy trình BIM một cách minh bạch và hiệu quả.</li>
+  <li>Tạo lập mô hình BIM 3D để phục vụ thẩm định theo các yêu cầu của Nhà nước.</li>
+  <li>Ứng dụng các giải pháp BIM tiên tiến như BIM 4D (mô phỏng tiến độ thi công), BIM 5D (quản lý chi phí) và BIM 6D (quản lý vận hành), giúp chủ đầu tư kiểm soát toàn diện dự án.</li>
+  <li>Xây dựng mô hình số song sinh (Digital Twins), hỗ trợ giám sát, quản lý và bảo trì công trình sau khi đưa vào vận hành.</li>
 </ul>
 
-<p style="text-align: center;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/TU-VAN-BIM.jpg" style="width: 650px; max-width: 100%; height: auto;" /></span></span></p>
+<div class="my-6 text-center">
+  <img alt="Tư vấn BIM" src="https://www.cic.com.vn/upload_images/images/2025/BIM/TU-VAN-BIM.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+</div>
 
-<h3><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><em>2.2. Dịch vụ tư vấn BIM dành cho đơn vị tư vấn thiết kế</em></span></span></strong></h3>
+<h4 class="font-bold text-slate-900 text-base mt-6 mb-2">2.2. Dịch vụ tư vấn BIM dành cho đơn vị tư vấn thiết kế</h4>
 
-<h3 style="text-align: center;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><em><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM3.jpg" style="width: 800px; max-width: 100%; height: auto;" /></em></span></span></h3>
+<div class="my-6 text-center">
+  <img alt="BIM cho Đơn vị Thiết kế" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM3.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Khóa đào tạo BIM theo tiêu chuẩn ISO 19650 cho các đơn vị tư vấn thiết kế hàng đầu như: TEDI, VNCC, Junglim, CPG,…</em>
+</div>
 
-<p style="text-align: center;"><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;"><em>Khóa đào tạo BIM theo tiêu chuẩn ISO 19650 cho các đơn vị tư vấn thiết kế hàng đầu như: TEDI, VNCC, Junglim, CPG,…</em></span></span></p>
+<p class="mb-3">
+  <strong>CIC cung cấp dịch vụ tư vấn BIM chuyên sâu dành cho đơn vị tư vấn thiết kế để trực tiếp triển khai BIM trong dự án thực tế, bao gồm:</strong>
+</p>
 
-<p style="text-align: justify;"><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">CIC cung cấp dịch vụ tư vấn BIM chuyên sâu dành cho đơn vị tư vấn thiết kế để trực tiếp triển khai BIM trong dự án thực tế, bao gồm:.</span></span></strong></p>
-
-<ul>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thiết lập Kế hoạch thực hiện BIM (B.E.P) để triển khai BIM vào hoạt động sản xuất tại doanh nghiệp.&nbsp;</span></span></li>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đào tạo các kiến thức tổng quan về BIM, các công cụ tạo lập mô hình BIM phổ biến: Revit, Tekla, Allplan,.. để tạo lập mô hình BIM (3D)</span></span></li>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đào tạo về các công cụ phần mềm để thực hiện các nội dung áp dụng BIM như: BIM 4D (Fuzor, SYNCHRO), BIM 5D (Cubicost),…</span></span></li>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Kết hợp với đơn vị tư vấn thiết kế thực hiện tạo lập mô hình BIM (3D) để nộp thẩm định và một số nội dung áp dụng BIM phổ thông khác như: BIM 4D (mô phỏng tiến độ thi công), BIM 5D (quản lý chi phí), BIM 6D (quản lý vận hành)</span></span></li>
+<ul class="list-disc pl-5 space-y-2 mb-6 text-slate-600">
+  <li>Thiết lập Kế hoạch thực hiện BIM (B.E.P) để triển khai BIM vào hoạt động sản xuất tại doanh nghiệp.</li>
+  <li>Đào tạo các kiến thức tổng quan về BIM, các công cụ tạo lập mô hình BIM phổ biến: Revit, Tekla, Allplan,.. để tạo lập mô hình BIM (3D).</li>
+  <li>Đào tạo về các công cụ phần mềm để thực hiện các nội dung áp dụng BIM như: BIM 4D (Fuzor, SYNCHRO), BIM 5D (Cubicost),…</li>
+  <li>Kết hợp với đơn vị tư vấn thiết kế thực hiện tạo lập mô hình BIM (3D) để nộp thẩm định và một số nội dung áp dụng BIM phổ thông khác như: BIM 4D (mô phỏng tiến độ thi công), BIM 5D (quản lý chi phí), BIM 6D (quản lý vận hành).</li>
 </ul>
 
-<h3 style="text-align: justify;"><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><em>2.3. Dịch vụ Tư vấn BIM dành cho nhà thầu thi công</em></span></span></strong></h3>
+<h4 class="font-bold text-slate-900 text-base mt-6 mb-2">2.3. Dịch vụ Tư vấn BIM dành cho nhà thầu thi công</h4>
 
-<h3 style="text-align: center;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><em><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM4.jpg" style="width: 800px; max-width: 100%; height: auto;" /></em></span></span></h3>
+<div class="my-6 text-center">
+  <img alt="BIM cho Nhà thầu" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM4.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+</div>
 
-<p style="text-align: justify;"><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">CIC cung cấp dịch vụ tư vấn BIM chuyên sâu dành cho nhà thầu thi công để trực tiếp triển khai BIM trong dự án thực tế, bao gồm:</span></span></strong></p>
+<p class="mb-3">
+  <strong>CIC cung cấp dịch vụ tư vấn BIM chuyên sâu dành cho nhà thầu thi công để trực tiếp triển khai BIM trong dự án thực tế, bao gồm:</strong>
+</p>
 
-<ul>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thiết lập Kế hoạch thực hiện BIM (B.E.P) để triển khai BIM vào hoạt động sản xuất tại doanh nghiệp.&nbsp;</span></span></li>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đào tạo các kiến thức tổng quan về BIM, các công cụ tạo lập mô hình BIM phổ biến: Revit, Tekla, Allplan,.. để tạo lập mô hình BIM (3D).</span></span></li>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đào tạo về các công cụ phần mềm để thực hiện các nội dung áp dụng BIM như: BIM 4D (Fuzor, SYNCHRO), BIM 5D (Cubicost),</span></span></li>
-	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Kết hợp với nhà thầu thi công thực hiện tạo lập mô hình BIM (3D) để nộp thẩm định và một số nội dung áp dụng BIM phổ thông khác như: BIM 4D (mô phỏng tiến độ thi công), BIM 5D (quản lý chi phí), BIM 6D (quản lý vận hành)</span></span></li>
+<ul class="list-disc pl-5 space-y-2 mb-6 text-slate-600">
+  <li>Thiết lập Kế hoạch thực hiện BIM (B.E.P) để triển khai BIM vào hoạt động sản xuất tại doanh nghiệp.</li>
+  <li>Đào tạo các kiến thức tổng quan về BIM, các công cụ tạo lập mô hình BIM phổ biến: Revit, Tekla, Allplan,.. để tạo lập mô hình BIM (3D).</li>
+  <li>Đào tạo về các công cụ phần mềm để thực hiện các nội dung áp dụng BIM như: BIM 4D (Fuzor, SYNCHRO), BIM 5D (Cubicost).</li>
+  <li>Kết hợp với nhà thầu thi công thực hiện tạo lập mô hình BIM (3D) để nộp thẩm định và một số nội dung áp dụng BIM phổ thông khác như: BIM 4D (mô phỏng tiến độ thi công), BIM 5D (quản lý chi phí), BIM 6D (quản lý vận hành).</li>
 </ul>
 
-<h3 style="text-align: justify;"><strong><em><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">2.4. Dịch vụ Tư vấn BIM dành cho đơn vị vận hành tài sản</span></span></em></strong></h3>
+<h4 class="font-bold text-slate-900 text-base mt-6 mb-2">2.4. Dịch vụ Tư vấn BIM dành cho đơn vị vận hành tài sản</h4>
 
-<p style="text-align: center;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/tu-van-bim-cua-cic.png" style="width: 650px; max-width: 100%; height: auto;" /></p>
+<div class="my-6 text-center">
+  <img alt="BIM Vận hành tài sản" src="https://www.cic.com.vn/upload_images/images/2025/BIM/tu-van-bim-cua-cic.png" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Ứng dụng BIM trong quá trình vận hành tài sản với giải pháp Autodesk Tandem</em>
+</div>
 
-<p style="text-align: center;"><span style="font-size:16px;"><em><span style="font-family:Times New Roman,Times,serif;">Ứng dụng BIM trong quá trình vận hành tài sản với giái pháp Autodesk Tandem</span></em></span></p>
+<p class="mb-3">
+  <strong>Công ty CIC cung cấp dịch vụ tư vấn BIM chuyên sâu dành cho đơn vị vận hành tài sản để trực tiếp triển khai BIM trong dự án thực tế, bao gồm:</strong>
+</p>
 
-<p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Công ty CIC cung cấp dịch vụ tư vấn BIM chuyên sâu dành cho đơn vị vận hành tài sản để trực tiếp triển khai BIM trong dự án thực tế, bao gồm:</span></span></strong></p>
-
-<ul>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đào tạo các kiến thức tổng quan về BIM: công nghệ và cơ sở pháp lý.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thiết lập quy trình áp dụng BIM trong công tác vận hành bảo trì tài sản: thiết lập môi trường trao đổi dữ liệu chung (CDE).</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Cập nhật mô hình BIM theo bản vẽ hoàn công, tích hợp các thông vận hành tài sản theo chuẩn Cobie.</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Tích hợp các dữ liệu vận hành để tạo lập mô hình số song sinh (Digital Twins)</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Tích hợp dữ liệu từ các giải pháp ERP (SAP, Oracle) vào môi trường giữ liệu chung (CDE) để kiểm soát dữ liệu vận hành.</span></span></li>
+<ul class="list-disc pl-5 space-y-2 mb-6 text-slate-600">
+  <li>Đào tạo các kiến thức tổng quan về BIM: công nghệ và cơ sở pháp lý.</li>
+  <li>Thiết lập quy trình áp dụng BIM trong công tác vận hành bảo trì tài sản: thiết lập môi trường trao đổi dữ liệu chung (CDE).</li>
+  <li>Cập nhật mô hình BIM theo bản vẽ hoàn công, tích hợp các thông tin vận hành tài sản theo chuẩn COBie.</li>
+  <li>Tích hợp các dữ liệu vận hành để tạo lập mô hình số song sinh (Digital Twins).</li>
+  <li>Tích hợp dữ liệu từ các giải pháp ERP (SAP, Oracle) vào môi trường dữ liệu chung (CDE) để kiểm soát dữ liệu vận hành.</li>
 </ul>
 
-<p><span style="font-size:24px;"><span style="font-family:Times New Roman,Times,serif;">&gt;&gt;&gt;Đăng ký nhận tư vấn miễn phí ngay <a href="https://forms.gle/JsbYeYNxvf5vNNk17" target="_blank" rel="noopener noreferrer">tại đây!</a></span></span></p>
+<h3 class="text-slate-900 font-bold text-lg mt-8 mb-3">3. Hợp tác với cơ quan quản lý Nhà nước trong lĩnh vực BIM</h3>
 
-<h2><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">3. Hợp tác với cơ quan quản lý Nhà nước trong lĩnh vực BIM</span></span></strong></h2>
+<p class="mb-3">
+  Nhận thức được vai trò quan trọng của BIM trong việc nâng cao chất lượng thẩm định và quản lý dự án, Công ty CIC đã tích cực hợp tác với các cơ quan quản lý Nhà nước nhằm thúc đẩy ứng dụng BIM trong các dự án xây dựng công cộng.
+</p>
 
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Nhận thức được vai trò quan trọng của BIM trong việc nâng cao chất lượng thẩm định và quản lý dự án, Công ty CIC đã tích cực hợp tác với các cơ quan quản lý Nhà nước nhằm thúc đẩy ứng dụng BIM trong các dự án xây dựng công cộng.&nbsp;</span></span></p>
+<p class="mb-4">
+  Vào ngày 10/9/2024, CIC cùng Cục Quản lý hoạt động xây dựng đã tổ chức Hội nghị thảo luận về việc áp dụng BIM trong thẩm định dự án đầu tư xây dựng. Tại hội nghị, đại diện Công ty CIC đã trình bày về mô hình BIM và các phần mềm liên quan, nhấn mạnh việc sử dụng BIM như công cụ hỗ trợ thẩm định báo cáo nghiên cứu khả thi, thiết kế xây dựng, cấp phép và kiểm tra nghiệm thu công trình.
+</p>
 
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Vào ngày 10/9/2024, CIC cùng Cục Quản lý hoạt động xây dựng đã tổ chức Hội nghị thảo luận về việc áp dụng BIM trong thẩm định dự án đầu tư xây dựng. Tại hội nghị, đại diện Công ty&nbsp;CIC đã trình bày về mô hình BIM và các phần mềm liên quan, nhấn mạnh việc sử dụng BIM như công cụ hỗ trợ thẩm định báo cáo nghiên cứu khả thi, thiết kế xây dựng, cấp phép và kiểm tra nghiệm thu công trình.</span></span></p>
+<div class="my-6 text-center">
+  <img alt="Làm việc với Cục QLHĐXD" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM6.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Nhóm Chuyên gia của Trung tâm BIM & Digital Twins (Công ty CIC) làm việc với lãnh đạo Cục Quản lý hoạt động xây dựng (Bộ Xây dựng)</em>
+</div>
 
-<p style="text-align: center;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM6.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></p>
+<div class="my-6 text-center">
+  <img alt="Làm việc Bộ Xây dựng" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM7.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Ông Lương Thành Hưng – Phó Tổng Giám đốc Công ty CIC làm việc với lãnh đạo Cục Quản lý hoạt động xây dựng (Bộ Xây dựng)</em>
+</div>
 
-<p style="text-align: center;"><em><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;">Nhóm Chuyên gia của Trung tâm BIM &amp; Digital Twins (Công ty CIC) làm việc với lãnh đạo Cục Quản lý hoạt động xây dựng (Bộ Xây dựng)</span></span></em></p>
+<p class="mb-4">
+  Cùng với đó, Công ty CIC đã phối hợp với Sở Xây dựng các tỉnh thành như: Hà Nội, TP.HCM, Quảng Ninh, Lào Cai,… tổ chức lớp bồi dưỡng kiến thức về Mô hình thông tin công trình (BIM) cho các học viên đến từ các Sở, Ban Quản lý dự án và UBND các quận, huyện, thị xã,…
+</p>
 
-<p style="text-align: center;"><span style="font-family:Times New Roman,Times,serif;"><span style="font-size:18px;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM7.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></p>
+<div class="my-6 text-center">
+  <img alt="Hội thảo SXD Hà Nội" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM8.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Ông Lương Thành Hưng – Phó Tổng Giám đốc Công ty CIC tại buổi hội thảo với Sở Xây dựng Hà Nội</em>
+</div>
 
-<p style="text-align: center;"><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;"><em>Ông Lương Thành Hưng – Phó Tổng Giám đốc Công ty CIC làm việc với lãnh đạo Cục Quản lý hoạt động xây dựng (Bộ Xây dựng)</em></span></span></p>
+<div class="my-6 text-center">
+  <img alt="Tập huấn SXD Quảng Trị" src="https://www.cic.com.vn/upload_images/images/2025/BIM/CIC-dao-ta-BIM-cho-SXD-Quang-Tri.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">CIC tham gia tập huấn Mô hình thông tin BIM tại Sở Xây dựng tỉnh Quảng Trị</em>
+</div>
 
-<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Cùng với đó, Công ty CIC đã phối hợp với Sở Xây dựng các tỉnh thành như: Hà Nội, TP.HCM, Quảng Ninh, Lào Cai,…tổ chức lớp bồi dưỡng kiến thức về Mô hình thông tin công trình (BIM) cho các học viên đến từ các Sở, Ban Quản lý dự án và UBND các quận, huyện, thị xã ,…</span></span></p>
+<div class="my-6 text-center">
+  <img alt="Hội thảo VECAS" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM9.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Ông Nguyễn Hoàng Hà – Tổng Giám đốc (CIC) tại buổi hội thảo AI với Hiệp hội tư vấn xây dựng Việt Nam (VECAS)</em>
+</div>
 
-<p style="text-align: center;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM8.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></p>
+<h3 class="text-slate-900 font-bold text-lg mt-8 mb-3">4. Hợp tác quốc tế – Định hướng phát triển bền vững</h3>
 
-<p style="text-align: center;"><em><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;">Ông Lương Thành Hưng – Phó Tổng Giám đốc Công ty CIC tại buổi hội thảo với Sở Xây dựng Hà Nội</span></span></em></p>
+<div class="my-6 text-center">
+  <img alt="Lễ ký kết BIMAGE" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM11.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Lễ ký kết MoU giữa CIC và BIMAGE Consulting</em>
+</div>
 
-<p style="text-align: center;"><em><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/CIC-dao-ta-BIM-cho-SXD-Quang-Tri.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></em></p>
+<p class="mb-4">
+  Với mục tiêu nâng cao chất lượng dịch vụ và mang đến các giải pháp BIM tiên tiến, Công ty CIC đã ký kết thỏa thuận hợp tác chiến lược với BIMAGE Consulting – công ty tư vấn BIM hàng đầu Singapore. Sự hợp tác này giúp CIC tiếp cận các công nghệ và phương pháp tiên tiến trong lĩnh vực BIM, đồng thời mang lại lợi ích thiết thực cho các doanh nghiệp Việt Nam thông qua việc chuyển giao công nghệ, đào tạo nhân lực và triển khai các dự án BIM quy mô lớn theo tiêu chuẩn quốc tế.
+</p>
 
-<p style="text-align: center;"><em><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;">CIC tham gia tập huấn Mô hình thông tin BIM tại Sở Xây dựng tỉnh Quảng Trị</span></span></em></p>
+<div class="my-6 text-center">
+  <img alt="Autodesk & VC GROUP" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM12.jpg" class="mx-auto rounded-lg shadow-sm max-w-full" />
+  <em class="block text-xs text-slate-500 mt-2 italic text-center">Ông Nguyễn Hoàng Hà – Tổng Giám đốc (CIC) tại lễ ký kết biên bản ghi nhớ hợp tác giữa Autodesk và VC GROUP</em>
+</div>
 
-<p style="text-align: center;"><span style="font-family:Times New Roman,Times,serif;"><span style="font-size:18px;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM9.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></p>
+<h3 class="text-slate-900 font-bold text-lg mt-8 mb-3">5. Lợi ích khi đồng hành cùng Công ty CIC</h3>
 
-<p style="text-align: center;"><span style="font-size:16px;"><em><span style="font-family:Times New Roman,Times,serif;">Ông Nguyễn Hoàng Hà &nbsp;– Tổng Giám đốc (CIC) tại buổi hội thảo AI với Hiệp hội tư vấn xây dựng Việt Nam (VECAS)</span></em></span></p>
-
-<h2><strong><span style="font-family:Times New Roman,Times,serif;"><span style="font-size:18px;">4. Hợp tác quốc tế – Định hướng phát triển bền vững</span></span></strong></h2>
-
-<p style="text-align: center;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM11.jpg" style="width: 800px; max-width: 100%; height: auto;" /></p>
-
-<p style="text-align: center;"><span style="font-size:16px;"><span style="font-family:Times New Roman,Times,serif;">Lễ ký kết MoU giữa CIC và BIMAGE&nbsp;</span></span></p>
-
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Với mục tiêu nâng cao chất lượng dịch vụ và mang đến các giải pháp BIM tiên tiến, Công ty CIC đã ký kết thỏa thuận hợp tác chiến lược với BIMAGE Consulting – công ty tư vấn BIM hàng đầu Singapore. Sự hợp tác này giúp CIC tiếp cận các công nghệ và phương pháp tiên tiến trong lĩnh vực BIM, đồng thời mang lại lợi ích thiết thực cho các doanh nghiệp Việt Nam thông qua việc chuyển giao công nghệ, đào tạo nhân lực và triển khai các dự án BIM quy mô lớn theo tiêu chuẩn quốc tế.</span></span></p>
-
-<p style="text-align: center;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><img alt="" src="https://www.cic.com.vn/upload_images/images/2025/BIM/Cong-ty-CIC-dich-vu-BIM12.jpg" style="width: 800px; max-width: 100%; height: auto;" /></span></span></p>
-
-<p style="text-align: center;"><span style="font-size:16px;"><em><span style="font-family:Times New Roman,Times,serif;">Ông Nguyễn Hoàng Hà &nbsp;– Tổng Giám đốc (CIC) tại lễ ký kết biên bản ghi nhớ hợp tác giữa Autodesk và VC GROUP</span></em></span></p>
-
-<h2><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">5. Lợi ích khi đồng hành cùng Công ty CIC</span></span></strong></h2>
-
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">•&nbsp;&nbsp; &nbsp;Tiết kiệm chi phí &amp; thời gian: Hạn chế tối đa sai sót, giúp dự án hoàn thành đúng tiến độ với ngân sách tối ưu.<br />
-•&nbsp;&nbsp; &nbsp;Chuyển giao công nghệ toàn diện: Doanh nghiệp không chỉ được tư vấn mà còn được đào tạo để chủ động triển khai BIM hiệu quả.<br />
-•&nbsp;&nbsp; &nbsp;Đội ngũ chuyên gia hàng đầu: Với kinh nghiệm triển khai nhiều dự án lớn, CIC cam kết mang đến giải pháp phù hợp nhất cho từng doanh nghiệp.<br />
-•&nbsp;&nbsp; &nbsp;Tăng cường tính cạnh tranh: BIM giúp nâng cao chất lượng thiết kế, thi công và vận hành, tạo lợi thế lớn cho doanh nghiệp trong ngành xây dựng.</span></span></p>
-
-<h2><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">6. CIC – Đối tác tin cậy trong hành trình chuyển đổi số ngành xây dựng</span></span></strong></h2>
-
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Với sứ mệnh tiên phong trong lĩnh vực công nghệ xây dựng, CIC cam kết mang đến những giải pháp BIM toàn diện, giúp doanh nghiệp xây dựng tại Việt Nam nâng cao năng lực cạnh tranh và bắt kịp xu hướng công nghệ trên thế giới.</span></span></p>
-
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Đồng hành cùng CIC, doanh nghiệp không chỉ được tiếp cận với các giải pháp công nghệ tiên tiến mà còn được hỗ trợ tận tình trong quá trình triển khai và ứng dụng BIM một cách hiệu quả nhất.</span></span></p>
-
-<p><span style="font-size:24px;"><span style="font-family:Times New Roman,Times,serif;">&gt;&gt;&gt;Đăng ký nhận tư vấn miễn phí ngay <a href="https://forms.gle/JsbYeYNxvf5vNNk17" target="_blank" rel="noopener noreferrer">tại đây!</a></span></span></p>
-
-<p><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>LIÊN HỆ NGAY VỚI ĐỘI NGŨ CHUYÊN GIA</strong></span></span></p>
-
-<ul>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Điện thoại: 086 893 4576 &nbsp;- 024 3976 1381</span></span></li>
-	<li><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Email: &nbsp;info@cic.com.vn</span></span></li>
+<ul class="list-disc pl-5 space-y-2 mb-6 text-slate-600">
+  <li><strong>Tiết kiệm chi phí & thời gian:</strong> Hạn chế tối đa sai sót, giúp dự án hoàn thành đúng tiến độ với ngân sách tối ưu.</li>
+  <li><strong>Chuyển giao công nghệ toàn diện:</strong> Doanh nghiệp không chỉ được tư vấn mà còn được đào tạo để chủ động triển khai BIM hiệu quả.</li>
+  <li><strong>Đội ngũ chuyên gia hàng đầu:</strong> Với kinh nghiệm triển khai nhiều dự án lớn, CIC cam kết mang đến giải pháp phù hợp nhất cho từng doanh nghiệp.</li>
+  <li><strong>Tăng cường tính cạnh tranh:</strong> BIM giúp nâng cao chất lượng thiết kế, thi công và vận hành, tạo lợi thế lớn cho doanh nghiệp trong ngành xây dựng.</li>
 </ul>
+
+<h3 class="text-slate-900 font-bold text-lg mt-8 mb-3">6. CIC – Đối tác tin cậy trong hành trình chuyển đổi số ngành xây dựng</h3>
+
+<p class="mb-3">
+  Với sứ mệnh tiên phong trong lĩnh vực công nghệ xây dựng, CIC cam kết mang đến những giải pháp BIM toàn diện, giúp doanh nghiệp xây dựng tại Việt Nam nâng cao năng lực cạnh tranh và bắt kịp xu hướng công nghệ trên thế giới.
+</p>
+
+<p class="mb-6">
+  Đồng hành cùng CIC, doanh nghiệp không chỉ được tiếp cận với các giải pháp công nghệ tiên tiến mà còn được hỗ trợ tận tình trong quá trình triển khai và ứng dụng BIM một cách hiệu quả nhất.
+</p>
+
+<div class="mt-8 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+  <h4 class="text-slate-900 font-bold text-sm uppercase mb-2">LIÊN HỆ NGAY VỚI ĐỘI NGŨ CHUYÊN GIA</h4>
+  <p class="text-xs text-slate-600 mb-1"><strong>Điện thoại:</strong> 086 893 4576 - 024 3976 1381</p>
+  <p class="text-xs text-slate-600"><strong>Email:</strong> info@cic.com.vn</p>
 </div>
     `
   },

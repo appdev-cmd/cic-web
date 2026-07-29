@@ -1136,8 +1136,8 @@ export function NewsView({
 
                 {/* Linked Products / Solutions Block */}
                 {effectiveLinkedProducts.length > 0 && (
-                  <div className="bg-white border border-slate-200/80 shadow-2xs p-5 space-y-3 rounded-[10px]">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-100 pb-2 flex items-center justify-between">
+                  <div className="bg-transparent p-0 space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Box size={16} className="text-orange-600" />
                         <span>Giải pháp liên quan</span>
@@ -1151,7 +1151,7 @@ export function NewsView({
                           onClick={() => {
                             if (onNavigateToProduct) onNavigateToProduct(prod.id);
                           }}
-                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs rounded-[8px]"
+                          className="group cursor-pointer p-2 bg-transparent hover:bg-slate-100/60 border-0 transition-all flex items-center gap-3 rounded-[8px]"
                         >
                           <img 
                             src={prod.img} 
@@ -1175,8 +1175,8 @@ export function NewsView({
 
                 {/* Related Articles (Tin tức liên quan) */}
                 {relatedArticles.length > 0 && (
-                  <div className="bg-white border border-slate-200/80 shadow-2xs p-5 space-y-3 rounded-[10px]">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-100 pb-2 flex items-center justify-between">
+                  <div className="bg-transparent p-0 space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FileText size={16} className="text-orange-600" />
                         <span>Tin tức liên quan</span>
@@ -1189,7 +1189,7 @@ export function NewsView({
                         <div
                           key={article.id}
                           onClick={() => handleSelectNews(article.id)}
-                          className="group cursor-pointer p-2.5 bg-white border border-slate-200/80 hover:border-orange-500 transition-all flex items-center gap-3 shadow-2xs rounded-[8px]"
+                          className="group cursor-pointer p-2 bg-transparent hover:bg-slate-100/60 border-0 transition-all flex items-center gap-3 rounded-[8px]"
                         >
                           <img 
                             src={article.img} 
@@ -1299,9 +1299,9 @@ export function NewsView({
                       {filteredNews[0].shortDesc}
                     </p>
 
-                    <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115]">
+                    <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115] pr-2">
                       <span>Đọc tiếp</span>
-                      <ArrowRight size={16} className="transform group-hover:translate-x-2 transition-transform duration-300" />
+                      <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform duration-300 shrink-0" />
                     </div>
                   </div>
                 </div>
@@ -1317,7 +1317,7 @@ export function NewsView({
                     <div 
                       key={sideItem.id}
                       onClick={() => handleSelectNews(sideItem.id)}
-                      className="group cursor-pointer flex gap-4 items-center p-3 bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-all shadow-2xs hover:shadow rounded-[10px] overflow-hidden"
+                      className="group cursor-pointer flex gap-4 items-center p-2 bg-transparent hover:bg-slate-100/50 transition-all border-0 shadow-none rounded-[10px] overflow-hidden"
                     >
                       {/* Larger Thumbnail Image */}
                       <div className="w-36 sm:w-40 lg:w-44 h-28 lg:h-32 shrink-0 overflow-hidden relative bg-slate-900 rounded-[10px]">
@@ -1375,7 +1375,7 @@ export function NewsView({
               </div>
 
               {/* SECONDARY FILTER ENGINE BAR */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4 rounded-[10px]">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-transparent p-0">
                 {/* Search Input */}
                 <div className="md:col-span-6 relative">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
@@ -1569,10 +1569,10 @@ export function NewsView({
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.05, duration: 0.4 }}
                       onClick={() => handleSelectNews(news.id)}
-                      className="group cursor-pointer bg-white border border-slate-200/90 p-3 hover:border-orange-500/40 transition-all duration-300 shadow-2xs hover:shadow-[0_16px_32px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden rounded-[10px]"
+                      className="group cursor-pointer bg-transparent border-0 p-0 transition-all duration-300 shadow-none flex flex-col overflow-hidden rounded-[12px]"
                     >
                       {/* Top: Image Container */}
-                      <div className="w-full h-48 lg:h-52 shrink-0 relative overflow-hidden bg-slate-900 rounded-[10px]">
+                      <div className="w-full h-52 lg:h-56 shrink-0 relative overflow-hidden bg-slate-900 rounded-[14px]">
                         <img 
                           src={news.img} 
                           alt={news.title}
@@ -1587,7 +1587,7 @@ export function NewsView({
                       </div>
 
                       {/* Bottom: Card Content */}
-                      <div className="p-4 flex flex-col flex-1 space-y-3">
+                      <div className="pt-4 pb-2 flex flex-col flex-1 space-y-2.5">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
                             <Clock size={12} className="text-[#FC5115]" /> {news.date}
@@ -1606,9 +1606,9 @@ export function NewsView({
                         </p>
 
                         {/* Hover Arrow CTA */}
-                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-black uppercase tracking-wider text-[#FC5115]">
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-black uppercase tracking-wider text-[#FC5115] pr-2">
                           <span>Đọc tiếp</span>
-                          <ArrowRight size={14} className="transform group-hover:translate-x-1.5 transition-transform duration-300" />
+                          <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform duration-300 shrink-0" />
                         </div>
                       </div>
                     </motion.div>

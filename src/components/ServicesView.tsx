@@ -45,6 +45,34 @@ interface ServicesViewProps {
   onOpenConsultation?: () => void;
 }
 
+const cleanCmsHtml = (htmlString: string): string => {
+  if (!htmlString) return '';
+  let cleaned = htmlString;
+
+  // 1. Remove duplicate title_head block if present
+  cleaned = cleaned.replace(/<div\s+class=["']title_head[^"']*["']>[\s\S]*?<\/div>/gi, '');
+
+  // 2. Convert heading tags (h1, h2, h3, h4) that wrap long sentences (> 90 chars) into normal <p> tags
+  cleaned = cleaned.replace(/<h[1234][^>]*>([\s\S]*?)<\/h[1234]>/gi, (match, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    if (text.length > 90) {
+      return `<p>${inner}</p>`;
+    }
+    return match;
+  });
+
+  // 3. Strip problematic inline style declarations
+  cleaned = cleaned
+    .replace(/font-family\s*:\s*[^;"]+;?/gi, '')
+    .replace(/font-size\s*:\s*[^;"]+;?/gi, '')
+    .replace(/line-height\s*:\s*[^;"]+;?/gi, '')
+    .replace(/background-color\s*:\s*[^;"]+;?/gi, '')
+    .replace(/background\s*:\s*[^;"]+;?/gi, '')
+    .replace(/color\s*:\s*[^;"]+;?/gi, '');
+
+  return cleaned;
+};
+
 const getServiceExcerpt = (service: ServiceDetail): string => {
   if (service.shortDesc && service.shortDesc.trim().length > 15) {
     return service.shortDesc.trim();
@@ -199,7 +227,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
               </div>
 
               {/* Search & Filter Controls */}
-              <div className="bg-white border border-slate-200/80 p-6 space-y-6 rounded-[10px]">
+              <div className="bg-transparent p-0 border-0 shadow-none space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                   
                   {/* Search input */}
@@ -210,12 +238,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                      className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                      className="w-full bg-white border border-slate-200/90 hover:border-slate-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-[10px] shadow-2xs"
                     />
                     {searchQuery && (
                       <button 
                         onClick={() => setSearchQuery('')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                       >
                         <X size={14} />
                       </button>
@@ -231,7 +259,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                 </div>
 
                 {/* Category filtering pills */}
-                <div className="border-t border-slate-100 pt-4">
+                <div className="border-t border-slate-200/80 pt-4">
                   <div className="flex flex-wrap gap-2 items-center">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2">Phân loại:</span>
                     <div className="flex flex-wrap gap-1.5">
@@ -241,10 +269,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                           <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all border rounded-[8px] ${
+                            className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all border rounded-[8px] cursor-pointer ${
                               isSelected
-                                ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
-                                : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                ? 'bg-orange-600 border-orange-600 text-white shadow-2xs'
+                                : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
                             }`}
                           >
                             {cat}
@@ -254,7 +282,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                     </div>
                   </div>
                 </div>
-
               </div>
 
               {/* Service Cards Bento Grid / Empty State */}
@@ -272,7 +299,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                   {paginatedServices.map((service, idx) => {
                     const isHero = idx === 0;
                     const isDarkCard = idx === 1;
@@ -291,65 +318,57 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.05, duration: 0.6 }}
                           onClick={() => handleServiceSelect(service.id)}
-                          className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white border border-slate-800 hover:border-orange-500/60 p-6 md:p-8 group flex flex-col md:flex-row gap-6 shadow-xl hover:shadow-2xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                          className="md:col-span-2 lg:col-span-2 bg-transparent border-0 p-0 shadow-none group flex flex-col md:flex-row gap-6 transition-all duration-300 relative overflow-hidden cursor-pointer"
                         >
-                          {/* Background Glow */}
-                          <div className="absolute top-0 right-0 w-80 h-80 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
                           {/* Image Container */}
-                          <div className="md:w-1/2 h-64 md:h-auto overflow-hidden relative rounded-[12px] shrink-0 border border-white/10">
+                          <div className="md:w-1/2 h-64 md:h-80 overflow-hidden relative rounded-[16px] shrink-0">
                             <img 
                               src={service.image} 
                               alt={service.title} 
-                              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                               referrerPolicy="no-referrer"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
                             
                             <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                               <span className="px-3 py-1 bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
                                 Nổi Bật
                               </span>
-                              <span className="px-3 py-1 bg-slate-900/90 text-slate-200 text-[10px] font-bold uppercase tracking-wider border border-white/10 rounded-full backdrop-blur-md">
+                              <span className="px-3 py-1 bg-slate-900/90 text-slate-200 text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
                                 {service.category}
                               </span>
                             </div>
                           </div>
 
                           {/* Content */}
-                          <div className="md:w-1/2 flex flex-col justify-between space-y-5 relative z-10">
+                          <div className="md:w-1/2 flex flex-col justify-between space-y-4 py-1 relative z-10">
                             <div className="space-y-3">
-                              <div className="flex items-center gap-2 text-orange-400 text-xs font-bold uppercase tracking-wider">
-                                <Sparkles size={14} /> Giải Pháp Trọng Tâm
-                              </div>
-                              <h3 className="text-xl md:text-2xl font-black text-white leading-tight group-hover:text-orange-400 transition-colors uppercase">
+                              <h3 className="text-xl md:text-2xl font-black text-slate-950 leading-tight group-hover:text-orange-600 transition-colors uppercase">
                                 {cleanTitle}
                               </h3>
-                              <p className="text-xs text-slate-300 leading-relaxed font-normal line-clamp-3">
+                              <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
                                 {getServiceExcerpt(service)}
                               </p>
 
                               {/* Highlight Badges */}
                               <div className="pt-2 flex flex-wrap gap-2">
                                 {['Chuẩn TCVN & ISO', 'Tối Ưu Chi Phí 35%', 'Tích Hợp AI / BIM'].map((chip, cIdx) => (
-                                  <span key={cIdx} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 text-[11px] font-medium text-slate-300 rounded-md">
-                                    <Check size={12} className="text-orange-400" /> {chip}
+                                  <span key={cIdx} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-200/60 text-[11px] font-medium text-slate-700 rounded-md">
+                                    <Check size={12} className="text-orange-600" /> {chip}
                                   </span>
                                 ))}
                               </div>
                             </div>
 
-                            <button 
-                              className="w-full sm:w-auto self-start px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-[10px] shadow-lg group-hover:translate-x-1 cursor-pointer"
-                            >
-                              Khám phá giải pháp chi tiết <ArrowRight size={14} />
-                            </button>
+                            <div className="pt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
+                              <span>Khám phá giải pháp chi tiết</span>
+                              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                            </div>
                           </div>
                         </motion.div>
                       );
                     }
 
-                    // 2. DARK ACCENT BENTO CARD (Index 1)
+                    // 2. SECOND BENTO CARD (Index 1)
                     if (isDarkCard) {
                       return (
                         <motion.div
@@ -358,40 +377,32 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1, duration: 0.6 }}
                           onClick={() => handleServiceSelect(service.id)}
-                          className="bg-slate-900 border border-slate-800 hover:border-orange-500/50 p-6 group flex flex-col justify-between shadow-lg hover:shadow-xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                          className="bg-transparent border-0 p-0 shadow-none group flex flex-col justify-between transition-all duration-300 relative overflow-hidden cursor-pointer"
                         >
                           <div className="space-y-4">
-                            {/* Top Badge & Icon */}
-                            <div className="flex items-center justify-between">
-                              <span className="px-3 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold uppercase tracking-wider rounded-full">
-                                {service.category}
-                              </span>
-                              <div className="w-8 h-8 rounded-full bg-slate-800 text-orange-400 flex items-center justify-center">
-                                <Building2 size={16} />
-                              </div>
-                            </div>
-
-                            <div className="h-40 w-full overflow-hidden relative rounded-[10px] border border-slate-800">
+                            <div className="h-48 w-full overflow-hidden relative rounded-[14px]">
                               <img 
                                 src={service.image} 
                                 alt={service.title} 
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                                 referrerPolicy="no-referrer"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
+                              <span className="absolute top-3 left-3 px-3 py-1 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
+                                {service.category}
+                              </span>
                             </div>
 
                             <div className="space-y-2">
-                              <h3 className="text-base font-bold text-white group-hover:text-orange-400 transition-colors uppercase line-clamp-2">
+                              <h3 className="text-base font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2">
                                 {cleanTitle}
                               </h3>
-                              <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
                                 {getServiceExcerpt(service)}
                               </p>
                             </div>
                           </div>
 
-                          <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-orange-400 group-hover:text-orange-300">
+                          <div className="pt-4 mt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700">
                             <span>Xem chi tiết dịch vụ</span>
                             <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                           </div>
@@ -408,9 +419,9 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2, duration: 0.6 }}
                           onClick={() => handleServiceSelect(service.id)}
-                          className="md:col-span-2 lg:col-span-2 bg-white border border-slate-200 hover:border-orange-500/50 p-6 group flex flex-col md:flex-row gap-6 shadow-sm hover:shadow-xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                          className="md:col-span-2 lg:col-span-2 bg-transparent border-0 p-0 shadow-none group flex flex-col md:flex-row gap-6 transition-all duration-300 relative overflow-hidden cursor-pointer"
                         >
-                          <div className="md:w-5/12 h-52 md:h-auto overflow-hidden relative rounded-[12px] shrink-0">
+                          <div className="md:w-5/12 h-56 md:h-auto overflow-hidden relative rounded-[16px] shrink-0">
                             <img 
                               src={service.image} 
                               alt={service.title} 
@@ -424,9 +435,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
 
                           <div className="md:w-7/12 flex flex-col justify-between space-y-4">
                             <div className="space-y-3">
-                              <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                                <Box size={14} className="text-orange-600" /> Giải pháp chuyên sâu
-                              </div>
                               <h3 className="text-lg font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2">
                                 {cleanTitle}
                               </h3>
@@ -447,17 +455,16 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                               </div>
                             </div>
 
-                            <button 
-                              className="w-full py-2.5 bg-slate-50 hover:bg-orange-600 hover:text-white border border-slate-200 hover:border-orange-600 transition-all text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center justify-center gap-2 rounded-[8px] cursor-pointer"
-                            >
-                              Xem chi tiết <ArrowRight size={14} />
-                            </button>
+                            <div className="pt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
+                              <span>Xem chi tiết giải pháp</span>
+                              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                            </div>
                           </div>
                         </motion.div>
                       );
                     }
 
-                    // 4. STANDARD MODERN BENTO CARD (Index 2, 4, 5, etc.)
+                    // 4. STANDARD BENTO CARD
                     return (
                       <motion.div
                         key={service.id}
@@ -465,17 +472,16 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.05, duration: 0.6 }}
                         onClick={() => handleServiceSelect(service.id)}
-                        className="bg-white border border-slate-200/90 hover:border-orange-500/50 p-5 group flex flex-col justify-between shadow-2xs hover:shadow-xl transition-all duration-300 relative rounded-[16px] overflow-hidden cursor-pointer"
+                        className="bg-transparent border-0 p-0 shadow-none group flex flex-col justify-between transition-all duration-300 relative overflow-hidden cursor-pointer"
                       >
                         <div className="space-y-4">
-                          <div className="h-44 w-full overflow-hidden relative rounded-[10px]">
+                          <div className="h-48 w-full overflow-hidden relative rounded-[14px]">
                             <img 
                               src={service.image} 
                               alt={service.title} 
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                               referrerPolicy="no-referrer"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
                             <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-[6px]">
                               {service.category}
                             </span>
@@ -485,13 +491,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                             <h3 className="text-sm font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
                               {cleanTitle}
                             </h3>
-                            <p className="text-xs text-slate-500 leading-relaxed font-normal line-clamp-3">
+                            <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
                               {getServiceExcerpt(service)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-700 group-hover:text-orange-600 transition-colors">
+                        <div className="pt-4 mt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-700 group-hover:text-orange-600 transition-colors">
                           <span>Khám phá dịch vụ</span>
                           <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                         </div>
@@ -499,13 +505,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                     );
                   })}
 
-                  {/* EMBEDDED BENTO HIGHLIGHT WIDGET (Appears dynamically to complete the Bento Grid balance) */}
+                  {/* EMBEDDED BENTO HIGHLIGHT WIDGET */}
                   {paginatedServices.length >= 3 && (
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.25, duration: 0.6 }}
-                      className="bg-gradient-to-br from-orange-600 via-orange-600 to-amber-700 text-white p-6 rounded-[16px] flex flex-col justify-between shadow-lg relative overflow-hidden"
+                      className="bg-gradient-to-br from-orange-600 via-orange-600 to-amber-700 text-white p-6 rounded-[16px] flex flex-col justify-between border-0 shadow-none relative overflow-hidden"
                     >
                       <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
 
@@ -627,7 +633,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                         {activeService.category}
                       </span>
                     )}
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-snug">
+                    <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight leading-snug">
                       {activeService?.title}
                     </h1>
                     {activeService?.tagline && (
@@ -641,7 +647,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                   {activeService?.htmlContent && (
                     <div 
                       className="service-cms-content pt-0"
-                      dangerouslySetInnerHTML={{ __html: activeService.htmlContent }}
+                      dangerouslySetInnerHTML={{ __html: cleanCmsHtml(activeService.htmlContent) }}
                     />
                   )}
 

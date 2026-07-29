@@ -483,19 +483,21 @@ export function ProductsView(_props?: ProductsViewProps) {
                     : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
               >
-                Mua bản quyền
+                {getProductType(activeProduct) === 'Thiết bị' ? 'Đăng ký mua' : 'Mua bản quyền'}
               </button>
-              <button
-                type="button"
-                onClick={() => handleTabSwitch('download')}
-                className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-                  modalType === 'download'
-                    ? 'border-orange-600 text-orange-600 font-black'
-                    : 'border-transparent text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                Tải phần mềm
-              </button>
+              {getProductType(activeProduct) !== 'Thiết bị' && (
+                <button
+                  type="button"
+                  onClick={() => handleTabSwitch('download')}
+                  className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
+                    modalType === 'download'
+                      ? 'border-orange-600 text-orange-600 font-black'
+                      : 'border-transparent text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  Tải phần mềm
+                </button>
+              )}
             </div>
 
             {/* Selected Product Banner */}

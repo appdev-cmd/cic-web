@@ -164,20 +164,20 @@ export function ProjectsView({
               </p>
             </div>
 
-            {/* SLEEK FILTER & CATEGORY TABS */}
-            <div className="space-y-6 pt-2 border-t border-slate-200/80">
+            {/* SLEEK & VISIBLE FLAT FILTER LAYOUT */}
+            <div className="bg-transparent p-0 border-0 shadow-none space-y-5">
               {/* Sector Category Pill Tabs */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {sectors.map((sec) => {
                   const isActive = selectedSector === sec;
                   return (
                     <button
                       key={sec}
                       onClick={() => setSelectedSector(sec)}
-                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
+                      className={`shrink-0 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all border rounded-[8px] cursor-pointer ${
                         isActive
-                          ? 'bg-[#FC5115] text-white shadow-md'
-                          : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
+                          ? 'bg-[#FC5115] border-[#FC5115] text-white shadow-2xs'
+                          : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
                       }`}
                     >
                       {sec}
@@ -187,7 +187,7 @@ export function ProjectsView({
               </div>
 
               {/* Secondary Filter Controls Bar (Search + Solution + Customer) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4 rounded-[10px]">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border-t border-slate-200/80 pt-4">
                 {/* Search Bar */}
                 <div className="md:col-span-5 relative">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
@@ -196,7 +196,7 @@ export function ProjectsView({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm tên dự án, chủ đầu tư, địa điểm..."
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
+                    className="w-full bg-white border border-slate-200/90 hover:border-slate-300 focus:border-[#FC5115] focus:ring-1 focus:ring-[#FC5115] pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[10px] shadow-2xs"
                   />
                 </div>
 
@@ -205,7 +205,7 @@ export function ProjectsView({
                   <select
                     value={selectedSolution}
                     onChange={(e) => setSelectedSolution(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
+                    className="w-full bg-white border border-slate-200/90 hover:border-slate-300 focus:border-[#FC5115] focus:ring-1 focus:ring-[#FC5115] px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[10px] cursor-pointer shadow-2xs"
                   >
                     <option value="Tất cả">Giải pháp: Tất cả</option>
                     {solutions.filter(s => s !== 'Tất cả').map(sol => (
@@ -219,7 +219,7 @@ export function ProjectsView({
                   <select
                     value={selectedCustomer}
                     onChange={(e) => setSelectedCustomer(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
+                    className="w-full bg-white border border-slate-200/90 hover:border-slate-300 focus:border-[#FC5115] focus:ring-1 focus:ring-[#FC5115] px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[10px] cursor-pointer shadow-2xs"
                   >
                     <option value="Tất cả">Chủ đầu tư: Tất cả</option>
                     {customers.filter(c => c !== 'Tất cả').map(cust => (
@@ -238,7 +238,7 @@ export function ProjectsView({
                         setSelectedSolution('Tất cả');
                         setSelectedCustomer('Tất cả');
                       }}
-                      className="px-3 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap rounded-[8px]"
+                      className="px-3 py-2 bg-white hover:bg-[#FC5115] border border-slate-200 hover:border-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap rounded-[8px] cursor-pointer shadow-2xs"
                     >
                       Xóa lọc
                     </button>
@@ -247,7 +247,7 @@ export function ProjectsView({
               </div>
 
               {/* Found count indicator */}
-              <div className="flex justify-between items-center text-xs font-medium text-slate-500">
+              <div className="flex justify-between items-center text-xs font-medium text-slate-500 pt-1">
                 <span>Hiển thị <strong className="text-slate-900 font-bold">{totalItems}</strong> dự án thực tế</span>
               </div>
             </div>

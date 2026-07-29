@@ -133,6 +133,13 @@ export function ProductDetailView({
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'video' | 'documents'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Check if product is Equipment / Hardware
+  const isEquipment = useMemo(() => {
+    if (product.productType) return product.productType === 'Thiết bị';
+    const name = (product.name || '').toLowerCase();
+    return name.includes('rô bốt') || name.includes('thiết bị') || name.includes('máy') || name.includes('cảm biến') || name.includes('chum') || name.includes('pet');
+  }, [product]);
+
   // Product slideshow images
   const slideImages = useMemo(() => {
     if (product.slides && product.slides.length > 0) {
@@ -264,7 +271,9 @@ export function ProductDetailView({
 
             {/* Price */}
             <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px] rounded-[10px]">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Giá bán bản quyền</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                {isEquipment ? 'Giá bán' : 'Giá bán bản quyền'}
+              </span>
               <span className="text-2xl font-extrabold text-orange-600 tracking-tight">
                 {product.price}
               </span>
@@ -294,8 +303,8 @@ export function ProductDetailView({
               </div>
             </div>
 
-            {/* CTA 3 buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+            {/* CTA buttons */}
+            <div className={`grid grid-cols-1 ${isEquipment ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-4 pt-4`}>
               <button
                 onClick={() => onContact(product)}
                 className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-lg shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
@@ -304,13 +313,15 @@ export function ProductDetailView({
                 Yêu cầu tư vấn
               </button>
               
-              <button
-                onClick={() => onDownload(product)}
-                className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
-              >
-                <Download size={16} />
-                Tải phần mềm
-              </button>
+              {!isEquipment && (
+                <button
+                  onClick={() => onDownload(product)}
+                  className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                >
+                  <Download size={16} />
+                  Tải phần mềm
+                </button>
+              )}
 
               <button
                 onClick={() => onBuy(product)}
