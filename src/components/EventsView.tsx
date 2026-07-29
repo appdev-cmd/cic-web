@@ -54,7 +54,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
   // Filters & Searching
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'past'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('Tất cả');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
+
+  const eventCategories = ['Tất cả', ...Array.from(new Set(eventsData.map(e => e.eventType).filter(Boolean) as string[]))];
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +66,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
   // Reset page on filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, searchTerm, sortBy]);
+  }, [statusFilter, categoryFilter, searchTerm, sortBy]);
 
   // Registration form state
   const [registerEvent, setRegisterEvent] = useState<EventItem | null>(null);
@@ -153,8 +156,9 @@ export const EventsView: React.FC<EventsViewProps> = ({
         (event.eventType && event.eventType.toLowerCase().includes(searchTerm.toLowerCase()));
       
       const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
+      const matchesCategory = categoryFilter === 'Tất cả' || event.eventType === categoryFilter;
 
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesCategory;
     })
     .sort((a, b) => {
       if (statusFilter === 'all') {
@@ -371,7 +375,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         <input
                           type="text"
                           required
-                          placeholder="Ví dụ: Nguyễn Văn A"
+                          placeholder="Nhập họ và tên"
                           value={formData.fullName}
                           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                           className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -389,7 +393,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         <input
                           type="tel"
                           required
-                          placeholder="Ví dụ: 0912345678"
+                          placeholder="Nhập số điện thoại"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -407,7 +411,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         <input
                           type="email"
                           required
-                          placeholder="Ví dụ: email@domain.com"
+                          placeholder="Nhập email liên hệ"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -425,7 +429,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         <input
                           type="text"
                           required
-                          placeholder="Ví dụ: Tổng công ty Tư vấn Thiết kế Giao thông"
+                          placeholder="Ví dụ: Công ty ABC"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                           className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -443,7 +447,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         <input
                           type="text"
                           required
-                          placeholder="Ví dụ: Kỹ sư trưởng, BIM Manager"
+                          placeholder="Ví dụ: Kỹ sư trưởng, Chuyên viên..."
                           value={formData.position}
                           onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                           className={`w-full p-3 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -476,7 +480,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         Ghi chú / Câu hỏi gửi tới Ban tổ chức
                       </label>
                       <textarea
-                        placeholder="Nhập câu hỏi hoặc yêu cầu đặc biệt của bạn..."
+                        placeholder="Mô tả nhu cầu của bạn..."
                         rows={3}
                         value={formData.note}
                         onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -1140,33 +1144,42 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   />
                 </div>
 
-                {/* Filter Tabs & Sort Dropdown */}
+                {/* Filter Select Dropdowns & Sort Dropdown */}
                 <div className="flex flex-wrap items-center gap-3 justify-between lg:justify-end w-full lg:w-auto">
                   
-                  {/* Status Tabs */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                    {[
-                      { key: 'all', label: 'Tất cả' },
-                      { key: 'upcoming', label: 'Sắp diễn ra' },
-                      { key: 'ongoing', label: 'Đang diễn ra' },
-                      { key: 'past', label: 'Đã kết thúc' }
-                    ].map((tab) => (
-                      <button
-                        key={tab.key}
-                        onClick={() => setStatusFilter(tab.key as any)}
-                        className={`px-3.5 py-1.5 font-bold uppercase tracking-wider transition-all border rounded-[8px] cursor-pointer ${
-                          statusFilter === tab.key
-                            ? 'bg-[#FC5115] border-[#FC5115] text-white shadow-2xs'
-                            : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
+                  {/* Category Select Dropdown */}
+                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-700 rounded-[10px] shadow-2xs">
+                    <span className="text-slate-400 font-medium hidden sm:inline">Danh mục:</span>
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
+                    >
+                      {eventCategories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Status Select Dropdown */}
+                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-700 rounded-[10px] shadow-2xs">
+                    <span className="text-slate-400 font-medium hidden sm:inline">Trạng thái:</span>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="upcoming">Sắp diễn ra</option>
+                      <option value="ongoing">Đang diễn ra</option>
+                      <option value="past">Đã kết thúc</option>
+                    </select>
                   </div>
 
                   {/* Sort Select */}
-                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-600 rounded-[10px] shadow-2xs">
+                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-700 rounded-[10px] shadow-2xs">
                     <span className="text-slate-400 font-medium hidden sm:inline">Sắp xếp:</span>
                     <select
                       value={sortBy}
@@ -1177,6 +1190,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <option value="oldest">Cũ nhất</option>
                     </select>
                   </div>
+
                 </div>
 
               </div>
@@ -1358,7 +1372,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <input
                         type="email"
                         required
-                        placeholder="Nhập địa chỉ email của bạn..."
+                        placeholder="Nhập email liên hệ"
                         value={subscriberEmail}
                         onChange={(e) => setSubscriberEmail(e.target.value)}
                         className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 text-xs px-4 py-3 rounded-xl placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white transition-all"

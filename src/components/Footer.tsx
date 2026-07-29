@@ -55,7 +55,7 @@ export const Footer = ({
               <form className="relative flex" onSubmit={(e) => e.preventDefault()}>
                 <input 
                   type="email" 
-                  placeholder="Email của bạn..." 
+                  placeholder="Nhập email liên hệ" 
                   className="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-sm focus:outline-none focus:border-orange-600 rounded-none transition-all"
                 />
                 <button className="px-4 py-2 bg-orange-600 text-white text-xs font-black uppercase rounded-none hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>

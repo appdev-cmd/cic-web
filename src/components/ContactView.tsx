@@ -362,7 +362,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                     </label>
                     <input
                       type="text"
-                      placeholder="Ví dụ: Nguyễn Văn A"
+                      placeholder="Nhập họ và tên"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -384,7 +384,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       </label>
                       <input
                         type="email"
-                        placeholder="email@congty.com"
+                        placeholder="Nhập email liên hệ"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -404,7 +404,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       </label>
                       <input
                         type="tel"
-                        placeholder="Ví dụ: 0912 345 678"
+                        placeholder="Nhập số điện thoại"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
@@ -447,7 +447,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="Mô tả cụ thể nội dung yêu cầu của bạn..."
+                      placeholder="Mô tả nhu cầu của bạn..."
                       value={formData.note}
                       onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                       className="w-full p-2.5 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600 resize-none rounded-[8px]"

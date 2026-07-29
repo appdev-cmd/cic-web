@@ -17,7 +17,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
     name: '',
     phone: '',
     email: '',
-    service: 'Phần mềm kỹ thuật',
+    consultationNeed: 'Tư vấn báo giá sản phẩm & giải pháp',
     message: ''
   });
 
@@ -25,11 +25,13 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const servicesList = [
-    'Phần mềm kỹ thuật',
-    'Thiết bị & IOT',
-    'Tư vấn BIM/Digital Twins',
-    'Chuyển đổi số & Net Zero'
+  const consultationNeedsList = [
+    'Tư vấn báo giá sản phẩm & giải pháp',
+    'Tải phần mềm & dùng thử',
+    'Đăng ký mua bản quyền / thiết bị',
+    'Tư vấn chuyển đổi số & BIM',
+    'Đào tạo & Hỗ trợ kỹ thuật',
+    'Nhu cầu khác'
   ];
 
   const validateForm = () => {
@@ -62,7 +64,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
         name: '',
         phone: '',
         email: '',
-        service: 'Phần mềm kỹ thuật',
+        consultationNeed: 'Tư vấn báo giá sản phẩm & giải pháp',
         message: ''
       });
     }, 1200);
@@ -115,56 +117,54 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     Vui lòng cung cấp đầy đủ thông tin bên dưới. Đội ngũ kỹ sư và chuyên gia tư vấn giàu kinh nghiệm của CIC sẽ chủ động liên hệ hỗ trợ bạn trong vòng 15 phút làm việc.
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Full Name */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                        Họ tên <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="Nguyễn Văn A"
-                          className={`w-full bg-slate-50 border ${
-                            errors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
-                        />
-                      </div>
-                      {errors.name && (
-                        <p className="text-xs text-red-500 font-bold">{errors.name}</p>
-                      )}
-                    </div>
-
-                    {/* Phone Number */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                        Số điện thoại <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                          type="text"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="0912xxxxxx"
-                          className={`w-full bg-slate-50 border ${
-                            errors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                          } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
-                        />
-                      </div>
-                      {errors.phone && (
-                        <p className="text-xs text-red-500 font-bold">{errors.phone}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Email Address */}
+                  {/* Full Name */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Địa chỉ email
+                      Họ tên <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Nhập họ và tên"
+                        className={`w-full bg-slate-50 border ${
+                          errors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
+                      />
+                    </div>
+                    {errors.name && (
+                      <p className="text-xs text-red-500 font-bold">{errors.name}</p>
+                    )}
+                  </div>
+
+                  {/* Phone Number */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                      Số điện thoại <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="text"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="Nhập số điện thoại"
+                        className={`w-full bg-slate-50 border ${
+                          errors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
+                      />
+                    </div>
+                    {errors.phone && (
+                      <p className="text-xs text-red-500 font-bold">{errors.phone}</p>
+                    )}
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                      Email
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -172,7 +172,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="email@congty.com.vn"
+                        placeholder="Nhập email liên hệ"
                         className={`w-full bg-slate-50 border ${
                           errors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
                         } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
@@ -183,35 +183,17 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                     )}
                   </div>
 
-                  {/* Service Of Interest */}
+                  {/* Ghi chú */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Dịch vụ quan tâm <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.service}
-                      onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:bg-white rounded-[8px] font-bold cursor-pointer"
-                    >
-                      {servicesList.map((srv) => (
-                        <option key={srv} value={srv}>
-                          {srv}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Message / Nội dung */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Nội dung
+                      Ghi chú
                     </label>
                     <div className="relative">
                       <MessageSquare className="absolute left-3 top-3 text-slate-400" size={16} />
                       <textarea
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        placeholder="Mô tả cụ thể nhu cầu của bạn..."
+                        placeholder="Mô tả nhu cầu của bạn..."
                         rows={3}
                         className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium resize-none"
                       />

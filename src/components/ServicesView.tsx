@@ -14,24 +14,17 @@ import {
   User, 
   ChevronRight, 
   Briefcase, 
-  Clock, 
   Send, 
   Building2, 
-  Globe, 
-  FileText, 
-  Sparkles,
   Check,
   Search,
   X,
   ChevronLeft,
   SlidersHorizontal,
-  Box,
   ExternalLink,
-  Tag,
-  Layers,
-  Info,
-  Package,
-  ShoppingCart,
+  ShieldCheck,
+  Award,
+  Sparkles,
   MessageSquare
 } from 'lucide-react';
 import { servicesData, ServiceDetail } from '../data/servicesData';
@@ -92,21 +85,21 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
   return service.tagline || service.title;
 };
 
-export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenConsultation }: ServicesViewProps) => {
+export const ServicesView = ({ initialServiceId = null, onNavigateHome }: ServicesViewProps) => {
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     fullname: '',
     phone: '',
     email: '',
-    service: 'Phần mềm kỹ thuật',
+    service: 'Tư vấn BIM',
     notes: ''
   });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // 6 items per page is perfect for clean pagination on 9 items
+  const itemsPerPage = 4; // 4 equal size white blocks per page as requested
 
   // Reset page when category or search changes
   useEffect(() => {
@@ -148,12 +141,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedServices = filteredServices.slice(startIndex, startIndex + itemsPerPage);
 
-  // Watch for external initial ID updates (e.g. from dropdown navigation)
+  // Watch for external initial ID updates
   useEffect(() => {
     setActiveServiceId(initialServiceId);
   }, [initialServiceId]);
 
-  // Related products modal state & selector
+  // Related products modal state
   const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
 
   const currentRelatedProducts = useMemo(() => {
@@ -164,18 +157,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
     return productsData.slice(0, 4);
   }, [activeService]);
 
-  const handleSelectProductForConsultation = (prod: Product) => {
-    setFormData(prev => ({
-      ...prev,
-      service: prod.productType || prev.service,
-      notes: `[Yêu cầu tư vấn sản phẩm]: ${prod.name} (${prod.brand || 'CIC'})`
-    }));
-    const formElement = document.getElementById('consultation-form');
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullname || !formData.phone) {
@@ -185,7 +166,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
-      setFormData({ fullname: '', phone: '', email: '', service: 'Phần mềm kỹ thuật', notes: '' });
+      setFormData({ fullname: '', phone: '', email: '', service: 'Tư vấn BIM', notes: '' });
     }, 5000);
   };
 
@@ -194,419 +175,455 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter out the active service for "Related Services"
-  const relatedServices = servicesData.filter(s => s.id !== activeServiceId).slice(0, 3);
-
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-28 pb-20 relative">
-      {/* Visual Header Decoration */}
-      <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-slate-900 to-transparent pointer-events-none opacity-[0.03] z-0"></div>
-
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+    <div className="min-h-screen bg-slate-50/60 pt-28 pb-20 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         <AnimatePresence mode="wait">
           {!activeServiceId ? (
             /* ============================================================== */
-            /* 1. CATALOG PAGE (TRANG DANH MỤC)                               */
+            /* 1. CATALOG PAGE (TRANG DANH MỤC DỊCH VỤ & GIẢI PHÁP)           */
             /* ============================================================== */
             <motion.div
               key="catalog"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4 }}
               className="space-y-12"
             >
-              {/* Heading */}
-              <div className="text-center max-w-4xl mx-auto space-y-4">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-950 uppercase tracking-tight leading-tight sm:whitespace-nowrap">
-                  GIẢI PHÁP & <span className="text-orange-600">DỊCH VỤ</span> <span className="whitespace-nowrap">KỸ THUẬT SỐ</span>
-                </h1>
-                <p className="text-slate-500 font-normal text-sm leading-relaxed max-w-3xl mx-auto">
-                  CIC đồng hành cùng cơ quan Nhà nước, Chủ đầu tư và các Nhà thầu hàng đầu xây dựng chuỗi giải pháp Tư vấn BIM, Chuyển đổi số xây dựng, Năng lượng tái tạo và Kiểm kê phát thải tiên tiến bậc nhất.
-                </p>
-              </div>
+              {/* BLOCK ĐEN TO TRÊN CÙNG (HERO BANNER NỔI BẬT VỚI ẢNH BÊN PHẢI) */}
+              <div className="relative overflow-hidden rounded-[20px] bg-slate-950 text-white p-6 sm:p-10 md:p-12 border border-slate-800 shadow-2xl">
+                {/* Visual Decorative Gradients & Grid */}
+                <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute bottom-0 left-1/3 -mb-16 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
 
-              {/* Search & Filter Controls */}
-              <div className="bg-transparent p-0 border-0 shadow-none space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
                   
-                  {/* Search input */}
-                  <div className="md:col-span-2 relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                      className="w-full bg-white border border-slate-200/90 hover:border-slate-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 px-11 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-[10px] shadow-2xs"
-                    />
-                    {searchQuery && (
-                      <button 
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
+                  {/* Left Column: Text & Stats */}
+                  <div className="lg:col-span-7 space-y-6">
+                    {/* Est Badge */}
+                    <div className="flex items-center gap-3">
+                      <span className="w-10 sm:w-12 h-1 bg-orange-600 rounded-full"></span>
+                      <span className="text-orange-500 font-bold tracking-widest text-xs uppercase font-mono">
+                        THÀNH LẬP TỪ NĂM 1990
+                      </span>
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase leading-[1.15]">
+                      GIẢI PHÁP & <span className="text-orange-500">DỊCH VỤ</span> CÔNG NGHỆ
+                    </h1>
+
+                    {/* Subtitle / Description */}
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                      Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.
+                    </p>
+
+                    {/* Stats Highlights */}
+                    <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80">
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-orange-500 block">35+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Năm Kinh Nghiệm</span>
+                      </div>
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-white block">5.000+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Dự Án Thành Công</span>
+                      </div>
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-white block">100+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Đối Tác Toàn Cầu</span>
+                      </div>
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-orange-500 block">150+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Nhân Sự Chất Lượng Cao</span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Filter stats */}
-                  <div className="flex items-center justify-end text-xs font-bold text-slate-500 gap-2">
-                    <SlidersHorizontal size={14} className="text-slate-400" />
-                    Hiển thị {filteredServices.length} trên tổng số {servicesData.length} dịch vụ
+                  {/* Right Column: Hero Showcase Image */}
+                  <div className="lg:col-span-5 relative group">
+                    <div className="relative rounded-[16px] overflow-hidden border border-slate-800 shadow-2xl bg-slate-900 group-hover:border-orange-500/50 transition-all duration-500">
+                      <img 
+                        src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80" 
+                        alt="Dịch vụ chuyển đổi số và công nghệ kỹ thuật CIC" 
+                        className="w-full h-64 sm:h-80 lg:h-[340px] object-cover transition-transform duration-700 group-hover:scale-105"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
                   </div>
 
                 </div>
+              </div>
 
-                {/* Category filtering pills */}
-                <div className="border-t border-slate-200/80 pt-4">
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2">Phân loại:</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {categories.map((cat) => {
-                        const isSelected = selectedCategory === cat;
-                        return (
-                          <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all border rounded-[8px] cursor-pointer ${
-                              isSelected
-                                ? 'bg-orange-600 border-orange-600 text-white shadow-2xs'
-                                : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                            }`}
+              {/* MAIN LAYOUT WITH SIDEBAR (TƯƠNG TỰ FORMAT TRANG SẢN PHẨM) */}
+              <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start space-y-10 lg:space-y-0">
+                
+                {/* COLUMN LEFT: SERVICES LIST (CÁC BLOCK TRẮNG ĐỒNG NHẤT SIZE) */}
+                <div className="lg:col-span-8 space-y-8">
+                  
+                  {/* Search Bar & Category Filter Pills */}
+                  <div className="bg-white border border-slate-200/90 rounded-[14px] p-5 shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                      {/* Search Input */}
+                      <div className="relative w-full sm:w-auto sm:flex-1">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Tìm kiếm dịch vụ, giải pháp..."
+                          className="w-full bg-slate-50/80 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white pl-10 pr-9 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-[8px]"
+                        />
+                        {searchQuery && (
+                          <button 
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                           >
-                            {cat}
+                            <X size={14} />
                           </button>
+                        )}
+                      </div>
+
+                      {/* Stats Counter */}
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
+                        <SlidersHorizontal size={14} className="text-orange-600" />
+                        <span>Hiển thị {filteredServices.length} trên tổng {servicesData.length} dịch vụ</span>
+                      </div>
+                    </div>
+
+                    {/* Category Filter Select */}
+                    <div className="border-t border-slate-100 pt-3 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Danh mục dịch vụ:</span>
+                        <div className="relative w-full sm:w-64">
+                          <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="w-full bg-slate-50/80 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white pl-3.5 pr-8 py-2 text-xs font-bold text-slate-800 focus:outline-none transition-all rounded-[8px] cursor-pointer appearance-none"
+                          >
+                            {categories.map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      {selectedCategory !== 'Tất cả' && (
+                        <button
+                          onClick={() => setSelectedCategory('Tất cả')}
+                          className="text-[11px] font-bold text-orange-600 hover:text-orange-700 underline shrink-0 cursor-pointer"
+                        >
+                          Xóa bộ lọc danh mục
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* GRID 4 BLOCK TRẮNG ĐỒNG NHẤT SIZE */}
+                  {paginatedServices.length === 0 ? (
+                    <div className="text-center py-16 bg-white border border-slate-200/90 rounded-[14px] p-8 space-y-4">
+                      <p className="text-slate-400 font-bold text-sm">Không tìm thấy dịch vụ nào phù hợp với bộ lọc.</p>
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSelectedCategory('Tất cả');
+                        }}
+                        className="px-5 py-2 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
+                      >
+                        Xóa tìm kiếm & Bộ lọc
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                      {paginatedServices.map((service, idx) => {
+                        const cleanTitle = service.title
+                          .replace("Dịch Vụ ", "")
+                          .replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "");
+
+                        return (
+                          <motion.div
+                            key={service.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05, duration: 0.4 }}
+                            onClick={() => handleServiceSelect(service.id)}
+                            className="bg-white border border-slate-200/90 hover:border-orange-500/80 rounded-[14px] p-6 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full group cursor-pointer relative overflow-hidden"
+                          >
+                            <div>
+                              {/* Uniform Image Banner */}
+                              <div className="h-48 sm:h-52 w-full overflow-hidden rounded-[10px] relative mb-5 shrink-0 bg-slate-100">
+                                <img 
+                                  src={service.image} 
+                                  alt={service.title} 
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                                  <span className="px-3 py-1 bg-slate-950/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-md backdrop-blur-md border border-white/10">
+                                    {service.category}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Title & Excerpt */}
+                              <div className="space-y-3 mb-5">
+                                <h3 className="text-base sm:text-lg font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2 leading-snug">
+                                  {cleanTitle}
+                                </h3>
+                                <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
+                                  {getServiceExcerpt(service)}
+                                </p>
+
+                                {/* Highlights bullets */}
+                                <div className="space-y-1.5 pt-1">
+                                  <div className="flex items-center gap-2 text-[11px] font-medium text-slate-700">
+                                    <CheckCircle2 size={13} className="text-orange-600 shrink-0" />
+                                    <span>Tối ưu chi phí & đảm bảo tiến độ triển khai</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-[11px] font-medium text-slate-700">
+                                    <CheckCircle2 size={13} className="text-orange-600 shrink-0" />
+                                    <span>Đội ngũ chuyên gia trên 35+ năm kinh nghiệm</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card Footer Action Button */}
+                            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
+                              <span>Xem Chi Tiết Dịch Vụ</span>
+                              <ArrowRight size={15} className="transition-transform group-hover:translate-x-1.5" />
+                            </div>
+                          </motion.div>
                         );
                       })}
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Service Cards Bento Grid / Empty State */}
-              {paginatedServices.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-slate-200/80 space-y-4 rounded-[12px]">
-                  <p className="text-slate-400 font-bold text-sm">Không tìm thấy dịch vụ nào phù hợp với điều kiện tìm kiếm.</p>
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('Tất cả');
-                    }}
-                    className="px-6 py-2.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
-                  >
-                    Xóa bộ lọc tìm kiếm
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-                  {paginatedServices.map((service, idx) => {
-                    const isHero = idx === 0;
-                    const isDarkCard = idx === 1;
-                    const isWideCard = idx === 3;
-
-                    const cleanTitle = service.title
-                      .replace("Dịch Vụ ", "")
-                      .replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "");
-
-                    // 1. HERO BENTO CARD (Index 0: Spans 2 columns on lg)
-                    if (isHero) {
-                      return (
-                        <motion.div
-                          key={service.id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.05, duration: 0.6 }}
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="md:col-span-2 lg:col-span-2 bg-transparent border-0 p-0 shadow-none group flex flex-col md:flex-row gap-6 transition-all duration-300 relative overflow-hidden cursor-pointer"
-                        >
-                          {/* Image Container */}
-                          <div className="md:w-1/2 h-64 md:h-80 overflow-hidden relative rounded-[16px] shrink-0">
-                            <img 
-                              src={service.image} 
-                              alt={service.title} 
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                              referrerPolicy="no-referrer"
-                            />
-                            
-                            <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                              <span className="px-3 py-1 bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
-                                Nổi Bật
-                              </span>
-                              <span className="px-3 py-1 bg-slate-900/90 text-slate-200 text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
-                                {service.category}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Content */}
-                          <div className="md:w-1/2 flex flex-col justify-between space-y-4 py-1 relative z-10">
-                            <div className="space-y-3">
-                              <h3 className="text-xl md:text-2xl font-black text-slate-950 leading-tight group-hover:text-orange-600 transition-colors uppercase">
-                                {cleanTitle}
-                              </h3>
-                              <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
-                                {getServiceExcerpt(service)}
-                              </p>
-
-                              {/* Highlight Badges */}
-                              <div className="pt-2 flex flex-wrap gap-2">
-                                {['Chuẩn TCVN & ISO', 'Tối Ưu Chi Phí 35%', 'Tích Hợp AI / BIM'].map((chip, cIdx) => (
-                                  <span key={cIdx} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-200/60 text-[11px] font-medium text-slate-700 rounded-md">
-                                    <Check size={12} className="text-orange-600" /> {chip}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="pt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
-                              <span>Khám phá giải pháp chi tiết</span>
-                              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    }
-
-                    // 2. SECOND BENTO CARD (Index 1)
-                    if (isDarkCard) {
-                      return (
-                        <motion.div
-                          key={service.id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1, duration: 0.6 }}
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="bg-transparent border-0 p-0 shadow-none group flex flex-col justify-between transition-all duration-300 relative overflow-hidden cursor-pointer"
-                        >
-                          <div className="space-y-4">
-                            <div className="h-48 w-full overflow-hidden relative rounded-[14px]">
-                              <img 
-                                src={service.image} 
-                                alt={service.title} 
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                                referrerPolicy="no-referrer"
-                              />
-                              <span className="absolute top-3 left-3 px-3 py-1 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
-                                {service.category}
-                              </span>
-                            </div>
-
-                            <div className="space-y-2">
-                              <h3 className="text-base font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2">
-                                {cleanTitle}
-                              </h3>
-                              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
-                                {getServiceExcerpt(service)}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="pt-4 mt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700">
-                            <span>Xem chi tiết dịch vụ</span>
-                            <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                          </div>
-                        </motion.div>
-                      );
-                    }
-
-                    // 3. WIDE HORIZONTAL BENTO CARD (Index 3: Spans 2 columns on lg)
-                    if (isWideCard) {
-                      return (
-                        <motion.div
-                          key={service.id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2, duration: 0.6 }}
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="md:col-span-2 lg:col-span-2 bg-transparent border-0 p-0 shadow-none group flex flex-col md:flex-row gap-6 transition-all duration-300 relative overflow-hidden cursor-pointer"
-                        >
-                          <div className="md:w-5/12 h-56 md:h-auto overflow-hidden relative rounded-[16px] shrink-0">
-                            <img 
-                              src={service.image} 
-                              alt={service.title} 
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                              referrerPolicy="no-referrer"
-                            />
-                            <span className="absolute top-3 left-3 px-3 py-1 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
-                              {service.category}
-                            </span>
-                          </div>
-
-                          <div className="md:w-7/12 flex flex-col justify-between space-y-4">
-                            <div className="space-y-3">
-                              <h3 className="text-lg font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2">
-                                {cleanTitle}
-                              </h3>
-                              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
-                                {getServiceExcerpt(service)}
-                              </p>
-                              
-                              <div className="space-y-1.5 pt-1">
-                                {[
-                                  'Quy trình chuẩn hóa, dễ dàng triển khai cho mọi quy mô công trình',
-                                  'Tư vấn trực tiếp bởi đội ngũ chuyên gia giàu kinh nghiệm thực chiến'
-                                ].map((bullet, bIdx) => (
-                                  <div key={bIdx} className="flex items-center gap-2 text-xs text-slate-700 font-medium">
-                                    <CheckCircle2 size={14} className="text-orange-600 shrink-0" />
-                                    <span>{bullet}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="pt-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
-                              <span>Xem chi tiết giải pháp</span>
-                              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    }
-
-                    // 4. STANDARD BENTO CARD
-                    return (
-                      <motion.div
-                        key={service.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.05, duration: 0.6 }}
-                        onClick={() => handleServiceSelect(service.id)}
-                        className="bg-transparent border-0 p-0 shadow-none group flex flex-col justify-between transition-all duration-300 relative overflow-hidden cursor-pointer"
-                      >
-                        <div className="space-y-4">
-                          <div className="h-48 w-full overflow-hidden relative rounded-[14px]">
-                            <img 
-                              src={service.image} 
-                              alt={service.title} 
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                              referrerPolicy="no-referrer"
-                            />
-                            <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-[6px]">
-                              {service.category}
-                            </span>
-                          </div>
-
-                          <div className="space-y-2">
-                            <h3 className="text-sm font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 uppercase">
-                              {cleanTitle}
-                            </h3>
-                            <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
-                              {getServiceExcerpt(service)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="pt-4 mt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-700 group-hover:text-orange-600 transition-colors">
-                          <span>Khám phá dịch vụ</span>
-                          <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-
-                  {/* EMBEDDED BENTO HIGHLIGHT WIDGET */}
-                  {paginatedServices.length >= 3 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25, duration: 0.6 }}
-                      className="bg-gradient-to-br from-orange-600 via-orange-600 to-amber-700 text-white p-6 rounded-[16px] flex flex-col justify-between border-0 shadow-none relative overflow-hidden"
-                    >
-                      <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-
-                      <div className="space-y-3 relative z-10">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 text-white text-[10px] font-black uppercase tracking-wider rounded-full backdrop-blur-md">
-                          <Building2 size={12} /> Hợp Tác Kỹ Thuật
-                        </div>
-                        <h3 className="text-lg font-black uppercase tracking-tight text-white leading-tight">
-                          CIC - 35+ NĂM DẪN ĐẦU CHUYỂN ĐỔI SỐ
-                        </h3>
-                        <p className="text-xs text-white/90 leading-relaxed">
-                          Cung cấp hệ sinh thái toàn diện từ phần mềm bản quyền, dịch vụ tư vấn BIM, đo đạc 3D đến Net Zero.
-                        </p>
-                      </div>
-
-                      <div className="pt-4 relative z-10 border-t border-white/20 flex flex-wrap gap-2 items-center justify-between">
-                        <span className="text-[11px] font-bold text-white/90">Tư vấn giải pháp trực tiếp</span>
-                        <button
-                          type="button"
-                          onClick={() => onOpenConsultation?.()}
-                          className="px-3.5 py-1.5 bg-white text-orange-600 hover:bg-slate-100 text-xs font-bold uppercase tracking-wider rounded-[8px] transition-all shadow-md inline-flex items-center gap-1.5 cursor-pointer hover:shadow-lg"
-                        >
-                          <MessageSquare size={13} /> Yêu cầu tư vấn ngay
-                        </button>
-                      </div>
-                    </motion.div>
                   )}
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 border-t border-slate-200 pt-8 mt-8">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
+                          currentPage === 1
+                            ? 'border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500 cursor-pointer shadow-xs'
+                        }`}
+                      >
+                        <ChevronLeft size={14} /> Trước
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                          const isCurrent = page === currentPage;
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-all rounded-[8px] border cursor-pointer ${
+                                isCurrent
+                                  ? 'bg-orange-600 border-orange-600 text-white shadow-xs'
+                                  : 'bg-white border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
+                          currentPage === totalPages
+                            ? 'border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500 cursor-pointer shadow-xs'
+                        }`}
+                      >
+                        Sau <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
+
                 </div>
-              )}
 
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 border-t border-slate-200 pt-8 mt-12">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`inline-flex items-center gap-1 px-3 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
-                      currentPage === 1
-                        ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                        : 'border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                    }`}
-                  >
-                    <ChevronLeft size={14} /> Trước
-                  </button>
+                {/* COLUMN RIGHT: STICKY SIDEBAR (FORM ĐĂNG KÝ TƯ VẤN & DEMO) */}
+                <aside className="lg:col-span-4 space-y-6">
+                  <div className="sticky top-28 space-y-6">
+                    
+                    {/* White Form Container */}
+                    <div className="bg-white text-slate-900 p-7 sm:p-8 rounded-[16px] border border-slate-200/90 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none text-slate-950">
+                        <Briefcase size={90} />
+                      </div>
 
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                      const isCurrent = page === currentPage;
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-all border rounded-none ${
-                            isCurrent
-                              ? 'bg-orange-600 border-orange-600 text-white'
-                              : 'bg-white border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
+                      <div className="relative z-10 space-y-5">
+                        <div className="space-y-2">
+                          <span className="inline-block px-2.5 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-bold uppercase tracking-wider rounded-md">
+                            TƯ VẤN TRỰC TIẾP
+                          </span>
+                          <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-950 leading-tight">
+                            Đăng Ký Tư Vấn & Demo
+                          </h3>
+                          <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                            Sẵn sàng chuyển đổi số cùng CIC? Hãy để lại thông tin, chuyên gia của chúng tôi sẽ liên hệ trong 15 phút.
+                          </p>
+                        </div>
+
+                        <div className="w-full h-[1px] bg-slate-100"></div>
+
+                        {formSubmitted ? (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-orange-600 p-6 text-center space-y-3 rounded-[12px]"
+                          >
+                            <CheckCircle2 size={36} className="mx-auto text-white animate-bounce" />
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG!</h4>
+                            <p className="text-xs text-white/90 leading-relaxed font-normal">
+                              Chuyên viên CIC sẽ gọi lại ngay theo số điện thoại bạn cung cấp. Xin trân trọng cảm ơn!
+                            </p>
+                          </motion.div>
+                        ) : (
+                          <form className="space-y-4" onSubmit={handleFormSubmit}>
+                            
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Họ và tên *</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
+                                <input 
+                                  type="text"
+                                  required
+                                  value={formData.fullname}
+                                  onChange={(e) => setFormData({...formData, fullname: e.target.value})}
+                                  placeholder="Nhập họ và tên" 
+                                  className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Số điện thoại *</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={14} /></span>
+                                <input 
+                                  type="tel"
+                                  required
+                                  value={formData.phone}
+                                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                  placeholder="Nhập số điện thoại" 
+                                  className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Địa chỉ Email</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
+                                <input 
+                                  type="email"
+                                  value={formData.email}
+                                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                  placeholder="Nhập email liên hệ" 
+                                  className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Dịch vụ quan tâm</label>
+                              <select 
+                                value={formData.service}
+                                onChange={(e) => setFormData({...formData, service: e.target.value})}
+                                className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none transition-all font-normal cursor-pointer rounded-[8px]"
+                              >
+                                {servicesData.map(s => (
+                                  <option key={s.id} value={s.title}>{s.title}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Nội dung yêu cầu</label>
+                              <textarea 
+                                rows={2}
+                                value={formData.notes}
+                                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                placeholder="Mô tả nhu cầu của bạn..." 
+                                className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal resize-none rounded-[8px]"
+                              ></textarea>
+                            </div>
+
+                            <button 
+                              type="submit"
+                              className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs shadow-md shadow-orange-600/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                            >
+                              Gửi Yêu Cầu Tư Vấn <Send size={14} />
+                            </button>
+
+                          </form>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Support Contact Box */}
+                    <div className="bg-white border border-slate-200/90 p-5 rounded-[14px] space-y-3.5 shadow-xs">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+                        HỖ TRỢ TRỰC TIẾP 24/7
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex gap-3 items-center">
+                          <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                            <Phone size={14} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase">Tổng đài tư vấn</span>
+                            <span className="text-xs font-bold text-slate-900">086 893 4576 / 024 3976 1381</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 items-center">
+                          <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                            <Mail size={14} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase">Hộp thư hỗ trợ</span>
+                            <span className="text-xs font-bold text-slate-900">info@cic.com.vn</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+
                   </div>
+                </aside>
 
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`inline-flex items-center gap-1 px-3 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
-                      currentPage === totalPages
-                        ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                        : 'border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                    }`}
-                  >
-                    Sau <ChevronRight size={14} />
-                  </button>
-                </div>
-              )}
+              </div>
             </motion.div>
           ) : (
             /* ============================================================== */
-            /* 2. DETAIL PAGE (TRANG CHI TIẾT)                                */
+            /* 2. DETAIL PAGE (TRANG CHI TIẾT DỊCH VỤ)                        */
             /* ============================================================== */
             <motion.div
               key="detail"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-10"
+              transition={{ duration: 0.4 }}
+              className="space-y-8"
             >
-              {/* Back to Catalog Button & Navigation Path */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
+              {/* Back Button & Breadcrumbs */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/90 pb-5">
                 <button
                   onClick={() => setActiveServiceId(null)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px]"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-800 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer shadow-xs"
                 >
                   <ArrowLeft size={14} /> Trở về danh mục dịch vụ
                 </button>
@@ -616,192 +633,127 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                   <ChevronRight size={12} />
                   <span className="hover:text-orange-600 cursor-pointer" onClick={() => setActiveServiceId(null)}>Dịch vụ</span>
                   <ChevronRight size={12} />
-                  <span className="text-slate-700 truncate max-w-[200px]">{activeService?.title.slice(0, 30)}...</span>
+                  <span className="text-slate-800 truncate max-w-[200px]">{activeService?.title}</span>
                 </div>
               </div>
 
-              {/* Main Detail Content Grid */}
+              {/* Detail Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
-                {/* Column Left: Main description & rich HTML content */}
-                <div className="lg:col-span-8 space-y-5 bg-white border border-slate-200/80 p-8 sm:p-10 rounded-[10px]">
+                {/* Column Left: Main Content */}
+                <div className="lg:col-span-8 space-y-6 bg-white border border-slate-200/90 p-8 sm:p-10 rounded-[16px] shadow-xs">
                   
-                  {/* Title & Tagline */}
-                  <div className="space-y-3 border-b border-slate-100 pb-4">
+                  {/* Header Title & Tagline */}
+                  <div className="space-y-3 border-b border-slate-100 pb-5">
                     {activeService?.category && (
                       <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider rounded-md">
                         {activeService.category}
                       </span>
                     )}
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight leading-snug">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight leading-snug">
                       {activeService?.title}
                     </h1>
                     {activeService?.tagline && (
-                      <p className="text-xs sm:text-sm text-slate-500 font-medium italic leading-relaxed border-l-2 border-orange-500 pl-3">
+                      <p className="text-xs sm:text-sm text-slate-600 font-medium italic leading-relaxed border-l-3 border-orange-500 pl-3 py-0.5 bg-slate-50 rounded-r-md">
                         "{activeService.tagline}"
                       </p>
                     )}
                   </div>
 
-                  {/* Rich HTML Content Area */}
+                  {/* Cleaned CMS HTML Content */}
                   {activeService?.htmlContent && (
                     <div 
-                      className="service-cms-content pt-0"
+                      className="service-cms-content pt-2"
                       dangerouslySetInnerHTML={{ __html: cleanCmsHtml(activeService.htmlContent) }}
                     />
                   )}
 
                 </div>
 
-                {/* Column Right: Related Products & Custom Consultation Form */}
-                <div className="lg:col-span-4 space-y-8">
+                {/* Column Right: Form & Related Products */}
+                <div className="lg:col-span-4 space-y-6">
                   
-                  {/* Modern Form Card */}
-                  <div id="consultation-form" className="bg-white text-slate-900 p-8 border border-slate-200 shadow-xl relative scroll-mt-32 rounded-[10px]">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-slate-950">
-                      <Briefcase size={80} />
-                    </div>
+                  {/* White Consultation Form */}
+                  <div id="consultation-form" className="bg-white text-slate-900 p-7 sm:p-8 rounded-[16px] border border-slate-200/90 shadow-sm relative scroll-mt-32">
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <span className="text-orange-600 font-bold text-[10px] uppercase tracking-wider block">YÊU CẦU DỊCH VỤ</span>
+                        <h3 className="text-lg font-extrabold uppercase text-slate-950 leading-tight">Tư Vấn Giải Pháp Thích Hợp</h3>
+                        <p className="text-xs text-slate-600 font-normal">Chuyên gia CIC sẽ kết nối trực tiếp tư vấn chi tiết trong 15 phút.</p>
+                      </div>
 
-                    <div className="space-y-4 relative z-10">
-                      <h3 className="text-lg font-bold uppercase tracking-tight text-slate-950 leading-tight">
-                        Tư Vấn Giải Pháp Thích Hợp
-                      </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed font-normal">
-                        Điền nhanh thông tin dưới đây, Đội ngũ chuyên gia Trung tâm dịch vụ CIC sẽ kết nối tư vấn miễn phí trong 15 phút.
-                      </p>
-
-                      <div className="w-full h-[1px] bg-slate-100 my-4"></div>
+                      <div className="w-full h-[1px] bg-slate-100 my-3"></div>
 
                       {formSubmitted ? (
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="bg-orange-600 p-6 text-center space-y-3 rounded-[8px]"
-                        >
-                          <CheckCircle2 size={36} className="mx-auto text-white animate-bounce" />
-                          <h4 className="text-sm font-bold uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG</h4>
-                          <p className="text-xs text-white/90 leading-relaxed font-normal">
-                            Hệ thống đã ghi nhận nhu cầu tư vấn. Chúng tôi sẽ gọi lại ngay cho bạn qua số điện thoại đã cung cấp. Xin cảm ơn!
-                          </p>
-                        </motion.div>
+                        <div className="bg-orange-600 p-5 text-center space-y-2 rounded-[10px]">
+                          <CheckCircle2 size={32} className="mx-auto text-white animate-bounce" />
+                          <h4 className="text-xs font-bold uppercase text-white">GỬI YÊU CẦU THÀNH CÔNG!</h4>
+                          <p className="text-[11px] text-white/90">Cảm ơn bạn. Chuyên viên CIC sẽ liên hệ ngay.</p>
+                        </div>
                       ) : (
-                        <form className="space-y-5" onSubmit={handleFormSubmit}>
-                          
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Họ tên *</label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
-                              <input 
-                                type="text"
-                                required
-                                value={formData.fullname}
-                                onChange={(e) => setFormData({...formData, fullname: e.target.value})}
-                                placeholder="Ví dụ: Nguyễn Đức Anh" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal rounded-[8px]"
-                              />
-                            </div>
+                        <form className="space-y-3.5" onSubmit={handleFormSubmit}>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Họ tên *</label>
+                            <input 
+                              type="text"
+                              required
+                              value={formData.fullname}
+                              onChange={(e) => setFormData({...formData, fullname: e.target.value})}
+                              placeholder="Nhập họ và tên" 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
+                            />
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Số điện thoại *</label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={14} /></span>
-                              <input 
-                                type="tel"
-                                required
-                                value={formData.phone}
-                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                placeholder="Ví dụ: 0868934576" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal rounded-[8px]"
-                              />
-                            </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Số điện thoại *</label>
+                            <input 
+                              type="tel"
+                              required
+                              value={formData.phone}
+                              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                              placeholder="Nhập số điện thoại" 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
+                            />
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Địa chỉ email</label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
-                              <input 
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                placeholder="Ví dụ: anh.nguyen@company.com" 
-                                className="w-full bg-slate-50 border border-slate-200 px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal rounded-[8px]"
-                              />
-                            </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Email</label>
+                            <input 
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({...formData, email: e.target.value})}
+                              placeholder="Nhập email liên hệ" 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
+                            />
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Dịch vụ quan tâm</label>
-                            <select 
-                              value={formData.service}
-                              onChange={(e) => setFormData({...formData, service: e.target.value})}
-                              className="w-full bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal cursor-pointer rounded-[8px]"
-                            >
-                              <option>Phần mềm kỹ thuật</option>
-                              <option>Thiết bị & IOT</option>
-                              <option>Tư vấn BIM/Digital Twins</option>
-                              <option>Chuyển đổi số & Net Zero</option>
-                            </select>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Nội dung</label>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Ghi chú nhu cầu</label>
                             <textarea 
-                              rows={3}
+                              rows={2}
                               value={formData.notes}
                               onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                              placeholder="Mô tả cụ thể nhu cầu của bạn..." 
-                              className="w-full bg-slate-50 border border-slate-200 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white transition-all font-normal resize-none rounded-[8px]"
+                              placeholder="Mô tả nhu cầu của bạn..." 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal resize-none rounded-[8px]"
                             ></textarea>
-                          </div>
-
-                          <div className="text-xs text-slate-500 font-normal leading-relaxed">
-                            Bằng cách đăng ký, bạn đồng ý với chính sách bảo mật và cam kết bảo vệ thông tin doanh nghiệp của CIC.
                           </div>
 
                           <button 
                             type="submit"
-                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs btn-modern-interaction shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
+                            className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-orange-600/10"
                           >
-                            Gửi yêu cầu tư vấn <Send size={14} />
+                            Đăng Ký Tư Vấn <Send size={14} />
                           </button>
-
                         </form>
                       )}
                     </div>
                   </div>
 
-                  {/* Hotlines & Support Contacts matching exact inputs */}
-                  <div className="bg-white border border-slate-200 p-6 space-y-4 rounded-[10px]">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">HỖ TRỢ TRỰC TIẾP 24/7</h4>
-                    <div className="space-y-3">
-                      <div className="flex gap-3 items-center">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
-                          <Phone size={14} />
-                        </div>
-                        <div>
-                          <span className="text-xs font-bold text-slate-400 block uppercase">Hà Nội & Miền Bắc</span>
-                          <span className="text-xs font-bold text-slate-800">086 893 4576 / 024 3976 1381</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-3 items-center">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
-                          <Mail size={14} />
-                        </div>
-                        <div>
-                          <span className="text-xs font-bold text-slate-400 block uppercase">Hộp thư điện tử</span>
-                          <span className="text-xs font-bold text-slate-800">info@cic.com.vn</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Related Products Widget (Minimal & Clean) */}
+                  {/* Related Products Widget */}
                   {currentRelatedProducts.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-5 space-y-3 rounded-[10px]">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2.5">
-                        SẢN PHẨM LIÊN QUAN
+                    <div className="bg-white border border-slate-200/90 p-5 rounded-[14px] space-y-3.5 shadow-xs">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+                        SẢN PHẨM PHẦN MỀM LIÊN QUAN
                       </h4>
 
                       <div className="divide-y divide-slate-100">
@@ -809,26 +761,21 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                           <div 
                             key={prod.id} 
                             onClick={() => setSelectedProductModal(prod)}
-                            className="py-2.5 first:pt-0 last:pb-0 flex gap-3 items-center group cursor-pointer hover:bg-slate-50/80 transition-colors p-1 rounded-[8px]"
+                            className="py-2.5 flex gap-3 items-center group cursor-pointer hover:bg-slate-50 transition-colors p-1.5 rounded-[8px]"
                           >
-                            {/* Thumbnail */}
-                            <div className="w-14 h-14 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative rounded-[8px]">
+                            <div className="w-12 h-12 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative rounded-[6px]">
                               <img 
                                 src={prod.img} 
                                 alt={prod.name} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                 referrerPolicy="no-referrer"
                               />
                             </div>
-
-                            {/* Details */}
-                            <div className="flex-1 min-w-0 space-y-0.5">
-                              <h5 className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-xs font-bold text-slate-900 group-hover:text-orange-600 transition-colors truncate">
                                 {prod.name}
                               </h5>
-                              <p className="text-xs text-slate-400 font-normal">
-                                {prod.brand || 'CIC Tech'} {prod.productType ? `• ${prod.productType}` : ''}
-                              </p>
+                              <span className="text-[10px] text-slate-400 block uppercase font-medium">{prod.brand}</span>
                             </div>
                           </div>
                         ))}
@@ -839,140 +786,51 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, onOpenCo
                 </div>
 
               </div>
-
-              {/* Related Services List (Dịch vụ liên quan) */}
-              <div className="space-y-6 border-t border-slate-200 pt-10">
-                <h3 className="text-lg font-extrabold text-slate-950 uppercase tracking-tight flex items-center gap-2">
-                  <span className="w-2.5 h-5 bg-orange-600 inline-block"></span>
-                  Dịch vụ liên quan & Hệ giải pháp số
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {relatedServices.map((rSrv) => (
-                    <div 
-                      key={rSrv.id} 
-                      onClick={() => handleServiceSelect(rSrv.id)}
-                      className="bg-white border border-slate-200 p-5 space-y-3 hover:border-orange-500 hover:shadow-lg cursor-pointer transition-all duration-300 rounded-[10px]"
-                    >
-                      <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">{rSrv.category}</span>
-                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide group-hover:text-orange-600 line-clamp-1">{rSrv.title.replace("Dịch Vụ ", "").replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "")}</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed font-normal line-clamp-2">{rSrv.shortDesc}</p>
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase text-orange-600 tracking-wider">Tìm hiểu thêm <ChevronRight size={12} /></span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Product Quick Specs Modal */}
-        <AnimatePresence>
-          {selectedProductModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white border border-slate-200 w-full max-w-2xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col rounded-[12px]"
-              >
-                {/* Header */}
-                <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b-2 border-orange-600 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Box size={20} className="text-orange-500" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-orange-400">
-                      THÔNG SỐ SẢN PHẨM / PHẦN MỀM
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setSelectedProductModal(null)}
-                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors rounded-[6px]"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-
-                {/* Modal Body */}
-                <div className="p-6 space-y-6 overflow-y-auto flex-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start">
-                    <div className="sm:col-span-5 space-y-3">
-                      <div className="h-48 w-full bg-slate-900 border border-slate-200 overflow-hidden relative rounded-[10px]">
-                        <img 
-                          src={selectedProductModal.img} 
-                          alt={selectedProductModal.name} 
-                          className="w-full h-full object-cover" 
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                      <div className="p-3 bg-slate-50 border border-slate-100 space-y-1.5 text-xs rounded-[8px]">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Thương hiệu:</span>
-                          <span className="font-bold text-slate-800">{selectedProductModal.brand || 'CIC Tech'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Lĩnh vực:</span>
-                          <span className="font-bold text-slate-800">{selectedProductModal.field || 'Xây dựng'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Phân loại:</span>
-                          <span className="font-bold text-orange-600">{selectedProductModal.productType || 'Phần mềm'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-7 space-y-4">
-                      <h3 className="text-lg font-bold text-slate-950 uppercase leading-snug">
-                        {selectedProductModal.name}
-                      </h3>
-
-                      <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 border border-orange-200 text-xs font-bold rounded-[6px]">
-                        Mức giá đề xuất: {selectedProductModal.price}
-                      </div>
-
-                      <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                        {selectedProductModal.description}
-                      </p>
-
-                      <div className="space-y-2 border-t border-slate-100 pt-3 text-xs font-normal">
-                        <div className="flex items-center gap-2 text-slate-700">
-                          <CheckCircle2 size={14} className="text-orange-500 shrink-0" />
-                          <span>Bản quyền chính hãng & Hỗ trợ chuyển giao 100%</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-700">
-                          <CheckCircle2 size={14} className="text-orange-500 shrink-0" />
-                          <span>Đội ngũ kỹ sư tư vấn chuyên môn sâu từ CIC</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
-                  <button
-                    onClick={() => setSelectedProductModal(null)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-bold uppercase tracking-wider rounded-[8px]"
-                  >
-                    Đóng
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const prod = selectedProductModal;
-                      setSelectedProductModal(null);
-                      handleSelectProductForConsultation(prod);
-                    }}
-                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md rounded-[8px]"
-                  >
-                    Thêm vào form tư vấn <Send size={14} />
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
       </div>
+
+      {/* Product Detail Modal */}
+      {selectedProductModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white rounded-[16px] max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+            <button 
+              onClick={() => setSelectedProductModal(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="h-40 w-full overflow-hidden rounded-[10px] bg-slate-100 relative">
+              <img src={selectedProductModal.img} alt={selectedProductModal.name} className="w-full h-full object-cover" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">{selectedProductModal.brand}</span>
+              <h3 className="text-lg font-bold text-slate-950">{selectedProductModal.name}</h3>
+              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{selectedProductModal.description}</p>
+            </div>
+
+            <div className="pt-2 flex gap-2">
+              <button
+                onClick={() => {
+                  setSelectedProductModal(null);
+                  setFormData(prev => ({
+                    ...prev,
+                    service: selectedProductModal.name,
+                    notes: `Quan tâm sản phẩm: ${selectedProductModal.name}`
+                  }));
+                }}
+                className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider rounded-[8px] transition-all"
+              >
+                Yêu cầu báo giá sản phẩm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

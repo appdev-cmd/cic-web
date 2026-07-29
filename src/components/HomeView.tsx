@@ -963,7 +963,7 @@ export const HomeView = ({
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
-                      placeholder="Nguyễn Văn A" 
+                      placeholder="Nhập họ và tên" 
                     />
                   </div>
                   <div className="space-y-2">
@@ -974,7 +974,7 @@ export const HomeView = ({
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
-                      placeholder="0xxx xxx xxx" 
+                      placeholder="Nhập số điện thoại" 
                     />
                   </div>
                 </div>
@@ -998,7 +998,7 @@ export const HomeView = ({
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold resize-none" 
-                    placeholder="Tôi muốn tìm hiểu về..."
+                    placeholder="Mô tả nhu cầu của bạn..."
                   />
                 </div>
                 <button type="submit" className="w-full py-2.5 bg-orange-600 text-white rounded-none font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">

@@ -163,35 +163,13 @@ export function ProductsView(_props?: ProductsViewProps) {
   // Form input states
   const [formData, setFormData] = useState({
     name: '',
-    company: '',
-    address: '',
-    province: '',
-    email: '',
     phone: '',
+    email: '',
+    version: 'v2026-pro',
     notes: '',
-    captchaInput: '',
-    version: '',
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  const [captchaValue, setCaptchaValue] = useState(() => {
-    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-    let res = '';
-    for (let i = 0; i < 5; i++) {
-      res += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return res;
-  });
-
-  const regenerateCaptcha = () => {
-    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-    let res = '';
-    for (let i = 0; i < 5; i++) {
-      res += chars[Math.floor(Math.random() * chars.length)];
-    }
-    setCaptchaValue(res);
-  };
 
   // Dynamic filter values generated from data
   const fields = useMemo(() => {
@@ -279,16 +257,11 @@ export function ProductsView(_props?: ProductsViewProps) {
     setFormErrors({});
     setFormData({
       name: '',
-      company: '',
-      address: '',
-      province: '',
-      email: '',
       phone: '',
+      email: '',
+      version: 'v2026-pro',
       notes: '',
-      captchaInput: '',
-      version: '',
     });
-    regenerateCaptcha();
   };
 
   const triggerContact = (product: Product) => {
@@ -298,16 +271,11 @@ export function ProductsView(_props?: ProductsViewProps) {
     setFormErrors({});
     setFormData({
       name: '',
-      company: '',
-      address: '',
-      province: '',
-      email: '',
       phone: '',
+      email: '',
+      version: 'v2026-pro',
       notes: '',
-      captchaInput: '',
-      version: '',
     });
-    regenerateCaptcha();
   };
 
   const triggerBuy = (product: Product) => {
@@ -317,16 +285,11 @@ export function ProductsView(_props?: ProductsViewProps) {
     setFormErrors({});
     setFormData({
       name: '',
-      company: '',
-      address: '',
-      province: '',
-      email: '',
       phone: '',
+      email: '',
+      version: 'v2026-pro',
       notes: '',
-      captchaInput: '',
-      version: '',
     });
-    regenerateCaptcha();
   };
 
   const handleTabSwitch = (type: 'contact' | 'buy' | 'download') => {
@@ -335,16 +298,11 @@ export function ProductsView(_props?: ProductsViewProps) {
     setFormErrors({});
     setFormData({
       name: '',
-      company: '',
-      address: '',
-      province: '',
-      email: '',
       phone: '',
+      email: '',
+      version: 'v2026-pro',
       notes: '',
-      captchaInput: '',
-      version: '',
     });
-    regenerateCaptcha();
     if (type === 'download') {
       setDownloadFormSubmitted(false);
       setDownloading(false);
@@ -374,31 +332,19 @@ export function ProductsView(_props?: ProductsViewProps) {
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!formData.name.trim()) {
-      errors.name = 'Vui lòng nhập họ tên';
-    }
-
-    if (!formData.province) {
-      errors.province = 'Vui lòng chọn tỉnh/thành phố';
-    }
-
-    if (!formData.email.trim()) {
-      errors.email = 'Vui lòng nhập email';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'Địa chỉ email không hợp lệ';
+      errors.name = 'Vui lòng nhập họ và tên';
     }
 
     if (!formData.phone.trim()) {
       errors.phone = 'Vui lòng nhập số điện thoại';
     }
 
-    if (modalType === 'download' && !formData.version) {
-      errors.version = 'Vui lòng chọn phiên bản';
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errors.email = 'Địa chỉ email không hợp lệ';
     }
 
-    if (!formData.captchaInput.trim()) {
-      errors.captchaInput = 'Vui lòng nhập mã bảo mật';
-    } else if (formData.captchaInput.trim().toUpperCase() !== captchaValue.toUpperCase()) {
-      errors.captchaInput = 'Mã bảo mật không chính xác';
+    if (modalType === 'download' && !formData.version) {
+      errors.version = 'Vui lòng chọn phiên bản';
     }
 
     setFormErrors(errors);
@@ -416,17 +362,12 @@ export function ProductsView(_props?: ProductsViewProps) {
       setActiveProduct(null);
       setFormData({
         name: '',
-        company: '',
-        address: '',
-        province: '',
-        email: '',
         phone: '',
+        email: '',
+        version: 'v2026-pro',
         notes: '',
-        captchaInput: '',
-        version: '',
       });
       setFormErrors({});
-      regenerateCaptcha();
     }, 2000);
   };
 
@@ -450,7 +391,7 @@ export function ProductsView(_props?: ProductsViewProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-[10px] w-full max-w-xl p-5 md:p-6 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] premium-scrollbar"
+            className="bg-white border border-slate-200 shadow-[0_30px_70px_rgba(0,0,0,0.25)] rounded-2xl w-full max-w-xl p-6 md:p-8 relative z-10 text-slate-900 overflow-y-auto max-h-[92vh] sm:max-h-[94vh] custom-scrollbar"
           >
             {/* Close Button */}
             <button 
@@ -501,136 +442,80 @@ export function ProductsView(_props?: ProductsViewProps) {
             </div>
 
             {/* Selected Product Banner */}
-            <div className="p-3 bg-slate-50 border-l-4 border-orange-600 mb-5 flex items-center justify-between gap-4">
+            <div className="p-3.5 bg-slate-50 border-l-4 border-orange-600 mb-6 rounded-r-[8px] flex items-center justify-between gap-4">
               <div>
                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Sản phẩm đang chọn</span>
                 <span className="text-sm font-black text-slate-800">{activeProduct.name}</span>
               </div>
-              <span className="text-[10px] font-bold px-2 py-1 bg-orange-50 text-orange-600 border border-orange-100 uppercase tracking-wider hidden sm:inline-block">Chính hãng</span>
             </div>
 
             {/* Download Modal Body */}
             {modalType === 'download' && (
               <div>
                 {!downloadFormSubmitted ? (
-                  <form className="space-y-3" onSubmit={handleDownloadFormSubmit}>
-                    {/* Row 1: Họ tên & Đơn vị công tác */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Họ tên <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          required 
-                          type="text" 
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="Nguyễn Văn A" 
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.name ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        {formErrors.name && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.name}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Đơn vị công tác
-                        </label>
-                        <input 
-                          type="text" 
-                          value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          placeholder="Trường học, Doanh nghiệp..." 
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
-                        />
-                      </div>
+                  <form className="space-y-4" onSubmit={handleDownloadFormSubmit}>
+                    {/* Row 1: Họ tên */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                        Họ tên <span className="text-red-500">*</span>
+                      </label>
+                      <input 
+                        required 
+                        type="text" 
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Nhập họ và tên" 
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
+                      />
+                      {formErrors.name && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.name}</p>
+                      )}
                     </div>
 
-                    {/* Row 2: Địa chỉ & Tỉnh/Thành phố */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Địa chỉ
-                        </label>
-                        <input 
-                          type="text" 
-                          value={formData.address}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder="Số nhà, tên đường..." 
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Chọn tỉnh/thành phố <span className="text-red-500">*</span>
-                        </label>
-                        <select 
-                          required
-                          value={formData.province}
-                          onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.province ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 cursor-pointer`}
-                        >
-                          <option value="">-- Chọn tỉnh/TP --</option>
-                          {PROVINCES.map((p) => (
-                            <option key={p} value={p}>{p}</option>
-                          ))}
-                        </select>
-                        {formErrors.province && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.province}</p>
-                        )}
-                      </div>
+                    {/* Row 2: Số điện thoại */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                        Số điện thoại <span className="text-red-500">*</span>
+                      </label>
+                      <input 
+                        required 
+                        type="tel" 
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="Nhập số điện thoại" 
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
+                      />
+                      {formErrors.phone && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.phone}</p>
+                      )}
                     </div>
 
-                    {/* Row 3: Email & Điện thoại di động */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Email <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          required 
-                          type="email" 
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="username@domain.com" 
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.email ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        {formErrors.email && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.email}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Điện thoại di động <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          required 
-                          type="tel" 
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="09xx xxx xxx" 
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.phone ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        {formErrors.phone && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.phone}</p>
-                        )}
-                      </div>
+                    {/* Row 3: Email */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                        Email
+                      </label>
+                      <input 
+                        type="email" 
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="Nhập email liên hệ" 
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
+                      />
+                      {formErrors.email && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.email}</p>
+                      )}
                     </div>
 
                     {/* Row 4: Chọn phiên bản * */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                         Chọn phiên bản <span className="text-red-500">*</span>
                       </label>
                       <select 
@@ -638,8 +523,8 @@ export function ProductsView(_props?: ProductsViewProps) {
                         value={formData.version}
                         onChange={(e) => setFormData({ ...formData, version: e.target.value })}
                         className={`w-full bg-slate-50 border ${
-                          formErrors.version ? 'border-red-500' : 'border-slate-200'
-                        } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 cursor-pointer`}
+                          formErrors.version ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 rounded-[8px] transition-all cursor-pointer`}
                       >
                         <option value="">-- Chọn phiên bản tải về --</option>
                         <option value="v2026-pro">{activeProduct.name} v2026.1 (Professional Edition)</option>
@@ -648,80 +533,39 @@ export function ProductsView(_props?: ProductsViewProps) {
                         <option value="v2024-lts">{activeProduct.name} v2024.4 (LTS Stable Edition)</option>
                       </select>
                       {formErrors.version && (
-                        <p className="text-[11px] text-red-500 font-bold">{formErrors.version}</p>
+                        <p className="text-xs text-red-500 font-bold">{formErrors.version}</p>
                       )}
                     </div>
 
                     {/* Row 5: Ghi chú */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                         Ghi chú
                       </label>
                       <textarea 
                         rows={2} 
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder="Ghi chú thêm (nếu có)..." 
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 resize-none"
+                        placeholder="Mô tả nhu cầu của bạn..." 
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all resize-none"
                       />
-                    </div>
-
-                    {/* Row 6: Nhập mã bảo mật & captcha Display */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                        Nhập mã bảo mật <span className="text-red-500">*</span>
-                      </label>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <input 
-                          required 
-                          type="text" 
-                          value={formData.captchaInput}
-                          onChange={(e) => setFormData({ ...formData, captchaInput: e.target.value })}
-                          placeholder="Nhập mã bảo mật" 
-                          className={`flex-1 bg-slate-50 border ${
-                            formErrors.captchaInput ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        
-                        <div className="flex items-center gap-2">
-                          <div className="bg-slate-100 border border-slate-300 px-4 py-2 font-mono font-black text-lg tracking-[0.2em] text-orange-600 select-none bg-[linear-gradient(45deg,#f8f9fa_25%,transparent_25%),linear-gradient(-45deg,#f8f9fa_25%,transparent_25%)] bg-[size:12px_12px] relative overflow-hidden flex items-center justify-center min-w-[120px] h-[38px] shadow-inner">
-                            <span className="relative z-10 skew-x-12 select-none line-through decoration-slate-400 decoration-2">{captchaValue}</span>
-                            <div className="absolute inset-0 opacity-25 pointer-events-none">
-                              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-orange-600 -rotate-12"></div>
-                              <div className="absolute top-1/3 left-0 w-full h-[1px] bg-slate-900 rotate-12"></div>
-                              <div className="absolute top-2/3 left-0 w-full h-[1px] bg-orange-600 rotate-6"></div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={regenerateCaptcha}
-                            className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors border border-slate-200 flex items-center justify-center h-[38px] w-[38px]"
-                            title="Đổi mã bảo mật"
-                          >
-                            <RefreshCw size={16} />
-                          </button>
-                        </div>
-                      </div>
-                      {formErrors.captchaInput && (
-                        <p className="text-xs text-red-500 font-bold">{formErrors.captchaInput}</p>
-                      )}
                     </div>
 
                     {/* Note block */}
                     <p className="text-[11px] text-orange-600 font-bold italic pt-0.5">
-                      *Vui lòng điền đúng thông tin, chúng tôi sẽ liên hệ qua email của bạn
+                      *Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn
                     </p>
 
                     <button 
                       type="submit" 
-                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
+                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px]"
                     >
                       Bắt đầu tải phần mềm
                     </button>
                   </form>
                 ) : (
                   <div className="text-center py-4">
-                    <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-none">
+                    <div className="w-16 h-16 bg-orange-600/10 text-orange-600 flex items-center justify-center mx-auto mb-4 rounded-full">
                       <Download size={32} className={downloading ? 'animate-bounce' : ''} />
                     </div>
                     <h3 className="text-lg font-black uppercase text-slate-950 tracking-tight mb-2">
@@ -731,28 +575,28 @@ export function ProductsView(_props?: ProductsViewProps) {
                     {downloading ? (
                       <div className="space-y-4">
                         <p className="text-xs text-slate-500 font-medium">Đang chuẩn bị bộ cài dùng thử, brochure hướng dẫn và tài liệu đi kèm...</p>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-none overflow-hidden relative">
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden relative">
                           <div 
                             style={{ width: `${downloadProgress}%` }}
-                            className="h-full bg-orange-600 transition-all duration-150"
+                            className="h-full bg-orange-600 transition-all duration-150 rounded-full"
                           ></div>
                         </div>
                         <span className="text-xs font-sans font-black text-slate-700">{downloadProgress}%</span>
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100">
+                        <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100 rounded-[8px]">
                           <Check size={16} /> Tải phần mềm thành công!
                         </div>
                         <p className="text-xs text-slate-500 font-medium leading-relaxed">
                           Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
                         </p>
                         <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
-                          Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào địa chỉ email của bạn.
+                          Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào thông tin liên hệ của bạn.
                         </p>
                         <button 
                           onClick={() => setModalType(null)}
-                          className="px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
+                          className="px-6 py-2.5 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors rounded-[8px]"
                         >
                           Đóng cửa sổ
                         </button>
@@ -772,7 +616,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                     animate={{ opacity: 1 }}
                     className="text-center py-6 space-y-4"
                   >
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto rounded-none">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto rounded-full">
                       <Check size={24} />
                     </div>
                     <h4 className="text-lg font-black uppercase text-slate-950 tracking-tight">Gửi thông tin thành công!</h4>
@@ -781,192 +625,96 @@ export function ProductsView(_props?: ProductsViewProps) {
                     </p>
                     <button 
                       onClick={() => setModalType(null)}
-                      className="mt-2 px-6 py-2 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors"
+                      className="mt-2 px-6 py-2.5 bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-colors rounded-[8px]"
                     >
                       Đóng
                     </button>
                   </motion.div>
                 ) : (
-                  <form className="space-y-3" onSubmit={handleFormSubmit}>
-                    {/* Row 1: Họ tên & Đơn vị công tác */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Họ tên <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          required 
-                          type="text" 
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="Nguyễn Văn A" 
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.name ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        {formErrors.name && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.name}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Đơn vị công tác
-                        </label>
-                        <input 
-                          type="text" 
-                          value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          placeholder="Trường học, Doanh nghiệp..." 
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
-                        />
-                      </div>
+                  <form className="space-y-4" onSubmit={handleFormSubmit}>
+                    {/* Row 1: Họ tên */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                        Họ tên <span className="text-red-500">*</span>
+                      </label>
+                      <input 
+                        required 
+                        type="text" 
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Nhập họ và tên" 
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
+                      />
+                      {formErrors.name && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.name}</p>
+                      )}
                     </div>
 
-                    {/* Row 2: Địa chỉ & Tỉnh/Thành phố */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Địa chỉ
-                        </label>
-                        <input 
-                          type="text" 
-                          value={formData.address}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder="Số nhà, tên đường..." 
-                          className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Chọn tỉnh/thành phố <span className="text-red-500">*</span>
-                        </label>
-                        <select 
-                          required
-                          value={formData.province}
-                          onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.province ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 cursor-pointer`}
-                        >
-                          <option value="">-- Chọn tỉnh/TP --</option>
-                          {PROVINCES.map((p) => (
-                            <option key={p} value={p}>{p}</option>
-                          ))}
-                        </select>
-                        {formErrors.province && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.province}</p>
-                        )}
-                      </div>
+                    {/* Row 2: Số điện thoại */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                        Số điện thoại <span className="text-red-500">*</span>
+                      </label>
+                      <input 
+                        required 
+                        type="tel" 
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="Nhập số điện thoại" 
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
+                      />
+                      {formErrors.phone && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.phone}</p>
+                      )}
                     </div>
 
-                    {/* Row 3: Email & Điện thoại di động */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Email <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          required 
-                          type="email" 
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="username@domain.com" 
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.email ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        {formErrors.email && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.email}</p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                          Điện thoại di động <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          required 
-                          type="tel" 
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="09xx xxx xxx" 
-                          className={`w-full bg-slate-50 border ${
-                            formErrors.phone ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        {formErrors.phone && (
-                          <p className="text-[11px] text-red-500 font-bold">{formErrors.phone}</p>
-                        )}
-                      </div>
+                    {/* Row 3: Email */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                        Email
+                      </label>
+                      <input 
+                        type="email" 
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="Nhập email liên hệ" 
+                        className={`w-full bg-slate-50 border ${
+                          formErrors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
+                        } focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all`}
+                      />
+                      {formErrors.email && (
+                        <p className="text-xs text-red-500 font-bold">{formErrors.email}</p>
+                      )}
                     </div>
 
                     {/* Row 4: Ghi chú */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                         Ghi chú
                       </label>
                       <textarea 
                         rows={2} 
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder={modalType === 'contact' ? "Tôi muốn nhận báo giá chi tiết..." : "Yêu cầu thêm về sản phẩm..."}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800 resize-none"
+                        placeholder="Mô tả nhu cầu của bạn..."
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:outline-none focus:bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 rounded-[8px] transition-all resize-none"
                       />
-                    </div>
-
-                    {/* Row 5: Nhập mã bảo mật & captcha Display */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
-                        Nhập mã bảo mật <span className="text-red-500">*</span>
-                      </label>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <input 
-                          required 
-                          type="text" 
-                          value={formData.captchaInput}
-                          onChange={(e) => setFormData({ ...formData, captchaInput: e.target.value })}
-                          placeholder="Nhập mã bảo mật" 
-                          className={`flex-1 bg-slate-50 border ${
-                            formErrors.captchaInput ? 'border-red-500' : 'border-slate-200'
-                          } focus:border-orange-600 focus:outline-none px-3.5 py-2 text-sm font-bold text-slate-800`}
-                        />
-                        
-                        <div className="flex items-center gap-2">
-                          <div className="bg-slate-100 border border-slate-300 px-4 py-2 font-mono font-black text-lg tracking-[0.2em] text-orange-600 select-none bg-[linear-gradient(45deg,#f8f9fa_25%,transparent_25%),linear-gradient(-45deg,#f8f9fa_25%,transparent_25%)] bg-[size:12px_12px] relative overflow-hidden flex items-center justify-center min-w-[120px] h-[38px] shadow-inner">
-                            <span className="relative z-10 skew-x-12 select-none line-through decoration-slate-400 decoration-2">{captchaValue}</span>
-                            <div className="absolute inset-0 opacity-25 pointer-events-none">
-                              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-orange-600 -rotate-12"></div>
-                              <div className="absolute top-1/3 left-0 w-full h-[1px] bg-slate-900 rotate-12"></div>
-                              <div className="absolute top-2/3 left-0 w-full h-[1px] bg-orange-600 rotate-6"></div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={regenerateCaptcha}
-                            className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors border border-slate-200 flex items-center justify-center h-[38px] w-[38px]"
-                            title="Đổi mã bảo mật"
-                          >
-                            <RefreshCw size={16} />
-                          </button>
-                        </div>
-                      </div>
-                      {formErrors.captchaInput && (
-                        <p className="text-xs text-red-500 font-bold">{formErrors.captchaInput}</p>
-                      )}
                     </div>
 
                     {/* Note block */}
                     <p className="text-[11px] text-orange-600 font-bold italic pt-0.5">
-                      *Vui lòng điền đúng thông tin, chúng tôi sẽ liên hệ qua email của bạn
+                      *Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn
                     </p>
 
                     <button 
                       type="submit" 
-                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-colors shadow-lg shadow-orange-600/20"
+                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px]"
                     >
-                      {modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký bản quyền ngay'}
+                      {modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký ngay'}
                     </button>
                   </form>
                 )}

@@ -1005,7 +1005,7 @@ export function NewsView({
                               required
                               value={consultName}
                               onChange={(e) => setConsultName(e.target.value)}
-                              placeholder="Nguyễn Văn A"
+                              placeholder="Nhập họ và tên"
                               className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
                             />
                           </div>
@@ -1017,7 +1017,7 @@ export function NewsView({
                               required
                               value={consultEmail}
                               onChange={(e) => setConsultEmail(e.target.value)}
-                              placeholder="email@congty.com"
+                              placeholder="Nhập email liên hệ"
                               className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
                             />
                           </div>
@@ -1029,7 +1029,7 @@ export function NewsView({
                             rows={3}
                             value={consultMessage}
                             onChange={(e) => setConsultMessage(e.target.value)}
-                            placeholder="Tôi muốn nhận thông tin tư vấn giải pháp..."
+                            placeholder="Mô tả nhu cầu của bạn..."
                             className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white resize-none transition-colors rounded-[8px]"
                           />
                         </div>
@@ -1691,7 +1691,7 @@ export function NewsView({
                         required
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
-                        placeholder="Địa chỉ email của bạn"
+                        placeholder="Nhập email liên hệ"
                         className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 text-xs px-4 py-3 rounded-xl placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white transition-all"
                       />
 
