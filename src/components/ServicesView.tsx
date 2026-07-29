@@ -212,7 +212,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                     {/* Headline */}
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase leading-[1.15]">
-                      GIẢI PHÁP & <span className="text-orange-500">DỊCH VỤ</span> CÔNG NGHỆ
+                      GIẢI PHÁP & <span className="text-orange-500">DỊCH VỤ</span> <span className="whitespace-nowrap">CÔNG NGHỆ</span>
                     </h1>
 
                     {/* Subtitle / Description */}
@@ -377,18 +377,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
                                   {getServiceExcerpt(service)}
                                 </p>
-
-                                {/* Highlights bullets */}
-                                <div className="space-y-1.5 pt-1">
-                                  <div className="flex items-center gap-2 text-[11px] font-medium text-slate-700">
-                                    <CheckCircle2 size={13} className="text-orange-600 shrink-0" />
-                                    <span>Tối ưu chi phí & đảm bảo tiến độ triển khai</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-[11px] font-medium text-slate-700">
-                                    <CheckCircle2 size={13} className="text-orange-600 shrink-0" />
-                                    <span>Đội ngũ chuyên gia trên 35+ năm kinh nghiệm</span>
-                                  </div>
-                                </div>
                               </div>
                             </div>
 

@@ -518,10 +518,9 @@ export const HomeView = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[500px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
             {filteredProjects.length > 0 ? (
               filteredProjects.map((proj, i) => {
-                const isFullWidth = proj.size === 'full' || proj.id === 1;
                 return (
                   <motion.div 
                     key={proj.id}
@@ -531,34 +530,33 @@ export const HomeView = ({
                     transition={{ duration: 0.8, delay: (i % 3) * 0.1, ease: [0.21, 1.11, 0.81, 0.99] }}
                     viewport={{ once: true, margin: "-50px" }}
                     onClick={() => setSelectedProject(proj)}
-                    className={`group relative overflow-hidden rounded-none cursor-pointer shadow-2xl border border-white/10
-                      ${isFullWidth ? 'col-span-12 h-[320px] md:h-[380px]' : 'col-span-12 md:col-span-4 lg:col-span-4 h-[260px] md:h-[280px]'}
-                    `}
+                    className="group relative overflow-hidden rounded-[10px] cursor-pointer shadow-md hover:shadow-xl border border-slate-200/80 aspect-video w-full bg-slate-900 transition-all duration-300"
                   >
                     {/* Static Image (Dimmed) */}
                     <img 
                       src={proj.img} 
                       alt={proj.name} 
-                      className="w-full h-full object-cover transition-all duration-1000 grayscale-[40%] brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-110" 
+                      className="w-full h-full object-cover transition-all duration-700 grayscale-[20%] brightness-90 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105" 
+                      referrerPolicy="no-referrer"
                     />
                     
                     {/* Static Overlay (Dim) */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent opacity-85 group-hover:opacity-60 transition-opacity duration-500"></div>
                     
-                    {/* Static Title (Bottom Left) */}
-                    <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 transition-all duration-500 group-hover:translate-x-2">
+                    {/* Title (Bottom Left) */}
+                    <div className="absolute bottom-5 left-5 right-5 md:bottom-6 md:left-6 md:right-6 transition-all duration-500 group-hover:translate-x-1">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <div className="text-orange-600 text-[10px] font-black uppercase tracking-[0.15em]">{proj.location}</div>
-                        <div className="w-1 h-1 bg-white/30 rounded-none"></div>
-                        <div className="text-white/60 text-[10px] font-black uppercase tracking-[0.15em]">
+                        <div className="text-orange-500 text-[11px] font-extrabold uppercase tracking-widest">{proj.location}</div>
+                        <div className="w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+                        <div className="text-white/80 text-[11px] font-bold uppercase tracking-widest">
                           {proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn'}
                         </div>
                       </div>
-                      <h3 className={`font-black text-white leading-tight ${isFullWidth ? 'text-lg md:text-xl lg:text-2xl max-w-xl' : 'text-base md:text-lg max-w-xs'}`}>{proj.name}</h3>
+                      <h3 className="font-extrabold text-white leading-snug text-base sm:text-lg md:text-xl line-clamp-2 max-w-full">{proj.name}</h3>
                     </div>
 
                     {/* Hover UI (Tags) */}
-                    <div className="absolute top-5 left-5 md:top-6 md:left-6 flex flex-wrap gap-1.5 pr-16">
+                    <div className="absolute top-4 left-4 md:top-5 md:left-5 flex flex-wrap gap-1.5 pr-14">
                       {proj.tags.map((tag, idx) => (
                         <motion.span 
                           key={tag}
@@ -568,8 +566,8 @@ export const HomeView = ({
                             opacity: 1, 
                             x: 0 
                           }}
-                          className="px-2.5 py-1 bg-orange-600 text-white text-[9px] font-black rounded-none uppercase tracking-widest shadow-[0_10px_20px_rgba(234,88,12,0.3)] opacity-0 transform -translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500"
-                          style={{ transitionDelay: `${idx * 80}ms` }}
+                          className="px-2.5 py-1 bg-orange-600 text-white text-[10px] font-bold rounded-[6px] uppercase tracking-wider shadow-md opacity-0 transform -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300"
+                          style={{ transitionDelay: `${idx * 60}ms` }}
                         >
                           {tag}
                         </motion.span>
@@ -577,8 +575,8 @@ export const HomeView = ({
                     </div>
 
                     {/* Hover Icon (Top Right) */}
-                    <div className="absolute top-6 right-6 md:top-8 md:right-8 w-10 h-10 md:w-12 md:h-12 bg-white text-orange-600 rounded-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0 duration-500 shadow-2xl">
-                      <ArrowUpRight size={24} />
+                    <div className="absolute top-4 right-4 md:top-5 md:right-5 w-9 h-9 md:w-10 md:h-10 bg-white text-orange-600 rounded-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 duration-300 shadow-lg">
+                      <ArrowUpRight size={20} />
                     </div>
                   </motion.div>
                 );

@@ -252,7 +252,7 @@ export function ProjectsView({
               </div>
             </div>
 
-            {/* FULL IMAGE SHOWCASE GRID (STUDIO PORTFOLIO - ASYMMETRIC RHYTHM & HOVER OVERLAY) */}
+            {/* FULL IMAGE SHOWCASE GRID (STUDIO PORTFOLIO - 16:9 ASPECT RATIO CARDS) */}
             {paginatedProjects.length === 0 ? (
               <div className="text-center py-20 border border-dashed border-slate-300 space-y-4 rounded-[10px]">
                 <p className="text-slate-500 font-medium text-sm">Không tìm thấy dự án nào phù hợp với bộ lọc hiện tại.</p>
@@ -269,23 +269,8 @@ export function ProjectsView({
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 group/grid">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 group/grid">
                 {paginatedProjects.map((project, idx) => {
-                  // Asymmetric Alternating Grid Layout: 2 items per row
-                  // Row 1: Big (7 cols) - Small (5 cols)
-                  // Row 2: Small (5 cols) - Big (7 cols)
-                  const mod = idx % 4;
-                  let spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]';
-                  if (mod === 0) {
-                    spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // Row 1: Big
-                  } else if (mod === 1) {
-                    spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // Row 1: Small
-                  } else if (mod === 2) {
-                    spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // Row 2: Small
-                  } else if (mod === 3) {
-                    spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // Row 2: Big
-                  }
-
                   return (
                     <motion.div
                       key={project.id}
@@ -294,7 +279,7 @@ export function ProjectsView({
                       viewport={{ once: true }}
                       transition={{ delay: idx * 0.08, duration: 0.6 }}
                       onClick={() => handleSelectProject(project.id)}
-                      className={`relative overflow-hidden cursor-pointer group rounded-[10px] bg-slate-900 transition-all duration-500 group-hover/grid:opacity-50 hover:!opacity-100 ${spanClass}`}
+                      className="relative overflow-hidden cursor-pointer group rounded-[10px] bg-slate-900 transition-all duration-500 group-hover/grid:opacity-50 hover:!opacity-100 aspect-video shadow-xs border border-slate-200/50"
                     >
                       {/* 1. Full Image background */}
                       <img
@@ -308,54 +293,51 @@ export function ProjectsView({
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent transition-opacity duration-500 group-hover:opacity-0" />
 
                       {/* Default state title badge at bottom */}
-                      <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="px-2.5 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider rounded-[8px]">
+                      <div className="absolute bottom-4 left-4 right-4 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-4">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="px-2 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider rounded-[6px]">
                             {project.sector}
                           </span>
                           <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">
                             {project.time}
                           </span>
                         </div>
-                        <h3 className="text-base lg:text-lg font-bold text-white leading-snug line-clamp-1">
+                        <h3 className="text-sm lg:text-base font-bold text-white leading-snug line-clamp-1">
                           {project.name}
                         </h3>
                       </div>
 
                       {/* 3. Full Hover Overlay - Smooth slide-up with dark backdrop & orange accents */}
-                      <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 lg:p-8 flex flex-col justify-end">
-                        <div className="transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-3">
+                      <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-all duration-500 p-4 lg:p-5 flex flex-col justify-end">
+                        <div className="transform translate-y-6 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-2">
                           
                           {/* Accent orange horizontal line */}
                           <div className="w-8 h-0.5 bg-[#FC5115] rounded-[8px]" />
 
-                          {/* Project Title - Refined font size and line clamping for long titles */}
-                          <h3 className="text-base lg:text-xl font-bold text-white leading-snug line-clamp-2">
+                          {/* Project Title */}
+                          <h3 className="text-sm lg:text-base font-bold text-white leading-snug line-clamp-2">
                             {project.name}
                           </h3>
 
                           {/* 1-Line Description */}
-                          <p className="text-xs lg:text-sm text-slate-200 line-clamp-2 font-medium leading-relaxed max-w-3xl">
+                          <p className="text-xs text-slate-200 line-clamp-2 font-normal leading-relaxed">
                             {project.shortDesc}
                           </p>
 
                           {/* Tag pills */}
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            <span className="px-2 py-0.5 bg-white/20 text-white border border-white/20 text-[9px] font-bold uppercase tracking-wider rounded-[6px]">
                               {project.sector}
                             </span>
-                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                            <span className="px-2 py-0.5 bg-white/20 text-white border border-white/20 text-[9px] font-bold uppercase tracking-wider rounded-[6px]">
                               {project.solution}
-                            </span>
-                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
-                              {project.customer}
                             </span>
                           </div>
 
                           {/* Orange Accent CTA with arrow */}
-                          <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115]">
-                            <span>Xem chi tiết dự án</span>
-                            <ArrowRight size={16} className="transform group-hover:translate-x-2 transition-transform duration-300" />
+                          <div className="pt-1 flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#FC5115]">
+                            <span>Xem chi tiết</span>
+                            <ArrowRight size={14} className="transform group-hover:translate-x-2 transition-transform duration-300" />
                           </div>
 
                         </div>
@@ -476,7 +458,7 @@ export function ProjectsView({
                   <>
                     {/* Main Feature Image */}
                     {activeProject.img && (
-                      <div className="rounded-[10px] overflow-hidden border border-slate-200/80 bg-slate-900 h-[280px] sm:h-[360px] relative shadow-2xs mb-6">
+                      <div className="rounded-[10px] overflow-hidden border border-slate-200/80 bg-slate-900 aspect-video relative shadow-2xs mb-6">
                         <img 
                           src={activeProject.img} 
                           alt={activeProject.name} 
@@ -537,7 +519,7 @@ export function ProjectsView({
                           Hình ảnh thực tế dự án
                         </h2>
                         <div className="space-y-3">
-                          <div className="h-[320px] sm:h-[380px] w-full bg-slate-900 overflow-hidden relative rounded-[10px] border border-slate-200">
+                          <div className="aspect-video w-full bg-slate-900 overflow-hidden relative rounded-[10px] border border-slate-200">
                             <img
                               src={activeProject.gallery[activeGalleryIndex]}
                               alt="Project gallery view"
@@ -773,7 +755,7 @@ export function ProjectsView({
                       onClick={() => handleSelectProject(proj.id)}
                       className="bg-white border border-slate-200 hover:border-orange-500 group cursor-pointer flex flex-col hover:shadow-md transition-all duration-300 rounded-[10px] overflow-hidden"
                     >
-                      <div className="h-40 overflow-hidden relative">
+                      <div className="aspect-video overflow-hidden relative">
                         <img src={proj.img} alt={proj.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
                         <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-md">
                           {proj.location}

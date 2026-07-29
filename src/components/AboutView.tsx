@@ -61,15 +61,17 @@ import {
   hardwarePartners
 } from '../data/aboutData';
 
-const SectionHeader = ({ title, sub, dark }: { title: string; sub: string; dark?: boolean }) => (
+const SectionHeader = ({ title, sub, dark }: { title: string; sub?: string; dark?: boolean }) => (
   <div className="text-center mb-6">
     <h2 className={`text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 ${dark ? 'text-white' : 'text-slate-950'}`}>
       {title}
     </h2>
     <div className="w-16 h-1 bg-orange-600 mx-auto mt-2 mb-4"></div>
-    <p className={`font-bold uppercase tracking-widest text-[10px] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-      {sub}
-    </p>
+    {sub && (
+      <p className={`font-bold uppercase tracking-widest text-[10px] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
+        {sub}
+      </p>
+    )}
   </div>
 );
 
@@ -189,11 +191,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
-              className="w-full space-y-12 lg:space-y-16"
+              className="w-full space-y-6 lg:space-y-8"
              >
                 {/* 0. Giới Thiệu & Video */}
-                <section className="pb-8 lg:pb-10 bg-white relative overflow-hidden z-10 border-b border-slate-100">
+                <section className="pb-4 lg:pb-6 bg-white relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="w-full relative z-10">
+                    <SectionHeader 
+                      title="Tổng quan doanh nghiệp" 
+                    />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                       <div>
                         <p className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
@@ -222,18 +227,18 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* 3. Tiến Trình Phát Triển (Timeline) */}
-                <section className="py-16 bg-white relative overflow-hidden border-b border-slate-100 z-10">
+                <section className="py-6 md:py-8 bg-white relative overflow-hidden border-b border-slate-100 z-10">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="text-center mb-16">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-full mb-4">
+                    <div className="text-center mb-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-full mb-2">
                         <span className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
                         <span className="text-[10px] font-black uppercase tracking-widest">Hành trình 35 năm</span>
                       </div>
-                      <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 text-slate-900">Lịch sử phát triển</h2>
-                      <p className="text-slate-500 max-w-2xl mx-auto">Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.</p>
+                      <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">Lịch sử phát triển</h2>
+                      <p className="text-slate-500 max-w-2xl mx-auto text-sm">Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.</p>
                     </div>
 
-                    <div className="relative max-w-6xl mx-auto px-4 mt-8 md:mt-16">
+                    <div className="relative max-w-6xl mx-auto px-4 mt-4 md:mt-6">
                       {/* Horizontal Line - Thin */}
                       <div className="absolute top-[28px] left-[10%] right-[10%] h-[1px] bg-slate-300 hidden md:block"></div>
                       
@@ -478,16 +483,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             className="space-y-12"
           >
             {/* Structural Banner */}
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <h2 className="text-2xl md:text-4xl font-black text-slate-950 uppercase tracking-tight font-sans leading-tight">
-                CƠ CẤU TỔ CHỨC
-              </h2>
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <div className="w-12 h-[2px] bg-gradient-to-r from-transparent to-orange-500"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-orange-600"></div>
-                <div className="w-12 h-[2px] bg-gradient-to-l from-transparent to-orange-500"></div>
-              </div>
-            </div>
+            <SectionHeader title="Cơ cấu tổ chức" />
 
             {/* Sơ đồ cơ cấu tổ chức chuẩn xác theo sơ đồ gốc CIC - Tự động co giãn full chiều ngang không kéo scrollbar trên PC */}
             <div className="w-full overflow-x-auto lg:overflow-x-visible py-2">
@@ -725,14 +721,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             {/* Top Capacity & Scale Overview */}
             <div className="w-full bg-white">
               <div className="max-w-7xl mx-auto relative z-10">
-                <div className="flex flex-col items-center text-center">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-100 text-orange-600 rounded-full mb-6">
-                    <span className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Năng lực & Quy mô</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 mb-6 leading-tight">
+                <div className="flex flex-col items-center text-center pt-2">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight">
                     Tiềm lực vững vàng, <br/><span className="text-orange-600">vươn tầm quốc tế</span>
                   </h2>
+                  <div className="w-16 h-1 bg-orange-600 mx-auto mt-3 mb-6"></div>
                   <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl">
                     Trải qua 35 năm hình thành và phát triển, CIC đã xây dựng được một đội ngũ nhân sự chất lượng cao, mạng lưới đối tác toàn cầu và danh mục khách hàng rộng khắp, khẳng định vị thế vững chắc trong lĩnh vực công nghệ và xây dựng.
                   </p>

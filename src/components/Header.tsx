@@ -238,7 +238,7 @@ export const Header = ({
                                 setActiveLink(link.name);
                               }
                             }}
-                            className="block px-4 py-2 text-[15px] font-semibold text-slate-800 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap"
+                            className="block px-4 py-2 text-[15px] font-normal text-slate-800 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap"
                           >
                             {subItem.name}
                           </a>
@@ -469,7 +469,7 @@ export const Header = ({
                           <a
                             key={subItem.name}
                             href={subItem.href}
-                            className="text-base font-semibold text-slate-200 hover:text-orange-500 transition-colors py-1.5"
+                            className="text-base font-normal text-slate-200 hover:text-orange-500 transition-colors py-1.5"
                              onClick={(e) => {
                               setMobileMenuOpen(false);
                               if (link.name === 'Giới thiệu') {

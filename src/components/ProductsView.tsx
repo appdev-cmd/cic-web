@@ -802,12 +802,12 @@ export function ProductsView(_props?: ProductsViewProps) {
           >
             {/* Sidebar Title */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-5">
-              <span className="flex items-center gap-2 font-bold uppercase tracking-wider text-xs text-slate-900">
-                <SlidersHorizontal size={15} className="text-orange-600" />
+              <span className="flex items-center gap-2 font-bold uppercase tracking-wider text-sm text-slate-900">
+                <SlidersHorizontal size={16} className="text-orange-600" />
                 Bộ lọc tìm kiếm
               </span>
               {activeFiltersCount > 0 && (
-                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded-[8px]">
+                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-[8px]">
                   Đã chọn {activeFiltersCount}
                 </span>
               )}
@@ -815,22 +815,22 @@ export function ProductsView(_props?: ProductsViewProps) {
 
             {/* Compact Search Input */}
             <div className="mb-5">
-              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">Từ khóa</label>
+              <label className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-1.5">Từ khóa</label>
               <div className="relative">
                 <input 
                   type="text" 
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                   placeholder="Nhập tên sản phẩm..."
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 text-xs font-medium text-slate-800 transition-all placeholder:text-slate-400 rounded-[8px]"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 text-sm font-medium text-slate-800 transition-all placeholder:text-slate-400 rounded-[8px]"
                 />
-                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 {search && (
                   <button 
                     onClick={() => setSearch('')}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
-                    <X size={12} />
+                    <X size={14} />
                   </button>
                 )}
               </div>
@@ -840,13 +840,13 @@ export function ProductsView(_props?: ProductsViewProps) {
             <div className="border-b border-slate-100 pb-3 mb-3">
               <div 
                 onClick={() => setIsFieldsOpen(!isFieldsOpen)}
-                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+                className="flex items-center justify-between cursor-pointer py-1.5 text-sm font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
               >
                 <span className="flex items-center gap-1.5">
-                  <Layers size={13} className="text-orange-600" />
+                  <Layers size={15} className="text-orange-600" />
                   Lĩnh vực
                   {selectedFields.length > 0 && (
-                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-xs font-bold rounded-full">
                       {selectedFields.length}
                     </span>
                   )}
@@ -855,13 +855,13 @@ export function ProductsView(_props?: ProductsViewProps) {
                   {selectedFields.length > 0 && (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedFields([]); }} 
-                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      className="text-xs font-medium text-slate-400 hover:text-orange-600 normal-case"
                       title="Xóa bộ lọc lĩnh vực"
                     >
                       Xóa
                     </button>
                   )}
-                  {isFieldsOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                  {isFieldsOpen ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
                 </div>
               </div>
 
@@ -879,28 +879,28 @@ export function ProductsView(_props?: ProductsViewProps) {
                       <button
                         key={field}
                         onClick={() => toggleFilterItem(selectedFields, setSelectedFields, field)}
-                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-sm transition-all border-l-2 ${
                           isSelected 
-                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
-                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                            ? 'border-orange-600 bg-orange-50/80 text-orange-600 font-normal' 
+                            : 'border-transparent text-slate-600 font-normal hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                          <div className={`w-4 h-4 border flex items-center justify-center shrink-0 transition-colors ${
                             isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
                           }`}>
-                            {isSelected && <Check size={10} strokeWidth={3} />}
+                            {isSelected && <Check size={11} strokeWidth={3} />}
                           </div>
                           <span className="truncate">{field}</span>
                         </div>
-                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                        <span className="text-xs text-slate-400 font-normal ml-1">({count})</span>
                       </button>
                     );
                   })}
                   {fields.length > 10 && (
                     <button
                       onClick={() => setIsFieldsExpanded(!isFieldsExpanded)}
-                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
+                      className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
                     >
                       {isFieldsExpanded ? 'Thu gọn ▲' : `Xem thêm (${fields.length - 10}) ▼`}
                     </button>
@@ -913,13 +913,13 @@ export function ProductsView(_props?: ProductsViewProps) {
             <div className="border-b border-slate-100 pb-3 mb-3">
               <div 
                 onClick={() => setIsBrandsOpen(!isBrandsOpen)}
-                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+                className="flex items-center justify-between cursor-pointer py-1.5 text-sm font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
               >
                 <span className="flex items-center gap-1.5">
-                  <Box size={13} className="text-orange-600" />
+                  <Box size={15} className="text-orange-600" />
                   Hãng phát triển
                   {selectedBrands.length > 0 && (
-                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-xs font-bold rounded-full">
                       {selectedBrands.length}
                     </span>
                   )}
@@ -928,13 +928,13 @@ export function ProductsView(_props?: ProductsViewProps) {
                   {selectedBrands.length > 0 && (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedBrands([]); }} 
-                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      className="text-xs font-medium text-slate-400 hover:text-orange-600 normal-case"
                       title="Xóa bộ lọc hãng phát triển"
                     >
                       Xóa
                     </button>
                   )}
-                  {isBrandsOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                  {isBrandsOpen ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
                 </div>
               </div>
 
@@ -952,28 +952,28 @@ export function ProductsView(_props?: ProductsViewProps) {
                       <button
                         key={brand}
                         onClick={() => toggleFilterItem(selectedBrands, setSelectedBrands, brand)}
-                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-sm transition-all border-l-2 ${
                           isSelected 
-                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
-                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                            ? 'border-orange-600 bg-orange-50/80 text-orange-600 font-normal' 
+                            : 'border-transparent text-slate-600 font-normal hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                          <div className={`w-4 h-4 border flex items-center justify-center shrink-0 transition-colors ${
                             isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
                           }`}>
-                            {isSelected && <Check size={10} strokeWidth={3} />}
+                            {isSelected && <Check size={11} strokeWidth={3} />}
                           </div>
                           <span className="truncate">{brand}</span>
                         </div>
-                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                        <span className="text-xs text-slate-400 font-normal ml-1">({count})</span>
                       </button>
                     );
                   })}
                   {brands.length > 10 && (
                     <button
                       onClick={() => setIsBrandsExpanded(!isBrandsExpanded)}
-                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
+                      className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
                     >
                       {isBrandsExpanded ? 'Thu gọn ▲' : `Xem thêm (${brands.length - 10}) ▼`}
                     </button>
@@ -986,13 +986,13 @@ export function ProductsView(_props?: ProductsViewProps) {
             <div className="border-b border-slate-100 pb-3 mb-3">
               <div 
                 onClick={() => setIsAppsOpen(!isAppsOpen)}
-                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+                className="flex items-center justify-between cursor-pointer py-1.5 text-sm font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
               >
                 <span className="flex items-center gap-1.5">
-                  <FileText size={13} className="text-orange-600" />
+                  <FileText size={15} className="text-orange-600" />
                   Ứng dụng
                   {selectedApps.length > 0 && (
-                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-xs font-bold rounded-full">
                       {selectedApps.length}
                     </span>
                   )}
@@ -1001,13 +1001,13 @@ export function ProductsView(_props?: ProductsViewProps) {
                   {selectedApps.length > 0 && (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedApps([]); }} 
-                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      className="text-xs font-medium text-slate-400 hover:text-orange-600 normal-case"
                       title="Xóa bộ lọc ứng dụng"
                     >
                       Xóa
                     </button>
                   )}
-                  {isAppsOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                  {isAppsOpen ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
                 </div>
               </div>
 
@@ -1025,28 +1025,28 @@ export function ProductsView(_props?: ProductsViewProps) {
                       <button
                         key={app}
                         onClick={() => toggleFilterItem(selectedApps, setSelectedApps, app)}
-                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-sm transition-all border-l-2 ${
                           isSelected 
-                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
-                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                            ? 'border-orange-600 bg-orange-50/80 text-orange-600 font-normal' 
+                            : 'border-transparent text-slate-600 font-normal hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                          <div className={`w-4 h-4 border flex items-center justify-center shrink-0 transition-colors ${
                             isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
                           }`}>
-                            {isSelected && <Check size={10} strokeWidth={3} />}
+                            {isSelected && <Check size={11} strokeWidth={3} />}
                           </div>
                           <span className="truncate">{app}</span>
                         </div>
-                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                        <span className="text-xs text-slate-400 font-normal ml-1">({count})</span>
                       </button>
                     );
                   })}
                   {apps.length > 10 && (
                     <button
                       onClick={() => setIsAppsExpanded(!isAppsExpanded)}
-                      className="text-[11px] font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
+                      className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
                     >
                       {isAppsExpanded ? 'Thu gọn ▲' : `Xem thêm (${apps.length - 10}) ▼`}
                     </button>
@@ -1059,13 +1059,13 @@ export function ProductsView(_props?: ProductsViewProps) {
             <div>
               <div 
                 onClick={() => setIsTypesOpen(!isTypesOpen)}
-                className="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
+                className="flex items-center justify-between cursor-pointer py-1.5 text-sm font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
               >
                 <span className="flex items-center gap-1.5">
-                  <Tag size={13} className="text-orange-600" />
+                  <Tag size={15} className="text-orange-600" />
                   Loại sản phẩm
                   {selectedProductTypes.length > 0 && (
-                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-[10px] font-bold rounded-full">
+                    <span className="px-1.5 py-0.2 bg-orange-600 text-white text-xs font-bold rounded-full">
                       {selectedProductTypes.length}
                     </span>
                   )}
@@ -1074,13 +1074,13 @@ export function ProductsView(_props?: ProductsViewProps) {
                   {selectedProductTypes.length > 0 && (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedProductTypes([]); }} 
-                      className="text-[10px] font-medium text-slate-400 hover:text-orange-600 normal-case"
+                      className="text-xs font-medium text-slate-400 hover:text-orange-600 normal-case"
                       title="Xóa bộ lọc loại sản phẩm"
                     >
                       Xóa
                     </button>
                   )}
-                  {isTypesOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                  {isTypesOpen ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
                 </div>
               </div>
 
@@ -1098,21 +1098,21 @@ export function ProductsView(_props?: ProductsViewProps) {
                       <button
                         key={type}
                         onClick={() => toggleFilterItem(selectedProductTypes, setSelectedProductTypes, type)}
-                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-xs transition-all border-l-2 ${
+                        className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-sm transition-all border-l-2 ${
                           isSelected 
-                            ? 'border-orange-600 bg-orange-50/80 text-slate-950 font-bold' 
-                            : 'border-transparent text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
+                            ? 'border-orange-600 bg-orange-50/80 text-orange-600 font-normal' 
+                            : 'border-transparent text-slate-600 font-normal hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className={`w-3.5 h-3.5 border flex items-center justify-center shrink-0 transition-colors ${
+                          <div className={`w-4 h-4 border flex items-center justify-center shrink-0 transition-colors ${
                             isSelected ? 'bg-orange-600 border-orange-600 text-white' : 'border-slate-300 bg-white'
                           }`}>
-                            {isSelected && <Check size={10} strokeWidth={3} />}
+                            {isSelected && <Check size={11} strokeWidth={3} />}
                           </div>
                           <span className="truncate">{type}</span>
                         </div>
-                        <span className="text-[11px] text-slate-400 font-normal ml-1">({count})</span>
+                        <span className="text-xs text-slate-400 font-normal ml-1">({count})</span>
                       </button>
                     );
                   })}
@@ -1250,67 +1250,47 @@ export function ProductsView(_props?: ProductsViewProps) {
                 {paginatedProducts.map((product, idx) => (
                   <motion.div
                     key={product.id}
-                    initial={{ opacity: 0, y: 25 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: idx * 0.05 }}
+                    transition={{ duration: 0.4, delay: idx * 0.04 }}
                     onClick={() => { setSelectedProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="bg-white border border-slate-200/90 hover:border-orange-500 p-3 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 rounded-[10px] group flex flex-col overflow-hidden relative cursor-pointer"
+                    className="bg-white border border-slate-200/90 hover:border-orange-500 p-5 sm:p-6 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 rounded-[12px] group flex flex-col justify-between cursor-pointer relative overflow-hidden min-h-[285px] sm:min-h-[305px]"
                   >
-                    {/* Field badge in top corner */}
-                    <div className="absolute top-5 left-5 z-10">
-                      <span className="px-3 py-1 bg-slate-950 text-white text-[9px] font-black uppercase tracking-widest rounded-[8px]">
-                        {product.field}
-                      </span>
-                    </div>
-
-                    {/* Image Area */}
-                    <div className="h-52 overflow-hidden bg-white border border-slate-100 relative rounded-[10px] p-4 flex items-center justify-center">
-                      <img 
-                        src={product.img || product.icon} 
-                        alt={product.name}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="p-4 sm:p-5 flex-1 flex flex-col gap-2.5">
-                      <div className="space-y-1.5">
-                        {/* Brand & App badges */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="px-2 py-0.5 bg-orange-600/10 text-orange-600 text-[9px] font-black uppercase tracking-wider rounded-[8px]">
-                            {product.productType || getProductType(product)}
-                          </span>
-                          <span className="text-[9px] font-sans font-black uppercase text-slate-600 tracking-wider">
-                            {product.brand}
-                          </span>
-                          <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                            • {product.app}
-                          </span>
+                    <div className="space-y-4">
+                      {/* Image on Left (Logo size), Title on Right */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-slate-50 border border-slate-200/80 rounded-[8px] p-1.5 flex items-center justify-center overflow-hidden group-hover:border-orange-200 transition-colors">
+                          <img 
+                            src={product.img || product.icon} 
+                            alt={product.name}
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                          />
                         </div>
-
-                        {/* Title */}
-                        <h3 className="text-base font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
+                        <h3 className="text-xs sm:text-sm font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
                           {product.name}
                         </h3>
                       </div>
 
-                      {/* Description */}
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-3">
-                        {product.description}
-                      </p>
-
-                      {/* Spacer */}
-                      <div className="flex-1"></div>
-
                       {/* Price Section */}
-                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Giá bán:</span>
-                        <span className="text-sm font-black text-orange-600 tracking-tight">
+                      <div className="flex items-center gap-2 pt-1">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Giá bán:</span>
+                        <span className="text-base font-black text-orange-600 tracking-tight">
                           {product.price === 'Liên hệ' ? 'Liên hệ' : product.price}
                         </span>
                       </div>
+
+                      {/* Short Description */}
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-3 pt-3 border-t border-slate-100">
+                        {product.description}
+                      </p>
+                    </div>
+
+                    {/* Product Details Action at Bottom */}
+                    <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
+                      <span className="font-bold tracking-tight">Chi tiết sản phẩm</span>
+                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </div>
                   </motion.div>
                 ))}

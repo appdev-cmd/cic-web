@@ -1,19 +1,19 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 @theme {
-  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
-  --font-display: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
-  --font-mono: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  --font-sans: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  --font-display: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  --font-mono: "Roboto", "Be Vietnam Pro", monospace;
 }
 
 html {
   scroll-behavior: smooth;
-  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  font-family: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
 }
 
 body {
-  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  font-family: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -134,7 +134,7 @@ input[type="button"],
 /* Service CMS Content styling - matches Corporate Overview (Tổng quan doanh nghiệp) typography */
 .service-cms-content,
 .service-cms-content * {
-  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif !important;
+  font-family: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif !important;
 }
 
 .service-cms-content p,
