@@ -234,7 +234,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-8 text-center space-y-4"
                 >
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-none mb-2 border border-green-200">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-[8px] mb-2 border border-green-200">
                     <CheckCircle2 size={36} className="stroke-[1.5]" />
                   </div>
                   <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight">
@@ -257,7 +257,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                         setIsSuccess(false);
                         onClose();
                       }}
-                      className="px-8 py-3 bg-slate-950 text-white text-xs font-black uppercase tracking-wider transition-all hover:bg-orange-600"
+                      className="px-8 py-3 bg-slate-950 text-white text-xs font-black uppercase tracking-wider transition-all hover:bg-orange-600 rounded-[8px]"
                     >
                       Xác nhận & Quay lại
                     </button>

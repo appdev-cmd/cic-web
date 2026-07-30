@@ -127,8 +127,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/40"></div>
           </div>
           <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-none mb-4 lg:mb-6 backdrop-blur-md">
-              <span className="flex h-2 w-2 rounded-none bg-orange-600 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-[8px] mb-4 lg:mb-6 backdrop-blur-md">
+              <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
                 Về chúng tôi
               </span>
@@ -157,7 +157,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     setActiveTab(tab.id as any);
                     window.scrollTo({ top: 320, behavior: 'smooth' });
                   }}
-                  className={`relative px-4 py-4 text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-2 rounded-none ${
+                  className={`relative px-4 py-4 text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-2 rounded-[8px] ${
                     active 
                       ? 'text-orange-600' 
                       : 'text-slate-500 hover:text-slate-900'
@@ -211,9 +211,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                           Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng, quyết đoán, và năng động cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm. Chúng tôi luôn gắn bó với sứ mệnh: “Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ công nghệ thông tin hiện đại, có tính ứng dụng cao để hỗ trợ các kỹ sư, doanh nghiệp, cơ quan nghiên cứu, các nhà quản lý trong công tác nghiên cứu, sản xuất, điều hành tại Việt Nam và các nước trong khu vực; đồng thời không ngừng phát triển nhằm góp phần vào sự hội nhập và phát triển chung của đất nước, đem lại thu nhập cao ổn định cho cán bộ công nhân viên cũng như hài hoà với lợi ích của cổ đông.”
                         </p>
                       </div>
-                      <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl border-4 border-slate-100 bg-slate-900">
+                      <div className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-slate-900">
                         <iframe 
-                          className="w-full h-full"
+                          className="w-full h-full rounded-[10px]"
                           src="https://www.youtube.com/embed/hdLFK_09-tU?start=448" 
                           title="YouTube video player" 
                           frameBorder="0" 
@@ -230,7 +230,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 <section className="py-6 md:py-8 bg-white relative overflow-hidden border-b border-slate-100 z-10">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-6">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-full mb-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-[8px] mb-2">
                         <span className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
                         <span className="text-[10px] font-black uppercase tracking-widest">Hành trình 35 năm</span>
                       </div>
@@ -278,16 +278,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                       {/* Left: Illustration */}
-                      <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-sm group hidden lg:block">
-                        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+                      <div className="relative aspect-[4/5] rounded-[10px] overflow-hidden shadow-sm group hidden lg:block">
+                        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
                       </div>
 
                       {/* Right: Content Blocks */}
                       <div className="flex flex-col gap-6">
                         {/* Sứ mệnh */}
-                        <div className="p-8 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 items-start hover:border-orange-200 transition-colors">
-                          <div className="w-14 h-14 shrink-0 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
+                        <div className="p-8 bg-white rounded-[10px] border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 items-start hover:border-orange-200 transition-colors">
+                          <div className="w-14 h-14 shrink-0 rounded-[8px] bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
                             <ShieldCheck size={28} />
                           </div>
                           <div>
@@ -299,8 +299,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                         </div>
 
                         {/* Tầm nhìn */}
-                        <div className="p-8 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 items-start hover:border-blue-200 transition-colors">
-                          <div className="w-14 h-14 shrink-0 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                        <div className="p-8 bg-white rounded-[10px] border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 items-start hover:border-blue-200 transition-colors">
+                          <div className="w-14 h-14 shrink-0 rounded-[8px] bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
                             <Globe size={28} />
                           </div>
                           <div>
@@ -312,8 +312,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                         </div>
 
                         {/* Giá trị cốt lõi */}
-                        <div className="p-8 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 items-start hover:border-orange-200 transition-colors">
-                          <div className="w-14 h-14 shrink-0 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
+                        <div className="p-8 bg-white rounded-[10px] border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 items-start hover:border-orange-200 transition-colors">
+                          <div className="w-14 h-14 shrink-0 rounded-[8px] bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
                             <Award size={28} />
                           </div>
                           <div className="relative z-10 w-full">
@@ -359,9 +359,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                       ].map((item, i) => (
                         <div 
                           key={i}
-                          className="flex flex-col gap-4 p-5 md:p-6 bg-slate-50 border border-slate-200 rounded-2xl hover:border-orange-300 hover:shadow-md transition-all"
+                          className="flex flex-col gap-4 p-5 md:p-6 bg-slate-50 border border-slate-200 rounded-[10px] hover:border-orange-300 hover:shadow-md transition-all"
                         >
-                          <div className="w-14 h-14 shrink-0 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-orange-600 shadow-sm">
+                          <div className="w-14 h-14 shrink-0 rounded-[8px] bg-white border border-slate-200 flex items-center justify-center text-orange-600 shadow-sm">
                             {item.icon}
                           </div>
                           <div>
@@ -396,7 +396,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                       ].map((award, i) => (
                         <div 
                           key={i}
-                          className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col items-center hover:border-orange-300 hover:shadow-md transition-all duration-300"
+                          className="bg-white p-4 rounded-[10px] border border-slate-200 flex flex-col items-center hover:border-orange-300 hover:shadow-md transition-all duration-300"
                         >
                           <div className="h-20 flex items-center justify-center overflow-hidden mb-3 w-full">
                             <img src={award.img} alt={award.name} className="max-h-full max-w-full object-contain" />
@@ -426,20 +426,20 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     
                     {/* Modern Photo Album (Bento Grid) */}
                     <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[250px] mb-12">
-                      <div className="md:col-span-8 rounded-3xl overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
+                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                      <div className="md:col-span-4 rounded-3xl overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                      <div className="md:col-span-4 rounded-3xl overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
+                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
-                      <div className="md:col-span-8 rounded-3xl overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
+                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     </div>
@@ -458,7 +458,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                       {[...partners, ...partners].map((partner, i) => (
                         <div 
                           key={i}
-                          className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-lg bg-slate-50 border border-slate-100 h-20 md:h-24 w-44 md:w-48"
+                          className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-[10px] bg-slate-50 border border-slate-100 h-20 md:h-24 w-44 md:w-48"
                         >
                           <img 
                             src={partner.logo} 
@@ -731,19 +731,19 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                   </p>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full">
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
                       <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">150+</div>
                       <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Nhân sự chất lượng cao</div>
                     </div>
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
                       <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">100+</div>
                       <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Đối tác toàn cầu</div>
                     </div>
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
                       <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">5.000+</div>
                       <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Dự án thành công</div>
                     </div>
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
+                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
                       <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">35+</div>
                       <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Năm kinh nghiệm</div>
                     </div>
@@ -752,8 +752,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                   <div className="flex flex-col gap-12 lg:gap-16 text-left w-full mb-12">
                     {/* 1. Phát triển nguồn nhân lực chất lượng cao */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
-                      <div className="rounded-2xl overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80" alt="Phát triển nguồn nhân lực chất lượng cao" className="w-full h-[260px] md:h-[320px] object-cover" />
+                      <div className="rounded-[10px] overflow-hidden shadow-md">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80" alt="Phát triển nguồn nhân lực chất lượng cao" className="w-full h-[260px] md:h-[320px] object-cover rounded-[10px]" />
                       </div>
                       <div>
                         <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Phát triển nguồn nhân lực chất lượng cao</h3>
@@ -765,8 +765,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
 
                     {/* 2. Đối tác chiến lược với các hãng công nghệ danh tiếng */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center md:flex-row-reverse">
-                      <div className="order-1 md:order-2 rounded-2xl overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80" alt="Đối tác chiến lược" className="w-full h-[260px] md:h-[320px] object-cover" />
+                      <div className="order-1 md:order-2 rounded-[10px] overflow-hidden shadow-md">
+                        <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80" alt="Đối tác chiến lược" className="w-full h-[260px] md:h-[320px] object-cover rounded-[10px]" />
                       </div>
                       <div className="order-2 md:order-1">
                         <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Đối tác chiến lược với các hãng công nghệ danh tiếng</h3>
@@ -778,8 +778,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
 
                     {/* 3. Cập nhật xu hướng công nghệ hàng đầu */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
-                      <div className="rounded-2xl overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80" alt="Xu hướng công nghệ" className="w-full h-[260px] md:h-[320px] object-cover" />
+                      <div className="rounded-[10px] overflow-hidden shadow-md">
+                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80" alt="Xu hướng công nghệ" className="w-full h-[260px] md:h-[320px] object-cover rounded-[10px]" />
                       </div>
                       <div>
                         <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Cập nhật xu hướng công nghệ hàng đầu</h3>
@@ -792,7 +792,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                   
                   <a 
                     href="mailto:info@cic.com.vn?subject=Yeu%20cau%20ho%20so%20nang%20luc%20CIC" 
-                    className="px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-sm hover:bg-orange-700 transition-colors inline-flex items-center gap-3 rounded-md shadow-lg shadow-orange-600/30 cursor-pointer"
+                    className="px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-sm hover:bg-orange-700 transition-colors inline-flex items-center gap-3 rounded-[8px] shadow-lg shadow-orange-600/30 cursor-pointer"
                   >
                     <Download size={20} /> Tải hồ sơ năng lực (Profile)
                   </a>

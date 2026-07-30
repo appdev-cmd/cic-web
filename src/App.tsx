@@ -14,6 +14,7 @@ import { Footer } from './components/Footer';
 import { ZaloIcon } from './components/shared/Icons';
 import { ConsultationModal } from './components/ConsultationModal';
 import { ChatbotWidget } from './components/ChatbotWidget';
+import { DesignTokensModal } from './components/DesignTokensModal';
 
 // View components
 import { HomeView } from './components/HomeView';
@@ -41,6 +42,7 @@ export default function App() {
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
+  const [isDesignTokensOpen, setIsDesignTokensOpen] = useState(false);
 
   // View reset keys to ensure clicking header/footer menu returns from detail pages back to list pages
   const [productsResetKey, setProductsResetKey] = useState(0);

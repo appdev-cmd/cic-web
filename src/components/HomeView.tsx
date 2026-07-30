@@ -177,8 +177,8 @@ export const HomeView = ({
             transition={{ duration: 0.8 }}
             className="lg:col-span-8 xl:col-span-9"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-none mb-5 backdrop-blur-md">
-              <span className="flex h-2 w-2 rounded-none bg-orange-600 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-[8px] mb-5 backdrop-blur-md">
+              <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
                 Leading Innovation since 1990
               </span>
@@ -200,13 +200,13 @@ export const HomeView = ({
                   setActiveLink('Sản phẩm');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2 bg-orange-600 text-white rounded-none font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_50px_rgba(234,88,12,0.3)] border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3"
+                className="px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_50px_rgba(234,88,12,0.3)] border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3"
               >
                 Khám phá giải pháp <ArrowRight size={20} />
               </button>
               <button 
                 onClick={() => window.open('https://www.youtube.com/watch?v=Eeh4Y-PLptY&t=8s', '_blank')}
-                className="px-5 py-2 bg-white/5 text-white rounded-none font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction"
+                className="px-5 py-2 bg-white/5 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction"
               >
                 <Play size={20} fill="currentColor" /> Về chúng tôi
               </button>
@@ -219,7 +219,7 @@ export const HomeView = ({
             <button 
               key={i} 
               onClick={() => setCurrentSlide(i)}
-              className={`h-2 rounded-none transition-all duration-300 ${i === currentSlide ? 'w-10 bg-orange-600' : 'w-4 bg-white/20 hover:bg-white/40'}`}
+              className={`h-2 rounded-[8px] transition-all duration-300 ${i === currentSlide ? 'w-10 bg-orange-600' : 'w-4 bg-white/20 hover:bg-white/40'}`}
               title={`Slide ${i + 1}`}
             />
           ))}
@@ -228,7 +228,7 @@ export const HomeView = ({
         {/* Headline Ticker */}
         <div className="absolute bottom-0 left-0 right-0 bg-slate-950/80 border-t border-white/10 backdrop-blur-md z-30 hidden md:block">
           <div className="max-w-7xl mx-auto px-6 h-12 flex items-center gap-4 relative overflow-hidden">
-            <div className="flex bg-orange-600 text-white px-3 py-1 rounded-none text-[10px] font-black uppercase tracking-widest shrink-0 gap-2 items-center z-10">
+            <div className="flex bg-orange-600 text-white px-3 py-1 rounded-[8px] text-[10px] font-black uppercase tracking-widest shrink-0 gap-2 items-center z-10">
               <Bell size={12} /> Tin nổi bật
             </div>
             <div className="flex-1 overflow-hidden relative h-full flex items-center group">
@@ -274,11 +274,11 @@ export const HomeView = ({
                     setAboutSubTab('overview');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-lg border-2 border-orange-600 btn-modern-interaction flex items-center gap-2"
+                  className="px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-lg border-2 border-orange-600 btn-modern-interaction flex items-center gap-2"
                 >
                   Khám phá hành trình CIC <ArrowRight size={16} />
                 </button>
-                <button className="px-5 py-2 bg-white text-slate-900 rounded-none font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 btn-modern-interaction flex items-center gap-2">
+                <button className="px-5 py-2 bg-white text-slate-900 rounded-[8px] font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 btn-modern-interaction flex items-center gap-2">
                   Tải Hồ sơ năng lực <Download size={16} />
                 </button>
               </div>
@@ -289,20 +289,20 @@ export const HomeView = ({
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="group relative rounded-none overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.15)] aspect-video cursor-pointer"
+              className="group relative rounded-[10px] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.15)] aspect-video cursor-pointer"
               onClick={() => window.open('https://www.youtube.com/watch?v=Eeh4Y-PLptY&t=8s', '_blank')}
             >
               <img 
                 src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&q=80" 
                 alt="Office" 
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-[10px]"
               />
               <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-all flex items-center justify-center">
                 <div className="relative">
-                  <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-none flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
+                  <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-[8px] flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
                     <Play size={22} fill="white" className="ml-0.5" />
                   </div>
-                  <div className="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-orange-600 rounded-none animate-ping opacity-20"></div>
+                  <div className="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-orange-600 rounded-[8px] animate-ping opacity-20"></div>
                 </div>
               </div>
             </motion.div>
@@ -358,7 +358,7 @@ export const HomeView = ({
           />
           <div className="flex justify-center -mt-2 mb-8">
             <div className="w-full max-w-[280px] relative">
-              <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 shadow-sm transition-all rounded-md text-sm font-medium" />
+              <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 shadow-sm transition-all rounded-[8px] text-sm font-medium" />
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
@@ -375,13 +375,13 @@ export const HomeView = ({
                 setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-8 group relative p-6 md:p-8 rounded-lg bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-xl"
+              className="lg:col-span-8 group relative p-6 md:p-8 rounded-[10px] bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-xl"
             >
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-all duration-500 transform group-hover:rotate-12 text-slate-900">
                 <BIMIcon />
               </div>
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-600 rounded-md text-[10px] font-black text-white uppercase tracking-widest mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-600 rounded-[8px] text-[10px] font-black text-white uppercase tracking-widest mb-8">
                   <div className="w-2 h-2 bg-slate-50 rounded-full animate-pulse"></div>
                   Advanced Technology
                 </div>
@@ -390,7 +390,7 @@ export const HomeView = ({
                   Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình, kiểm soát rủi ro tức thời và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.
                 </p>
                 <button className="flex items-center gap-4 text-orange-600 font-black uppercase tracking-widest group/btn">
-                  Trải nghiệm giải pháp <div className="w-10 h-10 bg-orange-600 text-white rounded-md flex items-center justify-center group-hover/btn:px-6 group-hover/btn:w-auto transition-all duration-300"><ArrowRight size={20} /></div>
+                  Trải nghiệm giải pháp <div className="w-10 h-10 bg-orange-600 text-white rounded-[8px] flex items-center justify-center group-hover/btn:px-6 group-hover/btn:w-auto transition-all duration-300"><ArrowRight size={20} /></div>
                 </button>
               </div>
             </motion.div>
@@ -408,9 +408,9 @@ export const HomeView = ({
                 if (setActiveServiceId) setActiveServiceId('tu-van-bim');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-4 group p-6 md:p-8 rounded-lg bg-slate-50 shadow-sm border border-slate-100 transition-all relative overflow-hidden hover:shadow-xl cursor-pointer"
+              className="lg:col-span-4 group p-6 md:p-8 rounded-[10px] bg-slate-50 shadow-sm border border-slate-100 transition-all relative overflow-hidden hover:shadow-xl cursor-pointer"
             >
-              <div className="w-16 h-16 bg-slate-50 rounded-lg flex items-center justify-center mb-8 border border-slate-100 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 text-slate-400 transition-all">
+              <div className="w-16 h-16 bg-slate-50 rounded-[10px] flex items-center justify-center mb-8 border border-slate-100 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 text-slate-400 transition-all">
                 <BIMIcon />
               </div>
               <h3 className="text-xl font-black mb-4 group-hover:text-orange-600 transition-colors">BIM & Digital Twins</h3>
@@ -445,7 +445,7 @@ export const HomeView = ({
                   }
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className={`${item.cols} p-6 rounded-lg bg-slate-50 border border-slate-100 shadow-sm transition-all group hover:shadow-xl hover:border-slate-200 cursor-pointer`}
+                className={`${item.cols} p-6 rounded-[10px] bg-slate-50 border border-slate-100 shadow-sm transition-all group hover:shadow-xl hover:border-slate-200 cursor-pointer`}
               >
                 <div className="h-1 w-12 bg-slate-200 mb-6 group-hover:w-full group-hover:bg-orange-600 transition-all duration-500 rounded-full"></div>
                 <h3 className="text-xl font-black mb-3 group-hover:text-orange-600 transition-colors text-slate-900">{item.title}</h3>
@@ -462,10 +462,10 @@ export const HomeView = ({
                 setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-12 p-8 rounded-lg bg-orange-600 text-white flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer shadow-lg"
+              className="lg:col-span-12 p-8 rounded-[10px] bg-orange-600 text-white flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer shadow-lg"
             >
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-slate-50/20 rounded-lg flex items-center justify-center">
+                <div className="w-16 h-16 bg-slate-50/20 rounded-[10px] flex items-center justify-center">
                   <Globe size={32} />
                 </div>
                 <div>
@@ -473,7 +473,7 @@ export const HomeView = ({
                   <p className="text-white/80 font-bold">Xây dựng, Giao thông, Khai thác, Môi trường, Công nghiệp, Cơ khí...</p>
                 </div>
               </div>
-              <button className="px-5 py-2 bg-[#0b1b36] rounded-md font-black uppercase tracking-widest text-sm hover:px-12 transition-all btn-modern-interaction">Khám phá chi tiết</button>
+              <button className="px-5 py-2 bg-[#0b1b36] rounded-[8px] font-black uppercase tracking-widest text-sm hover:px-12 transition-all btn-modern-interaction">Khám phá chi tiết</button>
             </motion.div>
           </div>
         </div>
@@ -502,7 +502,7 @@ export const HomeView = ({
                     setActiveProjectTab(tab.id);
                     setHoveredProjectIndex(null);
                   }}
-                  className={`px-8 py-2.5 rounded-none font-black text-xs uppercase tracking-widest transition-all ${
+                  className={`px-8 py-2.5 rounded-[8px] font-black text-xs uppercase tracking-widest transition-all ${
                     activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-xl' : 'bg-white text-slate-500 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
@@ -520,7 +520,7 @@ export const HomeView = ({
                   setProjectSearchQuery(e.target.value);
                   setHoveredProjectIndex(null);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-none font-medium text-sm text-slate-900 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-[8px] font-medium text-sm text-slate-900 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 transition-all"
               />
             </div>
           </div>
@@ -594,7 +594,7 @@ export const HomeView = ({
                       }`}
                     >
                       {/* 16:9 Aspect Ratio Image Box */}
-                      <div className={`relative w-full aspect-video md:aspect-[16/9] overflow-hidden rounded-2xl border transition-all duration-300 bg-slate-950 ${
+                      <div className={`relative w-full aspect-video md:aspect-[16/9] overflow-hidden rounded-[10px] border transition-all duration-300 bg-slate-950 ${
                         isHovered 
                           ? 'shadow-2xl border-orange-500/60 ring-2 ring-orange-500/20 -translate-y-1' 
                           : 'shadow-md border-slate-200 group-hover:border-slate-300'
@@ -602,7 +602,7 @@ export const HomeView = ({
                         <img 
                           src={proj.img} 
                           alt={proj.name} 
-                          className={`w-full h-full object-cover transition-all duration-300 ${
+                          className={`w-full h-full object-cover transition-all duration-300 rounded-[10px] ${
                             isHovered ? 'scale-105 brightness-100' : 'scale-100 brightness-95 group-hover:scale-105'
                           }`}
                           referrerPolicy="no-referrer"
@@ -610,7 +610,7 @@ export const HomeView = ({
 
                         {/* Top Right Number Badge */}
                         <div className="absolute top-3.5 right-3.5 z-20">
-                          <span className={`inline-flex items-center justify-center min-w-[36px] h-8 px-2.5 rounded-full font-black text-xs tracking-wider shadow-md transition-all duration-300 ${
+                          <span className={`inline-flex items-center justify-center min-w-[36px] h-8 px-2.5 rounded-[8px] font-black text-xs tracking-wider shadow-md transition-all duration-300 ${
                             isHovered 
                               ? 'bg-orange-600 text-white border border-orange-400/50 scale-105' 
                               : 'bg-slate-950/60 text-white/90 backdrop-blur-md border border-white/20'
@@ -639,7 +639,7 @@ export const HomeView = ({
                                 className="absolute inset-x-4 bottom-4 md:inset-x-5 md:bottom-5 z-20 text-white"
                               >
                                 <div className="flex items-center gap-2 mb-1.5">
-                                  <span className="px-2.5 py-0.5 bg-orange-600/90 text-white text-[10px] font-black uppercase tracking-widest rounded-md backdrop-blur-sm">
+                                  <span className="px-2.5 py-0.5 bg-orange-600/90 text-white text-[10px] font-black uppercase tracking-widest rounded-[8px] backdrop-blur-sm">
                                     {proj.category || (proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn')}
                                   </span>
                                   <span className="text-slate-300 text-xs font-semibold">• {proj.location}</span>
@@ -658,13 +658,13 @@ export const HomeView = ({
                                 <div className="flex items-center justify-between gap-3 mt-1">
                                   <div className="flex flex-wrap gap-1.5">
                                     {proj.tags?.slice(0, 2).map((tag: string) => (
-                                      <span key={tag} className="px-2 py-0.5 bg-white/10 text-white text-[10px] font-bold rounded-md border border-white/20 backdrop-blur-sm">
+                                      <span key={tag} className="px-2 py-0.5 bg-white/10 text-white text-[10px] font-bold rounded-[8px] border border-white/20 backdrop-blur-sm">
                                         {tag}
                                       </span>
                                     ))}
                                   </div>
 
-                                  <button className="inline-flex items-center gap-1 px-3 py-1 bg-orange-600 hover:bg-orange-500 text-white text-xs font-black uppercase tracking-wider rounded-lg shadow-md transition-all shrink-0">
+                                  <button className="inline-flex items-center gap-1 px-3 py-1 bg-orange-600 hover:bg-orange-500 text-white text-xs font-black uppercase tracking-wider rounded-[8px] shadow-md transition-all shrink-0">
                                     Chi tiết <ArrowUpRight size={15} />
                                   </button>
                                 </div>
@@ -693,7 +693,7 @@ export const HomeView = ({
                 });
               })()
             ) : (
-              <div className="w-full flex flex-col items-center justify-center py-16 text-slate-500 font-medium bg-slate-50 rounded-2xl border border-slate-200">
+              <div className="w-full flex flex-col items-center justify-center py-16 text-slate-500 font-medium bg-slate-50 rounded-[10px] border border-slate-200">
                 Không tìm thấy dự án nào phù hợp với từ khóa tìm kiếm.
               </div>
             )}
@@ -706,7 +706,7 @@ export const HomeView = ({
                 setActiveLink('Dự án');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-none font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-md inline-flex items-center gap-1.5"
+              className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-md inline-flex items-center gap-1.5"
             >
               Xem tất cả dự án <ChevronRight className="inline-block group-hover:translate-x-1.5 transition-transform" />
             </button>
@@ -731,7 +731,7 @@ export const HomeView = ({
                 </button>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
                   <motion.div layoutId={`project-${selectedProject.id}`}>
-                     <img src={selectedProject.img} className="w-full rounded-none shadow-2xl" alt="" />
+                     <img src={selectedProject.img} className="w-full rounded-[10px] shadow-2xl" alt="" />
                   </motion.div>
                   <motion.div
                     initial={{ opacity: 0, x: 50 }}
@@ -744,11 +744,11 @@ export const HomeView = ({
                        <p>Mô tả chi tiết dự án: Dự án triển khai hạ tầng số với quy mô lớn, ứng dụng các giải pháp tiên tiến nhất từ đối tác Bentley Systems và giải pháp AI do CIC phát triển.</p>
                        <div className="flex gap-4">
                          {selectedProject.tags.map((tag: string) => (
-                           <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-950 font-black rounded-none uppercase text-xs tracking-widest">{tag}</span>
+                           <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-950 font-black rounded-[8px] uppercase text-xs tracking-widest">{tag}</span>
                          ))}
                        </div>
                     </div>
-                    <button className="mt-12 px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-widest shadow-xl hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all active:scale-95 btn-modern-interaction">
+                    <button className="mt-12 px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest shadow-xl hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all active:scale-95 btn-modern-interaction">
                       Tải Portfolio Dự án
                     </button>
                   </motion.div>
@@ -778,7 +778,7 @@ export const HomeView = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveEventTab(tab.id)}
-                className={`px-6 py-2 rounded-none font-bold text-sm transition-all ${
+                className={`px-6 py-2 rounded-[8px] font-bold text-sm transition-all ${
                   activeEventTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-800 border border-slate-800'
                 }`}
               >
@@ -792,11 +792,11 @@ export const HomeView = ({
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="lg:col-span-7 bg-slate-900/40 rounded-none overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group"
+              className="lg:col-span-7 bg-slate-900/40 rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group"
             >
               <div className="h-[360px] md:h-[400px] overflow-hidden relative">
-                <img src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" alt="Special Event" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-                <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-none text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
+                <img src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" alt="Special Event" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 rounded-[10px]" />
+                <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-[8px] text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
                 {/* Logo Overlay */}
                 <div className="absolute top-6 right-6 z-10 transition-all duration-300 group-hover:scale-105">
                   <img src="/logo.png" alt="CIC Logo" className="h-6 md:h-8 w-auto object-contain drop-shadow-xl" />
@@ -846,10 +846,10 @@ export const HomeView = ({
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="flex gap-4 p-4 md:p-4.5 rounded-none border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left bg-slate-900/20"
+                  className="flex gap-4 p-4 md:p-4.5 rounded-[10px] border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left bg-slate-900/20"
                 >
-                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-none overflow-hidden shadow-inner flex-shrink-0 relative">
-                    <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-[10px] overflow-hidden shadow-inner flex-shrink-0 relative">
+                    <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700 rounded-[10px]" />
                     {/* Watermark */}
                     <div className="absolute bottom-2 right-2 opacity-10 group-hover:opacity-40 transition-all w-7">
                        <img src="/logo.png" alt="" className="w-full invert" />
@@ -870,7 +870,7 @@ export const HomeView = ({
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="w-full py-2.5 border-2 border-orange-600/20 text-orange-600 rounded-none font-bold text-sm hover:bg-orange-600 hover:text-white transition-all uppercase tracking-widest shadow-sm btn-modern-interaction"
+                  className="w-full py-2.5 border-2 border-orange-600/20 text-orange-600 rounded-[8px] font-bold text-sm hover:bg-orange-600 hover:text-white transition-all uppercase tracking-widest shadow-sm btn-modern-interaction"
                 >
                   Xem tất cả sự kiện
                 </button>
@@ -901,7 +901,7 @@ export const HomeView = ({
               <button
                 key={cat.id}
                 onClick={() => setActiveNewsCategory(cat.id)}
-                className={`flex-shrink-0 px-6 py-2 rounded-none font-bold text-xs uppercase tracking-tighter shadow-sm border transition-all ${
+                className={`flex-shrink-0 px-6 py-2 rounded-[8px] font-bold text-xs uppercase tracking-tighter shadow-sm border transition-all ${
                   activeNewsCategory === cat.id ? 'bg-orange-600 text-white border-orange-600 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-orange-600 hover:text-orange-600'
                 }`}
               >
@@ -921,17 +921,17 @@ export const HomeView = ({
                   setPreSelectedNewsCategory(news.category);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="group bg-slate-50 rounded-none overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col relative cursor-pointer"
+                className="group bg-slate-50 rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col relative cursor-pointer"
               >
-                <div className="h-56 overflow-hidden relative">
-                  <img src={news.img} alt={news.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="h-56 overflow-hidden relative rounded-[10px]">
+                  <img src={news.img} alt={news.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 rounded-[10px]" />
                   
                   {/* Watermark */}
                   <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-20 transition-all w-10">
                     <img src="/logo.png" alt="" className="w-full invert" />
                   </div>
 
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-orange-600 text-white rounded-none text-[10px] font-black uppercase tracking-widest shadow-lg">
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-orange-600 text-white rounded-[8px] text-[10px] font-black uppercase tracking-widest shadow-lg">
                     {news.category === 'company' ? 'Tin Công ty' : news.category === 'promo' ? 'Khuyến mại' : news.category === 'career' ? 'Tuyển dụng' : news.category === 'investor' ? 'Cổ đông' : 'Tech News'}
                   </div>
                 </div>
@@ -978,7 +978,7 @@ export const HomeView = ({
               <motion.div 
                 key={i}
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-lg bg-white border border-slate-100 hover:shadow-xl hover:border-orange-200 transition-all cursor-pointer h-20 md:h-24 w-44 md:w-48 group"
+                className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-[10px] bg-white border border-slate-100 hover:shadow-xl hover:border-orange-200 transition-all cursor-pointer h-20 md:h-24 w-44 md:w-48 group"
               >
                 <img 
                   src={partner.logo} 
@@ -994,7 +994,7 @@ export const HomeView = ({
       {/* CTA & Contact Section */}
       <section id="contact" className="py-12 bg-slate-50/50 overflow-hidden relative z-10">
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-600 opacity-5 blur-[150px] rounded-none translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-600 opacity-5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -1014,7 +1014,7 @@ export const HomeView = ({
               
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-none bg-slate-100 flex items-center justify-center text-slate-950 flex-shrink-0">
+                  <div className="w-12 h-12 rounded-[8px] bg-slate-100 flex items-center justify-center text-slate-950 flex-shrink-0">
                     <Phone size={24} />
                   </div>
                   <div>
@@ -1023,7 +1023,7 @@ export const HomeView = ({
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-none bg-slate-100 flex items-center justify-center text-slate-950 flex-shrink-0">
+                  <div className="w-12 h-12 rounded-[8px] bg-slate-100 flex items-center justify-center text-slate-950 flex-shrink-0">
                     <Mail size={24} />
                   </div>
                   <div>
@@ -1039,7 +1039,7 @@ export const HomeView = ({
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="bg-slate-50 rounded-none p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 relative"
+              className="bg-slate-50 rounded-[10px] p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 relative"
             >
               <h3 className="text-2xl font-black text-slate-950 mb-8">Gửi yêu cầu tư vấn</h3>
               
@@ -1071,7 +1071,7 @@ export const HomeView = ({
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
                       placeholder="Nhập họ và tên" 
                     />
                   </div>
@@ -1082,7 +1082,7 @@ export const HomeView = ({
                       required
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
                       placeholder="Nhập số điện thoại" 
                     />
                   </div>
@@ -1092,7 +1092,7 @@ export const HomeView = ({
                   <select 
                     value={interestService}
                     onChange={(e) => setInterestService(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold cursor-pointer"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold cursor-pointer"
                   >
                     <option>Phần mềm kỹ thuật bản quyền</option>
                     <option>Thiết bị & IoT</option>
@@ -1106,11 +1106,11 @@ export const HomeView = ({
                     rows={4} 
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-none px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold resize-none" 
+                    className="w-full bg-slate-50 border border-slate-100 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold resize-none" 
                     placeholder="Mô tả nhu cầu của bạn..."
                   />
                 </div>
-                <button type="submit" className="w-full py-2.5 bg-orange-600 text-white rounded-none font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">
+                <button type="submit" className="w-full py-2.5 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">
                   Gửi thông tin ngay
                 </button>
               </form>

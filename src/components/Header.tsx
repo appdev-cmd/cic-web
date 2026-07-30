@@ -197,7 +197,7 @@ export const Header = ({
                   
                   {hasDropdown && (
                     <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50 w-max min-w-[170px] max-w-[90vw]">
-                      <div className="bg-white border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-md py-2 text-slate-800">
+                      <div className="bg-white border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[10px] py-2 text-slate-800">
                         {link.dropdown?.map((subItem) => (
                           <a
                             key={subItem.name}
@@ -238,7 +238,7 @@ export const Header = ({
                                 setActiveLink(link.name);
                               }
                             }}
-                            className="block px-4 py-2 text-[15px] font-normal text-slate-800 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap"
+                            className="block px-4 py-2 text-[15px] font-normal text-slate-800 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap rounded-[8px]"
                           >
                             {subItem.name}
                           </a>
@@ -253,11 +253,11 @@ export const Header = ({
 
           <div className="flex items-center gap-4">
             {/* Language Selector */}
-            <div className={`hidden md:flex items-center gap-1 p-1 rounded-none border backdrop-blur-md transition-all duration-500 ${
+            <div className={`hidden md:flex items-center gap-1 p-1 rounded-[8px] border backdrop-blur-md transition-all duration-500 ${
               isHeaderWhite ? 'bg-slate-100 border-slate-200' : 'bg-white/10 border-white/20'
             }`}>
               <button 
-                className={`px-3 py-1 text-[10px] font-black rounded-none transition-all ${
+                className={`px-3 py-1 text-[10px] font-black rounded-[8px] transition-all ${
                   isHeaderWhite 
                     ? 'bg-orange-600 text-white shadow-sm' 
                     : 'bg-orange-600 text-white shadow-[0_0_15px_rgba(234,88,12,0.4)]'
@@ -266,7 +266,7 @@ export const Header = ({
                 VN
               </button>
               <button 
-                className={`px-3 py-1 text-[10px] font-black rounded-none transition-all ${
+                className={`px-3 py-1 text-[10px] font-black rounded-[8px] transition-all ${
                   isHeaderWhite ? 'text-slate-400 hover:text-slate-600' : 'text-white/40 hover:text-white'
                 }`}
               >
@@ -276,19 +276,19 @@ export const Header = ({
 
             <button 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`p-2 transition-colors ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
+              className={`p-2 rounded-[8px] transition-colors ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
               title="Tìm kiếm"
             >
               <Search size={20} />
             </button>
             <button 
               onClick={onOpenConsultation}
-              className="hidden sm:block px-5 py-2 bg-orange-600 text-white rounded-none text-sm font-black transition-all active:scale-95 border-2 border-orange-600 btn-modern-interaction"
+              className="hidden sm:block px-5 py-2 bg-orange-600 text-white rounded-[8px] text-sm font-black transition-all active:scale-95 border-2 border-orange-600 btn-modern-interaction"
             >
               Tư vấn ngay
             </button>
             <button 
-              className="lg:hidden p-2 text-white" 
+              className="lg:hidden p-2 text-white rounded-[8px]" 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
@@ -326,7 +326,7 @@ export const Header = ({
                     }
                   }}
                   placeholder="Nhập từ khóa tìm kiếm sản phẩm, dịch vụ, dự án, tin tức..."
-                  className={`w-full border px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-none font-bold transition-colors ${
+                  className={`w-full border px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-[8px] font-bold transition-colors ${
                     !isHeaderWhite
                       ? 'bg-slate-900 border-slate-700 text-white'
                       : 'bg-slate-50 border-slate-200 text-slate-800'
@@ -335,13 +335,13 @@ export const Header = ({
                 />
                 <button
                   onClick={handleGlobalSearch}
-                  className="px-4 sm:px-6 py-2 sm:py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs tracking-wider transition-colors shrink-0"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs tracking-wider transition-colors shrink-0 rounded-[8px]"
                 >
                   Tìm kiếm
                 </button>
                 <button
                   onClick={() => setIsSearchOpen(false)}
-                  className={`p-2 transition-colors shrink-0 ${
+                  className={`p-2 transition-colors shrink-0 rounded-[8px] ${
                     !isHeaderWhite
                       ? 'text-slate-400 hover:text-white hover:bg-slate-800'
                       : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
@@ -523,7 +523,7 @@ export const Header = ({
                   setMobileMenuOpen(false);
                   onOpenConsultation?.();
                 }}
-                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black text-center uppercase tracking-wider text-sm transition-all border-2 border-orange-600 active:scale-[0.98]"
+                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black text-center uppercase tracking-wider text-sm transition-all border-2 border-orange-600 active:scale-[0.98] rounded-[8px]"
               >
                 Tư vấn ngay
               </button>

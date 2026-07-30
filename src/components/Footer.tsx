@@ -44,7 +44,7 @@ export const Footer = ({
               <img 
                 src="/LOGO - 1990-08.png" 
                 alt="CIC Logo Small" 
-                className="h-26 sm:h-30 w-auto mb-4"
+                className="h-26 sm:h-30 w-auto mb-4 rounded-[10px]"
               />
             </div>
             <p className="text-white font-black text-lg mb-4 leading-tight whitespace-nowrap">
@@ -52,29 +52,29 @@ export const Footer = ({
             </p>
             <div className="mb-8">
               <h4 className="text-white/60 text-xs font-bold mb-4 tracking-tight">Đăng ký để nhận bản tin công nghệ mới nhất từ CIC</h4>
-              <form className="relative flex" onSubmit={(e) => e.preventDefault()}>
+              <form className="relative flex gap-2" onSubmit={(e) => e.preventDefault()}>
                 <input 
                   type="email" 
                   placeholder="Nhập email liên hệ" 
-                  className="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-sm focus:outline-none focus:border-orange-600 rounded-none transition-all"
+                  className="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-sm focus:outline-none focus:border-orange-600 rounded-[8px] transition-all"
                 />
-                <button className="px-4 py-2 bg-orange-600 text-white text-xs font-black uppercase rounded-none hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>
+                <button className="px-4 py-2 bg-orange-600 text-white text-xs font-black uppercase rounded-[8px] hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>
               </form>
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
-              <a href="https://www.facebook.com/cic.com.vn" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-none border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
+              <a href="https://www.facebook.com/cic.com.vn" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
                 <Facebook size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-none border border-white/10 flex items-center justify-center hover:bg-[#0077b5] hover:border-[#0077b5] text-white transition-all shadow-lg group">
+              <a href="#" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#0077b5] hover:border-[#0077b5] text-white transition-all shadow-lg group">
                 <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-none border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
+              <a href="#" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
                 <Youtube size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="https://zalo.me/02439761381" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-none border border-white/10 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 text-white transition-all shadow-lg group">
+              <a href="https://zalo.me/02439761381" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 text-white transition-all shadow-lg group">
                 <ZaloIcon size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-none border border-white/10 flex items-center justify-center hover:bg-slate-800 hover:border-slate-800 text-white transition-all shadow-lg group">
+              <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-slate-800 hover:border-slate-800 text-white transition-all shadow-lg group">
                 <Globe size={20} className="group-hover:scale-110 transition-transform" />
               </a>
             </div>
