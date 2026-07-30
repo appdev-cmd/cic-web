@@ -113,7 +113,13 @@ export function ProjectsView({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage);
 
-  const activeProject = projectsData.find(p => p.id === activeProjectId);
+  const activeProject = projectsData.find(p => 
+    p.id === activeProjectId ||
+    (activeProjectId === '1' && p.id === 'landmark-81-bim') ||
+    (activeProjectId === '2' && p.id === 'cao-toc-bac-nam-twin') ||
+    (activeProjectId === '3' && p.id === 'dien-gio-mui-dinh') ||
+    (activeProjectId === '4' && (p.id === 'ham-duong-bo-deo-ca-pro' || p.id === 'nha-may-thep-hoa-phat-bim'))
+  );
 
   const handleSelectProject = (id: string) => {
     setActiveProjectId(id);

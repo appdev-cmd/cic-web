@@ -31,6 +31,11 @@ export interface Project {
   name: string;
   tags: string[];
   size?: 'wide' | 'tall' | 'small' | 'full';
+  short?: string;
+  service?: string;
+  client?: string;
+  description?: string;
+  category?: string;
 }
 
 export interface NewsItem {
