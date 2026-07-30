@@ -1,0 +1,263 @@
+[
+  {
+    "table": "cic_cities",
+    "column": "area_id",
+    "ref_table": "cic_areas",
+    "total": 3,
+    "matched": 3,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_cities_en",
+    "column": "area_id",
+    "ref_table": "cic_areas",
+    "total": 3,
+    "matched": 3,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_users_permission",
+    "column": "task_id",
+    "ref_table": "cic_permission_tasks",
+    "total": 74,
+    "matched": 12,
+    "stub": 62,
+    "coverage": 16.2
+  },
+  {
+    "table": "cic_users_permission",
+    "column": "user_id",
+    "ref_table": "cic_users",
+    "total": 33,
+    "matched": 9,
+    "stub": 24,
+    "coverage": 27.3
+  },
+  {
+    "table": "cic_users_permission_field",
+    "column": "user_id",
+    "ref_table": "cic_users",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_users_permission_fun",
+    "column": "user_id",
+    "ref_table": "cic_users",
+    "total": 17,
+    "matched": 15,
+    "stub": 2,
+    "coverage": 88.2
+  },
+  {
+    "table": "cic_menus_items",
+    "column": "group_id",
+    "ref_table": "cic_menus_groups",
+    "total": 4,
+    "matched": 4,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_blocks",
+    "column": "module_id",
+    "ref_table": "cic_config_modules",
+    "total": 6,
+    "matched": 6,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_contents",
+    "column": "category_id",
+    "ref_table": "cic_contents_categories",
+    "total": 3,
+    "matched": 3,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_news",
+    "column": "category_id",
+    "ref_table": "cic_news_categories",
+    "total": 10,
+    "matched": 10,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_news",
+    "column": "author_id",
+    "ref_table": "cic_users",
+    "total": 4,
+    "matched": 4,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_news",
+    "column": "author_last_id",
+    "ref_table": "cic_users",
+    "total": 5,
+    "matched": 5,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_news_en",
+    "column": "author_id",
+    "ref_table": "cic_users",
+    "total": 3,
+    "matched": 3,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_news_en",
+    "column": "author_last_id",
+    "ref_table": "cic_users",
+    "total": 2,
+    "matched": 2,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_event",
+    "column": "author_id",
+    "ref_table": "cic_users",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_event",
+    "column": "author_last_id",
+    "ref_table": "cic_users",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_event_en",
+    "column": "author_id",
+    "ref_table": "cic_users",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_event_en",
+    "column": "author_last_id",
+    "ref_table": "cic_users",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_banners",
+    "column": "category_id",
+    "ref_table": "cic_banners_categories",
+    "total": 4,
+    "matched": 4,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_slideshow",
+    "column": "category_id",
+    "ref_table": "cic_slideshow_categories",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_products",
+    "column": "types_id",
+    "ref_table": "cic_products_types",
+    "total": 2,
+    "matched": 2,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_products_en",
+    "column": "types_id",
+    "ref_table": "cic_products_types",
+    "total": 2,
+    "matched": 2,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_products_images",
+    "column": "record_id",
+    "ref_table": "cic_products",
+    "total": 351,
+    "matched": 264,
+    "stub": 87,
+    "coverage": 75.2
+  },
+  {
+    "table": "cic_products_images_en",
+    "column": "record_id",
+    "ref_table": "cic_products",
+    "total": 174,
+    "matched": 172,
+    "stub": 2,
+    "coverage": 98.9
+  },
+  {
+    "table": "cic_product_contact",
+    "column": "products_id",
+    "ref_table": "cic_products",
+    "total": 64,
+    "matched": 62,
+    "stub": 2,
+    "coverage": 96.9
+  },
+  {
+    "table": "cic_order_items",
+    "column": "order_id",
+    "ref_table": "cic_order",
+    "total": 2,
+    "matched": 2,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_order_items",
+    "column": "product_id",
+    "ref_table": "cic_products",
+    "total": 2,
+    "matched": 1,
+    "stub": 1,
+    "coverage": 50.0
+  },
+  {
+    "table": "cic_image_images",
+    "column": "record_id",
+    "ref_table": "cic_image",
+    "total": 22,
+    "matched": 14,
+    "stub": 8,
+    "coverage": 63.6
+  },
+  {
+    "table": "cic_image_images_en",
+    "column": "record_id",
+    "ref_table": "cic_image",
+    "total": 13,
+    "matched": 13,
+    "stub": 0,
+    "coverage": 100.0
+  }
+]
