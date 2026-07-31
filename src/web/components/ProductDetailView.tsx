@@ -262,7 +262,7 @@ export function ProductDetailView({
             </div>
 
             {/* Name */}
-            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 uppercase tracking-tight leading-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#333] uppercase tracking-tight leading-tight">
               {product.name}
             </h1>
 
@@ -594,7 +594,7 @@ export function ProductDetailView({
         {/* Related Products Carousel (Sản phẩm liên quan) */}
         <div className="pt-16 border-t border-slate-200 mt-16 space-y-8">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-950">Sản phẩm liên quan</h3>
+            <h3 className="text-xl font-extrabold uppercase tracking-tight text-[#333]">Sản phẩm liên quan</h3>
             <span className="text-xs font-bold uppercase tracking-wider text-orange-600">Được đề xuất nhiều nhất</span>
           </div>
 
@@ -622,7 +622,7 @@ export function ProductDetailView({
                 <div className="p-4 flex-1 flex flex-col justify-between gap-3">
                   <div className="space-y-1">
                     <span className="text-xs font-bold uppercase text-orange-600">{rel.brand}</span>
-                    <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 line-clamp-2 leading-snug">{rel.name}</h4>
+                    <h4 className="text-xs font-bold text-[#333] group-hover:text-orange-600 line-clamp-2 leading-snug">{rel.name}</h4>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs font-bold">
                     <span className="text-slate-400 uppercase">Giá bán:</span>

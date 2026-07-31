@@ -25,7 +25,8 @@ import {
   ShieldCheck,
   Award,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Filter
 } from 'lucide-react';
 import { servicesData, ServiceDetail } from '../data/servicesData';
 import { productsData } from '../data/mockData';
@@ -125,7 +126,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     }
   }, [activeService]);
 
-  const categories = ['Tất cả', ...Array.from(new Set(servicesData.map(s => s.category)))];
+  const categoryList = useMemo(() => {
+    const rawCats = Array.from(new Set(servicesData.map(s => s.category)));
+    return ['Tất cả', ...rawCats];
+  }, []);
 
   const filteredServices = servicesData.filter(service => {
     const matchesCategory = selectedCategory === 'Tất cả' || service.category === selectedCategory;
@@ -262,18 +266,18 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 {/* COLUMN LEFT: SERVICES LIST (CÁC BLOCK TRẮNG ĐỒNG NHẤT SIZE) */}
                 <div className="lg:col-span-8 space-y-8">
                   
-                  {/* Search Bar & Category Filter Pills */}
-                  <div className="bg-white border border-slate-200/90 rounded-[14px] p-5 shadow-xs space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-                      {/* Search Input */}
-                      <div className="relative w-full sm:w-auto sm:flex-1">
+                  {/* Search Bar & Category Filter Pills (Format chuẩn đồng nhất với Tin tức & Sự kiện) */}
+                  <div className="space-y-5">
+                    {/* Search Input Bar & Counter */}
+                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                      <div className="relative w-full sm:max-w-md">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                         <input
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                          className="w-full bg-slate-50/80 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white pl-10 pr-9 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-[8px]"
+                          className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-orange-500 pl-10 pr-9 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-xl shadow-xs"
                         />
                         {searchQuery && (
                           <button 
@@ -285,41 +289,31 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         )}
                       </div>
 
-                      {/* Stats Counter */}
                       <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
                         <SlidersHorizontal size={14} className="text-orange-600" />
-                        <span>Hiển thị {filteredServices.length} trên tổng {servicesData.length} dịch vụ</span>
+                        <span>Hiển thị {filteredServices.length} trên {servicesData.length} dịch vụ</span>
                       </div>
                     </div>
 
-                    {/* Category Filter Select */}
-                    <div className="border-t border-slate-100 pt-3 flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Danh mục dịch vụ:</span>
-                        <div className="relative w-full sm:w-64">
-                          <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full bg-slate-50/80 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white pl-3.5 pr-8 py-2 text-xs font-bold text-slate-800 focus:outline-none transition-all rounded-[8px] cursor-pointer appearance-none"
+                    {/* Category Filter Pills (Không bị bọc bởi block trắng) */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                      {categoryList.map((cat) => {
+                        const isActive = selectedCategory === cat;
+                        return (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                              isActive
+                                ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
+                                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                            }`}
                           >
-                            {categories.map((cat) => (
-                              <option key={cat} value={cat}>
-                                {cat}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      {selectedCategory !== 'Tất cả' && (
-                        <button
-                          onClick={() => setSelectedCategory('Tất cả')}
-                          className="text-[11px] font-bold text-orange-600 hover:text-orange-700 underline shrink-0 cursor-pointer"
-                        >
-                          Xóa bộ lọc danh mục
-                        </button>
-                      )}
+                            {cat}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -351,22 +345,22 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05, duration: 0.4 }}
                             onClick={() => handleServiceSelect(service.id)}
-                            className="bg-white border border-slate-200/90 hover:border-orange-500/80 rounded-[14px] p-6 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full group cursor-pointer relative overflow-hidden"
+                            className="bg-transparent border-0 p-0 transition-all duration-300 shadow-none flex flex-col justify-between h-full group cursor-pointer relative overflow-hidden"
                           >
                             <div>
                               {/* Uniform Image Banner */}
-                              <div className="h-48 sm:h-52 w-full overflow-hidden rounded-[10px] relative mb-5 shrink-0 bg-slate-100">
+                              <div className="h-48 sm:h-52 w-full overflow-hidden rounded-[12px] relative mb-4 shrink-0 bg-slate-100">
                                 <img 
                                   src={service.image} 
                                   alt={service.title} 
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                                   referrerPolicy="no-referrer"
                                 />
                               </div>
 
                               {/* Title & Excerpt */}
-                              <div className="space-y-3 mb-5">
-                                <h3 className="text-base sm:text-lg font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2 leading-snug">
+                              <div className="space-y-2 mb-4">
+                                <h3 className="text-base sm:text-lg font-semibold text-[#333] group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
                                   {cleanTitle}
                                 </h3>
                                 <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
@@ -376,7 +370,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                             </div>
 
                             {/* Card Footer Action Button */}
-                            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
+                            <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
                               <span>Xem Chi Tiết Dịch Vụ</span>
                               <ArrowRight size={15} className="transition-transform group-hover:translate-x-1.5" />
                             </div>
@@ -388,48 +382,38 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
 
                   {/* Pagination Controls */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 border-t border-slate-200 pt-8 mt-8">
+                    <div className="flex justify-center items-center gap-2 mt-12 sm:mt-14">
                       <button
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
-                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
-                          currentPage === 1
-                            ? 'border-slate-200 text-slate-300 cursor-not-allowed'
-                            : 'border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500 cursor-pointer shadow-xs'
-                        }`}
+                        className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px] cursor-pointer"
                       >
-                        <ChevronLeft size={14} /> Trước
+                        <ChevronLeft size={16} />
                       </button>
 
-                      <div className="flex items-center gap-1.5">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                          const isCurrent = page === currentPage;
-                          return (
-                            <button
-                              key={page}
-                              onClick={() => setCurrentPage(page)}
-                              className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-all rounded-[8px] border cursor-pointer ${
-                                isCurrent
-                                  ? 'bg-orange-600 border-orange-600 text-white shadow-xs'
-                                  : 'bg-white border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        const isCurrent = page === currentPage;
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`w-10 h-10 border flex items-center justify-center text-xs font-bold transition-all rounded-[8px] cursor-pointer ${
+                              isCurrent
+                                ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-700 hover:border-orange-600 hover:text-orange-600'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
 
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
-                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
-                          currentPage === totalPages
-                            ? 'border-slate-200 text-slate-300 cursor-not-allowed'
-                            : 'border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500 cursor-pointer shadow-xs'
-                        }`}
+                        className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px] cursor-pointer"
                       >
-                        Sau <ChevronRight size={14} />
+                        <ChevronRight size={16} />
                       </button>
                     </div>
                   )}

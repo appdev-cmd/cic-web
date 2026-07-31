@@ -933,7 +933,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                                 <span className="text-orange-600 font-bold">{item.date}</span>
                                 <span className="truncate max-w-[110px] text-slate-400">{item.location.split(',')[0]}</span>
                               </div>
-                              <h4 className="text-xs font-bold text-[#222222] group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
+                              <h4 className="text-xs font-semibold text-[#333] group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
                                 {item.title}
                               </h4>
                               <p className="text-[11px] text-[#6B7280] line-clamp-2 leading-relaxed">
@@ -972,7 +972,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                                   className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
                                 />
                               </div>
-                              <h4 className="text-xs font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
+                              <h4 className="text-xs font-semibold text-[#333] leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
                                 {prod.name}
                               </h4>
                             </div>
@@ -1020,8 +1020,8 @@ export const EventsView: React.FC<EventsViewProps> = ({
               {/* PAGE TITLE BANNER */}
               <div className="border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-orange-600 block">Sự kiện & Hội thảo CIC</span>
-                  <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-950 mt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 block">Sự kiện & Hội thảo CIC</span>
+                  <h1 className="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#444] mt-1">
                     Cổng Sự Kiện Công Nghệ
                   </h1>
                   <p className="text-slate-500 text-sm mt-1 max-w-2xl font-medium">
@@ -1094,7 +1094,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setSelectedEvent(heroEvent);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="text-xl sm:text-2xl font-black text-[#222222] leading-snug uppercase group-hover:text-[#FC5115] cursor-pointer transition-colors"
+                          className="text-xl sm:text-2xl font-bold text-[#444] leading-snug uppercase group-hover:text-[#FC5115] cursor-pointer transition-colors"
                         >
                           {heroEvent.title}
                         </h2>
@@ -1282,7 +1282,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                                   </span>
                                 </div>
 
-                                <h3 className="text-sm font-bold text-[#222222] group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2 min-h-[2.5rem]">
+                                <h3 className="text-sm font-semibold text-[#333] group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2 min-h-[2.5rem]">
                                   {event.title}
                                 </h3>
 
@@ -1303,16 +1303,16 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-2 pt-6 border-t border-slate-200">
+                      <div className="flex justify-center items-center gap-2 mt-8">
                         <button
                           disabled={currentPage === 1}
                           onClick={() => {
                             setCurrentPage(p => Math.max(1, p - 1));
                             window.scrollTo({ top: 400, behavior: 'smooth' });
                           }}
-                          className="px-3.5 py-1.5 border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                          className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px] cursor-pointer"
                         >
-                          ← Trang trước
+                          <ChevronLeft size={16} />
                         </button>
 
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -1322,10 +1322,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               setCurrentPage(p);
                               window.scrollTo({ top: 400, behavior: 'smooth' });
                             }}
-                            className={`w-8 h-8 flex items-center justify-center text-xs font-bold transition-all ${
+                            className={`w-10 h-10 border flex items-center justify-center text-xs font-bold transition-all rounded-[8px] cursor-pointer ${
                               currentPage === p
-                                ? 'bg-orange-600 text-white shadow-sm'
-                                : 'border border-slate-300 text-slate-700 hover:bg-slate-100'
+                                ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-700 hover:border-orange-600 hover:text-orange-600'
                             }`}
                           >
                             {p}
@@ -1338,9 +1338,9 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setCurrentPage(p => Math.min(totalPages, p + 1));
                             window.scrollTo({ top: 400, behavior: 'smooth' });
                           }}
-                          className="px-3.5 py-1.5 border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                          className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px] cursor-pointer"
                         >
-                          Trang sau →
+                          <ChevronRight size={16} />
                         </button>
                       </div>
                     )}

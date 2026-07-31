@@ -757,7 +757,7 @@ export function ProductsView(_props?: ProductsViewProps) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-5xl font-black uppercase text-slate-950 tracking-tighter mb-4"
+            className="text-4xl md:text-5xl font-bold uppercase text-[#444] tracking-tighter mb-4"
           >
             Hệ thống <span className="text-orange-600">Sản phẩm & Giải pháp</span>
           </motion.h1>
@@ -1219,9 +1219,9 @@ export function ProductsView(_props?: ProductsViewProps) {
 
             {/* Listing Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 gap-4">
-              <span className="text-sm font-black uppercase tracking-wider text-slate-950 flex items-center gap-2">
+              <span className="text-sm font-bold uppercase tracking-wider text-[#444] flex items-center gap-2">
                 Danh sách sản phẩm 
-                <span className="px-2.5 py-0.5 bg-orange-600/10 text-orange-600 text-xs font-black rounded-[8px]">
+                <span className="px-2.5 py-0.5 bg-orange-600/10 text-orange-600 text-xs font-bold rounded-[8px]">
                   {filteredProducts.length} Kết quả
                 </span>
               </span>
@@ -1268,7 +1268,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
                           />
                         </div>
-                        <h3 className="text-xs sm:text-sm font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
+                        <h3 className="text-xs sm:text-sm font-bold text-[#333] leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
                           {product.name}
                         </h3>
                       </div>
@@ -1348,7 +1348,7 @@ export function ProductsView(_props?: ProductsViewProps) {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700"
+                  className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px]"
                 >
                   <ChevronRight size={16} />
                 </button>

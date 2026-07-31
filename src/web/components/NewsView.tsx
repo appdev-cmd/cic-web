@@ -1110,65 +1110,10 @@ export function NewsView({
                   )}
                 </main>
 
-                {/* BLOCK 2: SẢN PHẨM & SỰ KIỆN LIÊN QUAN */}
+                {/* BLOCK 2: SỰ KIỆN LIÊN QUAN */}
                 <section className="bg-transparent border-0 p-0 shadow-none space-y-8">
-                  {/* Related Products Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
-                      <Box size={16} className="text-orange-600" />
-                      <span>Sản phẩm liên quan</span>
-                    </h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {(effectiveLinkedProducts.length > 0 ? effectiveLinkedProducts : productsData.slice(0, 3)).map((prod) => (
-                        <div
-                          key={prod.id}
-                          onClick={() => {
-                            if (onNavigateToProduct) onNavigateToProduct(prod.id);
-                          }}
-                          className="bg-white border border-slate-200/90 hover:border-orange-500 p-4 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 rounded-[10px] group flex flex-col justify-between cursor-pointer"
-                        >
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-11 h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
-                                <img 
-                                  src={prod.img || prod.icon} 
-                                  alt={prod.name}
-                                  loading="lazy"
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
-                                />
-                              </div>
-                              <h4 className="text-xs font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
-                                {prod.name}
-                              </h4>
-                            </div>
-
-                            {prod.price && (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giá:</span>
-                                <span className="text-xs font-bold text-orange-600">
-                                  {prod.price}
-                                </span>
-                              </div>
-                            )}
-
-                            <p className="text-[11px] text-slate-500 font-normal leading-relaxed line-clamp-2 border-t border-slate-100 pt-2">
-                              {prod.description}
-                            </p>
-                          </div>
-
-                          <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
-                            <span>Chi tiết sản phẩm</span>
-                            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Related Events Section */}
-                  <div className="space-y-4 pt-6 border-t border-slate-200/80">
+                  <div className="space-y-4">
                     <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
                       <Calendar size={16} className="text-orange-600" />
                       <span>Sự kiện liên quan</span>
@@ -1277,7 +1222,7 @@ export function NewsView({
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Box size={16} className="text-orange-600" />
-                        <span>Giải pháp liên quan</span>
+                        <span>Sản phẩm liên quan</span>
                       </div>
                     </h3>
                     <div className="space-y-2.5">
@@ -1391,10 +1336,10 @@ export function NewsView({
             
             {/* Header section */}
             <div className="border-l-4 border-orange-600 pl-6 space-y-2">
-              <h1 className="text-4xl font-black text-slate-950 uppercase tracking-tight">
+              <h1 className="text-3xl md:text-4xl font-bold text-[#444] uppercase tracking-tight">
                 Tin Tức & Truyền Thông
               </h1>
-              <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
                 Cập nhật thông tin hoạt động, kiến thức kỹ thuật chuyên ngành và các thông cáo cổ đông mới nhất
               </p>
             </div>
@@ -1697,7 +1642,7 @@ export function NewsView({
                               <Clock size={12} className="text-[#FC5115] shrink-0" />
                               <span>{news.date}</span>
                             </div>
-                            <h3 className="text-sm font-black text-slate-950 group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2">
+                            <h3 className="text-sm font-bold text-[#333] group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2">
                               {news.title}
                             </h3>
                           </div>
@@ -1761,7 +1706,7 @@ export function NewsView({
                         </div>
 
                         {/* Title - Max 2 lines */}
-                        <h3 className="text-base font-bold text-slate-900 group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2">
+                        <h3 className="text-base font-semibold text-[#333] group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2">
                           {news.title}
                         </h3>
 
@@ -1784,48 +1729,38 @@ export function NewsView({
 
             {/* PAGINATION ENGINE CONTROLS */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 border-t border-slate-200 pt-8">
+              <div className="flex justify-center items-center gap-2 mt-8">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className={`inline-flex items-center gap-1 px-3 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
-                    currentPage === 1
-                      ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                  }`}
+                  className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px] cursor-pointer"
                 >
-                  <ChevronLeft size={14} /> Trước
+                  <ChevronLeft size={16} />
                 </button>
 
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    const isCurrent = page === currentPage;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-all border rounded-none ${
-                          isCurrent
-                            ? 'bg-orange-600 border-orange-600 text-white'
-                            : 'bg-white border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  const isCurrent = page === currentPage;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 border flex items-center justify-center text-xs font-bold transition-all rounded-[8px] cursor-pointer ${
+                        isCurrent
+                          ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-orange-600 hover:text-orange-600'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
 
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className={`inline-flex items-center gap-1 px-3 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-none ${
-                    currentPage === totalPages
-                      ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'border-slate-200 text-slate-700 hover:text-orange-600 hover:border-orange-500'
-                  }`}
+                  className="w-10 h-10 border border-slate-200 flex items-center justify-center transition-colors hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200 disabled:cursor-not-allowed bg-white text-slate-700 rounded-[8px] cursor-pointer"
                 >
-                  Sau <ChevronRight size={14} />
+                  <ChevronRight size={16} />
                 </button>
               </div>
             )}

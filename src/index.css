@@ -84,16 +84,16 @@ select:focus {
 
 select option {
   background-color: #ffffff !important;
-  color: #0f172a !important;
+  color: #333333 !important;
   padding: 10px 14px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   font-size: 13px !important;
 }
 
 select option:checked {
   background-color: #fff7ed !important;
   color: #ea580c !important;
-  font-weight: 800 !important;
+  font-weight: 500 !important;
 }
 
 /* Ensure all interactive components have cursor pointer */
