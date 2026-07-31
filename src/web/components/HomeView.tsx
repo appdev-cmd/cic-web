@@ -302,7 +302,7 @@ export const HomeView = ({
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="group relative rounded-[16px] sm:rounded-[20px] overflow-hidden shadow-2xl border border-slate-200/90 aspect-video cursor-pointer"
-              onClick={() => window.open('https://www.youtube.com/watch?v=Eeh4Y-PLptY&t=8s', '_blank')}
+              onClick={() => window.open('https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s', '_blank')}
             >
               <img 
                 src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&q=80" 

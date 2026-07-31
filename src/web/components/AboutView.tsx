@@ -47,6 +47,8 @@ import {
 } from 'lucide-react';
 
 import { partners } from '../data/mockData';
+import { homeAwards } from '../data/homeData';
+import { AwardsSlider } from './AwardsSlider';
 import { BIMIcon } from '@shared/components/Icons';
 import {
   coreValues,
@@ -114,31 +116,42 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
   return (
     <div className="pt-24 bg-transparent min-h-screen">
       {/* Visual Top Hero Banner */}
-              <section className="relative pt-24 pb-12 lg:pt-32 lg:pb-16 overflow-hidden bg-slate-950 z-10 border-b border-slate-800">
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline 
-              className="w-full h-full object-cover opacity-30 mix-blend-screen scale-105"
-              src="https://cdn.pixabay.com/video/2020/01/31/31755-388274351_large.mp4" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/40"></div>
+      <section className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img 
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80" 
+            alt="CIC Technology Banner"
+            className="w-full h-full object-cover opacity-75 scale-105 filter brightness-105 contrast-105"
+          />
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen scale-105"
+            src="https://cdn.pixabay.com/video/2020/01/31/31755-388274351_large.mp4" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-slate-950/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/40 via-transparent to-slate-950/40"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/60 border border-white/20 rounded-[8px] mb-4 lg:mb-6 backdrop-blur-md shadow-lg">
+            <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
+              Về chúng tôi
+            </span>
           </div>
-          <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-[8px] mb-4 lg:mb-6 backdrop-blur-md">
-              <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
-                Về chúng tôi
-              </span>
-            </div>
-            
-            <h1 className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-4 lg:mb-6 tracking-tighter max-w-full mx-auto whitespace-nowrap">
-              HƠN 35 NĂM NHỊP BƯỚC <span className="text-orange-500">CÙNG CÔNG NGHỆ</span>
-            </h1>
-          </div>
-        </section>
+          
+          <h1 className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-3 lg:mb-4 tracking-tighter max-w-full mx-auto whitespace-nowrap [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]">
+            HƠN 35 NĂM NHỊP BƯỚC <span className="text-orange-500">CÙNG CÔNG NGHỆ</span>
+          </h1>
+
+          <p className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]">
+            Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.
+          </p>
+        </div>
+      </section>
 
       {/* Modern Tab Menu Bar */}
       <div className="bg-white border-b border-slate-200 z-30 relative shadow-sm">
@@ -228,6 +241,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
 
                 {/* 3. Tiến Trình Phát Triển (Timeline) */}
                 <section className="py-6 md:py-8 bg-white relative overflow-hidden border-b border-slate-100 z-10">
+                  {/* Submerged Background Watermark - Centered */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[550px] h-[400px] md:h-[550px] opacity-[0.035] pointer-events-none select-none z-0">
+                    <img src="/logo CIC-12.png" alt="" className="w-full h-full object-contain filter grayscale" />
+                  </div>
+
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-[8px] mb-2">
@@ -386,26 +404,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                         Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.
                       </p>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-8 max-w-7xl mx-auto">
-                      {[
-                        { name: 'Giải thưởng Sao Khuê 2014', img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2014_1582012560.jpg' },
-                        { name: 'Giải thưởng Sao Khuê 2015', img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2015_1582012665.jpg' },
-                        { name: 'Cúp CNTT năm 2004', img: 'https://www.cic.com.vn/images/banners/original/cup-cntt-nam-2004_1582012378.jpg' },
-                        { name: 'Giải thưởng VIFOTEC', img: 'https://www.cic.com.vn/images/banners/original/giai-thuong-vifotec_1582012769.jpg' },
-                        { name: 'Huân chương Lao động hạng 3', img: 'https://www.cic.com.vn/images/banners/original/huan-chuong-lao-dong-hang-3_1582012829.jpg' },
-                      ].map((award, i) => (
-                        <div 
-                          key={i}
-                          className="bg-white p-4 rounded-[10px] border border-slate-200 flex flex-col items-center hover:border-orange-300 hover:shadow-md transition-all duration-300"
-                        >
-                          <div className="h-20 flex items-center justify-center overflow-hidden mb-3 w-full">
-                            <img src={award.img} alt={award.name} className="max-h-full max-w-full object-contain" />
-                          </div>
-                          <h3 className="text-[10px] font-bold text-slate-700 text-center uppercase tracking-wider">
-                            {award.name}
-                          </h3>
-                        </div>
-                      ))}
+                    <div className="mt-8">
+                      <AwardsSlider awards={homeAwards} />
                     </div>
                   </div>
                 </section>
@@ -414,8 +414,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 <section className="py-10 bg-white border-b border-slate-100 overflow-hidden relative z-10">
                   <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
                     <SectionHeader 
-                      title="Khách hàng - Đối tác" 
-                      sub="Đồng hành cùng phát triển bền vững" 
+                      title="Đối tác chiến lược" 
+                      sub="Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" 
                     />
                     
                     <div className="text-center mt-6 mb-12">
@@ -456,16 +456,17 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                       className="flex gap-6 whitespace-nowrap"
                     >
                       {[...partners, ...partners].map((partner, i) => (
-                        <div 
+                        <motion.div 
                           key={i}
-                          className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-[10px] bg-slate-50 border border-slate-100 h-20 md:h-24 w-44 md:w-48"
+                          whileHover={{ scale: 1.05, y: -5 }}
+                          className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-[10px] bg-white border border-slate-100 hover:shadow-xl hover:border-orange-200 transition-all cursor-pointer h-20 md:h-24 w-44 md:w-48 group"
                         >
                           <img 
                             src={partner.logo} 
                             alt={partner.name} 
-                            className="max-h-12 md:max-h-14 w-full object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300" 
+                            className="max-h-12 md:max-h-14 w-full object-contain grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500" 
                           />
-                        </div>
+                        </motion.div>
                       ))}
                     </motion.div>
                   </div>
