@@ -69,7 +69,7 @@ export interface EventSpeaker {
   name: string;
   role: string;
   company: string;
-  avatar: string;
+  avatar?: string;
   bio?: string;
 }
 

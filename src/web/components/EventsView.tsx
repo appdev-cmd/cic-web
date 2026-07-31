@@ -793,20 +793,17 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                     {/* SPEAKERS / PRESENTERS */}
                     {selectedEvent.speakers && selectedEvent.speakers.length > 0 && (
-                      <div className="p-6 sm:p-8 space-y-4">
-                        <h2 className="text-xl font-extrabold uppercase tracking-tight text-slate-950">
+                      <div className="p-6 sm:p-8 space-y-4 border-t border-slate-100">
+                        <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight">
                           Ban diễn giả & Chuyên gia
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {selectedEvent.speakers.map((speaker, i) => (
-                            <div key={i} className="border border-slate-200 bg-slate-50 p-5 rounded-[10px] space-y-2">
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-950">{speaker.name}</h4>
-                                <p className="text-xs font-bold uppercase tracking-wider text-orange-600">{speaker.role}</p>
-                                <p className="text-xs font-bold text-slate-400">{speaker.company}</p>
-                              </div>
+                            <div key={i} className="text-sm">
+                              <p className="font-bold text-slate-900">{speaker.name}</p>
+                              <p className="text-xs text-orange-600 font-semibold">{speaker.role} – {speaker.company}</p>
                               {speaker.bio && (
-                                <p className="text-slate-500 text-xs font-medium leading-relaxed border-t border-slate-200 pt-2">
+                                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                                   {speaker.bio}
                                 </p>
                               )}

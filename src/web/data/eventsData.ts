@@ -29,7 +29,8 @@ export const eventsData: EventItem[] = [
       { time: '09:45 - 10:45', title: 'Demo tự động hóa vẽ CAD & Lập dự toán bằng AI Assistant', description: 'Trải nghiệm tích hợp AI Assistant trên enjiCAD.', speaker: 'ThS. Trần Hoàng Nam' }
     ],
     speakers: [
-      { name: 'TS. Nguyễn Minh Triết', role: 'Giám đốc Công nghệ (CTO)', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Hơn 15 năm kinh nghiệm triển khai AI & BIM.' }
+      { name: 'TS. Nguyễn Minh Triết', role: 'Giám đốc Công nghệ (CTO)', company: 'CIC Tech', bio: 'Hơn 15 năm kinh nghiệm triển khai AI, Generative Design & giải pháp BIM.' },
+      { name: 'ThS. Trần Hoàng Nam', role: 'Trưởng phòng Kỹ thuật & Chuyển đổi số', company: 'CIC Tech', bio: 'Chuyên gia tư vấn quy trình CDE và tự động hóa CAD/BIM.' }
     ],
     media: { gallery: ['https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
     documents: [{ name: 'Báo cáo Ứng dụng AI Hạ tầng 2026.pdf', size: '3.2 MB', url: '#' }]
@@ -53,7 +54,10 @@ export const eventsData: EventItem[] = [
       { time: '08:30 - 09:00', title: 'Đón tiếp đại biểu', description: 'Check-in và trải nghiệm gian hàng giải pháp số.' },
       { time: '09:00 - 10:30', title: 'Báo cáo Digital Twins Đô thị', description: 'Ứng dụng mô hình bản sao số nâng cao.', speaker: 'TS. Nguyễn Minh Triết' }
     ],
-    speakers: [{ name: 'TS. Nguyễn Minh Triết', role: 'CTO', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80', bio: 'Chuyên gia GIS & BIM.' }],
+    speakers: [
+      { name: 'TS. Nguyễn Minh Triết', role: 'CTO', company: 'CIC Tech', bio: 'Chuyên gia GIS, Digital Twins & Đô thị thông minh.' },
+      { name: 'KS. Trịnh Quốc Bảo', role: 'Trưởng phòng Trắc địa & GIS', company: 'CIC Tech', bio: 'Hơn 12 năm tư vấn thu thập và số hóa dữ liệu không gian 3D.' }
+    ],
     media: { gallery: ['https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
     documents: [{ name: 'Brochure Digital Twins 2026.pdf', size: '2.4 MB', url: '#' }]
   },
@@ -76,7 +80,10 @@ export const eventsData: EventItem[] = [
       { time: '13:30 - 14:00', title: 'Cài đặt bản quyền dùng thử', description: 'Kỹ thuật viên hỗ trợ cài đặt.' },
       { time: '14:00 - 16:30', title: 'Thực hành Vẽ & Bóc tách trên enjiCAD', description: 'Triển khai chi tiết bê tông cốt thép.', speaker: 'KS. Lê Văn Bình' }
     ],
-    speakers: [{ name: 'KS. Lê Văn Bình', role: 'Trưởng phòng CAD/BIM', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80', bio: 'Hơn 10 năm kinh nghiệm.' }],
+    speakers: [
+      { name: 'KS. Lê Văn Bình', role: 'Trưởng phòng CAD/BIM', company: 'CIC Tech', bio: 'Hơn 10 năm kinh nghiệm phát triển và triển khai enjiCAD.' },
+      { name: 'ThS. Trần Hoàng Nam', role: 'Trưởng phòng Kỹ thuật', company: 'CIC Tech', bio: 'Chuyên gia tư vấn tự động hóa bóc tách tiên lượng và dự toán TCVN.' }
+    ],
     media: { gallery: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
     documents: [{ name: 'Hướng dẫn enjiCAD 2026.pdf', size: '5.6 MB', url: '#' }]
   },
@@ -99,7 +106,10 @@ export const eventsData: EventItem[] = [
       { time: '08:30 - 10:00', title: 'Phương pháp mô phỏng đất nền trong PLAXIS 3D', description: 'Thiết lập tham số bài toán móng cọc.', speaker: 'TS. Phạm Hoàng Minh' },
       { time: '10:15 - 12:00', title: 'Thực hành tính toán hố móng sâu đô thị', description: 'Phân tích ổn định tường vằn và chuyển vị.', speaker: 'ThS. Trần Hoàng Nam' }
     ],
-    speakers: [{ name: 'TS. Phạm Hoàng Minh', role: 'Chuyên gia Chuyên sâu Địa kỹ thuật', company: 'CIC Tech', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80', bio: 'Giảng viên Đại học Xây dựng.' }],
+    speakers: [
+      { name: 'TS. Phạm Hoàng Minh', role: 'Chuyên gia Địa kỹ thuật', company: 'ĐH Xây dựng / CIC Tech', bio: 'Giảng viên chuyên sâu mô phỏng ứng suất biến dạng đất nền.' },
+      { name: 'KS. Nguyễn Thành Vinh', role: 'Chuyên gia Thiết bị & Mô phỏng', company: 'CIC Tech', bio: 'Hơn 8 năm kinh nghiệm tính toán ổn định hố móng sâu và mái dốc.' }
+    ],
     media: { gallery: ['https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80'], videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
     documents: [{ name: 'Tài liệu PLAXIS Geotechnical 2026.pdf', size: '4.8 MB', url: '#' }]
   },
