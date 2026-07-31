@@ -7,27 +7,27 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Facebook, Linkedin, Bot, ChevronDown, ChevronUp, MessageSquare, X, Headphones } from 'lucide-react';
 
-import { Constellation } from './components/Constellation';
-import { TechAboutBackground } from './components/TechAboutBackground';
-import { Header } from './components/Header';
-import { Footer } from './components/Footer';
-import { ZaloIcon } from './components/shared/Icons';
-import { ConsultationModal } from './components/ConsultationModal';
-import { ChatbotWidget } from './components/ChatbotWidget';
-import { DesignTokensModal } from './components/DesignTokensModal';
+import { Constellation } from '@web/components/Constellation';
+import { TechAboutBackground } from '@web/components/TechAboutBackground';
+import { Header } from '@web/components/Header';
+import { Footer } from '@web/components/Footer';
+import { ZaloIcon } from '@shared/components/Icons';
+import { ConsultationModal } from '@web/components/ConsultationModal';
+import { ChatbotWidget } from '@web/components/ChatbotWidget';
+import { DesignTokensModal } from '@web/components/DesignTokensModal';
 
 // View components
-import { HomeView } from './components/HomeView';
-import { ProductsView } from './components/ProductsView';
-import { AboutView } from './components/AboutView';
-import { ServicesView } from './components/ServicesView';
-import { ProjectsView } from './components/ProjectsView';
-import { NewsView } from './components/NewsView';
-import { EventsView } from './components/EventsView';
-import { ContactView } from './components/ContactView';
-import { PrivacyPolicyView } from './components/PrivacyPolicyView';
-import { TermsOfUseView } from './components/TermsOfUseView';
-import { SearchView } from './components/SearchView';
+import { HomeView } from '@web/components/HomeView';
+import { ProductsView } from '@web/components/ProductsView';
+import { AboutView } from '@web/components/AboutView';
+import { ServicesView } from '@web/components/ServicesView';
+import { ProjectsView } from '@web/components/ProjectsView';
+import { NewsView } from '@web/components/NewsView';
+import { EventsView } from '@web/components/EventsView';
+import { ContactView } from '@web/components/ContactView';
+import { PrivacyPolicyView } from '@web/components/PrivacyPolicyView';
+import { TermsOfUseView } from '@web/components/TermsOfUseView';
+import { SearchView } from '@web/components/SearchView';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search'>('home');

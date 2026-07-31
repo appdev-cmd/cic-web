@@ -1,0 +1,815 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect, useMemo, FormEvent } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle2, 
+  Phone, 
+  Mail, 
+  User, 
+  ChevronRight, 
+  Briefcase, 
+  Send, 
+  Building2, 
+  Check,
+  Search,
+  X,
+  ChevronLeft,
+  SlidersHorizontal,
+  ExternalLink,
+  ShieldCheck,
+  Award,
+  Sparkles,
+  MessageSquare
+} from 'lucide-react';
+import { servicesData, ServiceDetail } from '../data/servicesData';
+import { productsData } from '../data/mockData';
+import { Product } from '@shared/types';
+
+interface ServicesViewProps {
+  key?: string | number;
+  initialServiceId?: string | null;
+  onNavigateHome?: () => void;
+  onOpenConsultation?: () => void;
+}
+
+const cleanCmsHtml = (htmlString: string): string => {
+  if (!htmlString) return '';
+  let cleaned = htmlString;
+
+  // 1. Remove duplicate title_head block if present
+  cleaned = cleaned.replace(/<div\s+class=["']title_head[^"']*["']>[\s\S]*?<\/div>/gi, '');
+
+  // 2. Convert heading tags (h1, h2, h3, h4) that wrap long sentences (> 90 chars) into normal <p> tags
+  cleaned = cleaned.replace(/<h[1234][^>]*>([\s\S]*?)<\/h[1234]>/gi, (match, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    if (text.length > 90) {
+      return `<p>${inner}</p>`;
+    }
+    return match;
+  });
+
+  // 3. Strip problematic inline style declarations
+  cleaned = cleaned
+    .replace(/font-family\s*:\s*[^;"]+;?/gi, '')
+    .replace(/font-size\s*:\s*[^;"]+;?/gi, '')
+    .replace(/line-height\s*:\s*[^;"]+;?/gi, '')
+    .replace(/background-color\s*:\s*[^;"]+;?/gi, '')
+    .replace(/background\s*:\s*[^;"]+;?/gi, '')
+    .replace(/color\s*:\s*[^;"]+;?/gi, '');
+
+  return cleaned;
+};
+
+const getServiceExcerpt = (service: ServiceDetail): string => {
+  if (service.shortDesc && service.shortDesc.trim().length > 15) {
+    return service.shortDesc.trim();
+  }
+  if (service.htmlContent) {
+    const cleanText = service.htmlContent
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (cleanText.length > 20) {
+      return cleanText.slice(0, 160) + '...';
+    }
+  }
+  return service.tagline || service.title;
+};
+
+export const ServicesView = ({ initialServiceId = null, onNavigateHome }: ServicesViewProps) => {
+  const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    fullname: '',
+    phone: '',
+    email: '',
+    service: 'Tư vấn BIM',
+    notes: ''
+  });
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4; // 4 equal size white blocks per page as requested
+
+  // Reset page when category or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
+
+  const activeService = servicesData.find(s => s.id === activeServiceId);
+
+  // Handle fallback images for broken image URLs in htmlContent
+  useEffect(() => {
+    if (activeService) {
+      const timer = setTimeout(() => {
+        const images = document.querySelectorAll('.service-cms-content img');
+        images.forEach((img) => {
+          const htmlImg = img as HTMLImageElement;
+          htmlImg.onerror = () => {
+            htmlImg.onerror = null;
+            htmlImg.src = activeService.image || "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80";
+          };
+        });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [activeService]);
+
+  const categories = ['Tất cả', ...Array.from(new Set(servicesData.map(s => s.category)))];
+
+  const filteredServices = servicesData.filter(service => {
+    const matchesCategory = selectedCategory === 'Tất cả' || service.category === selectedCategory;
+    const matchesSearch = 
+      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.shortDesc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (service.tagline || '').toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const totalItems = filteredServices.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedServices = filteredServices.slice(startIndex, startIndex + itemsPerPage);
+
+  // Watch for external initial ID updates
+  useEffect(() => {
+    setActiveServiceId(initialServiceId);
+  }, [initialServiceId]);
+
+  // Related products modal state
+  const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
+
+  const currentRelatedProducts = useMemo(() => {
+    if (!activeService) return [];
+    if (activeService.relatedProductIds && activeService.relatedProductIds.length > 0) {
+      return productsData.filter(p => activeService.relatedProductIds!.includes(p.id));
+    }
+    return productsData.slice(0, 4);
+  }, [activeService]);
+
+  const handleFormSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullname || !formData.phone) {
+      alert("Vui lòng điền họ tên và số điện thoại liên hệ.");
+      return;
+    }
+    setFormSubmitted(true);
+    setTimeout(() => {
+      setFormSubmitted(false);
+      setFormData({ fullname: '', phone: '', email: '', service: 'Tư vấn BIM', notes: '' });
+    }, 5000);
+  };
+
+  const handleServiceSelect = (id: string) => {
+    setActiveServiceId(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50/60 pt-28 pb-20 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
+        <AnimatePresence mode="wait">
+          {!activeServiceId ? (
+            /* ============================================================== */
+            /* 1. CATALOG PAGE (TRANG DANH MỤC DỊCH VỤ & GIẢI PHÁP)           */
+            /* ============================================================== */
+            <motion.div
+              key="catalog"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-12"
+            >
+              {/* BLOCK ĐEN TO TRÊN CÙNG (HERO BANNER NỔI BẬT VỚI ẢNH BÊN PHẢI) */}
+              <div className="relative overflow-hidden rounded-[20px] bg-slate-950 text-white p-6 sm:p-10 md:p-12 border border-slate-800 shadow-2xl">
+                {/* Visual Decorative Gradients & Grid */}
+                <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute bottom-0 left-1/3 -mb-16 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
+
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+                  
+                  {/* Left Column: Text & Stats */}
+                  <div className="lg:col-span-7 space-y-6">
+                    {/* Est Badge */}
+                    <div className="flex items-center gap-3">
+                      <span className="w-10 sm:w-12 h-1 bg-orange-600 rounded-full"></span>
+                      <span className="text-orange-500 font-bold tracking-widest text-xs uppercase font-mono">
+                        THÀNH LẬP TỪ NĂM 1990
+                      </span>
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase leading-[1.15]">
+                      GIẢI PHÁP & <span className="text-orange-500">DỊCH VỤ</span> <span className="whitespace-nowrap">CÔNG NGHỆ</span>
+                    </h1>
+
+                    {/* Subtitle / Description */}
+                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                      Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.
+                    </p>
+
+                    {/* Stats Highlights */}
+                    <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80">
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-orange-500 block">35+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Năm Kinh Nghiệm</span>
+                      </div>
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-white block">5.000+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Dự Án Thành Công</span>
+                      </div>
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-white block">100+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Đối Tác Toàn Cầu</span>
+                      </div>
+                      <div>
+                        <span className="text-2xl sm:text-3xl font-extrabold text-orange-500 block">150+</span>
+                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Nhân Sự Chất Lượng Cao</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Hero Showcase Image */}
+                  <div className="lg:col-span-5 relative group">
+                    <div className="relative rounded-[16px] overflow-hidden border border-slate-800 shadow-2xl bg-slate-900 group-hover:border-orange-500/50 transition-all duration-500">
+                      <img 
+                        src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80" 
+                        alt="Dịch vụ chuyển đổi số và công nghệ kỹ thuật CIC" 
+                        className="w-full h-64 sm:h-80 lg:h-[340px] object-cover transition-transform duration-700 group-hover:scale-105"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* MAIN LAYOUT WITH SIDEBAR (TƯƠNG TỰ FORMAT TRANG SẢN PHẨM) */}
+              <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start space-y-10 lg:space-y-0">
+                
+                {/* COLUMN LEFT: SERVICES LIST (CÁC BLOCK TRẮNG ĐỒNG NHẤT SIZE) */}
+                <div className="lg:col-span-8 space-y-8">
+                  
+                  {/* Search Bar & Category Filter Pills */}
+                  <div className="bg-white border border-slate-200/90 rounded-[14px] p-5 shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                      {/* Search Input */}
+                      <div className="relative w-full sm:w-auto sm:flex-1">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Tìm kiếm dịch vụ, giải pháp..."
+                          className="w-full bg-slate-50/80 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white pl-10 pr-9 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-[8px]"
+                        />
+                        {searchQuery && (
+                          <button 
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Stats Counter */}
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
+                        <SlidersHorizontal size={14} className="text-orange-600" />
+                        <span>Hiển thị {filteredServices.length} trên tổng {servicesData.length} dịch vụ</span>
+                      </div>
+                    </div>
+
+                    {/* Category Filter Select */}
+                    <div className="border-t border-slate-100 pt-3 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 shrink-0">Danh mục dịch vụ:</span>
+                        <div className="relative w-full sm:w-64">
+                          <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="w-full bg-slate-50/80 border border-slate-200 hover:border-slate-300 focus:border-orange-500 focus:bg-white pl-3.5 pr-8 py-2 text-xs font-bold text-slate-800 focus:outline-none transition-all rounded-[8px] cursor-pointer appearance-none"
+                          >
+                            {categories.map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      {selectedCategory !== 'Tất cả' && (
+                        <button
+                          onClick={() => setSelectedCategory('Tất cả')}
+                          className="text-[11px] font-bold text-orange-600 hover:text-orange-700 underline shrink-0 cursor-pointer"
+                        >
+                          Xóa bộ lọc danh mục
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* GRID 4 BLOCK TRẮNG ĐỒNG NHẤT SIZE */}
+                  {paginatedServices.length === 0 ? (
+                    <div className="text-center py-16 bg-white border border-slate-200/90 rounded-[14px] p-8 space-y-4">
+                      <p className="text-slate-400 font-bold text-sm">Không tìm thấy dịch vụ nào phù hợp với bộ lọc.</p>
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSelectedCategory('Tất cả');
+                        }}
+                        className="px-5 py-2 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
+                      >
+                        Xóa tìm kiếm & Bộ lọc
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                      {paginatedServices.map((service, idx) => {
+                        const cleanTitle = service.title
+                          .replace("Dịch Vụ ", "")
+                          .replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "");
+
+                        return (
+                          <motion.div
+                            key={service.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05, duration: 0.4 }}
+                            onClick={() => handleServiceSelect(service.id)}
+                            className="bg-white border border-slate-200/90 hover:border-orange-500/80 rounded-[14px] p-6 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full group cursor-pointer relative overflow-hidden"
+                          >
+                            <div>
+                              {/* Uniform Image Banner */}
+                              <div className="h-48 sm:h-52 w-full overflow-hidden rounded-[10px] relative mb-5 shrink-0 bg-slate-100">
+                                <img 
+                                  src={service.image} 
+                                  alt={service.title} 
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                                  referrerPolicy="no-referrer"
+                                />
+                              </div>
+
+                              {/* Title & Excerpt */}
+                              <div className="space-y-3 mb-5">
+                                <h3 className="text-base sm:text-lg font-bold text-slate-950 group-hover:text-orange-600 transition-colors uppercase line-clamp-2 leading-snug">
+                                  {cleanTitle}
+                                </h3>
+                                <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
+                                  {getServiceExcerpt(service)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Card Footer Action Button */}
+                            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
+                              <span>Xem Chi Tiết Dịch Vụ</span>
+                              <ArrowRight size={15} className="transition-transform group-hover:translate-x-1.5" />
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 border-t border-slate-200 pt-8 mt-8">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
+                          currentPage === 1
+                            ? 'border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500 cursor-pointer shadow-xs'
+                        }`}
+                      >
+                        <ChevronLeft size={14} /> Trước
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                          const isCurrent = page === currentPage;
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`w-9 h-9 flex items-center justify-center text-xs font-bold transition-all rounded-[8px] border cursor-pointer ${
+                                isCurrent
+                                  ? 'bg-orange-600 border-orange-600 text-white shadow-xs'
+                                  : 'bg-white border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] ${
+                          currentPage === totalPages
+                            ? 'border-slate-200 text-slate-300 cursor-not-allowed'
+                            : 'border-slate-300 text-slate-700 hover:text-orange-600 hover:border-orange-500 cursor-pointer shadow-xs'
+                        }`}
+                      >
+                        Sau <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* COLUMN RIGHT: STICKY SIDEBAR (FORM ĐĂNG KÝ TƯ VẤN & DEMO) */}
+                <aside className="lg:col-span-4 space-y-6">
+                  <div className="sticky top-28 space-y-6">
+                    
+                    {/* White Form Container */}
+                    <div className="bg-white text-slate-900 p-7 sm:p-8 rounded-[16px] border border-slate-200/90 shadow-sm relative overflow-hidden">
+                      <div className="relative z-10 space-y-5">
+                        <div className="space-y-2">
+                          <span className="inline-block px-2.5 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-bold uppercase tracking-wider rounded-md">
+                            TƯ VẤN TRỰC TIẾP
+                          </span>
+                          <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-950 leading-tight">
+                            Đăng Ký Tư Vấn & Demo
+                          </h3>
+                          <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                            Sẵn sàng chuyển đổi số cùng CIC? Hãy để lại thông tin, chuyên gia của chúng tôi sẽ liên hệ trong 15 phút.
+                          </p>
+                        </div>
+
+                        <div className="w-full h-[1px] bg-slate-100"></div>
+
+                        {formSubmitted ? (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-orange-600 p-6 text-center space-y-3 rounded-[12px]"
+                          >
+                            <CheckCircle2 size={36} className="mx-auto text-white animate-bounce" />
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-white">GỬI YÊU CẦU THÀNH CÔNG!</h4>
+                            <p className="text-xs text-white/90 leading-relaxed font-normal">
+                              Chuyên viên CIC sẽ gọi lại ngay theo số điện thoại bạn cung cấp. Xin trân trọng cảm ơn!
+                            </p>
+                          </motion.div>
+                        ) : (
+                          <form className="space-y-4" onSubmit={handleFormSubmit}>
+                            
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Họ và tên *</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><User size={14} /></span>
+                                <input 
+                                  type="text"
+                                  required
+                                  value={formData.fullname}
+                                  onChange={(e) => setFormData({...formData, fullname: e.target.value})}
+                                  placeholder="Nhập họ và tên" 
+                                  className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Số điện thoại *</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={14} /></span>
+                                <input 
+                                  type="tel"
+                                  required
+                                  value={formData.phone}
+                                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                  placeholder="Nhập số điện thoại" 
+                                  className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Địa chỉ Email</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={14} /></span>
+                                <input 
+                                  type="email"
+                                  value={formData.email}
+                                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                  placeholder="Nhập email liên hệ" 
+                                  className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-9 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal rounded-[8px]"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Dịch vụ quan tâm</label>
+                              <select 
+                                value={formData.service}
+                                onChange={(e) => setFormData({...formData, service: e.target.value})}
+                                className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none transition-all font-normal cursor-pointer rounded-[8px]"
+                              >
+                                {servicesData.map(s => (
+                                  <option key={s.id} value={s.title}>{s.title}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">Nội dung yêu cầu</label>
+                              <textarea 
+                                rows={2}
+                                value={formData.notes}
+                                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                placeholder="Mô tả nhu cầu của bạn..." 
+                                className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-normal resize-none rounded-[8px]"
+                              ></textarea>
+                            </div>
+
+                            <button 
+                              type="submit"
+                              className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs shadow-md shadow-orange-600/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                            >
+                              Gửi Yêu Cầu Tư Vấn <Send size={14} />
+                            </button>
+
+                          </form>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Support Contact Box */}
+                    <div className="bg-white border border-slate-200/90 p-5 rounded-[14px] space-y-3.5 shadow-xs">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+                        HỖ TRỢ TRỰC TIẾP 24/7
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex gap-3 items-center">
+                          <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                            <Phone size={14} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase">Tổng đài tư vấn</span>
+                            <span className="text-xs font-bold text-slate-900">086 893 4576 / 024 3976 1381</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 items-center">
+                          <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                            <Mail size={14} />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase">Hộp thư hỗ trợ</span>
+                            <span className="text-xs font-bold text-slate-900">info@cic.com.vn</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+
+                  </div>
+                </aside>
+
+              </div>
+            </motion.div>
+          ) : (
+            /* ============================================================== */
+            /* 2. DETAIL PAGE (TRANG CHI TIẾT DỊCH VỤ)                        */
+            /* ============================================================== */
+            <motion.div
+              key="detail"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-8"
+            >
+              {/* Back Button & Breadcrumbs */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/90 pb-5">
+                <button
+                  onClick={() => setActiveServiceId(null)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-800 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer shadow-xs"
+                >
+                  <ArrowLeft size={14} /> Trở về danh mục dịch vụ
+                </button>
+
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => onNavigateHome?.()}>Trang chủ</span>
+                  <ChevronRight size={12} />
+                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => setActiveServiceId(null)}>Dịch vụ</span>
+                  <ChevronRight size={12} />
+                  <span className="text-slate-800 truncate max-w-[200px]">{activeService?.title}</span>
+                </div>
+              </div>
+
+              {/* Detail Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                
+                {/* Column Left: Main Content */}
+                <div className="lg:col-span-8 space-y-6 bg-white border border-slate-200/90 p-8 sm:p-10 rounded-[16px] shadow-xs">
+                  
+                  {/* Header Title & Tagline */}
+                  <div className="space-y-3 border-b border-slate-100 pb-5">
+                    {activeService?.category && (
+                      <span className="inline-block px-3 py-1 bg-orange-50 border border-orange-100 text-orange-600 font-bold text-[11px] uppercase tracking-wider rounded-md">
+                        {activeService.category}
+                      </span>
+                    )}
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight leading-snug">
+                      {activeService?.title}
+                    </h1>
+                    {activeService?.tagline && (
+                      <p className="text-xs sm:text-sm text-slate-600 font-medium italic leading-relaxed border-l-3 border-orange-500 pl-3 py-0.5 bg-slate-50 rounded-r-md">
+                        "{activeService.tagline}"
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Cleaned CMS HTML Content */}
+                  {activeService?.htmlContent && (
+                    <div 
+                      className="service-cms-content pt-2"
+                      dangerouslySetInnerHTML={{ __html: cleanCmsHtml(activeService.htmlContent) }}
+                    />
+                  )}
+
+                </div>
+
+                {/* Column Right: Form & Related Products */}
+                <div className="lg:col-span-4 space-y-6">
+                  
+                  {/* White Consultation Form */}
+                  <div id="consultation-form" className="bg-white text-slate-900 p-7 sm:p-8 rounded-[16px] border border-slate-200/90 shadow-sm relative scroll-mt-32">
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <span className="text-orange-600 font-bold text-[10px] uppercase tracking-wider block">YÊU CẦU DỊCH VỤ</span>
+                        <h3 className="text-lg font-extrabold uppercase text-slate-950 leading-tight">Tư Vấn Giải Pháp Thích Hợp</h3>
+                        <p className="text-xs text-slate-600 font-normal">Chuyên gia CIC sẽ kết nối trực tiếp tư vấn chi tiết trong 15 phút.</p>
+                      </div>
+
+                      <div className="w-full h-[1px] bg-slate-100 my-3"></div>
+
+                      {formSubmitted ? (
+                        <div className="bg-orange-600 p-5 text-center space-y-2 rounded-[10px]">
+                          <CheckCircle2 size={32} className="mx-auto text-white animate-bounce" />
+                          <h4 className="text-xs font-bold uppercase text-white">GỬI YÊU CẦU THÀNH CÔNG!</h4>
+                          <p className="text-[11px] text-white/90">Cảm ơn bạn. Chuyên viên CIC sẽ liên hệ ngay.</p>
+                        </div>
+                      ) : (
+                        <form className="space-y-3.5" onSubmit={handleFormSubmit}>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Họ tên *</label>
+                            <input 
+                              type="text"
+                              required
+                              value={formData.fullname}
+                              onChange={(e) => setFormData({...formData, fullname: e.target.value})}
+                              placeholder="Nhập họ và tên" 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Số điện thoại *</label>
+                            <input 
+                              type="tel"
+                              required
+                              value={formData.phone}
+                              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                              placeholder="Nhập số điện thoại" 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Email</label>
+                            <input 
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({...formData, email: e.target.value})}
+                              placeholder="Nhập email liên hệ" 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal rounded-[8px]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-slate-700 block">Ghi chú nhu cầu</label>
+                            <textarea 
+                              rows={2}
+                              value={formData.notes}
+                              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                              placeholder="Mô tả nhu cầu của bạn..." 
+                              className="w-full bg-slate-50/80 border border-slate-200 focus:border-orange-500 focus:bg-white px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-normal resize-none rounded-[8px]"
+                            ></textarea>
+                          </div>
+
+                          <button 
+                            type="submit"
+                            className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-orange-600/10"
+                          >
+                            Đăng Ký Tư Vấn <Send size={14} />
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Related Products Widget */}
+                  {currentRelatedProducts.length > 0 && (
+                    <div className="bg-white border border-slate-200/90 p-5 rounded-[14px] space-y-3.5 shadow-xs">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-2">
+                        SẢN PHẨM PHẦN MỀM LIÊN QUAN
+                      </h4>
+
+                      <div className="divide-y divide-slate-100">
+                        {currentRelatedProducts.map((prod) => (
+                          <div 
+                            key={prod.id} 
+                            onClick={() => setSelectedProductModal(prod)}
+                            className="py-2.5 flex gap-3 items-center group cursor-pointer hover:bg-slate-50 transition-colors p-1.5 rounded-[8px]"
+                          >
+                            <div className="w-12 h-12 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative rounded-[6px]">
+                              <img 
+                                src={prod.img} 
+                                alt={prod.name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-xs font-bold text-slate-900 group-hover:text-orange-600 transition-colors truncate">
+                                {prod.name}
+                              </h5>
+                              <span className="text-[10px] text-slate-400 block uppercase font-medium">{prod.brand}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Product Detail Modal */}
+      {selectedProductModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white rounded-[16px] max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+            <button 
+              onClick={() => setSelectedProductModal(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="h-40 w-full overflow-hidden rounded-[10px] bg-slate-100 relative">
+              <img src={selectedProductModal.img} alt={selectedProductModal.name} className="w-full h-full object-cover" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">{selectedProductModal.brand}</span>
+              <h3 className="text-lg font-bold text-slate-950">{selectedProductModal.name}</h3>
+              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{selectedProductModal.description}</p>
+            </div>
+
+            <div className="pt-2 flex gap-2">
+              <button
+                onClick={() => {
+                  setSelectedProductModal(null);
+                  setFormData(prev => ({
+                    ...prev,
+                    service: selectedProductModal.name,
+                    notes: `Quan tâm sản phẩm: ${selectedProductModal.name}`
+                  }));
+                }}
+                className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider rounded-[8px] transition-all"
+              >
+                Yêu cầu báo giá sản phẩm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
