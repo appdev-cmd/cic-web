@@ -362,11 +362,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                                   referrerPolicy="no-referrer"
                                 />
-                                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                                  <span className="px-3 py-1 bg-slate-950/90 text-white text-[10px] font-bold uppercase tracking-wider rounded-md backdrop-blur-md border border-white/10">
-                                    {service.category}
-                                  </span>
-                                </div>
                               </div>
 
                               {/* Title & Excerpt */}
@@ -447,10 +442,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                     
                     {/* White Form Container */}
                     <div className="bg-white text-slate-900 p-7 sm:p-8 rounded-[16px] border border-slate-200/90 shadow-sm relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none text-slate-950">
-                        <Briefcase size={90} />
-                      </div>
-
                       <div className="relative z-10 space-y-5">
                         <div className="space-y-2">
                           <span className="inline-block px-2.5 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-bold uppercase tracking-wider rounded-md">

@@ -1259,13 +1259,13 @@ export function ProductsView(_props?: ProductsViewProps) {
                     <div className="space-y-4">
                       {/* Image on Left (Logo size), Title on Right */}
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-slate-50 border border-slate-200/80 rounded-[8px] p-1.5 flex items-center justify-center overflow-hidden group-hover:border-orange-200 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
                           <img 
                             src={product.img || product.icon} 
                             alt={product.name}
                             loading="lazy"
                             referrerPolicy="no-referrer"
-                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
                           />
                         </div>
                         <h3 className="text-xs sm:text-sm font-black text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">

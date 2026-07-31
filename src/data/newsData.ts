@@ -72,7 +72,7 @@ export interface PromotionNewsItem extends BaseNewsItem {
 // 5. Shareholder News Extra Details
 export interface ShareholderNewsItem extends BaseNewsItem {
   category: 'shareholder';
-  docType: 'Thông báo' | 'Báo cáo' | 'Nghị quyết' | 'Tài liệu cổ đông'; // Loại tài liệu cổ đông
+  docType: 'Thông báo cổ đông' | 'Báo cáo thường niên' | 'Điều lệ công ty' | 'Báo cáo tài chính'; // Submenu tài liệu cổ đông
   year: number; // Năm tài chính / công bố
   pdfUrl?: string; // Link file PDF
   pdfSize?: string; // Dung lượng file PDF
@@ -859,7 +859,80 @@ Tiêu chuẩn ISO 19650 đã chính thức trở thành bộ quy chuẩn quốc 
 * Chương trình ưu đãi kiểm định thiết bị quan trắc đã kết thúc.`
   },
 
-  // --- QUAN HỆ CỔ ĐÔNG (BỔ SUNG ĐỦ 7 TIN) ---
+  // --- QUAN HỆ CỔ ĐÔNG (DANH SÁCH FILE PDF THEO CHUYÊN MỤC) ---
+  // 1. THÔNG BÁO CỔ ĐÔNG
+  {
+    id: 'nghi-quyet-trieu-tap-dhcd-thuong-nien-2024',
+    category: 'shareholder',
+    title: 'Nghị quyết triệu tập ĐHCĐ thường niên năm 2024',
+    date: '22/03/2024',
+    shortDesc: 'Nghị quyết Hội đồng Quản trị về việc triệu tập Đại hội đồng cổ đông thường niên năm 2024 Công ty Cổ phần Tin học và Tư vấn Xây dựng.',
+    img: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&q=80',
+    docType: 'Thông báo cổ đông',
+    year: 2024,
+    pdfUrl: '#',
+    pdfSize: '1.8 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 1420,
+    tags: ['ĐHCĐ 2024', 'Triệu tập họp', 'Thông báo cổ đông'],
+    contentMarkdown: `### NGHỊ QUYẾT TRIỆU TẬP ĐẠI HỘI ĐỒNG CỔ ĐÔNG THƯỜNG NIÊN NĂM 2024
+* Kính gửi Quý cổ đông tài liệu Nghị quyết triệu tập họp ĐHCĐ thường niên năm 2024. Vui lòng tải file PDF đính kèm để xem chi tiết.`
+  },
+  {
+    id: 'nghi-quyet-dhcd-y-kien-bang-van-ban-2023',
+    category: 'shareholder',
+    title: 'Nghị quyết ĐHCĐ thông qua bằng hình thức lấy ý kiến CĐ bằng văn bản',
+    date: '10/02/2023',
+    shortDesc: 'Nghị quyết Đại hội đồng cổ đông thông qua các nội dung quan trọng bằng hình thức lấy ý kiến cổ đông bằng văn bản.',
+    img: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80',
+    docType: 'Thông báo cổ đông',
+    year: 2023,
+    pdfUrl: '#',
+    pdfSize: '1.2 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 1180,
+    tags: ['Lấy ý kiến văn bản', 'Nghị quyết ĐHCĐ', 'Thông báo cổ đông'],
+    contentMarkdown: `### NGHỊ QUYẾT ĐẠI HỘI ĐỒNG CỔ ĐÔNG LẤY Ý KIẾN BẰNG VĂN BẢN
+* Chi tiết Nghị quyết ĐHCĐ thông qua bằng hình thức lấy ý kiến bằng văn bản. Tải về file PDF đầy đủ.`
+  },
+  {
+    id: 'thong-bao-moi-hop-dhcd-2024-giay-uy-quyen',
+    category: 'shareholder',
+    title: 'Thông báo mời họp Đại hội cổ đông năm 2024 và Giấy ủy quyền',
+    date: '06/01/2023',
+    shortDesc: 'Thông báo mời tham dự họp Đại hội đồng cổ đông thường niên năm 2024 kèm Mẫu giấy ủy quyền tham dự.',
+    img: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80',
+    docType: 'Thông báo cổ đông',
+    year: 2024,
+    pdfUrl: '#',
+    pdfSize: '2.1 MB',
+    author: 'Ban Quan hệ Cổ đông CIC',
+    views: 1650,
+    tags: ['Mời họp ĐHCĐ', 'Giấy ủy quyền', 'Thông báo cổ đông'],
+    contentMarkdown: `### THÔNG BÁO MỜI HỌP ĐẠI HỘI CỔ ĐÔNG VÀ GIẤY ỦY QUYỀN
+* Kính gửi Quý cổ đông Thông báo mời họp và Giấy ủy quyền tham dự ĐHCĐ. Tải file PDF để lấy mẫu văn bản.`
+  },
+  {
+    id: 'thong-bao-chot-danh-sach-co-dong-nhan-co-tuc-2026',
+    category: 'shareholder',
+    title: 'Thông báo chốt danh sách cổ đông hưởng quyền nhận cổ tức năm 2025 bằng tiền mặt',
+    date: '01/07/2026',
+    shortDesc: 'Thông báo ngày đăng ký cuối cùng để thực hiện quyền nhận cổ tức tỷ lệ 15% bằng tiền mặt năm 2025.',
+    img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80',
+    docType: 'Thông báo cổ đông',
+    year: 2026,
+    pdfUrl: '#',
+    pdfSize: '1.1 MB',
+    author: 'Ban Quan hệ Cổ đông CIC',
+    views: 1250,
+    tags: ['Chốt danh sách cổ đông', 'Cổ tức 15%', 'Thông báo cổ đông'],
+    contentMarkdown: `### THÔNG BÁO CHỐT DANH SÁCH CỔ ĐÔNG NHẬN CỔ TỨC
+* **Ngày đăng ký cuối cùng**: 15/08/2026.
+* **Tỷ lệ thực hiện**: 15%/cổ phiếu (1.500 VNĐ/cổ phiếu).
+* **Ngày thanh toán dự kiến**: 05/09/2026.`
+  },
+
+  // 2. BÁO CÁO THƯỜNG NIÊN
   {
     id: 'bao-cao-thuong-nien-2025-cic',
     category: 'shareholder',
@@ -867,7 +940,7 @@ Tiêu chuẩn ISO 19650 đã chính thức trở thành bộ quy chuẩn quốc 
     date: '10/04/2026',
     shortDesc: 'Báo cáo tổng kết toàn bộ hoạt động quản trị, tài chính và định hướng chiến lược phát triển bền vững của CIC Tech.',
     img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
-    docType: 'Báo cáo',
+    docType: 'Báo cáo thường niên',
     year: 2025,
     pdfUrl: '#',
     pdfSize: '8.5 MB',
@@ -878,56 +951,126 @@ Tiêu chuẩn ISO 19650 đã chính thức trở thành bộ quy chuẩn quốc 
 * Kính gửi Quý cổ đông tài liệu Báo cáo Thường niên năm tài chính 2025. Chi tiết xem tệp đính kèm.`
   },
   {
-    id: 'thong-bao-chot-danh-sach-co-dong-nhan-co-tuc-2026',
+    id: 'bao-cao-thuong-nien-2024-cic',
     category: 'shareholder',
-    title: 'Thông báo chốt danh sách cổ đông hưởng quyền nhận cổ tức năm 2025 bằng tiền mặt',
-    date: '01/07/2026',
-    shortDesc: 'Thông báo ngày đăng ký cuối cùng để thực hiện quyền nhận cổ tức tỷ lệ 15% bằng tiền mặt năm 2025.',
+    title: 'Báo cáo Thường niên năm 2024 - Công ty Cổ phần Tin học và Tư vấn Xây dựng',
+    date: '15/04/2025',
+    shortDesc: 'Báo cáo thường niên tổng kết kết quả kinh doanh năm 2024 và kế hoạch hành động cho giai đoạn tiếp theo.',
+    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
+    docType: 'Báo cáo thường niên',
+    year: 2024,
+    pdfUrl: '#',
+    pdfSize: '7.2 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 1120,
+    tags: ['Báo cáo thường niên 2024', 'Báo cáo quản trị'],
+    contentMarkdown: `### BÁO CÁO THƯỜNG NIÊN 2024
+* Chi tiết Báo cáo Thường niên năm 2024. Vui lòng ấn tải file PDF để xem đầy đủ nội dung.`
+  },
+  {
+    id: 'bao-cao-thuong-nien-2023-cic',
+    category: 'shareholder',
+    title: 'Báo cáo Thường niên năm 2023 - Đổi mới công nghệ và phát triển bền vững',
+    date: '12/04/2024',
+    shortDesc: 'Báo cáo thường niên năm 2023 đánh dấu mốc tăng trưởng vững chắc của hệ sinh thái phần mềm xây dựng.',
+    img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80',
+    docType: 'Báo cáo thường niên',
+    year: 2023,
+    pdfUrl: '#',
+    pdfSize: '6.8 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 890,
+    tags: ['Báo cáo thường niên 2023', 'Kết quả kinh doanh'],
+    contentMarkdown: `### BÁO CÁO THƯỜNG NIÊN 2023
+* Báo cáo Thường niên năm 2023 trân trọng gửi tới Quý cổ đông.`
+  },
+
+  // 3. ĐIỀU LỆ CÔNG TY
+  {
+    id: 'dieu-le-cong-ty-cic-2024',
+    category: 'shareholder',
+    title: 'Điều lệ Công ty Cổ phần Tin học và Tư vấn Xây dựng (Sửa đổi, bổ sung năm 2024)',
+    date: '20/05/2024',
+    shortDesc: 'Văn bản Điều lệ tổ chức và hoạt động của Công ty Cổ phần Tin học và Tư vấn Xây dựng được ĐHCĐ thông qua.',
+    img: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80',
+    docType: 'Điều lệ công ty',
+    year: 2024,
+    pdfUrl: '#',
+    pdfSize: '4.1 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 2100,
+    tags: ['Điều lệ công ty', 'Văn bản pháp lý', 'CIC Tech'],
+    contentMarkdown: `### ĐIỀU LỆ CÔNG TY CỔ PHẦN TIN HỌC VÀ TƯ VẤN XÂY DỰNG
+* Văn bản Điều lệ công ty mới nhất sửa đổi, bổ sung năm 2024. Tải file PDF chính thức tại đây.`
+  },
+  {
+    id: 'quy-che-quan-tri-cong-ty-2024',
+    category: 'shareholder',
+    title: 'Quy chế Quản trị Công ty Cổ phần Tin học và Tư vấn Xây dựng',
+    date: '15/06/2024',
+    shortDesc: 'Quy chế nội bộ về quản trị công ty áp dụng theo Luật Doanh nghiệp và tiêu chuẩn niêm yết hiện hành.',
+    img: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80',
+    docType: 'Điều lệ công ty',
+    year: 2024,
+    pdfUrl: '#',
+    pdfSize: '2.9 MB',
+    author: 'Hội đồng Quản trị CIC',
+    views: 1340,
+    tags: ['Quy chế quản trị', 'Điều lệ công ty'],
+    contentMarkdown: `### QUY CHẾ QUẢN TRỊ CÔNG TY
+* Quy chế quản trị nội bộ chi tiết quy định quyền hạn và nghĩa vụ của Ban điều hành và Hội đồng quản trị.`
+  },
+
+  // 4. BÁO CÁO TÀI CHÍNH
+  {
+    id: 'bao-cao-tai-chinh-kiem-toan-2025',
+    category: 'shareholder',
+    title: 'Báo cáo Tài chính Kiểm toán năm 2025 - Báo cáo Hợp nhất',
+    date: '28/03/2026',
+    shortDesc: 'Báo cáo tài chính hợp nhất năm tài chính 2025 đã được kiểm toán bởi công ty kiểm toán độc lập.',
+    img: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80',
+    docType: 'Báo cáo tài chính',
+    year: 2025,
+    pdfUrl: '#',
+    pdfSize: '5.4 MB',
+    author: 'Ban Tài chính Kế toán',
+    views: 1890,
+    tags: ['Báo cáo tài chính 2025', 'Kiểm toán', 'Báo cáo hợp nhất'],
+    contentMarkdown: `### BÁO CÁO TÀI CHÍNH KIỂM TOÁN NĂM 2025
+* Báo cáo tài chính hợp nhất đã được kiểm toán đầy đủ. Vui lòng bấm Tải về để xem file PDF.`
+  },
+  {
+    id: 'bao-cao-tai-chinh-soat-xet-ban-nien-2025',
+    category: 'shareholder',
+    title: 'Báo cáo Tài chính Soát xét Bán niên 2025',
+    date: '15/08/2025',
+    shortDesc: 'Báo cáo tài chính soát xét giữa niên độ 6 tháng đầu năm 2025 của CIC Tech.',
+    img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80',
+    docType: 'Báo cáo tài chính',
+    year: 2025,
+    pdfUrl: '#',
+    pdfSize: '3.8 MB',
+    author: 'Ban Tài chính Kế toán',
+    views: 1050,
+    tags: ['Bán niên 2025', 'Soát xét BCTC', 'Báo cáo tài chính'],
+    contentMarkdown: `### BÁO CÁO TÀI CHÍNH SOÁT XÉT BÁN NIÊN 2025
+* Báo cáo tài chính soát xét bán niên 2025 đầy đủ.`
+  },
+  {
+    id: 'bao-cao-tai-chinh-kiem-toan-2024',
+    category: 'shareholder',
+    title: 'Báo cáo Tài chính Kiểm toán năm 2024',
+    date: '25/03/2025',
+    shortDesc: 'Báo cáo tài chính kiểm toán năm 2024 của Công ty Cổ phần Tin học và Tư vấn Xây dựng.',
     img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80',
-    docType: 'Thông báo',
-    year: 2026,
+    docType: 'Báo cáo tài chính',
+    year: 2024,
     pdfUrl: '#',
-    pdfSize: '1.1 MB',
-    author: 'Ban Quan hệ Cổ đông CIC',
-    views: 1250,
-    tags: ['Chốt danh sách cổ đông', 'Cổ tức 15%', 'Thông báo'],
-    contentMarkdown: `### THÔNG BÁO CHỐT DANH SÁCH CỔ ĐÔNG NHẬN CỔ TỨC
-* **Ngày đăng ký cuối cùng**: 15/08/2026.
-* **Tỷ lệ thực hiện**: 15%/cổ phiếu (1.500 VNĐ/cổ phiếu).
-* **Ngày thanh toán dự kiến**: 05/09/2026.`
-  },
-  {
-    id: 'tai-lieu-hop-dai-hoi-dong-co-dong-bat-thuong-2026',
-    category: 'shareholder',
-    title: 'Tài liệu họp Đại hội đồng Cổ đông bất thường năm 2026 thông qua dự án Trụ sở mới',
-    date: '15/02/2026',
-    shortDesc: 'Tờ trình và dự thảo Nghị quyết Đại hội cổ đông bất thường về việc phê duyệt phương án đầu tư xây dựng Tòa nhà Văn phòng CIC Tech.',
-    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
-    docType: 'Tài liệu cổ đông',
-    year: 2026,
-    pdfUrl: '#',
-    pdfSize: '3.4 MB',
-    author: 'Hội đồng Quản trị CIC',
-    views: 840,
-    tags: ['ĐHĐCĐ bất thường', 'Tài liệu họp', 'Trụ sở CIC'],
-    contentMarkdown: `### TÀI LIỆU HỌP ĐẠI HỘI CỔ ĐÔNG BẤT THƯỜNG 2026
-* Kính gửi Quý cổ đông bộ tài liệu phục vụ Đại hội đồng cổ đông bất thường năm 2026.`
-  },
-  {
-    id: 'nghi-quyet-hdqt-phe-duyet-hop-tac-quoc-te',
-    category: 'shareholder',
-    title: 'Nghị quyết Hội đồng Quản trị về việc phê duyệt hợp tác liên doanh công nghệ quốc tế',
-    date: '20/01/2026',
-    shortDesc: 'Thông qua việc ký kết hợp tác thành lập liên doanh nghiên cứu phần mềm kiểm kê khí nhà kính tự động.',
-    img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
-    docType: 'Nghị quyết',
-    year: 2026,
-    pdfUrl: '#',
-    pdfSize: '1.8 MB',
-    author: 'Hội đồng Quản trị CIC',
-    views: 910,
-    tags: ['Nghị quyết HĐQT', 'Hợp tác quốc tế', 'Liên doanh công nghệ'],
-    contentMarkdown: `### NGHỊ QUYẾT HỘI ĐỒNG QUẢN TRỊ VỀ HỢP TÁC LIÊN DOANH
-* Phê duyệt phương án thành lập Liên doanh Công nghệ Xanh cùng đối tác Châu Âu.`
+    pdfSize: '4.9 MB',
+    author: 'Ban Tài chính Kế toán',
+    views: 1420,
+    tags: ['BCTC 2024', 'Kiểm toán', 'Báo cáo tài chính'],
+    contentMarkdown: `### BÁO CÁO TÀI CHÍNH KIỂM TOÁN NĂM 2024
+* Chi tiết Báo cáo tài chính kiểm toán năm 2024.`
   }
 ];

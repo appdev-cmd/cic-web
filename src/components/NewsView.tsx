@@ -49,7 +49,11 @@ import {
   Box,
   Sparkles,
   Palette,
-  Mail
+  Mail,
+  Bell,
+  BellRing,
+  Pause,
+  X
 } from 'lucide-react';
 import { newsData, DetailedNewsItem, CompanyNewsItem, SpecialtyNewsItem, RecruitmentNewsItem, PromotionNewsItem, ShareholderNewsItem } from '../data/newsData';
 import { projectsData } from '../data/projectsData';
@@ -61,6 +65,7 @@ interface NewsViewProps {
   initialCategory?: string | null;
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: number) => void;
+  onNavigateToEvent?: (eventId: string) => void;
   onNavigateHome: () => void;
   onNavigateToPrivacy?: () => void;
 }
@@ -101,6 +106,7 @@ export function NewsView({
   initialCategory, 
   onNavigateToService, 
   onNavigateToProduct, 
+  onNavigateToEvent,
   onNavigateHome,
   onNavigateToPrivacy
 }: NewsViewProps) {
@@ -113,7 +119,7 @@ export function NewsView({
   const [searchQuery, setSearchQuery] = useState('');
   
   // Category-specific sub-filters
-  const [companySubType, setCompanySubType] = useState<'Tất cả' | 'Hoạt động CIC' | 'Thông báo' | 'Văn hóa doanh nghiệp'>('Tất cả');
+  const [companySubType, setCompanySubType] = useState<string>('Tất cả');
   const [specialtySubType, setSpecialtySubType] = useState<'Tất cả' | 'Kiến thức' | 'Cập nhật công nghệ' | 'Chính sách' | 'Giải pháp'>('Tất cả');
   
   const [recruitmentDept, setRecruitmentDept] = useState<string>('Tất cả');
@@ -138,6 +144,93 @@ export function NewsView({
 
   // Scroll Reading Progress state
   const [readingProgress, setReadingProgress] = useState(0);
+
+  // News Ticker & Interactive Bell State
+  const [isTickerPaused, setIsTickerPaused] = useState(false);
+  const [showBellModal, setShowBellModal] = useState(false);
+  const [bellSubscribed, setBellSubscribed] = useState(true);
+  const [bellEmail, setBellEmail] = useState('');
+  const [bellToast, setBellToast] = useState<string | null>(null);
+
+  const handleBellSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bellEmail.trim()) return;
+    setBellSubscribed(true);
+    setBellToast('Đã đăng ký nhận thông báo tin tức nổi bật thành công!');
+    setBellEmail('');
+    setTimeout(() => {
+      setBellToast(null);
+    }, 4000);
+  };
+
+  const toggleBellSubscription = () => {
+    const nextState = !bellSubscribed;
+    setBellSubscribed(nextState);
+    setBellToast(nextState ? 'Đã bật thông báo tin tức nổi bật!' : 'Đã tắt thông báo tin tức');
+    setTimeout(() => {
+      setBellToast(null);
+    }, 3000);
+  };
+
+  const breakingNewsList = React.useMemo(() => {
+    return newsData.slice(0, 6);
+  }, []);
+
+  const renderNewsTicker = () => (
+    <div className="relative my-4">
+      {/* Ticker Bar Container - Clean & Simple like HomeView */}
+      <div 
+        className="bg-slate-950/90 text-white rounded-[8px] px-3.5 py-2 border border-slate-800/80 shadow-xs flex items-center justify-between gap-3 overflow-hidden backdrop-blur-sm"
+        onMouseEnter={() => setIsTickerPaused(true)}
+        onMouseLeave={() => setIsTickerPaused(false)}
+      >
+        {/* Interactive Bell Badge */}
+        <button
+          onClick={() => setShowBellModal(true)}
+          className="flex bg-orange-600 hover:bg-orange-500 text-white px-2.5 py-1 rounded-[6px] text-[10px] font-black uppercase tracking-widest shrink-0 gap-1.5 items-center z-10 cursor-pointer transition-colors shadow-2xs"
+          title="Nhấn để mở bảng tin nổi bật & đăng ký thông báo"
+        >
+          <div className="relative flex items-center justify-center shrink-0">
+            <Bell size={13} className={`animate-[bounce_1.2s_infinite] ${bellSubscribed ? 'fill-white' : ''}`} />
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-yellow-400"></span>
+            </span>
+          </div>
+          <span>HOT NEWS</span>
+        </button>
+
+        {/* Marquee Ticker */}
+        <div className="flex-1 overflow-hidden relative min-w-0">
+          <div 
+            className="animate-marquee flex items-center"
+            style={{
+              animationPlayState: isTickerPaused ? 'paused' : 'running'
+            }}
+          >
+            {[...breakingNewsList, ...breakingNewsList].map((item, idx) => (
+              <button
+                key={`ticker-${item.id}-${idx}`}
+                onClick={() => handleSelectNews(item.id)}
+                className="inline-flex items-center gap-3 text-slate-300 hover:text-orange-400 transition-colors text-xs font-medium whitespace-nowrap cursor-pointer shrink-0 mr-6"
+              >
+                <span>{item.title}</span>
+                <span className="text-slate-600 font-bold">•</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Bell Notification Quick Toast */}
+      {bellToast && (
+        <div className="absolute -bottom-9 right-0 z-50 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded-md shadow-md flex items-center gap-2 animate-fade-in">
+          <CheckCircle2 size={13} />
+          <span>{bellToast}</span>
+        </div>
+      )}
+    </div>
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -510,6 +603,33 @@ export function NewsView({
     }
   };
 
+  const getTypeSimpleText = (news: DetailedNewsItem) => {
+    if (news.category === 'company') {
+      return 'Tin công ty';
+    }
+    if (news.category === 'specialty') {
+      return 'Tin chuyên ngành';
+    }
+    if (news.category === 'recruitment') {
+      return 'Tuyển dụng';
+    }
+    if (news.category === 'promotion') {
+      return 'Tin khuyến mại';
+    }
+    if (news.category === 'shareholder') {
+      return 'Quan hệ cổ đông';
+    }
+    return 'Tin tức';
+  };
+
+  // Get latest articles for detail sidebar
+  const latestNews = React.useMemo(() => {
+    if (!selectedItem) return [];
+    return [...newsData]
+      .filter(item => item.id !== selectedItem.id)
+      .slice(0, 5);
+  }, [selectedItem]);
+
   // Get related articles
   const relatedArticles = React.useMemo(() => {
     if (!selectedItem) return [];
@@ -525,8 +645,8 @@ export function NewsView({
   const locs = ['Tất cả', 'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng'];
   const rStatuses = ['Tất cả', 'Đang tuyển', 'Đã hết hạn'];
   const pStatuses = ['Tất cả', 'Đang diễn ra', 'Đã kết thúc'];
-  const shYears = ['Tất cả', '2026'];
-  const shDocTypes = ['Tất cả', 'Thông báo', 'Báo cáo', 'Nghị quyết', 'Tài liệu cổ đông'];
+  const shYears = ['Tất cả', '2026', '2025', '2024', '2023'];
+  const shDocTypes = ['Tất cả', 'Thông báo cổ đông', 'Báo cáo thường niên', 'Điều lệ công ty', 'Báo cáo tài chính'];
 
   // Categories helper to render beautiful tabs
   const categoriesList = [
@@ -558,7 +678,7 @@ export function NewsView({
           <motion.div 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
+            className="space-y-6"
           >
             {/* HERO HEADER SECTION */}
             <section className="relative w-full p-6 sm:p-10 bg-slate-100/90 border border-slate-200/80 shadow-sm overflow-hidden">
@@ -571,18 +691,41 @@ export function NewsView({
               />
 
               <div className="relative z-10 space-y-5">
-                {/* Back Button */}
-                <button
-                  onClick={handleBackToList}
-                  className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors bg-white px-4 py-2 border border-slate-200 shadow-sm"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Quay lại danh sách tin tức</span>
-                </button>
+                {/* Breadcrumb Navigation & Back Button */}
+                <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 font-medium">
+                  <nav className="flex items-center gap-2 text-xs text-slate-500 font-sans flex-wrap">
+                    <button 
+                      onClick={onNavigateHome} 
+                      className="hover:text-orange-600 transition-colors cursor-pointer font-medium"
+                    >
+                      Trang chủ
+                    </button>
+                    <span>/</span>
+                    <button 
+                      onClick={handleBackToList} 
+                      className="hover:text-orange-600 transition-colors cursor-pointer font-medium"
+                    >
+                      Tin tức
+                    </button>
+                    <span>/</span>
+                    <span className="text-slate-900 font-semibold line-clamp-1 max-w-xs sm:max-w-md">
+                      {selectedItem.title}
+                    </span>
+                  </nav>
 
+                  <button
+                    onClick={handleBackToList}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors bg-white px-3.5 py-1.5 border border-slate-200 shadow-xs cursor-pointer rounded-md shrink-0"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Quay lại</span>
+                  </button>
+                </div>
+
+                {/* Tags & Meta Row */}
                 <div className="flex flex-wrap items-center gap-3 text-xs">
                   <span className="bg-orange-600/10 border border-orange-500/20 text-orange-600 font-black px-3 py-1 uppercase tracking-wider text-[10px]">
-                    {categoriesList.find(c => c.id === selectedItem.category)?.label || selectedItem.category}
+                    {getTypeSimpleText(selectedItem)}
                   </span>
                   <span className="text-slate-500 font-medium flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-orange-600" />
@@ -609,10 +752,6 @@ export function NewsView({
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-950 uppercase leading-tight">
                   {selectedItem.title}
                 </h1>
-
-                <p className="text-xs sm:text-base text-slate-600 font-medium italic border-l-4 border-orange-500 pl-4 py-2 leading-relaxed bg-white/70">
-                  {selectedItem.shortDesc}
-                </p>
 
                 {/* Hero Actions Row: Social Share & Bookmark */}
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-200/60">
@@ -670,411 +809,409 @@ export function NewsView({
               </div>
             </section>
 
+            {/* 🔔 NEWS TICKER (Repositioned after Hero Header so reader context comes first) */}
+            {renderNewsTicker()}
+
             {/* 2-COLUMN EXPANDED LAYOUT (Main: 8-cols, Sidebar: 4-cols) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
-              {/* CENTER COLUMN (col-span-8): Rich Article Details - EXPANDED */}
-              <main className="lg:col-span-8 space-y-8 bg-white border border-slate-200/80 p-6 sm:p-10 lg:p-12 shadow-sm rounded-[10px]">
+              {/* CENTER COLUMN (col-span-8): Distinct Blocks Stack */}
+              <div className="lg:col-span-8 space-y-8">
                 
-                {/* Featured Hero Banner Image */}
-                <div className="h-72 sm:h-[460px] lg:h-[500px] w-full relative overflow-hidden group rounded-[10px]">
-                  <img 
-                    src={selectedItem.img} 
-                    alt={selectedItem.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-[10px]"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                    <p className="text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles size={14} className="text-orange-400" />
-                      {selectedItem.title}
+                {/* BLOCK 1: MAIN ARTICLE CONTENT */}
+                <main className="bg-white border border-slate-200/80 p-6 sm:p-10 lg:p-12 shadow-sm rounded-[10px] space-y-8">
+                  
+                  {/* Article Summary Lead Paragraph (Tóm tắt nội dung để trước ảnh tiêu đề) */}
+                  {selectedItem.shortDesc && (
+                    <p className="text-sm md:text-base text-slate-800 font-medium italic border-l-4 border-orange-500 pl-4 py-3 leading-relaxed bg-orange-50/60 rounded-r-lg">
+                      {selectedItem.shortDesc}
                     </p>
-                  </div>
-                </div>
+                  )}
 
-                {/* Recruitment Specific Info Box */}
-                {selectedItem.category === 'recruitment' && (
-                  <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 my-4 shadow-2xs">
-                    <div className="space-y-2">
-                      <p><span className="text-slate-500 font-medium">Vị trí ứng tuyển:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).position}</span></p>
-                      <p><span className="text-slate-500 font-medium">Phòng ban:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).department}</span></p>
-                      <p><span className="text-slate-500 font-medium">Địa điểm làm việc:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).location}</span></p>
-                    </div>
-                    <div className="space-y-2">
-                      <p><span className="text-slate-500 font-medium">Mức lương đề xuất:</span> <span className="text-orange-700 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).salary}</span></p>
-                      <p><span className="text-slate-500 font-medium">Hình thức làm việc:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).jobType}</span></p>
-                      <p><span className="text-slate-500 font-medium">Hạn nộp hồ sơ:</span> <span className="text-red-600 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).deadline}</span></p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Promotion Specific Info Box */}
-                {selectedItem.category === 'promotion' && (
-                  <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 space-y-3.5 text-xs text-slate-800 my-4 shadow-2xs">
-                    <div className="flex items-center justify-between gap-2 border-b border-orange-100 pb-2.5">
-                      <h3 className="font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2 text-xs">
-                        <Percent size={16} className="text-orange-600 shrink-0" />
-                        <span>Thông tin chương trình khuyến mại</span>
-                      </h3>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider ${
-                        (selectedItem as PromotionNewsItem).status === 'Đang diễn ra' 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                          : 'bg-slate-100 text-slate-600 border border-slate-200'
-                      }`}>
-                        {(selectedItem as PromotionNewsItem).status}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700">
-                      <p><span className="font-bold text-slate-900">Chương trình:</span> {(selectedItem as PromotionNewsItem).programName}</p>
-                      <p><span className="font-bold text-slate-900">Thời gian áp dụng:</span> <span className="font-bold text-orange-700 bg-orange-50 px-1.5 py-0.5 border border-orange-200/80">{(selectedItem as PromotionNewsItem).timeFrame}</span></p>
-                      <p className="md:col-span-2"><span className="font-bold text-slate-900">Đối tượng áp dụng:</span> {(selectedItem as PromotionNewsItem).appliedTargets.join(', ')}</p>
-                    </div>
-
-                    <div className="pt-2 text-[11px] text-slate-500 italic flex items-center gap-1.5 border-t border-orange-100">
-                      <Sparkles size={13} className="text-orange-500 shrink-0" />
-                      <span>Tư vấn trực tiếp và nhận báo giá ưu đãi từ chuyên gia CIC Tech.</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Shareholder Specific Info Box */}
-                {selectedItem.category === 'shareholder' && (
-                  <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 my-4 shadow-2xs">
-                    <p><span className="text-slate-500 font-medium">Loại văn bản:</span> <span className="text-orange-700 font-bold ml-1">{(selectedItem as ShareholderNewsItem).docType}</span></p>
-                    <p><span className="text-slate-500 font-medium">Năm tài chính công bố:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as ShareholderNewsItem).year}</span></p>
-                  </div>
-                )}
-
-                {/* RICH DETAILED ARTICLE TEXT WITH MARKDOWN SIMULATION */}
-                <div className="prose max-w-none text-slate-700 text-xs md:text-sm leading-relaxed space-y-4">
-                  {(() => {
-                    type ContentBlock = {
-                      type: 'h3' | 'h4' | 'ol' | 'ul' | 'quote' | 'p';
-                      content: string;
-                      items?: string[];
-                    };
-                    const blocks: ContentBlock[] = [];
-                    const rawParagraphs = selectedItem.contentMarkdown.split('\n\n');
-
-                    rawParagraphs.forEach((p) => {
-                      const lines = p.split('\n').map(l => l.trim()).filter(Boolean);
-                      if (lines.length === 0) return;
-
-                      let currentListItems: string[] = [];
-                      let currentListType: 'ol' | 'ul' | null = null;
-
-                      const flushList = () => {
-                        if (currentListItems.length > 0 && currentListType) {
-                          blocks.push({
-                            type: currentListType,
-                            content: '',
-                            items: [...currentListItems]
-                          });
-                          currentListItems = [];
-                          currentListType = null;
-                        }
-                      };
-
-                      lines.forEach((line) => {
-                        if (line.startsWith('### ')) {
-                          flushList();
-                          blocks.push({ type: 'h3', content: line.replace('### ', '') });
-                        } else if (line.startsWith('#### ')) {
-                          flushList();
-                          blocks.push({ type: 'h4', content: line.replace('#### ', '') });
-                        } else if (
-                          line.startsWith('> ') || 
-                          (line.startsWith('*"') && line.endsWith('"*')) || 
-                          (line.startsWith('* "') && line.endsWith('"*')) ||
-                          (line.startsWith('*"') && line.includes('"*'))
-                        ) {
-                          flushList();
-                          let quoteText = line;
-                          if (quoteText.startsWith('> ')) quoteText = quoteText.replace('> ', '');
-                          if (quoteText.startsWith('*"')) quoteText = quoteText.slice(2);
-                          if (quoteText.endsWith('"*')) quoteText = quoteText.slice(0, -2);
-                          blocks.push({ type: 'quote', content: quoteText });
-                        } else if (/^\d+\.\s/.test(line)) {
-                          if (currentListType && currentListType !== 'ol') flushList();
-                          currentListType = 'ol';
-                          currentListItems.push(line.replace(/^\d+\.\s*/, ''));
-                        } else if (/^\*\s/.test(line) || /^-\s/.test(line)) {
-                          if (currentListType && currentListType !== 'ul') flushList();
-                          currentListType = 'ul';
-                          currentListItems.push(line.replace(/^[\*\-]\s*/, ''));
-                        } else {
-                          flushList();
-                          blocks.push({ type: 'p', content: line });
-                        }
-                      });
-
-                      flushList();
-                    });
-
-                    return blocks.map((block, idx) => {
-                      const sectionId = `sec-heading-${idx}`;
-                      if (block.type === 'h3') {
-                        return (
-                          <h3 
-                            key={idx} 
-                            id={sectionId}
-                            className="text-base md:text-lg font-bold text-slate-900 pt-3 border-b border-slate-100 pb-2 scroll-mt-28"
-                          >
-                            {renderFormattedText(block.content)}
-                          </h3>
-                        );
-                      }
-                      if (block.type === 'h4') {
-                        return (
-                          <h4 
-                            key={idx} 
-                            id={sectionId}
-                            className="text-sm md:text-base font-semibold text-slate-900 pt-2 scroll-mt-28"
-                          >
-                            {renderFormattedText(block.content)}
-                          </h4>
-                        );
-                      }
-                      if (block.type === 'quote') {
-                        return (
-                          <blockquote 
-                            key={idx} 
-                            className="my-4 p-4 md:p-5 bg-orange-50/70 border-l-4 border-orange-500 text-slate-800 text-xs md:text-sm italic font-medium leading-relaxed shadow-2xs"
-                          >
-                            "{renderFormattedText(block.content)}"
-                          </blockquote>
-                        );
-                      }
-                      if (block.type === 'ol' && block.items) {
-                        return (
-                          <ol key={idx} className="space-y-2.5 my-3 pl-1">
-                            {block.items.map((item, iIdx) => (
-                              <li key={iIdx} className="flex items-start gap-2 text-slate-700 text-xs md:text-sm leading-relaxed">
-                                <span className="h-5 w-5 bg-orange-100 text-orange-700 border border-orange-200 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                                  {iIdx + 1}
-                                </span>
-                                <span className="flex-1">{renderFormattedText(item)}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        );
-                      }
-                      if (block.type === 'ul' && block.items) {
-                        return (
-                          <ul key={idx} className="space-y-2 my-2.5 pl-1">
-                            {block.items.map((item, iIdx) => (
-                              <li key={iIdx} className="flex items-start gap-2 text-slate-700 text-xs md:text-sm leading-relaxed">
-                                <CornerDownRight size={14} className="text-orange-600 shrink-0 mt-1" />
-                                <span className="flex-1">{renderFormattedText(item)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        );
-                      }
-                      return (
-                        <p key={idx} className="text-slate-700 text-xs md:text-sm leading-relaxed my-2 text-justify">
-                          {renderFormattedText(block.content)}
-                        </p>
-                      );
-                    });
-                  })()}
-                </div>
-
-                {/* Additional Media: Video & Attachments */}
-                {(selectedItem.gallery && selectedItem.gallery.length > 1) || selectedItem.video || selectedItem.attachments ? (
-                  <div className="space-y-6 pt-8 border-t border-slate-100">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-l-4 border-orange-600 pl-3">
-                      Tài liệu bổ sung & Phương tiện trực quan
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Video embed */}
-                      {selectedItem.video && (
-                        <div className="space-y-2 md:col-span-2">
-                          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-                            <Video size={14} className="text-orange-600" /> Video giới thiệu/sự kiện
-                          </h4>
-                          <div className="bg-slate-900 border border-slate-800 relative overflow-hidden h-52 flex flex-col justify-center items-center">
-                            {!isVideoPlaying ? (
-                              <>
-                                <img 
-                                  src={selectedItem.video.thumbnail} 
-                                  alt="Video thumbnail" 
-                                  className="absolute inset-0 w-full h-full object-cover opacity-40"
-                                  referrerPolicy="no-referrer"
-                                />
-                                <div className="absolute inset-0 bg-slate-950/40"></div>
-                                <button
-                                  onClick={() => setIsVideoPlaying(true)}
-                                  className="w-12 h-12 bg-orange-600 hover:bg-orange-700 hover:scale-105 text-white flex items-center justify-center rounded-full z-10 shadow-lg transition-all"
-                                >
-                                  <Play size={20} className="ml-1" />
-                                </button>
-                                <span className="absolute bottom-3 left-3 text-[9px] font-bold text-white z-10 uppercase tracking-widest bg-slate-900/85 px-2 py-0.5">
-                                  {selectedItem.video.title}
-                                </span>
-                              </>
-                            ) : (
-                              <iframe
-                                title="News Video Player"
-                                src={selectedItem.video.embedUrl + "?autoplay=1"}
-                                className="w-full h-full border-0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Attachments list */}
-                      {selectedItem.attachments && selectedItem.attachments.length > 0 && (
-                        <div className="space-y-2 md:col-span-2">
-                          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tài liệu đính kèm tải về</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {selectedItem.attachments.map((file, idx) => {
-                              const isDownloaded = pdfDownloadedId === file.title && downloadProgress === 100;
-                              const isDownloading = pdfDownloadedId === file.title && downloadProgress < 100;
-                              return (
-                                <div key={idx} className="bg-slate-50 border border-slate-200 p-4 space-y-3 flex flex-col justify-between">
-                                  <div className="flex gap-3 items-start">
-                                    <div className="h-9 w-9 bg-red-100 border border-red-200 text-red-600 flex items-center justify-center shrink-0">
-                                      <FileText size={18} />
-                                    </div>
-                                    <div className="space-y-0.5">
-                                      <h5 className="text-[11px] font-black text-slate-950 line-clamp-2 uppercase">
-                                        {file.title}
-                                      </h5>
-                                      <p className="text-xs text-slate-400">{file.size}</p>
-                                    </div>
-                                  </div>
-
-                                  {isDownloading && (
-                                    <div className="w-full bg-slate-200 h-1">
-                                      <div className="bg-orange-600 h-full transition-all" style={{ width: `${downloadProgress}%` }}></div>
-                                    </div>
-                                  )}
-
-                                  <button
-                                    onClick={() => handleDownloadAttachment(file.title)}
-                                    disabled={isDownloaded}
-                                    className={`w-full py-2 text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center gap-1.5 rounded-none ${
-                                      isDownloaded
-                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
-                                        : 'bg-white hover:bg-slate-900 hover:text-white border-slate-200 text-slate-700'
-                                    }`}
-                                  >
-                                    {isDownloaded ? <><Check size={12} /> Đã tải thành công</> : <><Download size={12} /> Tải tài liệu (.PDF)</>}
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Consultation Form Widget - Clean Orange Framed Theme */}
-                {selectedItem.category !== 'recruitment' && (
-                  <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-6 md:p-8 space-y-4 my-6 shadow-2xs rounded-[10px]">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-bold uppercase tracking-tight text-slate-900 flex items-center gap-2">
-                        <Send size={16} className="text-orange-600" />
-                        <span>Đăng ký nhận tư vấn</span>
-                      </h3>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Nhận thông tin tư vấn bản quyền enjiCAD, giải pháp phần mềm kỹ thuật hoặc chuyển đổi số từ chuyên gia CIC Tech.
+                  {/* Featured Hero Banner Image */}
+                  <div className="h-72 sm:h-[460px] lg:h-[500px] w-full relative overflow-hidden group rounded-[10px]">
+                    <img 
+                      src={selectedItem.img} 
+                      alt={selectedItem.title} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-[10px]"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                      <p className="text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles size={14} className="text-orange-400" />
+                        {selectedItem.title}
                       </p>
                     </div>
-
-                    {consultSubmitted ? (
-                      <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 rounded-[8px]">
-                        <Check size={18} className="text-emerald-600 shrink-0" />
-                        <span>Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công. CIC Tech sẽ liên hệ lại trong thời gian sớm nhất.</span>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleConsultSubmit} className="space-y-3.5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Họ và tên *</label>
-                            <input
-                              type="text"
-                              required
-                              value={consultName}
-                              onChange={(e) => setConsultName(e.target.value)}
-                              placeholder="Nhập họ và tên"
-                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Email liên hệ *</label>
-                            <input
-                              type="email"
-                              required
-                              value={consultEmail}
-                              onChange={(e) => setConsultEmail(e.target.value)}
-                              placeholder="Nhập email liên hệ"
-                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Nội dung yêu cầu</label>
-                          <textarea
-                            rows={3}
-                            value={consultMessage}
-                            onChange={(e) => setConsultMessage(e.target.value)}
-                            placeholder="Mô tả nhu cầu của bạn..."
-                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white resize-none transition-colors rounded-[8px]"
-                          />
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={isConsultSubmitting}
-                          className="w-full py-3 bg-[#FC5115] hover:bg-orange-600 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 rounded-[8px]"
-                        >
-                          {isConsultSubmitting ? (
-                            <span>Đang gửi thông tin...</span>
-                          ) : (
-                            <>
-                              <span>Gửi yêu cầu tư vấn</span>
-                              <Send size={14} />
-                            </>
-                          )}
-                        </button>
-                      </form>
-                    )}
                   </div>
-                )}
 
-                {/* Author Info Card */}
-                {selectedItem.author && (
-                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold overflow-hidden border border-slate-300">
-                        <User size={20} />
+                  {/* Recruitment Specific Info Box */}
+                  {selectedItem.category === 'recruitment' && (
+                    <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 my-4 shadow-2xs">
+                      <div className="space-y-2">
+                        <p><span className="text-slate-500 font-medium">Vị trí ứng tuyển:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).position}</span></p>
+                        <p><span className="text-slate-500 font-medium">Phòng ban:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).department}</span></p>
+                        <p><span className="text-slate-500 font-medium">Địa điểm làm việc:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).location}</span></p>
                       </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-900">{selectedItem.author}</h4>
-                        <p className="text-xs text-slate-400 font-medium">Ban biên tập tin tức CIC Tech</p>
+                      <div className="space-y-2">
+                        <p><span className="text-slate-500 font-medium">Mức lương đề xuất:</span> <span className="text-orange-700 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).salary}</span></p>
+                        <p><span className="text-slate-500 font-medium">Hình thức làm việc:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).jobType}</span></p>
+                        <p><span className="text-slate-500 font-medium">Hạn nộp hồ sơ:</span> <span className="text-red-600 font-bold ml-1">{(selectedItem as RecruitmentNewsItem).deadline}</span></p>
                       </div>
                     </div>
-                    <button
-                      onClick={handleShareClick}
-                      className="p-2 border border-slate-200 hover:border-orange-500 text-slate-600 hover:text-orange-600 transition-colors"
-                      title="Sao chép đường dẫn"
-                    >
-                      <Share2 size={16} />
-                    </button>
+                  )}
+
+                  {/* Promotion Specific Info Box */}
+                  {selectedItem.category === 'promotion' && (
+                    <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 space-y-3.5 text-xs text-slate-800 my-4 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2 border-b border-orange-100 pb-2.5">
+                        <h3 className="font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2 text-xs">
+                          <Percent size={16} className="text-orange-600 shrink-0" />
+                          <span>Thông tin chương trình khuyến mại</span>
+                        </h3>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider ${
+                          (selectedItem as PromotionNewsItem).status === 'Đang diễn ra' 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}>
+                          {(selectedItem as PromotionNewsItem).status}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700">
+                        <p><span className="font-bold text-slate-900">Chương trình:</span> {(selectedItem as PromotionNewsItem).programName}</p>
+                        <p><span className="font-bold text-slate-900">Thời gian áp dụng:</span> <span className="font-bold text-orange-700 bg-orange-50 px-1.5 py-0.5 border border-orange-200/80">{(selectedItem as PromotionNewsItem).timeFrame}</span></p>
+                        <p className="md:col-span-2"><span className="font-bold text-slate-900">Đối tượng áp dụng:</span> {(selectedItem as PromotionNewsItem).appliedTargets.join(', ')}</p>
+                      </div>
+
+                      <div className="pt-2 text-[11px] text-slate-500 italic flex items-center gap-1.5 border-t border-orange-100">
+                        <Sparkles size={13} className="text-orange-500 shrink-0" />
+                        <span>Tư vấn trực tiếp và nhận báo giá ưu đãi từ chuyên gia CIC Tech.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Shareholder Specific Info Box */}
+                  {selectedItem.category === 'shareholder' && (
+                    <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 my-4 shadow-2xs">
+                      <p><span className="text-slate-500 font-medium">Loại văn bản:</span> <span className="text-orange-700 font-bold ml-1">{(selectedItem as ShareholderNewsItem).docType}</span></p>
+                      <p><span className="text-slate-500 font-medium">Năm tài chính công bố:</span> <span className="text-slate-900 font-bold ml-1">{(selectedItem as ShareholderNewsItem).year}</span></p>
+                    </div>
+                  )}
+
+                  {/* RICH DETAILED ARTICLE TEXT WITH MARKDOWN SIMULATION */}
+                  <div className="prose max-w-none text-slate-700 text-xs md:text-sm leading-relaxed space-y-4">
+                    {(() => {
+                      type ContentBlock = {
+                        type: 'h3' | 'h4' | 'ol' | 'ul' | 'quote' | 'p';
+                        content: string;
+                        items?: string[];
+                      };
+                      const blocks: ContentBlock[] = [];
+                      const rawParagraphs = selectedItem.contentMarkdown.split('\n\n');
+
+                      rawParagraphs.forEach((p) => {
+                        const lines = p.split('\n').map(l => l.trim()).filter(Boolean);
+                        if (lines.length === 0) return;
+
+                        let currentListItems: string[] = [];
+                        let currentListType: 'ol' | 'ul' | null = null;
+
+                        const flushList = () => {
+                          if (currentListItems.length > 0 && currentListType) {
+                            blocks.push({
+                              type: currentListType,
+                              content: '',
+                              items: [...currentListItems]
+                            });
+                            currentListItems = [];
+                            currentListType = null;
+                          }
+                        };
+
+                        lines.forEach((line) => {
+                          if (line.startsWith('### ')) {
+                            flushList();
+                            blocks.push({ type: 'h3', content: line.replace('### ', '') });
+                          } else if (line.startsWith('#### ')) {
+                            flushList();
+                            blocks.push({ type: 'h4', content: line.replace('#### ', '') });
+                          } else if (
+                            line.startsWith('> ') || 
+                            (line.startsWith('*"') && line.endsWith('"*')) || 
+                            (line.startsWith('* "') && line.endsWith('"*')) ||
+                            (line.startsWith('*"') && line.includes('"*'))
+                          ) {
+                            flushList();
+                            let quoteText = line;
+                            if (quoteText.startsWith('> ')) quoteText = quoteText.replace('> ', '');
+                            if (quoteText.startsWith('*"')) quoteText = quoteText.slice(2);
+                            if (quoteText.endsWith('"*')) quoteText = quoteText.slice(0, -2);
+                            blocks.push({ type: 'quote', content: quoteText });
+                          } else if (/^\d+\.\s/.test(line)) {
+                            if (currentListType && currentListType !== 'ol') flushList();
+                            currentListType = 'ol';
+                            currentListItems.push(line.replace(/^\d+\.\s*/, ''));
+                          } else if (/^\*\s/.test(line) || /^-\s/.test(line)) {
+                            if (currentListType && currentListType !== 'ul') flushList();
+                            currentListType = 'ul';
+                            currentListItems.push(line.replace(/^[\*\-]\s*/, ''));
+                          } else {
+                            flushList();
+                            blocks.push({ type: 'p', content: line });
+                          }
+                        });
+
+                        flushList();
+                      });
+
+                      return blocks.map((block, idx) => {
+                        const sectionId = `sec-heading-${idx}`;
+                        if (block.type === 'h3') {
+                          return (
+                            <h3 
+                              key={idx} 
+                              id={sectionId}
+                              className="text-base md:text-lg font-bold text-slate-900 pt-3 border-b border-slate-100 pb-2 scroll-mt-28"
+                            >
+                              {renderFormattedText(block.content)}
+                            </h3>
+                          );
+                        }
+                        if (block.type === 'h4') {
+                          return (
+                            <h4 
+                              key={idx} 
+                              id={sectionId}
+                              className="text-sm md:text-base font-semibold text-slate-900 pt-2 scroll-mt-28"
+                            >
+                              {renderFormattedText(block.content)}
+                            </h4>
+                          );
+                        }
+                        if (block.type === 'quote') {
+                          return (
+                            <blockquote 
+                              key={idx} 
+                              className="my-4 p-4 md:p-5 bg-orange-50/70 border-l-4 border-orange-500 text-slate-800 text-xs md:text-sm italic font-medium leading-relaxed shadow-2xs"
+                            >
+                              "{renderFormattedText(block.content)}"
+                            </blockquote>
+                          );
+                        }
+                        if (block.type === 'ol' && block.items) {
+                          return (
+                            <ol key={idx} className="space-y-2.5 my-3 pl-1">
+                              {block.items.map((item, iIdx) => (
+                                <li key={iIdx} className="flex items-start gap-2 text-slate-700 text-xs md:text-sm leading-relaxed">
+                                  <span className="h-5 w-5 bg-orange-100 text-orange-700 border border-orange-200 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                                    {iIdx + 1}
+                                  </span>
+                                  <span className="flex-1">{renderFormattedText(item)}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          );
+                        }
+                        if (block.type === 'ul' && block.items) {
+                          return (
+                            <ul key={idx} className="space-y-2 my-2.5 pl-1">
+                              {block.items.map((item, iIdx) => (
+                                <li key={iIdx} className="flex items-start gap-2.5 text-slate-700 text-xs md:text-sm leading-relaxed">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-700 shrink-0 mt-2"></span>
+                                  <span className="flex-1">{renderFormattedText(item)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                        }
+                        return (
+                          <p key={idx} className="text-slate-700 text-xs md:text-sm leading-relaxed my-2 text-justify">
+                            {renderFormattedText(block.content)}
+                          </p>
+                        );
+                      });
+                    })()}
                   </div>
-                )}
-              </main>
+
+                  {/* Consultation Form Widget - Inside Main Article Box */}
+                  {selectedItem.category !== 'recruitment' && (
+                    <div className="bg-orange-50/50 border border-orange-200 border-l-4 border-l-orange-500 p-6 md:p-8 space-y-4 shadow-2xs rounded-[10px] my-6">
+                      <div className="space-y-1">
+                        <h3 className="text-base font-bold uppercase tracking-tight text-slate-900 flex items-center gap-2">
+                          <Send size={16} className="text-orange-600" />
+                          <span>Đăng ký nhận tư vấn</span>
+                        </h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          Nhận thông tin tư vấn bản quyền enjiCAD, giải pháp phần mềm kỹ thuật hoặc chuyển đổi số từ chuyên gia CIC Tech.
+                        </p>
+                      </div>
+
+                      {consultSubmitted ? (
+                        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 rounded-[8px]">
+                          <Check size={18} className="text-emerald-600 shrink-0" />
+                          <span>Cảm ơn bạn! Yêu cầu tư vấn đã được gửi thành công. CIC Tech sẽ liên hệ lại trong thời gian sớm nhất.</span>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleConsultSubmit} className="space-y-3.5">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Họ và tên *</label>
+                              <input
+                                type="text"
+                                required
+                                value={consultName}
+                                onChange={(e) => setConsultName(e.target.value)}
+                                placeholder="Nhập họ và tên"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Email liên hệ *</label>
+                              <input
+                                type="email"
+                                required
+                                value={consultEmail}
+                                onChange={(e) => setConsultEmail(e.target.value)}
+                                placeholder="Nhập email liên hệ"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Nội dung yêu cầu</label>
+                            <textarea
+                              rows={3}
+                              value={consultMessage}
+                              onChange={(e) => setConsultMessage(e.target.value)}
+                              placeholder="Mô tả nhu cầu của bạn..."
+                              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white resize-none transition-colors rounded-[8px]"
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={isConsultSubmitting}
+                            className="w-full py-3 bg-[#FC5115] hover:bg-orange-600 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 rounded-[8px]"
+                          >
+                            {isConsultSubmitting ? (
+                              <span>Đang gửi thông tin...</span>
+                            ) : (
+                              <>
+                                <span>Gửi yêu cầu tư vấn</span>
+                                <Send size={14} />
+                              </>
+                            )}
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  )}
+                </main>
+
+                {/* BLOCK 2: SẢN PHẨM & SỰ KIỆN LIÊN QUAN */}
+                <section className="bg-transparent border-0 p-0 shadow-none space-y-8">
+                  {/* Related Products Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                      <Box size={16} className="text-orange-600" />
+                      <span>Sản phẩm liên quan</span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(effectiveLinkedProducts.length > 0 ? effectiveLinkedProducts : productsData.slice(0, 3)).map((prod) => (
+                        <div
+                          key={prod.id}
+                          onClick={() => {
+                            if (onNavigateToProduct) onNavigateToProduct(prod.id);
+                          }}
+                          className="bg-white border border-slate-200/90 hover:border-orange-500 p-4 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 rounded-[10px] group flex flex-col justify-between cursor-pointer"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-11 h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
+                                <img 
+                                  src={prod.img || prod.icon} 
+                                  alt={prod.name}
+                                  loading="lazy"
+                                  referrerPolicy="no-referrer"
+                                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
+                                />
+                              </div>
+                              <h4 className="text-xs font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
+                                {prod.name}
+                              </h4>
+                            </div>
+
+                            {prod.price && (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giá:</span>
+                                <span className="text-xs font-bold text-orange-600">
+                                  {prod.price}
+                                </span>
+                              </div>
+                            )}
+
+                            <p className="text-[11px] text-slate-500 font-normal leading-relaxed line-clamp-2 border-t border-slate-100 pt-2">
+                              {prod.description}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
+                            <span>Chi tiết sản phẩm</span>
+                            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Related Events Section */}
+                  <div className="space-y-4 pt-6 border-t border-slate-200/80">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                      <Calendar size={16} className="text-orange-600" />
+                      <span>Sự kiện liên quan</span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {(linkedEvents.length > 0 ? linkedEvents : eventsData.slice(0, 2)).map((evt) => (
+                        <div
+                          key={evt.id}
+                          onClick={() => {
+                            if (onNavigateToEvent) {
+                              onNavigateToEvent(evt.id);
+                            }
+                          }}
+                          className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-4 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
+                        >
+                          <div className="px-3 py-2 bg-orange-600 text-white rounded-[8px] text-center shrink-0 group-hover:bg-orange-700 transition-colors">
+                            <span className="block text-[10px] font-extrabold uppercase tracking-wider">
+                              {evt.date.split('/')[1] ? `Thg ${evt.date.split('/')[1]}` : 'Sự kiện'}
+                            </span>
+                            <span className="block text-base font-black leading-none mt-0.5">
+                              {evt.date.split('/')[0]}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                              {evt.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                              <MapPin size={12} className="text-orange-600 shrink-0" />
+                              <span className="line-clamp-1">{evt.location}</span>
+                            </p>
+                            <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                              <span>Xem chi tiết sự kiện</span>
+                              <ChevronRight size={12} className="ml-0.5" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              </div>
 
               {/* RIGHT SIDEBAR (col-span-4): Category-Aware Dynamic Sidebar */}
               <aside className="lg:col-span-4 space-y-6">
@@ -1142,7 +1279,6 @@ export function NewsView({
                         <Box size={16} className="text-orange-600" />
                         <span>Giải pháp liên quan</span>
                       </div>
-                      <span className="text-[10px] text-slate-400 font-normal">CIC Tech</span>
                     </h3>
                     <div className="space-y-2.5">
                       {effectiveLinkedProducts.map((prod) => (
@@ -1173,19 +1309,18 @@ export function NewsView({
                   </div>
                 )}
 
-                {/* Related Articles (Tin tức liên quan) */}
-                {relatedArticles.length > 0 && (
+                {/* Latest News */}
+                {latestNews.length > 0 && (
                   <div className="bg-transparent p-0 space-y-3">
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-950 border-b border-slate-200 pb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <FileText size={16} className="text-orange-600" />
-                        <span>Tin tức liên quan</span>
+                        <Clock size={16} className="text-orange-600" />
+                        <span>Tin mới nhất</span>
                       </div>
-                      <span className="text-[10px] text-slate-400 font-normal">CIC News</span>
                     </h3>
 
                     <div className="space-y-2.5">
-                      {relatedArticles.map((article) => (
+                      {latestNews.map((article) => (
                         <div
                           key={article.id}
                           onClick={() => handleSelectNews(article.id)}
@@ -1252,7 +1387,7 @@ export function NewsView({
         ) : (
           
           /* VIEW 2: TECH NEWSROOM & EDITORIAL HUB VIEW */
-          <div className="space-y-12">
+          <div className="space-y-8">
             
             {/* Header section */}
             <div className="border-l-4 border-orange-600 pl-6 space-y-2">
@@ -1263,6 +1398,9 @@ export function NewsView({
                 Cập nhật thông tin hoạt động, kiến thức kỹ thuật chuyên ngành và các thông cáo cổ đông mới nhất
               </p>
             </div>
+
+            {/* Running News Ticker in Main Newsroom View */}
+            {renderNewsTicker()}
 
             {/* HERO NEWSROOM SECTION (Top Highlight Story + Vertical Side Features) */}
             {activeCategory === 'all' && !searchQuery && filteredNews.length >= 4 && (
@@ -1327,16 +1465,16 @@ export function NewsView({
                           className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                           referrerPolicy="no-referrer"
                         />
-                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#FC5115] text-white text-[9px] font-black uppercase tracking-wider shadow rounded-[8px]">
-                          {categoriesList.find(c => c.id === sideItem.category)?.label}
-                        </span>
                       </div>
 
                       {/* Bigger Content & Excerpt */}
                       <div className="space-y-1.5 flex-1 min-w-0">
-                        <span className="text-xs text-slate-400 font-bold flex items-center gap-1">
-                          <Clock size={12} className="text-[#FC5115]" /> {sideItem.date}
-                        </span>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                          <Clock size={12} className="text-[#FC5115] shrink-0" />
+                          <span>{sideItem.date}</span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-600 font-medium">{getTypeSimpleText(sideItem)}</span>
+                        </div>
                         <h4 className="text-sm lg:text-base font-bold text-slate-900 transition-colors line-clamp-2 leading-snug">
                           {sideItem.title}
                         </h4>
@@ -1374,6 +1512,28 @@ export function NewsView({
                 })}
               </div>
 
+              {/* SHAREHOLDER SUBMENU TABS */}
+              {activeCategory === 'shareholder' && (
+                <div className="pt-2 pb-1 border-t border-slate-100 flex items-center gap-2 overflow-x-auto scrollbar-none">
+                  {shDocTypes.map((dt) => {
+                    const isSelected = shareholderDocType === dt;
+                    return (
+                      <button
+                        key={dt}
+                        onClick={() => setShareholderDocType(dt)}
+                        className={`shrink-0 px-4 py-2 text-xs font-bold transition-all rounded-[6px] ${
+                          isSelected
+                            ? 'bg-[#FC5115] text-white shadow-xs'
+                            : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                        }`}
+                      >
+                        {dt}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* SECONDARY FILTER ENGINE BAR */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-transparent p-0">
                 {/* Search Input */}
@@ -1396,7 +1556,7 @@ export function NewsView({
                       onChange={(e: any) => setCompanySubType(e.target.value)}
                       className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                     >
-                      {['Tất cả', 'Hoạt động CIC', 'Thông báo', 'Văn hóa doanh nghiệp'].map(st => (
+                      {['Tất cả', 'Thông báo', 'Văn hóa doanh nghiệp'].map(st => (
                         <option key={st} value={st}>{st}</option>
                       ))}
                     </select>
@@ -1453,26 +1613,15 @@ export function NewsView({
                 )}
 
                 {activeCategory === 'shareholder' && (
-                  <>
-                    <div className="md:col-span-2">
-                      <select
-                        value={shareholderYear}
-                        onChange={(e) => setShareholderYear(e.target.value)}
-                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
-                      >
-                        {shYears.map(y => <option key={y} value={y}>Năm: {y}</option>)}
-                      </select>
-                    </div>
-                    <div className="md:col-span-2">
-                      <select
-                        value={shareholderDocType}
-                        onChange={(e) => setShareholderDocType(e.target.value)}
-                        className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
-                      >
-                        {shDocTypes.map(d => <option key={d} value={d}>Loại: {d}</option>)}
-                      </select>
-                    </div>
-                  </>
+                  <div className="md:col-span-4">
+                    <select
+                      value={shareholderYear}
+                      onChange={(e) => setShareholderYear(e.target.value)}
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
+                    >
+                      {shYears.map(y => <option key={y} value={y}>Năm: {y}</option>)}
+                    </select>
+                  </div>
                 )}
 
                 {/* Reset Filters button */}
@@ -1497,7 +1646,7 @@ export function NewsView({
               </div>
             </div>
 
-            {/* EDITORIAL LIST SHOWCASE (APPLE / NVIDIA NEWSROOM STYLE - NO CARDS / NO BOXES) */}
+            {/* EDITORIAL LIST SHOWCASE */}
             {paginatedNews.length === 0 ? (
               <div className="text-center py-20 border border-dashed border-slate-300 space-y-4 rounded-[10px]">
                 <p className="text-slate-500 font-medium text-sm">Không tìm thấy tin tức hay văn bản nào phù hợp với bộ lọc.</p>
@@ -1519,45 +1668,66 @@ export function NewsView({
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              <div className={activeCategory === 'shareholder' ? "space-y-3" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"}>
                 {paginatedNews.map((news, index) => {
-                  
-                  // Specific badges depending on type
-                  let typeBadge = null;
-                  if (news.category === 'recruitment') {
-                    const r = news as RecruitmentNewsItem;
-                    typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 rounded-[8px]">
-                        {r.position} • {r.location}
-                      </span>
-                    );
-                  } else if (news.category === 'promotion') {
-                    const p = news as PromotionNewsItem;
-                    typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-orange-100 text-orange-800 rounded-[8px]">
-                        {p.status}
-                      </span>
-                    );
-                  } else if (news.category === 'shareholder') {
-                    const s = news as ShareholderNewsItem;
-                    typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-indigo-100 text-indigo-800 rounded-[8px]">
-                        {s.docType} ({s.year})
-                      </span>
-                    );
-                  } else if (news.category === 'company') {
-                    const c = news as CompanyNewsItem;
-                    typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-amber-100 text-amber-800 rounded-[8px]">
-                        {c.subType}
-                      </span>
-                    );
-                  } else if (news.category === 'specialty') {
-                    const sp = news as SpecialtyNewsItem;
-                    typeBadge = (
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-sky-100 text-sky-800 rounded-[8px]">
-                        {sp.subType}
-                      </span>
+                  if (news.category === 'shareholder') {
+                    return (
+                      <motion.div
+                        key={news.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.03, duration: 0.25 }}
+                        onClick={() => handleDownloadAttachment(news.title)}
+                        className="group cursor-pointer bg-white border border-slate-200 hover:border-[#FC5115] rounded-[10px] p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:-translate-y-0.5"
+                      >
+                        {/* Left: Document Icon & Details */}
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                          {/* PDF Icon Box */}
+                          <div className="w-12 h-14 sm:w-14 sm:h-16 shrink-0 bg-red-50 border border-red-200 rounded-[8px] flex flex-col items-center justify-center gap-0.5 group-hover:border-red-400 group-hover:bg-red-100/80 transition-all shadow-2xs">
+                            <FileText size={24} className="text-red-600 group-hover:scale-110 transition-transform" />
+                            <span className="text-[9px] font-extrabold text-red-700 uppercase tracking-wider px-1 py-0.2 bg-red-100/90 rounded-[2px]">
+                              PDF
+                            </span>
+                          </div>
+
+                          {/* Title & Metadata */}
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                              <Clock size={12} className="text-[#FC5115] shrink-0" />
+                              <span>{news.date}</span>
+                            </div>
+                            <h3 className="text-sm font-black text-slate-950 group-hover:text-[#FC5115] transition-colors leading-snug line-clamp-2">
+                              {news.title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        {/* Right: File Size & Download Button */}
+                        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                          <div className="text-right">
+                            <span className="block text-xs font-bold text-slate-500 group-hover:text-[#FC5115] transition-colors">
+                              {(news as ShareholderNewsItem).pdfSize || 'PDF Document'}
+                            </span>
+                            {pdfDownloadedId === news.title && (
+                              <span className="text-[10px] font-bold text-emerald-600 flex items-center justify-end gap-1 animate-pulse">
+                                <CheckCircle2 size={12} /> Đã tải tệp
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadAttachment(news.title);
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-[#FC5115] text-white text-xs font-bold transition-all rounded-[6px] shadow-2xs group-hover:bg-[#FC5115] shrink-0"
+                          >
+                            <Download size={14} />
+                            <span>Tải về</span>
+                          </button>
+                        </div>
+                      </motion.div>
                     );
                   }
 
@@ -1579,20 +1749,15 @@ export function NewsView({
                           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                           referrerPolicy="no-referrer"
                         />
-                        <div className="absolute top-3 left-3 flex gap-2">
-                          <span className="px-2.5 py-1 bg-[#FC5115] text-white text-[9px] font-black uppercase tracking-wider shadow-sm rounded-[8px]">
-                            {categoriesList.find(c => c.id === news.category)?.label}
-                          </span>
-                        </div>
                       </div>
 
                       {/* Bottom: Card Content */}
                       <div className="pt-4 pb-2 flex flex-col flex-1 space-y-2.5">
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
-                            <Clock size={12} className="text-[#FC5115]" /> {news.date}
-                          </span>
-                          {typeBadge}
+                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                          <Clock size={12} className="text-[#FC5115] shrink-0" />
+                          <span>{news.date}</span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-600 font-medium">{getTypeSimpleText(news)}</span>
                         </div>
 
                         {/* Title - Max 2 lines */}
@@ -1748,6 +1913,139 @@ export function NewsView({
         )}
 
       </div>
+
+      {/* Interactive Bell Notification Modal */}
+      <AnimatePresence>
+        {showBellModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white border border-slate-200 rounded-[16px] shadow-2xl max-w-lg w-full overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="bg-slate-900 text-white p-5 flex items-start justify-between gap-4 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-orange-600/20 border border-orange-500/40 flex items-center justify-center text-orange-500 shrink-0">
+                    <BellRing size={20} className="animate-bounce" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white uppercase tracking-tight">
+                      Bảng Tin Nổi Bật & Thông Báo CIC Tech
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Cập nhật tin nóng tức thì về công nghệ, khuyến mại & sự kiện
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowBellModal(false)}
+                  className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-5 space-y-5 max-h-[75vh] overflow-y-auto">
+                {/* Bell Alert Toggle */}
+                <div className="p-4 bg-orange-50/60 border border-orange-200/80 rounded-[12px] flex items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Bell size={14} className="text-orange-600" />
+                      <span>Thông báo tin nóng trên trình duyệt</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-600">
+                      {bellSubscribed ? 'Đang bật: Bạn sẽ nhận tin nổi bật ngay khi có thông cáo mới.' : 'Đang tắt thông báo tự động.'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={toggleBellSubscription}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-[8px] transition-all cursor-pointer shrink-0 ${
+                      bellSubscribed
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                    }`}
+                  >
+                    {bellSubscribed ? 'Đã bật' : 'Bật ngay'}
+                  </button>
+                </div>
+
+                {/* Email Subscription Form */}
+                <form onSubmit={handleBellSubscribe} className="space-y-2">
+                  <label className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+                    Đăng ký nhận tin tức qua Email
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Nhập email của bạn..."
+                      value={bellEmail}
+                      onChange={(e) => setBellEmail(e.target.value)}
+                      className="flex-1 bg-slate-50 border border-slate-200 text-xs px-3 py-2 rounded-[8px] focus:outline-none focus:border-orange-500 focus:bg-white"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer shrink-0"
+                    >
+                      Đăng ký
+                    </button>
+                  </div>
+                </form>
+
+                {/* Latest Breaking News Feed inside Modal */}
+                <div className="space-y-2.5 pt-2 border-t border-slate-200">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center justify-between">
+                    <span>Tin tức nổi bật mới cập nhật</span>
+                    <span className="text-[10px] text-orange-600 font-bold">{breakingNewsList.length} tin mới</span>
+                  </h4>
+                  <div className="space-y-2">
+                    {breakingNewsList.map((item) => (
+                      <div
+                        key={`bell-modal-${item.id}`}
+                        onClick={() => {
+                          handleSelectNews(item.id);
+                          setShowBellModal(false);
+                        }}
+                        className="p-3 bg-slate-50 hover:bg-orange-50/50 border border-slate-200 hover:border-orange-300 rounded-[10px] cursor-pointer transition-all flex items-start gap-3 group"
+                      >
+                        <div className="w-12 h-12 rounded-[6px] overflow-hidden bg-slate-200 shrink-0">
+                          <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-0.5">
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                            <span className="font-bold text-orange-600 uppercase">{item.category}</span>
+                            <span>•</span>
+                            <span>{item.date}</span>
+                          </div>
+                          <h5 className="text-xs font-bold text-slate-900 group-hover:text-orange-600 line-clamp-1">
+                            {item.title}
+                          </h5>
+                          <p className="text-[11px] text-slate-500 line-clamp-1">
+                            {item.shortDesc}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button
+                  onClick={() => setShowBellModal(false)}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

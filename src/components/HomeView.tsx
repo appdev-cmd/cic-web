@@ -152,7 +152,7 @@ export const HomeView = ({
   return (
     <>
       {/* Hero Section */}
-      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10">
+      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10 border-b border-orange-500/60 shadow-[0_4px_25px_rgba(252,81,21,0.15)]">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.img 
@@ -200,15 +200,20 @@ export const HomeView = ({
                   setActiveLink('Sản phẩm');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_50px_rgba(234,88,12,0.3)] border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3"
+                className="px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_50px_rgba(234,88,12,0.3)] border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3 cursor-pointer"
               >
                 Khám phá giải pháp <ArrowRight size={20} />
               </button>
               <button 
-                onClick={() => window.open('https://www.youtube.com/watch?v=Eeh4Y-PLptY&t=8s', '_blank')}
-                className="px-5 py-2 bg-white/5 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction"
+                onClick={() => {
+                  setCurrentView('about');
+                  setActiveLink('Giới thiệu');
+                  setAboutSubTab('overview');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-5 py-2 bg-white/5 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction cursor-pointer"
               >
-                <Play size={20} fill="currentColor" /> Về chúng tôi
+                <Users size={20} /> Về chúng tôi
               </button>
             </div>
           </motion.div>
@@ -228,8 +233,15 @@ export const HomeView = ({
         {/* Headline Ticker */}
         <div className="absolute bottom-0 left-0 right-0 bg-slate-950/80 border-t border-white/10 backdrop-blur-md z-30 hidden md:block">
           <div className="max-w-7xl mx-auto px-6 h-12 flex items-center gap-4 relative overflow-hidden">
-            <div className="flex bg-orange-600 text-white px-3 py-1 rounded-[8px] text-[10px] font-black uppercase tracking-widest shrink-0 gap-2 items-center z-10">
-              <Bell size={12} /> Tin nổi bật
+            <div className="flex bg-orange-600 text-white px-3 py-1 rounded-[8px] text-[10px] font-black uppercase tracking-widest shrink-0 gap-2 items-center z-10 shadow-xs">
+              <div className="relative flex items-center justify-center shrink-0">
+                <Bell size={13} className="animate-[bounce_1.2s_infinite] text-white shrink-0" />
+                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-yellow-400"></span>
+                </span>
+              </div>
+              <span>HOT NEWS</span>
             </div>
             <div className="flex-1 overflow-hidden relative h-full flex items-center group">
               <motion.div 
@@ -289,13 +301,13 @@ export const HomeView = ({
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="group relative rounded-[10px] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.15)] aspect-video cursor-pointer"
+              className="group relative rounded-[16px] sm:rounded-[20px] overflow-hidden shadow-2xl border border-slate-200/90 aspect-video cursor-pointer"
               onClick={() => window.open('https://www.youtube.com/watch?v=Eeh4Y-PLptY&t=8s', '_blank')}
             >
               <img 
                 src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&q=80" 
                 alt="Office" 
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-[10px]"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-[16px] sm:rounded-[20px]"
               />
               <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-all flex items-center justify-center">
                 <div className="relative">
@@ -352,10 +364,24 @@ export const HomeView = ({
           <div className="absolute inset-0 bg-slate-50/50"></div>
         </div>
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <SectionHeader 
-            title="Hệ sinh thái Công nghệ CIC" 
-            sub="Phần mềm, thiết bị, AI, BIM, Digital Twins & Tư vấn đào tạo" 
-          />
+          <div 
+            onClick={() => {
+              setCurrentView('services');
+              setActiveLink('Dịch vụ');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="text-center mb-6 cursor-pointer group inline-block w-full"
+            title="Nhấn để xem trang Dịch vụ"
+          >
+            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-950 group-hover:text-orange-600 transition-colors inline-flex items-center gap-2 justify-center">
+              Hệ sinh thái Công nghệ CIC
+              <ArrowRight size={26} className="text-orange-600 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all shrink-0 hidden sm:inline-block" />
+            </h2>
+            <div className="w-16 h-1 bg-orange-600 mx-auto mt-2 mb-4 group-hover:w-28 transition-all"></div>
+            <p className="font-bold uppercase tracking-widest text-[10px] text-slate-500 group-hover:text-orange-600 transition-colors">
+              Phần mềm, thiết bị, AI, BIM, Digital Twins & Tư vấn đào tạo — Xem trang Dịch vụ &rarr;
+            </p>
+          </div>
           <div className="flex justify-center -mt-2 mb-8">
             <div className="w-full max-w-[280px] relative">
               <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 shadow-sm transition-all rounded-[8px] text-sm font-medium" />

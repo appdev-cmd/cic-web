@@ -30,9 +30,11 @@ import {
   Timer,
   Share2,
   ExternalLink,
-  Tag
+  Tag,
+  Box
 } from 'lucide-react';
 import { eventsData } from '../data/eventsData';
+import { productsData } from '../data/mockData';
 import { EventItem, EventRegistration } from '../types';
 
 interface EventsViewProps {
@@ -47,6 +49,7 @@ interface EventsViewProps {
 export const EventsView: React.FC<EventsViewProps> = ({ 
   initialEventId,
   initialIsRegistering,
+  onNavigateToProduct,
 }) => {
   // Navigation & details state
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
@@ -638,224 +641,182 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 
-                {/* MAIN CONTENT COLUMN */}
-                <div className="lg:col-span-8 space-y-10">
-                  
-                  {/* HERO BANNER & MAIN METADATA */}
-                  <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="relative aspect-video bg-slate-950 overflow-hidden">
-                      <img 
-                        src={selectedEvent.img} 
-                        alt={selectedEvent.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-6 left-6 flex gap-2">
-                        <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-md ${getStatusColor(selectedEvent.status)}`}>
-                          {getStatusLabel(selectedEvent.status)}
-                        </span>
-                        {selectedEvent.isOpenRegistration && (
-                          <span className="bg-orange-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-md">
-                            Mở Đăng Ký
+                {/* MAIN CONTENT COLUMN - SINGLE UNIFIED CONTAINER */}
+                <div className="lg:col-span-8">
+                  <div className="bg-white border border-slate-200 shadow-sm rounded-[12px] overflow-hidden space-y-2">
+                    
+                    {/* HERO BANNER & MAIN METADATA */}
+                    <div>
+                      <div className="relative aspect-video bg-slate-950 overflow-hidden">
+                        <img 
+                          src={selectedEvent.img} 
+                          alt={selectedEvent.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-6 left-6 flex gap-2">
+                          <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-md ${getStatusColor(selectedEvent.status)}`}>
+                            {getStatusLabel(selectedEvent.status)}
                           </span>
+                          {selectedEvent.isOpenRegistration && (
+                            <span className="bg-orange-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-md">
+                              Mở Đăng Ký
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-6 sm:p-8 space-y-6">
+                        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 leading-tight uppercase tracking-tight">
+                          {selectedEvent.title}
+                        </h1>
+
+                        {/* Meta quick badges */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b border-slate-100 py-6">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 rounded-md">
+                              <Calendar className="text-orange-600" size={18} />
+                            </div>
+                            <div>
+                              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Thời gian</span>
+                              <span className="font-bold text-slate-800 text-sm leading-snug block">{selectedEvent.date}</span>
+                              <span className="text-xs text-slate-500 font-medium">Bắt đầu: {selectedEvent.startDate.split('T')[1].slice(0, 5)}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0 rounded-md">
+                              <MapPin className="text-orange-600" size={18} />
+                            </div>
+                            <div>
+                              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Địa điểm tổ chức</span>
+                              <span className="font-bold text-slate-800 text-sm leading-snug block">{selectedEvent.location}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Countdown widget if upcoming */}
+                        {(selectedEvent.status === 'upcoming' || selectedEvent.status === 'ongoing') && (
+                          <div className="bg-slate-950 text-white p-6 flex flex-col md:flex-row items-center justify-between gap-6 rounded-[10px]">
+                            <div className="flex items-center gap-3">
+                              <Timer className="text-orange-500 shrink-0" size={32} />
+                              <div>
+                                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Đếm ngược sự kiện</span>
+                                <span className="text-sm font-bold text-slate-200">Sắp sửa diễn ra chương trình</span>
+                              </div>
+                            </div>
+
+                            {/* Flip clock numbers */}
+                            <div className="flex gap-2 text-center">
+                              {[
+                                { value: timeLeft.days, label: 'NGÀY' },
+                                { value: timeLeft.hours, label: 'GIỜ' },
+                                { value: timeLeft.minutes, label: 'PHÚT' },
+                                { value: timeLeft.seconds, label: 'GIÂY' }
+                              ].map((unit, i) => (
+                                <div key={i} className="bg-slate-900 border border-white/10 p-2.5 min-w-[65px] rounded-[8px]">
+                                  <span className="block text-2xl font-extrabold text-orange-500 leading-none">
+                                    {String(unit.value).padStart(2, '0')}
+                                  </span>
+                                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1 block">
+                                    {unit.label}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="p-8 space-y-6">
-                      <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 leading-tight uppercase tracking-tight">
-                        {selectedEvent.title}
-                      </h1>
-
-                      {/* Meta quick badges */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b border-slate-100 py-6">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
-                            <Calendar className="text-orange-600" size={18} />
-                          </div>
-                          <div>
-                            <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Thời gian</span>
-                            <span className="font-bold text-slate-800 text-sm leading-snug block">{selectedEvent.date}</span>
-                            <span className="text-xs text-slate-500 font-medium">Bắt đầu: {selectedEvent.startDate.split('T')[1].slice(0, 5)}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
-                            <MapPin className="text-orange-600" size={18} />
-                          </div>
-                          <div>
-                            <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Địa điểm tổ chức</span>
-                            <span className="font-bold text-slate-800 text-sm leading-snug block">{selectedEvent.location}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Countdown widget if upcoming */}
-                      {(selectedEvent.status === 'upcoming' || selectedEvent.status === 'ongoing') && (
-                        <div className="bg-slate-950 text-white p-6 flex flex-col md:flex-row items-center justify-between gap-6 rounded-[10px]">
-                          <div className="flex items-center gap-3">
-                            <Timer className="text-orange-500 shrink-0" size={32} />
-                            <div>
-                              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Đếm ngược sự kiện</span>
-                              <span className="text-sm font-bold text-slate-200">Sắp sửa diễn ra chương trình</span>
-                            </div>
-                          </div>
-
-                          {/* Flip clock numbers */}
-                          <div className="flex gap-2 text-center">
-                            {[
-                              { value: timeLeft.days, label: 'NGÀY' },
-                              { value: timeLeft.hours, label: 'GIỜ' },
-                              { value: timeLeft.minutes, label: 'PHÚT' },
-                              { value: timeLeft.seconds, label: 'GIÂY' }
-                            ].map((unit, i) => (
-                              <div key={i} className="bg-slate-900 border border-white/10 p-2.5 min-w-[65px] rounded-[8px]">
-                                <span className="block text-2xl font-extrabold text-orange-500 leading-none">
-                                  {String(unit.value).padStart(2, '0')}
-                                </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1 block">
-                                  {unit.label}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* LONG FORM DESCRIPTION */}
-                  <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
-                    <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                      <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Giới thiệu chương trình
-                    </h2>
-                    <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line">
-                      {selectedEvent.longDesc}
-                    </div>
-                  </div>
-
-                  {/* AUDIENCE / TARGET GROUP */}
-                  {selectedEvent.targetAudience && selectedEvent.targetAudience.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
-                      <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Đối tượng tham dự phù hợp
+                    {/* LONG FORM DESCRIPTION */}
+                    <div className="p-6 sm:p-8 space-y-4">
+                      <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
+                        Giới thiệu chương trình
                       </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                        {selectedEvent.targetAudience.map((aud, i) => (
-                          <div key={i} className="flex gap-3 items-start bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                            <CheckCircle size={18} className="text-orange-600 shrink-0 mt-0.5" />
-                            <span className="text-xs font-bold text-slate-700 leading-relaxed">{aud}</span>
-                          </div>
-                        ))}
+                      <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line">
+                        {selectedEvent.longDesc}
                       </div>
                     </div>
-                  )}
 
-                  {/* AGENDA TIMELINE */}
-                  {selectedEvent.agenda && selectedEvent.agenda.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
-                      <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Agenda chi tiết chương trình
-                      </h2>
-                      
-                      <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-8 py-2">
-                        {selectedEvent.agenda.map((item, i) => (
-                          <div key={i} className="relative group">
-                            
-                            {/* Timeline point */}
-                            <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-white border-2 border-orange-600 rounded-full group-hover:bg-orange-600 transition-all"></div>
-                            
-                            <div className="space-y-1">
-                              <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                <span className="px-2.5 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider shrink-0 w-fit rounded-[6px]">
-                                  {item.time}
-                                </span>
-                                {item.speaker && (
-                                  <span className="text-xs font-bold text-orange-600">
-                                    • Diễn giả: {item.speaker}
+                    {/* AUDIENCE / TARGET GROUP */}
+                    {selectedEvent.targetAudience && selectedEvent.targetAudience.length > 0 && (
+                      <div className="p-6 sm:p-8 space-y-4">
+                        <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
+                          Đối tượng tham dự phù hợp
+                        </h2>
+                        <ul className="space-y-2">
+                          {selectedEvent.targetAudience.map((aud, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-sm font-medium text-slate-700">
+                              <span className="w-1.5 h-1.5 rounded-full bg-orange-600 mt-2 shrink-0" />
+                              <span className="leading-relaxed">{aud}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* AGENDA TIMELINE */}
+                    {selectedEvent.agenda && selectedEvent.agenda.length > 0 && (
+                      <div className="p-6 sm:p-8 space-y-4">
+                        <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
+                          Agenda chi tiết chương trình
+                        </h2>
+                        
+                        <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-8 py-2">
+                          {selectedEvent.agenda.map((item, i) => (
+                            <div key={i} className="relative group">
+                              
+                              {/* Timeline point */}
+                              <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-white border-2 border-orange-600 rounded-full group-hover:bg-orange-600 transition-all"></div>
+                              
+                              <div className="space-y-1">
+                                <div className="flex flex-col md:flex-row md:items-center gap-2">
+                                  <span className="px-2.5 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider shrink-0 w-fit rounded-[6px]">
+                                    {item.time}
                                   </span>
+                                  {item.speaker && (
+                                    <span className="text-xs font-bold text-orange-600">
+                                      • Diễn giả: {item.speaker}
+                                    </span>
+                                  )}
+                                </div>
+                                <h4 className="text-sm font-bold text-slate-950">{item.title}</h4>
+                                {item.description && (
+                                  <p className="text-slate-500 text-xs font-medium leading-relaxed max-w-2xl">{item.description}</p>
                                 )}
                               </div>
-                              <h4 className="text-sm font-bold text-slate-950">{item.title}</h4>
-                              {item.description && (
-                                <p className="text-slate-500 text-xs font-medium leading-relaxed max-w-2xl">{item.description}</p>
-                              )}
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* SPEAKERS / PRESENTERS */}
-                  {selectedEvent.speakers && selectedEvent.speakers.length > 0 && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
-                      <h2 className="text-xl font-extrabold uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Ban diễn giả & Chuyên gia
-                      </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {selectedEvent.speakers.map((speaker, i) => (
-                          <div key={i} className="border border-slate-200 bg-slate-50 p-6 flex flex-col md:flex-row gap-4 items-start rounded-[10px]">
-                            <img 
-                              src={speaker.avatar} 
-                              alt={speaker.name}
-                              className="w-16 h-16 object-cover border border-slate-300 shrink-0 rounded-[10px]"
-                            />
-                            <div className="space-y-2">
+                    {/* SPEAKERS / PRESENTERS */}
+                    {selectedEvent.speakers && selectedEvent.speakers.length > 0 && (
+                      <div className="p-6 sm:p-8 space-y-4">
+                        <h2 className="text-xl font-extrabold uppercase tracking-tight text-slate-950">
+                          Ban diễn giả & Chuyên gia
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {selectedEvent.speakers.map((speaker, i) => (
+                            <div key={i} className="border border-slate-200 bg-slate-50 p-5 rounded-[10px] space-y-2">
                               <div>
                                 <h4 className="text-sm font-bold text-slate-950">{speaker.name}</h4>
                                 <p className="text-xs font-bold uppercase tracking-wider text-orange-600">{speaker.role}</p>
                                 <p className="text-xs font-bold text-slate-400">{speaker.company}</p>
                               </div>
                               {speaker.bio && (
-                                <p className="text-slate-500 text-xs font-medium leading-relaxed border-t border-slate-200 pt-2 mt-1">
+                                <p className="text-slate-500 text-xs font-medium leading-relaxed border-t border-slate-200 pt-2">
                                   {speaker.bio}
                                 </p>
                               )}
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* LOCATION VISUAL MAP & GOOGLE MAPS SIMULATION */}
-                  {selectedEvent.address && (
-                    <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-6 rounded-[10px]">
-                      <h2 className="text-xl font-extrabold uppercase tracking-tight text-slate-950 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-orange-600 rounded-[2px]"></span> Bản đồ địa điểm sự kiện
-                      </h2>
-                      
-                      <div className="space-y-3">
-                        <p className="text-xs text-slate-500 leading-relaxed font-bold flex items-start gap-1.5 bg-slate-50 p-3.5 border-l-2 border-orange-600 rounded-[8px]">
-                          <MapPin size={16} className="text-orange-600 shrink-0 mt-0.5" />
-                          <span>{selectedEvent.address}</span>
-                        </p>
-
-                        {/* Map graphic mock */}
-                        <div className="h-64 bg-slate-900 relative border border-slate-200 overflow-hidden flex items-center justify-center rounded-[10px]">
-                          <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                          
-                          <div className="text-center z-10 px-6 space-y-3">
-                            <MapIcon className="text-orange-500 mx-auto animate-bounce" size={40} />
-                            <div>
-                              <span className="block text-sm font-bold text-white">{selectedEvent.location.split(',')[0]}</span>
-                              <span className="text-xs font-bold uppercase text-slate-400 tracking-wider">Mô phỏng bản đồ tương tác GIS</span>
-                            </div>
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedEvent.address)}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider px-4 py-2 transition-all rounded-[8px]"
-                            >
-                              Mở Google Maps <ExternalLink size={12} />
-                            </a>
-                          </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
+                  </div>
                 </div>
 
                 {/* FLOATING ACTION SIDEBAR */}
@@ -949,43 +910,97 @@ export const EventsView: React.FC<EventsViewProps> = ({
 
                 </div>
 
-                {/* RELATED EVENTS CONTAINER */}
-                <div className="lg:col-span-12 mt-8 pt-8 border-t border-slate-200 space-y-4">
-                  <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Sự kiện liên quan</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {eventsData
-                      .filter(e => e.id !== selectedEvent.id)
-                      .slice(0, 4)
-                      .map((item) => (
-                        <div 
-                          key={item.id}
-                          onClick={() => {
-                            setSelectedEvent(item);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="bg-white hover:bg-white rounded-xl border border-slate-200/80 p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group space-y-2.5"
-                        >
-                          <div className="aspect-[16/9] bg-slate-100 overflow-hidden rounded-lg">
-                            <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" />
+                {/* RELATED EVENTS & PRODUCTS CONTAINER */}
+                <div className="lg:col-span-12 mt-1 pt-5 border-t border-slate-200 space-y-6">
+                  {/* SỰ KIỆN LIÊN QUAN */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Sự kiện liên quan</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {eventsData
+                        .filter(e => e.id !== selectedEvent.id)
+                        .slice(0, 4)
+                        .map((item) => (
+                          <div 
+                            key={item.id}
+                            onClick={() => {
+                              setSelectedEvent(item);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="bg-white hover:bg-white rounded-xl border border-slate-200/80 p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group space-y-2.5"
+                          >
+                            <div className="aspect-[16/9] bg-slate-100 overflow-hidden rounded-lg">
+                              <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" />
+                            </div>
+                            <div className="px-1.5 space-y-2">
+                              <div className="flex items-center justify-between text-[10px] text-[#6B7280] font-semibold">
+                                <span className="text-orange-600 font-bold">{item.date}</span>
+                                <span className="truncate max-w-[110px] text-slate-400">{item.location.split(',')[0]}</span>
+                              </div>
+                              <h4 className="text-xs font-bold text-[#222222] group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
+                                {item.title}
+                              </h4>
+                              <p className="text-[11px] text-[#6B7280] line-clamp-2 leading-relaxed">
+                                {item.shortDesc}
+                              </p>
+                              <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                                <span>Xem chi tiết</span>
+                                <span className="ml-1">→</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="px-1.5 space-y-2">
-                            <div className="flex items-center justify-between text-[10px] text-[#6B7280] font-semibold">
-                              <span className="text-orange-600 font-bold">{item.date}</span>
-                              <span className="truncate max-w-[110px] text-slate-400">{item.location.split(',')[0]}</span>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* SẢN PHẨM LIÊN QUAN */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Sản phẩm liên quan</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {productsData.slice(0, 4).map((prod) => (
+                        <div
+                          key={prod.id}
+                          onClick={() => {
+                            if (onNavigateToProduct) onNavigateToProduct(String(prod.id));
+                          }}
+                          className="bg-white border border-slate-200/90 hover:border-orange-500 p-4 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 rounded-[10px] group flex flex-col justify-between cursor-pointer"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-11 h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
+                                <img 
+                                  src={prod.img || prod.icon} 
+                                  alt={prod.name}
+                                  loading="lazy"
+                                  referrerPolicy="no-referrer"
+                                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
+                                />
+                              </div>
+                              <h4 className="text-xs font-bold text-slate-950 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
+                                {prod.name}
+                              </h4>
                             </div>
-                            <h4 className="text-xs font-bold text-[#222222] group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
-                              {item.title}
-                            </h4>
-                            <p className="text-[11px] text-[#6B7280] line-clamp-2 leading-relaxed">
-                              {item.shortDesc}
+
+                            {prod.price && (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giá:</span>
+                                <span className="text-xs font-bold text-orange-600">
+                                  {prod.price}
+                                </span>
+                              </div>
+                            )}
+
+                            <p className="text-[11px] text-slate-500 font-normal leading-relaxed line-clamp-2 border-t border-slate-100 pt-2">
+                              {prod.desc || (prod as any).description}
                             </p>
-                            <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                              <span>Xem chi tiết</span>
-                              <span className="ml-1">→</span>
-                            </div>
+                          </div>
+
+                          <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
+                            <span>Chi tiết sản phẩm</span>
+                            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>
                       ))}
+                    </div>
                   </div>
                 </div>
 

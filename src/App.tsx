@@ -310,6 +310,13 @@ export default function App() {
               setCurrentView('home');
               setActiveLink('');
             }}
+            onNavigateToEvent={(eventId) => {
+              setCurrentView('events');
+              setActiveLink('Sự kiện');
+              setActiveEventId(eventId);
+              setEventsResetKey(prev => prev + 1);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             onNavigateToService={(serviceId) => {
               setCurrentView('services');
               setActiveLink('Dịch vụ');
