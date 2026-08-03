@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Phone, Facebook, Linkedin, Bot, ChevronDown, ChevronUp, MessageSquare, X, Headphones } from 'lucide-react';
+import { Phone, Facebook, Linkedin, Bot, ChevronDown, ChevronUp, MessageSquare, X, Headphones, LayoutDashboard } from 'lucide-react';
 
 import { Constellation } from '@web/components/Constellation';
 import { TechAboutBackground } from '@web/components/TechAboutBackground';
@@ -15,6 +15,8 @@ import { ZaloIcon } from '@shared/components/Icons';
 import { ConsultationModal } from '@web/components/ConsultationModal';
 import { ChatbotWidget } from '@web/components/ChatbotWidget';
 import { DesignTokensModal } from '@web/components/DesignTokensModal';
+
+import { CmsDashboard } from './cms/components/CmsDashboard';
 
 // View components
 import { HomeView } from '@web/components/HomeView';
@@ -30,7 +32,7 @@ import { TermsOfUseView } from '@web/components/TermsOfUseView';
 import { SearchView } from '@web/components/SearchView';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'cms'>('home');
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -75,6 +77,10 @@ export default function App() {
     setIsRegisteringEvent(false);
     setEventsResetKey(prev => prev + 1);
   };
+
+  if (currentView === 'cms') {
+    return <CmsDashboard onSwitchToWebsite={() => setCurrentView('home')} />;
+  }
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-orange-500 selection:text-white relative">

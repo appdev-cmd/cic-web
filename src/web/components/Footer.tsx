@@ -16,7 +16,7 @@ import {
 import { ZaloIcon } from '@shared/components/Icons';
 
 interface FooterProps {
-  setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms') => void;
+  setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'cms') => void;
   setActiveLink: (link: string) => void;
   onResetProducts?: () => void;
   onResetServices?: () => void;
@@ -162,7 +162,7 @@ export const Footer = ({
 
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs uppercase tracking-widest font-black">
           <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
-          <div className="flex gap-10">
+          <div className="flex items-center gap-6 sm:gap-10">
             <a 
               href="#privacy" 
               onClick={(e) => {
@@ -187,6 +187,16 @@ export const Footer = ({
             >
               ĐIỀU KHOẢN SỬ DỤNG
             </a>
+            <button 
+              onClick={() => {
+                setCurrentView('cms');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="text-slate-600 hover:text-orange-500 transition-all cursor-pointer text-[10px] font-semibold tracking-normal normal-case border-l border-slate-800 pl-4"
+              title="Truy cập hệ thống quản trị"
+            >
+              Hệ thống CMS
+            </button>
           </div>
         </div>
       </div>
