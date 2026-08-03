@@ -551,7 +551,7 @@ export const StaticPageFormModal: React.FC<StaticPageFormModalProps> = ({
           {/* TAB 4: SEO SETTINGS */}
           {activeTab === 'seo' && (
             <div className="space-y-4">
-              <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 rounded-xl text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2">
+              <div className="p-3 bg-orange-50/50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50 rounded-xl text-xs text-orange-700 dark:text-orange-300 flex items-center gap-2">
                 <Globe className="w-4 h-4 shrink-0" />
                 <span>Tối ưu hóa các thẻ Meta SEO để trang tĩnh dễ dàng xếp hạng cao trên các công cụ tìm kiếm Google.</span>
               </div>
@@ -605,7 +605,7 @@ export const StaticPageFormModal: React.FC<StaticPageFormModalProps> = ({
                 <p className="text-[11px] uppercase font-bold text-slate-400 tracking-wider">
                   Xem trước thẻ SERP Google
                 </p>
-                <p className="text-blue-700 dark:text-blue-400 text-sm font-semibold truncate hover:underline cursor-pointer">
+                <p className="text-orange-600 dark:text-orange-400 text-sm font-semibold truncate hover:underline cursor-pointer">
                   {seoTitle || title || 'Tiêu đề trang tĩnh'}
                 </p>
                 <p className="text-emerald-700 dark:text-emerald-400 text-[11px] font-mono">

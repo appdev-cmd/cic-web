@@ -80,7 +80,7 @@ export const PermissionManagement: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
+              <span className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
                 <Shield className="w-5 h-5" />
               </span>
               <h1 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -98,7 +98,7 @@ export const PermissionManagement: React.FC = () => {
               onClick={() => setActiveTab('matrix')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'matrix'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                  ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
@@ -109,7 +109,7 @@ export const PermissionManagement: React.FC = () => {
               onClick={() => setActiveTab('tasks')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'tasks'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                  ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >

@@ -15,6 +15,8 @@ import {
   Layers,
   ArrowUpDown,
   SlidersHorizontal,
+  Square,
+  CheckSquare,
 } from 'lucide-react';
 import { CicUser } from './types';
 import { cicUsersMock, agenciesMock, productCategoriesMock, newsCategoriesMock } from './mockData';
@@ -159,13 +161,13 @@ export const CicUsersManager: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
+            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
               <Shield className="w-5 h-5" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
               Quản lý Tài khoản Quản trị
             </h1>
-            <span className="px-2.5 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full">
+            <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
               {users.length} tài khoản
             </span>
           </div>
@@ -180,7 +182,7 @@ export const CicUsersManager: React.FC = () => {
             setUserToEdit(null);
             setIsModalOpen(true);
           }}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Thêm quản trị viên</span>
@@ -198,7 +200,7 @@ export const CicUsersManager: React.FC = () => {
               placeholder="Tìm kiếm theo Username, Họ tên, Email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
@@ -207,7 +209,7 @@ export const CicUsersManager: React.FC = () => {
             <select
               value={publishedFilter}
               onChange={(e) => setPublishedFilter(e.target.value as any)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="all">Tất cả trạng thái hoạt động</option>
               <option value="published">Đang hoạt động (Published)</option>
@@ -220,7 +222,7 @@ export const CicUsersManager: React.FC = () => {
             <select
               value={onlineFilter}
               onChange={(e) => setOnlineFilter(e.target.value as any)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="all">Tất cả trạng thái Online</option>
               <option value="online">Trực tuyến (Online)</option>
@@ -242,7 +244,7 @@ export const CicUsersManager: React.FC = () => {
           <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
             <span>Hiển thị: <strong>{filteredUsers.length}</strong> / {users.length} tài khoản</span>
             {selectedIds.length > 0 && (
-              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold rounded-lg">
+              <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
                 Đã chọn: {selectedIds.length} dòng
               </span>
             )}
@@ -258,17 +260,6 @@ export const CicUsersManager: React.FC = () => {
                 <span>Xóa ({selectedIds.length})</span>
               </button>
             )}
-
-            <button
-              onClick={() => {
-                setUserToEdit(null);
-                setIsModalOpen(true);
-              }}
-              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Thêm mới</span>
-            </button>
           </div>
         </div>
       </div>
@@ -280,14 +271,17 @@ export const CicUsersManager: React.FC = () => {
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="p-3 w-10 text-center">
-                  <input
-                    type="checkbox"
-                    checked={
-                      filteredUsers.length > 0 && selectedIds.length === filteredUsers.length
-                    }
-                    onChange={handleSelectAll}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-                  />
+                  <button
+                    type="button"
+                    onClick={handleSelectAll}
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  >
+                    {filteredUsers.length > 0 && selectedIds.length === filteredUsers.length ? (
+                      <CheckSquare className="w-4 h-4 text-orange-600" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                  </button>
                 </th>
                 <th className="p-3 w-14 text-center">Avatar</th>
                 <th className="p-3">Username</th>
@@ -315,17 +309,22 @@ export const CicUsersManager: React.FC = () => {
                     <tr
                       key={user.id}
                       className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
-                        isSelected ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
+                        isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
                       }`}
                     >
                       {/* Checkbox */}
                       <td className="p-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleSelectOne(user.id)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSelectOne(user.id)}
+                          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="w-4 h-4 text-orange-600" />
+                          ) : (
+                            <Square className="w-4 h-4" />
+                          )}
+                        </button>
                       </td>
 
                       {/* Avatar */}
@@ -405,7 +404,7 @@ export const CicUsersManager: React.FC = () => {
                           onChange={(e) =>
                             handleOrderingChange(user.id, parseInt(e.target.value) || 0)
                           }
-                          className="w-16 px-1.5 py-1 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-mono font-bold text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-16 px-1.5 py-1 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-mono font-bold text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
                       </td>
 
@@ -423,7 +422,7 @@ export const CicUsersManager: React.FC = () => {
                               setUserToEdit(user);
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
                             title="Sửa thông tin tài khoản"
                           >
                             <Edit className="w-4 h-4" />
@@ -453,7 +452,7 @@ export const CicUsersManager: React.FC = () => {
             Hiển thị <strong>{filteredUsers.length}</strong> / <strong>{users.length}</strong> tài khoản quản trị
           </span>
           {selectedIds.length > 0 && (
-            <span className="text-blue-600 font-bold">
+            <span className="text-orange-600 font-bold">
               Đã chọn {selectedIds.length} mục
             </span>
           )}

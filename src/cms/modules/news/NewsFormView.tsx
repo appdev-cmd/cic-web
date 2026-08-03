@@ -30,7 +30,12 @@ import {
   Check,
   Package,
   FileText,
+  BookOpen,
+  AlignLeft,
+  Sliders,
 } from 'lucide-react';
+import { RichTextEditor } from '../static_pages/RichTextEditor';
+import { SearchableSelect, SearchableMultiSelect } from '../../components/SearchableSelect';
 import { NewsArticle, NewsCategory, RelatedProductItem } from './types';
 import { mockNewsCategories, mockRelatedProducts, mockArticles } from './mockData';
 
@@ -75,7 +80,11 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     articleToEdit?.category_id || categories[0]?.id || ''
   );
   const [summary, setSummary] = useState(articleToEdit?.summary || '');
+  const [specifications, setSpecifications] = useState('');
   const [content, setContent] = useState(articleToEdit?.content || '');
+  
+  // 3 Rich Text Editor tabs: 'overview' | 'specifications' | 'detail'
+  const [editorTab, setEditorTab] = useState<'overview' | 'specifications' | 'detail'>('overview');
   const [image, setImage] = useState(
     articleToEdit?.image ||
       'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80'
@@ -217,15 +226,12 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg uppercase tracking-wider">
-              {articleToEdit ? 'Chỉnh sửa tin tức' : 'Thêm tin tức mới'}
-            </span>
             {published ? (
-              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold rounded-md flex items-center gap-1">
-                <Check className="w-3 h-3" /> Đã xuất bản
+              <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-lg flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> Đã xuất bản
               </span>
             ) : (
-              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[11px] font-bold rounded-md">
+              <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold rounded-lg">
                 Bản nháp
               </span>
             )}
@@ -268,7 +274,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Nhập tiêu đề tin tức, bài viết chuyên ngành..."
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-base font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-400 placeholder:font-normal"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-base font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:text-slate-400 placeholder:font-normal"
               />
             </div>
 
@@ -288,7 +294,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                     setIsAliasManuallyEdited(true);
                   }}
                   placeholder="alias-duong-dan-bai-viet"
-                  className="w-full pl-7 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700/80 focus:outline-none focus:border-blue-500"
+                  className="w-full pl-7 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700/80 focus:outline-none focus:border-orange-500"
                 />
               </div>
             </div>
@@ -298,64 +304,19 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Danh mục bài viết <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsCatDropdownOpen(!isCatDropdownOpen)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                >
-                  <span>{selectedCategoryObj ? selectedCategoryObj.name : 'Chưa chọn danh mục'}</span>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
-
-                {/* Dropdown Menu with Search Input */}
-                {isCatDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 space-y-2 animate-in fade-in duration-150">
-                    <div className="relative">
-                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-                      <input
-                        type="text"
-                        value={catSearchQuery}
-                        onChange={(e) => setCatSearchQuery(e.target.value)}
-                        placeholder="Tìm kiếm danh mục..."
-                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none"
-                      />
-                    </div>
-                    <div className="max-h-48 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
-                      {filteredCategories.length > 0 ? (
-                        filteredCategories.map((cat) => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => {
-                              setCategoryId(cat.id);
-                              setIsCatDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg flex items-center justify-between cursor-pointer transition-colors ${
-                              categoryId === cat.id
-                                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-bold'
-                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <span>{cat.name}</span>
-                            {categoryId === cat.id && <Check className="w-3.5 h-3.5" />}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="p-3 text-center text-slate-400 text-xs">
-                          Không tìm thấy danh mục phù hợp
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SearchableSelect
+                options={categories.map((c) => ({ id: c.id, label: c.name }))}
+                selectedId={categoryId}
+                onChange={setCategoryId}
+                placeholder="Chọn danh mục bài viết..."
+                searchPlaceholder="Tìm kiếm danh mục..."
+              />
             </div>
 
-            {/* 4. Tóm tắt (summary) - Multiline with Character Counter */}
-            <div className="space-y-1.5 pt-2">
+            {/* 4. Tóm tắt bài viết */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
-                <span>Tóm tắt bài viết</span>
+                <span>Tóm tắt / Giới thiệu bài tin</span>
                 <span className="text-[11px] font-normal text-slate-400 font-mono">
                   {summary.length} / 300 ký tự
                 </span>
@@ -365,111 +326,23 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                 value={summary}
                 maxLength={300}
                 onChange={(e) => setSummary(e.target.value)}
-                placeholder="Nhập mô tả tóm tắt ngắn gọn hiển thị ngoài danh sách tin tức..."
-                className="w-full p-3 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-medium resize-none"
+                placeholder="Nhập tóm tắt bài viết (hiển thị ngoài thẻ danh sách)..."
+                className="w-full p-3 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium resize-none"
               />
             </div>
 
-            {/* 5. Nội dung (content) - Rich Text Editor (Min Height 300px) */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                <span>
-                  Nội dung chi tiết <span className="text-red-500">*</span>
+            {/* 5. Nội dung bài viết (RichTextEditor) */}
+            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-orange-600" />
+                  <span>Nội dung chi tiết bài viết <span className="text-red-500">*</span></span>
+                </label>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  Soạn thảo HTML trực quan & xem trước live
                 </span>
-                <span className="text-[11px] font-normal text-slate-400">
-                  Rich Text Editor (HTML)
-                </span>
-              </label>
-
-              {/* Rich Text Editor Toolbar */}
-              <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800/60">
-                <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('bold')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Đậm (Bold)"
-                  >
-                    <Bold className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('italic')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Nghiêng (Italic)"
-                  >
-                    <Italic className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('underline')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Gạch chân (Underline)"
-                  >
-                    <Underline className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('h2')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Tiêu đề H2"
-                  >
-                    <Heading2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('h3')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Tiêu đề H3"
-                  >
-                    <Heading3 className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('ul')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Danh sách không thứ tự"
-                  >
-                    <List className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('ol')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Danh sách có thứ tự"
-                  >
-                    <ListOrdered className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('link')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Chèn liên kết"
-                  >
-                    <LinkIcon className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('code')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Chèn mã code"
-                  >
-                    <Code className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <textarea
-                  required
-                  rows={12}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Nhập nội dung bài viết HTML đầy đủ tại đây..."
-                  className="w-full p-4 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs font-mono leading-relaxed min-h-[300px] focus:outline-none border-none resize-y"
-                />
               </div>
+              <RichTextEditor value={content} onChange={setContent} minHeight="320px" />
             </div>
 
             {/* 6. Video (YouTube link recognition) */}
@@ -503,14 +376,14 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
             {/* 7. Tags (Từ khóa - Chip Input) */}
             <div className="space-y-1.5 pt-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Tag className="w-4 h-4 text-blue-500" />
+                <Tag className="w-4 h-4 text-orange-500" />
                 <span>Từ khóa bài viết (Tags)</span>
               </label>
               <div className="p-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl flex flex-wrap items-center gap-1.5">
                 {tags.map((t, idx) => (
                   <span
                     key={idx}
-                    className="px-2.5 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-xs rounded-lg flex items-center gap-1"
+                    className="px-2.5 py-1 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold text-xs rounded-lg flex items-center gap-1"
                   >
                     #{t}
                     <button
@@ -533,176 +406,44 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               </div>
             </div>
 
-            {/* 8. Tin liên quan (news_related) Multi-Select */}
+            {/* 8. Tin liên quan (news_related) Searchable Multi-Select */}
             <div className="space-y-1.5 pt-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-purple-500" />
                 <span>Tin tức liên quan</span>
               </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsNewsDropdownOpen(!isNewsDropdownOpen)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer"
-                >
-                  <span>Chọn tin tức liên quan ({newsRelated.length} bài)</span>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
-
-                {isNewsDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 max-h-56 overflow-y-auto space-y-1">
-                    {mockArticles.map((art) => {
-                      const isSelected = newsRelated.includes(art.id);
-                      return (
-                        <button
-                          key={art.id}
-                          type="button"
-                          onClick={() => {
-                            if (isSelected) {
-                              setNewsRelated(newsRelated.filter((id) => id !== art.id));
-                            } else {
-                              setNewsRelated([...newsRelated, art.id]);
-                            }
-                          }}
-                          className={`w-full text-left p-2 rounded-lg flex items-center gap-3 cursor-pointer transition-colors ${
-                            isSelected
-                              ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-300 dark:border-purple-800'
-                              : 'hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                          }`}
-                        >
-                          <img
-                            src={art.image}
-                            alt=""
-                            className="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                          />
-                          <div className="truncate text-xs space-y-0.5">
-                            <p className="font-bold text-slate-900 dark:text-white truncate">
-                              {art.title}
-                            </p>
-                            <p className="text-[10px] text-slate-400">ID: {art.id}</p>
-                          </div>
-                          {isSelected && <Check className="w-4 h-4 text-purple-600 ml-auto shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Display selected news tags with small thumbnails */}
-              {newsRelated.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {newsRelated.map((relId) => {
-                    const item = mockArticles.find((a) => a.id === relId);
-                    if (!item) return null;
-                    return (
-                      <div
-                        key={relId}
-                        className="px-2.5 py-1 bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-xl flex items-center gap-2"
-                      >
-                        <img src={item.image} alt="" className="w-5 h-5 rounded object-cover" />
-                        <span className="max-w-[200px] truncate">{item.title}</span>
-                        <button
-                          type="button"
-                          onClick={() => setNewsRelated(newsRelated.filter((id) => id !== relId))}
-                          className="hover:text-red-500 cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <SearchableMultiSelect
+                options={mockArticles.map((art) => ({
+                  id: art.id,
+                  label: art.title,
+                  subLabel: `Mã: ${art.id}`,
+                  image: art.image,
+                }))}
+                selectedIds={newsRelated}
+                onChange={setNewsRelated}
+                placeholder="Chọn tin tức liên quan..."
+                searchPlaceholder="Tìm kiếm tiêu đề tin tức..."
+              />
             </div>
 
-            {/* 9. Sản phẩm liên quan (products_related) Multi-Select */}
+            {/* 9. Sản phẩm liên quan (products_related) Searchable Multi-Select */}
             <div className="space-y-1.5 pt-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Package className="w-4 h-4 text-orange-500" />
                 <span>Sản phẩm phần mềm liên quan</span>
               </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsProdDropdownOpen(!isProdDropdownOpen)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer"
-                >
-                  <span>Chọn sản phẩm liên quan ({productsRelated.length} sản phẩm)</span>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
-
-                {isProdDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 max-h-56 overflow-y-auto space-y-1">
-                    {mockRelatedProducts.map((prod) => {
-                      const isSelected = productsRelated.includes(prod.id);
-                      return (
-                        <button
-                          key={prod.id}
-                          type="button"
-                          onClick={() => {
-                            if (isSelected) {
-                              setProductsRelated(
-                                productsRelated.filter((id) => id !== prod.id)
-                              );
-                            } else {
-                              setProductsRelated([...productsRelated, prod.id]);
-                            }
-                          }}
-                          className={`w-full text-left p-2 rounded-lg flex items-center gap-3 cursor-pointer transition-colors ${
-                            isSelected
-                              ? 'bg-orange-50 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-800'
-                              : 'hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                          }`}
-                        >
-                          <img
-                            src={prod.image}
-                            alt=""
-                            className="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                          />
-                          <div className="truncate text-xs space-y-0.5">
-                            <p className="font-bold text-slate-900 dark:text-white truncate">
-                              {prod.name}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-mono">
-                              Mã: {prod.code}
-                            </p>
-                          </div>
-                          {isSelected && <Check className="w-4 h-4 text-orange-600 ml-auto shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Display selected product chips */}
-              {productsRelated.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {productsRelated.map((pId) => {
-                    const prod = mockRelatedProducts.find((p) => p.id === pId);
-                    if (!prod) return null;
-                    return (
-                      <div
-                        key={pId}
-                        className="px-2.5 py-1 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-xs font-semibold rounded-xl flex items-center gap-2"
-                      >
-                        <img src={prod.image} alt="" className="w-5 h-5 rounded object-cover" />
-                        <span className="max-w-[200px] truncate">{prod.name}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setProductsRelated(productsRelated.filter((id) => id !== pId))
-                          }
-                          className="hover:text-red-500 cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <SearchableMultiSelect
+                options={mockRelatedProducts.map((prod) => ({
+                  id: prod.id,
+                  label: prod.name,
+                  subLabel: `Mã SP: ${prod.code}`,
+                  image: prod.image,
+                }))}
+                selectedIds={productsRelated}
+                onChange={setProductsRelated}
+                placeholder="Chọn sản phẩm phần mềm liên quan..."
+                searchPlaceholder="Tìm kiếm tên sản phẩm..."
+              />
             </div>
 
             {/* 10. Start Time & End Time (Side-by-side in 1 row) */}
@@ -737,14 +478,14 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
         </div>
 
         {/* ==================== RIGHT COLUMN (CARDS: ACTIONS, PUBLISH, IMAGE, SEO) ==================== */}
-        <div className="lg:col-span-4 space-y-5 sticky top-4">
+        <div className="lg:col-span-4 space-y-5">
           {/* STICKY ACTIONS BAR & CARD 1: XUẤT BẢN & CẤU HÌNH */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
             {/* Top Action Buttons Sticky at top of Right Column */}
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
               <button
                 type="submit"
-                className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="flex-1 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Lưu bài viết</span>
@@ -771,7 +512,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   type="button"
                   onClick={() => setIsHot(!isHot)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isHot ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    isHot ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -789,7 +530,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   type="button"
                   onClick={() => setIsNew(!isNew)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isNew ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    isNew ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -807,7 +548,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   type="button"
                   onClick={() => setShowInHomepage(!showInHomepage)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    showInHomepage ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    showInHomepage ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -825,7 +566,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   type="button"
                   onClick={() => setPublished(!published)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
+                    published ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -917,7 +658,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               className="w-full p-4 sm:p-5 text-left flex items-center justify-between font-bold text-xs text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-blue-500" />
+                <Globe className="w-4 h-4 text-orange-500" />
                 <span>Tối ưu hóa SEO (Search Engine)</span>
               </div>
               {isSeoOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -965,6 +706,26 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                     placeholder={summary || 'Mặc định lấy từ Tóm tắt bài viết'}
                     className="w-full p-3 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none font-medium resize-none"
                   />
+                </div>
+
+                {/* SERP Preview */}
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl space-y-1 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                      <Globe className="w-3 h-3 text-slate-400" />
+                      <span>Xem trước Google SERP</span>
+                    </p>
+                    <span className="text-[10px] text-slate-400 font-mono">cic.com.vn</span>
+                  </div>
+                  <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold truncate hover:underline cursor-pointer pt-0.5">
+                    {seoTitle || title || 'Tiêu đề bài viết tin tức'}
+                  </p>
+                  <p className="text-emerald-700 dark:text-emerald-400 text-[11px] font-mono truncate">
+                    https://cic.com.vn/tin-tuc/{alias || slugify(title || 'bai-viet')}
+                  </p>
+                  <p className="text-slate-600 dark:text-slate-300 text-xs line-clamp-2 leading-relaxed">
+                    {seoDescription || summary || 'Mô tả bài viết tin tức hiển thị tại đây...'}
+                  </p>
                 </div>
               </div>
             )}

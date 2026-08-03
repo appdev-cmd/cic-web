@@ -242,7 +242,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
+            <div className="p-2 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
               <User className="w-5 h-5" />
             </div>
             <div>
@@ -269,7 +269,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             <div className="lg:col-span-7 space-y-6">
               {/* SECTION 1: Thông tin tài khoản */}
               <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-orange-600 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
                   <KeyRound className="w-4 h-4" />
                   <span>Thông tin tài khoản</span>
                 </div>
@@ -337,7 +337,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                           onChange={(e) => setIsChangingPassword(e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
                       </label>
                     </div>
                   ) : null}
@@ -404,7 +404,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
               {/* SECTION 2: Thông tin cá nhân */}
               <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-orange-600 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
                   <User className="w-4 h-4" />
                   <span>Thông tin cá nhân</span>
                 </div>
@@ -533,7 +533,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                       <img
                         src={avatar}
                         alt="Avatar preview"
-                        className="w-24 h-24 rounded-full object-cover border-4 border-blue-500/20 shadow-md"
+                        className="w-24 h-24 rounded-full object-cover border-4 border-orange-500/20 shadow-md"
                       />
                       <button
                         type="button"
@@ -620,7 +620,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                       return (
                         <label
                           key={agency.id}
-                          className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-blue-500 transition-colors"
+                          className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-orange-500 transition-colors"
                         >
                           <input
                             type="checkbox"
@@ -632,7 +632,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                                 setSelectedAgencies([...selectedAgencies, agency.id]);
                               }
                             }}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
                           />
                           <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
                             {agency.name}
@@ -646,7 +646,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
               {/* SECTION: Phân quyền Danh mục Sản phẩm & Tin tức */}
               <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-orange-600 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
                   <Building className="w-4 h-4" />
                   <span>Phân quyền Phụ trách Danh mục</span>
                 </div>
@@ -685,7 +685,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 transition-all cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>{isEditMode ? 'Lưu thay đổi' : 'Tạo tài khoản'}</span>

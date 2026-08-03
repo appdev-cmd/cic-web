@@ -143,7 +143,7 @@ export const CmsRightDrawer: React.FC<CmsRightDrawerProps> = ({
                 <label className="font-bold text-slate-700 dark:text-slate-300 mb-1 block">
                   Sản phẩm quan tâm:
                 </label>
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-300 rounded-xl font-bold text-sm border border-blue-200 dark:border-blue-900/50">
+                <div className="p-3 bg-orange-50 dark:bg-orange-950/30 text-orange-900 dark:text-orange-300 rounded-xl font-bold text-sm border border-orange-200 dark:border-orange-900/50">
                   {item.data.product_name}
                 </div>
               </div>
@@ -241,7 +241,7 @@ export const CmsRightDrawer: React.FC<CmsRightDrawerProps> = ({
           {item.type === 'pending' && (
             <button
               onClick={() => handleAction('published')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Cập nhật & Xuất bản</span>

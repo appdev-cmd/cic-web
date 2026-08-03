@@ -21,7 +21,13 @@ import {
   Code,
   Check,
   Link as LinkIcon,
+  BookOpen,
+  AlignLeft,
+  Sliders,
+  FileText,
 } from 'lucide-react';
+import { RichTextEditor } from '../static_pages/RichTextEditor';
+import { SearchableSelect, SearchableMultiSelect } from '../../components/SearchableSelect';
 import { EventItem, EventCategory } from './types';
 import { mockEventCategories, mockEvents, mockEventProducts } from './mockData';
 import { mockArticles } from '../news/mockData';
@@ -59,7 +65,11 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     eventToEdit?.category_id || categories[0]?.id || ''
   );
   const [summary, setSummary] = useState(eventToEdit?.summary || '');
+  const [specifications, setSpecifications] = useState('');
   const [content, setContent] = useState(eventToEdit?.content || '');
+
+  // 3 Rich Text Editor tabs: 'overview' | 'specifications' | 'detail'
+  const [editorTab, setEditorTab] = useState<'overview' | 'specifications' | 'detail'>('overview');
   const [image, setImage] = useState(
     eventToEdit?.image ||
       'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80'
@@ -189,15 +199,12 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
       <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg uppercase tracking-wider">
-              {eventToEdit ? 'Chỉnh sửa sự kiện' : 'Tạo sự kiện mới'}
-            </span>
             {published ? (
-              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold rounded-md flex items-center gap-1">
-                <Check className="w-3 h-3" /> Đã xuất bản
+              <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-lg flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> Đã xuất bản
               </span>
             ) : (
-              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 text-[11px] font-bold rounded-md">
+              <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold rounded-lg">
                 Bản nháp
               </span>
             )}
@@ -238,7 +245,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Nhập tên sự kiện, hội thảo hoặc chương trình đào tạo..."
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-base font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:font-normal placeholder:text-slate-400"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-base font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all placeholder:font-normal placeholder:text-slate-400"
               />
             </div>
 
@@ -258,73 +265,29 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                     setIsAliasManuallyEdited(true);
                   }}
                   placeholder="alias-duong-dan-su-kien"
-                  className="w-full pl-7 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700/80 focus:outline-none focus:border-blue-500"
+                  className="w-full pl-7 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700/80 focus:outline-none focus:border-orange-500"
                 />
               </div>
             </div>
 
-            {/* 3. Danh mục (category_id) */}
+            {/* 3. Danh mục (category_id) - Searchable Select */}
             <div className="space-y-1.5 pt-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Danh mục sự kiện <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsCatDropdownOpen(!isCatDropdownOpen)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                >
-                  <span>{selectedCategoryObj ? selectedCategoryObj.name : 'Chưa chọn danh mục'}</span>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
-
-                {isCatDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 space-y-2 animate-in fade-in duration-150">
-                    <div className="relative">
-                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-                      <input
-                        type="text"
-                        value={catSearchQuery}
-                        onChange={(e) => setCatSearchQuery(e.target.value)}
-                        placeholder="Tìm kiếm danh mục..."
-                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none"
-                      />
-                    </div>
-                    <div className="max-h-48 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
-                      {filteredCategories.length > 0 ? (
-                        filteredCategories.map((cat) => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => {
-                              setCategoryId(cat.id);
-                              setIsCatDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-xs font-medium rounded-lg flex items-center justify-between cursor-pointer transition-colors ${
-                              categoryId === cat.id
-                                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-bold'
-                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <span>{cat.name}</span>
-                            {categoryId === cat.id && <Check className="w-3.5 h-3.5 text-blue-600" />}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="p-3 text-center text-slate-400 text-xs">
-                          Không tìm thấy danh mục
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SearchableSelect
+                options={categories.map((c) => ({ id: c.id, label: c.name }))}
+                selectedId={categoryId}
+                onChange={setCategoryId}
+                placeholder="Chọn danh mục sự kiện..."
+                searchPlaceholder="Tìm kiếm danh mục..."
+              />
             </div>
 
-            {/* 4. Tóm tắt (summary) */}
-            <div className="space-y-1.5 pt-2">
+            {/* 4. Tóm tắt sự kiện */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
-                <span>Tóm tắt giới thiệu sự kiện</span>
+                <span>Tóm tắt / Giới thiệu sự kiện</span>
                 <span className="text-[11px] font-normal text-slate-400 font-mono">
                   {summary.length} / 300 ký tự
                 </span>
@@ -334,110 +297,23 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 value={summary}
                 maxLength={300}
                 onChange={(e) => setSummary(e.target.value)}
-                placeholder="Nhập mô tả tóm tắt sự kiện..."
-                className="w-full p-3 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-medium resize-none"
+                placeholder="Nhập tóm tắt ngắn sự kiện (hiển thị ngoài thẻ danh sách)..."
+                className="w-full p-3 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium resize-none"
               />
             </div>
 
-            {/* 5. Nội dung (content) Rich Text Editor */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                <span>
-                  Nội dung chi tiết chương trình <span className="text-red-500">*</span>
+            {/* 5. Nội dung sự kiện (RichTextEditor) */}
+            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-orange-600" />
+                  <span>Nội dung chi tiết chương trình sự kiện <span className="text-red-500">*</span></span>
+                </label>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  Soạn thảo HTML trực quan & xem trước live
                 </span>
-                <span className="text-[11px] font-normal text-slate-400">
-                  Rich Text Editor
-                </span>
-              </label>
-
-              <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800/60">
-                <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('bold')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Đậm (Bold)"
-                  >
-                    <Bold className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('italic')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Nghiêng (Italic)"
-                  >
-                    <Italic className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('underline')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Gạch chân (Underline)"
-                  >
-                    <Underline className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('h2')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Tiêu đề H2"
-                  >
-                    <Heading2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('h3')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Tiêu đề H3"
-                  >
-                    <Heading3 className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('ul')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Danh sách"
-                  >
-                    <List className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('ol')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Danh sách thứ tự"
-                  >
-                    <ListOrdered className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('link')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Chèn liên kết"
-                  >
-                    <LinkIcon className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEditorCommand('code')}
-                    className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                    title="Mã code"
-                  >
-                    <Code className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <textarea
-                  required
-                  rows={10}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Nhập nội dung chi tiết sự kiện..."
-                  className="w-full p-4 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs font-mono leading-relaxed min-h-[260px] focus:outline-none border-none resize-y"
-                />
               </div>
+              <RichTextEditor value={content} onChange={setContent} minHeight="320px" />
             </div>
 
             {/* 6. time_event & end_time */}
@@ -451,7 +327,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   required
                   value={timeEvent}
                   onChange={(e) => setTimeEvent(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-mono"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono"
                 />
               </div>
 
@@ -463,7 +339,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   type="datetime-local"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-mono"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono"
                 />
               </div>
             </div>
@@ -478,7 +354,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 value={place}
                 onChange={(e) => setPlace(e.target.value)}
                 placeholder="Ví dụ: Trung tâm Hội nghị Quốc gia, 57 Phạm Hùng, Hà Nội..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
               />
             </div>
 
@@ -492,7 +368,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 value={specificTime}
                 onChange={(e) => setSpecificTime(e.target.value)}
                 placeholder="Ví dụ: 8h00 - 17h00 hàng ngày"
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
               />
             </div>
 
@@ -506,7 +382,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 value={chuDe}
                 onChange={(e) => setChuDe(e.target.value)}
                 placeholder="Nhập chủ đề chính của sự kiện..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
               />
             </div>
 
@@ -520,11 +396,11 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 value={linkDangky}
                 onChange={(e) => setLinkDangky(e.target.value)}
                 placeholder="https://cic.com.vn/su-kien/dang-ky-..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 font-mono"
+                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono"
               />
             </div>
 
-            {/* 11. LIÊN KẾT: 3 ô chọn nhiều giá trị */}
+            {/* 11. LIÊN KẾT: 3 ô chọn nhiều giá trị Searchable Multi-Select */}
             <div className="space-y-4 pt-3 border-t border-slate-100 dark:border-slate-800">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Liên kết nội dung
@@ -535,79 +411,18 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Sự kiện liên quan
                 </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsEventDropdownOpen(!isEventDropdownOpen)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Chọn sự kiện liên quan ({eventRelated.length})</span>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  </button>
-
-                  {isEventDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 max-h-52 overflow-y-auto space-y-1">
-                      {mockEvents.map((ev) => {
-                        const isSelected = eventRelated.includes(ev.id);
-                        return (
-                          <button
-                            key={ev.id}
-                            type="button"
-                            onClick={() => {
-                              if (isSelected) {
-                                setEventRelated(eventRelated.filter((id) => id !== ev.id));
-                              } else {
-                                setEventRelated([...eventRelated, ev.id]);
-                              }
-                            }}
-                            className={`w-full text-left p-2 rounded-lg flex items-center gap-3 cursor-pointer transition-colors ${
-                              isSelected
-                                ? 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800'
-                                : 'hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <img
-                              src={ev.image}
-                              alt=""
-                              className="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                            />
-                            <div className="truncate text-xs space-y-0.5">
-                              <p className="font-bold text-slate-900 dark:text-white truncate">
-                                {ev.title}
-                              </p>
-                              <p className="text-[10px] text-slate-400 font-mono">ID: {ev.id}</p>
-                            </div>
-                            {isSelected && <Check className="w-4 h-4 text-blue-600 ml-auto shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {eventRelated.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {eventRelated.map((evId) => {
-                      const ev = mockEvents.find((e) => e.id === evId);
-                      if (!ev) return null;
-                      return (
-                        <div
-                          key={evId}
-                          className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-2"
-                        >
-                          <span className="max-w-[200px] truncate">{ev.title}</span>
-                          <button
-                            type="button"
-                            onClick={() => setEventRelated(eventRelated.filter((id) => id !== evId))}
-                            className="hover:text-red-500 cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                <SearchableMultiSelect
+                  options={mockEvents.map((ev) => ({
+                    id: ev.id,
+                    label: ev.title,
+                    subLabel: `Mã: ${ev.id}`,
+                    image: ev.image,
+                  }))}
+                  selectedIds={eventRelated}
+                  onChange={setEventRelated}
+                  placeholder="Chọn sự kiện liên quan..."
+                  searchPlaceholder="Tìm kiếm tên sự kiện..."
+                />
               </div>
 
               {/* Group 2: Tin tức liên quan */}
@@ -615,178 +430,50 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Tin tức & Bài viết liên quan
                 </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsNewsDropdownOpen(!isNewsDropdownOpen)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Chọn tin tức liên quan ({newsRelated.length})</span>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  </button>
-
-                  {isNewsDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 max-h-52 overflow-y-auto space-y-1">
-                      {mockArticles.map((art) => {
-                        const isSelected = newsRelated.includes(art.id);
-                        return (
-                          <button
-                            key={art.id}
-                            type="button"
-                            onClick={() => {
-                              if (isSelected) {
-                                setNewsRelated(newsRelated.filter((id) => id !== art.id));
-                              } else {
-                                setNewsRelated([...newsRelated, art.id]);
-                              }
-                            }}
-                            className={`w-full text-left p-2 rounded-lg flex items-center gap-3 cursor-pointer transition-colors ${
-                              isSelected
-                                ? 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800'
-                                : 'hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <img
-                              src={art.image}
-                              alt=""
-                              className="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                            />
-                            <div className="truncate text-xs space-y-0.5">
-                              <p className="font-bold text-slate-900 dark:text-white truncate">
-                                {art.title}
-                              </p>
-                              <p className="text-[10px] text-slate-400 font-mono">ID: {art.id}</p>
-                            </div>
-                            {isSelected && <Check className="w-4 h-4 text-blue-600 ml-auto shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {newsRelated.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {newsRelated.map((relId) => {
-                      const item = mockArticles.find((a) => a.id === relId);
-                      if (!item) return null;
-                      return (
-                        <div
-                          key={relId}
-                          className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-2"
-                        >
-                          <span className="max-w-[200px] truncate">{item.title}</span>
-                          <button
-                            type="button"
-                            onClick={() => setNewsRelated(newsRelated.filter((id) => id !== relId))}
-                            className="hover:text-red-500 cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                <SearchableMultiSelect
+                  options={mockArticles.map((art) => ({
+                    id: art.id,
+                    label: art.title,
+                    subLabel: `Mã: ${art.id}`,
+                    image: art.image,
+                  }))}
+                  selectedIds={newsRelated}
+                  onChange={setNewsRelated}
+                  placeholder="Chọn tin tức liên quan..."
+                  searchPlaceholder="Tìm kiếm bài tin..."
+                />
               </div>
 
-              {/* Group 3: Sản phẩm liên quan */}
+              {/* Group 3: Sản phẩm phần mềm liên quan */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Sản phẩm phần mềm liên quan
                 </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsProdDropdownOpen(!isProdDropdownOpen)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Chọn sản phẩm liên quan ({productsRelated.length})</span>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  </button>
-
-                  {isProdDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 max-h-52 overflow-y-auto space-y-1">
-                      {mockEventProducts.map((prod) => {
-                        const isSelected = productsRelated.includes(prod.id);
-                        return (
-                          <button
-                            key={prod.id}
-                            type="button"
-                            onClick={() => {
-                              if (isSelected) {
-                                setProductsRelated(
-                                  productsRelated.filter((id) => id !== prod.id)
-                                );
-                              } else {
-                                setProductsRelated([...productsRelated, prod.id]);
-                              }
-                            }}
-                            className={`w-full text-left p-2 rounded-lg flex items-center gap-3 cursor-pointer transition-colors ${
-                              isSelected
-                                ? 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800'
-                                : 'hover:bg-slate-100 dark:hover:bg-slate-700/60'
-                            }`}
-                          >
-                            <img
-                              src={prod.image}
-                              alt=""
-                              className="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                            />
-                            <div className="truncate text-xs space-y-0.5">
-                              <p className="font-bold text-slate-900 dark:text-white truncate">
-                                {prod.name}
-                              </p>
-                              <p className="text-[10px] text-slate-400 font-mono">
-                                Mã: {prod.code}
-                              </p>
-                            </div>
-                            {isSelected && <Check className="w-4 h-4 text-blue-600 ml-auto shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {productsRelated.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {productsRelated.map((pId) => {
-                      const prod = mockEventProducts.find((p) => p.id === pId);
-                      if (!prod) return null;
-                      return (
-                        <div
-                          key={pId}
-                          className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-2"
-                        >
-                          <span className="max-w-[200px] truncate">{prod.name}</span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setProductsRelated(productsRelated.filter((id) => id !== pId))
-                            }
-                            className="hover:text-red-500 cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                <SearchableMultiSelect
+                  options={mockEventProducts.map((prod) => ({
+                    id: prod.id,
+                    label: prod.name,
+                    subLabel: `Mã SP: ${prod.code}`,
+                    image: prod.image,
+                  }))}
+                  selectedIds={productsRelated}
+                  onChange={setProductsRelated}
+                  placeholder="Chọn sản phẩm liên quan..."
+                  searchPlaceholder="Tìm kiếm sản phẩm..."
+                />
               </div>
             </div>
           </div>
         </div>
 
         {/* ==================== RIGHT COLUMN (CARDS) ==================== */}
-        <div className="lg:col-span-4 space-y-5 sticky top-4">
+        <div className="lg:col-span-4 space-y-5">
           {/* CARD 1: XUẤT BẢN & CẤU HÌNH */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
               <button
                 type="submit"
-                className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="flex-1 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Lưu sự kiện</span>
@@ -813,7 +500,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   type="button"
                   onClick={() => setIsNew(!isNew)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isNew ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    isNew ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -831,7 +518,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   type="button"
                   onClick={() => setIsHot(!isHot)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isHot ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    isHot ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -849,7 +536,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   type="button"
                   onClick={() => setShowInHome(!showInHome)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    showInHome ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    showInHome ? 'bg-orange-600' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -1003,6 +690,26 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                     placeholder={summary || 'Mặc định lấy từ Tóm tắt sự kiện'}
                     className="w-full p-3 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none font-medium resize-none"
                   />
+                </div>
+
+                {/* SERP Preview */}
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl space-y-1 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60 dark:border-slate-700/60">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                      <Globe className="w-3 h-3 text-slate-400" />
+                      <span>Xem trước Google SERP</span>
+                    </p>
+                    <span className="text-[10px] text-slate-400 font-mono">cic.com.vn</span>
+                  </div>
+                  <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold truncate hover:underline cursor-pointer pt-0.5">
+                    {seoTitle || title || 'Tiêu đề sự kiện'}
+                  </p>
+                  <p className="text-emerald-700 dark:text-emerald-400 text-[11px] font-mono truncate">
+                    https://cic.com.vn/su-kien/{alias || slugify(title || 'su-kien')}
+                  </p>
+                  <p className="text-slate-600 dark:text-slate-300 text-xs line-clamp-2 leading-relaxed">
+                    {seoDescription || summary || 'Mô tả sự kiện hiển thị tại đây...'}
+                  </p>
                 </div>
               </div>
             )}

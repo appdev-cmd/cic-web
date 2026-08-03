@@ -225,13 +225,13 @@ export const CicHistoryManager: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
+            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
               <Clock className="w-5 h-5" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
               Nhật ký Hoạt động
             </h1>
-            <span className="px-2.5 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full">
+            <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
               {logs.length} bản ghi
             </span>
           </div>
@@ -248,13 +248,13 @@ export const CicHistoryManager: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
             title="Làm mới dữ liệu"
           >
-            <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
+            <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-orange-600' : ''}`} />
             <span>Làm mới</span>
           </button>
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-600/20 cursor-pointer"
             title="Xuất file CSV"
           >
             <Download className="w-4 h-4" />
@@ -274,7 +274,7 @@ export const CicHistoryManager: React.FC = () => {
               placeholder="Username / IP / Nội dung..."
               value={filters.usernameSearch}
               onChange={(e) => setFilters((prev) => ({ ...prev, usernameSearch: e.target.value }))}
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500"
+              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
@@ -283,7 +283,7 @@ export const CicHistoryManager: React.FC = () => {
             <select
               value={filters.typeFilter}
               onChange={(e) => setFilters((prev) => ({ ...prev, typeFilter: e.target.value }))}
-              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="ALL">Loại nhật ký: Tất cả</option>
               <option value="Create">Create (Thêm mới)</option>
@@ -302,7 +302,7 @@ export const CicHistoryManager: React.FC = () => {
             <select
               value={filters.serviceFilter}
               onChange={(e) => setFilters((prev) => ({ ...prev, serviceFilter: e.target.value }))}
-              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="ALL">Dịch vụ: Tất cả</option>
               {serviceList.map((s) => (
@@ -320,7 +320,7 @@ export const CicHistoryManager: React.FC = () => {
               type="date"
               value={filters.startDate}
               onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
-              className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500"
+              className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
@@ -331,7 +331,7 @@ export const CicHistoryManager: React.FC = () => {
               type="date"
               value={filters.endDate}
               onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-              className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500"
+              className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
@@ -340,7 +340,7 @@ export const CicHistoryManager: React.FC = () => {
             <select
               value={filters.publishedFilter}
               onChange={(e) => setFilters((prev) => ({ ...prev, publishedFilter: e.target.value }))}
-              className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="ALL">Trạng thái: Tất cả</option>
               <option value="PUBLISHED">Đã xuất bản</option>
@@ -362,7 +362,7 @@ export const CicHistoryManager: React.FC = () => {
           <span>Hiển thị: <strong>{filteredAndSortedLogs.length}</strong> / {logs.length} nhật ký</span>
           <button
             onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1"
+            className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer flex items-center gap-1"
           >
             Mới nhất trước ({sortOrder === 'desc' ? 'Giảm dần' : 'Tăng dần'})
           </button>

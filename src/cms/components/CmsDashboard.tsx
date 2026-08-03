@@ -65,6 +65,9 @@ import { CicHistoryManager } from '../modules/cic_history/CicHistoryManager';
 import { StaticPagesManager } from '../modules/static_pages/StaticPagesManager';
 import { NewsManager } from '../modules/news/NewsManager';
 import { EventsManager } from '../modules/events/EventsManager';
+import { EmailTemplatesManager } from '../modules/email_templates/EmailTemplatesManager';
+import { BannerCategoriesManager } from '../modules/banner_categories/BannerCategoriesManager';
+import { BannersManager } from '../modules/banners/BannersManager';
 
 interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
@@ -220,6 +223,12 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <NewsManager />
           ) : activePath === '/cms/events' ? (
             <EventsManager />
+          ) : activePath === '/cms/email-templates' ? (
+            <EmailTemplatesManager />
+          ) : activePath === '/cms/banner-categories' || activePath === '/cms/banners/categories' ? (
+            <BannerCategoriesManager />
+          ) : activePath === '/cms/banners' ? (
+            <BannersManager />
           ) : (
             <>
               {/* 3. QUICK ACTIONS ROW */}
@@ -233,10 +242,10 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
               {[
                 { label: '+ Sản phẩm mới', icon: Package, path: '/cms/products', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                { label: '+ Tin tức mới', icon: Newspaper, path: '/cms/news', color: 'hover:border-blue-500 hover:text-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300' },
-                { label: '+ Trang tĩnh mới', icon: FileText, path: '/cms/static-pages', color: 'hover:border-purple-500 hover:text-purple-600 bg-purple-50/50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300' },
-                { label: '+ Banner mới', icon: ImageIcon, path: '/cms/banners', color: 'hover:border-emerald-500 hover:text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300' },
-                { label: '+ Slideshow mới', icon: Sliders, path: '/cms/slideshows', color: 'hover:border-amber-500 hover:text-amber-600 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300' },
+                { label: '+ Tin tức mới', icon: Newspaper, path: '/cms/news', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
+                { label: '+ Trang tĩnh mới', icon: FileText, path: '/cms/static-pages', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
+                { label: '+ Banner mới', icon: ImageIcon, path: '/cms/banners', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
+                { label: '+ Slideshow mới', icon: Sliders, path: '/cms/slideshows', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
               ].map((act, i) => {
                 const IconComponent = act.icon;
                 return (
@@ -280,10 +289,10 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             </div>
 
             {/* KPI 2: Published News */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs hover:border-blue-500/50 transition-all flex flex-col justify-between">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-2xs hover:border-orange-500/50 transition-all flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
                 <span>Tin tức</span>
-                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <div className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400">
                   <Newspaper className="w-4 h-4" />
                 </div>
               </div>
@@ -448,7 +457,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
                         className={`px-1.5 py-0.2 font-semibold rounded ${
                           msg.status === 'unread'
                             ? 'bg-red-500/10 text-red-600 border border-red-500/20'
-                            : 'bg-blue-500/10 text-blue-600'
+                            : 'bg-orange-500/10 text-orange-600'
                         }`}
                       >
                         {msg.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý'}

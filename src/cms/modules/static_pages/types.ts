@@ -11,6 +11,8 @@ export interface StaticPage {
   alias: string;
   category_id: string;
   summary: string;
+  overview?: string;
+  specifications?: string;
   content: string;
   image: string;
   tags: string[];
