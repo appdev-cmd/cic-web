@@ -11,6 +11,7 @@ import { CmsRightDrawer, DrawerItem } from './CmsRightDrawer';
 import { ContactMessage, ProductRegistration, PendingContent } from '../types';
 import { resolveCmsModule } from '../routing';
 import { demoCmsDataSource } from '../data/demoCmsDataSource';
+import type { CmsLocale } from '../data/CmsDataSource';
 
 const CicUsersManager = lazy(() => import('../modules/cic_users/CicUsersManager').then((module) => ({ default: module.CicUsersManager })));
 const PermissionManagement = lazy(() => import('../modules/permission_management/PermissionManagement').then((module) => ({ default: module.PermissionManagement })));
@@ -39,7 +40,7 @@ interface CmsDashboardProps {
 export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite }) => {
   // Theme & Layout States
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [lang, setLang] = useState<'VI' | 'EN'>('VI');
+  const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activePath, setActivePath] = useState('/cms/dashboard');
@@ -54,9 +55,10 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Lists state
-  const [contacts, setContacts] = useState<ContactMessage[]>(demoCmsDataSource.dashboard.contacts);
-  const [registrations, setRegistrations] = useState<ProductRegistration[]>(demoCmsDataSource.dashboard.productRegistrations);
-  const [pendingItems, setPendingItems] = useState<PendingContent[]>(demoCmsDataSource.dashboard.pendingContents);
+  const dashboardData = demoCmsDataSource.dashboardByLocale[workspaceLocale];
+  const [contacts, setContacts] = useState<ContactMessage[]>(demoCmsDataSource.dashboardByLocale.vi?.contacts ?? []);
+  const [registrations, setRegistrations] = useState<ProductRegistration[]>(demoCmsDataSource.dashboardByLocale.vi?.productRegistrations ?? []);
+  const [pendingItems, setPendingItems] = useState<PendingContent[]>(demoCmsDataSource.dashboardByLocale.vi?.pendingContents ?? []);
   const activeModule = resolveCmsModule(activePath);
 
   // Status updates handler
@@ -84,8 +86,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
         initialNotifications={demoCmsDataSource.notifications}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
-        lang={lang}
-        onToggleLang={() => setLang(lang === 'VI' ? 'EN' : 'VI')}
+        workspaceLocale={workspaceLocale}
+        onToggleWorkspaceLocale={() => setWorkspaceLocale(workspaceLocale === 'vi' ? 'en' : 'vi')}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onQuickAction={(type) => {
           setToastMessage(`Đã mở giao diện tạo mới ${type.toUpperCase()}`);
@@ -184,8 +186,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <LocalizationManager />
           ) : activeModule === 'dashboard' ? (
             <DashboardOverview
-              lang={lang}
-              data={demoCmsDataSource.dashboard}
+              workspaceLocale={workspaceLocale}
+              data={dashboardData}
               onNavigate={(path, title) => {
                 setActivePath(path);
                 setCurrentPageTitle(title);

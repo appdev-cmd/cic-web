@@ -11,6 +11,9 @@ import type {
   WeeklyContentStat,
 } from '../types';
 
+export type CmsLocale = 'vi' | 'en';
+export type CmsUiLanguage = 'vi' | 'en';
+
 export interface CmsDashboardData {
   kpi: KpiStats;
   contacts: ContactMessage[];
@@ -26,5 +29,6 @@ export interface CmsDataSource {
   currentUser: CmsUser;
   menuGroups: CmsMenuGroup[];
   notifications: NotificationItem[];
-  dashboard: CmsDashboardData;
+  availableLocales: CmsLocale[];
+  dashboardByLocale: Partial<Record<CmsLocale, CmsDashboardData>>;
 }

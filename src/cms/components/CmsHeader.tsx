@@ -20,14 +20,15 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { CmsUser, NotificationItem } from '../types';
+import type { CmsLocale } from '../data/CmsDataSource';
 
 interface CmsHeaderProps {
   user: CmsUser;
   initialNotifications: NotificationItem[];
   isDarkMode: boolean;
   onToggleTheme: () => void;
-  lang: 'VI' | 'EN';
-  onToggleLang: () => void;
+  workspaceLocale: CmsLocale;
+  onToggleWorkspaceLocale: () => void;
   onOpenCommandPalette: () => void;
   onQuickAction: (type: 'product' | 'news' | 'banner' | 'event' | 'static_page') => void;
   onToggleMobileSidebar: () => void;
@@ -39,8 +40,8 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   initialNotifications,
   isDarkMode,
   onToggleTheme,
-  lang,
-  onToggleLang,
+  workspaceLocale,
+  onToggleWorkspaceLocale,
   onOpenCommandPalette,
   onQuickAction,
   onToggleMobileSidebar,
@@ -77,9 +78,6 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">
                 CIC CMS
-              </span>
-              <span className="px-1.5 py-0.2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold rounded-md">
-                PROD v2.4
               </span>
             </div>
             <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline-block">
@@ -268,14 +266,15 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
           )}
         </div>
 
-        {/* Language Toggle VI | EN */}
+        {/* Workspace locale switch. UI language is a separate user preference. */}
         <button
-          onClick={onToggleLang}
+          onClick={onToggleWorkspaceLocale}
           className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
-          title="Đổi ngôn ngữ"
+          title="Chuyển vùng dữ liệu CMS"
+          aria-label={`Vùng dữ liệu hiện tại: ${workspaceLocale === 'vi' ? 'Tiếng Việt' : 'English'}`}
         >
           <Globe className="w-3.5 h-3.5 text-slate-500" />
-          <span>{lang}</span>
+          <span>{workspaceLocale.toUpperCase()}</span>
         </button>
 
         {/* Theme Toggle Light/Dark */}

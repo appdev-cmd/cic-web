@@ -8,14 +8,12 @@ export interface WidgetConfig {
 
 export interface DashboardPreference {
   timeRange: '7' | '30' | 'month' | 'year';
-  localeScope: 'current' | 'all';
   density: 'comfortable' | 'compact';
   widgets: WidgetConfig[];
 }
 
 export const defaultDashboardPreference: DashboardPreference = {
   timeRange: '7',
-  localeScope: 'current',
   density: 'comfortable',
   widgets: [
     { id: 'quick_actions', name: 'Thao tác nhanh hệ thống', category: 'Quick Actions', visible: true, order: 1 },

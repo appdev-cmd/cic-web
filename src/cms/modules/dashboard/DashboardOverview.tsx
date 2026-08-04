@@ -33,7 +33,7 @@ import {
   Legend,
 } from 'recharts';
 
-import type { CmsDashboardData } from '../../data/CmsDataSource';
+import type { CmsDashboardData, CmsLocale } from '../../data/CmsDataSource';
 
 import {
   ContactMessage,
@@ -51,14 +51,14 @@ import { DashboardCustomizerDrawer } from './DashboardCustomizerDrawer';
 import { ResetLayoutModal } from './ResetLayoutModal';
 
 interface DashboardOverviewProps {
-  lang?: 'VI' | 'EN';
-  data: CmsDashboardData;
+  workspaceLocale: CmsLocale;
+  data?: CmsDashboardData;
   onNavigate: (path: string, title: string) => void;
   onOpenDrawerItem: (type: 'contact' | 'registration' | 'pending' | 'activity', data: any) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
-  lang = 'VI',
+  workspaceLocale,
   data,
   onNavigate,
   onOpenDrawerItem,
@@ -68,7 +68,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   // Filter & Data States
   const [timeRange, setTimeRange] = useState<'7' | '30' | 'month' | 'year'>('7');
-  const [localeScope, setLocaleScope] = useState<'current' | 'all'>('current');
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -78,10 +77,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // Lists state
-  const [contacts] = useState<ContactMessage[]>(data.contacts);
-  const [registrations] = useState<ProductRegistration[]>(data.productRegistrations);
-  const [pendingItems] = useState<PendingContent[]>(data.pendingContents);
-  const [activityLogs] = useState<ActivityLog[]>(data.activityLogs);
+  const contacts: ContactMessage[] = data?.contacts ?? [];
+  const registrations: ProductRegistration[] = data?.productRegistrations ?? [];
+  const pendingItems: PendingContent[] = data?.pendingContents ?? [];
+  const activityLogs: ActivityLog[] = data?.activityLogs ?? [];
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -135,7 +134,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Dashboard · {lang === 'VI' ? 'Tiếng Việt' : 'English'}
+              Dashboard · {workspaceLocale === 'vi' ? 'Tiếng Việt' : 'English'}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Màn hình trung tâm tổng hợp thông số vận hành, yêu cầu xử lý và lịch sử hoạt động CIC Technology
@@ -181,36 +180,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             ))}
           </div>
 
-          {/* Scope / Locale Selector */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl text-xs font-semibold">
-            <button
-              onClick={() => setLocaleScope('current')}
-              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-xs flex items-center gap-1.5 whitespace-nowrap ${
-                localeScope === 'current'
-                  ? 'bg-emerald-600 text-white font-bold shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Locale ({lang})</span>
-            </button>
-            <button
-              onClick={() => setLocaleScope('all')}
-              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-xs flex items-center gap-1.5 whitespace-nowrap ${
-                localeScope === 'all'
-                  ? 'bg-emerald-600 text-white font-bold shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <span>Tất cả Locales</span>
-            </button>
+          <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+            <Globe className="h-3.5 w-3.5" />
+            <span>Vùng dữ liệu: {workspaceLocale.toUpperCase()}</span>
           </div>
         </div>
 
       </div>
 
       {/* DYNAMIC SECTIONS RENDERED BASED ON PREFERENCE ORDER AND VISIBILITY */}
-      {sortedWidgetIds.map((widgetId) => {
+      {!data ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">
+          <Globe className="mx-auto h-8 w-8 text-slate-400" />
+          <h2 className="mt-3 text-base font-bold text-slate-900 dark:text-white">Chưa có dữ liệu Dashboard cho English</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Workspace EN là dataset độc lập và không sử dụng dữ liệu VI để thay thế.
+          </p>
+        </div>
+      ) : sortedWidgetIds.map((widgetId) => {
         if (!isWidgetVisible(widgetId)) return null;
 
         // SECTION: QUICK ACTIONS
@@ -226,7 +213,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     Thao tác nhanh hệ thống
                   </h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                    [{lang}]
+                    [{workspaceLocale.toUpperCase()}]
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-400 hidden sm:inline">Phím tắt: Ctrl + K để mở Command Palette</span>

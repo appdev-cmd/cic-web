@@ -9,7 +9,6 @@ import {
   RotateCcw,
   Check,
   Grid,
-  Globe,
   Layout,
 } from 'lucide-react';
 
@@ -225,49 +224,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
               </div>
             </div>
 
-            {/* SECTION 3: DEFAULT LOCALE SCOPE */}
-            <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-emerald-500" />
-                <span>Phạm vi Dữ liệu Mặc định</span>
-              </h3>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() =>
-                    setTempPref((prev) => ({ ...prev, localeScope: 'current' }))
-                  }
-                  className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-                    tempPref.localeScope === 'current'
-                      ? 'border-emerald-500 bg-emerald-500/5 text-slate-900 dark:text-white font-bold shadow-2xs'
-                      : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  <span className="text-xs font-bold block">Locale hiện hành</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">
-                    Chỉ hiển thị dữ liệu VI/EN đang chọn
-                  </span>
-                </button>
-
-                <button
-                  onClick={() =>
-                    setTempPref((prev) => ({ ...prev, localeScope: 'all' }))
-                  }
-                  className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-                    tempPref.localeScope === 'all'
-                      ? 'border-emerald-500 bg-emerald-500/5 text-slate-900 dark:text-white font-bold shadow-2xs'
-                      : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  <span className="text-xs font-bold block">Tất cả Locales</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">
-                    Tổng hợp VI + EN (Phân bộc theo tab)
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* SECTION 4: RESET ACTION */}
+            {/* SECTION 3: RESET ACTION */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={onOpenResetModal}

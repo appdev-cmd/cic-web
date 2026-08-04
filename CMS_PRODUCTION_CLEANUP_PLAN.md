@@ -149,6 +149,7 @@ Chỉ bắt đầu sau khi bốn giai đoạn trên đạt gate.
 1. Tách rõ hai khái niệm:
    - **UI language:** ngôn ngữ nút, label, validation, toast.
    - **Workspace locale:** dataset nghiệp vụ VI/EN độc lập.
+   Runtime types đã được tách thành `CmsUiLanguage` và `CmsLocale`; nút VI/EN hiện điều khiển workspace locale, còn UI language giữ nguyên tiếng Việt cho tới khi có resource translation.
 2. Xác minh locale switch đổi toàn bộ workspace, không chỉ đổi chữ ở Header.
 3. Chốt canonical locale context cho route, deep link, Drawer, notification, recent và command palette.
 4. Chốt module nào là:

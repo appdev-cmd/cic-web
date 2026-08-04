@@ -49,3 +49,4 @@
 - `src/cms/data/CmsDataSource.ts`: contract cho current user, navigation, notification và Dashboard data.
 - `src/cms/data/demoCmsDataSource.ts`: adapter demo duy nhất của App Shell/Dashboard; vẫn bị production gate nhận diện.
 - Bước tiếp theo: tách `UI language` khỏi `workspace locale`, sau đó thay demo adapter bằng nguồn theo locale mà không fallback business data.
+- Runtime contract đã được bổ sung tại `docs/cms-locale-runtime-contract.md`: Dashboard EN thiếu dữ liệu hiển thị empty state và không fallback KPI/list/chart VI.

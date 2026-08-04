@@ -17,14 +17,17 @@ export const demoCmsDataSource: CmsDataSource = {
   currentUser: currentUserMock,
   menuGroups: cmsMenuGroupsMock,
   notifications: notificationsMock,
-  dashboard: {
-    kpi: kpiStatsMock,
-    contacts: contactMessagesMock,
-    productRegistrations: productRegistrationsMock,
-    pendingContents: pendingContentsMock,
-    activityLogs: activityLogsMock,
-    traffic7Days: dailyTrafficMock,
-    traffic30Days: monthlyTrafficMock,
-    weeklyContent: weeklyContentStatsMock,
+  availableLocales: ['vi', 'en'],
+  dashboardByLocale: {
+    vi: {
+      kpi: kpiStatsMock,
+      contacts: contactMessagesMock,
+      productRegistrations: productRegistrationsMock,
+      pendingContents: pendingContentsMock,
+      activityLogs: activityLogsMock,
+      traffic7Days: dailyTrafficMock,
+      traffic30Days: monthlyTrafficMock,
+      weeklyContent: weeklyContentStatsMock,
+    },
   },
 };
