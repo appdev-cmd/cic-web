@@ -1,776 +1,549 @@
 import React, { useState, useMemo } from 'react';
 import {
   Image as ImageIcon,
+  Sliders,
   Plus,
   Search,
-  Trash2,
-  Eye,
-  EyeOff,
-  Edit,
-  Copy,
-  Check,
-  CheckSquare,
-  Square,
-  LayoutGrid,
-  List,
-  Clock,
+  Filter,
+  Calendar,
+  Layers,
+  History,
   AlertTriangle,
-  Link as LinkIcon,
+  Eye,
+  CheckCircle2,
+  Clock,
+  Trash2,
+  Copy,
+  Send,
+  ShieldAlert,
+  RotateCcw,
+  Sparkles,
+  List,
+  Grid,
+  ChevronDown,
+  Globe,
+  UserCheck,
+  Inbox,
+  FileCheck,
 } from 'lucide-react';
-import { Banner, BANNER_STATUS_OPTIONS } from './types';
-import { mockBanners } from './mockData';
-import { mockBannerCategories } from '../banner_categories/mockData';
-import { BannerFormView } from './BannerFormView';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
+
+import {
+  BannerContent,
+  BannerPlacementConfig,
+  ScheduleConflict,
+  BannerVersion,
+  BannerActivityLog,
+  MainTabType,
+  SavedFilterView,
+  WorkflowStatus,
+} from './types';
+
+import {
+  mockBanners,
+  mockPlacements,
+  mockConflicts,
+  mockVersions,
+  mockActivityLogs,
+} from './mockData';
+
+import { BannerListView } from './BannerListView';
+import { BannerCalendarView } from './BannerCalendarView';
+import { BannerEditorDrawer } from './BannerEditorDrawer';
+import { BannerPreviewModal } from './BannerPreviewModal';
+import { BannerConflictModal } from './BannerConflictModal';
+import { BannerVersionDrawer } from './BannerVersionDrawer';
+import { BannerPlacementModal } from './BannerPlacementModal';
+import { BannerDuplicateModal } from './BannerDuplicateModal';
 
 export const BannersManager: React.FC = () => {
-  // Main items list
-  const [banners, setBanners] = useState<Banner[]>(mockBanners);
+  // Main Items & Data States
+  const [items, setItems] = useState<BannerContent[]>(mockBanners);
+  const [placements, setPlacements] = useState<BannerPlacementConfig[]>(mockPlacements);
+  const [conflicts, setConflicts] = useState<ScheduleConflict[]>(mockConflicts);
+  const [versions, setVersions] = useState<BannerVersion[]>(mockVersions);
 
-  // View mode state: 'grid' (Pattern 2 default) vs 'table'
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  // Sub-Navigation Tabs & Views
+  const [activeMainTab, setActiveMainTab] = useState<MainTabType>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [savedView, setSavedView] = useState<SavedFilterView>('all');
 
-  // Active view: 'list' vs 'form'
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
-
-  // Search & Filter state
+  // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedPlacement, setSelectedPlacement] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string>('all');
 
-  // Multi-select row state
+  // Selected Row IDs for Bulk Actions
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Delete Modal state
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<Banner[]>([]);
+  // Modals & Drawers States
+  const [editingItem, setEditingItem] = useState<BannerContent | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  // Toast notification state
+  const [previewItem, setPreviewItem] = useState<BannerContent | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const [duplicatingItem, setDuplicatingItem] = useState<BannerContent | null>(null);
+  const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
+
+  const [isConflictOpen, setIsConflictOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isPlacementOpen, setIsPlacementOpen] = useState(false);
+
+  // Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Helper check if expired
-  const isBannerExpired = (b: Banner) => {
-    if (b.status === 'expired') return true;
-    const todayStr = new Date().toISOString().split('T')[0];
-    return b.date_end < todayStr;
-  };
+  // Filtered items logic
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      // Main tab filter
+      if (activeMainTab === 'trash') {
+        if (!item.deleted_at) return false;
+      } else {
+        if (item.deleted_at) return false;
+      }
 
-  // Format short date string: '2026-07-01' -> '01/07'
-  const formatShortDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}`;
-    }
-    return dateStr;
-  };
+      if (activeMainTab === 'my_tasks') {
+        if (!item.owner_name.includes('Manh') && !item.owner_name.includes('Editor')) return false;
+      }
 
-  // Filtered Banners list
-  const filteredBanners = useMemo(() => {
-    return banners.filter((item) => {
-      const matchQuery =
+      if (activeMainTab === 'pending_queue') {
+        if (item.workflow_status !== 'pending_review') return false;
+      }
+
+      // Search query
+      const matchSearch =
         !searchQuery.trim() ||
-        item.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-        (item.alias && item.alias.toLowerCase().includes(searchQuery.toLowerCase().trim())) ||
-        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.alias.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.placement_name.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchCategory = categoryFilter === 'all' || item.category_id === categoryFilter;
+      // Placement filter
+      const matchPlacement = selectedPlacement === 'all' || item.placement_id === selectedPlacement;
 
-      let matchStatus = true;
-      if (statusFilter === 'running') matchStatus = item.status === 'running' && !isBannerExpired(item);
-      else if (statusFilter === 'expired') matchStatus = isBannerExpired(item);
-      else if (statusFilter === 'pending') matchStatus = item.status === 'pending';
-      else if (statusFilter === 'published') matchStatus = item.published;
-      else if (statusFilter === 'hidden') matchStatus = !item.published;
+      // Type filter
+      const matchType = selectedType === 'all' || item.type === selectedType;
 
-      return matchQuery && matchCategory && matchStatus;
+      // Workflow filter
+      const matchWorkflow = selectedWorkflow === 'all' || item.workflow_status === selectedWorkflow;
+
+      // Saved view filter
+      let matchSavedView = true;
+      if (savedView === 'running') matchSavedView = item.effective_status === 'running';
+      else if (savedView === 'upcoming') matchSavedView = item.effective_status === 'upcoming';
+      else if (savedView === 'pending') matchSavedView = item.workflow_status === 'pending_review';
+      else if (savedView === 'conflicts') matchSavedView = item.effective_status === 'conflict';
+      else if (savedView === 'missing_translation')
+        matchSavedView = Object.values(item.locale_status).includes('missing');
+      else if (savedView === 'ended') matchSavedView = item.effective_status === 'ended';
+
+      return matchSearch && matchPlacement && matchType && matchWorkflow && matchSavedView;
     });
-  }, [banners, searchQuery, categoryFilter, statusFilter]);
+  }, [items, activeMainTab, searchQuery, selectedPlacement, selectedType, selectedWorkflow, savedView]);
 
-  // Row selection handlers
+  // Selection handlers
   const handleToggleSelect = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((i) => i !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
-  const handleToggleSelectAll = () => {
-    if (selectedIds.length === filteredBanners.length && filteredBanners.length > 0) {
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredItems.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredBanners.map((b) => b.id));
+      setSelectedIds(filteredItems.map((i) => i.id));
     }
   };
 
-  // Single Toggle Published
-  const handleTogglePublished = (id: string) => {
-    setBanners((prev) =>
-      prev.map((b) => {
-        if (b.id === id) {
-          const nextVal = !b.published;
-          showToast(
-            nextVal
-              ? `Đã xuất bản banner "${b.name}"`
-              : `Đã tạm ẩn banner "${b.name}"`
-          );
-          return { ...b, published: nextVal };
-        }
-        return b;
-      })
-    );
+  // Actions
+  const handleCreateNew = (type: 'banner' | 'slideshow') => {
+    setEditingItem({ type } as any);
+    setIsEditorOpen(true);
   };
 
-  // Batch Publish / Hide
-  const handleBatchSetPublished = (publishedState: boolean) => {
-    if (selectedIds.length === 0) return;
-    setBanners((prev) =>
-      prev.map((b) => (selectedIds.includes(b.id) ? { ...b, published: publishedState } : b))
+  const handleSaveItem = (savedItem: BannerContent) => {
+    setItems((prev) => {
+      const exists = prev.some((i) => i.id === savedItem.id);
+      if (exists) {
+        return prev.map((i) => (i.id === savedItem.id ? savedItem : i));
+      }
+      return [savedItem, ...prev];
+    });
+
+    showToast(`Đã lưu thành công ${savedItem.type === 'slideshow' ? 'Slideshow' : 'Banner'} "${savedItem.title}"!`);
+  };
+
+  const handleDeleteItem = (id: string) => {
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, deleted_at: new Date().toISOString() } : i))
     );
-    showToast(
-      publishedState
-        ? `Đã xuất bản ${selectedIds.length} banner đã chọn!`
-        : `Đã ẩn ${selectedIds.length} banner đã chọn!`
+    showToast('Đã chuyển mục quảng bá vào Thùng rác!');
+  };
+
+  const handleDuplicateConfirm = (duplicated: BannerContent) => {
+    setItems((prev) => [duplicated, ...prev]);
+    showToast(`Đã tạo bản sao thành công: "${duplicated.title}"!`);
+  };
+
+  const handleResolveConflict = (conflictId: string, action: string) => {
+    setConflicts((prev) => prev.filter((c) => c.id !== conflictId));
+    setItems((prev) =>
+      prev.map((i) => (i.effective_status === 'conflict' ? { ...i, effective_status: 'upcoming' } : i))
     );
+    showToast('Đã tự động xử lý xung đột lịch hiển thị!');
+  };
+
+  // Bulk actions
+  const handleBulkPublish = () => {
+    setItems((prev) =>
+      prev.map((i) => (selectedIds.includes(i.id) ? { ...i, workflow_status: 'published' as WorkflowStatus } : i))
+    );
+    showToast(`Đã Xuất Bản (Publish) đồng loạt ${selectedIds.length} mục!`);
     setSelectedIds([]);
   };
 
-  // Duplicate Banner Handler
-  const handleDuplicateBanner = (bannerToDup: Banner, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    const newId = `banner_${Date.now()}`;
-    const duplicated: Banner = {
-      ...bannerToDup,
-      id: newId,
-      name: `${bannerToDup.name} (Bản sao)`,
-      alias: bannerToDup.alias ? `${bannerToDup.alias}-copy` : '',
-      created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    };
-
-    setBanners([duplicated, ...banners]);
-    showToast(`Đã nhân bản banner thành công!`);
-  };
-
-  // Trigger Delete Single
-  const handleTriggerDeleteSingle = (banner: Banner, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setItemsToDelete([banner]);
-    setIsDeleteModalOpen(true);
-  };
-
-  // Trigger Delete Batch
-  const handleTriggerDeleteBatch = () => {
-    if (selectedIds.length === 0) return;
-    const items = banners.filter((b) => selectedIds.includes(b.id));
-    setItemsToDelete(items);
-    setIsDeleteModalOpen(true);
-  };
-
-  // Confirm Delete
-  const handleConfirmDelete = () => {
-    const idsToRemove = itemsToDelete.map((i) => i.id);
-    setBanners((prev) => prev.filter((b) => !idsToRemove.includes(b.id)));
-    setSelectedIds((prev) => prev.filter((id) => !idsToRemove.includes(id)));
-    showToast(`Đã xóa thành công ${itemsToDelete.length} banner!`);
-    setIsDeleteModalOpen(false);
-    setItemsToDelete([]);
-  };
-
-  // Open Form Create
-  const handleOpenCreateForm = () => {
-    setEditingBanner(null);
-    setIsFormOpen(true);
-  };
-
-  // Open Form Edit
-  const handleOpenEditForm = (banner: Banner, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setEditingBanner(banner);
-    setIsFormOpen(true);
-  };
-
-  // Save Banner Handler
-  const handleSaveBanner = (formData: Partial<Banner>) => {
-    const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
-
-    if (editingBanner) {
-      setBanners((prev) =>
-        prev.map((b) =>
-          b.id === editingBanner.id
-            ? {
-                ...b,
-                ...formData,
-                updated_time: nowStr,
-              }
-            : b
-        )
-      );
-      showToast(`Đã cập nhật banner "${formData.name}"!`);
-    } else {
-      const newBanner: Banner = {
-        id: `banner_${Date.now()}`,
-        name: formData.name || 'Banner mới',
-        alias: formData.alias || '',
-        description: formData.description || '',
-        image:
-          formData.image ||
-          'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?q=80&w=1200&auto=format&fit=crop',
-        width: formData.width || 1200,
-        height: formData.height || 300,
-        link: formData.link || '',
-        category_id: formData.category_id || mockBannerCategories[0]?.id || 'bcat_001',
-        category_name: formData.category_name || 'Banner Header Trang chủ',
-        date_start: formData.date_start || '2026-08-01',
-        date_end: formData.date_end || '2026-08-31',
-        is_use: formData.is_use ?? true,
-        status: formData.status || 'running',
-        link_video: formData.link_video || '',
-        icon: formData.icon || 'Sparkles',
-        el_user_name: formData.el_user_name || '',
-        el_info: formData.el_info || '',
-        el_address: formData.el_address || '',
-        el_mobilephone: formData.el_mobilephone || '',
-        el_link_website: formData.el_link_website || '',
-        el_link_facebook: formData.el_link_facebook || '',
-        published: formData.published ?? true,
-        ordering: formData.ordering || 1,
-        created_time: nowStr,
-      };
-
-      setBanners([newBanner, ...banners]);
-      showToast(`Đã thêm mới banner "${newBanner.name}"!`);
-    }
-
-    setIsFormOpen(false);
-    setEditingBanner(null);
-  };
-
-  // IF FORM IS OPEN -> RENDER FULL PAGE FORM VIEW
-  if (isFormOpen) {
-    return (
-      <BannerFormView
-        bannerToEdit={editingBanner}
-        onSave={handleSaveBanner}
-        onCancel={() => {
-          setIsFormOpen(false);
-          setEditingBanner(null);
-        }}
-      />
+  const handleBulkArchive = () => {
+    setItems((prev) =>
+      prev.map((i) => (selectedIds.includes(i.id) ? { ...i, workflow_status: 'archived' as WorkflowStatus } : i))
     );
-  }
+    showToast(`Đã chuyển ${selectedIds.length} mục sang trạng thái Lưu trữ (Archived)!`);
+    setSelectedIds([]);
+  };
+
+  const handleBulkDelete = () => {
+    setItems((prev) =>
+      prev.map((i) => (selectedIds.includes(i.id) ? { ...i, deleted_at: new Date().toISOString() } : i))
+    );
+    showToast(`Đã xóa ${selectedIds.length} mục vào Thùng rác!`);
+    setSelectedIds([]);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
-          <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 dark:bg-slate-800 text-white rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 text-xs font-semibold">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* 1. HEADER BAR */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
-              <ImageIcon className="w-5 h-5" />
+      {/* Top Header Banner */}
+      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
+              <ImageIcon className="w-6 h-6" />
             </div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Quản lý Banner Quảng cáo
-            </h1>
-            <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-              {banners.length} banner
-            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  Quản lý Banner & Slideshow Quảng bá
+                </h1>
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
+                  Module 09
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Hợp nhất quản lý 100+ banner và 9 slideshow luân phiên theo Vị trí, Lịch chạy, Locale và Versioning.
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Hiển thị giao diện Pattern 2 (Ảnh làm trọng tâm). Quản lý danh sách banner theo vị trí, lịch chạy và trạng thái.
-          </p>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => handleCreateNew('banner')}
+              className="px-3.5 py-2 text-xs font-bold text-white bg-orange-600 hover:bg-orange-500 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Tạo Banner đơn</span>
+            </button>
+
+            <button
+              onClick={() => handleCreateNew('slideshow')}
+              className="px-3.5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+            >
+              <Sliders className="w-4 h-4" />
+              <span>+ Tạo Slideshow</span>
+            </button>
+          </div>
         </div>
 
-        {/* Top Action Button */}
-        <button
-          onClick={handleOpenCreateForm}
-          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm banner mới</span>
-        </button>
+        {/* Global Toolbar Status Summary & Tools */}
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4 text-xs">
+            <div>
+              <span className="text-slate-400">Tổng số nội dung: </span>
+              <strong className="text-slate-900 dark:text-white font-bold">{items.filter((i) => !i.deleted_at).length}</strong>
+            </div>
+            <div>
+              <span className="text-slate-400">Đang chạy (Live): </span>
+              <strong className="text-emerald-600 font-bold">
+                {items.filter((i) => i.effective_status === 'running' && !i.deleted_at).length}
+              </strong>
+            </div>
+            <div>
+              <span className="text-slate-400">Xung đột lịch: </span>
+              <strong className="text-rose-600 font-bold">{conflicts.length}</strong>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Conflict Guard Button */}
+            <button
+              onClick={() => setIsConflictOpen(true)}
+              className={`px-3 py-1.5 text-xs font-semibold border rounded-xl transition flex items-center gap-1.5 ${
+                conflicts.length > 0
+                  ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 text-rose-700 dark:text-rose-300 animate-pulse'
+                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
+              <span>Kiểm tra xung đột ({conflicts.length})</span>
+            </button>
+
+            {/* Placements Config Button */}
+            <button
+              onClick={() => setIsPlacementOpen(true)}
+              className="px-3 py-1.5 text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-100 transition flex items-center gap-1.5"
+            >
+              <Layers className="w-3.5 h-3.5 text-orange-500" />
+              <span>Vị trí Website ({placements.length})</span>
+            </button>
+
+            {/* Version History Button */}
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="px-3 py-1.5 text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-100 transition flex items-center gap-1.5"
+            >
+              <History className="w-3.5 h-3.5 text-purple-500" />
+              <span>Lịch sử phiên bản</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* 2. TOOLBAR (Search, Filters, Batch Actions & VIEW MODE TOGGLE) */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      {/* Main Sitemap Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1">
+        {[
+          { id: 'all', label: 'Tất cả nội dung', icon: ImageIcon },
+          { id: 'schedule', label: 'Lịch hiển thị (Timeline)', icon: Calendar },
+          { id: 'my_tasks', label: 'Việc của tôi', icon: UserCheck },
+          { id: 'pending_queue', label: 'Hàng chờ duyệt', icon: Inbox },
+          { id: 'trash', label: 'Thùng rác', icon: Trash2 },
+        ].map((t) => {
+          const IconComponent = t.icon;
+          const isActive = activeMainTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveMainTab(t.id as MainTabType)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-2 shrink-0 ${
+                isActive
+                  ? 'bg-orange-600 text-white shadow-2xs'
+                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <IconComponent className="w-4 h-4" />
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Main Filter & View Mode Bar */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Search Input */}
-          <div className="md:col-span-5 relative">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+          <div className="relative w-full md:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Tìm kiếm banner theo tên, alias..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+              placeholder="Tìm tiêu đề banner, alias hoặc vị trí..."
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
 
-          {/* Category Filter Dropdown */}
-          <div className="md:col-span-3">
+          {/* Filters & View Switcher */}
+          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-end">
+            {/* Filter by Placement */}
             <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+              value={selectedPlacement}
+              onChange={(e) => setSelectedPlacement(e.target.value)}
+              className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             >
-              <option value="all">Tất cả vị trí danh mục</option>
-              {mockBannerCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
+              <option value="all">Tất cả Vị trí</option>
+              {placements.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Status Filter & View Mode Switch */}
-          <div className="md:col-span-4 flex items-center gap-2 justify-end">
+            {/* Filter by Type */}
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="running">Đang chạy</option>
-              <option value="expired">Hết hạn</option>
-              <option value="pending">Chờ duyệt</option>
-              <option value="published">Đã xuất bản</option>
-              <option value="hidden">Đang ẩn</option>
+              <option value="all">Tất cả Loại</option>
+              <option value="banner">Single Banner</option>
+              <option value="slideshow">Slideshow</option>
             </select>
 
-            {/* Pattern 2: View Mode Switch (Grid Card vs Table) */}
-            <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
+            {/* View Mode List vs Calendar */}
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
               <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                  viewMode === 'grid'
-                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+                  viewMode === 'list'
+                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400'
                 }`}
-                title="Hiển thị Dạng lưới ảnh (Grid Card)"
               >
-                <LayoutGrid className="w-4 h-4" />
-                <span className="hidden sm:inline">Lưới</span>
+                <List className="w-3.5 h-3.5" /> Bảng
               </button>
-
               <button
-                onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                  viewMode === 'table'
-                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                onClick={() => setViewMode('calendar')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+                  viewMode === 'calendar'
+                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400'
                 }`}
-                title="Hiển thị Dạng bảng (Table)"
               >
-                <List className="w-4 h-4" />
-                <span className="hidden sm:inline">Bảng</span>
+                <Calendar className="w-3.5 h-3.5" /> Lịch Timeline
               </button>
             </div>
           </div>
         </div>
 
-        {/* Batch Action Toolbar Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-          <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
-            <span>
-              Hiển thị: <strong>{filteredBanners.length}</strong> / {banners.length} banner
+        {/* Bulk Actions Floating Bar */}
+        {selectedIds.length > 0 && (
+          <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/40 flex items-center justify-between gap-3 text-xs">
+            <span className="font-bold text-orange-900 dark:text-orange-200">
+              Đã chọn <strong>{selectedIds.length}</strong> mục quảng bá
             </span>
-            {selectedIds.length > 0 && (
-              <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
-                Đã chọn: {selectedIds.length} banner
-              </span>
-            )}
-          </div>
-
-          {/* Batch Action buttons */}
-          {selectedIds.length > 0 && (
-            <div className="flex items-center flex-wrap gap-2">
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => handleBatchSetPublished(true)}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100"
+                onClick={handleBulkPublish}
+                className="px-3 py-1.5 font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition"
               >
-                <Eye className="w-3.5 h-3.5" />
-                <span>Xuất bản ({selectedIds.length})</span>
+                Xuất bản đồng loạt
               </button>
-
               <button
-                onClick={() => handleBatchSetPublished(false)}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100"
+                onClick={handleBulkArchive}
+                className="px-3 py-1.5 font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 rounded-lg border border-slate-300 dark:border-slate-700 transition"
               >
-                <EyeOff className="w-3.5 h-3.5" />
-                <span>Ẩn ({selectedIds.length})</span>
+                Chuyển vào Lưu trữ
               </button>
-
               <button
-                onClick={handleTriggerDeleteBatch}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-100"
+                onClick={handleBulkDelete}
+                className="px-3 py-1.5 font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Xóa ({selectedIds.length})</span>
+                Xóa được chọn
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Dynamic Display View */}
+        {viewMode === 'list' ? (
+          <BannerListView
+            items={filteredItems}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+            onSelectAll={handleSelectAll}
+            onEdit={(item) => {
+              setEditingItem(item);
+              setIsEditorOpen(true);
+            }}
+            onPreview={(item) => {
+              setPreviewItem(item);
+              setIsPreviewOpen(true);
+            }}
+            onDuplicate={(item) => {
+              setDuplicatingItem(item);
+              setIsDuplicateOpen(true);
+            }}
+            onDelete={handleDeleteItem}
+            onQuickToggleStatus={(item) => {
+              showToast(`Đã đổi trạng thái nhanh của "${item.title}"`);
+            }}
+            savedView={savedView}
+            onSelectSavedView={setSavedView}
+          />
+        ) : (
+          <BannerCalendarView
+            items={filteredItems}
+            placements={placements}
+            onEdit={(item) => {
+              setEditingItem(item);
+              setIsEditorOpen(true);
+            }}
+            onPreview={(item) => {
+              setPreviewItem(item);
+              setIsPreviewOpen(true);
+            }}
+          />
+        )}
       </div>
 
-      {/* 3. CONTENT AREA (PATTERN 2: GRID CARD vs TABLE VIEW) */}
-      {viewMode === 'grid' ? (
-        /* PATTERN 2: DẠNG LƯỚI ẢNH (GRID CARD) */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredBanners.length === 0 ? (
-            <div className="col-span-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center text-slate-400">
-              <ImageIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="font-semibold">Không tìm thấy banner quảng cáo phù hợp.</p>
-            </div>
-          ) : (
-            filteredBanners.map((banner) => {
-              const expired = isBannerExpired(banner);
-              const isSelected = selectedIds.includes(banner.id);
-              const wNum = banner.width || 300;
-              const hNum = banner.height || 250;
-              const aspectRatioVal = `${wNum} / ${hNum}`;
+      {/* Editor Drawer */}
+      <BannerEditorDrawer
+        item={editingItem}
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        onSave={handleSaveItem}
+        placements={placements}
+      />
 
-              const categoryObj = mockBannerCategories.find((c) => c.id === banner.category_id);
+      {/* Live Contextual Preview Modal */}
+      <BannerPreviewModal
+        item={previewItem}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+      />
 
-              return (
-                <div
-                  key={banner.id}
-                  className={`group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border transition-all duration-200 shadow-2xs hover:shadow-lg flex flex-col justify-between ${
-                    expired
-                      ? 'border-red-500/80 dark:border-red-500/60 ring-2 ring-red-500/20'
-                      : isSelected
-                      ? 'border-orange-500 dark:border-orange-500 ring-2 ring-orange-500/20'
-                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                  }`}
-                >
-                  {/* Top Image Container with aspect ratio matching width/height */}
-                  <div className="relative w-full bg-slate-950/80 overflow-hidden">
-                    <div
-                      style={{ aspectRatio: aspectRatioVal }}
-                      className="w-full flex items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800"
-                    >
-                      <img
-                        src={banner.image}
-                        alt={banner.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
+      {/* Schedule Conflict Guard Modal */}
+      <BannerConflictModal
+        isOpen={isConflictOpen}
+        onClose={() => setIsConflictOpen(false)}
+        conflicts={conflicts}
+        items={items}
+        onResolveConflict={handleResolveConflict}
+      />
 
-                    {/* Multi-select checkbox top-left */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleSelect(banner.id);
-                      }}
-                      className="absolute top-2.5 left-2.5 z-10 p-1 bg-slate-900/60 backdrop-blur-xs text-white rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
-                    >
-                      {isSelected ? (
-                        <CheckSquare className="w-4 h-4 text-orange-400" />
-                      ) : (
-                        <Square className="w-4 h-4 text-white/80" />
-                      )}
-                    </button>
-
-                    {/* Top-right Badges */}
-                    <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
-                      {expired && (
-                        <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-md shadow-xs flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" />
-                          <span>Hết hạn</span>
-                        </span>
-                      )}
-                      {!banner.published && (
-                        <span className="px-2 py-0.5 bg-slate-800/90 text-slate-200 text-[10px] font-bold rounded-md shadow-xs">
-                          Đang ẩn
-                        </span>
-                      )}
-                    </div>
-
-                    {/* HOVER OVERLAY WITH 2 ICON BUTTONS (Edit & Duplicate) + Quick Delete */}
-                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
-                      <button
-                        onClick={(e) => handleOpenEditForm(banner, e)}
-                        className="p-2.5 bg-white text-slate-900 hover:bg-orange-600 hover:text-white rounded-xl shadow-lg transition-all transform hover:scale-110 cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-                        title="Chỉnh sửa banner"
-                      >
-                        <Edit className="w-4 h-4" />
-                        <span>Sửa</span>
-                      </button>
-
-                      <button
-                        onClick={(e) => handleDuplicateBanner(banner, e)}
-                        className="p-2.5 bg-white text-slate-900 hover:bg-blue-600 hover:text-white rounded-xl shadow-lg transition-all transform hover:scale-110 cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-                        title="Nhân bản banner"
-                      >
-                        <Copy className="w-4 h-4" />
-                        <span>Nhân bản</span>
-                      </button>
-
-                      <button
-                        onClick={(e) => handleTriggerDeleteSingle(banner, e)}
-                        className="p-2 bg-red-600 text-white hover:bg-red-700 rounded-xl shadow-lg transition-all transform hover:scale-110 cursor-pointer"
-                        title="Xóa banner"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Bottom Info Section */}
-                  <div className="p-3.5 space-y-2.5 flex-1 flex flex-col justify-between">
-                    <div>
-                      {/* Name */}
-                      <h3
-                        onClick={(e) => handleOpenEditForm(banner, e)}
-                        className="text-xs font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 line-clamp-2 cursor-pointer transition-colors leading-snug"
-                        title={banner.name}
-                      >
-                        {banner.name}
-                      </h3>
-
-                      {/* Category Badge */}
-                      <div className="mt-2 flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-semibold rounded-md truncate max-w-[180px]">
-                          {categoryObj?.name || banner.category_name || 'Danh mục Banner'}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-slate-400 shrink-0">
-                          {banner.width}x{banner.height}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Date range "Chạy: dd/mm - dd/mm" */}
-                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-slate-400" />
-                        <span>
-                          Chạy: {formatShortDate(banner.date_start)} - {formatShortDate(banner.date_end)}
-                        </span>
-                      </div>
-
-                      {/* Publish switch direct control */}
-                      <button
-                        onClick={() => handleTogglePublished(banner.id)}
-                        className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out ${
-                          banner.published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
-                        }`}
-                        title={banner.published ? 'Đã xuất bản' : 'Đang ẩn'}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                            banner.published ? 'translate-x-3' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      ) : (
-        /* PATTERN 2: DẠNG BẢNG THUẦN (TABLE VIEW) */
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  <th className="p-3.5 w-10 text-center">
-                    <button
-                      onClick={handleToggleSelectAll}
-                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                    >
-                      {selectedIds.length === filteredBanners.length && filteredBanners.length > 0 ? (
-                        <CheckSquare className="w-4 h-4 text-orange-600" />
-                      ) : (
-                        <Square className="w-4 h-4" />
-                      )}
-                    </button>
-                  </th>
-                  <th className="p-3.5 w-24">Ảnh thu nhỏ</th>
-                  <th className="p-3.5 min-w-[260px]">Tên Banner</th>
-                  <th className="p-3.5 w-48">Danh mục</th>
-                  <th className="p-3.5 w-44">Link liên kết</th>
-                  <th className="p-3.5 w-32 text-center">Trạng thái</th>
-                  <th className="p-3.5 w-36">Thời gian chạy</th>
-                  <th className="p-3.5 w-32 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
-                {filteredBanners.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-12 text-center text-slate-400">
-                      <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                      <p className="font-semibold">Không tìm thấy banner quảng cáo phù hợp.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredBanners.map((banner) => {
-                    const expired = isBannerExpired(banner);
-                    const isSelected = selectedIds.includes(banner.id);
-                    const categoryObj = mockBannerCategories.find((c) => c.id === banner.category_id);
-
-                    return (
-                      <tr
-                        key={banner.id}
-                        className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
-                          isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                        }`}
-                      >
-                        {/* Checkbox */}
-                        <td className="p-3.5 text-center">
-                          <button
-                            onClick={() => handleToggleSelect(banner.id)}
-                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                          >
-                            {isSelected ? (
-                              <CheckSquare className="w-4 h-4 text-orange-600" />
-                            ) : (
-                              <Square className="w-4 h-4" />
-                            )}
-                          </button>
-                        </td>
-
-                        {/* Thumbnail Image (80x50px) */}
-                        <td className="p-3.5">
-                          <div className="w-20 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 relative">
-                            <img
-                              src={banner.image}
-                              alt={banner.name}
-                              className="w-full h-full object-cover"
-                            />
-                            {expired && (
-                              <div className="absolute inset-0 bg-red-900/60 flex items-center justify-center">
-                                <span className="text-[9px] font-bold text-white px-1 bg-red-600 rounded">
-                                  Hết hạn
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Name */}
-                        <td className="p-3.5">
-                          <div className="space-y-1">
-                            <p
-                              onClick={(e) => handleOpenEditForm(banner, e)}
-                              className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition-colors leading-snug"
-                            >
-                              {banner.name}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-mono">
-                              Kích thước: {banner.width} x {banner.height} px
-                            </p>
-                          </div>
-                        </td>
-
-                        {/* Category Badge */}
-                        <td className="p-3.5">
-                          <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold rounded-lg inline-block truncate max-w-[180px]">
-                            {categoryObj?.name || banner.category_name}
-                          </span>
-                        </td>
-
-                        {/* Link */}
-                        <td className="p-3.5">
-                          {banner.link ? (
-                            <a
-                              href={banner.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 max-w-[150px] truncate"
-                              title={banner.link}
-                            >
-                              <LinkIcon className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{banner.link}</span>
-                            </a>
-                          ) : (
-                            <span className="text-slate-400 text-[11px]">Không có link</span>
-                          )}
-                        </td>
-
-                        {/* Status (published toggle switch) */}
-                        <td className="p-3.5 text-center">
-                          <button
-                            onClick={() => handleTogglePublished(banner.id)}
-                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                              banner.published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
-                            }`}
-                            title={banner.published ? 'Banner đang xuất bản' : 'Banner đang ẩn'}
-                          >
-                            <span
-                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                                banner.published ? 'translate-x-4' : 'translate-x-0'
-                              }`}
-                            />
-                          </button>
-                        </td>
-
-                        {/* Date range */}
-                        <td className="p-3.5">
-                          <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 space-y-0.5">
-                            <div>{banner.date_start}</div>
-                            <div className="text-slate-400">đến {banner.date_end}</div>
-                          </div>
-                        </td>
-
-                        {/* Actions (Edit, Duplicate, Delete) */}
-                        <td className="p-3.5 text-right space-x-1">
-                          <button
-                            onClick={(e) => handleOpenEditForm(banner, e)}
-                            className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Chỉnh sửa banner"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => handleDuplicateBanner(banner, e)}
-                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Nhân bản banner"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => handleTriggerDeleteSingle(banner, e)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Xóa banner"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        itemsToDelete={itemsToDelete}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setItemsToDelete([]);
+      {/* Version History Drawer */}
+      <BannerVersionDrawer
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        versions={versions}
+        onRestoreVersion={(ver) => {
+          showToast(`Đã khôi phục thành công phiên bản v${ver.version_number.toFixed(1)}!`);
+          setIsHistoryOpen(false);
         }}
-        onConfirm={handleConfirmDelete}
+      />
+
+      {/* Duplicate Options Modal */}
+      <BannerDuplicateModal
+        item={duplicatingItem}
+        isOpen={isDuplicateOpen}
+        onClose={() => setIsDuplicateOpen(false)}
+        onConfirmDuplicate={handleDuplicateConfirm}
+      />
+
+      {/* Website Placement Management Modal */}
+      <BannerPlacementModal
+        isOpen={isPlacementOpen}
+        onClose={() => setIsPlacementOpen(false)}
+        placements={placements}
       />
     </div>
   );

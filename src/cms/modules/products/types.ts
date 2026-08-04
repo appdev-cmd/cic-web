@@ -1,0 +1,154 @@
+/**
+ * Module 05: Sản phẩm (Products Catalog Management) Types
+ * Strict specification compliance for dual status, taxonomy, commercial, 11 form sections, quality checklist & audit history.
+ */
+
+export type EditorialStatus = 'draft' | 'pending_review' | 'approved' | 'published' | 'rejected' | 'archived';
+
+export type CatalogStatus = 'active' | 'inactive' | 'archived';
+
+export type LocaleStatus = 'missing' | 'in_progress' | 'review' | 'outdated' | 'complete';
+
+export type AvailabilitySignal = 'in_stock' | 'pre_order' | 'contact' | 'out_of_stock';
+
+export interface TechSpecParam {
+  id: string;
+  key: string;
+  value: string;
+  group?: string;
+}
+
+export interface ProductDocument {
+  id: string;
+  title: string;
+  file_url: string;
+  file_type: string;
+  file_size: string;
+  version: string;
+  access: 'public' | 'require_email';
+}
+
+export interface TranslationLocaleProgress {
+  locale: 'EN' | 'JA' | 'KR' | string;
+  locale_name: string;
+  status: LocaleStatus;
+  progress: number; // 0-100%
+  title?: string;
+  short_description?: string;
+  updated_time?: string;
+}
+
+export interface ProductItem {
+  id: string;
+  sku: string; // Mã sản phẩm / SKU
+  title: string;
+  alias: string; // Slug
+  tagline?: string;
+  short_description: string;
+  product_type: string; // e.g., 'Phần mềm', 'Thiết bị', 'Dịch vụ', 'Bản quyền'
+  
+  // Taxonomy
+  category_id: string;
+  brand_id: string;
+  brand_name: string;
+  application_areas: string[]; // Lĩnh vực ứng dụng (BIM, Kết cấu, Xây dựng...)
+
+  // Commercial
+  price: string; // e.g. 'Báo giá theo license', '15.000.000 VNĐ'
+  currency: 'VND' | 'USD';
+  unit: string; // License, Bộ, Năm...
+  origin: string; // Mỹ (CSI), Nhật Bản, Việt Nam...
+  warranty: string;
+  availability_signal: AvailabilitySignal;
+
+  // Content
+  content_html: string;
+  highlights: string[]; // Đặc điểm nổi bật
+  
+  // Tech Specs
+  tech_specs: TechSpecParam[];
+
+  // Media
+  image: string; // Thumbnail chính
+  gallery: string[];
+  video_url?: string;
+  og_image?: string;
+
+  // Documents
+  documents: ProductDocument[];
+
+  // SEO & Social
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
+  canonical_url: string;
+
+  // Contact & Owner
+  owner_id: string;
+  owner_name: string;
+  owner_avatar?: string;
+  inquiry_routing: string; // Bộ phận tiếp nhận liên hệ
+
+  // Localization
+  translations: Record<string, TranslationLocaleProgress>;
+
+  // Dual Statuses
+  editorial_status: EditorialStatus;
+  catalog_status: CatalogStatus;
+  published: boolean; // Computed or alias for published editorial
+  
+  // Placement & Ordering
+  is_hot: boolean;
+  ordering: number;
+  site_placement: string[]; // e.g. ['home_featured', 'catalog_grid', 'footer_links']
+  scheduled_publish_time?: string;
+
+  // Quality & Versions
+  completeness_score: number; // 0 - 100%
+  missing_fields?: string[];
+  working_version_id?: string;
+  has_working_draft?: boolean;
+
+  // Timestamps & Audit
+  created_time: string;
+  updated_time: string;
+  published_time?: string;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  count?: number;
+}
+
+export interface ProductBrand {
+  id: string;
+  name: string;
+  logo?: string;
+  country?: string;
+  website?: string;
+  description?: string;
+}
+
+export interface ProductActivityLog {
+  id: string;
+  product_id: string;
+  product_title: string;
+  user_name: string;
+  user_avatar?: string;
+  user_role: string;
+  action: 'create' | 'update' | 'working_draft' | 'review_submit' | 'approve' | 'reject' | 'publish' | 'activate' | 'deactivate' | 'archive';
+  details: string;
+  timestamp: string;
+  version_tag?: string;
+}
+
+export interface ProductOwnerOption {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  avatar?: string;
+}

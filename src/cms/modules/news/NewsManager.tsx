@@ -21,14 +21,29 @@ import {
   AlertCircle,
   Clock,
   ExternalLink,
+  History,
+  Activity,
+  SlidersHorizontal,
+  Bookmark,
+  User,
+  ShieldCheck,
+  Globe,
+  AlertTriangle,
 } from 'lucide-react';
-import { NewsArticle, NewsCategory } from './types';
+import { NewsArticle, NewsCategory, WorkflowStatus } from './types';
 import { mockArticles, mockNewsCategories } from './mockData';
 import { NewsFormView } from './NewsFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { ArticlePreviewModal } from './components/ArticlePreviewModal';
+import { QuickEditModal } from './components/QuickEditModal';
+import { ColumnSettingModal, ColumnVisibility, TableDensity } from './components/ColumnSettingModal';
+import { VersionHistoryDrawer } from './components/VersionHistoryDrawer';
+import { ActivityLogDrawer } from './components/ActivityLogDrawer';
+
+type ViewScopeTab = 'all' | 'my_work' | 'pending' | 'scheduled' | 'trash';
 
 export const NewsManager: React.FC = () => {
-  // Articles Data State
+  // Articles State
   const [articles, setArticles] = useState<NewsArticle[]>(mockArticles);
   const [categories] = useState<NewsCategory[]>(mockNewsCategories);
 
@@ -36,19 +51,45 @@ export const NewsManager: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
   const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(null);
 
-  // Search & Filter State
+  // Scope Tabs
+  const [activeScopeTab, setActiveScopeTab] = useState<ViewScopeTab>('all');
+  const [myWorkSubFilter, setMyWorkSubFilter] = useState<'all' | 'draft' | 'returned' | 'assigned'>('all');
+
+  // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'hidden'>('all');
+  const [workflowFilter, setWorkflowFilter] = useState<string>('ALL');
 
-  // Row Selection State for Batch Operations
+  // Saved Views Quick Filter
+  const [activeSavedView, setActiveSavedView] = useState<string | null>(null);
+
+  // Selection for Batch Operations
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Delete Modal State
+  // Modals & Drawers
+  const [previewArticle, setPreviewArticle] = useState<NewsArticle | null>(null);
+  const [quickEditArticle, setQuickEditArticle] = useState<NewsArticle | null>(null);
+  const [versionDrawerArticle, setVersionDrawerArticle] = useState<NewsArticle | null>(null);
+  const [activityDrawerArticle, setActivityDrawerArticle] = useState<NewsArticle | null>(null);
+  const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
+
+  // Table Density & Column Visibility
+  const [tableDensity, setTableDensity] = useState<TableDensity>('normal');
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
+    category: true,
+    localization: true,
+    author: true,
+    status: true,
+    publish_time: true,
+    updated_time: true,
+    actions: true,
+  });
+
+  // Delete / Trash Modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<NewsArticle[]>([]);
 
-  // Toast Notification
+  // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -56,40 +97,65 @@ export const NewsManager: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleRefresh = () => {
-    showToast('Đã làm mới danh sách tin tức & bài viết!');
-  };
-
-  // Filtered Articles List
-  const filteredArticles = useMemo(() => {
+  // Scope Filtered Articles
+  const scopeFilteredArticles = useMemo(() => {
     return articles.filter((item) => {
-      const matchQuery =
+      if (activeScopeTab === 'trash') return Boolean(item.in_trash);
+      if (item.in_trash) return false;
+
+      if (activeScopeTab === 'my_work') {
+        const isMyArticle = item.author?.name?.includes('Nam') || item.assignee?.name?.includes('Nam');
+        if (!isMyArticle) return false;
+        if (myWorkSubFilter === 'draft') return item.workflow_status === 'draft';
+        if (myWorkSubFilter === 'returned') return item.workflow_status === 'returned';
+        return true;
+      }
+
+      if (activeScopeTab === 'pending') {
+        return item.workflow_status === 'pending';
+      }
+
+      if (activeScopeTab === 'scheduled') {
+        return item.workflow_status === 'scheduled';
+      }
+
+      return true;
+    });
+  }, [articles, activeScopeTab, myWorkSubFilter]);
+
+  // Final Filtered List
+  const filteredArticles = useMemo(() => {
+    return scopeFilteredArticles.filter((item) => {
+      // Search
+      const matchSearch =
         !searchQuery.trim() ||
         item.title.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-        item.alias.toLowerCase().includes(searchQuery.toLowerCase().trim());
+        item.alias.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+        item.tags?.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase().trim()));
 
-      const matchCategory =
-        selectedCategory === 'ALL' || item.category_id === selectedCategory;
+      // Category
+      const matchCat = selectedCategory === 'ALL' || item.category_id === selectedCategory;
 
-      const matchStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'published' && item.published) ||
-        (statusFilter === 'hidden' && !item.published);
+      // Workflow
+      const matchWorkflow = workflowFilter === 'ALL' || item.workflow_status === workflowFilter;
 
-      return matchQuery && matchCategory && matchStatus;
+      // Saved Views
+      let matchSavedView = true;
+      if (activeSavedView === 'mine') {
+        matchSavedView = Boolean(item.author?.name?.includes('Nam'));
+      } else if (activeSavedView === 'pending') {
+        matchSavedView = item.workflow_status === 'pending';
+      } else if (activeSavedView === 'scheduled') {
+        matchSavedView = item.workflow_status === 'scheduled';
+      } else if (activeSavedView === 'missing_en') {
+        matchSavedView = item.translation_progress?.en !== 'complete';
+      }
+
+      return matchSearch && matchCat && matchWorkflow && matchSavedView;
     });
-  }, [articles, searchQuery, selectedCategory, statusFilter]);
+  }, [scopeFilteredArticles, searchQuery, selectedCategory, workflowFilter, activeSavedView]);
 
-  // Handle Single Checkbox Toggle
-  const handleToggleSelectRow = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((i) => i !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  };
-
-  // Handle Select All Rows
+  // Handle Select All
   const handleToggleSelectAll = () => {
     if (selectedIds.length === filteredArticles.length && filteredArticles.length > 0) {
       setSelectedIds([]);
@@ -98,31 +164,21 @@ export const NewsManager: React.FC = () => {
     }
   };
 
-  // Direct Toggle Published
-  const handleTogglePublished = (id: string) => {
-    setArticles((prev) =>
-      prev.map((a) => {
-        if (a.id === id) {
-          const nextVal = !a.published;
-          showToast(
-            nextVal ? `Đã xuất bản bài viết "${a.title}"` : `Đã chuyển bài viết "${a.title}" về bản nháp`
-          );
-          return { ...a, published: nextVal };
-        }
-        return a;
-      })
-    );
+  const handleToggleSelectRow = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((i) => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
   };
 
-  // Direct Toggle Is Hot
+  // Toggle Hot
   const handleToggleHot = (id: string) => {
     setArticles((prev) =>
       prev.map((a) => {
         if (a.id === id) {
           const nextVal = !a.is_hot;
-          showToast(
-            nextVal ? `Đã đánh dấu Nổi bật cho "${a.title}"` : `Đã bỏ Nổi bật bài viết "${a.title}"`
-          );
+          showToast(nextVal ? `Đã gắn cờ Nổi bật cho bài viết!` : `Đã bỏ cờ Nổi bật bài viết!`);
           return { ...a, is_hot: nextVal };
         }
         return a;
@@ -130,74 +186,67 @@ export const NewsManager: React.FC = () => {
     );
   };
 
-  // Batch Publish Toggle (Batch Xuất bản / Ẩn)
-  const handleBatchSetPublished = (publishedState: boolean) => {
-    if (selectedIds.length === 0) return;
+  // Move to Trash or Permanent Delete
+  const handleMoveToTrash = (article: NewsArticle) => {
     setArticles((prev) =>
-      prev.map((a) => (selectedIds.includes(a.id) ? { ...a, published: publishedState } : a))
+      prev.map((a) => (a.id === article.id ? { ...a, in_trash: true, deleted_at: new Date().toISOString() } : a))
     );
-    showToast(
-      publishedState
-        ? `Đã xuất bản ${selectedIds.length} bài viết đã chọn!`
-        : `Đã chuyển ${selectedIds.length} bài viết về bản nháp!`
-    );
-    setSelectedIds([]);
+    showToast(`Đã chuyển bài viết "${article.title}" vào thùng rác.`);
   };
 
-  // Single Delete Trigger
-  const handleTriggerDeleteSingle = (article: NewsArticle) => {
+  const handleRestoreFromTrash = (article: NewsArticle) => {
+    setArticles((prev) =>
+      prev.map((a) => (a.id === article.id ? { ...a, in_trash: false, deleted_at: undefined } : a))
+    );
+    showToast(`Đã khôi phục bài viết "${article.title}" thành công!`);
+  };
+
+  const handleTriggerPermanentDelete = (article: NewsArticle) => {
     setItemsToDelete([article]);
     setIsDeleteModalOpen(true);
   };
 
-  // Batch Delete Trigger
-  const handleTriggerDeleteBatch = () => {
-    if (selectedIds.length === 0) return;
-    const items = articles.filter((a) => selectedIds.includes(a.id));
-    setItemsToDelete(items);
-    setIsDeleteModalOpen(true);
-  };
-
-  // Confirm Delete
-  const handleConfirmDelete = () => {
+  const handleConfirmPermanentDelete = () => {
     const idsToRemove = itemsToDelete.map((i) => i.id);
     setArticles((prev) => prev.filter((a) => !idsToRemove.includes(a.id)));
     setSelectedIds((prev) => prev.filter((id) => !idsToRemove.includes(id)));
-    showToast(`Đã xóa thành công ${itemsToDelete.length} bài viết!`);
+    showToast(`Đã xóa vĩnh viễn ${itemsToDelete.length} bài viết!`);
     setIsDeleteModalOpen(false);
     setItemsToDelete([]);
   };
 
-  // Open Form for Create
+  // Batch Workflow Update
+  const handleBatchUpdateWorkflow = (targetStatus: WorkflowStatus) => {
+    if (selectedIds.length === 0) return;
+    setArticles((prev) =>
+      prev.map((a) => (selectedIds.includes(a.id) ? { ...a, workflow_status: targetStatus, published: targetStatus === 'published' } : a))
+    );
+    showToast(`Đã chuyển ${selectedIds.length} bài viết sang trạng thái ${targetStatus}!`);
+    setSelectedIds([]);
+  };
+
+  // Form Handlers
   const handleOpenCreateForm = () => {
     setEditingArticle(null);
     setViewMode('form');
   };
 
-  // Open Form for Edit
   const handleOpenEditForm = (article: NewsArticle) => {
     setEditingArticle(article);
     setViewMode('form');
   };
 
-  // Save Article (Create or Update)
-  const handleSaveArticle = (formData: Partial<NewsArticle>) => {
+  const handleSaveArticleFromForm = (formData: Partial<NewsArticle>) => {
     if (editingArticle) {
-      // Update existing
       setArticles((prev) =>
         prev.map((a) =>
           a.id === editingArticle.id
-            ? {
-                ...a,
-                ...formData,
-                updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-              }
+            ? { ...a, ...formData, updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19) }
             : a
         )
       );
-      showToast(`Đã cập nhật bài viết "${formData.title}" thành công!`);
+      showToast(`Đã cập nhật bài viết thành công!`);
     } else {
-      // Create new
       const newArticle: NewsArticle = {
         id: `news_${Date.now()}`,
         title: formData.title || 'Bài viết mới',
@@ -205,56 +254,61 @@ export const NewsManager: React.FC = () => {
         category_id: formData.category_id || categories[0]?.id || 'cat_news_tech',
         summary: formData.summary || '',
         content: formData.content || '',
-        image:
-          formData.image ||
-          'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80',
+        image: formData.image || 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80',
         video: formData.video || '',
         tags: formData.tags || [],
         news_related: formData.news_related || [],
         products_related: formData.products_related || [],
         start_time: formData.start_time || new Date().toISOString().substring(0, 16),
         end_time: formData.end_time || '2026-12-31T23:59',
+        workflow_status: formData.workflow_status || 'draft',
+        published: formData.workflow_status === 'published',
         is_hot: formData.is_hot ?? false,
         is_new: formData.is_new ?? true,
         show_in_homepage: formData.show_in_homepage ?? true,
-        published: formData.published ?? true,
         ordering: formData.ordering || 1,
         seo_title: formData.seo_title || formData.title || '',
         seo_keyword: formData.seo_keyword || '',
         seo_description: formData.seo_description || formData.summary || '',
         created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        author: { name: 'Nguyễn Văn Nam' },
+        primary_locale: 'vi',
+        translation_progress: { vi: 'complete', en: 'in_progress' },
+        working_version_number: 1,
       };
-
       setArticles([newArticle, ...articles]);
-      showToast(`Đã thêm bài viết mới "${newArticle.title}"!`);
+      showToast(`Đã thêm bài viết mới thành công!`);
     }
-
     setViewMode('list');
     setEditingArticle(null);
   };
 
-  // Helper to get Category Name
   const getCategoryName = (catId: string) => {
     const found = categories.find((c) => c.id === catId);
     return found ? found.name : 'Khác';
   };
 
+  const getRowPadding = () => {
+    if (tableDensity === 'compact') return 'p-2';
+    if (tableDensity === 'spacious') return 'p-4';
+    return 'p-3';
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
           <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* RENDER FORM VIEW OR LIST VIEW */}
       {viewMode === 'form' ? (
         <NewsFormView
           articleToEdit={editingArticle}
           categories={categories}
-          onSave={handleSaveArticle}
+          onSave={handleSaveArticleFromForm}
           onCancel={() => {
             setViewMode('list');
             setEditingArticle(null);
@@ -265,139 +319,230 @@ export const NewsManager: React.FC = () => {
           {/* HEADER BAR */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
             <div>
-              <div className="flex items-center gap-2">
-                <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-2xl">
                   <Newspaper className="w-5 h-5" />
                 </div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                  Quản lý Tin tức & Bài viết
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
+                  Quản lý Vòng đời Bài viết & Tin tức (Module 02)
                 </h1>
                 <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-                  {articles.length} bài viết
+                  1.532+ tin bài
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Quản lý danh sách tin tức chuyên ngành, bài viết kỹ thuật và thông tin doanh nghiệp CIC Technology.
+                Tạo, biên tập, dịch đa ngôn ngữ, duyệt phân quyền, lên lịch xuất bản và lưu trữ bài viết công khai CIC.
               </p>
             </div>
 
-            {/* Top Right Action Button */}
             <button
               onClick={handleOpenCreateForm}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Thêm tin tức mới</span>
             </button>
           </div>
 
-          {/* TOOLBAR (Search, Filters & Batch Actions) */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-4">
+          {/* VIEW SCOPE NAVIGATION TABS (SECTION 4.1) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-2xs">
+            <div className="flex flex-wrap items-center gap-1">
+              <button
+                onClick={() => { setActiveScopeTab('all'); setActiveSavedView(null); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeScopeTab === 'all'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                Tất cả bài viết ({articles.filter((a) => !a.in_trash).length})
+              </button>
+
+              <button
+                onClick={() => { setActiveScopeTab('my_work'); setActiveSavedView(null); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeScopeTab === 'my_work'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                Việc của tôi
+              </button>
+
+              <button
+                onClick={() => { setActiveScopeTab('pending'); setActiveSavedView(null); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  activeScopeTab === 'pending'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                }`}
+              >
+                <span>Hàng chờ duyệt</span>
+                <span className="px-1.5 py-0.2 bg-amber-500/20 text-xs rounded-full">
+                  {articles.filter((a) => !a.in_trash && a.workflow_status === 'pending').length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => { setActiveScopeTab('scheduled'); setActiveSavedView(null); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeScopeTab === 'scheduled'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40'
+                }`}
+              >
+                Lịch xuất bản ({articles.filter((a) => !a.in_trash && a.workflow_status === 'scheduled').length})
+              </button>
+
+              <button
+                onClick={() => { setActiveScopeTab('trash'); setActiveSavedView(null); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  activeScopeTab === 'trash'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
+                }`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Thùng rác ({articles.filter((a) => a.in_trash).length})</span>
+              </button>
+            </div>
+
+            {/* Column Setting Trigger */}
+            <button
+              onClick={() => setIsColumnModalOpen(true)}
+              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Tùy chỉnh cột & Mật độ</span>
+            </button>
+          </div>
+
+          {/* SAVED VIEWS QUICK PILLS */}
+          <div className="flex items-center gap-2 overflow-x-auto text-xs">
+            <span className="text-slate-400 font-bold flex items-center gap-1 shrink-0">
+              <Bookmark className="w-3.5 h-3.5" /> Chế độ xem nhanh:
+            </span>
+            <button
+              onClick={() => setActiveSavedView(activeSavedView === 'mine' ? null : 'mine')}
+              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
+                activeSavedView === 'mine'
+                  ? 'bg-orange-600 text-white border-orange-600'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-orange-500'
+              }`}
+            >
+              Bài của tôi
+            </button>
+            <button
+              onClick={() => setActiveSavedView(activeSavedView === 'pending' ? null : 'pending')}
+              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
+                activeSavedView === 'pending'
+                  ? 'bg-amber-600 text-white border-amber-600'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-amber-500'
+              }`}
+            >
+              Chờ phê duyệt
+            </button>
+            <button
+              onClick={() => setActiveSavedView(activeSavedView === 'scheduled' ? null : 'scheduled')}
+              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
+                activeSavedView === 'scheduled'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-blue-500'
+              }`}
+            >
+              Đã lên lịch xuất bản
+            </button>
+            <button
+              onClick={() => setActiveSavedView(activeSavedView === 'missing_en' ? null : 'missing_en')}
+              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
+                activeSavedView === 'missing_en'
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-purple-500'
+              }`}
+            >
+              Thiếu bản dịch Tiếng Anh
+            </button>
+          </div>
+
+          {/* SEARCH & FILTERS TOOLBAR */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-              {/* Search input */}
               <div className="md:col-span-5 relative">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm bài viết theo tiêu đề hoặc alias..."
+                  placeholder="Tìm kiếm theo tiêu đề, alias, từ khóa tag..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
                 />
               </div>
 
-              {/* Category filter dropdown */}
-              <div className="md:col-span-4 relative">
+              <div className="md:col-span-4">
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none"
                 >
-                  <option value="ALL">-- Tất cả Danh mục ({categories.length}) --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
+                  <option value="ALL">-- Tất cả Danh mục --</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Status filter dropdown */}
-              <div className="md:col-span-3 flex items-center gap-2">
+              <div className="md:col-span-3">
                 <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+                  value={workflowFilter}
+                  onChange={(e) => setWorkflowFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none"
                 >
-                  <option value="all">Tất cả trạng thái</option>
-                  <option value="published">Đã xuất bản</option>
-                  <option value="hidden">Đang ẩn (Nháp)</option>
+                  <option value="ALL">-- Tất cả Trạng thái Quy trình --</option>
+                  <option value="draft">Bản nháp (Draft)</option>
+                  <option value="pending">Chờ duyệt (Pending)</option>
+                  <option value="returned">Bị trả lại (Returned)</option>
+                  <option value="approved">Đã duyệt (Approved)</option>
+                  <option value="scheduled">Lên lịch (Scheduled)</option>
+                  <option value="published">Đã xuất bản (Published)</option>
+                  <option value="archived">Lưu trữ (Archived)</option>
                 </select>
-
-                <button
-                  onClick={handleRefresh}
-                  className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium cursor-pointer shrink-0"
-                  title="Làm mới danh sách"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
               </div>
             </div>
 
-            {/* Batch Action Toolbar Row */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-              <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
-                <span>Hiển thị: <strong>{filteredArticles.length}</strong> / {articles.length} bài viết</span>
-                {selectedIds.length > 0 && (
-                  <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
-                    Đã chọn: {selectedIds.length} dòng
-                  </span>
-                )}
-              </div>
-
-              {/* Batch Action buttons - Only show when items are selected */}
-              {selectedIds.length > 0 && (
-                <div className="flex items-center flex-wrap gap-2">
+            {/* BULK ACTIONS BAR */}
+            {selectedIds.length > 0 && (
+              <div className="p-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-bold text-orange-800 dark:text-orange-300">
+                  Đã chọn {selectedIds.length} bài viết
+                </span>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleBatchSetPublished(true)}
-                    className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100"
+                    onClick={() => handleBatchUpdateWorkflow('published')}
+                    className="px-3 py-1 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 transition-colors cursor-pointer"
                   >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Xuất bản ({selectedIds.length})</span>
+                    Xuất bản hàng loạt
                   </button>
-
                   <button
-                    onClick={() => handleBatchSetPublished(false)}
-                    className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100"
+                    onClick={() => handleBatchUpdateWorkflow('draft')}
+                    className="px-3 py-1 bg-slate-700 text-white font-bold rounded-lg hover:bg-slate-600 transition-colors cursor-pointer"
                   >
-                    <EyeOff className="w-3.5 h-3.5" />
-                    <span>Ẩn ({selectedIds.length})</span>
-                  </button>
-
-                  <button
-                    onClick={handleTriggerDeleteBatch}
-                    className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-100"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Xóa ({selectedIds.length})</span>
+                    Chuyển về Nháp
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* TABLE LIST */}
+          {/* DATA TABLE */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    {/* Checkbox Header */}
-                    <th className="p-3.5 w-10 text-center">
-                      <button
-                        onClick={handleToggleSelectAll}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      >
+                    <th className="p-3 w-10 text-center">
+                      <button onClick={handleToggleSelectAll} className="cursor-pointer">
                         {selectedIds.length === filteredArticles.length && filteredArticles.length > 0 ? (
                           <CheckSquare className="w-4 h-4 text-orange-600" />
                         ) : (
@@ -405,20 +550,22 @@ export const NewsManager: React.FC = () => {
                         )}
                       </button>
                     </th>
-                    <th className="p-3.5 min-w-[280px]">Tiêu đề bài viết</th>
-                    <th className="p-3.5 w-48">Danh mục</th>
-                    <th className="p-3.5 w-24 text-center">Nổi bật</th>
-                    <th className="p-3.5 w-32 text-center">Trạng thái</th>
-                    <th className="p-3.5 w-40">Ngày tạo</th>
-                    <th className="p-3.5 w-24 text-right">Thao tác</th>
+                    <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
+                    {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
+                    {columnVisibility.localization && <th className="p-3 min-w-[120px]">Ngôn ngữ / Dịch</th>}
+                    {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả & Phụ trách</th>}
+                    {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
+                    {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
+                    {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">Cập nhật</th>}
+                    {columnVisibility.actions && <th className="p-3 w-32 text-right sticky right-0 bg-slate-50 dark:bg-slate-800">Thao tác</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
                   {filteredArticles.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-12 text-center text-slate-400">
+                      <td colSpan={10} className="p-12 text-center text-slate-400">
                         <Newspaper className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                        <p className="font-semibold">Không tìm thấy bài viết tin tức phù hợp.</p>
+                        <p className="font-semibold">Không tìm thấy bài viết tin tức nào.</p>
                       </td>
                     </tr>
                   ) : (
@@ -432,21 +579,18 @@ export const NewsManager: React.FC = () => {
                           }`}
                         >
                           {/* Checkbox */}
-                          <td className="p-3.5 text-center">
-                            <button
-                              onClick={() => handleToggleSelectRow(art.id)}
-                              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                            >
+                          <td className={`p-3 text-center ${getRowPadding()}`}>
+                            <button onClick={() => handleToggleSelectRow(art.id)} className="cursor-pointer">
                               {isSelected ? (
                                 <CheckSquare className="w-4 h-4 text-orange-600" />
                               ) : (
-                                <Square className="w-4 h-4" />
+                                <Square className="w-4 h-4 text-slate-400" />
                               )}
                             </button>
                           </td>
 
-                          {/* Tiêu đề (bold + alias underneath) */}
-                          <td className="p-3.5">
+                          {/* Article Title & Warnings */}
+                          <td className={`p-3 ${getRowPadding()}`}>
                             <div className="flex items-start gap-3">
                               {art.image && (
                                 <img
@@ -455,83 +599,155 @@ export const NewsManager: React.FC = () => {
                                   className="w-12 h-9 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700 mt-0.5"
                                 />
                               )}
-                              <div className="space-y-0.5 max-w-lg">
-                                <p
-                                  onClick={() => handleOpenEditForm(art)}
-                                  className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition-colors leading-snug line-clamp-2"
-                                >
-                                  {art.title}
-                                </p>
-                                <p className="text-[11px] font-mono text-slate-400 truncate">
-                                  /{art.alias}
-                                </p>
+                              <div className="space-y-0.5 max-w-md">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    onClick={() => handleOpenEditForm(art)}
+                                    className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer line-clamp-2 leading-snug"
+                                  >
+                                    {art.title}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] font-mono text-slate-400 truncate">/{art.alias}</p>
+
+                                {/* Quality Warnings */}
+                                {art.quality_warnings && art.quality_warnings.length > 0 && (
+                                  <div className="pt-0.5 flex flex-wrap gap-1">
+                                    {art.quality_warnings.map((w, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="px-2 py-0.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-medium text-[10px] rounded-md flex items-center gap-1"
+                                      >
+                                        <AlertTriangle className="w-3 h-3 text-amber-500" />
+                                        <span>{w}</span>
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </td>
 
-                          {/* Danh mục (Grey Badge) */}
-                          <td className="p-3.5">
-                            <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px] rounded-lg border border-slate-200/80 dark:border-slate-700/80">
-                              {getCategoryName(art.category_id)}
-                            </span>
-                          </td>
+                          {/* Category */}
+                          {columnVisibility.category && (
+                            <td className={`p-3 ${getRowPadding()}`}>
+                              <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px] rounded-lg border border-slate-200 dark:border-slate-700">
+                                {getCategoryName(art.category_id)}
+                              </span>
+                            </td>
+                          )}
 
-                          {/* Nổi bật (Gold Star Icon toggle) */}
-                          <td className="p-3.5 text-center">
-                            <button
-                              onClick={() => handleToggleHot(art.id)}
-                              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                              title={art.is_hot ? 'Bỏ nổi bật' : 'Đánh dấu nổi bật'}
-                            >
-                              <Star
-                                className={`w-4 h-4 mx-auto ${
-                                  art.is_hot
-                                    ? 'fill-amber-400 text-amber-500'
-                                    : 'text-slate-300 dark:text-slate-600'
-                                }`}
-                              />
-                            </button>
-                          </td>
+                          {/* Languages & Progress */}
+                          {columnVisibility.localization && (
+                            <td className={`p-3 ${getRowPadding()}`}>
+                              <div className="flex items-center gap-1.5">
+                                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-400 font-extrabold text-[10px] rounded">
+                                  VI
+                                </span>
+                                <span className={`px-1.5 py-0.5 font-extrabold text-[10px] rounded ${
+                                  art.translation_progress?.en === 'complete' ? 'bg-emerald-100 text-emerald-800' :
+                                  art.translation_progress?.en === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                                  art.translation_progress?.en === 'review' ? 'bg-amber-100 text-amber-800' :
+                                  'bg-slate-200 text-slate-600'
+                                }`}>
+                                  EN ({art.translation_progress?.en || 'missing'})
+                                </span>
+                              </div>
+                            </td>
+                          )}
 
-                          {/* Trạng thái (Direct Toggle Switch) */}
-                          <td className="p-3.5 text-center">
-                            <button
-                              onClick={() => handleTogglePublished(art.id)}
-                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                art.published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
-                              }`}
-                              title={art.published ? 'Bài viết đang xuất bản' : 'Bài viết dạng nháp'}
-                            >
-                              <span
-                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                                  art.published ? 'translate-x-4' : 'translate-x-0'
-                                }`}
-                              />
-                            </button>
-                          </td>
+                          {/* Author & Assignee */}
+                          {columnVisibility.author && (
+                            <td className={`p-3 ${getRowPadding()}`}>
+                              <div className="space-y-0.5 text-xs">
+                                <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                  <User className="w-3 h-3 text-slate-400" />
+                                  <span>{art.author?.name || 'Nguyễn Văn Nam'}</span>
+                                </p>
+                                {art.assignee && (
+                                  <p className="text-[10px] text-slate-400">
+                                    Giao: {art.assignee.name}
+                                  </p>
+                                )}
+                              </div>
+                            </td>
+                          )}
 
-                          {/* Ngày tạo */}
-                          <td className="p-3.5 text-slate-500 font-mono text-[11px]">
-                            {art.created_time}
-                          </td>
+                          {/* Workflow Status Badge */}
+                          {columnVisibility.status && (
+                            <td className={`p-3 text-center ${getRowPadding()}`}>
+                              <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${
+                                art.workflow_status === 'published' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' :
+                                art.workflow_status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400' :
+                                art.workflow_status === 'returned' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' :
+                                art.workflow_status === 'scheduled' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400' :
+                                'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                              }`}>
+                                {art.workflow_status || 'draft'}
+                              </span>
+                            </td>
+                          )}
 
-                          {/* Nút Sửa & Single Delete */}
-                          <td className="p-3.5 text-right space-x-1">
-                            <button
-                              onClick={() => handleOpenEditForm(art)}
-                              className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
-                              title="Chỉnh sửa tin tức"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleTriggerDeleteSingle(art)}
-                              className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
-                              title="Xóa bài viết"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
+                          {/* Publish / Scheduled Time */}
+                          {columnVisibility.publish_time && (
+                            <td className={`p-3 text-slate-500 font-mono text-[11px] ${getRowPadding()}`}>
+                              {art.start_time || art.created_time}
+                            </td>
+                          )}
+
+                          {/* Updated Time */}
+                          {columnVisibility.updated_time && (
+                            <td className={`p-3 text-slate-500 font-mono text-[11px] ${getRowPadding()}`}>
+                              {art.updated_time || art.created_time}
+                            </td>
+                          )}
+
+                          {/* Actions */}
+                          {columnVisibility.actions && (
+                            <td className={`p-3 text-right space-x-1 sticky right-0 bg-white dark:bg-slate-900 ${getRowPadding()}`}>
+                              <button
+                                onClick={() => setPreviewArticle(art)}
+                                className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
+                                title="Xem trước"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={() => setQuickEditArticle(art)}
+                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors cursor-pointer"
+                                title="Sửa nhanh (Quick Edit)"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={() => handleOpenEditForm(art)}
+                                className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
+                                title="Chỉnh sửa toàn bộ"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+
+                              {art.in_trash ? (
+                                <button
+                                  onClick={() => handleRestoreFromTrash(art)}
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                                  title="Khôi phục"
+                                >
+                                  <RotateCcw className="w-4 h-4" />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleMoveToTrash(art)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
+                                  title="Chuyển vào thùng rác"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       );
                     })
@@ -543,7 +759,63 @@ export const NewsManager: React.FC = () => {
         </>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* MODALS & OVERLAYS */}
+      <ArticlePreviewModal
+        isOpen={Boolean(previewArticle)}
+        article={previewArticle}
+        onClose={() => setPreviewArticle(null)}
+      />
+
+      <QuickEditModal
+        isOpen={Boolean(quickEditArticle)}
+        article={quickEditArticle}
+        categories={categories}
+        onClose={() => setQuickEditArticle(null)}
+        onSave={(updated) => {
+          setArticles((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+          showToast(`Đã cập nhật nhanh bài viết "${updated.title}"!`);
+        }}
+      />
+
+      <ColumnSettingModal
+        isOpen={isColumnModalOpen}
+        visibility={columnVisibility}
+        density={tableDensity}
+        onClose={() => setIsColumnModalOpen(false)}
+        onToggleColumn={(key) =>
+          setColumnVisibility((prev) => ({ ...prev, [key]: !prev[key] }))
+        }
+        onChangeDensity={setTableDensity}
+        onReset={() => {
+          setTableDensity('normal');
+          setColumnVisibility({
+            category: true,
+            localization: true,
+            author: true,
+            status: true,
+            publish_time: true,
+            updated_time: true,
+            actions: true,
+          });
+        }}
+      />
+
+      <VersionHistoryDrawer
+        isOpen={Boolean(versionDrawerArticle)}
+        article={versionDrawerArticle}
+        onClose={() => setVersionDrawerArticle(null)}
+        onRestoreVersion={(ver) => {
+          showToast(`Đã khôi phục phiên bản v${ver.version_number}!`);
+          setVersionDrawerArticle(null);
+        }}
+      />
+
+      <ActivityLogDrawer
+        isOpen={Boolean(activityDrawerArticle)}
+        article={activityDrawerArticle}
+        onClose={() => setActivityDrawerArticle(null)}
+      />
+
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         itemsToDelete={itemsToDelete}
@@ -551,7 +823,7 @@ export const NewsManager: React.FC = () => {
           setIsDeleteModalOpen(false);
           setItemsToDelete([]);
         }}
-        onConfirm={handleConfirmDelete}
+        onConfirm={handleConfirmPermanentDelete}
       />
     </div>
   );

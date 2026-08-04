@@ -20,11 +20,21 @@ import {
   RefreshCw,
   Tag,
   CalendarDays,
+  History,
+  SlidersHorizontal,
+  Sliders,
+  ExternalLink,
+  Zap,
+  CheckCircle,
 } from 'lucide-react';
-import { EventItem, EventCategory } from './types';
+import { EventItem, EventCategory, EditorialStatus, EventProgressStatus } from './types';
 import { mockEvents, mockEventCategories } from './mockData';
 import { EventsFormView } from './EventsFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { EventPreviewModal } from './EventPreviewModal';
+import { EventQuickEditModal } from './EventQuickEditModal';
+import { EventActivityLogDrawer } from './EventActivityLogDrawer';
+import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
 
 // Helper to format date string to "dd/mm/yyyy HH:mm"
 function formatEventDateTime(dateStr: string): string {
@@ -52,10 +62,31 @@ export const EventsManager: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<EventItem | null>(null);
 
-  // Filter States
+  // Auxiliary Modals & Drawers States
+  const [previewEvent, setPreviewEvent] = useState<EventItem | null>(null);
+  const [quickEditEvent, setQuickEditEvent] = useState<EventItem | null>(null);
+  const [auditLogEvent, setAuditLogEvent] = useState<EventItem | null>(null);
+  const [isColumnSettingOpen, setIsColumnSettingOpen] = useState(false);
+
+  // Table Column Visibility & Density Config
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
+    title: true,
+    category: true,
+    time_event: true,
+    place: true,
+    editorial_status: true,
+    event_status: true,
+    is_hot: true,
+    ordering: true,
+    created_time: false,
+  });
+  const [density, setDensity] = useState<'normal' | 'compact'>('normal');
+
+  // Filter States (Dual Statuses)
   const [searchTitle, setSearchTitle] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'hidden'>('all');
+  const [editorialFilter, setEditorialFilter] = useState<string>('all');
+  const [eventStatusFilter, setEventStatusFilter] = useState<string>('all');
 
   // Multi-Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -76,21 +107,26 @@ export const EventsManager: React.FC = () => {
   const filteredEvents = events.filter((ev) => {
     const matchesTitle = ev.title.toLowerCase().includes(searchTitle.toLowerCase().trim());
     const matchesCategory = selectedCategory === 'all' || ev.category_id === selectedCategory;
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'published' && ev.published) ||
-      (statusFilter === 'hidden' && !ev.published);
-    return matchesTitle && matchesCategory && matchesStatus;
+    
+    // Dual Status Matching
+    const currentEditorial = ev.editorial_status || (ev.published ? 'published' : 'draft');
+    const currentEventStatus = ev.event_status || 'upcoming';
+
+    const matchesEditorial = editorialFilter === 'all' || currentEditorial === editorialFilter;
+    const matchesEventStatus = eventStatusFilter === 'all' || currentEventStatus === eventStatusFilter;
+
+    return matchesTitle && matchesCategory && matchesEditorial && matchesEventStatus;
   });
 
-  // Toggle Single Row Published status directly from table
+  // Toggle Single Row Editorial Status directly from table
   const handleTogglePublished = (id: string) => {
     setEvents((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const nextState = !item.published;
-          showToast(`Đã ${nextState ? 'xuất bản' : 'ẩn'} sự kiện "${item.title}"`);
-          return { ...item, published: nextState };
+          const nextPublished = !item.published;
+          const nextEditorial: EditorialStatus = nextPublished ? 'published' : 'draft';
+          showToast(`Đã ${nextPublished ? 'xuất bản' : 'chuyển sang bản nháp'} sự kiện "${item.title}"`);
+          return { ...item, published: nextPublished, editorial_status: nextEditorial };
         }
         return item;
       })
@@ -115,19 +151,37 @@ export const EventsManager: React.FC = () => {
   };
 
   // Batch Operations
-  const handleBatchPublish = (targetPublishedState: boolean) => {
+  const handleBatchChangeEditorialStatus = (status: EditorialStatus) => {
     if (selectedIds.length === 0) return;
     setEvents((prev) =>
       prev.map((item) => {
         if (selectedIds.includes(item.id)) {
-          return { ...item, published: targetPublishedState };
+          return {
+            ...item,
+            editorial_status: status,
+            published: status === 'published',
+          };
         }
         return item;
       })
     );
-    showToast(
-      `Đã ${targetPublishedState ? 'chuyển sang Xuất bản' : 'Ẩn'} ${selectedIds.length} sự kiện đã chọn!`
+    showToast(`Đã đổi trạng thái biên tập ${selectedIds.length} sự kiện sang "${status}"`);
+  };
+
+  const handleBatchChangeEventStatus = (status: EventProgressStatus) => {
+    if (selectedIds.length === 0) return;
+    setEvents((prev) =>
+      prev.map((item) => {
+        if (selectedIds.includes(item.id)) {
+          return {
+            ...item,
+            event_status: status,
+          };
+        }
+        return item;
+      })
     );
+    showToast(`Đã đổi trạng thái diễn ra ${selectedIds.length} sự kiện sang "${status}"`);
   };
 
   const handleOpenBatchDelete = () => {
@@ -158,6 +212,24 @@ export const EventsManager: React.FC = () => {
   const handleEdit = (ev: EventItem) => {
     setEventToEdit(ev);
     setIsFormOpen(true);
+  };
+
+  // Quick Edit Save Handler
+  const handleSaveQuickEdit = (updatedFields: Partial<EventItem>) => {
+    if (!quickEditEvent) return;
+    setEvents((prev) =>
+      prev.map((item) =>
+        item.id === quickEditEvent.id
+          ? {
+              ...item,
+              ...updatedFields,
+              updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            }
+          : item
+      )
+    );
+    showToast(`Đã cập nhật nhanh sự kiện "${quickEditEvent.title}"!`);
+    setQuickEditEvent(null);
   };
 
   // Save Form Handler
@@ -192,6 +264,10 @@ export const EventsManager: React.FC = () => {
         specific_time: data.specific_time || '',
         chu_de: data.chu_de || '',
         link_dangky: data.link_dangky || '',
+        organizer: data.organizer || '',
+        speakers: data.speakers || [],
+        editorial_status: data.editorial_status || 'published',
+        event_status: data.event_status || 'upcoming',
         event_related: data.event_related || [],
         news_related: data.news_related || [],
         products_related: data.products_related || [],
@@ -219,6 +295,38 @@ export const EventsManager: React.FC = () => {
     return cat ? cat.name : 'Chưa phân loại';
   };
 
+  // Editorial status badge helper
+  const renderEditorialBadge = (status?: EditorialStatus) => {
+    switch (status) {
+      case 'published':
+        return <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] rounded-lg border border-emerald-500/20">Xuất bản</span>;
+      case 'approved':
+        return <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-[10px] rounded-lg border border-blue-500/20">Đã duyệt</span>;
+      case 'pending_review':
+        return <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[10px] rounded-lg border border-amber-500/20">Chờ duyệt</span>;
+      case 'rejected':
+        return <span className="px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-[10px] rounded-lg border border-red-500/20">Bị trả lại</span>;
+      case 'archived':
+        return <span className="px-2 py-0.5 bg-slate-500/10 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded-lg border border-slate-500/20">Lưu trữ</span>;
+      default:
+        return <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] rounded-lg">Bản nháp</span>;
+    }
+  };
+
+  // Event progress status badge helper
+  const renderEventStatusBadge = (status?: EventProgressStatus) => {
+    switch (status) {
+      case 'ongoing':
+        return <span className="px-2 py-0.5 bg-emerald-600 text-white font-bold text-[10px] rounded-lg shadow-xs animate-pulse">Đang diễn ra</span>;
+      case 'ended':
+        return <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded-lg">Kết thúc</span>;
+      case 'cancelled':
+        return <span className="px-2 py-0.5 bg-red-600 text-white font-bold text-[10px] rounded-lg">Đã hủy</span>;
+      default:
+        return <span className="px-2 py-0.5 bg-orange-600 text-white font-bold text-[10px] rounded-lg">Sắp diễn ra</span>;
+    }
+  };
+
   // Render Form View if opened
   if (isFormOpen) {
     return (
@@ -239,7 +347,7 @@ export const EventsManager: React.FC = () => {
       {/* TOAST NOTIFICATION */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-5">
-          <Sparkles className="w-4 h-4 text-purple-400 dark:text-purple-600" />
+          <Sparkles className="w-4 h-4 text-orange-400 dark:text-orange-600" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -250,6 +358,55 @@ export const EventsManager: React.FC = () => {
         itemsToDelete={itemsToDelete}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
+      />
+
+      {/* MODAL PREVIEW */}
+      <EventPreviewModal
+        isOpen={!!previewEvent}
+        event={previewEvent}
+        categories={categories}
+        onClose={() => setPreviewEvent(null)}
+      />
+
+      {/* MODAL QUICK EDIT */}
+      <EventQuickEditModal
+        isOpen={!!quickEditEvent}
+        event={quickEditEvent}
+        categories={categories}
+        onSave={handleSaveQuickEdit}
+        onClose={() => setQuickEditEvent(null)}
+      />
+
+      {/* DRAWER ACTIVITY LOG */}
+      <EventActivityLogDrawer
+        isOpen={!!auditLogEvent}
+        event={auditLogEvent}
+        onClose={() => setAuditLogEvent(null)}
+      />
+
+      {/* MODAL COLUMN SETTINGS */}
+      <ColumnSettingModal
+        isOpen={isColumnSettingOpen}
+        columns={columnVisibility}
+        density={density}
+        onToggleColumn={(col) =>
+          setColumnVisibility((prev) => ({ ...prev, [col]: !prev[col] }))
+        }
+        onChangeDensity={setDensity}
+        onReset={() =>
+          setColumnVisibility({
+            title: true,
+            category: true,
+            time_event: true,
+            place: true,
+            editorial_status: true,
+            event_status: true,
+            is_hot: true,
+            ordering: true,
+            created_time: false,
+          })
+        }
+        onClose={() => setIsColumnSettingOpen(false)}
       />
 
       {/* HEADER CARD */}
@@ -267,26 +424,36 @@ export const EventsManager: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Quản lý lịch trình sự kiện, hội thảo chuyên đề, khóa đào tạo và webinar trực tuyến của CIC Technology.
+            Quản lý vòng đời sự kiện, hội thảo chuyên đề, khóa đào tạo và webinar trực tuyến của CIC với 2 tầng trạng thái độc lập.
           </p>
         </div>
 
         {/* Top Right Action Button */}
-        <button
-          type="button"
-          onClick={handleCreateNew}
-          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm sự kiện mới</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsColumnSettingOpen(true)}
+            className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            title="Cấu hình hiển thị cột & Mật độ"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleCreateNew}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Thêm sự kiện mới</span>
+          </button>
+        </div>
       </div>
 
-      {/* TOOLBAR (Search, Filters & Batch Actions) */}
+      {/* TOOLBAR (Search, Filters & Dual Status Controls) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           {/* Search input */}
-          <div className="md:col-span-5 relative">
+          <div className="md:col-span-4 relative">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
@@ -298,7 +465,7 @@ export const EventsManager: React.FC = () => {
           </div>
 
           {/* Category filter dropdown */}
-          <div className="md:col-span-4 relative">
+          <div className="md:col-span-3 relative">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -313,16 +480,35 @@ export const EventsManager: React.FC = () => {
             </select>
           </div>
 
-          {/* Status filter dropdown */}
-          <div className="md:col-span-3 flex items-center gap-2">
+          {/* Dual Status Filter 1: Editorial */}
+          <div className="md:col-span-2">
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              value={editorialFilter}
+              onChange={(e) => setEditorialFilter(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">Tất cả trạng thái</option>
+              <option value="all">TT Biên tập: Tất cả</option>
+              <option value="draft">Bản nháp</option>
+              <option value="pending_review">Chờ duyệt</option>
+              <option value="approved">Đã duyệt</option>
               <option value="published">Đã xuất bản</option>
-              <option value="hidden">Đang ẩn (Nháp)</option>
+              <option value="rejected">Bị trả lại</option>
+              <option value="archived">Lưu trữ</option>
+            </select>
+          </div>
+
+          {/* Dual Status Filter 2: Event Progress */}
+          <div className="md:col-span-3 flex items-center gap-2">
+            <select
+              value={eventStatusFilter}
+              onChange={(e) => setEventStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+            >
+              <option value="all">TT Diễn ra: Tất cả</option>
+              <option value="upcoming">Sắp diễn ra</option>
+              <option value="ongoing">Đang diễn ra</option>
+              <option value="ended">Đã kết thúc</option>
+              <option value="cancelled">Đã hủy</option>
             </select>
 
             <button
@@ -352,7 +538,7 @@ export const EventsManager: React.FC = () => {
             <div className="flex items-center flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => handleBatchPublish(true)}
+                onClick={() => handleBatchChangeEditorialStatus('published')}
                 className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100"
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -361,11 +547,11 @@ export const EventsManager: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => handleBatchPublish(false)}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100"
+                onClick={() => handleBatchChangeEditorialStatus('archived')}
+                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
               >
                 <EyeOff className="w-3.5 h-3.5" />
-                <span>Ẩn ({selectedIds.length})</span>
+                <span>Lưu trữ ({selectedIds.length})</span>
               </button>
 
               <button
@@ -400,18 +586,20 @@ export const EventsManager: React.FC = () => {
                     )}
                   </button>
                 </th>
-                <th className="py-3 px-4 min-w-[280px]">Tiêu đề sự kiện</th>
-                <th className="py-3 px-4 w-40">Danh mục</th>
-                <th className="py-3 px-4 w-40">Thời gian sự kiện</th>
-                <th className="py-3 px-4 min-w-[200px]">Địa điểm</th>
-                <th className="py-3 px-4 w-28 text-center">Trạng thái</th>
-                <th className="py-3 px-4 w-20 text-center">Thao tác</th>
+                {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">Tiêu đề sự kiện</th>}
+                {columnVisibility.category && <th className="py-3 px-4 w-36">Danh mục</th>}
+                {columnVisibility.time_event && <th className="py-3 px-4 w-40">Thời gian sự kiện</th>}
+                {columnVisibility.place && <th className="py-3 px-4 min-w-[180px]">Địa điểm</th>}
+                {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">TT Biên tập</th>}
+                {columnVisibility.event_status && <th className="py-3 px-4 w-32 text-center">TT Diễn ra</th>}
+                <th className="py-3 px-4 w-28 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredEvents.length > 0 ? (
                 filteredEvents.map((ev) => {
                   const isSelected = selectedIds.includes(ev.id);
+                  const isCompact = density === 'compact';
                   return (
                     <tr
                       key={ev.id}
@@ -422,7 +610,7 @@ export const EventsManager: React.FC = () => {
                       }`}
                     >
                       {/* Checkbox */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
                         <button
                           type="button"
                           onClick={() => handleSelectOne(ev.id)}
@@ -436,86 +624,114 @@ export const EventsManager: React.FC = () => {
                         </button>
                       </td>
 
-                      {/* Tiêu đề (bold text + image preview thumbnail) */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-start gap-3">
-                          <img
-                            src={ev.image}
-                            alt=""
-                            className="w-12 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 mt-0.5"
-                          />
-                          <div className="space-y-1">
-                            <h4
-                              onClick={() => handleEdit(ev)}
-                              className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer line-clamp-2 leading-snug"
-                            >
-                              {ev.title}
-                            </h4>
+                      {/* Tiêu đề */}
+                      {columnVisibility.title && (
+                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4`}>
+                          <div className="flex items-start gap-3">
+                            <img
+                              src={ev.image}
+                              alt=""
+                              className="w-12 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 mt-0.5"
+                            />
+                            <div className="space-y-1">
+                              <h4
+                                onClick={() => handleEdit(ev)}
+                                className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer line-clamp-2 leading-snug"
+                              >
+                                {ev.title}
+                              </h4>
 
-                            <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
-                              <span>/{ev.alias}</span>
-                              {ev.is_hot && (
-                                <span className="px-1.5 py-0.2 bg-amber-500/10 text-amber-500 font-bold rounded flex items-center gap-0.5">
-                                  <Star className="w-3 h-3 fill-amber-500" /> Hot
-                                </span>
-                              )}
+                              <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono flex-wrap">
+                                <span>/{ev.alias}</span>
+                                {ev.is_hot && (
+                                  <span className="px-1.5 py-0.2 bg-amber-500/10 text-amber-500 font-bold rounded flex items-center gap-0.5">
+                                    <Star className="w-3 h-3 fill-amber-500" /> Hot
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
+                      )}
 
-                      {/* Danh mục (Badge xám/xanh) */}
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 inline-block">
-                          {getCategoryBadge(ev.category_id)}
-                        </span>
-                      </td>
+                      {/* Danh mục */}
+                      {columnVisibility.category && (
+                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4`}>
+                          <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 inline-block">
+                            {getCategoryBadge(ev.category_id)}
+                          </span>
+                        </td>
+                      )}
 
-                      {/* Thời gian sự kiện (formatted "dd/mm/yyyy HH:mm") */}
-                      <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold">
-                        <div className="flex items-center gap-1.5">
-                          <CalendarDays className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
-                          <span>{formatEventDateTime(ev.time_event)}</span>
-                        </div>
-                      </td>
+                      {/* Thời gian sự kiện */}
+                      {columnVisibility.time_event && (
+                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold`}>
+                          <div className="flex items-center gap-1.5">
+                            <CalendarDays className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+                            <span>{formatEventDateTime(ev.time_event)}</span>
+                          </div>
+                        </td>
+                      )}
 
-                      {/* Địa điểm (cắt bớt + dấu "..." nếu dài, hiện tooltip đầy đủ khi hover) */}
-                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
-                        <div
-                          className="flex items-start gap-1.5 max-w-[220px]"
-                          title={ev.place || 'Chưa cập nhật địa điểm'}
-                        >
-                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                          <span className="truncate">{ev.place ? ev.place : '—'}</span>
-                        </div>
-                      </td>
+                      {/* Địa điểm */}
+                      {columnVisibility.place && (
+                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-slate-600 dark:text-slate-400`}>
+                          <div
+                            className="flex items-start gap-1.5 max-w-[200px]"
+                            title={ev.place || 'Chưa cập nhật địa điểm'}
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                            <span className="truncate">{ev.place ? ev.place : '—'}</span>
+                          </div>
+                        </td>
+                      )}
 
-                      {/* Trạng thái (Published, công tắc bật/tắt trực tiếp) */}
-                      <td className="py-3.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleTogglePublished(ev.id)}
-                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            ev.published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
-                          }`}
-                          title={ev.published ? 'Đang xuất bản (Click để ẩn)' : 'Đang ẩn (Click để xuất bản)'}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                              ev.published ? 'translate-x-4' : 'translate-x-0'
-                            }`}
-                          />
-                        </button>
-                      </td>
+                      {/* Editorial Status */}
+                      {columnVisibility.editorial_status && (
+                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
+                          {renderEditorialBadge(ev.editorial_status || (ev.published ? 'published' : 'draft'))}
+                        </td>
+                      )}
 
-                      {/* Action buttons (Sửa / Xóa) */}
-                      <td className="py-3.5 px-4 text-center">
+                      {/* Event Progress Status */}
+                      {columnVisibility.event_status && (
+                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
+                          {renderEventStatusBadge(ev.event_status || 'upcoming')}
+                        </td>
+                      )}
+
+                      {/* Action buttons (Preview, QuickEdit, History, FullEdit, Delete) */}
+                      <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
                         <div className="flex items-center justify-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewEvent(ev)}
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors cursor-pointer"
+                            title="Xem trước giao diện sự kiện"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickEditEvent(ev)}
+                            className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer"
+                            title="Sửa nhanh"
+                          >
+                            <Zap className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAuditLogEvent(ev)}
+                            className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
+                            title="Nhật ký thay đổi"
+                          >
+                            <History className="w-4 h-4" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleEdit(ev)}
                             className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition-colors cursor-pointer"
-                            title="Chỉnh sửa sự kiện"
+                            title="Chỉnh sửa chi tiết"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
@@ -534,7 +750,7 @@ export const EventsManager: React.FC = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50 text-slate-400" />
                     <p className="text-xs font-medium">Không tìm thấy sự kiện nào phù hợp.</p>
                   </td>
@@ -569,3 +785,4 @@ export const EventsManager: React.FC = () => {
     </div>
   );
 };
+

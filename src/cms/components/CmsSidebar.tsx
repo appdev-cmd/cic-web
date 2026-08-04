@@ -42,6 +42,11 @@ import {
   ChevronLeft,
   X,
   Search,
+  RotateCcw,
+  Inbox,
+  Star,
+  Pin,
+  PinOff,
 } from 'lucide-react';
 import { CmsMenuGroup, CmsMenuItem } from '../types';
 import { cmsMenuGroupsMock } from '../data/mockCmsData';
@@ -94,6 +99,8 @@ const renderIcon = (iconName: string, className: string = 'w-4 h-4') => {
     case 'ListOrdered': return <ListOrdered className={className} />;
     case 'Menu': return <Menu className={className} />;
     case 'Command': return <Command className={className} />;
+    case 'RotateCcw': return <RotateCcw className={className} />;
+    case 'Inbox': return <Inbox className={className} />;
     default: return <FileText className={className} />;
   }
 };
@@ -110,16 +117,56 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([
     'grp_tong_quan',
     'grp_noi_dung',
-    'grp_san_pham',
-    'grp_dia_diem',
+    'grp_danh_muc_kinh_doanh',
+    'grp_trinh_bay_website',
+    'grp_media',
+    'grp_khach_hang',
+    'grp_ban_dia_hoa',
+    'grp_quan_tri',
   ]);
+
+  // Nested sub-item expand state
+  const [expandedSubItemIds, setExpandedSubItemIds] = useState<string[]>([
+    'menu_products_group',
+    'menu_banners_slideshow',
+  ]);
+
+  // Pinned/Favorite item IDs (Max 6)
+  const [pinnedItemIds, setPinnedItemIds] = useState<string[]>([
+    'menu_dashboard',
+    'menu_news',
+    'menu_products_group',
+    'menu_contact_messages',
+  ]);
+
   const [searchKeyword, setSearchKeyword] = useState('');
 
   const toggleGroup = (groupId: string) => {
-    if (isCollapsed) return; // Ignore accordion toggle if collapsed
+    if (isCollapsed) return;
     setExpandedGroupIds((prev) =>
       prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
     );
+  };
+
+  const toggleSubItem = (itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCollapsed) return;
+    setExpandedSubItemIds((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+    );
+  };
+
+  const togglePinItem = (itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPinnedItemIds((prev) => {
+      if (prev.includes(itemId)) {
+        return prev.filter((id) => id !== itemId);
+      }
+      if (prev.length >= 6) {
+        return prev; // limit max 6 pinned
+      }
+      return [...prev, itemId];
+    });
   };
 
   const getBadgeStyle = (variant?: 'danger' | 'warning' | 'info') => {
@@ -133,6 +180,16 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
     }
   };
+
+  // Find all items across groups for quick lookup in pinned section
+  const allItems: CmsMenuItem[] = [];
+  menuGroups.forEach((g) => {
+    g.items.forEach((item) => {
+      allItems.push(item);
+    });
+  });
+
+  const pinnedItems = allItems.filter((i) => pinnedItemIds.includes(i.id));
 
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between select-none">
@@ -150,22 +207,22 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
             />
           </div>
         ) : (
-          <div className="mx-auto text-xs font-bold text-orange-600 dark:text-orange-400">
+          <div className="mx-auto text-[11px] font-bold text-orange-600 dark:text-orange-400 tracking-wider">
             MENU
           </div>
         )}
 
         <button
           onClick={onToggleCollapse}
-          className="hidden lg:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          title={isCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+          className="hidden lg:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          title={isCollapsed ? 'Mở rộng sidebar (248px)' : 'Thu gọn sidebar (72px)'}
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
 
         <button
           onClick={onCloseMobile}
-          className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white"
+          className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -173,12 +230,100 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
 
       {/* Navigation Links Area */}
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4 custom-scrollbar">
+        {/* FAVORITE / PINNED SECTION */}
+        {!searchKeyword && pinnedItems.length > 0 && (
+          <div className="space-y-1 pb-2 border-b border-slate-200/80 dark:border-slate-800/80">
+            {!isCollapsed ? (
+              <div className="px-2 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Star className="w-3 h-3 fill-orange-500 text-orange-500" />
+                  MỤC YÊU THÍCH ({pinnedItems.length}/6)
+                </span>
+              </div>
+            ) : (
+              <div className="w-full text-center py-1">
+                <Star className="w-3.5 h-3.5 mx-auto text-orange-500 fill-orange-500" />
+              </div>
+            )}
+
+            <div className="space-y-0.5">
+              {pinnedItems.map((item) => {
+                const isActive = activePath === item.path;
+                return (
+                  <div key={`pinned_${item.id}`} className="relative group">
+                    <div
+                      className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2.5 ${
+                        isActive
+                          ? 'bg-orange-600 text-white shadow-xs font-semibold'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
+                      } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (item.path) {
+                            onSelectMenu(item.path, item.title);
+                            if (isMobileOpen) onCloseMobile();
+                          }
+                        }}
+                        className="flex-1 flex items-center gap-2.5 text-left min-w-0 bg-transparent border-0 p-0 cursor-pointer"
+                      >
+                        <span className={isActive ? 'text-white' : 'text-orange-500 dark:text-orange-400'}>
+                          {renderIcon(item.iconName, 'w-4 h-4')}
+                        </span>
+
+                        {!isCollapsed && (
+                          <span className="truncate flex-1 text-left">{item.title}</span>
+                        )}
+
+                        {!isCollapsed && item.badgeCount !== undefined && (
+                          <span
+                            className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full border ${getBadgeStyle(
+                              item.badgeVariant
+                            )} ${isActive ? 'bg-white/20 text-white border-transparent' : ''}`}
+                          >
+                            {item.badgeCount}
+                          </span>
+                        )}
+                      </button>
+
+                      {!isCollapsed && (
+                        <button
+                          type="button"
+                          onClick={(e) => togglePinItem(item.id, e)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 transition-opacity cursor-pointer shrink-0"
+                          title="Bỏ ghim"
+                        >
+                          <PinOff className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Tooltip when Collapsed */}
+                    {isCollapsed && (
+                      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-medium rounded shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 border border-slate-700">
+                        {item.title} (Yêu thích)
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* GROUPS LIST */}
         {menuGroups.map((group) => {
-          const hasMultipleItems = group.items.length > 1;
           const isGroupOpen = expandedGroupIds.includes(group.id);
-          const filteredItems = group.items.filter((item) =>
-            item.title.toLowerCase().includes(searchKeyword.toLowerCase())
-          );
+
+          // Filter items based on search keyword (parent or sub-item match)
+          const filteredItems = group.items.filter((item) => {
+            if (!searchKeyword) return true;
+            const kw = searchKeyword.toLowerCase();
+            const parentMatch = item.title.toLowerCase().includes(kw);
+            const childMatch = item.children?.some((child) => child.title.toLowerCase().includes(kw));
+            return parentMatch || childMatch;
+          });
 
           if (searchKeyword && filteredItems.length === 0) return null;
 
@@ -186,80 +331,175 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
             <div key={group.id} className="space-y-1">
               {/* Group Title Header */}
               {!isCollapsed ? (
-                hasMultipleItems ? (
-                  <button
-                    onClick={() => toggleGroup(group.id)}
-                    className="w-full px-2 py-1 text-left text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
-                  >
-                    <span className="truncate">{group.groupTitle}</span>
-                    <ChevronDown
-                      className={`w-3 h-3 transition-transform duration-200 ${
-                        isGroupOpen ? 'transform rotate-0' : 'transform -rotate-90'
-                      }`}
-                    />
-                  </button>
-                ) : (
-                  <div className="px-2 py-1 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
-                    {group.groupTitle}
-                  </div>
-                )
+                <button
+                  onClick={() => toggleGroup(group.id)}
+                  className="w-full px-2 py-1 text-left text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
+                >
+                  <span className="truncate">{group.groupTitle}</span>
+                  <ChevronDown
+                    className={`w-3 h-3 transition-transform duration-200 ${
+                      isGroupOpen ? 'transform rotate-0' : 'transform -rotate-90'
+                    }`}
+                  />
+                </button>
               ) : (
                 <div className="w-full border-t border-slate-200 dark:border-slate-800 my-2" />
               )}
 
               {/* Group Items */}
-              {(isGroupOpen || !hasMultipleItems || isCollapsed || searchKeyword) && (
+              {(isGroupOpen || isCollapsed || searchKeyword) && (
                 <div className="space-y-0.5">
                   {(searchKeyword ? filteredItems : group.items).map((item) => {
-                    const isActive = activePath === item.path;
+                    const hasChildren = !!item.children && item.children.length > 0;
+                    const isSubExpanded = expandedSubItemIds.includes(item.id) || !!searchKeyword;
+                    const isPinned = pinnedItemIds.includes(item.id);
+
+                    // Check if parent or any child is active
+                    const isParentActive = activePath === item.path;
+                    const isChildActive = item.children?.some((child) => activePath === child.path);
+                    const isActive = isParentActive || isChildActive;
 
                     return (
                       <div key={item.id} className="relative group">
-                        <button
-                          onClick={() => {
-                            if (item.path) {
-                              onSelectMenu(item.path, item.title);
-                              if (isMobileOpen) onCloseMobile();
-                            }
-                          }}
-                          className={`w-full px-2.5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-2.5 cursor-pointer ${
+                        <div
+                          className={`w-full px-2.5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-2.5 ${
                             isActive
                               ? 'bg-orange-600 text-white shadow-xs font-semibold'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
+                              : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
                           } ${isCollapsed ? 'justify-center px-0' : ''}`}
                         >
-                          <span
-                            className={
-                              isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'
-                            }
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (hasChildren && !isCollapsed) {
+                                setExpandedSubItemIds((prev) =>
+                                  prev.includes(item.id)
+                                    ? prev.filter((id) => id !== item.id)
+                                    : [...prev, item.id]
+                                );
+                              }
+                              if (item.path) {
+                                onSelectMenu(item.path, item.title);
+                                if (isMobileOpen) onCloseMobile();
+                              }
+                            }}
+                            className="flex-1 flex items-center gap-2.5 text-left min-w-0 bg-transparent border-0 p-0 cursor-pointer"
                           >
-                            {renderIcon(item.iconName, 'w-4 h-4')}
-                          </span>
-
-                          {!isCollapsed && (
-                            <span className="truncate flex-1 text-left">{item.title}</span>
-                          )}
-
-                          {!isCollapsed && item.badgeCount !== undefined && (
-                            <span
-                              className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full border ${getBadgeStyle(
-                                item.badgeVariant
-                              )} ${isActive ? 'bg-white/20 text-white border-transparent' : ''}`}
-                            >
-                              {item.badgeCount}
+                            <span className={isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}>
+                              {renderIcon(item.iconName, 'w-4 h-4')}
                             </span>
-                          )}
-                        </button>
 
-                        {/* Hover Tooltip when Collapsed */}
-                        {isCollapsed && (
-                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-medium rounded shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 border border-slate-700">
-                            {item.title}
-                            {item.badgeCount && (
-                              <span className="ml-1.5 text-orange-400 font-bold">
-                                ({item.badgeCount})
+                            {!isCollapsed && (
+                              <span className="truncate flex-1 text-left">{item.title}</span>
+                            )}
+
+                            {!isCollapsed && item.badgeCount !== undefined && (
+                              <span
+                                className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full border ${getBadgeStyle(
+                                  item.badgeVariant
+                                )} ${isActive ? 'bg-white/20 text-white border-transparent' : ''}`}
+                              >
+                                {item.badgeCount}
                               </span>
                             )}
+                          </button>
+
+                          {/* Pin Toggle Button */}
+                          {!isCollapsed && (
+                            <button
+                              type="button"
+                              onClick={(e) => togglePinItem(item.id, e)}
+                              className={`p-0.5 transition-opacity cursor-pointer shrink-0 ${
+                                isPinned
+                                  ? 'text-orange-300 opacity-100'
+                                  : 'opacity-0 group-hover:opacity-100 text-slate-400 hover:text-orange-500'
+                              }`}
+                              title={isPinned ? 'Bỏ ghim khỏi Mục yêu thích' : 'Ghim vào Mục yêu thích'}
+                            >
+                              <Pin className={`w-3 h-3 ${isPinned ? 'fill-orange-400 text-orange-400' : ''}`} />
+                            </button>
+                          )}
+
+                          {/* Nested Sub-Menu Toggle Arrow */}
+                          {!isCollapsed && hasChildren && (
+                            <button
+                              type="button"
+                              onClick={(e) => toggleSubItem(item.id, e)}
+                              className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                              title={isSubExpanded ? 'Thu gọn' : 'Mở rộng'}
+                            >
+                              <ChevronDown
+                                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                  isSubExpanded ? 'rotate-180' : 'rotate-0'
+                                }`}
+                              />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Collapsed Tooltip or Flyout Submenu */}
+                        {isCollapsed && (
+                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-800 text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50 border border-slate-700 min-w-40 space-y-1">
+                            <div className="font-bold border-b border-slate-700 pb-1 flex items-center justify-between">
+                              <span>{item.title}</span>
+                              {item.badgeCount && (
+                                <span className="text-orange-400 font-bold ml-2">({item.badgeCount})</span>
+                              )}
+                            </div>
+                            {hasChildren && (
+                              <div className="pt-1 space-y-1">
+                                {item.children?.map((child) => (
+                                  <div
+                                    key={child.id}
+                                    onClick={() => {
+                                      onSelectMenu(child.path, child.title);
+                                      if (isMobileOpen) onCloseMobile();
+                                    }}
+                                    className={`px-2 py-1 rounded text-[11px] cursor-pointer hover:bg-orange-600 hover:text-white ${
+                                      activePath === child.path ? 'text-orange-400 font-bold' : 'text-slate-300'
+                                    }`}
+                                  >
+                                    • {child.title}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Expanded Sub-items List */}
+                        {!isCollapsed && hasChildren && isSubExpanded && (
+                          <div className="ml-6 pl-2.5 border-l border-slate-200 dark:border-slate-800 space-y-1 my-1">
+                            {item.children
+                              ?.filter(
+                                (child) =>
+                                  !searchKeyword ||
+                                  child.title.toLowerCase().includes(searchKeyword.toLowerCase())
+                              )
+                              .map((child) => {
+                                const isSubActive = activePath === child.path;
+                                return (
+                                  <button
+                                    key={child.id}
+                                    onClick={() => {
+                                      onSelectMenu(child.path, child.title);
+                                      if (isMobileOpen) onCloseMobile();
+                                    }}
+                                    className={`w-full px-2 py-1.5 rounded-md text-xs transition-all flex items-center justify-between cursor-pointer ${
+                                      isSubActive
+                                        ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold border-l-2 border-orange-500 pl-2'
+                                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                                    }`}
+                                  >
+                                    <span className="truncate">{child.title}</span>
+                                    {child.badgeCount && (
+                                      <span className="px-1.5 py-0.2 bg-orange-500/10 text-orange-600 text-[10px] font-bold rounded">
+                                        {child.badgeCount}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
                           </div>
                         )}
                       </div>
@@ -273,10 +513,17 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
       </div>
 
       {/* Sidebar Footer Info */}
-      {!isCollapsed && (
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
-          <span>Tài khoản: Super Admin</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-500" title="Trạng thái hệ thống online" />
+      {!isCollapsed ? (
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Super Admin</span>
+            <span className="text-[10px] text-slate-400">Hệ thống CMS TO-BE</span>
+          </div>
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title="Trạng thái hệ thống online" />
+        </div>
+      ) : (
+        <div className="p-2 border-t border-slate-200 dark:border-slate-800 flex justify-center">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title="Online" />
         </div>
       )}
     </div>
@@ -308,3 +555,4 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     </>
   );
 };
+

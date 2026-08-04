@@ -43,6 +43,15 @@ export const mockEvents: EventItem[] = [
     specific_time: '08:00 - 17:00 ngày 20/08/2026',
     chu_de: 'BIM & Digital Transformation in Construction 2026',
     link_dangky: 'https://cic.com.vn/su-kien/dang-ky-hoi-thao-bim-2026',
+    organizer: 'Công ty Cổ phần Công nghệ và Tư vấn CIC (CIC Technology)',
+    speakers: [
+      { id: 'spk_1', name: 'TS. Nguyễn Văn Hùng', title: 'Viện trưởng Viện Kinh tế Xây dựng', company: 'Bộ Xây dựng' },
+      { id: 'spk_2', name: 'ThS. Trần Hoàng Nam', title: 'GĐ Trung tâm Giải pháp Phần mềm Kết cấu', company: 'CIC Technology' },
+    ],
+    registration_count: 342,
+    max_seats: 500,
+    editorial_status: 'published',
+    event_status: 'upcoming',
     event_related: ['ev_1002'],
     news_related: ['news_1001', 'news_1002'],
     products_related: ['prod_sap2000', 'prod_cubicost'],
@@ -54,8 +63,33 @@ export const mockEvents: EventItem[] = [
     seo_title: 'Hội thảo Chuyển đổi số & BIM 2026 - Công ty CIC Technology',
     seo_keyword: 'Hoi thao BIM 2026, Chuyen doi so xay dung, CIC conference, SAP2000 v25',
     seo_description: 'Tham gia Diễn đàn Chuyển đổi số và Ứng dụng BIM 2026 tại Hà Nội do CIC tổ chức với hơn 500 chuyên gia.',
+    created_by: 'Nguyễn Văn Minh (Editor)',
     created_time: '2026-07-28 09:30:00',
     updated_time: '2026-07-29 14:15:00',
+    activity_logs: [
+      {
+        id: 'log_ev_1',
+        user: 'Lê Hoàng Nam',
+        role: 'Content Manager',
+        action: 'Xuất bản sự kiện & Đặt lịch quảng bá',
+        previous_editorial_status: 'approved',
+        new_editorial_status: 'published',
+        previous_event_status: 'upcoming',
+        new_event_status: 'upcoming',
+        timestamp: '2026-07-29 14:15:00',
+        note: 'Kiểm tra thông tin địa điểm và danh sách diễn giả hoàn tất.'
+      },
+      {
+        id: 'log_ev_2',
+        user: 'Nguyễn Văn Minh',
+        role: 'Editor',
+        action: 'Tạo mới bản nháp sự kiện',
+        previous_editorial_status: 'draft',
+        new_editorial_status: 'pending_review',
+        timestamp: '2026-07-28 09:30:00',
+        note: 'Gửi duyệt nội dung hội thảo BIM 2026.'
+      }
+    ]
   },
   {
     id: 'ev_1002',
@@ -71,6 +105,14 @@ export const mockEvents: EventItem[] = [
     specific_time: '08:30 - 16:30 các ngày thứ 6, thứ 7 và Chủ Nhật',
     chu_de: 'Structural Nonlinear Analysis Training',
     link_dangky: 'https://cic.com.vn/dao-tao/khoa-hoc-sap2000-etabs-2026',
+    organizer: 'Trung tâm Đào tạo Kỹ thuật CIC',
+    speakers: [
+      { id: 'spk_3', name: 'KS. Phạm Quốc Bảo', title: 'Chuyên gia Kỹ thuật Kết cấu Cao cấp', company: 'CIC Technology' }
+    ],
+    registration_count: 28,
+    max_seats: 40,
+    editorial_status: 'published',
+    event_status: 'upcoming',
     event_related: ['ev_1001'],
     news_related: ['news_1001'],
     products_related: ['prod_sap2000', 'prod_etabs'],
@@ -82,7 +124,19 @@ export const mockEvents: EventItem[] = [
     seo_title: 'Khóa đào tạo tính toán kết cấu phi tuyến SAP2000 & ETABS - CIC',
     seo_keyword: 'dao tao SAP2000, ETABS v21, ky su ket cau, TCVN 5574',
     seo_description: 'Khóa huấn luyện chuyên sâu thực hành phân tích kết cấu công trình chịu tải trọng động đất cùng chuyên gia CIC.',
+    created_by: 'Nguyễn Văn Minh (Editor)',
     created_time: '2026-07-25 11:20:00',
+    activity_logs: [
+      {
+        id: 'log_ev_3',
+        user: 'Lê Hoàng Nam',
+        role: 'Content Manager',
+        action: 'Duyệt & Xuất bản khóa đào tạo',
+        previous_editorial_status: 'pending_review',
+        new_editorial_status: 'published',
+        timestamp: '2026-07-25 11:20:00',
+      }
+    ]
   },
   {
     id: 'ev_1003',
@@ -98,6 +152,14 @@ export const mockEvents: EventItem[] = [
     specific_time: '14:00 - 16:30 Chiều Thứ Ba',
     chu_de: 'Automated Quantity Takeoff with Cubicost',
     link_dangky: 'https://zoom.us/webinar/register/cic-cubicost-2026',
+    organizer: 'Phòng Giải pháp Dự toán & Bóc tách Khối lượng CIC',
+    speakers: [
+      { id: 'spk_4', name: 'Đặng Mai Phương', title: 'Trưởng nhóm Tư vấn Cubicost', company: 'CIC Technology' }
+    ],
+    registration_count: 185,
+    max_seats: 300,
+    editorial_status: 'published',
+    event_status: 'upcoming',
     event_related: [],
     news_related: [],
     products_related: ['prod_cubicost'],
@@ -109,6 +171,18 @@ export const mockEvents: EventItem[] = [
     seo_title: 'Webinar Tự động hóa bóc tách khối lượng công trình Cubicost',
     seo_keyword: 'Webinar Cubicost, boc tach khoi luong, du toan xay dung, CIC Zoom',
     seo_description: 'Đăng ký tham dự Webinar miễn phí tự động hóa bóc tách khối lượng bê tông cốt thép với Cubicost.',
+    created_by: 'Trần Thị Thu (Marketing)',
     created_time: '2026-07-15 16:45:00',
+    activity_logs: [
+      {
+        id: 'log_ev_4',
+        user: 'Trần Thị Thu',
+        role: 'Marketing',
+        action: 'Tạo mới Webinar',
+        previous_editorial_status: 'draft',
+        new_editorial_status: 'published',
+        timestamp: '2026-07-15 16:45:00',
+      }
+    ]
   },
 ];

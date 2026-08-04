@@ -1,0 +1,144 @@
+/**
+ * Module 06: Thiết lập danh mục sản phẩm (Product Master Data & Settings Specification)
+ * Unified Master Data & Routing Engine for Products Taxonomy, Brands, Applications, Product Types, Sales Staff & Contact Email Routing.
+ */
+
+export type MasterDataType = 
+  | 'categories' 
+  | 'brands' 
+  | 'applications' 
+  | 'product_types' 
+  | 'sales_staff' 
+  | 'routing_rules';
+
+export type MasterItemStatus = 'active' | 'inactive' | 'archived';
+
+export interface BaseMasterItem {
+  id: string;
+  name: string;
+  code: string;
+  status: MasterItemStatus;
+  ordering: number;
+  usage_count: number;
+  created_time: string;
+  updated_time: string;
+  updated_by?: string;
+  description?: string;
+}
+
+// 1. Category / Lĩnh vực sản phẩm (Hierarchical Taxonomy)
+export interface MasterCategoryItem extends BaseMasterItem {
+  type: 'categories';
+  slug: string;
+  parent_id?: string | null;
+  parent_name?: string;
+  level: number; // 1 for Root, 2 for Subcategory
+  icon?: string;
+  image?: string;
+  meta_title?: string;
+  meta_description?: string;
+  canonical_url?: string;
+  site_scope: ('main_website' | 'portal_bim' | 'store_software')[];
+}
+
+// 2. Brand / Hãng sản xuất
+export interface MasterBrandItem extends BaseMasterItem {
+  type: 'brands';
+  logo?: string;
+  country: string;
+  website?: string;
+  is_featured: boolean;
+  contact_person?: string;
+  contact_email?: string;
+}
+
+// 3. Application Area / Lĩnh vực ứng dụng
+export interface MasterApplicationItem extends BaseMasterItem {
+  type: 'applications';
+  sector_group: string; // e.g., 'Kết cấu', 'Hạ tầng', 'Thủy lợi', 'Xây dựng dân dụng'
+  color_badge?: string;
+  icon?: string;
+}
+
+// 4. Product Type / Loại sản phẩm
+export interface MasterProductTypeItem extends BaseMasterItem {
+  type: 'product_types';
+  type_code: string; // 'software_desktop', 'software_cloud', 'hardware_device', 'service_consulting', 'training_course'
+  requires_license_key: boolean;
+  pricing_model_default: 'quote' | 'fixed_price' | 'subscription';
+  icon?: string;
+}
+
+// 5. Sales Representative / Nhân viên kinh doanh phụ trách
+export interface MasterSalesStaffItem extends BaseMasterItem {
+  type: 'sales_staff';
+  staff_code: string;
+  email: string;
+  phone: string;
+  role_title: string;
+  department: string;
+  avatar?: string;
+  assigned_category_ids: string[];
+  assigned_brand_ids: string[];
+  monthly_capacity_inquiries: number;
+  is_out_of_office?: boolean;
+}
+
+// 6. Contact & Email Routing Rule / Quy tắc nhận liên hệ
+export interface MasterRoutingRuleItem extends BaseMasterItem {
+  type: 'routing_rules';
+  priority: number; // 1 = highest
+  scope_category_ids: string[];
+  scope_brand_ids: string[];
+  trigger_keywords: string[];
+  primary_sales_id: string;
+  primary_sales_name?: string;
+  fallback_email: string;
+  notify_cc_emails: string[];
+  working_version?: boolean;
+  last_test_passed?: boolean;
+}
+
+export type AnyMasterItem = 
+  | MasterCategoryItem 
+  | MasterBrandItem 
+  | MasterApplicationItem 
+  | MasterProductTypeItem 
+  | MasterSalesStaffItem 
+  | MasterRoutingRuleItem;
+
+export interface UsageImpactRecord {
+  id: string;
+  type: 'product' | 'contact_inquiry' | 'product_registration';
+  title: string;
+  sku_or_code: string;
+  category_name?: string;
+  owner_name?: string;
+  status: string;
+  updated_time: string;
+}
+
+export interface MasterDataActivityLog {
+  id: string;
+  item_type: MasterDataType;
+  item_id: string;
+  item_name: string;
+  user_name: string;
+  user_avatar?: string;
+  action: 'create' | 'update' | 'deactivate' | 'activate' | 'archive' | 'restore' | 'reorder' | 'reparent';
+  details: string;
+  impact_count: number;
+  timestamp: string;
+}
+
+export interface OverviewMetrics {
+  total_categories: number;
+  total_brands: number;
+  total_applications: number;
+  total_product_types: number;
+  total_sales_staff: number;
+  total_routing_rules: number;
+  issue_dependency_count: number;
+  inactive_items_count: number;
+  archived_items_count: number;
+}

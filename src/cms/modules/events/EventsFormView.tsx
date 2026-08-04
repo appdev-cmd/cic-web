@@ -25,10 +25,15 @@ import {
   AlignLeft,
   Sliders,
   FileText,
+  Users,
+  Building,
+  Plus,
+  Trash2,
+  Calendar,
 } from 'lucide-react';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { SearchableSelect, SearchableMultiSelect } from '../../components/SearchableSelect';
-import { EventItem, EventCategory } from './types';
+import { EventItem, EventCategory, EditorialStatus, EventProgressStatus, EventSpeaker } from './types';
 import { mockEventCategories, mockEvents, mockEventProducts } from './mockData';
 import { mockArticles } from '../news/mockData';
 
@@ -65,11 +70,8 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     eventToEdit?.category_id || categories[0]?.id || ''
   );
   const [summary, setSummary] = useState(eventToEdit?.summary || '');
-  const [specifications, setSpecifications] = useState('');
   const [content, setContent] = useState(eventToEdit?.content || '');
 
-  // 3 Rich Text Editor tabs: 'overview' | 'specifications' | 'detail'
-  const [editorTab, setEditorTab] = useState<'overview' | 'specifications' | 'detail'>('overview');
   const [image, setImage] = useState(
     eventToEdit?.image ||
       'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80'
@@ -86,6 +88,21 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
   const [specificTime, setSpecificTime] = useState(eventToEdit?.specific_time || '');
   const [chuDe, setChuDe] = useState(eventToEdit?.chu_de || '');
   const [linkDangky, setLinkDangky] = useState(eventToEdit?.link_dangky || '');
+  const [organizer, setOrganizer] = useState(eventToEdit?.organizer || 'Công ty Cổ phần Công nghệ và Tư vấn CIC');
+  const [maxSeats, setMaxSeats] = useState<number>(eventToEdit?.max_seats || 200);
+  const [speakers, setSpeakers] = useState<EventSpeaker[]>(
+    eventToEdit?.speakers || [
+      { id: 'spk_1', name: 'TS. Nguyễn Văn Hùng', title: 'Chuyên gia Giải pháp BIM', company: 'CIC Technology' },
+    ]
+  );
+
+  // 2-Layer Dual Status System
+  const [editorialStatus, setEditorialStatus] = useState<EditorialStatus>(
+    eventToEdit?.editorial_status || (eventToEdit?.published ? 'published' : 'draft')
+  );
+  const [eventStatus, setEventStatus] = useState<EventProgressStatus>(
+    eventToEdit?.event_status || 'upcoming'
+  );
 
   // 3 Multi-Select Related Fields (stacked vertically)
   const [eventRelated, setEventRelated] = useState<string[]>(
@@ -97,13 +114,6 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
   const [productsRelated, setProductsRelated] = useState<string[]>(
     eventToEdit?.products_related || []
   );
-
-  // Dropdown States for Multi-Selects
-  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
-  const [catSearchQuery, setCatSearchQuery] = useState('');
-  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
-  const [isNewsDropdownOpen, setIsNewsDropdownOpen] = useState(false);
-  const [isProdDropdownOpen, setIsProdDropdownOpen] = useState(false);
 
   // Right Column Config Toggles
   const [isNew, setIsNew] = useState(eventToEdit?.is_new ?? true);
@@ -129,20 +139,24 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     }
   }, [title, isAliasManuallyEdited]);
 
-  // Rich Text Editor Command Mock
-  const handleEditorCommand = (cmd: string) => {
-    let tag = '';
-    if (cmd === 'bold') tag = '<strong>nội dung đậm</strong>';
-    if (cmd === 'italic') tag = '<em>nội dung nghiêng</em>';
-    if (cmd === 'underline') tag = '<u>nội dung gạch chân</u>';
-    if (cmd === 'h2') tag = '<h2>Tiêu đề H2</h2>';
-    if (cmd === 'h3') tag = '<h3>Tiêu đề H3</h3>';
-    if (cmd === 'ul') tag = '<ul><li>Mục 1</li><li>Mục 2</li></ul>';
-    if (cmd === 'ol') tag = '<ol><li>Bước 1</li><li>Bước 2</li></ol>';
-    if (cmd === 'link') tag = '<a href="#">Đường dẫn liên kết</a>';
-    if (cmd === 'code') tag = '<code>mã code</code>';
+  const handleAddSpeaker = () => {
+    const newSpk: EventSpeaker = {
+      id: `spk_${Date.now()}`,
+      name: '',
+      title: '',
+      company: 'CIC Technology',
+    };
+    setSpeakers([...speakers, newSpk]);
+  };
 
-    setContent((prev) => prev + (prev ? '\n' : '') + tag);
+  const handleRemoveSpeaker = (id: string) => {
+    setSpeakers(speakers.filter((s) => s.id !== id));
+  };
+
+  const handleSpeakerChange = (id: string, field: keyof EventSpeaker, value: string) => {
+    setSpeakers(
+      speakers.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    );
   };
 
   // Form Submit
@@ -174,13 +188,18 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
       specific_time: specificTime,
       chu_de: chuDe,
       link_dangky: linkDangky,
+      organizer,
+      speakers,
+      max_seats: maxSeats,
+      editorial_status: editorialStatus,
+      event_status: eventStatus,
       event_related: eventRelated,
       news_related: newsRelated,
       products_related: productsRelated,
       is_new: isNew,
       is_hot: isHot,
       show_in_home: showInHome,
-      published,
+      published: editorialStatus === 'published' ? true : published,
       ordering: Number(ordering) || 1,
       seo_title: seoTitle || title,
       seo_keyword: seoKeyword,
@@ -188,26 +207,18 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     });
   };
 
-  const selectedCategoryObj = categories.find((c) => c.id === categoryId);
-  const filteredCategories = categories.filter((c) =>
-    c.name.toLowerCase().includes(catSearchQuery.toLowerCase().trim())
-  );
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* HEADER BAR */}
       <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
-          <div className="flex items-center gap-2">
-            {published ? (
-              <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-lg flex items-center gap-1">
-                <Check className="w-3.5 h-3.5" /> Đã xuất bản
-              </span>
-            ) : (
-              <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold rounded-lg">
-                Bản nháp
-              </span>
-            )}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-lg flex items-center gap-1">
+              <Check className="w-3.5 h-3.5" /> Trạng thái Biên tập: {editorialStatus}
+            </span>
+            <span className="px-2.5 py-1 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-lg flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" /> Trạng thái Diễn ra: {eventStatus}
+            </span>
           </div>
           <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-1">
             {title ? title : 'Tiêu đề sự kiện / hội thảo mới...'}
@@ -270,21 +281,97 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               </div>
             </div>
 
-            {/* 3. Danh mục (category_id) - Searchable Select */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Danh mục sự kiện <span className="text-red-500">*</span>
-              </label>
-              <SearchableSelect
-                options={categories.map((c) => ({ id: c.id, label: c.name }))}
-                selectedId={categoryId}
-                onChange={setCategoryId}
-                placeholder="Chọn danh mục sự kiện..."
-                searchPlaceholder="Tìm kiếm danh mục..."
-              />
+            {/* 3. Danh mục & Đơn vị tổ chức */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Danh mục sự kiện <span className="text-red-500">*</span>
+                </label>
+                <SearchableSelect
+                  options={categories.map((c) => ({ id: c.id, label: c.name }))}
+                  selectedId={categoryId}
+                  onChange={setCategoryId}
+                  placeholder="Chọn danh mục sự kiện..."
+                  searchPlaceholder="Tìm kiếm danh mục..."
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Đơn vị tổ chức
+                </label>
+                <input
+                  type="text"
+                  value={organizer}
+                  onChange={(e) => setOrganizer(e.target.value)}
+                  placeholder="Công ty Cổ phần Công nghệ và Tư vấn CIC..."
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+                />
+              </div>
             </div>
 
-            {/* 4. Tóm tắt sự kiện */}
+            {/* 4. Speaker Lineup Manager */}
+            <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-orange-600" />
+                  <span>Diễn giả & Chuyên gia khách mời</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddSpeaker}
+                  className="px-2.5 py-1 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold text-xs rounded-lg hover:bg-orange-500/20 flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Thêm diễn giả
+                </button>
+              </div>
+
+              {speakers.map((spk, idx) => (
+                <div
+                  key={spk.id}
+                  className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-12 gap-2 items-center"
+                >
+                  <div className="sm:col-span-4">
+                    <input
+                      type="text"
+                      value={spk.name}
+                      onChange={(e) => handleSpeakerChange(spk.id, 'name', e.target.value)}
+                      placeholder="Họ tên diễn giả..."
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700"
+                    />
+                  </div>
+                  <div className="sm:col-span-4">
+                    <input
+                      type="text"
+                      value={spk.title}
+                      onChange={(e) => handleSpeakerChange(spk.id, 'title', e.target.value)}
+                      placeholder="Chức danh / Học vị..."
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 text-xs rounded-lg border border-slate-200 dark:border-slate-700"
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <input
+                      type="text"
+                      value={spk.company || ''}
+                      onChange={(e) => handleSpeakerChange(spk.id, 'company', e.target.value)}
+                      placeholder="Tổ chức..."
+                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 text-xs rounded-lg border border-slate-200 dark:border-slate-700"
+                    />
+                  </div>
+                  <div className="sm:col-span-1 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSpeaker(spk.id)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 5. Tóm tắt sự kiện */}
             <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
                 <span>Tóm tắt / Giới thiệu sự kiện</span>
@@ -302,7 +389,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               />
             </div>
 
-            {/* 5. Nội dung sự kiện (RichTextEditor) */}
+            {/* 6. Nội dung sự kiện (RichTextEditor) */}
             <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
@@ -316,7 +403,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               <RichTextEditor value={content} onChange={setContent} minHeight="320px" />
             </div>
 
-            {/* 6. time_event & end_time */}
+            {/* 7. time_event & end_time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -344,63 +431,78 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               </div>
             </div>
 
-            {/* 7. place */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Địa điểm tổ chức
-              </label>
-              <input
-                type="text"
-                value={place}
-                onChange={(e) => setPlace(e.target.value)}
-                placeholder="Ví dụ: Trung tâm Hội nghị Quốc gia, 57 Phạm Hùng, Hà Nội..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
-              />
+            {/* 8. place & specific_time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Địa điểm tổ chức
+                </label>
+                <input
+                  type="text"
+                  value={place}
+                  onChange={(e) => setPlace(e.target.value)}
+                  placeholder="Ví dụ: Trung tâm Hội nghị Quốc gia, 57 Phạm Hùng, Hà Nội..."
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Khung giờ chi tiết
+                </label>
+                <input
+                  type="text"
+                  value={specificTime}
+                  onChange={(e) => setSpecificTime(e.target.value)}
+                  placeholder="Ví dụ: 8h00 - 17h00 hàng ngày"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
+                />
+              </div>
             </div>
 
-            {/* 8. specific_time */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Khung giờ chi tiết
-              </label>
-              <input
-                type="text"
-                value={specificTime}
-                onChange={(e) => setSpecificTime(e.target.value)}
-                placeholder="Ví dụ: 8h00 - 17h00 hàng ngày"
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
-              />
+            {/* 9. chu_de & link_dangky & maxSeats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Chủ đề sự kiện
+                </label>
+                <input
+                  type="text"
+                  value={chuDe}
+                  onChange={(e) => setChuDe(e.target.value)}
+                  placeholder="Chủ đề chính..."
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Link đăng ký
+                </label>
+                <input
+                  type="url"
+                  value={linkDangky}
+                  onChange={(e) => setLinkDangky(e.target.value)}
+                  placeholder="https://cic.com.vn/..."
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Số lượng chỗ ngồi tối đa
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={maxSeats}
+                  onChange={(e) => setMaxSeats(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none font-bold"
+                />
+              </div>
             </div>
 
-            {/* 9. chu_de */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Chủ đề sự kiện
-              </label>
-              <input
-                type="text"
-                value={chuDe}
-                onChange={(e) => setChuDe(e.target.value)}
-                placeholder="Nhập chủ đề chính của sự kiện..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-medium"
-              />
-            </div>
-
-            {/* 10. link_dangky */}
-            <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Đường dẫn đăng ký
-              </label>
-              <input
-                type="url"
-                value={linkDangky}
-                onChange={(e) => setLinkDangky(e.target.value)}
-                placeholder="https://cic.com.vn/su-kien/dang-ky-..."
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono"
-              />
-            </div>
-
-            {/* 11. LIÊN KẾT: 3 ô chọn nhiều giá trị Searchable Multi-Select */}
+            {/* 10. LIÊN KẾT: 3 ô chọn nhiều giá trị Searchable Multi-Select */}
             <div className="space-y-4 pt-3 border-t border-slate-100 dark:border-slate-800">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Liên kết nội dung
@@ -468,7 +570,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
 
         {/* ==================== RIGHT COLUMN (CARDS) ==================== */}
         <div className="lg:col-span-4 space-y-5">
-          {/* CARD 1: XUẤT BẢN & CẤU HÌNH */}
+          {/* CARD 1: DUAL STATUSES & PUBLISHING */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
               <button
@@ -487,9 +589,46 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               </button>
             </div>
 
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Cấu hình Xuất bản
-            </h3>
+            {/* DUAL STATUSES BLOCK */}
+            <div className="p-3 bg-orange-500/5 dark:bg-orange-500/10 rounded-xl border border-orange-500/20 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                2 Tầng Trạng Thái Độc Lập
+              </h4>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  1. Trạng thái Biên tập
+                </label>
+                <select
+                  value={editorialStatus}
+                  onChange={(e) => setEditorialStatus(e.target.value as EditorialStatus)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none"
+                >
+                  <option value="draft">Bản nháp (Draft)</option>
+                  <option value="pending_review">Chờ duyệt (Pending Review)</option>
+                  <option value="approved">Đã duyệt (Approved)</option>
+                  <option value="published">Đã xuất bản (Published)</option>
+                  <option value="rejected">Bị trả lại (Rejected)</option>
+                  <option value="archived">Lưu trữ (Archived)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  2. Trạng thái Diễn ra
+                </label>
+                <select
+                  value={eventStatus}
+                  onChange={(e) => setEventStatus(e.target.value as EventProgressStatus)}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 focus:outline-none"
+                >
+                  <option value="upcoming">Sắp diễn ra (Upcoming)</option>
+                  <option value="ongoing">Đang diễn ra (Ongoing)</option>
+                  <option value="ended">Đã kết thúc (Ended)</option>
+                  <option value="cancelled">Đã hủy (Cancelled)</option>
+                </select>
+              </div>
+            </div>
 
             {/* Config Toggles */}
             <div className="space-y-3 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
@@ -542,24 +681,6 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
                       showInHome ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* published */}
-              <div className="flex items-center justify-between pt-3">
-                <span className="font-bold text-slate-800 dark:text-slate-200">Xuất bản sự kiện</span>
-                <button
-                  type="button"
-                  onClick={() => setPublished(!published)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                      published ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>
@@ -719,3 +840,4 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     </form>
   );
 };
+

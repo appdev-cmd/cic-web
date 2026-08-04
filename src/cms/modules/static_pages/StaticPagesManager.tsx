@@ -19,26 +19,83 @@ import {
   Globe,
   Square,
   CheckSquare,
+  Layers,
+  FolderTree,
+  ListFilter,
+  Sliders,
+  Link2,
+  History,
+  Activity,
+  AlertTriangle,
+  Send,
+  UserCheck,
+  Copy,
+  ExternalLink,
+  ChevronDown,
+  RotateCcw,
 } from 'lucide-react';
-import { StaticPage, StaticPageCategory } from './types';
+import { StaticPage, StaticPageCategory, WorkflowStatus } from './types';
 import { staticPagesMock, staticPageCategoriesMock } from './mockData';
 import { StaticPageFormView } from './StaticPageFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { TreeView } from './TreeView';
+import { UsedByDrawer } from './UsedByDrawer';
+import { VersionHistoryDrawer } from './VersionHistoryDrawer';
+import { ActivityLogDrawer } from './ActivityLogDrawer';
+import { PagePreviewModal } from './PagePreviewModal';
+import { QuickEditModal } from './QuickEditModal';
+import { ColumnSettingModal, ColumnConfig } from './ColumnSettingModal';
+import { ImpactWarningModal } from './ImpactWarningModal';
 
 export const StaticPagesManager: React.FC = () => {
-  // State
+  // Main Pages State
   const [pages, setPages] = useState<StaticPage[]>(staticPagesMock);
   const [categories] = useState<StaticPageCategory[]>(staticPageCategoriesMock);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Search & Filters
+  // View Mode: 'list' (Data Table) vs 'tree' (Content Hierarchy Tree)
+  const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
+
+  // Saved View Tab Filter: 'all' | 'my_work' | 'pending' | 'orphan' | 'missing_translation' | 'trash'
+  const [savedView, setSavedView] = useState<
+    'all' | 'my_work' | 'pending' | 'orphan' | 'missing_translation' | 'trash'
+  >('all');
+
+  // Toolbar Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'hidden'>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [localeFilter, setLocaleFilter] = useState<string>('all');
 
-  // Form Modal State
+  // Table Density & Column Settings
+  const [density, setDensity] = useState<'compact' | 'normal' | 'spacious'>('normal');
+  const [columns, setColumns] = useState<ColumnConfig[]>([
+    { id: 'title', label: 'Trang nội dung (Title)', visible: true, required: true },
+    { id: 'category', label: 'Danh mục (Category)', visible: true },
+    { id: 'path', label: 'Đường dẫn (Alias/Slug)', visible: true },
+    { id: 'locale', label: 'Bản dịch (Locale)', visible: true },
+    { id: 'workflow', label: 'Trạng thái quy trình', visible: true },
+    { id: 'used_by', label: 'Nơi sử dụng (Used-By)', visible: true },
+    { id: 'updated', label: 'Cập nhật', visible: true },
+    { id: 'actions', label: 'Thao tác', visible: true, required: true },
+  ]);
+
+  // Form View State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [pageToEdit, setPageToEdit] = useState<StaticPage | null>(null);
+
+  // Active Modals & Drawers State
+  const [activeUsedByPage, setActiveUsedByPage] = useState<StaticPage | null>(null);
+  const [activeVersionPage, setActiveVersionPage] = useState<StaticPage | null>(null);
+  const [activeActivityPage, setActiveActivityPage] = useState<StaticPage | null>(null);
+  const [activePreviewPage, setActivePreviewPage] = useState<StaticPage | null>(null);
+  const [activeQuickEditPage, setActiveQuickEditPage] = useState<StaticPage | null>(null);
+  const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
+
+  // High Impact Warning Modal
+  const [impactPage, setImpactPage] = useState<StaticPage | null>(null);
+  const [impactAction, setImpactAction] = useState<'url_change' | 'archive' | 'delete' | 'hierarchy_change'>('archive');
+  const [isImpactModalOpen, setIsImpactModalOpen] = useState(false);
 
   // Delete Confirm Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -52,38 +109,57 @@ export const StaticPagesManager: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // 1. Filtered Static Pages
+  // 1. Filtered Pages Logic
   const filteredPages = useMemo(() => {
     return pages.filter((page) => {
-      // Search by title
-      const query = searchQuery.toLowerCase().trim();
-      const matchSearch = !query || page.title.toLowerCase().includes(query) || page.alias.toLowerCase().includes(query);
+      // Saved View Filter
+      if (savedView === 'trash') return page.in_trash;
+      if (page.in_trash) return false;
 
-      // Filter by Category
+      if (savedView === 'my_work' && page.author?.name !== 'Nguyễn Văn Nam') return false;
+      if (savedView === 'pending' && page.workflow_status !== 'pending') return false;
+      if (savedView === 'orphan' && page.used_by && page.used_by.length > 0) return false;
+      if (savedView === 'missing_translation' && page.translation_progress?.en === 'complete') return false;
+
+      // Search Query
+      const query = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !query ||
+        page.title.toLowerCase().includes(query) ||
+        page.alias.toLowerCase().includes(query);
+
+      // Category
       const matchCategory = selectedCategoryId === 'all' || page.category_id === selectedCategoryId;
 
-      // Filter by Published status
-      const matchStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'published' && page.published) ||
-        (statusFilter === 'hidden' && !page.published);
+      // Status
+      const matchStatus = statusFilter === 'all' || page.workflow_status === statusFilter;
 
-      return matchSearch && matchCategory && matchStatus;
+      // Locale
+      const matchLocale =
+        localeFilter === 'all' ||
+        (localeFilter === 'en_complete' && page.translation_progress?.en === 'complete') ||
+        (localeFilter === 'en_missing' && page.translation_progress?.en === 'missing');
+
+      return matchSearch && matchCategory && matchStatus && matchLocale;
     });
-  }, [pages, searchQuery, selectedCategoryId, statusFilter]);
+  }, [pages, searchQuery, selectedCategoryId, statusFilter, localeFilter, savedView]);
 
-  // Map category ID to Category Name
+  // Helpers
   const getCategoryName = (catId: string) => {
     const found = categories.find((c) => c.id === catId);
     return found ? found.name : catId;
   };
 
-  // 2. Refresh Handler
-  const handleRefresh = () => {
-    showToast('Đã làm mới danh sách trang tĩnh!');
+  const isColumnVisible = (colId: string) => {
+    return columns.find((c) => c.id === colId)?.visible ?? true;
   };
 
-  // 3. Selection Handlers
+  // Refresh Handler
+  const handleRefresh = () => {
+    showToast('Đã cập nhật lại danh sách trang nội dung!');
+  };
+
+  // Selection Handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedIds(filteredPages.map((p) => p.id));
@@ -100,31 +176,44 @@ export const StaticPagesManager: React.FC = () => {
     }
   };
 
-  // 4. Toggle Published direct on list item
-  const handleTogglePublished = (id: string, currentStatus: boolean) => {
+  // Direct Toggle Published
+  const handleTogglePublished = (page: StaticPage) => {
+    if (page.published && page.used_by && page.used_by.length > 0) {
+      setImpactPage(page);
+      setImpactAction('archive');
+      setIsImpactModalOpen(true);
+      return;
+    }
+
     setPages((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, published: !currentStatus } : p))
+      prev.map((p) =>
+        p.id === page.id
+          ? {
+              ...p,
+              published: !p.published,
+              workflow_status: !p.published ? 'published' : 'archived',
+            }
+          : p
+      )
     );
-    showToast(`Đã ${!currentStatus ? 'Xuất bản' : 'Ẩn'} trang tĩnh!`);
+    showToast(`Đã ${!page.published ? 'Xuất bản' : 'Ẩn/Lưu trữ'} trang "${page.title}"!`);
   };
 
-  // 5. Batch Toggle Published / Hide
-  const handleBatchTogglePublished = (targetStatus: boolean) => {
+  // Batch Toggle Published / Archive
+  const handleBatchStatus = (status: WorkflowStatus) => {
     if (selectedIds.length === 0) return;
+    const isPub = status === 'published';
     setPages((prev) =>
-      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, published: targetStatus } : p))
+      prev.map((p) =>
+        selectedIds.includes(p.id)
+          ? { ...p, published: isPub, workflow_status: status }
+          : p
+      )
     );
-    showToast(
-      `Đã ${targetStatus ? 'Xuất bản' : 'Ẩn'} ${selectedIds.length} trang tĩnh được chọn!`
-    );
+    showToast(`Đã cập nhật trạng thái ${selectedIds.length} trang!`);
   };
 
-  // 6. Delete Handlers
-  const handleTriggerSingleDelete = (page: StaticPage) => {
-    setItemsToDelete([page]);
-    setIsDeleteModalOpen(true);
-  };
-
+  // Batch Move to Trash
   const handleTriggerBatchDelete = () => {
     if (selectedIds.length === 0) return;
     const selectedPages = pages.filter((p) => selectedIds.includes(p.id));
@@ -134,35 +223,59 @@ export const StaticPagesManager: React.FC = () => {
 
   const handleConfirmDelete = () => {
     const idsToRemove = itemsToDelete.map((i) => i.id);
-    setPages((prev) => prev.filter((p) => !idsToRemove.includes(p.id)));
+    setPages((prev) =>
+      prev.map((p) =>
+        idsToRemove.includes(p.id)
+          ? { ...p, in_trash: true, deleted_at: new Date().toISOString() }
+          : p
+      )
+    );
     setSelectedIds((prev) => prev.filter((id) => !idsToRemove.includes(id)));
     setIsDeleteModalOpen(false);
-    showToast(`Đã xóa thành công ${idsToRemove.length} trang tĩnh!`);
+    showToast(`Đã chuyển ${idsToRemove.length} trang vào Thùng rác!`);
   };
 
-  // 7. Form Save Handler (Add / Edit)
+  // Quick Edit Save Handler
+  const handleQuickEditSave = (id: string, updates: Partial<StaticPage>) => {
+    setPages((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              ...updates,
+              updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            }
+          : p
+      )
+    );
+    showToast('Đã cập nhật nhanh trang tĩnh!');
+  };
+
+  // Form Save Handler (Add / Edit)
   const handleSavePage = (pageData: Partial<StaticPage>) => {
     if (pageToEdit) {
       // Edit existing
       setPages((prev) =>
         prev.map((p) =>
           p.id === pageToEdit.id
-            ? {
+            ? ({
                 ...p,
                 ...pageData,
                 updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-              } as StaticPage
+              } as StaticPage)
             : p
         )
       );
-      showToast(`Đã cập nhật trang tĩnh "${pageData.title}"!`);
+      showToast(`Đã lưu thay đổi trang "${pageData.title}"!`);
     } else {
       // Create new
       const newPage: StaticPage = {
         id: `page_${Date.now().toString().slice(-4)}`,
-        title: pageData.title || 'Trang tĩnh mới',
-        alias: pageData.alias || 'trang-tinh-moi',
+        title: pageData.title || 'Trang nội dung mới',
+        alias: pageData.alias || 'trang-noi-dung-moi',
         category_id: pageData.category_id || categories[0]?.id || '',
+        parent_id: pageData.parent_id || null,
+        template: pageData.template || 'standard',
         summary: pageData.summary || '',
         content: pageData.content || '',
         image:
@@ -170,25 +283,63 @@ export const StaticPagesManager: React.FC = () => {
           'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
         tags: pageData.tags || [],
         show_in_homepage: pageData.show_in_homepage ?? false,
-        published: pageData.published ?? true,
+        show_in_header: pageData.show_in_header ?? false,
+        show_in_footer: pageData.show_in_footer ?? true,
+        published: pageData.published ?? false,
         ordering: pageData.ordering || pages.length + 1,
         seo_title: pageData.seo_title || pageData.title || '',
         seo_keyword: pageData.seo_keyword || '',
         seo_description: pageData.seo_description || pageData.summary || '',
         created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        author: { name: 'Nguyễn Văn Nam' },
+        workflow_status: pageData.workflow_status || 'draft',
+        working_version_number: 1,
+        published_version_number: pageData.published ? 1 : undefined,
+        primary_locale: 'vi',
+        translation_progress: { vi: 'complete', en: 'missing' },
+        used_by: [],
       };
       setPages([newPage, ...pages]);
-      showToast(`Đã thêm mới trang tĩnh "${newPage.title}"!`);
+      showToast(`Đã tạo thành công trang mới "${newPage.title}"!`);
     }
     setIsFormOpen(false);
     setPageToEdit(null);
   };
 
+  // Add Child Page from Tree View
+  const handleAddChildPage = (parentPage: StaticPage) => {
+    setPageToEdit({
+      id: '',
+      title: '',
+      alias: '',
+      category_id: parentPage.category_id,
+      parent_id: parentPage.id,
+      template: 'standard',
+      summary: '',
+      content: '',
+      image: '',
+      tags: [],
+      show_in_homepage: false,
+      published: false,
+      ordering: 1,
+      seo_title: '',
+      seo_keyword: '',
+      seo_description: '',
+      created_time: '',
+      working_version_number: 1,
+      workflow_status: 'draft',
+      primary_locale: 'vi',
+    });
+    setIsFormOpen(true);
+  };
+
+  // Render Form View
   if (isFormOpen) {
     return (
       <StaticPageFormView
         pageToEdit={pageToEdit}
         categories={categories}
+        allPages={pages}
         onCancel={() => {
           setIsFormOpen(false);
           setPageToEdit(null);
@@ -208,7 +359,7 @@ export const StaticPagesManager: React.FC = () => {
         </div>
       )}
 
-      {/* Header Bar */}
+      {/* Module 03 Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
@@ -216,324 +367,555 @@ export const StaticPagesManager: React.FC = () => {
               <FileText className="w-5 h-5" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Quản lý Trang tĩnh
+              Trang Nội dung (Module 03)
             </h1>
             <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-              {pages.length} trang
+              {pages.filter((p) => !p.in_trash).length} trang
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Quản lý các trang thông tin giới thiệu, chính sách pháp lý, quy trình tư vấn và hướng dẫn dịch vụ.
+            Quản lý trang dài hạn (Giới thiệu, Chính sách, Điều khoản, Landing pages). Tách biệt khỏi Tin tức & Dịch vụ.
           </p>
         </div>
 
-        {/* Top Right Action Button */}
+        {/* Top Right Actions */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* View Switcher: List Mode vs Tree Mode */}
+          <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center gap-1 border border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <ListFilter className="w-3.5 h-3.5" /> Danh sách
+            </button>
+            <button
+              onClick={() => setViewMode('tree')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                viewMode === 'tree'
+                  ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <FolderTree className="w-3.5 h-3.5" /> Cây nội dung (Tree)
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              setPageToEdit(null);
+              setIsFormOpen(true);
+            }}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tạo trang mới</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Saved View Tabs Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
         <button
-          onClick={() => {
-            setPageToEdit(null);
-            setIsFormOpen(true);
-          }}
-          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+          onClick={() => setSavedView('all')}
+          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 ${
+            savedView === 'all'
+              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+          }`}
         >
-          <Plus className="w-4 h-4" />
-          <span>Thêm trang tĩnh mới</span>
+          Tất cả trang ({pages.filter((p) => !p.in_trash).length})
+        </button>
+
+        <button
+          onClick={() => setSavedView('my_work')}
+          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 ${
+            savedView === 'my_work'
+              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          Việc của tôi
+        </button>
+
+        <button
+          onClick={() => setSavedView('pending')}
+          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+            savedView === 'pending'
+              ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-purple-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          <span>Hàng chờ duyệt</span>
+          <span className="px-1.5 py-0.2 bg-purple-500/20 rounded text-[10px]">
+            {pages.filter((p) => !p.in_trash && p.workflow_status === 'pending').length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setSavedView('orphan')}
+          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+            savedView === 'orphan'
+              ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-amber-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          <AlertTriangle className="w-3.5 h-3.5" />
+          <span>Trang mồ côi (Không liên kết)</span>
+          <span className="px-1.5 py-0.2 bg-amber-500/20 rounded text-[10px]">
+            {pages.filter((p) => !p.in_trash && (!p.used_by || p.used_by.length === 0)).length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setSavedView('missing_translation')}
+          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+            savedView === 'missing_translation'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-blue-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          <Globe className="w-3.5 h-3.5" />
+          <span>Thiếu bản dịch EN</span>
+        </button>
+
+        <button
+          onClick={() => setSavedView('trash')}
+          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+            savedView === 'trash'
+              ? 'bg-red-600 text-white border-red-600 shadow-xs'
+              : 'bg-white dark:bg-slate-900 text-red-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          <span>Thùng rác ({pages.filter((p) => p.in_trash).length})</span>
         </button>
       </div>
 
-      {/* TOOLBAR (Search, Filters & Batch Actions) */}
+      {/* Toolbar Controls */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-          {/* Ô tìm kiếm theo tiêu đề */}
-          <div className="md:col-span-5 relative">
+          {/* Search Input */}
+          <div className="md:col-span-4 relative">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm trang tĩnh theo tiêu đề hoặc alias..."
+              placeholder="Tìm kiếm theo tiêu đề hoặc slug URL..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
-          {/* Bộ lọc chọn Danh mục */}
-          <div className="md:col-span-4 relative">
+          {/* Category Filter */}
+          <div className="md:col-span-3">
             <select
               value={selectedCategoryId}
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">-- Tất cả Danh mục ({categories.length}) --</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
+              <option value="all">-- Tất cả danh mục --</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Bộ lọc trạng thái */}
-          <div className="md:col-span-3 flex items-center gap-2">
+          {/* Workflow Status Filter */}
+          <div className="md:col-span-3">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="published">Đã xuất bản</option>
-              <option value="hidden">Đang ẩn (Nháp)</option>
+              <option value="all">Tất cả trạng thái quy trình</option>
+              <option value="draft">Bản nháp (Draft)</option>
+              <option value="pending">Hàng chờ duyệt (Pending)</option>
+              <option value="published">Đã xuất bản (Published)</option>
+              <option value="returned">Yêu cầu sửa (Returned)</option>
+              <option value="archived">Lưu trữ (Archived)</option>
             </select>
+          </div>
 
+          {/* Extra Buttons */}
+          <div className="md:col-span-2 flex items-center gap-2 justify-end">
+            <button
+              onClick={() => setIsColumnModalOpen(true)}
+              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium cursor-pointer shrink-0"
+              title="Tùy chỉnh cột & Đô hiển thị table"
+            >
+              <Sliders className="w-4 h-4" />
+            </button>
             <button
               onClick={handleRefresh}
               className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium cursor-pointer shrink-0"
-              title="Làm mới danh sách"
+              title="Làm mới dữ liệu"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Batch Action Toolbar Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-          <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
-            <span>Hiển thị: <strong>{filteredPages.length}</strong> / {pages.length} bản ghi</span>
-            {selectedIds.length > 0 && (
-              <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
-                Đã chọn: {selectedIds.length} dòng
-              </span>
-            )}
-          </div>
-
-          {/* Batch Action buttons - Only show when items are selected */}
-          {selectedIds.length > 0 && (
-            <div className="flex items-center flex-wrap gap-2">
+        {/* Batch Actions Row */}
+        {selectedIds.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+            <span className="font-bold text-orange-600">Đã chọn {selectedIds.length} dòng</span>
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => handleBatchTogglePublished(true)}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100"
+                onClick={() => handleBatchStatus('published')}
+                className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-xl font-bold cursor-pointer hover:bg-emerald-100"
               >
-                <Eye className="w-3.5 h-3.5" />
-                <span>Xuất bản ({selectedIds.length})</span>
+                Xuất bản hàng loạt
               </button>
-
               <button
-                onClick={() => handleBatchTogglePublished(false)}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100"
+                onClick={() => handleBatchStatus('archived')}
+                className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-xl font-bold cursor-pointer hover:bg-amber-100"
               >
-                <EyeOff className="w-3.5 h-3.5" />
-                <span>Ẩn ({selectedIds.length})</span>
+                Lưu trữ hàng loạt
               </button>
-
               <button
                 onClick={handleTriggerBatchDelete}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-100"
+                className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-300 rounded-xl font-bold cursor-pointer hover:bg-red-100"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Xóa ({selectedIds.length})</span>
+                Chuyển Thùng rác
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* DATA TABLE DISPLAY */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4 w-10 text-center">
-                  <button
-                    type="button"
-                    onClick={handleSelectAll}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                  >
-                    {filteredPages.length > 0 && selectedIds.length === filteredPages.length ? (
-                      <CheckSquare className="w-4 h-4 text-orange-600" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
-                </th>
-                <th className="py-3 px-4 min-w-[280px]">Tiêu đề (title)</th>
-                <th className="py-3 px-4 min-w-[150px]">Danh mục (category_id)</th>
-                <th className="py-3 px-4 min-w-[130px] text-center">Trạng thái (published)</th>
-                <th className="py-3 px-4 min-w-[150px]">Ngày tạo (created_time)</th>
-                <th className="py-3 px-4 min-w-[110px] text-right">Thao tác</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
-              {filteredPages.length > 0 ? (
-                filteredPages.map((page) => {
-                  const isSelected = selectedIds.includes(page.id);
-
-                  return (
-                    <tr
-                      key={page.id}
-                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                        isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                      }`}
+      {/* Content Main View: LIST vs TREE */}
+      {viewMode === 'tree' ? (
+        <TreeView
+          pages={filteredPages}
+          onEditPage={(p) => {
+            setPageToEdit(p);
+            setIsFormOpen(true);
+          }}
+          onPreviewPage={(p) => setActivePreviewPage(p)}
+          onOpenUsedBy={(p) => setActiveUsedByPage(p)}
+          onAddChildPage={handleAddChildPage}
+        />
+      ) : (
+        /* Data Table Display */
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="py-3 px-4 w-10 text-center">
+                    <button
+                      type="button"
+                      onClick={handleSelectAll}
+                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                     >
-                      {/* Checkbox */}
-                      <td className="py-3.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleSelectOne(page.id)}
-                          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        >
-                          {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-orange-600" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
-                      </td>
+                      {filteredPages.length > 0 && selectedIds.length === filteredPages.length ? (
+                        <CheckSquare className="w-4 h-4 text-orange-600" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                    </button>
+                  </th>
 
-                      {/* Tiêu đề (title) & Detail Preview */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-start gap-3">
-                          <img
-                            src={page.image}
-                            alt={page.title}
-                            className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
-                          />
-                          <div className="space-y-1">
-                            <a
-                              onClick={() => {
-                                setPageToEdit(page);
-                                setIsFormOpen(true);
-                              }}
-                              className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 line-clamp-2 transition-colors cursor-pointer"
-                            >
-                              {page.title}
-                            </a>
+                  {isColumnVisible('title') && <th className="py-3 px-4 min-w-[280px]">Trang nội dung</th>}
+                  {isColumnVisible('category') && <th className="py-3 px-4 min-w-[140px]">Danh mục</th>}
+                  {isColumnVisible('path') && <th className="py-3 px-4 min-w-[150px]">URL Alias</th>}
+                  {isColumnVisible('locale') && <th className="py-3 px-4 min-w-[110px] text-center">Bản dịch</th>}
+                  {isColumnVisible('workflow') && <th className="py-3 px-4 min-w-[130px] text-center">Quy trình</th>}
+                  {isColumnVisible('used_by') && <th className="py-3 px-4 min-w-[130px] text-center">Nơi sử dụng</th>}
+                  {isColumnVisible('updated') && <th className="py-3 px-4 min-w-[140px]">Cập nhật</th>}
+                  {isColumnVisible('actions') && <th className="py-3 px-4 min-w-[120px] text-right">Thao tác</th>}
+                </tr>
+              </thead>
 
-                            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400 font-mono">
-                              <span className="text-slate-500">/{page.alias}</span>
-                              {page.show_in_homepage && (
-                                <span className="px-1.5 py-0.2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-sans font-bold text-[10px] rounded flex items-center gap-0.5">
-                                  <Home className="w-2.5 h-2.5 text-slate-400" />
-                                  Trang chủ
-                                </span>
-                              )}
-                              <span className="text-slate-400 font-sans">
-                                • Thứ tự: <strong>#{page.ordering}</strong>
-                              </span>
-                            </div>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
+                {filteredPages.length > 0 ? (
+                  filteredPages.map((page) => {
+                    const isSelected = selectedIds.includes(page.id);
+                    const isOrphan = !page.used_by || page.used_by.length === 0;
 
-                            {page.tags && page.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1 pt-0.5">
-                                {page.tags.map((t, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="px-1.5 py-0.2 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] rounded"
-                                  >
-                                    #{t}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Danh mục (category_id) */}
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-lg border border-slate-200 dark:border-slate-700 inline-block text-[11px]">
-                          {getCategoryName(page.category_id)}
-                        </span>
-                      </td>
-
-                      {/* Trạng thái (published) - TOGGLE DIRECTLY ON LIST */}
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                    return (
+                      <tr
+                        key={page.id}
+                        className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
+                          isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
+                        }`}
+                      >
+                        {/* Checkbox */}
+                        <td className="py-3.5 px-4 text-center">
                           <button
                             type="button"
-                            onClick={() => handleTogglePublished(page.id, page.published)}
-                            title={page.published ? 'Bấm để Ẩn trang tĩnh' : 'Bấm để Xuất bản trang tĩnh'}
-                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                              page.published ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
-                            }`}
+                            onClick={() => handleSelectOne(page.id)}
+                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                           >
-                            <span
-                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                                page.published ? 'translate-x-5' : 'translate-x-0'
-                              }`}
-                            />
+                            {isSelected ? (
+                              <CheckSquare className="w-4 h-4 text-orange-600" />
+                            ) : (
+                              <Square className="w-4 h-4" />
+                            )}
                           </button>
-                          <span
-                            className={`text-[11px] font-bold ${
-                              page.published ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'
-                            }`}
-                          >
-                            {page.published ? 'Xuất bản' : 'Ẩn'}
-                          </span>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Ngày tạo (created_time) */}
-                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
-                        <div>{page.created_time}</div>
-                        {page.updated_time && (
-                          <div className="text-[10px] text-slate-400 font-sans italic">
-                            Sửa: {page.updated_time.split(' ')[0]}
-                          </div>
+                        {/* Title & Info */}
+                        {isColumnVisible('title') && (
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-start gap-3">
+                              <img
+                                src={page.image}
+                                alt={page.title}
+                                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
+                              />
+                              <div className="space-y-1 min-w-0">
+                                <a
+                                  onClick={() => {
+                                    setPageToEdit(page);
+                                    setIsFormOpen(true);
+                                  }}
+                                  className="font-bold text-slate-900 dark:text-white hover:text-orange-600 line-clamp-2 transition-colors cursor-pointer"
+                                >
+                                  {page.title}
+                                </a>
+
+                                <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
+                                  <span className="font-mono text-slate-500">v{page.working_version_number}.0</span>
+                                  {page.show_in_homepage && (
+                                    <span className="px-1.5 py-0.2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-[10px] rounded flex items-center gap-0.5">
+                                      <Home className="w-2.5 h-2.5 text-slate-400" /> Trang chủ
+                                    </span>
+                                  )}
+                                  {isOrphan && (
+                                    <span className="px-1.5 py-0.2 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[10px] rounded">
+                                      Mồ côi
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
                         )}
-                      </td>
 
-                      {/* Action buttons: Sửa, Xóa */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* Nút Sửa */}
-                          <button
-                            onClick={() => {
-                              setPageToEdit(page);
-                              setIsFormOpen(true);
-                            }}
-                            className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition-colors cursor-pointer"
-                            title="Chỉnh sửa trang tĩnh"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
+                        {/* Category */}
+                        {isColumnVisible('category') && (
+                          <td className="py-3.5 px-4">
+                            <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-lg border border-slate-200 dark:border-slate-700 inline-block text-[11px]">
+                              {getCategoryName(page.category_id)}
+                            </span>
+                          </td>
+                        )}
 
-                          {/* Nút Xóa */}
-                          <button
-                            onClick={() => handleTriggerSingleDelete(page)}
-                            className="p-1.5 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
-                            title="Xóa trang tĩnh này"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400 space-y-2">
-                    <FileText className="w-10 h-10 mx-auto opacity-40" />
-                    <p className="text-sm font-medium">Không tìm thấy trang tĩnh nào phù hợp</p>
-                    <p className="text-xs text-slate-400">
-                      Hãy thử thay đổi từ khóa tìm kiếm hoặc bỏ bộ lọc.
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                        {/* Alias Slug */}
+                        {isColumnVisible('path') && (
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500 truncate max-w-[160px]">
+                            /{page.alias}
+                          </td>
+                        )}
 
-        {/* Table Footer */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-          <span>Tổng số: <strong>{filteredPages.length}</strong> trang tĩnh</span>
-          <div className="flex items-center gap-1 text-[11px] text-slate-400">
-            <span>Mẹo: Bạn có thể bật tắt Xuất bản/Ẩn trực tiếp trên công tắc ở danh sách</span>
+                        {/* Locale Progress */}
+                        {isColumnVisible('locale') && (
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 text-[10px] font-bold rounded">
+                                VI
+                              </span>
+                              {page.translation_progress?.en === 'complete' ? (
+                                <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-600 text-[10px] font-bold rounded">
+                                  EN
+                                </span>
+                              ) : page.translation_progress?.en === 'outdated' ? (
+                                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 text-[10px] font-bold rounded">
+                                  EN (Outdated)
+                                </span>
+                              ) : (
+                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-400 text-[10px] rounded">
+                                  EN (-)
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        )}
+
+                        {/* Workflow Status */}
+                        {isColumnVisible('workflow') && (
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              onClick={() => handleTogglePublished(page)}
+                              className="cursor-pointer inline-block"
+                            >
+                              {page.published ? (
+                                <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] rounded-full flex items-center justify-center gap-1">
+                                  <Check className="w-3 h-3" /> Xuất bản
+                                </span>
+                              ) : page.workflow_status === 'pending' ? (
+                                <span className="px-2.5 py-1 bg-purple-500/10 text-purple-600 font-bold text-[11px] rounded-full">
+                                  Chờ duyệt
+                                </span>
+                              ) : page.workflow_status === 'returned' ? (
+                                <span className="px-2.5 py-1 bg-red-500/10 text-red-600 font-bold text-[11px] rounded-full">
+                                  Yêu cầu sửa
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-1 bg-slate-100 text-slate-400 font-bold text-[11px] rounded-full">
+                                  Bản nháp
+                                </span>
+                              )}
+                            </button>
+                          </td>
+                        )}
+
+                        {/* Used-by Reference */}
+                        {isColumnVisible('used_by') && (
+                          <td className="py-3.5 px-4 text-center">
+                            {page.used_by && page.used_by.length > 0 ? (
+                              <button
+                                onClick={() => setActiveUsedByPage(page)}
+                                className="px-2.5 py-1 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 font-bold text-[11px] rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1"
+                              >
+                                <Link2 className="w-3 h-3" />
+                                <span>{page.used_by.length} nơi dùng</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setActiveUsedByPage(page)}
+                                className="px-2.5 py-1 bg-amber-500/10 text-amber-600 font-bold text-[11px] rounded-lg cursor-pointer"
+                              >
+                                Mồ côi
+                              </button>
+                            )}
+                          </td>
+                        )}
+
+                        {/* Updated Time & Author */}
+                        {isColumnVisible('updated') && (
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500">
+                            <div>{page.created_time.split(' ')[0]}</div>
+                            <div className="text-[10px] text-slate-400 font-sans">
+                              {page.author?.name || 'Nguyễn Văn Nam'}
+                            </div>
+                          </td>
+                        )}
+
+                        {/* Action buttons */}
+                        {isColumnVisible('actions') && (
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => setActivePreviewPage(page)}
+                                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+                                title="Xem trước trang công khai"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={() => setActiveQuickEditPage(page)}
+                                className="p-1.5 text-slate-400 hover:text-orange-600 rounded-lg cursor-pointer"
+                                title="Chỉnh sửa nhanh"
+                              >
+                                <Sliders className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setPageToEdit(page);
+                                  setIsFormOpen(true);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-orange-600 rounded-lg cursor-pointer"
+                                title="Chỉnh sửa toàn bộ trang"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={10} className="py-12 text-center text-slate-400 space-y-2">
+                      <FileText className="w-10 h-10 mx-auto opacity-40" />
+                      <p className="text-sm font-medium">Không tìm thấy trang nội dung nào phù hợp</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* Drawers & Modals */}
+      <UsedByDrawer
+        isOpen={!!activeUsedByPage}
+        page={activeUsedByPage}
+        onClose={() => setActiveUsedByPage(null)}
+      />
+
+      <VersionHistoryDrawer
+        isOpen={!!activeVersionPage}
+        page={activeVersionPage}
+        onClose={() => setActiveVersionPage(null)}
+      />
+
+      <ActivityLogDrawer
+        isOpen={!!activeActivityPage}
+        page={activeActivityPage}
+        onClose={() => setActiveActivityPage(null)}
+      />
+
+      <PagePreviewModal
+        isOpen={!!activePreviewPage}
+        page={activePreviewPage}
+        onClose={() => setActivePreviewPage(null)}
+      />
+
+      <QuickEditModal
+        isOpen={!!activeQuickEditPage}
+        page={activeQuickEditPage}
+        categories={categories}
+        allPages={pages}
+        onClose={() => setActiveQuickEditPage(null)}
+        onSave={handleQuickEditSave}
+      />
+
+      <ColumnSettingModal
+        isOpen={isColumnModalOpen}
+        columns={columns}
+        density={density}
+        onClose={() => setIsColumnModalOpen(false)}
+        onToggleColumn={(id) =>
+          setColumns((prev) =>
+            prev.map((c) => (c.id === id ? { ...c, visible: !c.visible } : c))
+          )
+        }
+        onChangeDensity={setDensity}
+      />
+
+      <ImpactWarningModal
+        isOpen={isImpactModalOpen}
+        page={impactPage}
+        actionType={impactAction}
+        onClose={() => setIsImpactModalOpen(false)}
+        onConfirm={() => {
+          if (impactPage) {
+            setPages((prev) =>
+              prev.map((p) =>
+                p.id === impactPage.id
+                  ? { ...p, published: false, workflow_status: 'archived' }
+                  : p
+              )
+            );
+            showToast(`Đã gỡ trang "${impactPage.title}" khỏi giao diện công khai!`);
+          }
+          setIsImpactModalOpen(false);
+        }}
+      />
+
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         itemsToDelete={itemsToDelete}
