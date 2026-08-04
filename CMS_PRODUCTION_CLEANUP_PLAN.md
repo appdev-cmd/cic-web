@@ -55,6 +55,8 @@ Không xóa ngay 20 file `mockData.ts`. Trước tiên phân loại từng file:
 
 Production gate: không còn manager production khởi tạo dữ liệu nghiệp vụ từ `mockData.ts` hoặc `mockCmsData.ts`.
 
+Gate tự động đã được bổ sung bằng `npm run check:cms-production`. Baseline hiện có 18 fixture, 36 runtime import và 0 production claim bị cấm; lệnh cố ý trả mã lỗi cho tới khi runtime mock import về 0.
+
 ## 2.4. Nhóm P2 — từ ngữ và microcopy cần chuẩn hóa
 
 Các từ sau không nhất thiết sai về nghiệp vụ, nhưng đang dùng lẫn lộn và dư thừa trong UI:
