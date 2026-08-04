@@ -35,7 +35,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { StaticPage, StaticPageCategory, WorkflowStatus } from './types';
-import { staticPagesMock, staticPageCategoriesMock } from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { StaticPagesModuleData } from '../../data/EditorialContentDataSource';
 import { StaticPageFormView } from './StaticPageFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { TreeView } from './TreeView';
@@ -47,10 +48,15 @@ import { QuickEditModal } from './QuickEditModal';
 import { ColumnSettingModal, ColumnConfig } from './ColumnSettingModal';
 import { ImpactWarningModal } from './ImpactWarningModal';
 
-export const StaticPagesManager: React.FC = () => {
+interface StaticPagesManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: StaticPagesModuleData;
+}
+
+export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspaceLocale, data }) => {
   // Main Pages State
-  const [pages, setPages] = useState<StaticPage[]>(staticPagesMock);
-  const [categories] = useState<StaticPageCategory[]>(staticPageCategoriesMock);
+  const [pages, setPages] = useState<StaticPage[]>(data?.pages ?? []);
+  const [categories] = useState<StaticPageCategory[]>(data?.categories ?? []);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // View Mode: 'list' (Data Table) vs 'tree' (Content Hierarchy Tree)
@@ -367,7 +373,7 @@ export const StaticPagesManager: React.FC = () => {
               <FileText className="w-5 h-5" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Trang nội dung
+              Trang nội dung · {workspaceLocale.toUpperCase()}
             </h1>
             <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
               {pages.filter((p) => !p.in_trash).length} trang

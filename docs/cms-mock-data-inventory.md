@@ -6,7 +6,7 @@
 
 - 18 file fixture `mockData.ts/mockCmsData.ts`.
 - Baseline ban đầu có 36 runtime import tham chiếu trực tiếp tới fixture.
-- Sau khi tách App Shell/Dashboard qua `CmsDataSource`, gate còn 34 dependency path tới demo/mock. Header, Sidebar và Dashboard page không import fixture trực tiếp nữa; `CmsDashboard` vẫn chủ động chọn demo adapter nên production gate tiếp tục chặn.
+- Sau khi tách App Shell/Dashboard và nhóm News/Static Pages/Services qua data-source boundary, gate ghi nhận 35 dependency path tới demo/mock. Con số này bao gồm cả dynamic import: ba module nội dung dùng chung demo adapter nhưng mỗi lazy boundary được đếm riêng. Production gate tiếp tục chặn cho tới khi có production adapter.
 - Production gate phải fail cho tới khi runtime không còn import mock.
 - TypeScript/build pass không đồng nghĩa production data readiness pass.
 
@@ -48,5 +48,8 @@
 
 - `src/cms/data/CmsDataSource.ts`: contract cho current user, navigation, notification và Dashboard data.
 - `src/cms/data/demoCmsDataSource.ts`: adapter demo duy nhất của App Shell/Dashboard; vẫn bị production gate nhận diện.
-- Bước tiếp theo: tách `UI language` khỏi `workspace locale`, sau đó thay demo adapter bằng nguồn theo locale mà không fallback business data.
+- `src/cms/data/EditorialContentDataSource.ts`: contract theo locale cho News, Static Pages và Services.
+- `src/cms/data/demoEditorialContentDataSource.ts`: gom fixture nội dung vào demo adapter; chỉ có VI để kiểm chứng không fallback sang VI khi workspace là EN.
+- News, Static Pages và Services không còn import fixture trực tiếp trong manager/form; demo adapter chỉ được tải trong lazy boundary của từng module.
+- Bước tiếp theo: tạo boundary theo locale cho Products và Product Settings.
 - Runtime contract đã được bổ sung tại `docs/cms-locale-runtime-contract.md`: Dashboard EN thiếu dữ liệu hiển thị empty state và không fallback KPI/list/chart VI.

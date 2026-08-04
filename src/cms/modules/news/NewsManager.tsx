@@ -31,7 +31,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { NewsArticle, NewsCategory, WorkflowStatus } from './types';
-import { mockArticles, mockNewsCategories } from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { NewsModuleData } from '../../data/EditorialContentDataSource';
 import { NewsFormView } from './NewsFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ArticlePreviewModal } from './components/ArticlePreviewModal';
@@ -42,10 +43,15 @@ import { ActivityLogDrawer } from './components/ActivityLogDrawer';
 
 type ViewScopeTab = 'all' | 'my_work' | 'pending' | 'scheduled' | 'trash';
 
-export const NewsManager: React.FC = () => {
+interface NewsManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: NewsModuleData;
+}
+
+export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data }) => {
   // Articles State
-  const [articles, setArticles] = useState<NewsArticle[]>(mockArticles);
-  const [categories] = useState<NewsCategory[]>(mockNewsCategories);
+  const [articles, setArticles] = useState<NewsArticle[]>(data?.articles ?? []);
+  const [categories] = useState<NewsCategory[]>(data?.categories ?? []);
 
   // View Mode: 'list' or 'form'
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
@@ -308,6 +314,8 @@ export const NewsManager: React.FC = () => {
         <NewsFormView
           articleToEdit={editingArticle}
           categories={categories}
+          relatedArticles={data?.articles ?? []}
+          relatedProducts={data?.relatedProducts ?? []}
           onSave={handleSaveArticleFromForm}
           onCancel={() => {
             setViewMode('list');
@@ -324,10 +332,10 @@ export const NewsManager: React.FC = () => {
                   <Newspaper className="w-5 h-5" />
                 </div>
                 <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-                  Quản lý bài viết và tin tức
+                  Quản lý bài viết và tin tức · {workspaceLocale.toUpperCase()}
                 </h1>
                 <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-                  1.532+ tin bài
+                  {articles.filter((article) => !article.in_trash).length} tin bài
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">

@@ -37,10 +37,13 @@ const copyViolations = [];
 
 for (const filePath of runtimeFiles) {
   const source = await readFile(filePath, 'utf8');
-  const importPattern = /from\s+['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource))['"]/g;
+  const importPattern = /from\s+['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource|demoEditorialContentDataSource))['"]/g;
+  const dynamicImportPattern = /import\(\s*['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource|demoEditorialContentDataSource))['"]\s*\)/g;
 
-  for (const match of source.matchAll(importPattern)) {
-    mockImports.push({ file: relative(filePath), importPath: match[1] });
+  for (const pattern of [importPattern, dynamicImportPattern]) {
+    for (const match of source.matchAll(pattern)) {
+      mockImports.push({ file: relative(filePath), importPath: match[1] });
+    }
   }
 
   for (const text of forbiddenCopy) {

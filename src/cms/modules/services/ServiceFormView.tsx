@@ -31,8 +31,11 @@ import {
   EditorialStatus,
   ServiceStatus,
   TranslationStatus,
+  ServiceActivityLog,
+  ServiceVersion,
+  ServiceUsedByReference,
+  ServiceRelatedContact,
 } from './types';
-import { mockServiceActivityLogs, mockServiceVersions, mockServiceUsedByReferences, mockServiceRelatedContacts } from './mockData';
 import { ActivityLogDrawer } from './ActivityLogDrawer';
 import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { UsedByDrawer } from './UsedByDrawer';
@@ -42,6 +45,10 @@ interface ServiceFormViewProps {
   service: ServiceItem;
   groups: ServiceGroup[];
   owners: { id: string; name: string; email: string }[];
+  activityLogs: ServiceActivityLog[];
+  versions: ServiceVersion[];
+  usedByReferences: ServiceUsedByReference[];
+  relatedContacts: ServiceRelatedContact[];
   onBack: () => void;
   onSave: (updated: ServiceItem) => void;
   onOpenPreview: (item: ServiceItem) => void;
@@ -51,6 +58,10 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
   service,
   groups,
   owners,
+  activityLogs,
+  versions,
+  usedByReferences,
+  relatedContacts,
   onBack,
   onSave,
   onOpenPreview,
@@ -907,14 +918,14 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         isOpen={isLogsDrawerOpen}
         onClose={() => setIsLogsDrawerOpen(false)}
         serviceTitle={formData.title}
-        logs={mockServiceActivityLogs}
+        logs={activityLogs}
       />
 
       <VersionHistoryDrawer
         isOpen={isVersionsDrawerOpen}
         onClose={() => setIsVersionsDrawerOpen(false)}
         serviceTitle={formData.title}
-        versions={mockServiceVersions}
+        versions={versions}
         onRestoreVersion={(ver) => {
           setFormData((prev) => ({
             ...prev,
@@ -930,14 +941,14 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         isOpen={isUsedByDrawerOpen}
         onClose={() => setIsUsedByDrawerOpen(false)}
         serviceTitle={formData.title}
-        references={mockServiceUsedByReferences}
+        references={usedByReferences}
       />
 
       <RelatedContactsDrawer
         isOpen={isContactsDrawerOpen}
         onClose={() => setIsContactsDrawerOpen(false)}
         serviceTitle={formData.title}
-        contacts={mockServiceRelatedContacts}
+        contacts={relatedContacts}
       />
     </div>
   );

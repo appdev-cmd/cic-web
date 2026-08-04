@@ -35,7 +35,8 @@ import {
   EditorialStatus,
   ServiceStatus,
 } from './types';
-import { mockServicesData, serviceGroupsMock, mockServiceActivityLogs, mockServiceVersions, mockServiceUsedByReferences, mockServiceRelatedContacts } from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { ServicesModuleData } from '../../data/EditorialContentDataSource';
 import { ServiceFormView } from './ServiceFormView';
 import { ServicePreviewModal } from './ServicePreviewModal';
 import { QuickEditModal } from './QuickEditModal';
@@ -45,8 +46,13 @@ import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { UsedByDrawer } from './UsedByDrawer';
 import { RelatedContactsDrawer } from './RelatedContactsDrawer';
 
-export const ServicesManager: React.FC = () => {
-  const [services, setServices] = useState<ServiceItem[]>(mockServicesData);
+interface ServicesManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: ServicesModuleData;
+}
+
+export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocale, data }) => {
+  const [services, setServices] = useState<ServiceItem[]>(data?.services ?? []);
   const [activeTab, setActiveTab] = useState<'all' | 'my_tasks' | 'pending' | 'active' | 'low_quality' | 'trash'>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -80,11 +86,8 @@ export const ServicesManager: React.FC = () => {
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const ownersList = [
-    { id: 'usr_002', name: 'Trần Văn Mạnh', email: 'manh.tv@cic.com.vn' },
-    { id: 'usr_003', name: 'Nguyễn Thị Bích', email: 'bich.nt@cic.com.vn' },
-    { id: 'usr_004', name: 'Vũ Quốc Huy', email: 'huy.vq@cic.com.vn' },
-  ];
+  const groups = data?.groups ?? [];
+  const ownersList = data?.owners ?? [];
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -266,8 +269,12 @@ export const ServicesManager: React.FC = () => {
     return (
       <ServiceFormView
         service={editingService}
-        groups={serviceGroupsMock}
+        groups={groups}
         owners={ownersList}
+        activityLogs={data?.activityLogs ?? []}
+        versions={data?.versions ?? []}
+        usedByReferences={data?.usedByReferences ?? []}
+        relatedContacts={data?.relatedContacts ?? []}
         onBack={() => setEditingService(null)}
         onSave={(updated) => {
           handleSaveServiceFromForm(updated);
@@ -296,7 +303,7 @@ export const ServicesManager: React.FC = () => {
           </div>
           <div>
             <h1 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              Quản lý dịch vụ
+              Quản lý dịch vụ · {workspaceLocale.toUpperCase()}
               <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                 {filteredServices.length} dịch vụ
               </span>
@@ -373,7 +380,7 @@ export const ServicesManager: React.FC = () => {
             className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
           >
             <option value="all">Tất cả Nhóm dịch vụ</option>
-            {serviceGroupsMock.map((g) => (
+            {groups.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name}
               </option>
@@ -782,7 +789,7 @@ export const ServicesManager: React.FC = () => {
         isOpen={Boolean(quickEditService)}
         onClose={() => setQuickEditService(null)}
         service={quickEditService}
-        groups={serviceGroupsMock}
+        groups={groups}
         owners={ownersList}
         onSave={(updated) => {
           handleSaveServiceFromForm(updated);
@@ -805,7 +812,7 @@ export const ServicesManager: React.FC = () => {
               isOpen={true}
               onClose={() => setActiveDrawer(null)}
               serviceTitle={activeDrawer.service.title}
-              logs={mockServiceActivityLogs}
+              logs={data?.activityLogs ?? []}
             />
           )}
 
@@ -814,7 +821,7 @@ export const ServicesManager: React.FC = () => {
               isOpen={true}
               onClose={() => setActiveDrawer(null)}
               serviceTitle={activeDrawer.service.title}
-              versions={mockServiceVersions}
+              versions={data?.versions ?? []}
             />
           )}
 
@@ -823,7 +830,7 @@ export const ServicesManager: React.FC = () => {
               isOpen={true}
               onClose={() => setActiveDrawer(null)}
               serviceTitle={activeDrawer.service.title}
-              references={mockServiceUsedByReferences}
+              references={data?.usedByReferences ?? []}
             />
           )}
 
@@ -832,7 +839,7 @@ export const ServicesManager: React.FC = () => {
               isOpen={true}
               onClose={() => setActiveDrawer(null)}
               serviceTitle={activeDrawer.service.title}
-              contacts={mockServiceRelatedContacts}
+              contacts={data?.relatedContacts ?? []}
             />
           )}
         </>

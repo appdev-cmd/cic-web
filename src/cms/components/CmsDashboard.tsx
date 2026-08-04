@@ -18,14 +18,56 @@ const PermissionManagement = lazy(() => import('../modules/permission_management
 const SystemConfiguration = lazy(() => import('../modules/system_configuration/SystemConfiguration').then((module) => ({ default: module.SystemConfiguration })));
 const ActivityLogsManager = lazy(() => import('../modules/activity_logs_trash/ActivityLogsManager').then((module) => ({ default: module.ActivityLogsManager })));
 const TrashManager = lazy(() => import('../modules/activity_logs_trash/TrashManager').then((module) => ({ default: module.TrashManager })));
-const StaticPagesManager = lazy(() => import('../modules/static_pages/StaticPagesManager').then((module) => ({ default: module.StaticPagesManager })));
-const NewsManager = lazy(() => import('../modules/news/NewsManager').then((module) => ({ default: module.NewsManager })));
+const StaticPagesManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/static_pages/StaticPagesManager'),
+    import('../data/demoEditorialContentDataSource'),
+  ]);
+
+  return {
+    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+      <module.StaticPagesManager
+        workspaceLocale={workspaceLocale}
+        data={dataModule.demoEditorialContentDataSource.staticPagesByLocale[workspaceLocale]}
+      />
+    ),
+  };
+});
+const NewsManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/news/NewsManager'),
+    import('../data/demoEditorialContentDataSource'),
+  ]);
+
+  return {
+    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+      <module.NewsManager
+        workspaceLocale={workspaceLocale}
+        data={dataModule.demoEditorialContentDataSource.newsByLocale[workspaceLocale]}
+      />
+    ),
+  };
+});
 const EventsManager = lazy(() => import('../modules/events/EventsManager').then((module) => ({ default: module.EventsManager })));
 const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
 const BannersManager = lazy(() => import('../modules/banners/BannersManager').then((module) => ({ default: module.BannersManager })));
 const ProductSettingsManager = lazy(() => import('../modules/product_settings/ProductSettingsManager').then((module) => ({ default: module.ProductSettingsManager })));
 const ProductsManager = lazy(() => import('../modules/products/ProductsManager').then((module) => ({ default: module.ProductsManager })));
-const ServicesManager = lazy(() => import('../modules/services/ServicesManager').then((module) => ({ default: module.ServicesManager })));
+const ServicesManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/services/ServicesManager'),
+    import('../data/demoEditorialContentDataSource'),
+  ]);
+
+  return {
+    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+      <module.ServicesManager
+        workspaceLocale={workspaceLocale}
+        data={dataModule.demoEditorialContentDataSource.servicesByLocale[workspaceLocale]}
+      />
+    ),
+  };
+});
 const MenuManager = lazy(() => import('../modules/menu/MenuManager').then((module) => ({ default: module.MenuManager })));
 const ContentBlocksManager = lazy(() => import('../modules/content_blocks/ContentBlocksManager').then((module) => ({ default: module.ContentBlocksManager })));
 const MediaManager = lazy(() => import('../modules/media/MediaManager').then((module) => ({ default: module.MediaManager })));
@@ -159,9 +201,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'trash' ? (
             <TrashManager />
           ) : activeModule === 'static_pages' ? (
-            <StaticPagesManager />
+            <StaticPagesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'news' ? (
-            <NewsManager />
+            <NewsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'events' ? (
             <EventsManager />
           ) : activeModule === 'email_templates' ? (
@@ -173,7 +215,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'products' ? (
             <ProductsManager />
           ) : activeModule === 'services' ? (
-            <ServicesManager />
+            <ServicesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'menu' ? (
             <MenuManager />
           ) : activeModule === 'content_blocks' ? (

@@ -24,8 +24,11 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - `CmsDataSource.availableLocales`: locale workspace mà shell có thể chọn.
 - `CmsDataSource.dashboardByLocale`: dữ liệu Dashboard theo locale, sử dụng `Partial<Record<...>>` để biểu diễn locale chưa có dữ liệu.
 - Demo adapter hiện chỉ có Dashboard VI. EN cố ý không có data để kiểm tra no-fallback behavior.
+- `EditorialContentDataSource` tách dữ liệu News, Static Pages và Services theo `CmsLocale`; từng module chỉ nhận dataset của workspace đang mở.
+- Demo adapter nội dung hiện chỉ khai báo VI. Khi chuyển sang EN, ba module hiển thị danh sách rỗng và không dùng nội dung, lookup hoặc owner của VI.
+- Adapter demo nội dung được tải cùng lazy boundary của module, không nằm trong entry bundle của CMS.
 - All-locales mode đã bị ẩn cho tới khi permission và breakdown được triển khai thật.
 
 ## Bước tiếp theo
 
-Mỗi module nghiệp vụ cần data-source boundary nhận `CmsLocale` trước khi chuyển UI copy sang resource key. Module Contacts là operational record dùng source locale, không nhân đôi một contact cho VI/EN.
+Tiếp tục áp dụng data-source boundary nhận `CmsLocale` cho Products/Product Settings, sau đó Menu/Banners/Content Blocks. Module Contacts là operational record dùng source locale, không nhân đôi một contact cho VI/EN.

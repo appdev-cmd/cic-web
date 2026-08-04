@@ -31,7 +31,6 @@ import {
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { SearchableSelect, SearchableMultiSelect } from '../../components/SearchableSelect';
 import { NewsArticle, NewsCategory, RelatedProductItem, WorkflowStatus, ArticleVersion } from './types';
-import { mockRelatedProducts, mockArticles } from './mockData';
 import { ArticlePreviewModal } from './components/ArticlePreviewModal';
 import { ReturnCommentModal } from './components/ReturnCommentModal';
 import { VersionHistoryDrawer } from './components/VersionHistoryDrawer';
@@ -40,6 +39,8 @@ import { ActivityLogDrawer } from './components/ActivityLogDrawer';
 interface NewsFormViewProps {
   articleToEdit: NewsArticle | null;
   categories: NewsCategory[];
+  relatedArticles: NewsArticle[];
+  relatedProducts: RelatedProductItem[];
   onSave: (data: Partial<NewsArticle>) => void;
   onCancel: () => void;
 }
@@ -68,6 +69,8 @@ type ActiveTab = 'content' | 'taxonomy' | 'media' | 'seo' | 'localization' | 'pu
 export const NewsFormView: React.FC<NewsFormViewProps> = ({
   articleToEdit,
   categories,
+  relatedArticles,
+  relatedProducts,
   onSave,
   onCancel,
 }) => {
@@ -532,7 +535,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   <span>Tin tức liên quan</span>
                 </label>
                 <SearchableMultiSelect
-                  options={mockArticles.map((art) => ({
+                  options={relatedArticles.map((art) => ({
                     id: art.id,
                     label: art.title,
                     image: art.image,
@@ -549,7 +552,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   <span>Sản phẩm phần mềm liên quan</span>
                 </label>
                 <SearchableMultiSelect
-                  options={mockRelatedProducts.map((prod) => ({
+                  options={relatedProducts.map((prod) => ({
                     id: prod.id,
                     label: prod.name,
                     subLabel: prod.code,
