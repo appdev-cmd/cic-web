@@ -33,16 +33,7 @@ import {
   Legend,
 } from 'recharts';
 
-import {
-  kpiStatsMock,
-  contactMessagesMock,
-  productRegistrationsMock,
-  pendingContentsMock,
-  dailyTrafficMock,
-  monthlyTrafficMock,
-  weeklyContentStatsMock,
-  activityLogsMock,
-} from '../../data/mockCmsData';
+import type { CmsDashboardData } from '../../data/CmsDataSource';
 
 import {
   ContactMessage,
@@ -61,12 +52,14 @@ import { ResetLayoutModal } from './ResetLayoutModal';
 
 interface DashboardOverviewProps {
   lang?: 'VI' | 'EN';
+  data: CmsDashboardData;
   onNavigate: (path: string, title: string) => void;
   onOpenDrawerItem: (type: 'contact' | 'registration' | 'pending' | 'activity', data: any) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   lang = 'VI',
+  data,
   onNavigate,
   onOpenDrawerItem,
 }) => {
@@ -85,10 +78,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // Lists state
-  const [contacts] = useState<ContactMessage[]>(contactMessagesMock);
-  const [registrations] = useState<ProductRegistration[]>(productRegistrationsMock);
-  const [pendingItems] = useState<PendingContent[]>(pendingContentsMock);
-  const [activityLogs] = useState<ActivityLog[]>(activityLogsMock);
+  const [contacts] = useState<ContactMessage[]>(data.contacts);
+  const [registrations] = useState<ProductRegistration[]>(data.productRegistrations);
+  const [pendingItems] = useState<PendingContent[]>(data.pendingContents);
+  const [activityLogs] = useState<ActivityLog[]>(data.activityLogs);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -282,7 +275,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
                 <div className="mt-3">
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
-                    {kpiStatsMock.published_products}
+                    {data.kpi.published_products}
                   </span>
                   <p className="text-[11px] text-slate-400 mt-0.5">Đang Published</p>
                 </div>
@@ -301,7 +294,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
                 <div className="mt-3">
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
-                    {kpiStatsMock.published_news}
+                    {data.kpi.published_news}
                   </span>
                   <p className="text-[11px] text-slate-400 mt-0.5">Bài viết tin tức</p>
                 </div>
@@ -320,7 +313,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
                 <div className="mt-3">
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
-                    {kpiStatsMock.static_pages}
+                    {data.kpi.static_pages}
                   </span>
                   <p className="text-[11px] text-slate-400 mt-0.5">Trang giới thiệu / Chính sách</p>
                 </div>
@@ -339,7 +332,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
                 <div className="mt-3">
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
-                    {kpiStatsMock.published_members}
+                    {data.kpi.published_members}
                   </span>
                   <p className="text-[11px] text-slate-400 mt-0.5">Đã kích hoạt</p>
                 </div>
@@ -359,7 +352,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="mt-3">
                   <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-black text-red-600 dark:text-red-400">
-                      {kpiStatsMock.unprocessed_contacts}
+                      {data.kpi.unprocessed_contacts}
                     </span>
                     <span className="px-1.5 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 text-[10px] font-bold rounded animate-pulse">
                       Chưa xử lý!
@@ -383,7 +376,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="mt-3">
                   <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-black text-amber-600 dark:text-amber-400">
-                      {kpiStatsMock.unprocessed_registrations}
+                      {data.kpi.unprocessed_registrations}
                     </span>
                     <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-bold rounded animate-pulse">
                       Chờ báo giá!
@@ -612,7 +605,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={timeRange === '7' ? dailyTrafficMock : monthlyTrafficMock}
+                      data={timeRange === '7' ? data.traffic7Days : data.traffic30Days}
                       margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.15} />
@@ -665,7 +658,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={weeklyContentStatsMock}
+                      data={data.weeklyContent}
                       margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.15} />

@@ -20,10 +20,10 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { CmsUser, NotificationItem } from '../types';
-import { notificationsMock } from '../data/mockCmsData';
 
 interface CmsHeaderProps {
   user: CmsUser;
+  initialNotifications: NotificationItem[];
   isDarkMode: boolean;
   onToggleTheme: () => void;
   lang: 'VI' | 'EN';
@@ -36,6 +36,7 @@ interface CmsHeaderProps {
 
 export const CmsHeader: React.FC<CmsHeaderProps> = ({
   user,
+  initialNotifications,
   isDarkMode,
   onToggleTheme,
   lang,
@@ -48,7 +49,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(notificationsMock);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 

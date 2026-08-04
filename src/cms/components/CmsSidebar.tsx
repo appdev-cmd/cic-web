@@ -49,10 +49,10 @@ import {
   PinOff,
 } from 'lucide-react';
 import { CmsMenuGroup, CmsMenuItem } from '../types';
-import { cmsMenuGroupsMock } from '../data/mockCmsData';
 
 interface CmsSidebarProps {
   isCollapsed: boolean;
+  menuGroups: CmsMenuGroup[];
   onToggleCollapse: () => void;
   activePath: string;
   onSelectMenu: (path: string, title: string) => void;
@@ -107,13 +107,13 @@ const renderIcon = (iconName: string, className: string = 'w-4 h-4') => {
 
 export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   isCollapsed,
+  menuGroups,
   onToggleCollapse,
   activePath,
   onSelectMenu,
   isMobileOpen,
   onCloseMobile,
 }) => {
-  const [menuGroups] = useState<CmsMenuGroup[]>(cmsMenuGroupsMock);
   const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([
     'grp_tong_quan',
     'grp_noi_dung',

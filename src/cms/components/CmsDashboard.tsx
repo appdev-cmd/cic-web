@@ -8,15 +8,9 @@ import { CmsFooter } from './CmsFooter';
 import { CmsCommandPalette } from './CmsCommandPalette';
 import { CmsRightDrawer, DrawerItem } from './CmsRightDrawer';
 
-import {
-  currentUserMock,
-  contactMessagesMock,
-  productRegistrationsMock,
-  pendingContentsMock,
-} from '../data/mockCmsData';
-
 import { ContactMessage, ProductRegistration, PendingContent } from '../types';
 import { resolveCmsModule } from '../routing';
+import { demoCmsDataSource } from '../data/demoCmsDataSource';
 
 const CicUsersManager = lazy(() => import('../modules/cic_users/CicUsersManager').then((module) => ({ default: module.CicUsersManager })));
 const PermissionManagement = lazy(() => import('../modules/permission_management/PermissionManagement').then((module) => ({ default: module.PermissionManagement })));
@@ -60,9 +54,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Lists state
-  const [contacts, setContacts] = useState<ContactMessage[]>(contactMessagesMock);
-  const [registrations, setRegistrations] = useState<ProductRegistration[]>(productRegistrationsMock);
-  const [pendingItems, setPendingItems] = useState<PendingContent[]>(pendingContentsMock);
+  const [contacts, setContacts] = useState<ContactMessage[]>(demoCmsDataSource.dashboard.contacts);
+  const [registrations, setRegistrations] = useState<ProductRegistration[]>(demoCmsDataSource.dashboard.productRegistrations);
+  const [pendingItems, setPendingItems] = useState<PendingContent[]>(demoCmsDataSource.dashboard.pendingContents);
   const activeModule = resolveCmsModule(activePath);
 
   // Status updates handler
@@ -86,7 +80,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
     <div className={`min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* 1. HEADER */}
       <CmsHeader
-        user={currentUserMock}
+        user={demoCmsDataSource.currentUser}
+        initialNotifications={demoCmsDataSource.notifications}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
         lang={lang}
@@ -103,6 +98,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
       {/* 2. SIDEBAR */}
       <CmsSidebar
         isCollapsed={isSidebarCollapsed}
+        menuGroups={demoCmsDataSource.menuGroups}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         activePath={activePath}
         onSelectMenu={(path, title) => {
@@ -189,6 +185,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'dashboard' ? (
             <DashboardOverview
               lang={lang}
+              data={demoCmsDataSource.dashboard}
               onNavigate={(path, title) => {
                 setActivePath(path);
                 setCurrentPageTitle(title);

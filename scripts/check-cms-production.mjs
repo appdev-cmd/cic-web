@@ -37,7 +37,7 @@ const copyViolations = [];
 
 for (const filePath of runtimeFiles) {
   const source = await readFile(filePath, 'utf8');
-  const importPattern = /from\s+['"]([^'"]*(?:mockData|mockCmsData))['"]/g;
+  const importPattern = /from\s+['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource))['"]/g;
 
   for (const match of source.matchAll(importPattern)) {
     mockImports.push({ file: relative(filePath), importPath: match[1] });

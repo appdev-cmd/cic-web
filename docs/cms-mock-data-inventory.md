@@ -5,7 +5,8 @@
 ## Baseline
 
 - 18 file fixture `mockData.ts/mockCmsData.ts`.
-- 36 runtime import còn tham chiếu trực tiếp tới fixture; một số file có nhiều hơn một nguồn mock.
+- Baseline ban đầu có 36 runtime import tham chiếu trực tiếp tới fixture.
+- Sau khi tách App Shell/Dashboard qua `CmsDataSource`, gate còn 34 dependency path tới demo/mock. Header, Sidebar và Dashboard page không import fixture trực tiếp nữa; `CmsDashboard` vẫn chủ động chọn demo adapter nên production gate tiếp tục chặn.
 - Production gate phải fail cho tới khi runtime không còn import mock.
 - TypeScript/build pass không đồng nghĩa production data readiness pass.
 
@@ -42,3 +43,9 @@
 6. Contacts.
 7. Users + Permission + Configuration + Audit/Trash.
 8. UI Localization sau khi glossary và locale workspace contract ổn định.
+
+## Boundary đã tạo
+
+- `src/cms/data/CmsDataSource.ts`: contract cho current user, navigation, notification và Dashboard data.
+- `src/cms/data/demoCmsDataSource.ts`: adapter demo duy nhất của App Shell/Dashboard; vẫn bị production gate nhận diện.
+- Bước tiếp theo: tách `UI language` khỏi `workspace locale`, sau đó thay demo adapter bằng nguồn theo locale mà không fallback business data.
