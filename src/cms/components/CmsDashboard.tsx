@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { CheckCircle2, RotateCcw } from 'lucide-react';
 
 import { CmsHeader } from './CmsHeader';
@@ -16,25 +16,27 @@ import {
 } from '../data/mockCmsData';
 
 import { ContactMessage, ProductRegistration, PendingContent } from '../types';
-import { CicUsersManager } from '../modules/cic_users/CicUsersManager';
-import { PermissionManagement } from '../modules/permission_management/PermissionManagement';
-import { SystemConfiguration } from '../modules/system_configuration/SystemConfiguration';
-import { ActivityLogsManager } from '../modules/activity_logs_trash/ActivityLogsManager';
-import { TrashManager } from '../modules/activity_logs_trash/TrashManager';
-import { StaticPagesManager } from '../modules/static_pages/StaticPagesManager';
-import { NewsManager } from '../modules/news/NewsManager';
-import { EventsManager } from '../modules/events/EventsManager';
-import { EmailTemplatesManager } from '../modules/email_templates/EmailTemplatesManager';
-import { BannersManager } from '../modules/banners/BannersManager';
-import { ProductsManager } from '../modules/products/ProductsManager';
-import { ProductSettingsManager } from '../modules/product_settings/ProductSettingsManager';
-import { ServicesManager } from '../modules/services/ServicesManager';
-import { MenuManager } from '../modules/menu/MenuManager';
-import { ContentBlocksManager } from '../modules/content_blocks/ContentBlocksManager';
-import { MediaManager } from '../modules/media/MediaManager';
-import { ContactsManager } from '../modules/contacts/ContactsManager';
-import { LocalizationManager } from '../modules/localization/LocalizationManager';
-import { DashboardOverview } from '../modules/dashboard/DashboardOverview';
+import { resolveCmsModule } from '../routing';
+
+const CicUsersManager = lazy(() => import('../modules/cic_users/CicUsersManager').then((module) => ({ default: module.CicUsersManager })));
+const PermissionManagement = lazy(() => import('../modules/permission_management/PermissionManagement').then((module) => ({ default: module.PermissionManagement })));
+const SystemConfiguration = lazy(() => import('../modules/system_configuration/SystemConfiguration').then((module) => ({ default: module.SystemConfiguration })));
+const ActivityLogsManager = lazy(() => import('../modules/activity_logs_trash/ActivityLogsManager').then((module) => ({ default: module.ActivityLogsManager })));
+const TrashManager = lazy(() => import('../modules/activity_logs_trash/TrashManager').then((module) => ({ default: module.TrashManager })));
+const StaticPagesManager = lazy(() => import('../modules/static_pages/StaticPagesManager').then((module) => ({ default: module.StaticPagesManager })));
+const NewsManager = lazy(() => import('../modules/news/NewsManager').then((module) => ({ default: module.NewsManager })));
+const EventsManager = lazy(() => import('../modules/events/EventsManager').then((module) => ({ default: module.EventsManager })));
+const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
+const BannersManager = lazy(() => import('../modules/banners/BannersManager').then((module) => ({ default: module.BannersManager })));
+const ProductSettingsManager = lazy(() => import('../modules/product_settings/ProductSettingsManager').then((module) => ({ default: module.ProductSettingsManager })));
+const ProductsManager = lazy(() => import('../modules/products/ProductsManager').then((module) => ({ default: module.ProductsManager })));
+const ServicesManager = lazy(() => import('../modules/services/ServicesManager').then((module) => ({ default: module.ServicesManager })));
+const MenuManager = lazy(() => import('../modules/menu/MenuManager').then((module) => ({ default: module.MenuManager })));
+const ContentBlocksManager = lazy(() => import('../modules/content_blocks/ContentBlocksManager').then((module) => ({ default: module.ContentBlocksManager })));
+const MediaManager = lazy(() => import('../modules/media/MediaManager').then((module) => ({ default: module.MediaManager })));
+const ContactsManager = lazy(() => import('../modules/contacts/ContactsManager').then((module) => ({ default: module.ContactsManager })));
+const LocalizationManager = lazy(() => import('../modules/localization/LocalizationManager').then((module) => ({ default: module.LocalizationManager })));
+const DashboardOverview = lazy(() => import('../modules/dashboard/DashboardOverview').then((module) => ({ default: module.DashboardOverview })));
 
 interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
@@ -61,6 +63,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [contacts, setContacts] = useState<ContactMessage[]>(contactMessagesMock);
   const [registrations, setRegistrations] = useState<ProductRegistration[]>(productRegistrationsMock);
   const [pendingItems, setPendingItems] = useState<PendingContent[]>(pendingContentsMock);
+  const activeModule = resolveCmsModule(activePath);
 
   // Status updates handler
   const handleUpdateStatus = (type: string, id: string, newStatus: string) => {
@@ -134,48 +137,56 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
 
           {/* Breadcrumb & Page Title */}
           <CmsBreadcrumb
-            items={activePath === '/cms/dashboard' || activePath === '/cms' ? [{ label: 'Tổng quan' }] : [{ label: 'Tổng quan' }, { label: currentPageTitle }]}
+            items={activeModule === 'dashboard' ? [{ label: 'Tổng quan' }] : [{ label: 'Tổng quan' }, { label: currentPageTitle }]}
             pageTitle={currentPageTitle}
             hideHeaderBar
           />
 
-          {activePath === '/cms/users' || activePath === '/cms/accounts' || activePath === '/cms/user-management' || activePath.startsWith('/cms/user') ? (
+          <Suspense
+            fallback={(
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900" aria-busy="true">
+                <div className="h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="mt-4 h-32 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+              </div>
+            )}
+          >
+          {activeModule === 'users' ? (
             <CicUsersManager />
-          ) : activePath === '/cms/permissions' ? (
+          ) : activeModule === 'permissions' ? (
             <PermissionManagement />
-          ) : activePath === '/cms/settings' || activePath === '/cms/system-settings' || activePath.startsWith('/cms/settings') ? (
+          ) : activeModule === 'settings' ? (
             <SystemConfiguration />
-          ) : activePath === '/cms/history' || activePath === '/cms/logs' || activePath === '/cms/activity-logs' || activePath === '/cms/audit' ? (
+          ) : activeModule === 'activity_logs' ? (
             <ActivityLogsManager />
-          ) : activePath === '/cms/trash' || activePath === '/cms/recycle-bin' ? (
+          ) : activeModule === 'trash' ? (
             <TrashManager />
-          ) : activePath === '/cms/static-pages' || activePath === '/cms/pages' ? (
+          ) : activeModule === 'static_pages' ? (
             <StaticPagesManager />
-          ) : activePath === '/cms/news' || activePath === '/cms/articles' ? (
+          ) : activeModule === 'news' ? (
             <NewsManager />
-          ) : activePath === '/cms/events' ? (
+          ) : activeModule === 'events' ? (
             <EventsManager />
-          ) : activePath === '/cms/email-templates' ? (
+          ) : activeModule === 'email_templates' ? (
             <EmailTemplatesManager />
-          ) : activePath === '/cms/slideshows' || activePath === '/cms/banners' || activePath.startsWith('/cms/banners') ? (
+          ) : activeModule === 'banners' ? (
             <BannersManager />
-          ) : activePath === '/cms/product-settings' || activePath === '/cms/products/settings' || activePath === '/cms/product-categories' || activePath === '/cms/manufacturers' || activePath === '/cms/applications' || activePath === '/cms/product-types' || activePath === '/cms/sales-staff' || activePath === '/cms/products/categories' || activePath === '/cms/products/brands' || activePath === '/cms/products/routing' ? (
+          ) : activeModule === 'product_settings' ? (
             <ProductSettingsManager />
-          ) : activePath === '/cms/products' || activePath === '/cms/products/catalog' || activePath === '/cms/catalog' ? (
+          ) : activeModule === 'products' ? (
             <ProductsManager />
-          ) : activePath === '/cms/services' || activePath.startsWith('/cms/services') ? (
+          ) : activeModule === 'services' ? (
             <ServicesManager />
-          ) : activePath === '/cms/menu' || activePath === '/cms/frontend-menus' || activePath === '/cms/navigation' || activePath.startsWith('/cms/menu') ? (
+          ) : activeModule === 'menu' ? (
             <MenuManager />
-          ) : activePath === '/cms/home-blocks' || activePath === '/cms/content-blocks' || activePath === '/cms/blocks' || activePath.startsWith('/cms/content-blocks') || activePath.startsWith('/cms/home-blocks') ? (
+          ) : activeModule === 'content_blocks' ? (
             <ContentBlocksManager />
-          ) : activePath === '/cms/media' || activePath === '/cms/media-library' || activePath === '/cms/albums' || activePath.startsWith('/cms/media') ? (
+          ) : activeModule === 'media' ? (
             <MediaManager />
-          ) : activePath === '/cms/contact-requests' || activePath === '/cms/contact-messages' || activePath === '/cms/product-registrations' || activePath === '/cms/contacts' || activePath === '/cms/customers' || activePath.startsWith('/cms/contact') ? (
+          ) : activeModule === 'contacts' ? (
             <ContactsManager />
-          ) : activePath === '/cms/translation-progress' || activePath === '/cms/translation-strings' || activePath === '/cms/localization' || activePath === '/cms/translations' || activePath.startsWith('/cms/translation') || activePath.startsWith('/cms/localization') ? (
+          ) : activeModule === 'localization' ? (
             <LocalizationManager />
-          ) : (
+          ) : activeModule === 'dashboard' ? (
             <DashboardOverview
               lang={lang}
               onNavigate={(path, title) => {
@@ -184,7 +195,25 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
               }}
               onOpenDrawerItem={(type, data) => setDrawerItem({ type, data })}
             />
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
+              <h1 className="text-lg font-bold text-slate-900 dark:text-white">Không tìm thấy trang</h1>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Đường dẫn này không thuộc module CMS đang được hỗ trợ.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePath('/cms/dashboard');
+                  setCurrentPageTitle('Tổng quan CMS');
+                }}
+                className="mt-5 rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+              >
+                Về Dashboard
+              </button>
+            </div>
           )}
+          </Suspense>
         </div>
 
         {/* 9. FOOTER */}

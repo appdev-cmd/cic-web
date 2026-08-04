@@ -102,7 +102,7 @@ Quy tắc copy:
 4. Ghi nhận lỗi hiện có, bundle size và warning.
 5. Chụp smoke baseline cho tất cả route sidebar ở desktop/tablet.
 
-Baseline đã được thiết lập ngày 2026-08-04: dependency được cài và `package-lock.json` được đồng bộ với `package.json`; `npm.cmd run lint` và `npm.cmd run build` đều pass. Build còn cảnh báo bundle JS lớn hơn 500 kB, cần xử lý bằng code splitting ở giai đoạn tối ưu sau cleanup chức năng.
+Baseline đã được thiết lập ngày 2026-08-04: dependency được cài và `package-lock.json` được đồng bộ với `package.json`; `npm.cmd run lint` và `npm.cmd run build` đều pass. Page manager đã được lazy-load theo canonical route: entry bundle giảm từ khoảng 3,62 MB xuống 1,57 MB và từng module được tách thành chunk riêng. Build vẫn cảnh báo entry chung lớn hơn 500 kB; cần tiếp tục tách phần website/app shell ở giai đoạn tối ưu sau cleanup chức năng.
 
 **Gate:** có baseline build/lint tái lập được trước khi xóa file.
 

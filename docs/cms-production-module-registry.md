@@ -32,6 +32,8 @@
 - Alias chỉ giữ khi có deep link cũ hoặc migration requirement được xác nhận.
 - Sidebar, Command Palette, notification và deep link dùng cùng registry.
 - Locale là context của route/workspace, không tạo bản sao menu module cho VI và EN.
+- Registry runtime nằm tại `src/cms/routing.ts`; route không xác định hiển thị Not Found và không fallback về Dashboard.
+- Page manager được lazy-load theo module để không tải toàn bộ CMS ngay khi mở một route.
 
 ## Quyết định đang chờ
 
