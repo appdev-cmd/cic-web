@@ -324,7 +324,7 @@ export const NewsManager: React.FC = () => {
                   <Newspaper className="w-5 h-5" />
                 </div>
                 <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-                  Quản lý Vòng đời Bài viết & Tin tức (Module 02)
+                  Quản lý bài viết và tin tức
                 </h1>
                 <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
                   1.532+ tin bài

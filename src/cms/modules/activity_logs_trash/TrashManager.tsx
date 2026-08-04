@@ -117,7 +117,6 @@ export const TrashManager: React.FC = () => {
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
                 QUẢN TRỊ HỆ THỐNG — RECYCLE BIN
               </span>
-              <span className="text-xs text-slate-400 font-mono">v2.5.0</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
               Thùng rác & Phục hồi Dữ liệu (Recycle Bin)

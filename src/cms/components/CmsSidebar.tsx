@@ -517,7 +517,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-semibold text-slate-800 dark:text-slate-200">Super Admin</span>
-            <span className="text-[10px] text-slate-400">Hệ thống CMS TO-BE</span>
+            <span className="text-[10px] text-slate-400">Hệ thống quản trị nội dung</span>
           </div>
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title="Trạng thái hệ thống online" />
         </div>
@@ -555,4 +555,3 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     </>
   );
 };
-

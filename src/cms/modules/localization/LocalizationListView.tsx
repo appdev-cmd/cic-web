@@ -13,7 +13,6 @@ import {
   Check,
   X,
   RotateCcw,
-  Download,
   MoreVertical,
   HelpCircle,
   Code,
@@ -32,7 +31,6 @@ interface LocalizationListViewProps {
   onOpenSourceDiff: (item: TranslationItem) => void;
   onBulkAssign: () => void;
   onBulkStatus: (status: TranslationStatus) => void;
-  onBulkExport: () => void;
   currentUserId: string;
 }
 
@@ -46,7 +44,6 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
   onOpenSourceDiff,
   onBulkAssign,
   onBulkStatus,
-  onBulkExport,
   currentUserId,
 }) => {
   // Density mode state
@@ -177,13 +174,6 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
               Đánh dấu Hoàn thành
             </button>
 
-            <button
-              onClick={onBulkExport}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Xuất XLSX</span>
-            </button>
           </div>
         </div>
       )}

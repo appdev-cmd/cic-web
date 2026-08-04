@@ -11,7 +11,6 @@ import {
   Trash2,
   Search,
   Filter,
-  Download,
   RotateCcw,
   Plus,
   SlidersHorizontal,
@@ -477,11 +476,6 @@ export const ContactsManager: React.FC = () => {
     setSelectedIds([]);
   };
 
-  const handleBulkExport = () => {
-    showToast(`Đã tạo job xuất file XLSX cho ${selectedIds.length} yêu cầu được chọn!`);
-    setSelectedIds([]);
-  };
-
   return (
     <div className="space-y-6">
       {/* Toast Alert with Dismiss */}
@@ -682,14 +676,6 @@ export const ContactsManager: React.FC = () => {
               <span>Bộ lọc nâng cao</span>
             </button>
 
-            {/* Export simulation */}
-            <button
-              onClick={() => showToast('Đã bắt đầu tạo báo cáo XLSX tất cả yêu cầu!')}
-              className="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors flex items-center gap-1.5"
-            >
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Xuất báo cáo</span>
-            </button>
           </div>
 
         </div>
@@ -784,7 +770,6 @@ export const ContactsManager: React.FC = () => {
         onBulkAssign={handleBulkAssign}
         onBulkStatus={handleBulkStatus}
         onBulkSpam={handleBulkSpam}
-        onBulkExport={handleBulkExport}
       />
 
       {/* 5. MODALS & DRAWERS */}

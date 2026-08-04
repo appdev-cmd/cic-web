@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   MoreVertical,
   SlidersHorizontal,
-  Download,
   ShieldAlert,
   Copy,
   Building2,
@@ -34,7 +33,6 @@ interface ContactListViewProps {
   onBulkAssign: () => void;
   onBulkStatus: (status: ContactStatus) => void;
   onBulkSpam: () => void;
-  onBulkExport: () => void;
 }
 
 export const ContactListView: React.FC<ContactListViewProps> = ({
@@ -51,7 +49,6 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
   onBulkAssign,
   onBulkStatus,
   onBulkSpam,
-  onBulkExport,
 }) => {
   const [density, setDensity] = useState<'compact' | 'standard' | 'spacious'>('standard');
   const [showColumnSettings, setShowColumnSettings] = useState(false);
@@ -341,13 +338,6 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
             <span>Báo Spam</span>
           </button>
 
-          <button
-            onClick={onBulkExport}
-            className="hover:text-sky-400 transition-colors flex items-center gap-1.5"
-          >
-            <Download className="w-4 h-4 text-sky-400" />
-            <span>Xuất Excel</span>
-          </button>
         </div>
       )}
     </div>

@@ -245,7 +245,7 @@ export const BannersManager: React.FC = () => {
                   Quản lý Banner & Slideshow Quảng bá
                 </h1>
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
-                  Module 09
+                  TRÌNH BÀY WEBSITE
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

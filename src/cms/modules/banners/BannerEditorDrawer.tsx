@@ -184,7 +184,7 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
                 {item ? `Chỉnh sửa ${formData.type === 'slideshow' ? 'Slideshow' : 'Banner'}` : 'Tạo mới Nội dung Quảng bá'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Form chuẩn hóa 8 nhóm cấu trúc theo Specification Module 09.
+                Biểu mẫu gồm 8 nhóm thông tin thống nhất.
               </p>
             </div>
           </div>

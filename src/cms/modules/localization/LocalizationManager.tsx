@@ -11,7 +11,6 @@ import {
   UserCheck,
   Search,
   SlidersHorizontal,
-  Download,
   Plus,
   RotateCcw,
   Check,
@@ -401,11 +400,6 @@ export const LocalizationManager: React.FC = () => {
     setSelectedIds([]);
   };
 
-  const handleBulkExport = () => {
-    showToast(`Đã khởi tạo xuất file XLSX cho ${selectedIds.length} bản ghi!`);
-    setSelectedIds([]);
-  };
-
   return (
     <div className="space-y-6">
       {/* Toast Alert Notification */}
@@ -529,13 +523,6 @@ export const LocalizationManager: React.FC = () => {
                   <span>Bộ lọc nâng cao</span>
                 </button>
 
-                <button
-                  onClick={handleBulkExport}
-                  className="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors flex items-center gap-1.5"
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">Xuất báo cáo</span>
-                </button>
               </div>
 
             </div>
@@ -627,7 +614,6 @@ export const LocalizationManager: React.FC = () => {
             onOpenSourceDiff={(item) => setDiffItem(item)}
             onBulkAssign={() => setIsBatchAssignOpen(true)}
             onBulkStatus={handleBulkStatus}
-            onBulkExport={handleBulkExport}
             currentUserId={CURRENT_LOCALIZATION_USER_ID}
           />
         </div>

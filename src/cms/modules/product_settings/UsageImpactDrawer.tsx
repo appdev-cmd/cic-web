@@ -107,7 +107,7 @@ export const UsageImpactDrawer: React.FC<UsageImpactDrawerProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
               <span>Danh sách đối tượng liên quan ({records.length})</span>
-              <span className="text-[11px] text-slate-400 font-normal">Trích xuất real-time từ Database</span>
+              <span className="text-[11px] text-slate-400 font-normal">Phạm vi sử dụng hiện tại</span>
             </div>
 
             <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 text-xs">
@@ -163,7 +163,7 @@ export const UsageImpactDrawer: React.FC<UsageImpactDrawerProps> = ({
             </button>
           ) : (
             <div className="text-[11px] text-slate-500">
-              Cần thay đổi hàng loạt? Dùng tính năng Chuyển danh mục / Hãng trong Module 05.
+              Cần thay đổi hàng loạt? Dùng tính năng Chuyển danh mục / Hãng trong Sản phẩm.
             </div>
           )}
 

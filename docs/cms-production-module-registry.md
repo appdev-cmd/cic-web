@@ -13,7 +13,7 @@
 | 07 | Dịch vụ | `services` | `/cms/services` | KEEP; trang giới thiệu dịch vụ, không phải service-delivery workflow |
 | 08 | Menu | `menu` | `/cms/frontend-menus` | KEEP |
 | 09 | Banner & Slideshow | `banners` | `/cms/banners` | KEEP; một workspace chung |
-| 09 | Danh mục/vị trí Banner | `banner_categories` | `/cms/banner-categories` | MERGE/VERIFY; route hiện đang mở `BannersManager`, manager riêng không được render |
+| 09 | Vị trí Banner | `banners` | `/cms/banners` | MERGED; quản lý bằng action “Vị trí Website” trong Banner & Slideshow, không có module/category manager riêng |
 | 10 | Khối nội dung | `content_blocks` | `/cms/home-blocks` | KEEP; CTA của Dịch vụ dùng từ đây |
 | 11 | Thư viện media | `media` | `/cms/media` | KEEP |
 | 12 | Khách hàng liên hệ | `contacts` | `/cms/contact-requests` | KEEP; các path liên hệ là filtered views, không phải module khác |
@@ -24,7 +24,7 @@
 | 16/VERIFY | Mẫu email | `email_templates` | `/cms/email-templates` | VERIFY; có route nhưng không có sidebar entry, cần chốt là subview Cấu hình hay loại bỏ |
 | 17 | Nhật ký hoạt động | `activity_logs_trash` | `/cms/activity-logs` | KEEP; menu độc lập trong Governance |
 | 17 | Thùng rác | `activity_logs_trash` | `/cms/trash` | KEEP; menu độc lập trong Governance |
-| VERIFY | Lịch sử CIC cũ | `cic_history` | Chưa có canonical path | MERGE/REMOVE; import cũ không render, phạm vi gần trùng Activity Logs |
+| 17 | Lịch sử CIC cũ | Đã loại bỏ | `/cms/activity-logs` | MERGED; prototype `cic_history` không có consumer và trùng Nhật ký hoạt động chuẩn |
 
 ## Quy tắc route
 
@@ -35,8 +35,6 @@
 
 ## Quyết định đang chờ
 
-1. `banner_categories`: trở thành view “Vị trí/Danh mục” trong Banner & Slideshow hay giữ page độc lập.
-2. `email_templates`: subview Cấu hình/Notification hay loại khỏi production.
-3. `cic_history`: có nguồn audit riêng hay là prototype cũ cần gộp/xóa.
+1. `email_templates`: subview Cấu hình/Notification hay loại khỏi production.
 
-Cho tới khi ba quyết định trên được chốt, không thêm chúng vào navigation mới và không xóa dữ liệu/file liên quan.
+Cho tới khi quyết định này được chốt, không thêm Email Templates vào navigation mới và không xóa dữ liệu/file liên quan.

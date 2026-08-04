@@ -243,7 +243,7 @@ export const PermissionManagement: React.FC = () => {
               </span>
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Module 15: Vai trò & Quyền (Role & Policy Governance)</span>
+                  <span>Vai trò & quyền</span>
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Quản lý vòng đời Vai trò (RBAC), Ma trận Quyền (Permission Matrix), Phạm vi Scope, Tách biệt Trách nhiệm (SoD) & Audit Review.
@@ -449,4 +449,3 @@ export const PermissionManagement: React.FC = () => {
     </div>
   );
 };
-

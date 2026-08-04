@@ -284,7 +284,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
                   </span>
                 )}
                 <span className="text-xs text-slate-400 font-mono">
-                  Quản lý Trang nội dung (Module 03)
+                  Quản lý trang nội dung
                 </span>
               </div>
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate mt-1">

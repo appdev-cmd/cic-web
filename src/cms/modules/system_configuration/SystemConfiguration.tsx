@@ -318,9 +318,8 @@ export const SystemConfiguration: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                MODULE 16 — TO-BE SPECIFICATION
+                CẤU HÌNH HỆ THỐNG
               </span>
-              <span className="text-xs text-slate-400 font-mono">v2.5.0</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
               Cấu hình Hệ thống (System Configuration & Site Scopes)

@@ -272,7 +272,7 @@ export const MediaManager: React.FC = () => {
               Thư Viện Media (Media Workspace & Asset Manager)
             </h1>
             <span className="text-xs font-bold uppercase bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 px-2.5 py-0.5 rounded-full border border-orange-200 dark:border-orange-900">
-              Module 11 • TO-BE
+              THƯ VIỆN MEDIA
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">

@@ -157,7 +157,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <EventsManager />
           ) : activePath === '/cms/email-templates' ? (
             <EmailTemplatesManager />
-          ) : activePath === '/cms/banner-categories' || activePath === '/cms/banners/categories' || activePath === '/cms/slideshows' || activePath === '/cms/banners' || activePath.startsWith('/cms/banners') ? (
+          ) : activePath === '/cms/slideshows' || activePath === '/cms/banners' || activePath.startsWith('/cms/banners') ? (
             <BannersManager />
           ) : activePath === '/cms/product-settings' || activePath === '/cms/products/settings' || activePath === '/cms/product-categories' || activePath === '/cms/manufacturers' || activePath === '/cms/applications' || activePath === '/cms/product-types' || activePath === '/cms/sales-staff' || activePath === '/cms/products/categories' || activePath === '/cms/products/brands' || activePath === '/cms/products/routing' ? (
             <ProductSettingsManager />

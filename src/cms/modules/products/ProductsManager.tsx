@@ -290,7 +290,7 @@ export const ProductsManager: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Quản lý Catalog Sản phẩm (Module 05)
+                Quản lý danh mục sản phẩm
               </h1>
               <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
                 282+ Sản phẩm

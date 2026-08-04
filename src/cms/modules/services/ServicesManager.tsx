@@ -296,7 +296,7 @@ export const ServicesManager: React.FC = () => {
           </div>
           <div>
             <h1 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              Quản lý Catalog Dịch vụ (Module 07)
+              Quản lý dịch vụ
               <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                 {filteredServices.length} dịch vụ
               </span>

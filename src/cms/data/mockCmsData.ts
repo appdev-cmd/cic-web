@@ -416,11 +416,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
             path: '/cms/banners',
           },
           {
-            id: 'sub_banner_cats',
-            title: 'Danh mục Banner',
-            path: '/cms/banner-categories',
-          },
-          {
             id: 'sub_slideshows',
             title: 'Slideshow trang chủ',
             path: '/cms/slideshows',
