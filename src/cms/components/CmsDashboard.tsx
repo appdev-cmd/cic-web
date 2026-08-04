@@ -1,43 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Package,
-  Newspaper,
-  FileText,
-  Users,
-  MessageSquare,
-  FileCheck,
-  ArrowUpRight,
-  ChevronRight,
-  Filter,
-  RefreshCw,
-  Download,
-  SlidersHorizontal,
-  Search,
-  Plus,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Send,
-  Eye,
-  Sliders,
-  Image as ImageIcon,
-  Sparkles,
-  ExternalLink,
-  RotateCcw,
-  Layers,
-} from 'lucide-react';
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip as RechartsTooltip,
-  CartesianGrid,
-  BarChart,
-  Bar,
-  Legend,
-} from 'recharts';
+import { CheckCircle2, RotateCcw } from 'lucide-react';
 
 import { CmsHeader } from './CmsHeader';
 import { CmsSidebar } from './CmsSidebar';
@@ -48,28 +10,21 @@ import { CmsRightDrawer, DrawerItem } from './CmsRightDrawer';
 
 import {
   currentUserMock,
-  kpiStatsMock,
   contactMessagesMock,
   productRegistrationsMock,
   pendingContentsMock,
-  dailyTrafficMock,
-  monthlyTrafficMock,
-  weeklyContentStatsMock,
-  activityLogsMock,
 } from '../data/mockCmsData';
 
-import { ContactMessage, ProductRegistration, PendingContent, ActivityLog } from '../types';
+import { ContactMessage, ProductRegistration, PendingContent } from '../types';
 import { CicUsersManager } from '../modules/cic_users/CicUsersManager';
 import { PermissionManagement } from '../modules/permission_management/PermissionManagement';
 import { SystemConfiguration } from '../modules/system_configuration/SystemConfiguration';
 import { ActivityLogsManager } from '../modules/activity_logs_trash/ActivityLogsManager';
 import { TrashManager } from '../modules/activity_logs_trash/TrashManager';
-import { CicHistoryManager } from '../modules/cic_history/CicHistoryManager';
 import { StaticPagesManager } from '../modules/static_pages/StaticPagesManager';
 import { NewsManager } from '../modules/news/NewsManager';
 import { EventsManager } from '../modules/events/EventsManager';
 import { EmailTemplatesManager } from '../modules/email_templates/EmailTemplatesManager';
-import { BannerCategoriesManager } from '../modules/banner_categories/BannerCategoriesManager';
 import { BannersManager } from '../modules/banners/BannersManager';
 import { ProductsManager } from '../modules/products/ProductsManager';
 import { ProductSettingsManager } from '../modules/product_settings/ProductSettingsManager';
@@ -100,26 +55,12 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
 
   // Filter & Data States
   const [trafficRange, setTrafficRange] = useState<'7' | '30'>('7');
-  const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Lists state
   const [contacts, setContacts] = useState<ContactMessage[]>(contactMessagesMock);
   const [registrations, setRegistrations] = useState<ProductRegistration[]>(productRegistrationsMock);
   const [pendingItems, setPendingItems] = useState<PendingContent[]>(pendingContentsMock);
-  const [activityLogs] = useState<ActivityLog[]>(activityLogsMock);
-  const [searchFilter, setSearchFilter] = useState('');
-
-  // Handle Refresh simulation
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setToastMessage('Đang làm mới dữ liệu hệ thống...');
-    setTimeout(() => {
-      setIsLoading(false);
-      setToastMessage('Đã đồng bộ dữ liệu CMS mới nhất!');
-      setTimeout(() => setToastMessage(null), 3000);
-    }, 600);
-  };
 
   // Status updates handler
   const handleUpdateStatus = (type: string, id: string, newStatus: string) => {
@@ -137,25 +78,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
     setToastMessage(`Đã cập nhật trạng thái dữ liệu sang "${newStatus}"!`);
     setTimeout(() => setToastMessage(null), 3500);
   };
-
-  // Filtered lists based on search
-  const filteredContacts = contacts.filter(
-    (c) =>
-      c.sender_name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      c.subject.toLowerCase().includes(searchFilter.toLowerCase())
-  );
-
-  const filteredRegistrations = registrations.filter(
-    (r) =>
-      r.company_name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      r.product_name.toLowerCase().includes(searchFilter.toLowerCase())
-  );
-
-  const filteredPending = pendingItems.filter(
-    (p) =>
-      p.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      p.author_name.toLowerCase().includes(searchFilter.toLowerCase())
-  );
 
   return (
     <div className={`min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
@@ -214,13 +136,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           <CmsBreadcrumb
             items={activePath === '/cms/dashboard' || activePath === '/cms' ? [{ label: 'Tổng quan' }] : [{ label: 'Tổng quan' }, { label: currentPageTitle }]}
             pageTitle={currentPageTitle}
-            pageDescription="Bảng điều khiển trung tâm quản lý số liệu tổng hợp từ toàn bộ hệ thống CIC Technology."
-            onRefresh={handleRefresh}
-            onExport={() => {
-              setToastMessage('Đã tạo file báo cáo XLSX cho Dashboard!');
-              setTimeout(() => setToastMessage(null), 3000);
-            }}
-            hideHeaderBar={activePath !== '/cms/dashboard' && activePath !== '/cms'}
+            hideHeaderBar
           />
 
           {activePath === '/cms/users' || activePath === '/cms/accounts' || activePath === '/cms/user-management' || activePath.startsWith('/cms/user') ? (

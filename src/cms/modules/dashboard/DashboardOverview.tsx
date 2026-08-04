@@ -7,8 +7,6 @@ import {
   MessageSquare,
   FileCheck,
   ChevronRight,
-  RefreshCw,
-  Download,
   Sliders,
   Plus,
   CheckCircle2,
@@ -78,11 +76,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   // Filter & Data States
   const [timeRange, setTimeRange] = useState<'7' | '30' | 'month' | 'year'>('7');
   const [localeScope, setLocaleScope] = useState<'current' | 'all'>('current');
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdatedTime, setLastUpdatedTime] = useState<string>(
-    new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' +
-    new Date().toLocaleDateString('vi-VN')
-  );
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -102,24 +95,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     setTimeout(() => {
       setToastMessage(null);
     }, 3500);
-  };
-
-  // Handle Refresh
-  const handleRefresh = () => {
-    setIsLoading(true);
-    showToast('Đang làm mới và đồng bộ dữ liệu Dashboard...');
-    setTimeout(() => {
-      setIsLoading(false);
-      setLastUpdatedTime(
-        new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' +
-        new Date().toLocaleDateString('vi-VN')
-      );
-      showToast('Đã cập nhật dữ liệu Dashboard mới nhất!');
-    }, 600);
-  };
-
-  const handleExportReport = () => {
-    showToast(`Đã tạo file báo cáo XLSX cho Dashboard (Phạm vi: ${localeScope === 'current' ? lang : 'VI & EN'})!`);
   };
 
   const isWidgetVisible = (widgetId: string) => {
@@ -178,13 +153,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {/* Right Header Actions */}
         <div className="flex items-center gap-3 self-start md:self-auto">
-          <div className="text-right hidden sm:block">
-            <span className="text-[10px] text-slate-400 block font-medium">Thời điểm đồng bộ:</span>
-            <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-              {lastUpdatedTime}
-            </span>
-          </div>
-
           <button
             onClick={() => setIsCustomizerOpen(true)}
             className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
@@ -247,32 +215,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
 
-        {/* Right Toolbar Actions */}
-        <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold hidden sm:inline text-[11px]">Realtime · Đồng bộ 100%</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRefresh}
-              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700"
-              title="Cập nhật lại dữ liệu"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 text-orange-500 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline text-xs font-bold">Làm mới</span>
-            </button>
-
-            <button
-              onClick={handleExportReport}
-              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700"
-            >
-              <Download className="w-3.5 h-3.5 text-orange-500" />
-              <span>Xuất XLSX</span>
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* DYNAMIC SECTIONS RENDERED BASED ON PREFERENCE ORDER AND VISIBILITY */}
