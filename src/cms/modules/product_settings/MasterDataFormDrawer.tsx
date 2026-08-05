@@ -55,6 +55,14 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   if (!isOpen) return null;
 
   const isEdit = !!item;
+  const typeLabels: Record<MasterDataType, string> = {
+    categories: 'danh mục sản phẩm',
+    brands: 'hãng sản xuất',
+    applications: 'lĩnh vực ứng dụng',
+    product_types: 'loại sản phẩm',
+    sales_staff: 'người phụ trách',
+    routing_rules: 'quy tắc nhận liên hệ',
+  };
 
   // Active form tab
   const [activeTab, setActiveTab] = useState<'basic' | 'structure' | 'seo' | 'routing'>('basic');
@@ -339,10 +347,10 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
             </div>
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">
-                {isEdit ? 'Chỉnh sửa Master Data' : 'Tạo mới Thiết lập Master Data'}
+                {isEdit ? `Chỉnh sửa ${typeLabels[targetType]}` : `Thêm ${typeLabels[targetType]}`}
               </h2>
               <p className="text-xs text-orange-600 font-bold capitalize">
-                Loại dữ liệu: {targetType.replace('_', ' ')}
+                Dùng trong phần thiết lập sản phẩm
               </p>
             </div>
           </div>
@@ -379,7 +387,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              2. SEO & Trình bày Public
+              2. Tìm kiếm và hiển thị công khai
             </button>
           )}
 
@@ -393,7 +401,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              2. Cấu hình Phân công & Routing
+              2. Phân công và nhận liên hệ
             </button>
           )}
         </div>
@@ -414,14 +422,14 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Phần mềm Thiết kế Kết cấu..."
+                    placeholder="Ví dụ: Phần mềm thiết kế kết cấu"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:border-orange-500 text-slate-900 dark:text-white"
                   />
                 </div>
 
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    Mã nhận diện (Code):
+                    Mã nhận diện:
                   </label>
                   <input
                     type="text"
@@ -443,14 +451,14 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                     onChange={(e) => setStatus(e.target.value as any)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold cursor-pointer focus:outline-none"
                   >
-                    <option value="active">Active (Hoạt động)</option>
-                    <option value="inactive">Inactive (Ngừng sử dụng)</option>
+                    <option value="active">Đang sử dụng</option>
+                    <option value="inactive">Ngừng sử dụng</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    Thứ tự ưu tiên (Ordering):
+                    Thứ tự ưu tiên:
                   </label>
                   <input
                     type="number"
@@ -778,7 +786,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
             className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 cursor-pointer transition-all"
           >
             <Save className="w-4 h-4" />
-            <span>{isEdit ? 'Cập nhật Master Data' : 'Lưu & Kích hoạt mới'}</span>
+            <span>{isEdit ? 'Lưu thay đổi' : `Thêm ${typeLabels[targetType]}`}</span>
           </button>
         </div>
 

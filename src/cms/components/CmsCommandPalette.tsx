@@ -34,7 +34,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
   if (!isOpen) return null;
 
   const quickPages = [
-    { label: 'Trang Tổng quan Dashboard', category: 'Điều hướng', path: '/cms/dashboard', icon: FileText },
+    { label: 'Trang tổng quan', category: 'Điều hướng', path: '/cms/dashboard', icon: FileText },
     { label: 'Quản lý Trang tĩnh', category: 'Nội dung', path: '/cms/static-pages', icon: FileText },
     { label: 'Quản lý Sản phẩm phần mềm', category: 'Sản phẩm', path: '/cms/products', icon: Package },
     { label: 'Tin tức & Bài viết chuyên ngành', category: 'Nội dung', path: '/cms/news', icon: Newspaper },

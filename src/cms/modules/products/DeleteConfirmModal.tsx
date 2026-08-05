@@ -55,7 +55,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all"
           >
             <Archive className="w-4 h-4" />
-            <span>Chuyển sang Lưu trữ (Archived - Khuyên dùng)</span>
+            <span>Chuyển vào lưu trữ — nên chọn</span>
           </button>
 
           <button

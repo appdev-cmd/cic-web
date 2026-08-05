@@ -99,7 +99,7 @@ export const RoutingSimulatorModal: React.FC<RoutingSimulatorModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">
-                Mô phỏng Phân luồng Liên hệ & Email (Routing Simulator)
+                Kiểm tra nơi nhận liên hệ và email
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Nhập kịch bản khách hàng gửi liên hệ để kiểm tra quy tắc nhận mail nào sẽ kích hoạt
@@ -150,7 +150,7 @@ export const RoutingSimulatorModal: React.FC<RoutingSimulatorModalProps> = ({
                   type="text"
                   value={testKeyword}
                   onChange={(e) => setTestKeyword(e.target.value)}
-                  placeholder="e.g. etabs, plaxis, escon..."
+                  placeholder="Ví dụ: ETABS, PLAXIS, ESCON"
                   className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:border-orange-500"
                 />
               </div>

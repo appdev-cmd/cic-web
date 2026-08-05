@@ -40,8 +40,8 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'category', label: 'Danh mục & Loại sản phẩm', desc: 'Phân loại catalog' },
     { key: 'brand', label: 'Hãng sản xuất', desc: 'Thương hiệu / Đối tác' },
     { key: 'owner', label: 'Người phụ trách', desc: 'Chuyên viên quản lý sản phẩm' },
-    { key: 'editorial_status', label: 'Trạng thái Biên tập', desc: 'Draft, Pending, Approved, Published' },
-    { key: 'catalog_status', label: 'Trạng thái Kinh doanh', desc: 'Active, Inactive, Archived' },
+    { key: 'editorial_status', label: 'Trạng thái biên tập', desc: 'Bản nháp, chờ duyệt, đã duyệt hoặc đã xuất bản' },
+    { key: 'catalog_status', label: 'Trạng thái kinh doanh', desc: 'Đang kinh doanh, ngừng kinh doanh hoặc lưu trữ' },
     { key: 'completeness', label: 'Điểm hoàn thiện (%)', desc: 'Completeness checklist score' },
     { key: 'updated_time', label: 'Thời gian cập nhật', desc: 'Người sửa & thời điểm gần nhất' },
   ];
@@ -76,7 +76,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-orange-600" />
-              <span>Mật độ hàng (Table Density):</span>
+              <span>Khoảng cách dòng:</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -88,7 +88,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                     : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
                 }`}
               >
-                <span>Thoải mái (Normal)</span>
+                <span>Tiêu chuẩn</span>
                 {density === 'normal' && <Check className="w-3.5 h-3.5" />}
               </button>
               <button
@@ -100,7 +100,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                     : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
                 }`}
               >
-                <span>Nén gọn (Compact)</span>
+                <span>Thu gọn</span>
                 {density === 'compact' && <Check className="w-3.5 h-3.5" />}
               </button>
             </div>

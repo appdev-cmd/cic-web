@@ -322,7 +322,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
           { id: 'my', label: 'Việc của tôi', count: products.filter((p) => p.owner_id === currentUserId).length },
           { id: 'pending', label: 'Hàng chờ review', count: products.filter((p) => p.editorial_status === 'pending_review').length },
           { id: 'low_quality', label: 'Chất lượng thấp (<75%)', count: products.filter((p) => p.completeness_score < 75).length },
-          { id: 'active', label: 'Đang Active', count: products.filter((p) => p.catalog_status === 'active').length },
+          { id: 'active', label: 'Đang kinh doanh', count: products.filter((p) => p.catalog_status === 'active').length },
           { id: 'archived', label: 'Lưu trữ / Thùng rác', count: products.filter((p) => p.editorial_status === 'archived' || p.catalog_status === 'archived').length },
         ].map((tab) => (
           <button
@@ -409,7 +409,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
               className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
               <option value="all">Tất cả Biên tập</option>
-              <option value="draft">Bản nháp (Draft)</option>
+              <option value="draft">Bản nháp</option>
               <option value="pending_review">Chờ duyệt (Pending)</option>
               <option value="approved">Đã duyệt (Approved)</option>
               <option value="published">Đã xuất bản (Published)</option>
@@ -446,7 +446,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                 onClick={() => handleBatchChangeCatalogStatus('active')}
                 className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg cursor-pointer"
               >
-                Kích hoạt Active Catalog
+                Đưa vào kinh doanh
               </button>
               <button
                 onClick={handleBatchArchive}
@@ -682,7 +682,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                           <button
                             onClick={() => setProductToPreview(p)}
                             className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                            title="Xem thử giao diện Public"
+                            title="Xem thử giao diện công khai"
                           >
                             <Eye className="w-4 h-4" />
                           </button>

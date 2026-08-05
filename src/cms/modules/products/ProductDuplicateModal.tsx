@@ -87,7 +87,7 @@ export const ProductDuplicateModal: React.FC<ProductDuplicateModalProps> = ({
             </p>
             <ul className="text-[11px] list-disc pl-5 space-y-0.5">
               <li>Mã ID, Trạng thái xuất bản và Lịch sử audit log sẽ KHÔNG được sao chép.</li>
-              <li>Sản phẩm mới sẽ ở trạng thái <strong>Bản nháp (Draft)</strong>.</li>
+              <li>Sản phẩm mới sẽ ở trạng thái <strong>Bản nháp</strong>.</li>
               <li>Bạn bắt buộc phải kiểm tra và đổi lại <strong>Mã SKU</strong> và <strong>Tên sản phẩm</strong> để tránh trùng lặp.</li>
             </ul>
           </div>

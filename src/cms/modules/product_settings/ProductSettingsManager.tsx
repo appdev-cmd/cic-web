@@ -68,6 +68,14 @@ interface ProductSettingsManagerProps {
 }
 
 export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ taxonomy, globalData }) => {
+  const createLabels: Record<MasterDataType, string> = {
+    categories: 'Thêm danh mục sản phẩm',
+    brands: 'Thêm hãng sản xuất',
+    applications: 'Thêm lĩnh vực ứng dụng',
+    product_types: 'Thêm loại sản phẩm',
+    sales_staff: 'Thêm người phụ trách',
+    routing_rules: 'Thêm quy tắc nhận liên hệ',
+  };
   // Master Datasets State
   const [categories, setCategories] = useState<MasterCategoryItem[]>(taxonomy?.categories ?? []);
   const [brands, setBrands] = useState<MasterBrandItem[]>(taxonomy?.brands ?? []);
@@ -236,7 +244,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     setSalesStaff((prev) => prev.map((i) => updateStatus(i) as MasterSalesStaffItem));
     setRoutingRules((prev) => prev.map((i) => updateStatus(i) as MasterRoutingRuleItem));
 
-    showToast(`Đã ngưng sử dụng (Deactivate) ${selectedIds.length} mục đã chọn!`);
+    showToast(`Đã ngừng sử dụng ${selectedIds.length} mục đã chọn.`);
     setSelectedIds([]);
   };
 
@@ -274,14 +282,14 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Thiết lập danh mục sản phẩm
+                Thiết lập sản phẩm
               </h1>
               <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
-                Master Data Workspace
+                Dữ liệu dùng chung
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Hợp nhất 6 nhóm master data: Lĩnh vực, Hãng sản xuất, Lĩnh vực ứng dụng, Loại sản phẩm, Người phụ trách & Quy tắc email routing
+              Quản lý các danh mục, hãng, loại sản phẩm, người phụ trách và nơi nhận liên hệ dùng trong biểu mẫu sản phẩm.
             </p>
           </div>
         </div>
@@ -292,7 +300,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center gap-2 cursor-pointer transition-all"
           >
             <Zap className="w-4 h-4 text-amber-500" />
-            <span>Mô phỏng Email Routing</span>
+            <span>Kiểm tra nơi nhận email</span>
           </button>
 
           <button
@@ -303,7 +311,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 cursor-pointer transition-all"
           >
             <Plus className="w-4 h-4" />
-            <span>Tạo mới Master Data</span>
+            <span>{createLabels[activeDataType]}</span>
           </button>
         </div>
       </div>
@@ -311,11 +319,11 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       {/* 2. SITEMAP SECTIONS TABS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
         {[
-          { id: 'overview', label: '1. Tổng quan Master Data' },
-          { id: 'taxonomy', label: '2. Phân loại & Taxonomy (4 loại)' },
-          { id: 'assignments', label: '3. Phân công & Liên hệ (2 loại)' },
+          { id: 'overview', label: '1. Tổng quan' },
+          { id: 'taxonomy', label: '2. Phân loại sản phẩm' },
+          { id: 'assignments', label: '3. Phụ trách và nhận liên hệ' },
           { id: 'archived', label: '4. Mục đã lưu trữ' },
-          { id: 'audit', label: '5. Lịch sử thay đổi (Audit Trail)' },
+          { id: 'audit', label: '5. Lịch sử thay đổi' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -340,12 +348,12 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           {/* Summary Metric Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { label: 'Lĩnh vực / Danh mục', count: categories.length, type: 'categories', icon: Building2, color: 'text-blue-600 bg-blue-500/10' },
+              { label: 'Danh mục sản phẩm', count: categories.length, type: 'categories', icon: Building2, color: 'text-blue-600 bg-blue-500/10' },
               { label: 'Hãng sản xuất', count: brands.length, type: 'brands', icon: Globe, color: 'text-emerald-600 bg-emerald-500/10' },
               { label: 'Lĩnh vực ứng dụng', count: applications.length, type: 'applications', icon: Cpu, color: 'text-purple-600 bg-purple-500/10' },
               { label: 'Loại sản phẩm', count: productTypes.length, type: 'product_types', icon: Layers, color: 'text-amber-600 bg-amber-500/10' },
               { label: 'Nhân viên phụ trách', count: salesStaff.length, type: 'sales_staff', icon: UserCheck, color: 'text-orange-600 bg-orange-500/10' },
-              { label: 'Quy tắc Routing Email', count: routingRules.length, type: 'routing_rules', icon: Zap, color: 'text-rose-600 bg-rose-500/10' },
+              { label: 'Quy tắc nhận email', count: routingRules.length, type: 'routing_rules', icon: Zap, color: 'text-rose-600 bg-rose-500/10' },
             ].map((stat, idx) => {
               const IconComp = stat.icon;
               return (
@@ -386,10 +394,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
               </div>
               <div>
                 <h3 className="font-bold text-amber-900 dark:text-amber-200 text-sm">
-                  Cảnh báo Kiểm tra Phụ thuộc & Dependency Health (1 Issue phát hiện)
+                  Có 1 dữ liệu cần kiểm tra
                 </h3>
                 <p className="text-amber-700 dark:text-amber-300 mt-0.5">
-                  Thương hiệu <strong>Glodon Company Limited</strong> đang ngưng sử dụng (Inactive) nhưng vẫn còn 8 sản phẩm kinh doanh chưa đổi hãng.
+                  Hãng <strong>Glodon Company Limited</strong> đã ngừng sử dụng nhưng vẫn còn 8 sản phẩm đang dùng hãng này.
                 </p>
               </div>
             </div>
@@ -415,10 +423,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           {activeMainTab === 'taxonomy' && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
               {[
-                { type: 'categories', label: '1. Lĩnh vực / Danh mục (Categories)' },
-                { type: 'brands', label: '2. Hãng sản xuất (Brands)' },
-                { type: 'applications', label: '3. Lĩnh vực ứng dụng (Applications)' },
-                { type: 'product_types', label: '4. Loại sản phẩm (Product Types)' },
+                { type: 'categories', label: '1. Danh mục sản phẩm' },
+                { type: 'brands', label: '2. Hãng sản xuất' },
+                { type: 'applications', label: '3. Lĩnh vực ứng dụng' },
+                { type: 'product_types', label: '4. Loại sản phẩm' },
               ].map((sub) => (
                 <button
                   key={sub.type}
@@ -441,8 +449,8 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           {activeMainTab === 'assignments' && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
               {[
-                { type: 'sales_staff', label: '1. Người phụ trách kinh doanh (Sales Staff)' },
-                { type: 'routing_rules', label: '2. Quy tắc nhận liên hệ (Routing Rules Engine)' },
+                { type: 'sales_staff', label: '1. Người phụ trách kinh doanh' },
+                { type: 'routing_rules', label: '2. Quy tắc nhận liên hệ' },
               ].map((sub) => (
                 <button
                   key={sub.type}
@@ -475,7 +483,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  placeholder="Tìm theo Tên, Mã nhận diện Code, Mô tả..."
+                  placeholder="Tìm theo tên, mã hoặc mô tả..."
                   className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
                 />
               </div>
@@ -492,8 +500,8 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
                 >
                   <option value="all">Tất cả trạng thái</option>
-                  <option value="active">Active (Đang dùng)</option>
-                  <option value="inactive">Inactive (Ngừng sử dụng)</option>
+                  <option value="active">Đang sử dụng</option>
+                  <option value="inactive">Ngừng sử dụng</option>
                 </select>
 
                 {/* Usage filter */}
@@ -526,7 +534,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
               <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-between flex-wrap gap-2 text-xs animate-in fade-in duration-200">
                 <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400 font-bold">
                   <CheckSquare className="w-4 h-4" />
-                  <span>Đã chọn {selectedIds.length} mục master data</span>
+                  <span>Đã chọn {selectedIds.length} mục</span>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
@@ -534,7 +542,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                     onClick={handleBatchDeactivate}
                     className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer"
                   >
-                    Ngừng sử dụng (Deactivate)
+                    Ngừng sử dụng
                   </button>
 
                   <button
@@ -571,7 +579,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
                     {/* Name & Code (Sticky Left) */}
                     <th className="py-3 px-4 min-w-[260px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                      Tên mục Master Data & Mã nhận diện
+                      Tên và mã nhận diện
                     </th>
 
                     {/* Usage count */}
@@ -754,7 +762,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                               <button
                                 onClick={() => setImpactDrawerItem(item)}
                                 className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                                title="Xem tác động Dependency"
+                                title="Xem nơi đang sử dụng"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
@@ -834,7 +842,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <div>
               <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                Nhật ký Thay đổi & Lịch sử Master Data (Audit Trail)
+                Lịch sử thay đổi dữ liệu sản phẩm
               </h2>
               <p className="text-xs text-slate-500">Truy vết ai đã chỉnh sửa, activate hoặc deactivate danh mục master data</p>
             </div>
@@ -918,7 +926,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         item={itemToDelete}
         onConfirmDeactivate={() => {
           if (itemToDelete) {
-            showToast(`Đã chuyển mục "${itemToDelete.name}" sang trạng thái Ngừng sử dụng (Inactive).`);
+            showToast(`Đã ngừng sử dụng mục "${itemToDelete.name}".`);
             setItemToDelete(null);
           }
         }}

@@ -248,16 +248,16 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-black text-slate-900 dark:text-white">
-                {isEdit ? `Chỉnh sửa: ${product.title}` : 'Thêm mới Sản phẩm Catalog'}
+                {isEdit ? `Chỉnh sửa: ${product.title}` : 'Thêm sản phẩm'}
               </h2>
               {isEdit && product.working_version_id && (
                 <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[10px] rounded-full border border-orange-500/20">
-                  Working Draft
+                  Bản đang chỉnh sửa
                 </span>
               )}
             </div>
             <p className="text-[11px] text-slate-500">
-              Form 11 phần chuẩn hóa thông tin sản phẩm công khai
+              Biểu mẫu gồm 11 phần thông tin sản phẩm
             </p>
           </div>
         </div>
@@ -270,7 +270,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Eye className="w-4 h-4 text-blue-500" />
-            <span>Xem thử (Preview)</span>
+            <span>Xem thử</span>
           </button>
 
           <button
@@ -279,7 +279,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             className="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>Lưu bản nháp (Draft)</span>
+            <span>Lưu bản nháp</span>
           </button>
 
           {editorialStatus === 'draft' && (
@@ -299,7 +299,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-orange-600/20 transition-all cursor-pointer"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Xuất bản & Active</span>
+            <span>Xuất bản</span>
           </button>
         </div>
       </div>
@@ -316,7 +316,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">1</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">1. Thông tin chung (General Info)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">1. Thông tin chung</h3>
               </div>
               {collapsedSections['sec_1'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -428,7 +428,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">2</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">2. Phân loại & Thương hiệu (Taxonomy)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">2. Phân loại và hãng sản xuất</h3>
               </div>
               {collapsedSections['sec_2'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -923,7 +923,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
                           }}
                           className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px]"
                         >
-                          <option value="public">Công khai (Public)</option>
+                          <option value="public">Công khai</option>
                           <option value="require_email">Cần nhập Email</option>
                         </select>
                       </div>
@@ -1002,7 +1002,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
 
                 {/* Google Search Card Live Preview */}
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Google Search Preview:</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Xem trước trên Google:</span>
                   <div className="text-blue-700 dark:text-blue-400 font-bold text-sm hover:underline cursor-pointer">
                     {metaTitle || title || 'Tên sản phẩm - CIC Technology'}
                   </div>
@@ -1025,7 +1025,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">9</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">9. Chuyên viên Phụ trách & Điều hướng (Contacts & Routing)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">9. Người phụ trách và nơi nhận liên hệ</h3>
               </div>
               {collapsedSections['sec_9'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -1052,7 +1052,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
 
                   <div>
                     <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                      Bộ phận Tiếp nhận Yêu cầu Báo giá (Inquiry Routing)
+                      Bộ phận nhận yêu cầu báo giá
                     </label>
                     <input
                       type="text"
@@ -1092,12 +1092,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
                       onChange={(e) => setEditorialStatus(e.target.value as EditorialStatus)}
                       className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold cursor-pointer"
                     >
-                      <option value="draft">Bản nháp (Draft)</option>
+                      <option value="draft">Bản nháp</option>
                       <option value="pending_review">Chờ duyệt (Pending Review)</option>
                       <option value="approved">Đã duyệt (Approved)</option>
                       <option value="published">Đã xuất bản (Published)</option>
                       <option value="rejected">Trả lại chỉnh sửa (Rejected)</option>
-                      <option value="archived">Lưu trữ (Archived)</option>
+                      <option value="archived">Lưu trữ</option>
                     </select>
                   </div>
 
@@ -1110,9 +1110,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
                       onChange={(e) => setCatalogStatus(e.target.value as CatalogStatus)}
                       className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold cursor-pointer"
                     >
-                      <option value="active">Đang kinh doanh (Active)</option>
-                      <option value="inactive">Ngừng kinh doanh (Inactive)</option>
-                      <option value="archived">Lưu trữ (Archived)</option>
+                      <option value="active">Đang kinh doanh</option>
+                      <option value="inactive">Ngừng kinh doanh</option>
+                      <option value="archived">Lưu trữ</option>
                     </select>
                   </div>
                 </div>

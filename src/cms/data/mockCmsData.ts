@@ -332,7 +332,7 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     items: [
       {
         id: 'menu_dashboard',
-        title: 'Dashboard',
+        title: 'Tổng quan',
         iconName: 'LayoutDashboard',
         path: '/cms/dashboard',
       },
@@ -376,7 +376,7 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         children: [
           {
             id: 'menu_product_settings',
-            title: 'Danh mục sản phẩm',
+            title: 'Thiết lập sản phẩm',
             path: '/cms/product-settings',
           },
         ],

@@ -35,7 +35,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-black text-slate-900 dark:text-white">
-                Xác nhận Tác động Master Data
+                Xác nhận thay đổi dữ liệu
               </h2>
               <p className="text-xs text-red-600 font-bold">Mã: {item.code}</p>
             </div>
@@ -75,7 +75,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               <PauseCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <strong className="font-bold text-amber-900 dark:text-amber-300 block">
-                  1. Ngừng sử dụng (Deactivate - An toàn nhất)
+                  1. Ngừng sử dụng — nên chọn
                 </strong>
                 <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
                   Ẩn khỏi các dropdown lựa chọn mới. Tất cả các sản phẩm cũ giữ nguyên dữ liệu không bị lỗi.
@@ -91,7 +91,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               <Archive className="w-5 h-5 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="font-bold text-slate-800 dark:text-slate-200 block">
-                  2. Chuyển sang Lưu trữ (Archived)
+                  2. Chuyển vào lưu trữ
                 </strong>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   Đưa vào danh mục thùng rác lưu trữ. Có thể phục hồi (Restore) lại bất cứ lúc nào.

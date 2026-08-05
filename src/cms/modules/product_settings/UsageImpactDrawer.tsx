@@ -42,7 +42,7 @@ export const UsageImpactDrawer: React.FC<UsageImpactDrawerProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                Nơi sử dụng & Tác động Dependency
+                Nơi sử dụng và ảnh hưởng
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Kiểm tra danh sách các Sản phẩm, Đơn hàng & Liên hệ đang dùng mục này
@@ -94,10 +94,10 @@ export const UsageImpactDrawer: React.FC<UsageImpactDrawerProps> = ({
             <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
             <div>
               <strong className="font-bold block text-amber-900 dark:text-amber-200 mb-0.5">
-                Quy tắc an toàn dữ liệu Master Data:
+                Quy tắc bảo toàn dữ liệu:
               </strong>
               <p className="leading-relaxed text-[11px]">
-                Khi ngưng sử dụng (Deactivate), giá trị này sẽ không còn xuất hiện trong ô chọn mới của Form Sản phẩm, nhưng tất cả các sản phẩm cũ dưới đây vẫn được giữ nguyên để bảo tồn lịch sử kinh doanh.
+                Khi ngừng sử dụng, giá trị này sẽ không còn xuất hiện trong danh sách chọn của biểu mẫu sản phẩm. Các sản phẩm đã dùng giá trị này vẫn được giữ nguyên.
               </p>
             </div>
           </div>

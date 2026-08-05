@@ -36,7 +36,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'code', label: 'Mã nhận diện / Code' },
     { key: 'type_badge', label: 'Loại master data' },
     { key: 'usage_count', label: 'Số sản phẩm đang dùng' },
-    { key: 'status', label: 'Trạng thái (Active/Inactive)' },
+    { key: 'status', label: 'Trạng thái sử dụng' },
     { key: 'ordering', label: 'Thứ tự hiển thị (Priority/Order)' },
     { key: 'scope_or_country', label: 'Phạm vi / Quốc gia / Email' },
     { key: 'updated_time', label: 'Thời gian cập nhật gần nhất' },
@@ -56,7 +56,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               <h2 className="text-sm font-black text-slate-900 dark:text-white">
                 Cấu hình Hiển thị Cột Bảng
               </h2>
-              <p className="text-xs text-slate-500">Tùy chỉnh bật tắt các cột thông tin Master Data</p>
+              <p className="text-xs text-slate-500">Chọn các cột thông tin cần hiển thị</p>
             </div>
           </div>
 
@@ -99,7 +99,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
 
           {/* Table Density Toggle */}
           <div className="space-y-2">
-            <div className="font-bold text-slate-700 dark:text-slate-300">Mật độ dòng (Density):</div>
+            <div className="font-bold text-slate-700 dark:text-slate-300">Khoảng cách dòng:</div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => onChangeDensity('normal')}
@@ -109,7 +109,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                     : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                 }`}
               >
-                Tiêu chuẩn (Normal)
+                Tiêu chuẩn
               </button>
               <button
                 onClick={() => onChangeDensity('compact')}
@@ -119,7 +119,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                     : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                 }`}
               >
-                Rút gọn (Compact)
+                Thu gọn
               </button>
             </div>
           </div>

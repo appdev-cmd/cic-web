@@ -54,7 +54,7 @@ export const ProductActivityDrawer: React.FC<ProductActivityDrawerProps> = ({
                   <span>Trạng thái phiên bản:</span>
                 </span>
                 <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 font-bold text-[10px] rounded-full border border-emerald-500/20">
-                  {product.editorial_status === 'published' ? 'Đang Live Public' : product.editorial_status}
+                  {product.editorial_status === 'published' ? 'Đang hiển thị công khai' : product.editorial_status}
                 </span>
               </div>
 
@@ -64,7 +64,7 @@ export const ProductActivityDrawer: React.FC<ProductActivityDrawerProps> = ({
                   <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{product.sku}</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
-                  <span>Phiên bản làm việc (Working Version):</span>
+                  <span>Phiên bản đang chỉnh sửa:</span>
                   <span className="font-mono font-bold text-orange-600">
                     {product.working_version_id || 'Không có (Dùng bản Live)'}
                   </span>

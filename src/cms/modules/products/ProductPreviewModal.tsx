@@ -29,7 +29,7 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
         <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <span className="px-2.5 py-0.5 bg-orange-600 text-white font-mono text-[10px] font-bold rounded-full uppercase tracking-wider">
-              Preview Public Website
+              Xem thử trên website
             </span>
             <span className="text-xs text-slate-400 hidden sm:inline">
               Mô phỏng hiển thị sản phẩm trên portal CIC Technology
