@@ -41,6 +41,7 @@ import type { StaticPagesModuleData } from '../../data/EditorialContentDataSourc
 import { StaticPageFormView } from './StaticPageFormView';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsListFooter } from '../../components/ui/CmsPagination';
@@ -404,71 +405,21 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
         </>}
       />
 
-      {/* Saved View Tabs Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
-        <button
-          onClick={() => setSavedView('all')}
-          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 ${
-            savedView === 'all'
-              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
-          }`}
-        >
-          Tất cả trang ({pages.filter((p) => !p.in_trash).length})
-        </button>
-
-        <button
-          onClick={() => setSavedView('my_work')}
-          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 ${
-            savedView === 'my_work'
-              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
-          }`}
-        >
-          Việc của tôi
-        </button>
-
-        <button
-          onClick={() => setSavedView('pending')}
-          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-            savedView === 'pending'
-              ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-purple-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
-          }`}
-        >
-          <span>Hàng chờ duyệt</span>
-          <span className="px-1.5 py-0.2 bg-purple-500/20 rounded text-[10px]">
-            {pages.filter((p) => !p.in_trash && p.workflow_status === 'pending').length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setSavedView('orphan')}
-          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-            savedView === 'orphan'
-              ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-amber-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
-          }`}
-        >
-          <AlertTriangle className="w-3.5 h-3.5" />
-          <span>Trang mồ côi (Không liên kết)</span>
-          <span className="px-1.5 py-0.2 bg-amber-500/20 rounded text-[10px]">
-            {pages.filter((p) => !p.in_trash && (!p.used_by || p.used_by.length === 0)).length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setSavedView('trash')}
-          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-            savedView === 'trash'
-              ? 'bg-red-600 text-white border-red-600 shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-red-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
-          }`}
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          <span>Thùng rác ({pages.filter((p) => p.in_trash).length})</span>
-        </button>
-      </div>
+      {/* Saved View Tabs */}
+      <CmsTabs
+        ariaLabel="Phân loại trang nội dung"
+        value={savedView}
+        onChange={(val) => {
+          setSavedView(val as any);
+        }}
+        items={[
+          { id: 'all', label: 'Tất cả trang', count: pages.filter((p) => !p.in_trash).length },
+          { id: 'my_work', label: 'Việc của tôi', count: pages.filter((p) => !p.in_trash && p.author?.name === 'Nguyễn Văn Nam').length },
+          { id: 'pending', label: 'Hàng chờ duyệt', count: pages.filter((p) => !p.in_trash && p.workflow_status === 'pending').length },
+          { id: 'orphan', label: 'Trang mồ côi (Không liên kết)', count: pages.filter((p) => !p.in_trash && (!p.used_by || p.used_by.length === 0)).length },
+          { id: 'trash', label: 'Lưu trữ & thùng rác', count: pages.filter((p) => p.in_trash).length },
+        ]}
+      />
 
       {/* Toolbar Controls */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-4">

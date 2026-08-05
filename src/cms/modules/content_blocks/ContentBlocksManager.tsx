@@ -36,6 +36,7 @@ import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { DuplicateModal } from './DuplicateModal';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface ContentBlocksManagerProps { data: ContentBlocksModuleData; }
 
@@ -328,40 +329,24 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
       />
 
       {/* Main Navigation Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto scrollbar-none">
-        <div className="flex items-center gap-1">
-          {[
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <CmsTabs
+          ariaLabel="Phân loại khối nội dung"
+          value={activeTab}
+          onChange={(tab) => {
+            setActiveTab(tab as any);
+            if (tab === 'placement_view') setViewMode('placement');
+            else setViewMode('list');
+          }}
+          items={[
             { id: 'all', label: 'Tất cả khối', count: blocks.filter((b) => !b.deleted_at).length },
             { id: 'placement_view', label: 'Phân loại theo vị trí', count: data.placements.length },
             { id: 'my_tasks', label: 'Việc của tôi', count: blocks.filter((b) => !b.deleted_at && b.owner_name === 'Nguyễn Văn Minh').length },
             { id: 'pending_queue', label: 'Hàng chờ duyệt', count: blocks.filter((b) => !b.deleted_at && b.workflow_status === 'pending_review').length },
             { id: 'issues', label: 'Cần khắc phục', count: issues.length },
             { id: 'trash', label: 'Thùng rác', count: blocks.filter((b) => b.deleted_at).length },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id as any);
-                if (tab.id === 'placement_view') setViewMode('placement');
-                else setViewMode('list');
-              }}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <span>{tab.label}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                  activeTab === tab.id ? 'bg-orange-700 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
-                }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
+          ]}
+        />
 
         {/* View Mode Switcher */}
         <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">

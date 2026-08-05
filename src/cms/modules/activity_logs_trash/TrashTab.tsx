@@ -20,6 +20,7 @@ import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface TrashTabProps {
   items: TrashedItem[];
@@ -113,63 +114,18 @@ export const TrashTab: React.FC<TrashTabProps> = ({
         </div>
 
         {/* SUB-TABS */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <button
-            onClick={() => setActiveCategory('all')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'all'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Tất cả mục đã xóa ({items.length})
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('content')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'content'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Nội dung (Bài viết / Trang)
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('media')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'media'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Media & Banners
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('config_resources')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'config_resources'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Cấu hình & Quản trị
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('expiring_soon')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeCategory === 'expiring_soon'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-amber-600'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            <span>Sắp hết hạn lưu giữ (&lt; 7 ngày) ({items.filter((i) => i.daysRemaining <= 7).length})</span>
-          </button>
-        </div>
+        <CmsTabs
+          ariaLabel="Phân loại mục đã xóa trong thùng rác"
+          value={activeCategory}
+          onChange={(cat) => setActiveCategory(cat as TrashCategory)}
+          items={[
+            { id: 'all', label: 'Tất cả mục đã xóa', count: items.length },
+            { id: 'content', label: 'Nội dung (Bài viết / Trang)' },
+            { id: 'media', label: 'Media & Banners' },
+            { id: 'config_resources', label: 'Cấu hình & Quản trị' },
+            { id: 'expiring_soon', label: 'Sắp hết hạn lưu giữ (< 7 ngày)', count: items.filter((i) => i.daysRemaining <= 7).length, icon: Clock },
+          ]}
+        />
       </div>
 
       {/* BULK SELECTION BAR */}

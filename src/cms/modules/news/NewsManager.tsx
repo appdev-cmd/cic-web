@@ -36,6 +36,7 @@ import type { NewsModuleData } from '../../data/EditorialContentDataSource';
 import { NewsFormView } from './NewsFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ArticlePreviewModal } from './components/ArticlePreviewModal';
 import { QuickEditModal } from './components/QuickEditModal';
@@ -340,76 +341,31 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
             </CmsButton>}
           />
 
-          {/* VIEW SCOPE NAVIGATION TABS (SECTION 4.1) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-2xs">
-            <div className="flex flex-wrap items-center gap-1">
-              <button
-                onClick={() => { setActiveScopeTab('all'); setActiveSavedView(null); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeScopeTab === 'all'
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                Tất cả bài viết ({articles.filter((a) => !a.in_trash).length})
-              </button>
-
-              <button
-                onClick={() => { setActiveScopeTab('my_work'); setActiveSavedView(null); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeScopeTab === 'my_work'
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                Việc của tôi
-              </button>
-
-              <button
-                onClick={() => { setActiveScopeTab('pending'); setActiveSavedView(null); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  activeScopeTab === 'pending'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
-                }`}
-              >
-                <span>Hàng chờ duyệt</span>
-                <span className="px-1.5 py-0.2 bg-amber-500/20 text-xs rounded-full">
-                  {articles.filter((a) => !a.in_trash && a.workflow_status === 'pending').length}
-                </span>
-              </button>
-
-              <button
-                onClick={() => { setActiveScopeTab('scheduled'); setActiveSavedView(null); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeScopeTab === 'scheduled'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40'
-                }`}
-              >
-                Lịch xuất bản ({articles.filter((a) => !a.in_trash && a.workflow_status === 'scheduled').length})
-              </button>
-
-              <button
-                onClick={() => { setActiveScopeTab('trash'); setActiveSavedView(null); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  activeScopeTab === 'trash'
-                    ? 'bg-rose-600 text-white shadow-xs'
-                    : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
-                }`}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Thùng rác ({articles.filter((a) => a.in_trash).length})</span>
-              </button>
-            </div>
+          {/* VIEW SCOPE NAVIGATION TABS */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CmsTabs
+              ariaLabel="Phân loại bài viết"
+              value={activeScopeTab}
+              onChange={(tab) => {
+                setActiveScopeTab(tab as any);
+                setActiveSavedView(null);
+              }}
+              items={[
+                { id: 'all', label: 'Tất cả bài viết', count: articles.filter((a) => !a.in_trash).length },
+                { id: 'my_work', label: 'Việc của tôi', count: articles.filter((a) => !a.in_trash && (a.author_name?.includes('Minh') || a.author_id === 'usr_01')).length },
+                { id: 'pending', label: 'Hàng chờ duyệt', count: articles.filter((a) => !a.in_trash && a.workflow_status === 'pending').length },
+                { id: 'scheduled', label: 'Lịch xuất bản', count: articles.filter((a) => !a.in_trash && a.workflow_status === 'scheduled').length },
+                { id: 'trash', label: 'Lưu trữ & thùng rác', count: articles.filter((a) => a.in_trash).length },
+              ]}
+            />
 
             {/* Column Setting Trigger */}
             <button
               onClick={() => setIsColumnModalOpen(true)}
-              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Tùy chỉnh cột & Mật độ</span>
+              <span>Tùy chỉnh cột</span>
             </button>
           </div>
 

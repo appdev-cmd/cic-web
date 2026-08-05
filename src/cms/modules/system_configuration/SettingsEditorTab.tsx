@@ -163,7 +163,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
       {/* MAIN LAYOUT: LEFT GROUP NAV + CENTRAL FORM + RIGHT CONTEXT DRAWER */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* LEFT NAV: 9 GROUPS & SEARCH (3 COLS) */}
-        <div className="lg:col-span-3 space-y-3">
+        <div className="lg:col-span-3 space-y-3 lg:sticky lg:top-20 lg:self-start">
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3 shadow-xs space-y-2">
             {/* SEARCH BOX */}
             <div className="relative">
@@ -190,10 +190,10 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                       setSearchTerm('');
                       setActiveGroupId(group.id);
                     }}
-                    className={`w-full p-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between cursor-pointer ${
+                    className={`w-full p-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between cursor-pointer border ${
                       isActive
-                        ? 'bg-orange-500 text-white font-bold shadow-md shadow-orange-500/20'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 font-bold border-orange-500/80 shadow-xs ring-2 ring-orange-500/10 border-l-4 border-l-orange-500'
+                        : 'bg-transparent text-slate-700 dark:text-slate-300 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-200 dark:hover:border-orange-900/50'
                     }`}
                   >
                     <div className="truncate pr-2">
@@ -202,7 +202,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                     <span
                       className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 ${
                         isActive
-                          ? 'bg-white/20 text-white'
+                          ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-900/40'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                       }`}
                     >
@@ -504,7 +504,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
         </div>
 
         {/* RIGHT CONTEXT DRAWER (3 COLS) */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-4 lg:sticky lg:top-20 lg:self-start">
           {/* SCOPE INHERITANCE SUMMARY */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3 text-xs">
             <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">

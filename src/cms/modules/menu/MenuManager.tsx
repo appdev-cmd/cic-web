@@ -39,6 +39,7 @@ import { MenuVersionHistoryDrawer } from './MenuVersionHistoryDrawer';
 import { MenuActivityLogDrawer } from './MenuActivityLogDrawer';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface MenuManagerProps { workspaceLocale: CmsLocale; data?: MenuModuleData; }
 
@@ -270,27 +271,17 @@ export const MenuManager: React.FC<MenuManagerProps> = ({ workspaceLocale, data 
         />
 
           {/* Group Switcher Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-800 dark:bg-slate-900 [scrollbar-width:thin]">
-            {groups.map((g) => {
-              const isActive = g.id === activeGroupId;
-              return (
-                <button
-                  key={g.id}
-                  onClick={() => setActiveGroupId(g.id)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 ${
-                    isActive
-                      ? 'bg-orange-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>{g.name}</span>
-                  {g.has_draft_changes && (
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  )}
-                </button>
-              );
-            })}
+          <div className="flex items-center justify-between gap-2">
+            <CmsTabs
+              ariaLabel="Nhóm menu"
+              value={activeGroupId}
+              onChange={(id) => setActiveGroupId(id)}
+              items={groups.map((g) => ({
+                id: g.id,
+                label: g.name + (g.has_draft_changes ? ' (Có nháp)' : ''),
+                icon: Layers,
+              }))}
+            />
 
             <CmsIconButton
               onClick={() => {

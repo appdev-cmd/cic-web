@@ -47,7 +47,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({ workspaceLocale }) => {
 
   return <div className="space-y-5">
     {toast && <div role="status" className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-2xl"><Check className="size-4 text-emerald-400"/>{toast}</div>}
-    <CmsPageHeader icon={<MailCheck/>} title="Mẫu email" description="Soạn, duyệt và quản lý phiên bản nội dung email theo từng sự kiện. Người nhận và cấu hình gửi được quản lý riêng." meta={<span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Workspace {workspaceLocale.toUpperCase()}</span>} actions={<CmsButton variant="primary" size="sm" leadingIcon={<Plus/>} onClick={() => { setEditing(null); setView('form'); }}>Thêm mẫu email</CmsButton>} />
+    <CmsPageHeader icon={<MailCheck/>} title="Mẫu email" description="Soạn, duyệt và quản lý phiên bản nội dung email theo từng sự kiện. Người nhận và cấu hình gửi được quản lý riêng." actions={<CmsButton variant="primary" size="sm" leadingIcon={<Plus/>} onClick={() => { setEditing(null); setView('form'); }}>Thêm mẫu email</CmsButton>} />
 
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
       <div className="grid gap-3 md:grid-cols-12">

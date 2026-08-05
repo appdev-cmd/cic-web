@@ -20,7 +20,6 @@ export type ConfigGroupId =
   | 'seo'
   | 'company'
   | 'footer_social'
-  | 'content_enjicad'
   | 'media_assets'
   | 'integrations'
   | 'email_notif'

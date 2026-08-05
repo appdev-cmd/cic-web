@@ -86,32 +86,26 @@ export const configGroupsMock: ConfigGroupDef[] = [
     iconName: 'Share2',
   },
   {
-    id: 'content_enjicad',
-    title: '5. Nội dung Cấu hình & enjiCAD',
-    description: 'Thông số CAD engine enjiCAD, Thư viện lệnh, Giới hạn tải, Khối giới thiệu & Feature toggles',
-    iconName: 'Cpu',
-  },
-  {
     id: 'media_assets',
-    title: '6. Media & Tài liệu',
+    title: '5. Media & Tài liệu',
     description: 'Ảnh watermark, Tập tin tài liệu pháp lý, Catalogue mẫu & Ảnh mặc định fallback',
     iconName: 'FolderImage',
   },
   {
     id: 'integrations',
-    title: '7. Tích hợp & Mật khẩu (API Secrets)',
+    title: '6. Tích hợp & Mật khẩu (API Secrets)',
     description: 'Cổng thanh toán, AI Studio / Gemini API, Zalo ZNS, Google OAuth & Webhooks (Bảo mật)',
     iconName: 'Key',
   },
   {
     id: 'email_notif',
-    title: '8. Email & Thông báo',
+    title: '7. Email & Thông báo',
     description: 'Cấu hình Máy chủ SMTP, Email gửi mặc định, Luồng nhận thông báo khách hàng & Webhook alert',
     iconName: 'Mail',
   },
   {
     id: 'advanced',
-    title: '9. Nâng cao & Kỹ thuật',
+    title: '8. Nâng cao & Kỹ thuật',
     description: 'Bảo trì Chế độ Maintenance, Cache TTL, CORS, Giới hạn API Rate-limit & Tham số ngừng dùng',
     iconName: 'SlidersHorizontal',
   },
@@ -415,61 +409,7 @@ export const configItemsMock: ConfigItem[] = [
     isShared: true,
   },
 
-  // 5. Content & enjiCAD Engine
-  {
-    id: 'cad_engine_version',
-    path: 'system.enjicad.engine_version',
-    label: 'Phiên bản enjiCAD CAD Engine',
-    groupId: 'content_enjicad',
-    description: 'Phiên bản lõi đồ họa hiển thị bản vẽ DWG/DXF trên Web Viewer',
-    type: 'text',
-    sensitivity: 'standard',
-    isShared: false,
-  },
-  {
-    id: 'cad_max_file_size_mb',
-    path: 'system.enjicad.max_upload_size_mb',
-    label: 'Dung lượng Tải file DWG Tối đa (MB)',
-    groupId: 'content_enjicad',
-    description: 'Giới hạn dung lượng tệp tin bản vẽ khi người dùng tải lên dùng thử',
-    type: 'number',
-    unit: 'MB',
-    sensitivity: 'sensitive',
-    isShared: false,
-  },
-  {
-    id: 'cad_trial_days',
-    path: 'system.enjicad.trial_days_count',
-    label: 'Số ngày dùng thử Miễn phí (License Trial)',
-    groupId: 'content_enjicad',
-    description: 'Thời hạn kích hoạt dùng thử tự động cho tài khoản đăng ký mới',
-    type: 'number',
-    unit: 'ngày',
-    sensitivity: 'standard',
-    isShared: true,
-  },
-  {
-    id: 'cad_enable_web_viewer',
-    path: 'system.enjicad.enable_web_viewer',
-    label: 'Cho phép Xem bản vẽ Online (Web DWG Viewer)',
-    groupId: 'content_enjicad',
-    description: 'Bật/tắt tính năng xem và đo đạc bản vẽ trực tiếp trên trình duyệt',
-    type: 'boolean',
-    sensitivity: 'standard',
-    isShared: true,
-  },
-  {
-    id: 'cad_notice_banner_text',
-    path: 'system.enjicad.notice_banner_text',
-    label: 'Thông báo Khuyến mại / Cập nhật enjiCAD',
-    groupId: 'content_enjicad',
-    description: 'Dòng chạy thông báo đặc biệt ở đầu trang Portal enjiCAD',
-    type: 'textarea',
-    sensitivity: 'standard',
-    isShared: false,
-  },
-
-  // 6. Media & Assets
+  // 5. Media & Assets
   {
     id: 'media_watermark_img',
     path: 'system.media.watermark_image',
@@ -501,7 +441,7 @@ export const configItemsMock: ConfigItem[] = [
     isShared: true,
   },
 
-  // 7. Integrations & API Secrets (Protected)
+  // 6. Integrations & API Secrets (Protected)
   {
     id: 'int_gemini_api_key',
     path: 'system.integrations.gemini_api_key',
@@ -555,7 +495,7 @@ export const configItemsMock: ConfigItem[] = [
     isShared: false,
   },
 
-  // 8. Email & Notifications
+  // 7. Email & Notifications
   {
     id: 'mail_smtp_host',
     path: 'system.email.smtp_host',
@@ -619,7 +559,7 @@ export const configItemsMock: ConfigItem[] = [
     isShared: false,
   },
 
-  // 9. Advanced & Deprecated
+  // 8. Advanced & Deprecated
   {
     id: 'adv_maintenance_mode',
     path: 'system.advanced.maintenance_mode',
@@ -1160,13 +1100,13 @@ export const initialIssuesMock: ValidationIssue[] = [
   {
     id: 'issue_103',
     scopeId: 'site_enjicad',
-    settingId: 'cad_max_file_size_mb',
-    settingLabel: 'Dung lượng Tải file DWG Tối đa',
-    groupId: 'content_enjicad',
+    settingId: 'adv_cache_ttl_seconds',
+    settingLabel: 'Thời gian Lưu Cache Hệ thống',
+    groupId: 'advanced',
     severity: 'info',
     code: 'HIGH_RESOURCE_THRESHOLD',
-    message: 'Dung lượng giới hạn file 150MB cao hơn mức khuyến nghị 100MB của hạ tầng Cloud Run.',
-    recommendation: 'Theo dõi tài nguyên bộ nhớ đệm RAM server nếu có nhiều lượt xem file cùng lúc.',
+    message: 'Thời gian lưu Cache 7200s cần theo dõi tài nguyên bộ nhớ đệm RAM server.',
+    recommendation: 'Theo dõi tài nguyên bộ nhớ đệm RAM server nếu có nhiều lượt truy cập cùng lúc.',
     createdAt: '2026-07-30 09:20:00',
   },
 ];

@@ -19,6 +19,7 @@ import {
 import { AuditEvent, AuditCategory, AuditSeverity, SavedViewFilter } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface AuditTabProps {
   logs: AuditEvent[];
@@ -155,64 +156,19 @@ export const AuditTab: React.FC<AuditTabProps> = ({
         </div>
 
         {/* CATEGORY TAB CHIPS */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs pt-1 border-t border-slate-100 dark:border-slate-800">
-          <span className="font-bold text-slate-400 text-[11px] shrink-0">Phân loại:</span>
-
-          <button
-            onClick={() => setActiveCategory('all')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'all'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Tất cả hoạt động ({logs.length})
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('sensitive')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeCategory === 'sensitive'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-red-600'
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Hoạt động nhạy cảm ({logs.filter((l) => l.action.isSensitive).length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('permissions_users')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'permissions_users'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Quyền & Người dùng
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('config_publish')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'config_publish'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Cấu hình & Xuất bản
-          </button>
-
-          <button
-            onClick={() => setActiveCategory('export_jobs')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-              activeCategory === 'export_jobs'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Export Jobs
-          </button>
+        <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+          <CmsTabs
+            ariaLabel="Phân loại nhật ký kiểm toán"
+            value={activeCategory}
+            onChange={(cat) => setActiveCategory(cat as AuditCategory)}
+            items={[
+              { id: 'all', label: 'Tất cả hoạt động', count: logs.length },
+              { id: 'sensitive', label: 'Hoạt động nhạy cảm', count: logs.filter((l) => l.action.isSensitive).length, icon: Lock },
+              { id: 'permissions_users', label: 'Quyền & Người dùng' },
+              { id: 'config_publish', label: 'Cấu hình & Xuất bản' },
+              { id: 'export_jobs', label: 'Export Jobs' },
+            ]}
+          />
         </div>
 
         {/* SAVED PRESETS */}

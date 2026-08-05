@@ -39,6 +39,7 @@ import { LocalizationListView } from './LocalizationListView';
 import { TranslationEditorDrawer } from './TranslationEditorDrawer';
 import { BatchAssignModal } from './BatchAssignModal';
 import { SourceDiffModal } from './SourceDiffModal';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 export const LocalizationManager: React.FC = () => {
   // Main Items State
@@ -414,49 +415,22 @@ export const LocalizationManager: React.FC = () => {
       )}
 
       {/* 1. SITEMAP WORKSPACE TABS */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1 scrollbar-none">
-        <div className="flex items-center gap-1">
-          {[
-            { key: 'overview', label: 'Tổng quan tiến độ', count: 0, icon: Globe },
-            { key: 'all', label: 'Tất cả mục', count: tabCounts.all, icon: Layers },
-            { key: 'frontend', label: 'Chuỗi Frontend (79 UI)', count: tabCounts.frontend, icon: Sparkles },
-            { key: 'backend', label: 'Chuỗi Backend (90 System)', count: tabCounts.backend, icon: Cpu },
-            { key: 'content', label: 'Nội dung CMS', count: tabCounts.content, icon: FileText },
-            { key: 'my_queue', label: 'Việc của tôi', count: tabCounts.myQueue, icon: UserCheck },
-            { key: 'review_queue', label: 'Hàng chờ review', count: tabCounts.reviewQueue, icon: Clock },
-            { key: 'missing', label: 'Bản dịch còn thiếu', count: tabCounts.missing, icon: AlertCircle },
-            { key: 'outdated', label: 'Nguồn vừa thay đổi', count: tabCounts.outdated, icon: AlertTriangle },
-          ].map((tab) => {
-            const IconComponent = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as MainTabType)}
-                className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <IconComponent className="w-4 h-4" />
-                <span>{tab.label}</span>
-                {tab.count > 0 && (
-                  <span
-                    className={`px-1.5 py-0.5 text-[10px] rounded-full ${
-                      isActive
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <CmsTabs
+        ariaLabel="Phân loại chuỗi giao diện và dịch thuật"
+        value={activeTab}
+        onChange={(key) => setActiveTab(key as MainTabType)}
+        items={[
+          { id: 'overview', label: 'Tổng quan tiến độ', icon: Globe },
+          { id: 'all', label: 'Tất cả mục', count: tabCounts.all, icon: Layers },
+          { id: 'frontend', label: 'Chuỗi Frontend', count: tabCounts.frontend, icon: Sparkles },
+          { id: 'backend', label: 'Chuỗi Backend', count: tabCounts.backend, icon: Cpu },
+          { id: 'content', label: 'Nội dung CMS', count: tabCounts.content, icon: FileText },
+          { id: 'my_queue', label: 'Việc của tôi', count: tabCounts.myQueue, icon: UserCheck },
+          { id: 'review_queue', label: 'Hàng chờ review', count: tabCounts.reviewQueue, icon: Clock },
+          { id: 'missing', label: 'Bản dịch còn thiếu', count: tabCounts.missing, icon: AlertCircle },
+          { id: 'outdated', label: 'Nguồn vừa thay đổi', count: tabCounts.outdated, icon: AlertTriangle },
+        ]}
+      />
 
       {/* 2. PROGRESS DASHBOARD VIEW */}
       {activeTab === 'overview' && (

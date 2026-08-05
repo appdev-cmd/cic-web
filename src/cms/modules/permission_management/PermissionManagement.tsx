@@ -26,6 +26,7 @@ import { PolicyIssuesTab } from './PolicyIssuesTab';
 import { AccessReviewsTab } from './AccessReviewsTab';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }> = ({ data }) => {
   // Tabs State: 'roles' (Module 15 Main) | 'assignments' | 'issues' | 'reviews' | 'matrix' | 'tasks'
@@ -276,78 +277,20 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
         </div>
 
         {/* PRIMARY TAB NAVIGATION BAR */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-          <button
-            onClick={() => setActiveTab('roles')}
-            className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'roles'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Danh sách vai trò</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('assignments')}
-            className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'assignments'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Gán vai trò ({assignments.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('issues')}
-            className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'issues'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <AlertTriangle className="w-4 h-4 text-red-400" />
-            <span>Xung đột quyền ({issues.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('reviews')}
-            className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'reviews'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Clock className="w-4 h-4 text-amber-400" />
-            <span>Đợt rà soát ({reviews.filter((r) => r.status === 'pending').length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('matrix')}
-            className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'matrix'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Sliders className="w-4 h-4" />
-            <span>Ma trận quyền</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('tasks')}
-            className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'tasks'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Danh mục chức năng</span>
-          </button>
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <CmsTabs
+            ariaLabel="Phân loại vai trò và quản trị quyền"
+            value={activeTab}
+            onChange={(tab) => setActiveTab(tab as any)}
+            items={[
+              { id: 'roles', label: 'Danh sách vai trò', icon: Shield },
+              { id: 'assignments', label: 'Gán vai trò', count: assignments.length, icon: Users },
+              { id: 'issues', label: 'Xung đột quyền', count: issues.length, icon: AlertTriangle },
+              { id: 'reviews', label: 'Đợt rà soát', count: reviews.filter((r) => r.status === 'pending').length, icon: Clock },
+              { id: 'matrix', label: 'Ma trận quyền', icon: Sliders },
+              { id: 'tasks', label: 'Danh mục chức năng', icon: Layers },
+            ]}
+          />
         </div>
       </div>
 
