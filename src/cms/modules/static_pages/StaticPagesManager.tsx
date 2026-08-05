@@ -392,6 +392,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
               setIsFormOpen(true);
             }}
             variant="primary"
+            size="sm"
             leadingIcon={<Plus />}
           >
             Thêm trang

@@ -239,6 +239,7 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
             <CmsButton
               onClick={() => handleCreateNew('banner')}
               variant="primary"
+              size="sm"
               leadingIcon={<Plus />}
             >
               Thêm banner
@@ -247,6 +248,7 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
             <CmsButton
               onClick={() => handleCreateNew('slideshow')}
               variant="secondary"
+              size="sm"
               leadingIcon={<Sliders />}
             >
               Thêm slideshow

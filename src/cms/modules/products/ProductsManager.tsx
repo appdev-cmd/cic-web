@@ -295,6 +295,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
               setViewMode('form');
             }}
             variant="primary"
+            size="sm"
             leadingIcon={<Plus />}
           >
             Thêm sản phẩm

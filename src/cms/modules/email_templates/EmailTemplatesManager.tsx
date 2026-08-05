@@ -248,7 +248,7 @@ export const EmailTemplatesManager: React.FC = () => {
             description="Quản lý nội dung email tự động dùng cho liên hệ, báo giá và thông báo nội bộ."
             meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{templates.length} mẫu</span>}
             actions={(
-              <CmsButton onClick={handleOpenCreateForm} variant="primary" leadingIcon={<MailCheck />}>
+              <CmsButton onClick={handleOpenCreateForm} variant="primary" size="sm" leadingIcon={<MailCheck />}>
                 Thêm mẫu email
               </CmsButton>
             )}

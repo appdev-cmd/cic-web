@@ -309,6 +309,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
           <CmsButton
             onClick={() => setIsConflictGuardOpen(true)}
             variant="secondary"
+            size="sm"
             leadingIcon={<ShieldAlert />}
           >
             Kiểm tra xung đột ({issues.length})
@@ -317,6 +318,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
           <CmsButton
             onClick={handleCreateNew}
             variant="primary"
+            size="sm"
             leadingIcon={<Plus />}
           >
             Thêm khối nội dung

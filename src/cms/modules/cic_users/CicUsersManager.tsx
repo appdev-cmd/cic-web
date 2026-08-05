@@ -250,6 +250,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
               setIsModalOpen(true);
             }}
             variant="primary"
+            size="sm"
             leadingIcon={<UserCheck />}
           >
             Thêm người dùng

@@ -285,6 +285,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           <CmsButton
             onClick={() => setIsSimulatorOpen(true)}
             variant="secondary"
+            size="sm"
             leadingIcon={<Zap />}
           >
             Kiểm tra nơi nhận email
@@ -296,6 +297,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
               setIsFormDrawerOpen(true);
             }}
             variant="primary"
+            size="sm"
             leadingIcon={<Plus />}
           >
             {createLabels[activeDataType]}

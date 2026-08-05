@@ -433,6 +433,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           <CmsButton
             onClick={handleCreateNew}
             variant="primary"
+            size="sm"
             leadingIcon={<Plus />}
           >
             Thêm sự kiện

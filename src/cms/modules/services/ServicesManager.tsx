@@ -302,6 +302,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         actions={<CmsButton
           onClick={handleCreateNew}
           variant="primary"
+          size="sm"
           leadingIcon={<Plus />}
         >
           Thêm dịch vụ

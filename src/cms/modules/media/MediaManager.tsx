@@ -280,6 +280,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
           <CmsButton
             onClick={() => setActiveTab('albums')}
             variant="secondary"
+            size="sm"
             leadingIcon={<FolderKanban />}
           >
             {albums.length} bộ sưu tập
@@ -288,6 +289,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
           <CmsButton
             onClick={handleOpenUpload}
             variant="primary"
+            size="sm"
             leadingIcon={<UploadCloud />}
           >
             Tải tệp lên

@@ -330,6 +330,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
             actions={<CmsButton
               onClick={handleOpenCreateForm}
               variant="primary"
+              size="sm"
               leadingIcon={<Plus />}
             >
               Thêm tin tức
