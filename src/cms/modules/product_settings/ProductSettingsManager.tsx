@@ -61,6 +61,8 @@ import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { MasterDataFormDrawer } from './MasterDataFormDrawer';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
 
@@ -519,30 +521,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             </div>
 
             {/* Bulk actions bar */}
-            {selectedIds.length > 0 && (
-              <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-between flex-wrap gap-2 text-xs animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400 font-bold">
-                  <CheckSquare className="w-4 h-4" />
-                  <span>Đã chọn {selectedIds.length} mục</span>
-                </div>
-
-                <div className="flex items-center gap-2 flex-wrap">
-                  <button
-                    onClick={handleBatchDeactivate}
-                    className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer"
-                  >
-                    Ngừng sử dụng
-                  </button>
-
-                  <button
-                    onClick={handleBatchArchive}
-                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg cursor-pointer"
-                  >
-                    Chuyển sang Lưu trữ
-                  </button>
-                </div>
-              </div>
-            )}
+            <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="mục thiết lập" onClear={() => setSelectedIds([])} actions={[
+              { label: 'Ngừng sử dụng', onClick: handleBatchDeactivate, icon: Archive },
+              { label: 'Lưu trữ', onClick: handleBatchArchive, icon: Trash2, variant: 'danger' },
+            ]} />
           </div>
 
           {/* MAIN UNIFIED MASTER DATA TABLE */}
@@ -553,17 +535,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   <tr>
                     {/* Checkbox Sticky Left */}
                     <th className="py-3 px-3 w-10 sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                      <button
-                        onClick={handleSelectAllOnPage}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      >
-                        {paginatedList.length > 0 &&
-                        paginatedList.every((i) => selectedIds.includes(i.id)) ? (
-                          <CheckSquare className="w-4 h-4 text-orange-600" />
-                        ) : (
-                          <Square className="w-4 h-4" />
-                        )}
-                      </button>
+                      <CmsSelectionCheckbox checked={paginatedList.length > 0 && paginatedList.every((item) => selectedIds.includes(item.id))} indeterminate={selectedIds.some((id) => paginatedList.some((item) => item.id === id)) && !paginatedList.every((item) => selectedIds.includes(item.id))} onChange={handleSelectAllOnPage} label="Chọn tất cả mục thiết lập trên trang" />
                     </th>
 
                     {/* Name & Code (Sticky Left) */}
@@ -617,16 +589,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                         >
                           {/* Checkbox */}
                           <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
-                            <button
-                              onClick={() => handleToggleSelect(item.id)}
-                              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                            >
-                              {isSelected ? (
-                                <CheckSquare className="w-4 h-4 text-orange-600" />
-                              ) : (
-                                <Square className="w-4 h-4" />
-                              )}
-                            </button>
+                            <CmsSelectionCheckbox checked={isSelected} onChange={() => handleToggleSelect(item.id)} label={`Chọn mục ${item.name}`} />
                           </td>
 
                           {/* Name & Code */}

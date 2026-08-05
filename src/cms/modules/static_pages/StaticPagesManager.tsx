@@ -19,6 +19,7 @@ import {
   Globe,
   Square,
   CheckSquare,
+  Archive,
   Layers,
   FolderTree,
   ListFilter,
@@ -40,6 +41,8 @@ import type { StaticPagesModuleData } from '../../data/EditorialContentDataSourc
 import { StaticPageFormView } from './StaticPageFormView';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { TreeView } from './TreeView';
 import { UsedByDrawer } from './UsedByDrawer';
@@ -533,31 +536,11 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
         </div>
 
         {/* Batch Actions Row */}
-        {selectedIds.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-            <span className="font-bold text-orange-600">Đã chọn {selectedIds.length} dòng</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleBatchStatus('published')}
-                className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-xl font-bold cursor-pointer hover:bg-emerald-100"
-              >
-                Xuất bản hàng loạt
-              </button>
-              <button
-                onClick={() => handleBatchStatus('archived')}
-                className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-300 rounded-xl font-bold cursor-pointer hover:bg-amber-100"
-              >
-                Lưu trữ hàng loạt
-              </button>
-              <button
-                onClick={handleTriggerBatchDelete}
-                className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-300 rounded-xl font-bold cursor-pointer hover:bg-red-100"
-              >
-                Chuyển Thùng rác
-              </button>
-            </div>
-          </div>
-        )}
+        <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="trang" onClear={() => setSelectedIds([])} actions={[
+          { label: 'Xuất bản', onClick: () => handleBatchStatus('published'), icon: CheckSquare, variant: 'primary' },
+          { label: 'Lưu trữ', onClick: () => handleBatchStatus('archived'), icon: Archive },
+          { label: 'Chuyển vào thùng rác', onClick: handleTriggerBatchDelete, icon: Trash2, variant: 'danger' },
+        ]} />
       </div>
 
       {/* Content Main View: LIST vs TREE */}
@@ -580,17 +563,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   <th className="py-3 px-4 w-10 text-center">
-                    <button
-                      type="button"
-                      onClick={handleSelectAll}
-                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                    >
-                      {filteredPages.length > 0 && selectedIds.length === filteredPages.length ? (
-                        <CheckSquare className="w-4 h-4 text-orange-600" />
-                      ) : (
-                        <Square className="w-4 h-4" />
-                      )}
-                    </button>
+                    <CmsSelectionCheckbox checked={filteredPages.length > 0 && selectedIds.length === filteredPages.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredPages.length} onChange={handleSelectAll} label="Chọn tất cả trang" />
                   </th>
 
                   {isColumnVisible('title') && <th className="py-3 px-4 min-w-[280px]">Trang nội dung</th>}
@@ -618,17 +591,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
                       >
                         {/* Checkbox */}
                         <td className="py-3.5 px-4 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleSelectOne(page.id)}
-                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                          >
-                            {isSelected ? (
-                              <CheckSquare className="w-4 h-4 text-orange-600" />
-                            ) : (
-                              <Square className="w-4 h-4" />
-                            )}
-                          </button>
+                          <CmsSelectionCheckbox checked={isSelected} onChange={() => handleSelectOne(page.id)} label={`Chọn trang ${page.title}`} />
                         </td>
 
                         {/* Title & Info */}

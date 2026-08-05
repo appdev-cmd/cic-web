@@ -40,6 +40,8 @@ import type { ServicesModuleData } from '../../data/EditorialContentDataSource';
 import { ServiceFormView } from './ServiceFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { ServicePreviewModal } from './ServicePreviewModal';
 import { QuickEditModal } from './QuickEditModal';
 import { ImpactWarningModal } from './ImpactWarningModal';
@@ -412,53 +414,34 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         </div>
 
         {/* Bulk Actions Bar if items selected */}
-        {selectedIds.length > 0 && (
-          <div className="p-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-xl flex items-center justify-between animate-in fade-in">
-            <span className="text-xs font-bold text-orange-800 dark:text-orange-300">
-              Đã chọn {selectedIds.length} dịch vụ
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
+        <CmsBulkActionBar
+          selectedCount={selectedIds.length}
+          itemLabel="dịch vụ"
+          onClear={() => setSelectedIds([])}
+          actions={[
+            { label: 'Kích hoạt', icon: Power, variant: 'primary', onClick: () => {
                   setServices((prev) =>
                     prev.map((s) => (selectedIds.includes(s.id) ? { ...s, service_status: 'active' } : s))
                   );
-                  showToast(`Đã kích hoạt Active cho ${selectedIds.length} dịch vụ!`);
+                  showToast(`Đã kích hoạt ${selectedIds.length} dịch vụ!`);
                   setSelectedIds([]);
-                }}
-                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1"
-              >
-                <Power className="w-3.5 h-3.5" /> Set Active
-              </button>
-
-              <button
-                onClick={() => {
+                } },
+            { label: 'Lưu trữ', icon: Archive, onClick: () => {
                   setServices((prev) =>
                     prev.map((s) => (selectedIds.includes(s.id) ? { ...s, service_status: 'archived' } : s))
                   );
                   showToast(`Đã lưu trữ ${selectedIds.length} dịch vụ!`);
                   setSelectedIds([]);
-                }}
-                className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1"
-              >
-                <Archive className="w-3.5 h-3.5" /> Archive
-              </button>
-
-              <button
-                onClick={() => {
+                } },
+            { label: 'Xóa', icon: Trash2, variant: 'danger', onClick: () => {
                   setServices((prev) =>
                     prev.map((s) => (selectedIds.includes(s.id) ? { ...s, is_deleted: true } : s))
                   );
                   showToast(`Đã di chuyển ${selectedIds.length} dịch vụ vào Thùng rác!`);
                   setSelectedIds([]);
-                }}
-                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Xóa hàng loạt
-              </button>
-            </div>
-          </div>
-        )}
+                } },
+          ]}
+        />
       </div>
 
       {/* Main Full-Width Data Table */}
@@ -468,13 +451,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800 z-10">
-                  <button onClick={handleSelectAll} className="text-slate-400 hover:text-slate-600">
-                    {selectedIds.length === paginatedServices.length && paginatedServices.length > 0 ? (
-                      <CheckSquare className="w-4 h-4 text-orange-600" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
+                  <CmsSelectionCheckbox checked={paginatedServices.length > 0 && selectedIds.length === paginatedServices.length} indeterminate={selectedIds.length > 0 && selectedIds.length < paginatedServices.length} onChange={handleSelectAll} label="Chọn tất cả dịch vụ trên trang" />
                 </th>
                 <th className="p-3 min-w-[280px] sticky left-10 bg-slate-50 dark:bg-slate-800 z-10">
                   Dịch vụ & Mã
@@ -509,16 +486,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                     >
                       {/* Checkbox */}
                       <td className="p-3 text-center sticky left-0 bg-white dark:bg-slate-900 z-10">
-                        <button
-                          onClick={() => handleToggleSelect(item.id)}
-                          className="text-slate-400 hover:text-slate-600"
-                        >
-                          {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-orange-600" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
+                        <CmsSelectionCheckbox checked={isSelected} onChange={() => handleToggleSelect(item.id)} label={`Chọn dịch vụ ${item.title}`} />
                       </td>
 
                       {/* Title & Code */}

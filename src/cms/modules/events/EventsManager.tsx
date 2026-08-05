@@ -36,6 +36,8 @@ import { EventPreviewModal } from './EventPreviewModal';
 import { EventQuickEditModal } from './EventQuickEditModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { EventActivityLogDrawer } from './EventActivityLogDrawer';
 import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
 
@@ -518,45 +520,15 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
           <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
             <span>Hiển thị: <strong>{filteredEvents.length}</strong> / {events.length} sự kiện</span>
-            {selectedIds.length > 0 && (
-              <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
-                Đã chọn: {selectedIds.length} dòng
-              </span>
-            )}
           </div>
 
           {/* Batch Action buttons - Only show when items are selected */}
-          {selectedIds.length > 0 && (
-            <div className="flex items-center flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => handleBatchChangeEditorialStatus('published')}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100"
-              >
-                <Eye className="w-3.5 h-3.5" />
-                <span>Xuất bản ({selectedIds.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleBatchChangeEditorialStatus('archived')}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-200"
-              >
-                <EyeOff className="w-3.5 h-3.5" />
-                <span>Lưu trữ ({selectedIds.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleOpenBatchDelete}
-                className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-100"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Xóa ({selectedIds.length})</span>
-              </button>
-            </div>
-          )}
         </div>
+        <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="sự kiện" onClear={() => setSelectedIds([])} actions={[
+          { label: 'Xuất bản', onClick: () => handleBatchChangeEditorialStatus('published'), icon: Eye, variant: 'primary' },
+          { label: 'Lưu trữ', onClick: () => handleBatchChangeEditorialStatus('archived'), icon: EyeOff },
+          { label: 'Xóa', onClick: handleOpenBatchDelete, icon: Trash2, variant: 'danger' },
+        ]} />
       </div>
 
       {/* TABLE DATA LIST */}
@@ -566,17 +538,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             <thead>
               <tr className="bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 <th className="py-3 px-4 w-10 text-center">
-                  <button
-                    type="button"
-                    onClick={handleSelectAll}
-                    className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    {selectedIds.length > 0 && selectedIds.length === filteredEvents.length ? (
-                      <CheckSquare className="w-4 h-4 text-orange-600" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
+                  <CmsSelectionCheckbox checked={filteredEvents.length > 0 && selectedIds.length === filteredEvents.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredEvents.length} onChange={handleSelectAll} label="Chọn tất cả sự kiện" />
                 </th>
                 {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">Tiêu đề sự kiện</th>}
                 {columnVisibility.category && <th className="py-3 px-4 w-36">Danh mục</th>}
@@ -603,17 +565,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                     >
                       {/* Checkbox */}
                       <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
-                        <button
-                          type="button"
-                          onClick={() => handleSelectOne(ev.id)}
-                          className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                        >
-                          {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-orange-600" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
+                        <CmsSelectionCheckbox checked={isSelected} onChange={() => handleSelectOne(ev.id)} label={`Chọn sự kiện ${ev.title}`} />
                       </td>
 
                       {/* Tiêu đề */}
