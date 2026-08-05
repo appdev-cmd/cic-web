@@ -13,11 +13,31 @@ import { resolveCmsModule } from '../routing';
 import { demoCmsDataSource } from '../data/demoCmsDataSource';
 import type { CmsLocale } from '../data/CmsDataSource';
 
-const CicUsersManager = lazy(() => import('../modules/cic_users/CicUsersManager').then((module) => ({ default: module.CicUsersManager })));
-const PermissionManagement = lazy(() => import('../modules/permission_management/PermissionManagement').then((module) => ({ default: module.PermissionManagement })));
-const SystemConfiguration = lazy(() => import('../modules/system_configuration/SystemConfiguration').then((module) => ({ default: module.SystemConfiguration })));
-const ActivityLogsManager = lazy(() => import('../modules/activity_logs_trash/ActivityLogsManager').then((module) => ({ default: module.ActivityLogsManager })));
-const TrashManager = lazy(() => import('../modules/activity_logs_trash/TrashManager').then((module) => ({ default: module.TrashManager })));
+const CicUsersManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/cic_users/CicUsersManager'), import('../data/demoGovernanceDataSource')]);
+  return { default: () => <module.CicUsersManager data={dataModule.demoGovernanceDataSource.users} /> };
+});
+const PermissionManagement = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/permission_management/PermissionManagement'), import('../data/demoGovernanceDataSource')]);
+  return { default: () => <module.PermissionManagement data={dataModule.demoGovernanceDataSource.permissions} /> };
+});
+const SystemConfiguration = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/system_configuration/SystemConfiguration'), import('../data/demoConfigurationDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.SystemConfiguration
+      websiteData={dataModule.demoConfigurationDataSource.websiteConfigByLocale[workspaceLocale]}
+      globalData={dataModule.demoConfigurationDataSource.globalConfig}
+    />
+  ) };
+});
+const ActivityLogsManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/ActivityLogsManager'), import('../data/demoGovernanceDataSource')]);
+  return { default: () => <module.ActivityLogsManager data={dataModule.demoGovernanceDataSource.audit} /> };
+});
+const TrashManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/TrashManager'), import('../data/demoGovernanceDataSource')]);
+  return { default: () => <module.TrashManager data={dataModule.demoGovernanceDataSource.trash} /> };
+});
 const StaticPagesManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([
     import('../modules/static_pages/StaticPagesManager'),
@@ -257,7 +277,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'permissions' ? (
             <PermissionManagement />
           ) : activeModule === 'settings' ? (
-            <SystemConfiguration />
+            <SystemConfiguration workspaceLocale={workspaceLocale} />
           ) : activeModule === 'activity_logs' ? (
             <ActivityLogsManager />
           ) : activeModule === 'trash' ? (

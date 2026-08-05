@@ -9,18 +9,15 @@ import {
   TrashedItem,
 } from './types';
 
-import {
-  initialTrashedItemsMock,
-} from './mockData';
 
 import { TrashTab } from './TrashTab';
 import { TrashItemDetailDrawer } from './TrashItemDetailDrawer';
 import { RestoreConflictModal } from './RestoreConflictModal';
 import { PermanentDeleteModal } from './PermanentDeleteModal';
 
-export const TrashManager: React.FC = () => {
+export const TrashManager: React.FC<{ data: TrashedItem[] }> = ({ data }) => {
   // State lists
-  const [trashedItems, setTrashedItems] = useState<TrashedItem[]>(initialTrashedItemsMock);
+  const [trashedItems, setTrashedItems] = useState<TrashedItem[]>(data);
 
   // Drawer / Modal states
   const [selectedTrashItem, setSelectedTrashItem] = useState<TrashedItem | null>(null);

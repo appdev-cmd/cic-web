@@ -12,21 +12,17 @@ import {
   SavedViewFilter,
 } from './types';
 
-import {
-  initialAuditLogsMock,
-  initialExportJobsMock,
-  savedViewFiltersMock,
-} from './mockData';
+import type { AuditGovernanceData } from '../../data/GovernanceDataSource';
 
 import { AuditTab } from './AuditTab';
 import { EventDetailDrawer } from './EventDetailDrawer';
 import { ExportJobsDrawer } from './ExportJobsDrawer';
 
-export const ActivityLogsManager: React.FC = () => {
+export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ data }) => {
   // State lists
-  const [auditLogs] = useState<AuditEvent[]>(initialAuditLogsMock);
-  const [exportJobs, setExportJobs] = useState<ExportJob[]>(initialExportJobsMock);
-  const [savedViews] = useState<SavedViewFilter[]>(savedViewFiltersMock);
+  const [auditLogs] = useState<AuditEvent[]>(data.auditLogs);
+  const [exportJobs, setExportJobs] = useState<ExportJob[]>(data.exportJobs);
+  const [savedViews] = useState<SavedViewFilter[]>(data.savedViews);
 
   // Drawer states
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);

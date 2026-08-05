@@ -6,7 +6,8 @@
 
 - 18 file fixture `mockData.ts/mockCmsData.ts`.
 - Baseline ban đầu có 36 runtime import tham chiếu trực tiếp tới fixture.
-- Sau khi tách thêm Events vào editorial boundary, gate giảm từ 37 còn 36 dependency path tới demo/mock. Events Manager/Form không còn import fixture trực tiếp hoặc import chéo News fixture.
+- Sau khi tách Events vào editorial boundary, gate từng giảm từ 37 còn 36 dependency path tới demo/mock. Events Manager/Form không còn import fixture trực tiếp hoặc import chéo News fixture.
+- Sau khi bổ sung adapter cho quản trị người dùng, phân quyền, nhật ký, thùng rác và cấu hình, gate hiện ghi nhận 37 dependency path. Con số tăng do gate tính cả đường dẫn adapter demo được nạp ở composition root; các component nghiệp vụ thuộc nhóm này không còn import fixture trực tiếp.
 - Production gate phải fail cho tới khi runtime không còn import mock.
 - TypeScript/build pass không đồng nghĩa production data readiness pass.
 
@@ -21,7 +22,7 @@
 | Media | Media mock | Record album/ảnh theo locale; lớp file storage có thể dùng chung |
 | Customer operations | Contacts | Hàng đợi VI/EN độc lập; staff và current user dùng chung |
 | UI localization | Localization | Chỉ Source–Target cho UI strings; không làm nguồn cho business records |
-| Governance | Users, Permission, Configuration, Audit/Trash | Identity global; permission/config/audit có locale scope theo policy |
+| Governance | Users, Permission, Configuration, Audit/Trash | Users/Permission/Audit/Trash global; cấu hình website theo locale, EnjiCAD global |
 | Email templates | Email Templates | Giữ ở trạng thái VERIFY; chưa đưa vào navigation production |
 
 ## Quy tắc chuyển đổi từng module
@@ -59,5 +60,9 @@
 - `src/cms/data/demoMediaDataSource.ts`: adapter demo theo locale; Media manager không còn import fixture trực tiếp.
 - `src/cms/data/ContactsDataSource.ts`: contract hàng đợi độc lập theo workspace; staff/current user là global.
 - `src/cms/data/demoContactsDataSource.ts`: adapter demo cho contacts/staff/current user; manager và reassign modal không còn import fixture.
+- `src/cms/data/GovernanceDataSource.ts`: contract global cho Users, Permission, Audit và Trash.
+- `src/cms/data/demoGovernanceDataSource.ts`: adapter demo governance; manager/modal con không còn import fixture trực tiếp.
+- `src/cms/data/ConfigurationDataSource.ts`: contract mixed cho cấu hình website theo locale và cấu hình EnjiCAD global.
+- `src/cms/data/demoConfigurationDataSource.ts`: phân scope demo theo đúng contract mixed.
 - Bước tiếp theo: tạo governance boundary cho Users, Permission, Configuration và Audit/Trash.
 - Runtime contract đã được bổ sung tại `docs/cms-locale-runtime-contract.md`: Dashboard EN thiếu dữ liệu hiển thị empty state và không fallback KPI/list/chart VI.

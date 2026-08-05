@@ -17,11 +17,11 @@ import {
   X,
 } from 'lucide-react';
 import { RoleAssignment, CmsRole, CmsUserPermissionTarget, ModulePermissionMatrix } from './types';
-import { permissionUsersMock } from './mockData';
 
 interface AssignmentsTabProps {
   assignments: RoleAssignment[];
   roles: CmsRole[];
+  users: CmsUserPermissionTarget[];
   onAddAssignment: (assignment: RoleAssignment) => void;
   onRevokeAssignment: (id: string) => void;
 }
@@ -29,6 +29,7 @@ interface AssignmentsTabProps {
 export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
   assignments,
   roles,
+  users,
   onAddAssignment,
   onRevokeAssignment,
 }) => {
@@ -37,7 +38,7 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
 
   // Assign Role Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [targetUserId, setTargetUserId] = useState<string>(permissionUsersMock[0]?.id || '');
+  const [targetUserId, setTargetUserId] = useState<string>(users[0]?.id || '');
   const [selectedRoleId, setSelectedRoleId] = useState<string>(roles[0]?.id || '');
   const [scopeCustomNote, setScopeCustomNote] = useState('Chi nhánh Hà Nội & TP.HCM');
 
@@ -61,7 +62,7 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
   // Submit New Assignment
   const handleAssignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const targetUser = permissionUsersMock.find((u) => u.id === targetUserId);
+    const targetUser = users.find((user) => user.id === targetUserId);
     const targetRole = roles.find((r) => r.id === selectedRoleId);
 
     if (!targetUser || !targetRole) return;
@@ -250,7 +251,7 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
                   onChange={(e) => setTargetUserId(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-medium cursor-pointer"
                 >
-                  {permissionUsersMock.map((u) => (
+                  {users.map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.fullName} ({u.username}) — {u.department}
                     </option>

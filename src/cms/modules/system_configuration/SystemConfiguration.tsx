@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Settings,
   Globe,
@@ -29,16 +29,7 @@ import {
   ConfigActivityLog,
 } from './types';
 
-import {
-  configScopesMock,
-  configGroupsMock,
-  configItemsMock,
-  initialConfigValuesMock,
-  initialIssuesMock,
-  initialDraftsMock,
-  initialVersionsMock,
-  initialActivityLogsMock,
-} from './mockData';
+import type { SystemConfigurationData } from '../../data/ConfigurationDataSource';
 
 import { OverviewTab } from './OverviewTab';
 import { SettingsEditorTab } from './SettingsEditorTab';
@@ -52,24 +43,59 @@ import { CompareDiffModal } from './CompareDiffModal';
 import { SecretRotateModal } from './SecretRotateModal';
 import { AssetPickerModal } from './AssetPickerModal';
 
-export const SystemConfiguration: React.FC = () => {
+interface SystemConfigurationProps {
+  websiteData?: SystemConfigurationData;
+  globalData: SystemConfigurationData;
+}
+
+export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websiteData, globalData }) => {
+  const mergedData = useMemo<SystemConfigurationData>(() => {
+    const localized = websiteData ?? { scopes: [], groups: [], items: [], values: {}, issues: [], drafts: [], versions: [], activityLogs: [] };
+    const uniqueById = <T extends { id: string }>(items: T[]) => Array.from(new Map(items.map((item) => [item.id, item])).values());
+    return {
+      scopes: uniqueById([...localized.scopes, ...globalData.scopes]),
+      groups: uniqueById([...localized.groups, ...globalData.groups]),
+      items: uniqueById([...localized.items, ...globalData.items]),
+      values: { ...localized.values, ...globalData.values },
+      issues: uniqueById([...localized.issues, ...globalData.issues]),
+      drafts: uniqueById([...localized.drafts, ...globalData.drafts]),
+      versions: uniqueById([...localized.versions, ...globalData.versions]),
+      activityLogs: uniqueById([...localized.activityLogs, ...globalData.activityLogs]),
+    };
+  }, [websiteData, globalData]);
   const [activeTab, setActiveTab] = useState<
     'overview' | 'editor' | 'table' | 'issues' | 'drafts' | 'versions' | 'audit'
   >('editor');
 
-  const [scopes] = useState<ConfigScope[]>(configScopesMock);
-  const [activeScopeId, setActiveScopeId] = useState<ConfigScopeId>('site_cic');
-  const [groups] = useState<ConfigGroupDef[]>(configGroupsMock);
-  const [items] = useState<ConfigItem[]>(configItemsMock);
+  const [scopes, setScopes] = useState<ConfigScope[]>(mergedData.scopes);
+  const [activeScopeId, setActiveScopeId] = useState<ConfigScopeId>(mergedData.scopes[0]?.id ?? 'site_enjicad');
+  const [groups, setGroups] = useState<ConfigGroupDef[]>(mergedData.groups);
+  const [items, setItems] = useState<ConfigItem[]>(mergedData.items);
 
   // Core Value Matrix: [scopeId][settingId] => ConfigValueRecord
   const [valuesRecordMap, setValuesRecordMap] =
-    useState<Record<string, Record<string, ConfigValueRecord>>>(initialConfigValuesMock);
+    useState<Record<string, Record<string, ConfigValueRecord>>>(mergedData.values);
 
-  const [issues, setIssues] = useState<ValidationIssue[]>(initialIssuesMock);
-  const [drafts, setDrafts] = useState<ConfigDraft[]>(initialDraftsMock);
-  const [versions, setVersions] = useState<ConfigVersionHistory[]>(initialVersionsMock);
-  const [activityLogs, setActivityLogs] = useState<ConfigActivityLog[]>(initialActivityLogsMock);
+  const [issues, setIssues] = useState<ValidationIssue[]>(mergedData.issues);
+  const [drafts, setDrafts] = useState<ConfigDraft[]>(mergedData.drafts);
+  const [versions, setVersions] = useState<ConfigVersionHistory[]>(mergedData.versions);
+  const [activityLogs, setActivityLogs] = useState<ConfigActivityLog[]>(mergedData.activityLogs);
+
+  useEffect(() => {
+    setScopes(mergedData.scopes);
+    setGroups(mergedData.groups);
+    setItems(mergedData.items);
+    setValuesRecordMap(mergedData.values);
+    setIssues(mergedData.issues);
+    setDrafts(mergedData.drafts);
+    setVersions(mergedData.versions);
+    setActivityLogs(mergedData.activityLogs);
+    setActiveScopeId((currentScopeId) =>
+      mergedData.scopes.some((scope) => scope.id === currentScopeId)
+        ? currentScopeId
+        : (mergedData.scopes[0]?.id ?? 'site_enjicad'),
+    );
+  }, [mergedData]);
 
   // Modals state
   const [compareModalOpen, setCompareModalOpen] = useState(false);

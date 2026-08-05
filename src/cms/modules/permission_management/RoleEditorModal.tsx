@@ -37,7 +37,7 @@ import {
   ScopeConstraint,
   RoleVersion,
 } from './types';
-import { agenciesMock } from '../cic_users/mockData';
+import type { AgencyOption } from '../cic_users/types';
 
 interface RoleEditorModalProps {
   isOpen: boolean;
@@ -45,6 +45,7 @@ interface RoleEditorModalProps {
   onSaveRole: (role: CmsRole, activateImmediately: boolean) => void;
   roleToEdit: CmsRole | null;
   existingRoles: CmsRole[];
+  agencies: AgencyOption[];
 }
 
 const MODULE_LIST = [
@@ -74,6 +75,7 @@ export const RoleEditorModal: React.FC<RoleEditorModalProps> = ({
   onSaveRole,
   roleToEdit,
   existingRoles,
+  agencies,
 }) => {
   if (!isOpen) return null;
 
@@ -566,7 +568,7 @@ export const RoleEditorModal: React.FC<RoleEditorModalProps> = ({
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
                   <div className="font-bold text-slate-800 dark:text-slate-200">Chọn Chi nhánh được phép (Allowed Sites):</div>
                   <div className="flex flex-wrap gap-2">
-                    {agenciesMock.map((ag) => {
+                    {agencies.map((ag) => {
                       const siteScope = scopes.find((s) => s.type === 'site');
                       const isChecked = siteScope?.allowedValues.includes(ag.id);
                       return (

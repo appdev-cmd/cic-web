@@ -26,8 +26,7 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import { CicUser, UserAccountStatus, UserSecurityLog, UserStatusHistory } from './types';
-import { agenciesMock, productCategoriesMock, newsCategoriesMock, rolesMock } from './mockData';
+import { AgencyOption, CategoryOption, CicUser, RoleOption, UserAccountStatus, UserSecurityLog, UserStatusHistory } from './types';
 import { SearchableMultiSelect } from './SearchableMultiSelect';
 
 interface CicUserFormModalProps {
@@ -36,6 +35,10 @@ interface CicUserFormModalProps {
   onSave: (user: CicUser) => void;
   userToEdit: CicUser | null;
   existingUsers: CicUser[];
+  agencies: AgencyOption[];
+  productCategories: CategoryOption[];
+  newsCategoryOptions: CategoryOption[];
+  roles: RoleOption[];
 }
 
 export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
@@ -44,6 +47,10 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   onSave,
   userToEdit,
   existingUsers,
+  agencies,
+  productCategories,
+  newsCategoryOptions,
+  roles,
 }) => {
   const isEditMode = !!userToEdit;
 
@@ -211,7 +218,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       return;
     }
 
-    const selectedRoleObj = rolesMock.find((r) => r.id === roleId);
+    const selectedRoleObj = roles.find((r) => r.id === roleId);
     const roleName = selectedRoleObj ? selectedRoleObj.name : 'Content Editor';
 
     const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
@@ -283,7 +290,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
   if (!isOpen) return null;
 
-  const currentRole = rolesMock.find((r) => r.id === roleId);
+  const currentRole = roles.find((r) => r.id === roleId);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
@@ -739,7 +746,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {rolesMock.map((r) => {
+                  {roles.map((r) => {
                     const isSelected = roleId === r.id;
                     return (
                       <div
@@ -780,7 +787,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {agenciesMock.map((ag) => {
+                  {agencies.map((ag) => {
                     const isChecked = selectedAgencies.includes(ag.id);
                     return (
                       <label
@@ -823,7 +830,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   <SearchableMultiSelect
                     label="Danh mục Sản phẩm phụ trách"
                     placeholder="Chọn danh mục sản phẩm..."
-                    options={productCategoriesMock}
+                    options={productCategories}
                     selectedIds={productsCategories}
                     onChange={setProductsCategories}
                   />
@@ -831,7 +838,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   <SearchableMultiSelect
                     label="Danh mục Tin tức phụ trách"
                     placeholder="Chọn danh mục tin tức..."
-                    options={newsCategoriesMock}
+                    options={newsCategoryOptions}
                     selectedIds={newsCategories}
                     onChange={setNewsCategories}
                   />
@@ -873,7 +880,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {selectedAgencies.map((aid) => {
-                      const ag = agenciesMock.find((a) => a.id === aid);
+                      const ag = agencies.find((a) => a.id === aid);
                       return (
                         <span key={aid} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold rounded">
                           {ag?.code || aid}

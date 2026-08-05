@@ -35,6 +35,8 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - `MediaDataSource.mediaByLocale` cung cấp record album/ảnh độc lập theo workspace, khớp các cặp `cic_image*` và `cic_image_images*`. File storage có thể tái sử dụng nhưng không thay thế dataset nghiệp vụ.
 - `ContactsDataSource.contactsByLocale` cung cấp hai hàng đợi độc lập, khớp `cic_contact` và `cic_contact_en`. Staff/current user là dữ liệu global dùng chung cho việc phân công.
 - `source_locale` có thể được giữ cho audit/import nhưng không được dùng để mô phỏng hai bảng bằng một hàng đợi global.
+- `GovernanceDataSource` cung cấp Users, Permission, Audit và Trash dưới dạng global; các module này không nhận `CmsLocale` và không remount khi đổi workspace.
+- `ConfigurationDataSource.websiteConfigByLocale` chứa cấu hình website VI/EN; `globalConfig` chứa scope EnjiCAD dùng chung. System Configuration trộn hai nguồn nhưng chỉ thay phần website khi đổi workspace.
 - All-locales mode đã bị ẩn cho tới khi permission và breakdown được triển khai thật.
 
 ## Bước tiếp theo

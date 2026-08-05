@@ -28,12 +28,12 @@ import {
   Mail,
 } from 'lucide-react';
 import { CicUser, UserAccountStatus } from './types';
-import { cicUsersMock, agenciesMock, productCategoriesMock, newsCategoriesMock, rolesMock } from './mockData';
+import type { UsersGovernanceData } from '../../data/GovernanceDataSource';
 import { CicUserFormModal } from './CicUserFormModal';
 
-export const CicUsersManager: React.FC = () => {
+export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data }) => {
   // Main Users State
-  const [users, setUsers] = useState<CicUser[]>(cicUsersMock);
+  const [users, setUsers] = useState<CicUser[]>(data.users);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Filter States
@@ -340,7 +340,7 @@ export const CicUsersManager: React.FC = () => {
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="all">Tất cả vai trò (Roles)</option>
-              {rolesMock.map((r) => (
+              {data.roles.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name}
                 </option>
@@ -356,7 +356,7 @@ export const CicUsersManager: React.FC = () => {
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="all">Tất cả chi nhánh</option>
-              {agenciesMock.map((ag) => (
+              {data.agencies.map((ag) => (
                 <option key={ag.id} value={ag.id}>
                   {ag.name}
                 </option>
@@ -455,7 +455,7 @@ export const CicUsersManager: React.FC = () => {
               ) : (
                 filteredUsers.map((user) => {
                   const isSelected = selectedIds.includes(user.id);
-                  const userRoleObj = rolesMock.find((r) => r.id === user.role_id);
+                  const userRoleObj = data.roles.find((r) => r.id === user.role_id);
                   return (
                     <tr
                       key={user.id}
@@ -524,7 +524,7 @@ export const CicUsersManager: React.FC = () => {
                       <td className="p-3">
                         <div className="flex flex-wrap gap-1">
                           {user.agencies.map((aid) => {
-                            const ag = agenciesMock.find((a) => a.id === aid);
+                            const ag = data.agencies.find((a) => a.id === aid);
                             return (
                               <span key={aid} className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-bold rounded">
                                 {ag?.code || aid}
@@ -638,6 +638,10 @@ export const CicUsersManager: React.FC = () => {
         onSave={handleSaveUser}
         userToEdit={userToEdit}
         existingUsers={users}
+        agencies={data.agencies}
+        productCategories={data.productCategories}
+        newsCategoryOptions={data.newsCategories}
+        roles={data.roles}
       />
 
       {/* STATUS CHANGE PROMPT MODAL */}

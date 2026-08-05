@@ -9,17 +9,7 @@ import {
   Layers,
   Plus,
 } from 'lucide-react';
-import {
-  permissionUsersMock,
-  initialPermissionTasksMock,
-  permissionFunctionsMock,
-  permissionFieldsMock,
-  initialUserPermissionsMock,
-  cmsRolesMock,
-  roleAssignmentsMock,
-  policyIssuesMock,
-  accessReviewsMock,
-} from './mockData';
+import type { PermissionsGovernanceData } from '../../data/GovernanceDataSource';
 import {
   PermissionTask,
   UserPermissionState,
@@ -36,21 +26,21 @@ import { AssignmentsTab } from './AssignmentsTab';
 import { PolicyIssuesTab } from './PolicyIssuesTab';
 import { AccessReviewsTab } from './AccessReviewsTab';
 
-export const PermissionManagement: React.FC = () => {
+export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }> = ({ data }) => {
   // Tabs State: 'roles' (Module 15 Main) | 'assignments' | 'issues' | 'reviews' | 'matrix' | 'tasks'
   const [activeTab, setActiveTab] = useState<'roles' | 'assignments' | 'issues' | 'reviews' | 'matrix' | 'tasks'>('roles');
 
   // Core Data States
-  const [users] = useState(permissionUsersMock);
-  const [tasks, setTasks] = useState<PermissionTask[]>(initialPermissionTasksMock);
-  const [functions] = useState(permissionFunctionsMock);
-  const [fields] = useState(permissionFieldsMock);
+  const [users] = useState(data.users);
+  const [tasks, setTasks] = useState<PermissionTask[]>(data.tasks);
+  const [functions] = useState(data.functions);
+  const [fields] = useState(data.fields);
 
   // Module 15 States
-  const [roles, setRoles] = useState<CmsRole[]>(cmsRolesMock);
-  const [assignments, setAssignments] = useState<RoleAssignment[]>(roleAssignmentsMock);
-  const [issues, setIssues] = useState<PolicyIssue[]>(policyIssuesMock);
-  const [reviews, setReviews] = useState<AccessReview[]>(accessReviewsMock);
+  const [roles, setRoles] = useState<CmsRole[]>(data.roles);
+  const [assignments, setAssignments] = useState<RoleAssignment[]>(data.assignments);
+  const [issues, setIssues] = useState<PolicyIssue[]>(data.issues);
+  const [reviews, setReviews] = useState<AccessReview[]>(data.reviews);
 
   // Modal State for Creating/Editing Role
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -59,7 +49,7 @@ export const PermissionManagement: React.FC = () => {
   // Legacy Matrix User Permissions Map State
   const [userPermissionsMap, setUserPermissionsMap] = useState<
     Record<string, UserPermissionState>
-  >(initialUserPermissionsMock);
+  >(data.userPermissions);
 
   // Toast notification state
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -392,6 +382,7 @@ export const PermissionManagement: React.FC = () => {
 
       {activeTab === 'assignments' && (
         <AssignmentsTab
+          users={users}
           assignments={assignments}
           roles={roles}
           onAddAssignment={handleAddAssignment}
@@ -445,6 +436,7 @@ export const PermissionManagement: React.FC = () => {
         onSaveRole={handleSaveRole}
         roleToEdit={roleToEdit}
         existingRoles={roles}
+        agencies={data.agencies}
       />
     </div>
   );
