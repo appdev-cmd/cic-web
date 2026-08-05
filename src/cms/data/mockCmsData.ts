@@ -375,11 +375,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         path: '/cms/products',
         children: [
           {
-            id: 'menu_all_products',
-            title: 'Tất cả sản phẩm',
-            path: '/cms/products',
-          },
-          {
             id: 'menu_product_settings',
             title: 'Danh mục sản phẩm',
             path: '/cms/product-settings',
@@ -409,18 +404,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Banner & Slideshow',
         iconName: 'Image',
         path: '/cms/banners',
-        children: [
-          {
-            id: 'sub_banners',
-            title: 'Tất cả Banners',
-            path: '/cms/banners',
-          },
-          {
-            id: 'sub_slideshows',
-            title: 'Slideshow trang chủ',
-            path: '/cms/slideshows',
-          },
-        ],
       },
       {
         id: 'menu_home_blocks',
@@ -448,24 +431,10 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     items: [
       {
         id: 'menu_all_requests',
-        title: 'Tất cả yêu cầu',
+        title: 'Yêu cầu khách hàng',
         iconName: 'Inbox',
         path: '/cms/contact-requests',
-      },
-      {
-        id: 'menu_contact_messages',
-        title: 'Liên hệ chung',
-        iconName: 'MessageSquare',
-        path: '/cms/contact-messages',
-        badgeCount: 3,
-        badgeVariant: 'danger',
-      },
-      {
-        id: 'menu_product_contacts',
-        title: 'Liên hệ sản phẩm',
-        iconName: 'FileCheck',
-        path: '/cms/product-registrations',
-        badgeCount: 5,
+        badgeCount: 8,
         badgeVariant: 'warning',
       },
     ],
@@ -474,12 +443,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     id: 'grp_ban_dia_hoa',
     groupTitle: 'BẢN ĐỊA HÓA',
     items: [
-      {
-        id: 'menu_translation_progress',
-        title: 'Tiến độ bản dịch',
-        iconName: 'Globe',
-        path: '/cms/translation-progress',
-      },
       {
         id: 'menu_translation_strings',
         title: 'Chuỗi giao diện',
