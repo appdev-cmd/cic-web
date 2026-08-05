@@ -42,6 +42,8 @@ import { QuickEditModal } from './components/QuickEditModal';
 import { ColumnSettingModal, ColumnVisibility, TableDensity } from './components/ColumnSettingModal';
 import { VersionHistoryDrawer } from './components/VersionHistoryDrawer';
 import { ActivityLogDrawer } from './components/ActivityLogDrawer';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 type ViewScopeTab = 'all' | 'my_work' | 'pending' | 'scheduled' | 'trash';
 
@@ -495,27 +497,15 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
             </div>
 
             {/* BULK ACTIONS BAR */}
-            {selectedIds.length > 0 && (
-              <div className="p-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="font-bold text-orange-800 dark:text-orange-300">
-                  Đã chọn {selectedIds.length} bài viết
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleBatchUpdateWorkflow('published')}
-                    className="px-3 py-1 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 transition-colors cursor-pointer"
-                  >
-                    Xuất bản hàng loạt
-                  </button>
-                  <button
-                    onClick={() => handleBatchUpdateWorkflow('draft')}
-                    className="px-3 py-1 bg-slate-700 text-white font-bold rounded-lg hover:bg-slate-600 transition-colors cursor-pointer"
-                  >
-                    Chuyển về Nháp
-                  </button>
-                </div>
-              </div>
-            )}
+            <CmsBulkActionBar
+              selectedCount={selectedIds.length}
+              itemLabel="bài viết"
+              onClear={() => setSelectedIds([])}
+              actions={[
+                { label: 'Xuất bản', onClick: () => handleBatchUpdateWorkflow('published'), icon: Check, variant: 'primary' },
+                { label: 'Chuyển về nháp', onClick: () => handleBatchUpdateWorkflow('draft'), icon: Edit },
+              ]}
+            />
           </div>
 
           {/* DATA TABLE */}
@@ -525,13 +515,12 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3 w-10 text-center">
-                      <button onClick={handleToggleSelectAll} className="cursor-pointer">
-                        {selectedIds.length === filteredArticles.length && filteredArticles.length > 0 ? (
-                          <CheckSquare className="w-4 h-4 text-orange-600" />
-                        ) : (
-                          <Square className="w-4 h-4" />
-                        )}
-                      </button>
+                      <CmsSelectionCheckbox
+                        checked={filteredArticles.length > 0 && selectedIds.length === filteredArticles.length}
+                        indeterminate={selectedIds.length > 0 && selectedIds.length < filteredArticles.length}
+                        onChange={handleToggleSelectAll}
+                        label="Chọn tất cả bài viết"
+                      />
                     </th>
                     <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
                     {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
@@ -562,13 +551,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                         >
                           {/* Checkbox */}
                           <td className={`p-3 text-center ${getRowPadding()}`}>
-                            <button onClick={() => handleToggleSelectRow(art.id)} className="cursor-pointer">
-                              {isSelected ? (
-                                <CheckSquare className="w-4 h-4 text-orange-600" />
-                              ) : (
-                                <Square className="w-4 h-4 text-slate-400" />
-                              )}
-                            </button>
+                            <CmsSelectionCheckbox checked={isSelected} onChange={() => handleToggleSelectRow(art.id)} label={`Chọn bài viết ${art.title}`} />
                           </td>
 
                           {/* Article Title & Warnings */}

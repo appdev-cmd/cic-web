@@ -747,6 +747,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
         onBulkAssign={handleBulkAssign}
         onBulkStatus={handleBulkStatus}
         onBulkSpam={handleBulkSpam}
+        onClearSelection={() => setSelectedIds([])}
       />
 
       {/* 5. MODALS & DRAWERS */}

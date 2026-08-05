@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { ContactRequest, ContactStatus, PriorityLevel, StaffMember } from './types';
 import { getPriorityBadge, getSlaRemainingText, getSourceBadge, getStatusBadge, maskEmail, maskName } from './utils';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface ContactListViewProps {
   contacts: ContactRequest[];
@@ -33,6 +35,7 @@ interface ContactListViewProps {
   onBulkAssign: () => void;
   onBulkStatus: (status: ContactStatus) => void;
   onBulkSpam: () => void;
+  onClearSelection: () => void;
 }
 
 export const ContactListView: React.FC<ContactListViewProps> = ({
@@ -49,6 +52,7 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
   onBulkAssign,
   onBulkStatus,
   onBulkSpam,
+  onClearSelection,
 }) => {
   const [density, setDensity] = useState<'compact' | 'standard' | 'spacious'>('standard');
   const [showColumnSettings, setShowColumnSettings] = useState(false);
@@ -95,11 +99,11 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
               <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {/* Sticky Checkbox Column */}
                 <th className="py-3 px-3 w-10 sticky left-0 z-10 bg-slate-50 dark:bg-slate-800">
-                  <input
-                    type="checkbox"
+                  <CmsSelectionCheckbox
                     checked={isAllSelected}
+                    indeterminate={selectedIds.length > 0 && !isAllSelected}
                     onChange={onToggleSelectAll}
-                    className="rounded text-orange-600 focus:ring-orange-500"
+                    label="Chọn tất cả yêu cầu"
                   />
                 </th>
 
@@ -146,11 +150,10 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
                     >
                       {/* Sticky Selection */}
                       <td className={`sticky left-0 z-10 ${rowPadding} ${isSelected ? 'bg-orange-50/90 dark:bg-slate-900' : 'bg-white dark:bg-slate-900'}`}>
-                        <input
-                          type="checkbox"
+                        <CmsSelectionCheckbox
                           checked={isSelected}
                           onChange={() => onToggleSelectOne(contact.id)}
-                          className="rounded text-orange-600 focus:ring-orange-500"
+                          label={`Chọn yêu cầu ${contact.id}`}
                         />
                       </td>
 
@@ -301,45 +304,17 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
       </div>
 
       {/* STICKY BULK ACTION BAR WHEN ITEMS ARE SELECTED */}
-      {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 dark:bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-4 text-xs font-semibold">
-          <span>Đã chọn <span className="text-orange-400 font-bold">{selectedIds.length}</span> yêu cầu</span>
-          <div className="h-4 w-px bg-slate-700" />
-
-          <button
-            onClick={onBulkAssign}
-            className="hover:text-orange-400 transition-colors flex items-center gap-1.5"
-          >
-            <UserCheck className="w-4 h-4 text-orange-400" />
-            <span>Phân công hàng loạt</span>
-          </button>
-
-          <button
-            onClick={() => onBulkStatus('in_progress')}
-            className="hover:text-amber-400 transition-colors flex items-center gap-1.5"
-          >
-            <Clock className="w-4 h-4 text-amber-400" />
-            <span>Chuyển Đang xử lý</span>
-          </button>
-
-          <button
-            onClick={() => onBulkStatus('resolved')}
-            className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
-          >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Chuyển Đã giải quyết</span>
-          </button>
-
-          <button
-            onClick={onBulkSpam}
-            className="hover:text-rose-400 transition-colors flex items-center gap-1.5"
-          >
-            <ShieldAlert className="w-4 h-4 text-rose-400" />
-            <span>Báo Spam</span>
-          </button>
-
-        </div>
-      )}
+      <CmsBulkActionBar
+        selectedCount={selectedIds.length}
+        itemLabel="yêu cầu"
+        onClear={onClearSelection}
+        actions={[
+          { label: 'Phân công', onClick: onBulkAssign, icon: UserCheck, variant: 'primary' },
+          { label: 'Đang xử lý', onClick: () => onBulkStatus('in_progress'), icon: Clock },
+          { label: 'Đã giải quyết', onClick: () => onBulkStatus('resolved'), icon: CheckCircle2 },
+          { label: 'Báo spam', onClick: onBulkSpam, icon: ShieldAlert, variant: 'danger' },
+        ]}
+      />
     </div>
   );
 };

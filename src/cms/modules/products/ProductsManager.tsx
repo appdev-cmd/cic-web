@@ -51,6 +51,8 @@ import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal'
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsTabs } from '../../components/ui/CmsTabs';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 type SystemViewTab = 'all' | 'my' | 'pending' | 'low_quality' | 'active' | 'archived';
 
@@ -400,41 +402,17 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
         </div>
 
         {/* BULK ACTIONS BAR (Visible when checkboxes are checked) */}
-        {selectedIds.length > 0 && (
-          <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-between flex-wrap gap-2 text-xs animate-in fade-in duration-200">
-            <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400 font-bold">
-              <CheckSquare className="w-4 h-4" />
-              <span>Đã chọn {selectedIds.length} sản phẩm</span>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                onClick={() => handleBatchChangeEditorialStatus('published')}
-                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg cursor-pointer"
-              >
-                Xuất bản hàng loạt
-              </button>
-              <button
-                onClick={() => handleBatchChangeCatalogStatus('active')}
-                className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg cursor-pointer"
-              >
-                Đưa vào kinh doanh
-              </button>
-              <button
-                onClick={handleBatchArchive}
-                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg cursor-pointer"
-              >
-                Chuyển sang Lưu trữ
-              </button>
-              <button
-                onClick={handleBatchDelete}
-                className="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg cursor-pointer"
-              >
-                Xóa các mục đã chọn
-              </button>
-            </div>
-          </div>
-        )}
+        <CmsBulkActionBar
+          selectedCount={selectedIds.length}
+          itemLabel="sản phẩm"
+          onClear={() => setSelectedIds([])}
+          actions={[
+            { label: 'Xuất bản', onClick: () => handleBatchChangeEditorialStatus('published'), icon: FileCheck, variant: 'primary' },
+            { label: 'Đưa vào kinh doanh', onClick: () => handleBatchChangeCatalogStatus('active'), icon: Package },
+            { label: 'Lưu trữ', onClick: handleBatchArchive, icon: Archive },
+            { label: 'Xóa', onClick: handleBatchDelete, icon: Trash2, variant: 'danger' },
+          ]}
+        />
       </div>
 
       {/* 4. MAIN DATA TABLE */}
@@ -445,17 +423,12 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
               <tr>
                 {/* Checkbox Sticky Left */}
                 <th className="py-3 px-3 w-10 sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                  <button
-                    onClick={handleSelectAllOnPage}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                  >
-                    {paginatedProducts.length > 0 &&
-                    paginatedProducts.every((p) => selectedIds.includes(p.id)) ? (
-                      <CheckSquare className="w-4 h-4 text-orange-600" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
+                  <CmsSelectionCheckbox
+                    checked={paginatedProducts.length > 0 && paginatedProducts.every((product) => selectedIds.includes(product.id))}
+                    indeterminate={selectedIds.some((id) => paginatedProducts.some((product) => product.id === id)) && !paginatedProducts.every((product) => selectedIds.includes(product.id))}
+                    onChange={handleSelectAllOnPage}
+                    label="Chọn tất cả sản phẩm trên trang"
+                  />
                 </th>
 
                 {/* Title & Identity (Sticky Left) */}
@@ -506,16 +479,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                     >
                       {/* Checkbox Sticky Left */}
                       <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
-                        <button
-                          onClick={() => handleToggleSelect(p.id)}
-                          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        >
-                          {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-orange-600" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
+                        <CmsSelectionCheckbox checked={isSelected} onChange={() => handleToggleSelect(p.id)} label={`Chọn sản phẩm ${p.title}`} />
                       </td>
 
                       {/* Product Identity */}

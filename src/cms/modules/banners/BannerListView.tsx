@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { BannerContent, SavedFilterView, WorkflowStatus, EffectiveStatus, slideshowPurposeOptions } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface BannerListViewProps {
   items: BannerContent[];
@@ -150,11 +151,11 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
               <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800">
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isAllSelected}
+                  indeterminate={selectedIds.length > 0 && !isAllSelected}
                   onChange={onSelectAll}
-                  className="rounded border-slate-300 dark:border-slate-700 text-orange-600 focus:ring-orange-500"
+                  label="Chọn tất cả slideshow"
                 />
               </th>
               <th className="p-3 min-w-[280px]">Nội dung & Loại</th>
@@ -189,11 +190,10 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
                   >
                     {/* Checkbox */}
                     <td className="p-3 text-center sticky left-0 bg-white dark:bg-slate-900">
-                      <input
-                        type="checkbox"
+                      <CmsSelectionCheckbox
                         checked={isSelected}
                         onChange={() => onToggleSelect(item.id)}
-                        className="rounded border-slate-300 dark:border-slate-700 text-orange-600 focus:ring-orange-500"
+                        label={`Chọn slideshow ${item.title}`}
                       />
                     </td>
 

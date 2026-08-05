@@ -51,6 +51,7 @@ import { BannerDuplicateModal } from './BannerDuplicateModal';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsTabs } from '../../components/ui/CmsTabs';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 
 interface BannersManagerProps { workspaceLocale: CmsLocale; data?: BannersModuleData; }
 
@@ -405,33 +406,16 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
         </div>
 
         {/* Bulk Actions Floating Bar */}
-        {selectedIds.length > 0 && (
-          <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/40 flex items-center justify-between gap-3 text-xs">
-            <span className="font-bold text-orange-900 dark:text-orange-200">
-              Đã chọn <strong>{selectedIds.length}</strong> mục quảng bá
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleBulkPublish}
-                className="px-3 py-1.5 font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition"
-              >
-                Xuất bản đồng loạt
-              </button>
-              <button
-                onClick={handleBulkArchive}
-                className="px-3 py-1.5 font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 rounded-lg border border-slate-300 dark:border-slate-700 transition"
-              >
-                Chuyển vào Lưu trữ
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className="px-3 py-1.5 font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition"
-              >
-                Xóa được chọn
-              </button>
-            </div>
-          </div>
-        )}
+        <CmsBulkActionBar
+          selectedCount={selectedIds.length}
+          itemLabel="slideshow"
+          onClear={() => setSelectedIds([])}
+          actions={[
+            { label: 'Xuất bản', onClick: handleBulkPublish, icon: FileCheck, variant: 'primary' },
+            { label: 'Lưu trữ', onClick: handleBulkArchive, icon: Inbox },
+            { label: 'Xóa', onClick: handleBulkDelete, icon: Trash2, variant: 'danger' },
+          ]}
+        />
 
         {/* Dynamic Display View */}
         {viewMode === 'list' ? (
