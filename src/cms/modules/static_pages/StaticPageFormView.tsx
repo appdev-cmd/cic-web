@@ -31,7 +31,6 @@ import {
   MoveDown,
   Calendar,
   UserCheck,
-  Languages,
 } from 'lucide-react';
 import {
   StaticPage,
@@ -75,9 +74,9 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
   onSave,
   onCancel,
 }) => {
-  // Main Tab Navigation: 1. Nội dung | 2. Cấu trúc | 3. Phân loại | 4. Media | 5. SEO | 6. Bản dịch | 7. Xuất bản
+  // Main Tab Navigation: 1. Nội dung | 2. Cấu trúc | 3. Phân loại | 4. Media | 5. SEO | 6. Xuất bản
   const [activeTab, setActiveTab] = useState<
-    'content' | 'structure' | 'category' | 'media' | 'seo' | 'translation' | 'workflow'
+    'content' | 'structure' | 'category' | 'media' | 'seo' | 'workflow'
   >('content');
 
   // Form Basic Fields
@@ -122,14 +121,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
   const [seoTitle, setSeoTitle] = useState(pageToEdit?.seo_title || '');
   const [seoKeyword, setSeoKeyword] = useState(pageToEdit?.seo_keyword || '');
   const [seoDescription, setSeoDescription] = useState(pageToEdit?.seo_description || '');
-
-  // Translations (EN)
-  const [enTitle, setEnTitle] = useState(pageToEdit?.translations?.en?.title || '');
-  const [enSummary, setEnSummary] = useState(pageToEdit?.translations?.en?.summary || '');
-  const [enContent, setEnContent] = useState(pageToEdit?.translations?.en?.content || '');
-  const [enProgress, setEnProgress] = useState<'missing' | 'in_progress' | 'review' | 'complete' | 'outdated'>(
-    pageToEdit?.translation_progress?.en || 'missing'
-  );
 
   // Workflow & Versioning
   const [workflowStatus, setWorkflowStatus] = useState<WorkflowStatus>(
@@ -205,8 +196,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
   if (!summary) qualityWarnings.push('Thiếu phần tóm tắt / giới thiệu ngắn');
   if (!imageAlt) qualityWarnings.push('Thiếu thẻ Alt mô tả ảnh đại diện (SEO image accessibility)');
   if (!seoKeyword) qualityWarnings.push('Chưa nhập từ khóa SEO');
-  if (enProgress === 'missing') qualityWarnings.push('Chưa có bản dịch Tiếng Anh (Missing EN translation)');
-  if (enProgress === 'outdated') qualityWarnings.push('Bản dịch Tiếng Anh đã cũ so với bản Việt');
   if (pageToEdit?.used_by && pageToEdit.used_by.length === 0) qualityWarnings.push('Trang chưa được liên kết từ Menu/Block nào (Mồ côi)');
 
   // Submit Handler
@@ -244,18 +233,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
       workflow_status: targetStatus,
       working_version_number: workingVersionNumber,
       published_version_number: isPublished ? workingVersionNumber : pageToEdit?.published_version_number || 1,
-      primary_locale: 'vi',
-      translations: {
-        en: {
-          title: enTitle,
-          summary: enSummary,
-          content: enContent,
-        },
-      },
-      translation_progress: {
-        vi: 'complete',
-        en: enProgress,
-      },
       quality_warnings: qualityWarnings,
     });
   };
@@ -431,18 +408,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
 
           <button
             type="button"
-            onClick={() => setActiveTab('translation')}
-            className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
-              activeTab === 'translation'
-                ? 'bg-orange-600 text-white shadow-xs'
-                : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-            }`}
-          >
-            <Languages className="w-4 h-4" /> 6. Bản dịch (EN)
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab('workflow')}
             className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
               activeTab === 'workflow'
@@ -450,7 +415,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
-            <UserCheck className="w-4 h-4" /> 7. Quy trình & Duyệt
+            <UserCheck className="w-4 h-4" /> 6. Quy trình & Duyệt
           </button>
         </div>
       </div>
@@ -929,71 +894,12 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             </div>
           )}
 
-          {/* TAB 6: BẢN DỊCH (EN) */}
-          {activeTab === 'translation' && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <Languages className="w-4 h-4 text-orange-600" />
-                  <span>6. Quản lý Bản dịch Tiếng Anh (English Translation)</span>
-                </h3>
-
-                <select
-                  value={enProgress}
-                  onChange={(e) => setEnProgress(e.target.value as any)}
-                  className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700"
-                >
-                  <option value="missing">Chưa dịch (Missing)</option>
-                  <option value="in_progress">Đang dịch (In Progress)</option>
-                  <option value="review">Chờ duyệt dịch (Review)</option>
-                  <option value="complete">Đã hoàn thành (Complete)</option>
-                  <option value="outdated">Đã cũ (Outdated)</option>
-                </select>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    Tiêu đề Tiếng Anh (English Title)
-                  </label>
-                  <input
-                    type="text"
-                    value={enTitle}
-                    onChange={(e) => setEnTitle(e.target.value)}
-                    placeholder="English page title..."
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    Tóm tắt Tiếng Anh (English Summary)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={enSummary}
-                    onChange={(e) => setEnSummary(e.target.value)}
-                    placeholder="English summary..."
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 text-xs rounded-xl border border-slate-200 dark:border-slate-700 resize-none font-medium"
-                  />
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    Nội dung Tiếng Anh (English Rich Content)
-                  </label>
-                  <RichTextEditor value={enContent} onChange={setEnContent} minHeight="300px" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 7: XUẤT BẢN & QUY TRÌNH */}
+          {/* TAB 6: XUẤT BẢN & QUY TRÌNH */}
           {activeTab === 'workflow' && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-orange-600" />
-                <span>7. Trạng thái Quy trình Duyệt & Phân công Biên tập</span>
+                <span>6. Trạng thái Quy trình Duyệt & Phân công Biên tập</span>
               </h3>
 
               <div className="space-y-4">
@@ -1212,8 +1118,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             created_time: new Date().toISOString(),
             working_version_number: 1,
             workflow_status: 'draft',
-            primary_locale: 'vi',
-            translations: { en: { title: enTitle, summary: enSummary, content: enContent } },
           }
         }
         onClose={() => setIsPreviewModalOpen(false)}

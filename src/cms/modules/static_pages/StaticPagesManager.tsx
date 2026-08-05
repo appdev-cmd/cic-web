@@ -62,16 +62,15 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
   // View Mode: 'list' (Data Table) vs 'tree' (Content Hierarchy Tree)
   const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
 
-  // Saved View Tab Filter: 'all' | 'my_work' | 'pending' | 'orphan' | 'missing_translation' | 'trash'
+  // Saved View Tab Filter
   const [savedView, setSavedView] = useState<
-    'all' | 'my_work' | 'pending' | 'orphan' | 'missing_translation' | 'trash'
+    'all' | 'my_work' | 'pending' | 'orphan' | 'trash'
   >('all');
 
   // Toolbar Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [localeFilter, setLocaleFilter] = useState<string>('all');
 
   // Table Density & Column Settings
   const [density, setDensity] = useState<'compact' | 'normal' | 'spacious'>('normal');
@@ -79,7 +78,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
     { id: 'title', label: 'Trang nội dung (Title)', visible: true, required: true },
     { id: 'category', label: 'Danh mục (Category)', visible: true },
     { id: 'path', label: 'Đường dẫn (Alias/Slug)', visible: true },
-    { id: 'locale', label: 'Bản dịch (Locale)', visible: true },
     { id: 'workflow', label: 'Trạng thái quy trình', visible: true },
     { id: 'used_by', label: 'Nơi sử dụng (Used-By)', visible: true },
     { id: 'updated', label: 'Cập nhật', visible: true },
@@ -125,7 +123,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
       if (savedView === 'my_work' && page.author?.name !== 'Nguyễn Văn Nam') return false;
       if (savedView === 'pending' && page.workflow_status !== 'pending') return false;
       if (savedView === 'orphan' && page.used_by && page.used_by.length > 0) return false;
-      if (savedView === 'missing_translation' && page.translation_progress?.en === 'complete') return false;
 
       // Search Query
       const query = searchQuery.toLowerCase().trim();
@@ -140,15 +137,9 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
       // Status
       const matchStatus = statusFilter === 'all' || page.workflow_status === statusFilter;
 
-      // Locale
-      const matchLocale =
-        localeFilter === 'all' ||
-        (localeFilter === 'en_complete' && page.translation_progress?.en === 'complete') ||
-        (localeFilter === 'en_missing' && page.translation_progress?.en === 'missing');
-
-      return matchSearch && matchCategory && matchStatus && matchLocale;
+      return matchSearch && matchCategory && matchStatus;
     });
-  }, [pages, searchQuery, selectedCategoryId, statusFilter, localeFilter, savedView]);
+  }, [pages, searchQuery, selectedCategoryId, statusFilter, savedView]);
 
   // Helpers
   const getCategoryName = (catId: string) => {
@@ -301,8 +292,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
         workflow_status: pageData.workflow_status || 'draft',
         working_version_number: 1,
         published_version_number: pageData.published ? 1 : undefined,
-        primary_locale: 'vi',
-        translation_progress: { vi: 'complete', en: 'missing' },
         used_by: [],
       };
       setPages([newPage, ...pages]);
@@ -334,7 +323,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
       created_time: '',
       working_version_number: 1,
       workflow_status: 'draft',
-      primary_locale: 'vi',
     });
     setIsFormOpen(true);
   };
@@ -474,18 +462,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
           <span className="px-1.5 py-0.2 bg-amber-500/20 rounded text-[10px]">
             {pages.filter((p) => !p.in_trash && (!p.used_by || p.used_by.length === 0)).length}
           </span>
-        </button>
-
-        <button
-          onClick={() => setSavedView('missing_translation')}
-          className={`px-3.5 py-2 rounded-xl border transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-            savedView === 'missing_translation'
-              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-blue-600 border-slate-200 dark:border-slate-800 hover:bg-slate-50'
-          }`}
-        >
-          <Globe className="w-3.5 h-3.5" />
-          <span>Thiếu bản dịch EN</span>
         </button>
 
         <button
@@ -631,7 +607,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
                   {isColumnVisible('title') && <th className="py-3 px-4 min-w-[280px]">Trang nội dung</th>}
                   {isColumnVisible('category') && <th className="py-3 px-4 min-w-[140px]">Danh mục</th>}
                   {isColumnVisible('path') && <th className="py-3 px-4 min-w-[150px]">URL Alias</th>}
-                  {isColumnVisible('locale') && <th className="py-3 px-4 min-w-[110px] text-center">Bản dịch</th>}
                   {isColumnVisible('workflow') && <th className="py-3 px-4 min-w-[130px] text-center">Quy trình</th>}
                   {isColumnVisible('used_by') && <th className="py-3 px-4 min-w-[130px] text-center">Nơi sử dụng</th>}
                   {isColumnVisible('updated') && <th className="py-3 px-4 min-w-[140px]">Cập nhật</th>}
@@ -718,30 +693,6 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
                         {isColumnVisible('path') && (
                           <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500 truncate max-w-[160px]">
                             /{page.alias}
-                          </td>
-                        )}
-
-                        {/* Locale Progress */}
-                        {isColumnVisible('locale') && (
-                          <td className="py-3.5 px-4 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 text-[10px] font-bold rounded">
-                                VI
-                              </span>
-                              {page.translation_progress?.en === 'complete' ? (
-                                <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-600 text-[10px] font-bold rounded">
-                                  EN
-                                </span>
-                              ) : page.translation_progress?.en === 'outdated' ? (
-                                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 text-[10px] font-bold rounded">
-                                  EN (Outdated)
-                                </span>
-                              ) : (
-                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-400 text-[10px] rounded">
-                                  EN (-)
-                                </span>
-                              )}
-                            </div>
                           </td>
                         )}
 

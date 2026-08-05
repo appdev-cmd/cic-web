@@ -72,17 +72,6 @@ export const staticPagesMock: StaticPage[] = [
     workflow_status: 'published',
     working_version_number: 1,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'complete' },
-    translations: {
-      en: {
-        title: 'Overview & Capabilities of CIC Technology & Consultancy JSC',
-        summary: 'CIC Technology & Consultancy is a pioneer in providing specialized software solutions for construction, geotechnical, structural engineering and BIM/CDE in Vietnam for over 30 years.',
-        content: '<h2>1. History and Development</h2><p>Established in 1990 under the Ministry of Construction, CIC is Vietnam leading provider of engineering software.</p>',
-        seo_title: 'About CIC Technology & Consultancy - Construction Software Solutions',
-        seo_description: 'Learn about CIC Technology & Consultancy - Vietnam premier software licensing and BIM consulting company.'
-      }
-    },
     used_by: [
       { id: 'u1', type: 'menu', location_name: 'Main Navigation Header -> Giới thiệu', link_url: '/gioi-thieu' },
       { id: 'u2', type: 'footer', location_name: 'Footer Column 1 -> Về CIC', link_url: '/gioi-thieu' },
@@ -119,8 +108,6 @@ export const staticPagesMock: StaticPage[] = [
     workflow_status: 'published',
     working_version_number: 1,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'in_progress' },
     used_by: [
       { id: 'u4', type: 'menu', location_name: 'Header Menu -> Về CIC -> Lịch sử phát triển', link_url: '/gioi-thieu/lich-su-hinh-thanh' }
     ]
@@ -148,8 +135,6 @@ export const staticPagesMock: StaticPage[] = [
     workflow_status: 'published',
     working_version_number: 1,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'missing' },
     used_by: [
       { id: 'u5', type: 'menu', location_name: 'Header Menu -> Về CIC -> Ban Lãnh đạo', link_url: '/gioi-thieu/ban-lanh-dao' }
     ]
@@ -189,17 +174,6 @@ export const staticPagesMock: StaticPage[] = [
     workflow_status: 'published',
     working_version_number: 1,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'complete' },
-    translations: {
-      en: {
-        title: 'Information Security & Privacy Policy',
-        summary: 'Commitment of CIC on collecting, storing, processing and protecting customer personal data in compliance with Vietnamese law.',
-        content: '<h2>1. Purpose of Data Collection</h2><p>CIC collects customer info to activate software licenses and provide technical support.</p>',
-        seo_title: 'Privacy Policy - CIC Technology',
-        seo_description: 'Read CIC Technology privacy policy and data security guidelines.'
-      }
-    },
     used_by: [
       { id: 'u6', type: 'footer', location_name: 'Footer Bottom Legal Links -> Chính sách bảo mật', link_url: '/chinh-sach-bao-mat-thong-tin' }
     ]
@@ -228,8 +202,6 @@ export const staticPagesMock: StaticPage[] = [
     workflow_status: 'published',
     working_version_number: 1,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'in_progress' },
     used_by: [
       { id: 'u7', type: 'footer', location_name: 'Footer Bottom Legal Links -> Điều khoản sử dụng', link_url: '/dieu-khoan-su-dung-website' }
     ]
@@ -266,12 +238,9 @@ export const staticPagesMock: StaticPage[] = [
     workflow_status: 'pending',
     working_version_number: 2,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'outdated' },
     used_by: [
       { id: 'u8', type: 'menu', location_name: 'Header Menu -> Dịch vụ -> Quy trình mua phần mềm', link_url: '/quy-trinh-tu-van-chuyen-giao-phan-mem' }
     ],
-    quality_warnings: ['Bản dịch Tiếng Anh đã cũ (outdated) do bản tiếng Việt vừa sửa đổi'],
     activities: [
       { id: 'a3', timestamp: '2026-07-30 08:10:00', actor_name: 'Vũ Quốc Khánh', action_type: 'update', details: 'Sửa đổi làm việc với working version v2.0-draft' },
       { id: 'a4', timestamp: '2026-07-30 09:00:00', actor_name: 'Vũ Quốc Khánh', action_type: 'submit', details: 'Gửi duyệt phiên bản v2.0' }
@@ -304,10 +273,8 @@ export const staticPagesMock: StaticPage[] = [
     author: { name: 'Vũ Quốc Khánh' },
     workflow_status: 'draft',
     working_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'missing' },
     used_by: [], // Orphan page test
-    quality_warnings: ['Chưa được liên kết từ bất kỳ Menu/Block nào (Trang mồ côi)', 'Thiếu bản dịch Tiếng Anh']
+    quality_warnings: ['Chưa được liên kết từ bất kỳ Menu/Block nào (Trang mồ côi)']
   },
   {
     id: 'page_005',
@@ -334,8 +301,6 @@ export const staticPagesMock: StaticPage[] = [
     return_comment: 'Cần bổ sung thêm ảnh minh họa các bước thao tác trên phần mềm Sentinel Control Center.',
     working_version_number: 2,
     published_version_number: 1,
-    primary_locale: 'vi',
-    translation_progress: { vi: 'complete', en: 'missing' },
     used_by: [
       { id: 'u9', type: 'menu', location_name: 'Footer Menu -> Hỗ trợ kỹ thuật -> Kích hoạt License', link_url: '/huong-dan-kich-hoat-license-khoa-cung' }
     ],

@@ -10,24 +10,11 @@ interface PagePreviewModalProps {
 
 export const PagePreviewModal: React.FC<PagePreviewModalProps> = ({ isOpen, page, onClose }) => {
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [activeLocale, setActiveLocale] = useState<'vi' | 'en'>('vi');
-
   if (!isOpen || !page) return null;
 
-  const displayTitle =
-    activeLocale === 'en' && page.translations?.en?.title
-      ? page.translations.en.title
-      : page.title;
-
-  const displaySummary =
-    activeLocale === 'en' && page.translations?.en?.summary
-      ? page.translations.en.summary
-      : page.summary;
-
-  const displayContent =
-    activeLocale === 'en' && page.translations?.en?.content
-      ? page.translations.en.content
-      : page.content;
+  const displayTitle = page.title;
+  const displaySummary = page.summary;
+  const displayContent = page.content;
 
   const getViewportWidthClass = () => {
     switch (viewport) {
@@ -59,7 +46,7 @@ export const PagePreviewModal: React.FC<PagePreviewModalProps> = ({ isOpen, page
           </div>
         </div>
 
-        {/* Viewport Switcher & Locale */}
+        {/* Viewport Switcher */}
         <div className="flex items-center gap-4">
           {/* Viewport Selector */}
           <div className="p-1 bg-slate-800 rounded-xl flex items-center gap-1 border border-slate-700">
@@ -86,26 +73,6 @@ export const PagePreviewModal: React.FC<PagePreviewModalProps> = ({ isOpen, page
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" /> Mobile
-            </button>
-          </div>
-
-          {/* Locale Selector */}
-          <div className="p-1 bg-slate-800 rounded-xl flex items-center gap-1 border border-slate-700">
-            <button
-              onClick={() => setActiveLocale('vi')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                activeLocale === 'vi' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              🇻🇳 VI
-            </button>
-            <button
-              onClick={() => setActiveLocale('en')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                activeLocale === 'en' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              🇬🇧 EN
             </button>
           </div>
 

@@ -41,14 +41,6 @@ export interface ActivityLogRecord {
   details: string;
 }
 
-export interface StaticPageTranslation {
-  title?: string;
-  summary?: string;
-  content?: string;
-  seo_title?: string;
-  seo_description?: string;
-}
-
 export type WorkflowStatus =
   | 'draft'
   | 'pending'
@@ -106,16 +98,6 @@ export interface StaticPage {
   // Trash state
   in_trash?: boolean;
   deleted_at?: string;
-
-  // Locales & Translations
-  primary_locale: 'vi' | 'en';
-  translations?: {
-    en?: StaticPageTranslation;
-  };
-  translation_progress?: {
-    vi?: 'complete';
-    en?: 'missing' | 'in_progress' | 'review' | 'complete' | 'outdated';
-  };
 
   // Nơi sử dụng (Used By references)
   used_by?: UsedByReference[];
