@@ -305,3 +305,5 @@ Rollback email không rollback hoặc xóa yêu cầu khách hàng.
 ## 16. Kết quả sau Bước 6
 
 Sau khi tài liệu này được duyệt, đội dự án có thể bắt đầu kiểm kê 13 mẫu legacy và chuẩn bị triển khai module theo các gate. Chưa được bật gửi production chỉ dựa trên việc tài liệu đã hoàn thành; từng wave vẫn phải có bằng chứng Go riêng.
+
+Worksheet đối chiếu ban đầu và chênh lệch số lượng `7`/`khoảng 13` được ghi tại `docs/email-template-legacy-reconciliation-worksheet.md`. Trạng thái hiện tại vẫn là No-Go cho migration/binding cho đến khi manifest thực tế được xác minh.

@@ -66,6 +66,7 @@ Gửi email thành công hoặc thất bại không tự động thay đổi own
 - Danh mục token, phạm vi sử dụng và quy tắc dữ liệu thiếu được quản lý tại `docs/email-template-variable-catalog.md`.
 - Nội dung baseline cho các mẫu khách hàng và nội bộ VI/EN được quản lý tại `docs/email-template-baseline-library.md`; seed không đồng nghĩa với Activate.
 - Kế hoạch đối chiếu 13 mẫu cũ, QA, rollout theo event và rollback được quản lý tại `docs/email-template-rollout-readiness-plan.md`.
+- Worksheet legacy và chênh lệch số lượng giữa khảo sát được quản lý tại `docs/email-template-legacy-reconciliation-worksheet.md`; không được coi `khoảng 13` là manifest đã xác minh.
 
 ## 7. Ngoài phạm vi quyết định này
 
