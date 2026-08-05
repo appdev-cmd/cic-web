@@ -224,3 +224,5 @@ Nếu đổi event/audience khiến token đang có trở nên không hợp lệ
 6. Domain nào được phép dùng cho link tải có thời hạn.
 
 Các biến phụ thuộc sáu quyết định này phải ở trạng thái khóa hoặc tùy chọn an toàn cho đến khi có xác nhận nghiệp vụ.
+
+Các token trong catalog được áp dụng vào 20 template khởi tạo tại `docs/email-template-baseline-library.md`.

@@ -473,3 +473,5 @@ Sự kiện → Đối tượng nhận → Routing → Template → Nhóm biến
 Ma trận này là baseline để nối Mẫu email với Sản phẩm và Yêu cầu khách hàng mà không đưa routing trở lại template. Các điểm được đánh dấu cần nghiệp vụ xác nhận phải được chốt trước khi bật gửi tự động tương ứng.
 
 Variable Catalog dùng cho editor, preview và validation được chốt tại `docs/email-template-variable-catalog.md`. Catalog chỉ cung cấp dữ liệu nội dung; không chứa SMTP, người nhận hoặc routing.
+
+Thư viện nội dung khởi tạo VI/EN cho năm event và hai audience được đặc tả tại `docs/email-template-baseline-library.md`. Tất cả mẫu khởi tạo ở trạng thái Draft và phải qua review trước khi Activate.
