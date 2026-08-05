@@ -436,6 +436,12 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         badgeCount: 8,
         badgeVariant: 'warning',
       },
+      {
+        id: 'menu_email_templates',
+        title: 'Mẫu email',
+        iconName: 'MailCheck',
+        path: '/cms/email-templates',
+      },
     ],
   },
   {

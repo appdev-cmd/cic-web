@@ -300,7 +300,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'events' ? (
             <EventsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'email_templates' ? (
-            <EmailTemplatesManager />
+            <EmailTemplatesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'banners' ? (
             <BannersManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'product_settings' ? (

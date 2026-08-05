@@ -1,49 +1,53 @@
-import { EmailTemplate } from './types';
+import { EmailAudience, EmailEvent, EmailTemplate, EmailWorkspace } from './types';
 
-export const mockEmailTemplates: EmailTemplate[] = [
-  {
-    id: 'tpl_001',
-    name: 'Thông báo xác nhận Yêu cầu tư vấn & Báo giá phần mềm',
-    types: 'quote_registration',
-    products: ['CSI ETABS Ultimate v21', 'CSI SAP2000 Advanced v25'],
-    content: `<p>Kính gửi <strong>{customer_name}</strong>,</p>
-<p>Cảm ơn Quý công ty <strong>{company_name}</strong> đã quan tâm và gửi yêu cầu tư vấn báo giá bản quyền sản phẩm <strong>{product_name}</strong> tại CIC Technology.</p>
-<p>Chuyên viên tư vấn giải pháp của chúng tôi đã ghi nhận thông tin và sẽ trực tiếp liên hệ lại với Quý khách trong vòng 24 giờ làm việc để cung cấp thông tin chi tiết về gói bản quyền & ưu đãi phù hợp nhất.</p>
-<blockquote class="border-l-4 border-orange-500 pl-4 py-1 italic text-slate-600 dark:text-slate-300">
-  Hotline hỗ trợ nhanh: 024.3822.9988 | Email: contact@cic.com.vn
-</blockquote>
-<p>Trân trọng cảm ơn,<br/><strong>Đội ngũ Kinh doanh & Phát triển Giải pháp CIC Technology</strong></p>`,
-    lienhe_kd: `Gửi thông tin đơn báo giá mới đến Phòng Kinh doanh: Khách hàng {customer_name} ({customer_email} - {customer_phone}) yêu cầu tư vấn gói Ultimate cho sản phẩm {product_name}.`,
-    lienhe_kt: `Gửi thông tin đến Phòng Kỹ thuật: Khách hàng cần hỗ trợ tư vấn thông số máy trạm khuyến nghị và khả năng tương thích với file ETABS v20 cũ.`,
-    lienhe_kdmb: `Phụ trách kinh doanh khu vực Miền Bắc: Giao chuyên viên Nguyễn Văn Nam phụ trách theo dõi và lập báo giá chính thức trong ngày.`,
-    lienhe_kdmn: `Phụ trách kinh doanh khu vực Miền Nam: Chuyển dữ liệu thông tin khách hàng vào cơ sở dữ liệu CRM để chăm sóc định kỳ.`,
-    published: true,
-    ordering: 1,
-    created_time: '2026-07-25 10:15:00',
-    updated_time: '2026-07-28 16:20:00',
-  },
-  {
-    id: 'tpl_002',
-    name: 'Thư xác nhận đăng ký tham dự Hội thảo BIM & Hạ tầng số 2026',
-    types: 'event_registration',
-    products: ['EnjiCAD Network Enterprise', 'Dự toán ESCON Professional'],
-    content: `<p>Kính gửi Quý đại biểu <strong>{participant_name}</strong>,</p>
-<p>Ban Tổ chức xin chân thành cảm ơn Quý vị đã đăng ký tham dự Hội thảo Chuyên đề: <strong>"Ứng dụng BIM & Hạ tầng số trong Quản lý Dự án Xây dựng 2026"</strong> do Công ty CIC hợp tác cùng Bộ Xây Dựng tổ chức.</p>
-<p><strong>Thông tin chi tiết chương trình:</strong></p>
-<ul>
-  <li><strong>Thời gian:</strong> 08:30 - 12:00, Thứ Sáu ngày 15/08/2026</li>
-  <li><strong>Địa điểm:</strong> Hội trường tầng 3, Trung tâm Hội nghị Quốc gia, Nam Từ Liêm, Hà Nội.</li>
-  <li><strong>Mã vé điện tử check-in:</strong> <span class="text-orange-600 font-bold">{ticket_code}</span></li>
-</ul>
-<p>Vui lòng xuất trình email này hoặc mã QR kèm theo tại quầy đón tiếp để nhận thẻ đeo và tài liệu hội thảo.</p>
-<p>Trân trọng,<br/><strong>Ban Tổ chức Hội thảo CIC Technology</strong></p>`,
-    lienhe_kd: `Phòng Kinh doanh: Theo dõi danh sách đại biểu đăng ký tham dự để chuẩn bị catalog và quà tặng lưu niệm tại sự kiện.`,
-    lienhe_kt: `Phòng Kỹ thuật: Chuẩn bị 05 máy tính trải nghiệm thực tế phần mềm EnjiCAD v2.5 và ESCON 2026 tại khu vực Demo.`,
-    lienhe_kdmb: `KD Miền Bắc: Phụ trách đón tiếp và hướng dẫn vị trí chỗ ngồi cho đại biểu các Sở Xây dựng và Ban QLDA khu vực phía Bắc.`,
-    lienhe_kdmn: `KD Miền Nam: Gửi đường dẫn xem phát sóng trực tiếp (Livestream) và bộ tài liệu số cho các đại biểu không thể tới tham dự trực tiếp.`,
-    published: true,
-    ordering: 2,
-    created_time: '2026-07-28 14:30:00',
-    updated_time: '2026-07-30 09:10:00',
-  },
+const events: Array<{ event: EmailEvent; vi: string; en: string }> = [
+  { event: 'product_contact', vi: 'Liên hệ sản phẩm', en: 'Product enquiry' },
+  { event: 'product_download', vi: 'Tải tài liệu sản phẩm', en: 'Product document download' },
+  { event: 'product_purchase', vi: 'Đăng ký mua sản phẩm', en: 'Purchase registration' },
+  { event: 'product_quote', vi: 'Yêu cầu báo giá', en: 'Quotation request' },
+  { event: 'product_hardlock', vi: 'Yêu cầu khóa cứng', en: 'Hardware lock request' },
 ];
+
+const customerContent = (locale: EmailWorkspace, event: EmailEvent) => {
+  const isEn = locale === 'en';
+  const intro = isEn ? 'Hello {{customer.full_name}},' : 'Xin chào {{customer.full_name}},';
+  const received = isEn
+    ? '{{brand.name}} received your request about {{product.name}} at {{request.received_at}}.'
+    : '{{brand.name}} đã tiếp nhận yêu cầu của bạn về {{product.name}} vào {{request.received_at}}.';
+  const reference = isEn ? 'Reference: {{request.reference}}' : 'Mã yêu cầu: {{request.reference}}';
+  const next = event === 'product_download'
+    ? (isEn ? 'Download {{document.name}}: {{document.download_url}}\nAvailable until {{document.expires_at}}.' : 'Tải {{document.name}}: {{document.download_url}}\nLiên kết có hiệu lực đến {{document.expires_at}}.')
+    : (isEn ? 'Our team will review the information and contact you with the next steps.' : 'Bộ phận phụ trách sẽ kiểm tra thông tin và liên hệ để hướng dẫn bước tiếp theo.');
+  const sign = isEn ? 'Regards,\n{{brand.name}}' : 'Trân trọng,\n{{brand.name}}';
+  return [intro, '', received, reference, '', next, '', sign].join('\n');
+};
+
+const internalContent = (locale: EmailWorkspace) => locale === 'en'
+  ? 'A new request requires review.\n\nRequest: {{request.type_name}} — {{request.reference}}\nCustomer: {{customer.full_name}} — {{customer.email}}\nProduct: {{product.name}}\nMessage: {{request.message}}\n\nOpen in CMS: {{cms.request_url}}'
+  : 'Có yêu cầu mới cần kiểm tra.\n\nYêu cầu: {{request.type_name}} — {{request.reference}}\nKhách hàng: {{customer.full_name}} — {{customer.email}}\nSản phẩm: {{product.name}}\nNội dung: {{request.message}}\n\nMở trong CMS: {{cms.request_url}}';
+
+const makeTemplate = (workspace: EmailWorkspace, event: typeof events[number], audience: EmailAudience, index: number): EmailTemplate => {
+  const isEn = workspace === 'en';
+  const eventName = isEn ? event.en : event.vi;
+  return {
+    id: `${workspace}-${event.event}-${audience}`,
+    workspace,
+    name: audience === 'customer'
+      ? (isEn ? `${eventName} acknowledgement` : `Xác nhận ${eventName.toLowerCase()}`)
+      : (isEn ? `New ${eventName.toLowerCase()} notification` : `Thông báo ${eventName.toLowerCase()} mới`),
+    event: event.event,
+    audience,
+    subject: audience === 'customer'
+      ? (isEn ? `${eventName} — {{request.reference}}` : `${eventName} — {{request.reference}}`)
+      : `[${eventName}] {{product.name}} — {{request.reference}}`,
+    content: audience === 'customer' ? customerContent(workspace, event.event) : internalContent(workspace),
+    status: 'draft',
+    version: 1,
+    usageCount: 0,
+    updatedAt: `2026-08-${String(5 - Math.min(index, 4)).padStart(2, '0')} 09:00`,
+  };
+};
+
+export const mockEmailTemplates: EmailTemplate[] = (['vi', 'en'] as EmailWorkspace[]).flatMap((workspace) =>
+  events.flatMap((event, index) => [makeTemplate(workspace, event, 'customer', index), makeTemplate(workspace, event, 'internal', index)]),
+);
