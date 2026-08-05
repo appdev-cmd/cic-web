@@ -330,9 +330,11 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className="flex items-center gap-1 px-6 pt-3 bg-slate-100/70 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 overflow-x-auto text-xs font-bold">
+        <div role="tablist" aria-label="Các phần thông tin người dùng" className="flex items-center gap-1 px-6 pt-3 bg-slate-100/70 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 overflow-x-auto text-xs font-bold">
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'profile'}
             onClick={() => setActiveTab('profile')}
             className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'profile'
@@ -341,11 +343,13 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             }`}
           >
             <User className="w-4 h-4" />
-            <span>1. Hồ sơ & Đăng nhập</span>
+            <span>Hồ sơ và đăng nhập</span>
           </button>
 
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'roles_scopes'}
             onClick={() => setActiveTab('roles_scopes')}
             className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'roles_scopes'
@@ -354,11 +358,13 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             }`}
           >
             <Shield className="w-4 h-4" />
-            <span>2. Vai trò & Phạm vi (Scopes)</span>
+            <span>Vai trò và phạm vi</span>
           </button>
 
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'effective_access'}
             onClick={() => setActiveTab('effective_access')}
             className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'effective_access'
@@ -367,12 +373,14 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>3. Tóm tắt Quyền hạn (Effective Access)</span>
+            <span>Quyền được cấp</span>
           </button>
 
           {isEditMode && (
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === 'security'}
               onClick={() => setActiveTab('security')}
               className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'security'
@@ -381,7 +389,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
               }`}
             >
               <History className="w-4 h-4" />
-              <span>4. Bảo mật & Nhật ký Hoạt động</span>
+              <span>Bảo mật và nhật ký</span>
             </button>
           )}
         </div>

@@ -50,6 +50,7 @@ import { BannerPlacementModal } from './BannerPlacementModal';
 import { BannerDuplicateModal } from './BannerDuplicateModal';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface BannersManagerProps { workspaceLocale: CmsLocale; data?: BannersModuleData; }
 
@@ -322,33 +323,18 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
         </div>
       </div>
 
-      {/* Main Sitemap Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1">
-        {[
-          { id: 'all', label: 'Tất cả nội dung', icon: ImageIcon },
-          { id: 'schedule', label: 'Lịch hiển thị (Timeline)', icon: Calendar },
-          { id: 'my_tasks', label: 'Việc của tôi', icon: UserCheck },
-          { id: 'pending_queue', label: 'Hàng chờ duyệt', icon: Inbox },
-          { id: 'trash', label: 'Thùng rác', icon: Trash2 },
-        ].map((t) => {
-          const IconComponent = t.icon;
-          const isActive = activeMainTab === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setActiveMainTab(t.id as MainTabType)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-2 shrink-0 ${
-                isActive
-                  ? 'bg-orange-600 text-white shadow-2xs'
-                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <IconComponent className="w-4 h-4" />
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <CmsTabs
+        ariaLabel="Chế độ quản lý banner và slideshow"
+        value={activeMainTab}
+        onChange={setActiveMainTab}
+        items={[
+          { id: 'all', label: 'Tất cả', count: items.filter((item) => !item.deleted_at).length },
+          { id: 'schedule', label: 'Lịch hiển thị' },
+          { id: 'my_tasks', label: 'Việc của tôi', count: items.filter((item) => !item.deleted_at && (item.owner_name.includes('Manh') || item.owner_name.includes('Editor'))).length },
+          { id: 'pending_queue', label: 'Chờ duyệt', count: items.filter((item) => !item.deleted_at && item.workflow_status === 'pending_review').length },
+          { id: 'trash', label: 'Thùng rác', count: items.filter((item) => Boolean(item.deleted_at)).length },
+        ]}
+      />
 
       {/* Main Filter & View Mode Bar */}
       <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
@@ -387,9 +373,9 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
               onChange={(e) => setSelectedType(e.target.value)}
               className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             >
-              <option value="all">Tất cả Loại</option>
-              <option value="banner">Single Banner</option>
-              <option value="slideshow">Slideshow</option>
+              <option value="all">Tất cả loại</option>
+              <option value="banner">Nội dung đơn</option>
+              <option value="slideshow">Trình chiếu</option>
             </select>
 
             {/* View Mode List vs Calendar */}
@@ -412,7 +398,7 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
-                <Calendar className="w-3.5 h-3.5" /> Lịch Timeline
+                <Calendar className="w-3.5 h-3.5" /> Lịch hiển thị
               </button>
             </div>
           </div>

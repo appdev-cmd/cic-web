@@ -317,9 +317,11 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       </div>
 
       {/* ================= FORM TAB NAVIGATION BAR ================= */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 flex items-center gap-1 overflow-x-auto custom-scrollbar">
+      <div role="tablist" aria-label="Các phần của bài viết" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1.5 flex items-center gap-1 overflow-x-auto custom-scrollbar">
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'content'}
           onClick={() => setActiveTab('content')}
           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'content'
@@ -328,11 +330,13 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>1. Nội dung bài viết</span>
+          <span>Nội dung</span>
         </button>
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'taxonomy'}
           onClick={() => setActiveTab('taxonomy')}
           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'taxonomy'
@@ -341,11 +345,13 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>2. Phân loại & Quan hệ</span>
+          <span>Phân loại và liên kết</span>
         </button>
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'media'}
           onClick={() => setActiveTab('media')}
           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'media'
@@ -354,11 +360,13 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           }`}
         >
           <ImageIcon className="w-4 h-4" />
-          <span>3. Media & Video</span>
+          <span>Hình ảnh và video</span>
         </button>
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'seo'}
           onClick={() => setActiveTab('seo')}
           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'seo'
@@ -367,11 +375,13 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span>4. SEO & Social Cards</span>
+          <span>SEO và chia sẻ</span>
         </button>
 
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'publishing'}
           onClick={() => setActiveTab('publishing')}
           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'publishing'
@@ -380,7 +390,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>5. Xuất bản & Quy trình</span>
+          <span>Xuất bản</span>
         </button>
       </div>
 

@@ -50,6 +50,7 @@ import { ProductActivityDrawer } from './ProductActivityDrawer';
 import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 type SystemViewTab = 'all' | 'my' | 'pending' | 'low_quality' | 'active' | 'archived';
 
@@ -303,39 +304,22 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
         )}
       />
 
-      {/* 2. SAVED SYSTEM VIEWS TABS */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
-        {[
+      <CmsTabs
+        ariaLabel="Nhóm sản phẩm"
+        value={activeTab}
+        onChange={(tab) => {
+          setActiveTab(tab);
+          setCurrentPage(1);
+        }}
+        items={[
           { id: 'all', label: 'Tất cả sản phẩm', count: products.filter((p) => p.editorial_status !== 'archived').length },
           { id: 'my', label: 'Việc của tôi', count: products.filter((p) => p.owner_id === currentUserId).length },
-          { id: 'pending', label: 'Hàng chờ review', count: products.filter((p) => p.editorial_status === 'pending_review').length },
-          { id: 'low_quality', label: 'Chất lượng thấp (<75%)', count: products.filter((p) => p.completeness_score < 75).length },
+          { id: 'pending', label: 'Chờ duyệt', count: products.filter((p) => p.editorial_status === 'pending_review').length },
+          { id: 'low_quality', label: 'Chất lượng dưới 75%', count: products.filter((p) => p.completeness_score < 75).length },
           { id: 'active', label: 'Đang kinh doanh', count: products.filter((p) => p.catalog_status === 'active').length },
-          { id: 'archived', label: 'Lưu trữ / Thùng rác', count: products.filter((p) => p.editorial_status === 'archived' || p.catalog_status === 'archived').length },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id as SystemViewTab);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2.5 font-bold text-xs rounded-t-xl transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border-b-2 -mb-px ${
-              activeTab === tab.id
-                ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/20'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span
-              className={`px-1.5 py-0.5 text-[10px] font-mono rounded-full ${
-                activeTab === tab.id ? 'bg-orange-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              {tab.count}
-            </span>
-          </button>
-        ))}
-      </div>
+          { id: 'archived', label: 'Lưu trữ và thùng rác', count: products.filter((p) => p.editorial_status === 'archived' || p.catalog_status === 'archived').length },
+        ]}
+      />
 
       {/* 3. TOOLBAR & FILTERS */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">

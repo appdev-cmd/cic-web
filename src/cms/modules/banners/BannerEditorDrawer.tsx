@@ -252,7 +252,7 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
         </div>
 
         {/* Section Navigation Tabs */}
-        <div className="flex items-center gap-1 px-6 border-b border-slate-200 dark:border-slate-800 overflow-x-auto bg-slate-100/50 dark:bg-slate-800/20">
+        <div role="tablist" aria-label="Các phần cấu hình trình chiếu" className="flex items-center gap-1 px-6 border-b border-slate-200 dark:border-slate-800 overflow-x-auto bg-slate-100/50 dark:bg-slate-800/20">
           {[
             { id: 'general', label: 'Thông tin chung' },
             { id: 'placement', label: 'Vị trí hiển thị' },
@@ -267,6 +267,9 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
           ].map((tab) => (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTabSection === tab.id}
               onClick={() => setActiveTabSection(tab.id as any)}
               className={`px-3.5 py-3 text-xs font-bold transition border-b-2 shrink-0 ${
                 activeTabSection === tab.id

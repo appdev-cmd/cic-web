@@ -43,6 +43,7 @@ import { CompareDiffModal } from './CompareDiffModal';
 import { SecretRotateModal } from './SecretRotateModal';
 import { AssetPickerModal } from './AssetPickerModal';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface SystemConfigurationProps {
   websiteData?: SystemConfigurationData;
@@ -343,91 +344,20 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       />
 
       {/* MODULE TOP NAVIGATION TABS */}
-      <div className="flex flex-nowrap md:flex-wrap items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 text-xs font-bold [scrollbar-width:thin] snap-x">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'overview'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Globe className="w-4 h-4" />
-          <span>Tổng quan</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('editor')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'editor'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Sliders className="w-4 h-4" />
-          <span>Chỉnh sửa cấu hình</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('table')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'table'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <TableIcon className="w-4 h-4" />
-          <span>Bảng cấu hình</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('issues')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'issues'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <ShieldAlert className="w-4 h-4" />
-          <span>Cảnh báo Lỗi ({issues.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('drafts')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'drafts'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          <span>Bản nháp Chờ duyệt ({drafts.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('versions')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'versions'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <History className="w-4 h-4" />
-          <span>Phiên bản & Rollback</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('audit')}
-          className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-            activeTab === 'audit'
-              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Shield className="w-4 h-4" />
-          <span>Nhật ký Audit</span>
-        </button>
-      </div>
+      <CmsTabs
+        ariaLabel="Các khu vực cấu hình hệ thống"
+        value={activeTab}
+        onChange={setActiveTab}
+        items={[
+          { id: 'overview', label: 'Tổng quan', icon: Globe },
+          { id: 'editor', label: 'Chỉnh sửa', icon: Sliders },
+          { id: 'table', label: 'Bảng cấu hình', icon: TableIcon },
+          { id: 'issues', label: 'Cảnh báo', count: issues.length, icon: ShieldAlert },
+          { id: 'drafts', label: 'Chờ duyệt', count: drafts.length, icon: Clock },
+          { id: 'versions', label: 'Phiên bản', icon: History },
+          { id: 'audit', label: 'Nhật ký', icon: Shield },
+        ]}
+      />
 
       {/* TAB CONTENT VIEWS */}
       {activeTab === 'overview' && (

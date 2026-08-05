@@ -429,7 +429,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-orange-600" />
-                <span>1. Nhận diện & Nội dung chính</span>
+                <span>Nhận diện và nội dung chính</span>
               </h3>
 
               {/* Tiêu đề */}
@@ -511,7 +511,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <LayoutGrid className="w-4 h-4 text-orange-600" />
-                <span>2. Chọn Mẫu Giao diện & Sắp xếp Khối Section</span>
+                <span>Mẫu giao diện và sắp xếp nội dung</span>
               </h3>
 
               {/* Template Selection */}
@@ -662,7 +662,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-orange-600" />
-                <span>3. Phân loại Nghiệp vụ & Quan hệ Cây nội dung (Tree)</span>
+                <span>Phân loại và cây nội dung</span>
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -761,7 +761,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-orange-600" />
-                <span>4. Quản lý Ảnh Đại diện, Banner & Accessibility</span>
+                <span>Ảnh đại diện, banner và hỗ trợ tiếp cận</span>
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -832,7 +832,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <Globe className="w-4 h-4 text-orange-600" />
-                <span>5. Tối ưu hóa SEO & Thẻ chia sẻ Mạng xã hội (Social Graph)</span>
+                <span>SEO và chia sẻ mạng xã hội</span>
               </h3>
 
               <div className="space-y-4">
@@ -899,7 +899,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-orange-600" />
-                <span>6. Trạng thái Quy trình Duyệt & Phân công Biên tập</span>
+                <span>Quy trình duyệt và phân công</span>
               </h3>
 
               <div className="space-y-4">

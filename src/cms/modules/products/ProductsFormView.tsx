@@ -316,7 +316,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">1</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">1. Thông tin chung</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Thông tin chung</h3>
               </div>
               {collapsedSections['sec_1'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -428,7 +428,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">2</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">2. Phân loại và hãng sản xuất</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Phân loại và hãng sản xuất</h3>
               </div>
               {collapsedSections['sec_2'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -521,7 +521,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">3</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">3. Thông tin Thương mại & Giá (Commercial)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Thông tin thương mại và giá</h3>
               </div>
               {collapsedSections['sec_3'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -625,7 +625,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">4</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">4. Nội dung & Đặc điểm nổi bật (Rich Content)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Nội dung và đặc điểm nổi bật</h3>
               </div>
               {collapsedSections['sec_4'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -688,7 +688,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">5</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">5. Thông số kỹ thuật (Technical Specifications)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Thông số kỹ thuật</h3>
               </div>
               {collapsedSections['sec_5'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -781,7 +781,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">6</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">6. Thư viện Hình ảnh & Video (Media)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Hình ảnh và video</h3>
               </div>
               {collapsedSections['sec_6'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -874,7 +874,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">7</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">7. Tài liệu & Brochure đính kèm (Documents)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Tài liệu đính kèm</h3>
               </div>
               {collapsedSections['sec_7'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -965,7 +965,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">8</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">8. Tối ưu SEO & Thẻ chia sẻ (SEO & Social)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">SEO và chia sẻ mạng xã hội</h3>
               </div>
               {collapsedSections['sec_8'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
@@ -1025,7 +1025,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">9</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">9. Người phụ trách và nơi nhận liên hệ</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Người phụ trách và nơi nhận liên hệ</h3>
               </div>
               {collapsedSections['sec_9'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>

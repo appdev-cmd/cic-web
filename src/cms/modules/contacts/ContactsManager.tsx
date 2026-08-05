@@ -40,6 +40,7 @@ import { ContactDetailDrawer } from './ContactDetailDrawer';
 import { ContactReassignModal } from './ContactReassignModal';
 import { ContactSpamDuplicateModal } from './ContactSpamDuplicateModal';
 import { ContactPiiAuditModal } from './ContactPiiAuditModal';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface ContactsManagerProps {
   data?: ContactsModuleData;
@@ -586,50 +587,22 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
         </div>
       </div>
 
-      {/* 2. SYSTEM WORKSPACE VIEW TABS (SITEMAP VIEWS) */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1 scrollbar-none">
-        <div className="flex items-center gap-1">
-          {[
-            { key: 'all', label: 'Tất cả yêu cầu', count: counts.all, icon: Inbox },
-            { key: 'my_queue', label: 'Việc của tôi', count: counts.myQueue, icon: UserCheck },
-            { key: 'unassigned', label: 'Chưa phân công', count: counts.unassigned, icon: Clock },
-            { key: 'overdue', label: 'Quá hạn SLA', count: counts.overdue, icon: AlertTriangle },
-            { key: 'general', label: 'Liên hệ chung', count: counts.general, icon: MessageSquare },
-            { key: 'product', label: 'Liên hệ sản phẩm', count: counts.product, icon: FileCheck },
-            { key: 'resolved', label: 'Đã giải quyết', count: counts.resolved, icon: CheckCircle2 },
-            { key: 'spam', label: 'Spam / Trùng', count: counts.spam, icon: ShieldAlert },
-            { key: 'trash', label: 'Thùng rác', count: counts.trash, icon: Trash2 },
-          ].map((tab) => {
-            const IconComponent = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as MainTabType)}
-                className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
-                  isActive
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <IconComponent className="w-4 h-4" />
-                <span>{tab.label}</span>
-                {tab.count > 0 && (
-                  <span
-                    className={`px-1.5 py-0.5 text-[10px] rounded-full ${
-                      isActive
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <CmsTabs
+        ariaLabel="Nhóm yêu cầu khách hàng"
+        value={activeTab}
+        onChange={setActiveTab}
+        items={[
+          { id: 'all', label: 'Tất cả yêu cầu', count: counts.all },
+          { id: 'my_queue', label: 'Việc của tôi', count: counts.myQueue },
+          { id: 'unassigned', label: 'Chưa phân công', count: counts.unassigned },
+          { id: 'overdue', label: 'Quá hạn', count: counts.overdue },
+          { id: 'general', label: 'Liên hệ chung', count: counts.general },
+          { id: 'product', label: 'Liên hệ sản phẩm', count: counts.product },
+          { id: 'resolved', label: 'Đã giải quyết', count: counts.resolved },
+          { id: 'spam', label: 'Spam hoặc trùng', count: counts.spam },
+          { id: 'trash', label: 'Thùng rác', count: counts.trash },
+        ]}
+      />
 
       {/* 3. SEARCH & ADVANCED TOOLBAR */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-3">
