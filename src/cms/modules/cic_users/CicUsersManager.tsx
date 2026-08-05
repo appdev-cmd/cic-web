@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Plus,
   RefreshCw,
   Search,
   Filter,
@@ -30,6 +29,8 @@ import {
 import { CicUser, UserAccountStatus } from './types';
 import type { UsersGovernanceData } from '../../data/GovernanceDataSource';
 import { CicUserFormModal } from './CicUserFormModal';
+import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data }) => {
   // Main Users State
@@ -237,34 +238,24 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         </div>
       )}
 
-      {/* HEADER & TOP TITLE */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
-              <Shield className="w-5 h-5" />
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Quản lý Người dùng & Tài khoản CMS
-            </h1>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Vòng đời tài khoản, hồ sơ cá nhân, phân quyền Role & Scope và theo dõi hoạt động bảo mật hệ thống.
-          </p>
-        </div>
-
-        {/* Top Action Button */}
-        <button
-          onClick={() => {
-            setUserToEdit(null);
-            setIsModalOpen(true);
-          }}
-          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm / Mời người dùng</span>
-        </button>
-      </div>
+      <CmsPageHeader
+        icon={<Shield />}
+        title="Người dùng CMS"
+        description="Quản lý tài khoản, hồ sơ, vai trò và trạng thái truy cập hệ thống."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{users.length} tài khoản</span>}
+        actions={(
+          <CmsButton
+            onClick={() => {
+              setUserToEdit(null);
+              setIsModalOpen(true);
+            }}
+            variant="primary"
+            leadingIcon={<UserCheck />}
+          >
+            Thêm người dùng
+          </CmsButton>
+        )}
+      />
 
       {/* KPI STATS CARDS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -366,13 +357,12 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
 
           {/* Refresh */}
           <div className="md:col-span-1 flex justify-end">
-            <button
+            <CmsIconButton
               onClick={handleRefresh}
-              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium cursor-pointer"
-              title="Làm mới"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
+              aria-label="Làm mới danh sách"
+              title="Làm mới danh sách"
+              icon={<RefreshCw />}
+            />
           </div>
         </div>
 
@@ -564,47 +554,47 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                       <td className="p-3 text-right pr-5 whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           {/* Edit button */}
-                          <button
+                          <CmsIconButton
                             onClick={() => {
                               setUserToEdit(user);
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Sửa hồ sơ & phân quyền"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
+                            aria-label="Sửa người dùng"
+                            title="Sửa người dùng"
+                            icon={<Edit />}
+                            size="sm"
+                          />
 
                           {/* Audit activity drawer trigger */}
-                          <button
+                          <CmsIconButton
                             onClick={() => setAuditUser(user)}
-                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors cursor-pointer"
+                            aria-label="Xem nhật ký bảo mật"
                             title="Xem nhật ký bảo mật"
-                          >
-                            <History className="w-4 h-4" />
-                          </button>
+                            icon={<History />}
+                            size="sm"
+                          />
 
                           {/* Quick Reset Password Link */}
-                          <button
+                          <CmsIconButton
                             onClick={() => handleSendResetPassword(user)}
-                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Gửi link khôi phục mật khẩu"
-                          >
-                            <Mail className="w-4 h-4" />
-                          </button>
+                            aria-label="Gửi liên kết đặt lại mật khẩu"
+                            title="Gửi liên kết đặt lại mật khẩu"
+                            icon={<Mail />}
+                            size="sm"
+                          />
 
                           {/* Status toggle modal trigger */}
-                          <button
+                          <CmsIconButton
                             onClick={() => {
                               setStatusPromptUser(user);
                               setTargetStatus(user.status === 'active' ? 'suspended' : 'active');
                               setChangeReason('');
                             }}
-                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Đổi trạng thái tài khoản"
-                          >
-                            {user.status === 'active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-                          </button>
+                            aria-label={user.status === 'active' ? 'Tạm khóa tài khoản' : 'Kích hoạt tài khoản'}
+                            title={user.status === 'active' ? 'Tạm khóa tài khoản' : 'Kích hoạt tài khoản'}
+                            icon={user.status === 'active' ? <Lock /> : <Unlock />}
+                            size="sm"
+                          />
                         </div>
                       </td>
                     </tr>

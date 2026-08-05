@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   MailCheck,
-  Plus,
   Search,
   Filter,
   Trash2,
@@ -19,6 +18,8 @@ import { EmailTemplate, EMAIL_TYPES } from './types';
 import { mockEmailTemplates } from './mockData';
 import { EmailTemplatesFormView } from './EmailTemplatesFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 export const EmailTemplatesManager: React.FC = () => {
   // Templates State
@@ -241,34 +242,17 @@ export const EmailTemplatesManager: React.FC = () => {
         />
       ) : (
         <>
-          {/* HEADER BAR */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
-                  <MailCheck className="w-5 h-5" />
-                </div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                  Quản lý Mẫu Email thông báo
-                </h1>
-                <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-                  {templates.length} mẫu email
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Quản lý nội dung các mẫu email tự động phục vụ liên hệ khách hàng, báo giá và thông báo phòng ban.
-              </p>
-            </div>
-
-            {/* Top Right Action Button */}
-            <button
-              onClick={handleOpenCreateForm}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm mẫu email mới</span>
-            </button>
-          </div>
+          <CmsPageHeader
+            icon={<MailCheck />}
+            title="Mẫu email"
+            description="Quản lý nội dung email tự động dùng cho liên hệ, báo giá và thông báo nội bộ."
+            meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{templates.length} mẫu</span>}
+            actions={(
+              <CmsButton onClick={handleOpenCreateForm} variant="primary" leadingIcon={<MailCheck />}>
+                Thêm mẫu email
+              </CmsButton>
+            )}
+          />
 
           {/* TOOLBAR (Search, Filters & Batch Actions) */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-4">
@@ -313,13 +297,12 @@ export const EmailTemplatesManager: React.FC = () => {
                   <option value="hidden">Đang ẩn (Nháp)</option>
                 </select>
 
-                <button
+                <CmsIconButton
                   onClick={handleRefresh}
-                  className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium cursor-pointer shrink-0"
+                  aria-label="Làm mới danh sách"
                   title="Làm mới danh sách"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+                  icon={<RefreshCw />}
+                />
               </div>
             </div>
 
@@ -472,20 +455,21 @@ export const EmailTemplatesManager: React.FC = () => {
 
                           {/* Nút Sửa & Single Delete */}
                           <td className="p-3.5 text-right space-x-1">
-                            <button
+                            <CmsIconButton
                               onClick={() => handleOpenEditForm(tpl)}
-                              className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
-                              title="Chỉnh sửa mẫu email"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
+                              aria-label="Sửa mẫu email"
+                              title="Sửa mẫu email"
+                              icon={<Edit />}
+                              size="sm"
+                            />
+                            <CmsIconButton
                               onClick={() => handleTriggerDeleteSingle(tpl)}
-                              className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
+                              aria-label="Xóa mẫu email"
                               title="Xóa mẫu email"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                              icon={<Trash2 />}
+                              size="sm"
+                              variant="danger"
+                            />
                           </td>
                         </tr>
                       );
