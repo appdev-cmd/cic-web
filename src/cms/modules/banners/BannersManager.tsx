@@ -55,7 +55,19 @@ interface BannersManagerProps { workspaceLocale: CmsLocale; data?: BannersModule
 
 export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale, data }) => {
   // Main Items & Data States
-  const [items, setItems] = useState<BannerContent[]>(data?.banners ?? []);
+  const [items, setItems] = useState<BannerContent[]>(() => (data?.banners ?? []).map((item) => ({
+    ...item,
+    purpose: item.purpose ?? (item.type === 'slideshow' ? 'homepage' : 'advertising'),
+    template: item.template ?? 'visual',
+    layout: item.layout ?? (item.type === 'slideshow' ? 'full_width' : 'contained'),
+    slideshow_config: {
+      loop: true,
+      navigation: 'arrows',
+      pagination: 'dots',
+      slides_per_view: 1,
+      ...item.slideshow_config,
+    },
+  })));
   const [placements, setPlacements] = useState<BannerPlacementConfig[]>(data?.placements ?? []);
   const [conflicts, setConflicts] = useState<ScheduleConflict[]>(data?.conflicts ?? []);
   const [versions, setVersions] = useState<BannerVersion[]>(data?.versions ?? []);
@@ -242,7 +254,7 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
               size="sm"
               leadingIcon={<Plus />}
             >
-              Thêm banner
+              Thêm nội dung đơn
             </CmsButton>
 
             <CmsButton

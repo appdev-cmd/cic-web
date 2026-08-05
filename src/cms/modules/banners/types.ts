@@ -1,5 +1,61 @@
 export type BannerItemType = 'banner' | 'slideshow';
 
+export type SlideshowPurpose =
+  | 'hero'
+  | 'homepage'
+  | 'landing_page'
+  | 'advertising'
+  | 'partners'
+  | 'customers'
+  | 'awards'
+  | 'certificates'
+  | 'projects'
+  | 'testimonials'
+  | 'logo_carousel'
+  | 'timeline'
+  | 'promotion'
+  | 'featured_news'
+  | 'custom';
+
+export type SlideshowTemplate = 'visual' | 'editorial' | 'logo_wall' | 'testimonial' | 'timeline' | 'cards';
+
+export type SlideshowLayout = 'full_width' | 'contained' | 'split' | 'carousel' | 'multi_item';
+
+export const slideshowPurposeOptions: Array<{ value: SlideshowPurpose; label: string }> = [
+  { value: 'hero', label: 'Hero banner' },
+  { value: 'homepage', label: 'Slider trang chủ' },
+  { value: 'landing_page', label: 'Banner landing page' },
+  { value: 'advertising', label: 'Quảng cáo' },
+  { value: 'partners', label: 'Đối tác' },
+  { value: 'customers', label: 'Khách hàng' },
+  { value: 'projects', label: 'Dự án' },
+  { value: 'awards', label: 'Giải thưởng' },
+  { value: 'certificates', label: 'Chứng nhận' },
+  { value: 'logo_carousel', label: 'Băng chuyền logo' },
+  { value: 'testimonials', label: 'Ý kiến khách hàng' },
+  { value: 'promotion', label: 'Khuyến mại' },
+  { value: 'featured_news', label: 'Tin nổi bật' },
+  { value: 'timeline', label: 'Dòng thời gian' },
+  { value: 'custom', label: 'Mục đích khác' },
+];
+
+export const slideshowTemplateOptions: Array<{ value: SlideshowTemplate; label: string }> = [
+  { value: 'visual', label: 'Hình ảnh nổi bật' },
+  { value: 'editorial', label: 'Nội dung biên tập' },
+  { value: 'logo_wall', label: 'Logo và thương hiệu' },
+  { value: 'testimonial', label: 'Ý kiến khách hàng' },
+  { value: 'timeline', label: 'Dòng thời gian' },
+  { value: 'cards', label: 'Thẻ nội dung' },
+];
+
+export const slideshowLayoutOptions: Array<{ value: SlideshowLayout; label: string }> = [
+  { value: 'full_width', label: 'Toàn chiều rộng' },
+  { value: 'contained', label: 'Trong khung nội dung' },
+  { value: 'split', label: 'Chia đôi nội dung và hình ảnh' },
+  { value: 'carousel', label: 'Băng chuyền ngang' },
+  { value: 'multi_item', label: 'Nhiều mục cùng lúc' },
+];
+
 export type WorkflowStatus = 'draft' | 'pending_review' | 'approved' | 'published' | 'archived';
 
 export type EffectiveStatus = 'upcoming' | 'running' | 'ended' | 'conflict';
@@ -32,16 +88,23 @@ export interface SlideItem {
 
 export interface SlideshowConfig {
   auto_play: boolean;
+  loop?: boolean;
   interval_ms: number;
   effect: 'fade' | 'slide' | 'zoom';
   pause_on_hover: boolean;
   show_dots: boolean;
   show_arrows: boolean;
+  navigation?: 'arrows' | 'thumbnails' | 'none';
+  pagination?: 'dots' | 'fraction' | 'progress' | 'none';
+  slides_per_view?: number;
 }
 
 export interface BannerContent {
   id: string;
   type: BannerItemType;
+  purpose?: SlideshowPurpose;
+  template?: SlideshowTemplate;
+  layout?: SlideshowLayout;
   title: string;
   alias: string;
   site_id: 'main_site' | 'en_site' | 'jp_site';

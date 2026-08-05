@@ -19,7 +19,7 @@ import {
   ArrowUpDown,
   Filter,
 } from 'lucide-react';
-import { BannerContent, SavedFilterView, WorkflowStatus, EffectiveStatus } from './types';
+import { BannerContent, SavedFilterView, WorkflowStatus, EffectiveStatus, slideshowPurposeOptions } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface BannerListViewProps {
@@ -221,7 +221,10 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
                                   : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                               }`}
                             >
-                              {item.type === 'slideshow' ? 'SLIDESHOW' : 'SINGLE BANNER'}
+                              {item.type === 'slideshow' ? 'Trình chiếu' : 'Nội dung đơn'}
+                            </span>
+                            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                              {slideshowPurposeOptions.find((option) => option.value === item.purpose)?.label || 'Chưa chọn mục đích'}
                             </span>
                             {item.has_draft_changes && (
                               <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
@@ -233,7 +236,7 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
                             {item.title}
                           </h4>
                           <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate max-w-xs">
-                            Alias: <code className="font-mono">{item.alias}</code>
+                            Mã: <code className="font-mono">{item.alias}</code>
                           </p>
                         </div>
                       </div>
