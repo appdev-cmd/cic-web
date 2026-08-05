@@ -31,8 +31,10 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - Demo catalog chỉ có VI. Workspace EN không sử dụng sản phẩm hoặc master data VI; các component con nhận dữ liệu từ manager thay vì tự import fixture.
 - `PresentationDataSource` tách Menu, Banners và Content Blocks theo workspace locale, bao gồm placement, page tree, conflict, version và audit liên quan.
 - Demo presentation chỉ có VI; editor/drawer nhận dữ liệu qua props và xử lý an toàn khi workspace EN chưa có placement hoặc page tree.
+- `MediaDataSource` cung cấp một thư viện asset dùng chung cho mọi workspace nhằm tránh nhân đôi file vật lý. `CmsLocale` chỉ xác định metadata bản địa hóa đang thao tác.
+- Asset, variant, license và folder là dữ liệu dùng chung; alt text, caption và usage reference phải giữ locale rõ ràng khi nối production adapter.
 - All-locales mode đã bị ẩn cho tới khi permission và breakdown được triển khai thật.
 
 ## Bước tiếp theo
 
-Tiếp tục áp dụng data-source boundary cho Media sau khi chốt policy asset global hay locale-aware. Module Contacts là operational record dùng source locale, không nhân đôi một contact cho VI/EN.
+Tiếp tục với Contacts theo mô hình operational record có source locale, không nhân đôi một contact cho VI/EN.

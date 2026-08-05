@@ -39,7 +39,8 @@ import {
   SavedFilterView,
   UploadFileItem,
 } from './types';
-import { MOCK_FOLDERS, MOCK_ALBUMS, INITIAL_ASSETS, MOCK_ISSUES } from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { MediaModuleData } from '../../data/MediaDataSource';
 import { MediaGridView } from './MediaGridView';
 import { MediaListView } from './MediaListView';
 import { AssetDetailDrawer } from './AssetDetailDrawer';
@@ -47,12 +48,17 @@ import { AlbumsView } from './AlbumsView';
 import { UploadQueueDrawer } from './UploadQueueDrawer';
 import { ReplaceArchiveModal } from './ReplaceArchiveModal';
 
-export const MediaManager: React.FC = () => {
+interface MediaManagerProps {
+  workspaceLocale: CmsLocale;
+  data: MediaModuleData;
+}
+
+export const MediaManager: React.FC<MediaManagerProps> = ({ workspaceLocale, data }) => {
   // Main State
-  const [assets, setAssets] = useState<MediaAsset[]>(INITIAL_ASSETS);
-  const [albums, setAlbums] = useState<MediaAlbum[]>(MOCK_ALBUMS);
-  const [folders, setFolders] = useState<MediaFolder[]>(MOCK_FOLDERS);
-  const [issues, setIssues] = useState<MediaIssue[]>(MOCK_ISSUES);
+  const [assets, setAssets] = useState<MediaAsset[]>(data.assets);
+  const [albums, setAlbums] = useState<MediaAlbum[]>(data.albums);
+  const [folders, setFolders] = useState<MediaFolder[]>(data.folders);
+  const [issues, setIssues] = useState<MediaIssue[]>(data.issues);
 
   const [activeTab, setActiveTab] = useState<MainTabType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -94,7 +100,7 @@ export const MediaManager: React.FC = () => {
     if (activeTab === 'images' && ast.type !== 'image') return false;
     if (activeTab === 'videos' && ast.type !== 'video') return false;
     if (activeTab === 'documents' && ast.type !== 'document') return false;
-    if (activeTab === 'my_uploads' && ast.owner_name !== 'Nguyễn Văn Minh') return false;
+    if (activeTab === 'my_uploads' && ast.owner_name !== data.currentUserName) return false;
     if (activeTab === 'incomplete_metadata' && ast.metadata_status !== 'incomplete') return false;
     if (activeTab === 'issues') {
       const hasIssue = issues.some((i) => i.asset_id === ast.id);
@@ -102,7 +108,7 @@ export const MediaManager: React.FC = () => {
     }
 
     // Saved View Pills
-    if (savedFilter === 'my_uploads' && ast.owner_name !== 'Nguyễn Văn Minh') return false;
+    if (savedFilter === 'my_uploads' && ast.owner_name !== data.currentUserName) return false;
     if (savedFilter === 'missing_alt' && !Object.values(ast.alt_text).some((v) => !String(v || '').trim())) return false;
     if (savedFilter === 'unused' && ast.used_by_count > 0) return false;
     if (savedFilter === 'issues' && !issues.some((i) => i.asset_id === ast.id)) return false;
@@ -269,7 +275,7 @@ export const MediaManager: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Thư Viện Media (Media Workspace & Asset Manager)
+              Thư Viện Media · metadata {workspaceLocale.toUpperCase()}
             </h1>
             <span className="text-xs font-bold uppercase bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 px-2.5 py-0.5 rounded-full border border-orange-200 dark:border-orange-900">
               THƯ VIỆN MEDIA

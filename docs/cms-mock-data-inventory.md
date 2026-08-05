@@ -6,7 +6,7 @@
 
 - 18 file fixture `mockData.ts/mockCmsData.ts`.
 - Baseline ban đầu có 36 runtime import tham chiếu trực tiếp tới fixture.
-- Sau khi tách thêm Menu/Banners/Content Blocks qua data-source boundary, gate vẫn ghi nhận 36 dependency path tới demo/mock. Các import trực tiếp trong component đã được thay bằng ba import của demo adapter và ba lazy boundary; production gate tiếp tục chặn cho tới khi có production adapter.
+- Sau khi tách thêm Media qua data-source boundary, gate ghi nhận 37 dependency path tới demo/mock. Media component không còn import fixture; demo adapter và lazy boundary vẫn được gate đếm để ngăn phát hành nhầm.
 - Production gate phải fail cho tới khi runtime không còn import mock.
 - TypeScript/build pass không đồng nghĩa production data readiness pass.
 
@@ -55,5 +55,7 @@
 - `src/cms/data/demoCatalogDataSource.ts`: gom fixture catalog/master data vào adapter VI; Products, Product Settings và Usage Impact không còn import fixture trực tiếp.
 - `src/cms/data/PresentationDataSource.ts`: contract theo locale cho Menu, Banners và Content Blocks.
 - `src/cms/data/demoPresentationDataSource.ts`: gom fixture presentation vào adapter VI; manager và drawer con không còn import fixture trực tiếp.
-- Bước tiếp theo: quyết định và triển khai data boundary cho Media.
+- `src/cms/data/MediaDataSource.ts`: contract thư viện asset dùng chung; localized metadata sử dụng workspace locale hiện hành.
+- `src/cms/data/demoMediaDataSource.ts`: adapter demo cho shared library; Media manager không còn import fixture trực tiếp.
+- Bước tiếp theo: tạo operational data boundary cho Contacts và giữ source locale trên từng record.
 - Runtime contract đã được bổ sung tại `docs/cms-locale-runtime-contract.md`: Dashboard EN thiếu dữ liệu hiển thị empty state và không fallback KPI/list/chart VI.

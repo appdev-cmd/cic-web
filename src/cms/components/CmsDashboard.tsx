@@ -113,7 +113,12 @@ const ContentBlocksManager = lazy(async () => {
     <module.ContentBlocksManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.contentBlocksByLocale[workspaceLocale]} />
   ) };
 });
-const MediaManager = lazy(() => import('../modules/media/MediaManager').then((module) => ({ default: module.MediaManager })));
+const MediaManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/media/MediaManager'), import('../data/demoMediaDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.MediaManager workspaceLocale={workspaceLocale} data={dataModule.demoMediaDataSource.sharedLibrary} />
+  ) };
+});
 const ContactsManager = lazy(() => import('../modules/contacts/ContactsManager').then((module) => ({ default: module.ContactsManager })));
 const LocalizationManager = lazy(() => import('../modules/localization/LocalizationManager').then((module) => ({ default: module.LocalizationManager })));
 const DashboardOverview = lazy(() => import('../modules/dashboard/DashboardOverview').then((module) => ({ default: module.DashboardOverview })));
@@ -264,7 +269,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'content_blocks' ? (
             <ContentBlocksManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'media' ? (
-            <MediaManager />
+            <MediaManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'contacts' ? (
             <ContactsManager />
           ) : activeModule === 'localization' ? (
