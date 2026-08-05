@@ -127,7 +127,6 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
           { id: 'upcoming', label: 'Sắp chạy' },
           { id: 'pending', label: 'Chờ duyệt' },
           { id: 'conflicts', label: 'Có xung đột' },
-          { id: 'missing_translation', label: 'Thiếu bản dịch' },
           { id: 'ended', label: 'Đã kết thúc' },
         ].map((view) => (
           <button
@@ -162,7 +161,6 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
               <th className="p-3 min-w-[140px]">Thời gian hiệu lực</th>
               <th className="p-3 min-w-[140px]">Trạng thái lịch</th>
               <th className="p-3 min-w-[130px]">Quy trình duyệt</th>
-              <th className="p-3 min-w-[110px]">Bản dịch</th>
               <th className="p-3 min-w-[90px] text-center">Ưu tiên</th>
               <th className="p-3 min-w-[140px]">Cập nhật</th>
               <th className="p-3 w-28 text-right sticky right-0 bg-slate-50 dark:bg-slate-800">Thao tác</th>
@@ -267,27 +265,6 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
 
                     {/* Workflow Status */}
                     <td className="p-3">{renderWorkflowBadge(item.workflow_status)}</td>
-
-                    {/* Locale Status */}
-                    <td className="p-3">
-                      <div className="flex items-center gap-1">
-                        {Object.entries(item.locale_status).map(([lang, st]) => (
-                          <span
-                            key={lang}
-                            title={`${lang.toUpperCase()}: ${st}`}
-                            className={`w-6 h-5 rounded text-[10px] font-bold flex items-center justify-center uppercase ${
-                              st === 'complete'
-                                ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
-                                : st === 'in_progress'
-                                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-300 dark:border-slate-700'
-                            }`}
-                          >
-                            {lang}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
 
                     {/* Priority Order */}
                     <td className="p-3 text-center">

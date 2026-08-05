@@ -134,8 +134,6 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
       else if (savedView === 'upcoming') matchSavedView = item.effective_status === 'upcoming';
       else if (savedView === 'pending') matchSavedView = item.workflow_status === 'pending_review';
       else if (savedView === 'conflicts') matchSavedView = item.effective_status === 'conflict';
-      else if (savedView === 'missing_translation')
-        matchSavedView = Object.values(item.locale_status).includes('missing');
       else if (savedView === 'ended') matchSavedView = item.effective_status === 'ended';
 
       return matchSearch && matchPlacement && matchType && matchWorkflow && matchSavedView;

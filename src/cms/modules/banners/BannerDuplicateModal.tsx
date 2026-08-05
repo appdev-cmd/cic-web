@@ -17,7 +17,6 @@ export const BannerDuplicateModal: React.FC<BannerDuplicateModalProps> = ({
 }) => {
   const [resetSchedule, setResetSchedule] = useState(true);
   const [resetWorkflow, setResetWorkflow] = useState(true);
-  const [copyTranslations, setCopyTranslations] = useState(true);
   const [newTitle, setNewTitle] = useState('');
 
   React.useEffect(() => {
@@ -111,17 +110,6 @@ export const BannerDuplicateModal: React.FC<BannerDuplicateModalProps> = ({
               </span>
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={copyTranslations}
-                onChange={(e) => setCopyTranslations(e.target.checked)}
-                className="rounded border-slate-300 dark:border-slate-700 text-orange-600 focus:ring-orange-500"
-              />
-              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                Giữ nguyên tất cả dữ liệu bản dịch đa ngôn ngữ
-              </span>
-            </label>
           </div>
         </div>
 

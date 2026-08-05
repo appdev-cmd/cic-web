@@ -4,8 +4,6 @@ export type WorkflowStatus = 'draft' | 'pending_review' | 'approved' | 'publishe
 
 export type EffectiveStatus = 'upcoming' | 'running' | 'ended' | 'conflict';
 
-export type TranslationStatus = 'missing' | 'in_progress' | 'review' | 'complete' | 'outdated';
-
 export type AspectRatio = '21:9' | '16:9' | '4:3' | '1:1' | '3:4' | 'custom';
 
 export interface BreakpointVariant {
@@ -65,7 +63,6 @@ export interface BannerContent {
   timezone: string;   // e.g. 'Asia/Ho_Chi_Minh'
   display_order: number;
   priority_weight: number; // 1 to 10
-  locale_status: Record<string, TranslationStatus>; // { vi: 'complete', en: 'in_progress', ja: 'missing' }
   workflow_status: WorkflowStatus;
   effective_status: EffectiveStatus;
   live_version: string;
@@ -121,4 +118,4 @@ export interface BannerActivityLog {
 
 export type MainTabType = 'all' | 'schedule' | 'placements' | 'my_tasks' | 'pending_queue' | 'trash';
 
-export type SavedFilterView = 'all' | 'running' | 'upcoming' | 'pending' | 'conflicts' | 'missing_translation' | 'ended';
+export type SavedFilterView = 'all' | 'running' | 'upcoming' | 'pending' | 'conflicts' | 'ended';

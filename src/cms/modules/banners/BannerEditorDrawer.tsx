@@ -47,7 +47,7 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
   onSave,
   placements,
 }) => {
-  const [activeTabSection, setActiveTabSection] = useState<'general' | 'placement' | 'media' | 'content' | 'slides' | 'schedule' | 'locale' | 'publish'>('general');
+  const [activeTabSection, setActiveTabSection] = useState<'general' | 'placement' | 'media' | 'content' | 'slides' | 'schedule' | 'publish'>('general');
 
   // Form State
   const [formData, setFormData] = useState<Partial<BannerContent>>({});
@@ -88,7 +88,6 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
         timezone: 'Asia/Ho_Chi_Minh',
         display_order: 1,
         priority_weight: 5,
-        locale_status: { vi: 'complete', en: 'missing' },
         workflow_status: 'draft',
         effective_status: 'upcoming',
         live_version: 'v1.0.0',
@@ -217,8 +216,7 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
             { id: 'content', label: '4. Nội dung & Link' },
             ...(formData.type === 'slideshow' ? [{ id: 'slides', label: `5. Danh sách Slides (${slides.length})` }] : []),
             { id: 'schedule', label: '6. Lịch & Ưu tiên' },
-            { id: 'locale', label: '7. Bản dịch' },
-            { id: 'publish', label: '8. Workflow & Phiên bản' },
+            { id: 'publish', label: '7. Workflow & Phiên bản' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -614,46 +612,7 @@ export const BannerEditorDrawer: React.FC<BannerEditorDrawerProps> = ({
             </div>
           )}
 
-          {/* Section 7: Bản dịch */}
-          {activeTabSection === 'locale' && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Trạng thái đa ngôn ngữ (Multi-Locale)</h3>
-              <div className="space-y-3">
-                {[
-                  { lang: 'vi', label: 'Tiếng Việt (Gốc)' },
-                  { lang: 'en', label: 'English (Tiếng Anh)' },
-                  { lang: 'ja', label: 'Japanese (Tiếng Nhật)' },
-                ].map((l) => {
-                  const st = formData.locale_status?.[l.lang] || 'missing';
-                  return (
-                    <div
-                      key={l.lang}
-                      className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between"
-                    >
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{l.label}</span>
-                      <select
-                        value={st}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            locale_status: { ...formData.locale_status, [l.lang]: e.target.value as any },
-                          })
-                        }
-                        className="px-2.5 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
-                      >
-                        <option value="complete">Hoàn thành (Complete)</option>
-                        <option value="in_progress">Đang biên dịch (In Progress)</option>
-                        <option value="missing">Chưa có bản dịch (Missing)</option>
-                        <option value="outdated">Cần cập nhật lại (Outdated)</option>
-                      </select>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section 8: Workflow & Phiên bản */}
+          {/* Section 7: Workflow & Phiên bản */}
           {activeTabSection === 'publish' && (
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
