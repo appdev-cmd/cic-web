@@ -211,7 +211,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
   return (
     <div className="space-y-5 relative">
       {/* ================= STICKY TOP WORKFLOW BAR ================= */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
+      <div className="cms-sticky-action bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             type="button"

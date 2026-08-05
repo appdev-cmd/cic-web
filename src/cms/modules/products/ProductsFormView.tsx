@@ -236,7 +236,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-200">
       {/* 1. STICKY TOP ACTION BAR */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="cms-sticky-action bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             onClick={onCancel}
@@ -1152,7 +1152,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
         {/* RIGHT COLUMN: COMPLETENESS SCORE & CONTEXT SIDEBAR */}
         <div className="lg:col-span-4 space-y-5">
           {/* Completeness Checklist Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4 sticky top-24">
+          <div className="cms-sticky-aside bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">
                 Chất lượng Dữ liệu (Completeness)

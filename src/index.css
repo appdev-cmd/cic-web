@@ -46,6 +46,31 @@ body {
   text-wrap: pretty;
 }
 
+.cms-shell {
+  --cms-header-height: 3.75rem;
+  --cms-sticky-gap: 0.75rem;
+  scroll-padding-top: calc(var(--cms-header-height) + var(--cms-sticky-gap));
+}
+
+.cms-sticky-action {
+  position: sticky;
+  top: calc(var(--cms-header-height) + var(--cms-sticky-gap));
+  z-index: 30;
+}
+
+@media (max-width: 767px) {
+  .cms-sticky-action {
+    position: static;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cms-sticky-aside {
+    position: sticky;
+    top: calc(var(--cms-header-height) + 6.5rem);
+  }
+}
+
 /* Custom background patterns for high-tech feel */
 .bg-tech-grid {
   background-image: radial-gradient(circle at 1px 1px, rgba(234, 88, 12, 0.1) 1px, transparent 0);

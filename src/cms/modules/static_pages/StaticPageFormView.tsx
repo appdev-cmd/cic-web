@@ -240,7 +240,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Sticky Top Bar & Action Bar */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4 sticky top-4 z-20">
+      <div className="cms-sticky-action bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 shadow-md space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -343,9 +343,10 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             </button>
           </div>
         </div>
+      </div>
 
-        {/* 7-Group Sub-Tabs Navigator */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-t border-slate-100 dark:border-slate-800 pt-3 text-xs font-bold scrollbar-none">
+      {/* Section navigation remains in document flow so it never covers form content. */}
+        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 text-xs font-bold shadow-xs dark:border-slate-800 dark:bg-slate-900 [scrollbar-width:thin]">
           <button
             type="button"
             onClick={() => setActiveTab('content')}
@@ -418,7 +419,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             <UserCheck className="w-4 h-4" /> 6. Quy trình & Duyệt
           </button>
         </div>
-      </div>
 
       {/* Main 2-Column Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

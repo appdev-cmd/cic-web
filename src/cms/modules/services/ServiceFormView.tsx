@@ -171,7 +171,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
       )}
 
       {/* Sticky Header Actions */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs sticky top-16 z-30 flex flex-wrap items-center justify-between gap-4">
+      <div className="cms-sticky-action bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -316,7 +316,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Sticky Navigation Menu */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 space-y-1 sticky top-36">
+          <div className="cms-sticky-aside bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 space-y-1">
             <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Cấu trúc Form 8 nhóm
             </div>
