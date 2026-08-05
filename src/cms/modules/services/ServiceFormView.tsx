@@ -11,7 +11,6 @@ import {
   Image as ImageIcon,
   PhoneCall,
   Search,
-  Languages,
   Clock,
   History,
   GitCommit,
@@ -30,7 +29,6 @@ import {
   ServiceGroup,
   EditorialStatus,
   ServiceStatus,
-  TranslationStatus,
   ServiceActivityLog,
   ServiceVersion,
   ServiceUsedByReference,
@@ -159,8 +157,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     { id: 'section_media', title: '4. Hình ảnh & Video', icon: ImageIcon },
     { id: 'section_conversion', title: '5. Liên hệ & Chuyển đổi', icon: PhoneCall },
     { id: 'section_seo', title: '6. SEO & Chia sẻ Meta', icon: Search },
-    { id: 'section_translation', title: '7. Cấu hình Bản dịch', icon: Languages },
-    { id: 'section_publishing', title: '8. Xuất bản & Hiển thị', icon: Globe },
+    { id: 'section_publishing', title: '7. Xuất bản & Hiển thị', icon: Globe },
   ];
 
   return (
@@ -756,63 +753,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             </div>
           </div>
 
-          {/* SECTION 7: BẢN DỊCH */}
-          <div
-            id="section_translation"
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4"
-          >
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
-              <Languages className="w-5 h-5 text-orange-600" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                7. Tiến độ & Trạng thái Bản dịch Đa ngôn ngữ
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { code: 'vi', label: 'Tiếng Việt (Gốc)', status: formData.locales?.vi || 'complete' },
-                { code: 'en', label: 'Tiếng Anh (English)', status: formData.locales?.en || 'missing' },
-                { code: 'ja', label: 'Tiếng Nhật (Japanese)', status: formData.locales?.ja || 'missing' },
-              ].map((loc) => (
-                <div
-                  key={loc.code}
-                  className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between"
-                >
-                  <div>
-                    <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">
-                      {loc.label}
-                    </div>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider ${
-                        loc.status === 'complete'
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : loc.status === 'outdated'
-                          ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-rose-500 dark:text-rose-400'
-                      }`}
-                    >
-                      {loc.status}
-                    </span>
-                  </div>
-
-                  <select
-                    value={loc.status}
-                    onChange={(e) => {
-                      const newLocales = { ...formData.locales, [loc.code]: e.target.value };
-                      handleChange('locales', newLocales);
-                    }}
-                    className="text-xs px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-                  >
-                    <option value="complete">Complete</option>
-                    <option value="outdated">Outdated</option>
-                    <option value="missing">Missing</option>
-                  </select>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* SECTION 8: XUẤT BẢN & HIỂN THỊ */}
+          {/* SECTION 7: XUẤT BẢN & HIỂN THỊ */}
           <div
             id="section_publishing"
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4"
@@ -820,7 +761,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Globe className="w-5 h-5 text-orange-600" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                8. Trạng thái Xuất bản & Vị trí Hiển thị
+                7. Trạng thái Xuất bản & Vị trí Hiển thị
               </h3>
             </div>
 

@@ -5,8 +5,6 @@
 
 export type EditorialStatus = 'draft' | 'pending' | 'approved' | 'published';
 export type ServiceStatus = 'active' | 'inactive' | 'archived';
-export type TranslationStatus = 'complete' | 'outdated' | 'missing';
-
 export interface ServiceGroup {
   id: string;
   name: string;
@@ -56,13 +54,6 @@ export interface ServiceItem {
   og_image: string;
   quality_warning?: string; // Cảnh báo chất lượng
   quality_score: number; // 0 - 100
-
-  // Bản dịch
-  locales: {
-    vi: TranslationStatus;
-    en: TranslationStatus;
-    ja?: TranslationStatus;
-  };
 
   // Xuất bản & Hiển thị
   editorial_status: EditorialStatus;

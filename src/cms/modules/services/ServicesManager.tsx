@@ -101,9 +101,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       setFilterServiceStatus('active');
     } else if (viewKey === 'view_pending') {
       setFilterEditorialStatus('pending');
-    } else if (viewKey === 'view_missing_translation') {
-      setFilterEditorialStatus('all');
-      setFilterServiceStatus('all');
     } else if (viewKey === 'view_unlinked') {
       setFilterGroupId('all');
     } else {
@@ -220,7 +217,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       quality_score: 75,
       editorial_status: 'draft',
       service_status: 'inactive',
-      locales: { vi: 'complete', en: 'missing' },
       site: 'cic.com.vn',
       placement: ['services_page'],
       display_order: services.length + 1,
@@ -421,7 +417,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             <option value="all">Saved View: Mặc định</option>
             <option value="view_active">Saved View: Dịch vụ Active</option>
             <option value="view_pending">Saved View: Chờ review</option>
-            <option value="view_missing_translation">Saved View: Thiếu bản dịch</option>
           </select>
         </div>
 
@@ -495,7 +490,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                 </th>
                 <th className="p-3 min-w-[160px]">Nhóm dịch vụ</th>
                 <th className="p-3 min-w-[140px]">Người phụ trách</th>
-                <th className="p-3 min-w-[120px]">Bản dịch</th>
                 <th className="p-3 min-w-[130px]">Editorial Status</th>
                 <th className="p-3 min-w-[130px]">Service Status</th>
                 <th className="p-3 min-w-[150px]">Vị trí hiển thị</th>
@@ -583,41 +577,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                           />
                           <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
                             {item.owner_name}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Translations Progress */}
-                      <td className="p-3">
-                        <div className="flex items-center gap-1 text-[10px] font-bold">
-                          <span
-                            className={`px-1.5 py-0.5 rounded ${
-                              item.locales?.vi === 'complete'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-slate-100 text-slate-400'
-                            }`}
-                          >
-                            VI
-                          </span>
-                          <span
-                            className={`px-1.5 py-0.5 rounded ${
-                              item.locales?.en === 'complete'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : item.locales?.en === 'outdated'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-slate-100 text-slate-400'
-                            }`}
-                          >
-                            EN
-                          </span>
-                          <span
-                            className={`px-1.5 py-0.5 rounded ${
-                              item.locales?.ja === 'complete'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-slate-100 text-slate-400'
-                            }`}
-                          >
-                            JA
                           </span>
                         </div>
                       </td>
