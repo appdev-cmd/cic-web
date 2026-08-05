@@ -418,3 +418,5 @@ Không có mẫu nào được Activate chỉ vì đã được seed vào CMS.
 7. Năm event nào cần thông báo nội bộ và mức ưu tiên tương ứng.
 
 Các quyết định này ảnh hưởng việc Activate hoặc tạo biến thể tiếp theo, nhưng không làm thay đổi baseline acknowledgement an toàn đã thiết kế.
+
+Thứ tự review, đối chiếu legacy, QA, rollout và rollback của các mẫu này được quy định tại `docs/email-template-rollout-readiness-plan.md`.

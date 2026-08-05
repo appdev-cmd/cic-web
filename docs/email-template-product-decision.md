@@ -65,6 +65,7 @@ Gửi email thành công hoặc thất bại không tự động thay đổi own
 - Ma trận sự kiện–người nhận–template–routing được quản lý tại `docs/email-event-template-routing-matrix.md` và phải được xác nhận trước khi triển khai tích hợp.
 - Danh mục token, phạm vi sử dụng và quy tắc dữ liệu thiếu được quản lý tại `docs/email-template-variable-catalog.md`.
 - Nội dung baseline cho các mẫu khách hàng và nội bộ VI/EN được quản lý tại `docs/email-template-baseline-library.md`; seed không đồng nghĩa với Activate.
+- Kế hoạch đối chiếu 13 mẫu cũ, QA, rollout theo event và rollback được quản lý tại `docs/email-template-rollout-readiness-plan.md`.
 
 ## 7. Ngoài phạm vi quyết định này
 
@@ -80,4 +81,4 @@ Gửi email thành công hoặc thất bại không tự động thay đổi own
 - Ma trận sự kiện–template được chốt.
 - Danh sách biến của từng loại template được xác nhận.
 - Quyền xem, sửa, duyệt, kích hoạt và lưu trữ được xác nhận.
-- Kế hoạch đối chiếu 13 mẫu cũ và consumer hiện tại được hoàn thành.
+- Kế hoạch đối chiếu 13 mẫu cũ và consumer hiện tại được lập tại `docs/email-template-rollout-readiness-plan.md`; worksheet thực tế phải hoàn thành 13/13 trước Go-Live.
