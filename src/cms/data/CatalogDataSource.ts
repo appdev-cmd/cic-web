@@ -26,11 +26,14 @@ export interface ProductsModuleData {
   currentUserId?: string;
 }
 
-export interface ProductSettingsModuleData {
+export interface ProductTaxonomyModuleData {
   categories: MasterCategoryItem[];
   brands: MasterBrandItem[];
   applications: MasterApplicationItem[];
   productTypes: MasterProductTypeItem[];
+}
+
+export interface ProductSettingsGlobalData {
   salesStaff: MasterSalesStaffItem[];
   routingRules: MasterRoutingRuleItem[];
   activityLogs: MasterDataActivityLog[];
@@ -39,5 +42,6 @@ export interface ProductSettingsModuleData {
 
 export interface CatalogDataSource {
   productsByLocale: Partial<Record<CmsLocale, ProductsModuleData>>;
-  productSettingsByLocale: Partial<Record<CmsLocale, ProductSettingsModuleData>>;
+  productTaxonomyByLocale: Partial<Record<CmsLocale, ProductTaxonomyModuleData>>;
+  productSettingsGlobal: ProductSettingsGlobalData;
 }

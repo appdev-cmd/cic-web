@@ -22,13 +22,11 @@ export const demoPresentationDataSource: PresentationDataSource = {
       versions: mockVersions,
     },
   },
-  contentBlocksByLocale: {
-    vi: {
-      blocks: INITIAL_BLOCKS,
-      placements: MOCK_PLACEMENTS,
-      pageTree: MOCK_PAGE_TREE,
-      issues: MOCK_ISSUES,
-      versions: MOCK_VERSIONS,
-    },
+  contentBlocksUnscoped: {
+    blocks: INITIAL_BLOCKS,
+    placements: MOCK_PLACEMENTS,
+    pageTree: MOCK_PAGE_TREE,
+    issues: MOCK_ISSUES,
+    versions: MOCK_VERSIONS,
   },
 };

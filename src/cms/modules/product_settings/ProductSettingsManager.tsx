@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   FolderTree,
   Building2,
@@ -52,8 +52,7 @@ import {
   MasterRoutingRuleItem,
   MasterDataActivityLog,
 } from './types';
-import type { CmsLocale } from '../../data/CmsDataSource';
-import type { ProductSettingsModuleData } from '../../data/CatalogDataSource';
+import type { ProductSettingsGlobalData, ProductTaxonomyModuleData } from '../../data/CatalogDataSource';
 
 import { UsageImpactDrawer } from './UsageImpactDrawer';
 import { RoutingSimulatorModal } from './RoutingSimulatorModal';
@@ -64,19 +63,26 @@ import { MasterDataFormDrawer } from './MasterDataFormDrawer';
 type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
 
 interface ProductSettingsManagerProps {
-  workspaceLocale: CmsLocale;
-  data?: ProductSettingsModuleData;
+  taxonomy?: ProductTaxonomyModuleData;
+  globalData: ProductSettingsGlobalData;
 }
 
-export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ workspaceLocale, data }) => {
+export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ taxonomy, globalData }) => {
   // Master Datasets State
-  const [categories, setCategories] = useState<MasterCategoryItem[]>(data?.categories ?? []);
-  const [brands, setBrands] = useState<MasterBrandItem[]>(data?.brands ?? []);
-  const [applications, setApplications] = useState<MasterApplicationItem[]>(data?.applications ?? []);
-  const [productTypes, setProductTypes] = useState<MasterProductTypeItem[]>(data?.productTypes ?? []);
-  const [salesStaff, setSalesStaff] = useState<MasterSalesStaffItem[]>(data?.salesStaff ?? []);
-  const [routingRules, setRoutingRules] = useState<MasterRoutingRuleItem[]>(data?.routingRules ?? []);
-  const [activityLogs] = useState<MasterDataActivityLog[]>(data?.activityLogs ?? []);
+  const [categories, setCategories] = useState<MasterCategoryItem[]>(taxonomy?.categories ?? []);
+  const [brands, setBrands] = useState<MasterBrandItem[]>(taxonomy?.brands ?? []);
+  const [applications, setApplications] = useState<MasterApplicationItem[]>(taxonomy?.applications ?? []);
+  const [productTypes, setProductTypes] = useState<MasterProductTypeItem[]>(taxonomy?.productTypes ?? []);
+  const [salesStaff, setSalesStaff] = useState<MasterSalesStaffItem[]>(globalData.salesStaff);
+  const [routingRules, setRoutingRules] = useState<MasterRoutingRuleItem[]>(globalData.routingRules);
+  const [activityLogs] = useState<MasterDataActivityLog[]>(globalData.activityLogs);
+
+  useEffect(() => {
+    setCategories(taxonomy?.categories ?? []);
+    setBrands(taxonomy?.brands ?? []);
+    setApplications(taxonomy?.applications ?? []);
+    setProductTypes(taxonomy?.productTypes ?? []);
+  }, [taxonomy]);
 
   // Navigation State
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('taxonomy');
@@ -268,7 +274,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Thiết lập danh mục sản phẩm · {workspaceLocale.toUpperCase()}
+                Thiết lập danh mục sản phẩm
               </h1>
               <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
                 Master Data Workspace
@@ -872,7 +878,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       <UsageImpactDrawer
         isOpen={!!impactDrawerItem}
         item={impactDrawerItem}
-        records={data?.usageImpactRecords ?? []}
+        records={globalData.usageImpactRecords}
         onClose={() => setImpactDrawerItem(null)}
       />
 

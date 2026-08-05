@@ -28,10 +28,10 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - Demo adapter nội dung hiện chỉ khai báo VI. Khi chuyển sang EN, bốn module hiển thị danh sách rỗng và không dùng nội dung, lookup hoặc owner của VI.
 - Event Form nhận related events/articles/products từ cùng dataset locale; không import chéo fixture News.
 - Adapter demo nội dung được tải cùng lazy boundary của module, không nằm trong entry bundle của CMS.
-- `CatalogDataSource` tách Products và Product Settings theo workspace locale, bao gồm sản phẩm, taxonomy, owner, routing, impact và audit liên quan.
-- Demo catalog chỉ có VI. Workspace EN không sử dụng sản phẩm hoặc master data VI; các component con nhận dữ liệu từ manager thay vì tự import fixture.
-- `PresentationDataSource` tách Menu, Banners và Content Blocks theo workspace locale, bao gồm placement, page tree, conflict, version và audit liên quan.
-- Demo presentation chỉ có VI; editor/drawer nhận dữ liệu qua props và xử lý an toàn khi workspace EN chưa có placement hoặc page tree.
+- `CatalogDataSource` tách Products và taxonomy sản phẩm theo workspace locale. Staff, routing, impact và audit của Product Settings nằm trong `productSettingsGlobal` và không đổi theo workspace.
+- Khi đổi workspace trong Product Settings, chỉ category/brand/application/product type được nạp lại; state staff/routing không remount.
+- `PresentationDataSource` tách Menu và Banners theo workspace locale. Content Blocks dùng `contentBlocksUnscoped` cho tới khi xác định được bảng lưu thật.
+- Content Blocks không phản ứng với workspace switch và không hiển thị locale trong tiêu đề.
 - `MediaDataSource.mediaByLocale` cung cấp record album/ảnh độc lập theo workspace, khớp các cặp `cic_image*` và `cic_image_images*`. File storage có thể tái sử dụng nhưng không thay thế dataset nghiệp vụ.
 - `ContactsDataSource.contactsByLocale` cung cấp hai hàng đợi độc lập, khớp `cic_contact` và `cic_contact_en`. Staff/current user là dữ liệu global dùng chung cho việc phân công.
 - `source_locale` có thể được giữ cho audit/import nhưng không được dùng để mô phỏng hai bảng bằng một hàng đợi global.

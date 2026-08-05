@@ -70,8 +70,8 @@ const ProductSettingsManager = lazy(async () => {
   return {
     default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
       <module.ProductSettingsManager
-        workspaceLocale={workspaceLocale}
-        data={dataModule.demoCatalogDataSource.productSettingsByLocale[workspaceLocale]}
+        taxonomy={dataModule.demoCatalogDataSource.productTaxonomyByLocale[workspaceLocale]}
+        globalData={dataModule.demoCatalogDataSource.productSettingsGlobal}
       />
     ),
   };
@@ -114,8 +114,8 @@ const MenuManager = lazy(async () => {
 });
 const ContentBlocksManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/content_blocks/ContentBlocksManager'), import('../data/demoPresentationDataSource')]);
-  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-    <module.ContentBlocksManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.contentBlocksByLocale[workspaceLocale]} />
+  return { default: () => (
+    <module.ContentBlocksManager data={dataModule.demoPresentationDataSource.contentBlocksUnscoped} />
   ) };
 });
 const MediaManager = lazy(async () => {
@@ -273,7 +273,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'banners' ? (
             <BannersManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'product_settings' ? (
-            <ProductSettingsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
+            <ProductSettingsManager workspaceLocale={workspaceLocale} />
           ) : activeModule === 'products' ? (
             <ProductsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'services' ? (
@@ -281,7 +281,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'menu' ? (
             <MenuManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'content_blocks' ? (
-            <ContentBlocksManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
+            <ContentBlocksManager />
           ) : activeModule === 'media' ? (
             <MediaManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'contacts' ? (

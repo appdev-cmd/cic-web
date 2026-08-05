@@ -15,8 +15,8 @@
 | Nhóm | Fixture hiện tại | Hướng cô lập |
 |---|---|---|
 | App shell | `data/mockCmsData.ts` | Tách current user, navigation, notification và Dashboard data thành các data provider riêng |
-| Nội dung | News, Static Pages, Events, Services, Content Blocks | Adapter theo locale workspace; VI/EN là dataset độc lập |
-| Catalog | Products, Product Settings | Adapter theo locale và taxonomy policy; không mặc định dùng chung record |
+| Nội dung | News, Static Pages, Events, Services | Adapter theo locale workspace; VI/EN là dataset độc lập |
+| Catalog | Products, Product Settings | Product/taxonomy theo locale; staff/routing của Product Settings dùng chung |
 | Presentation | Menu, Banners | Adapter theo site + locale; Draft/Live độc lập từng locale |
 | Media | Media mock | Record album/ảnh theo locale; lớp file storage có thể dùng chung |
 | Customer operations | Contacts | Hàng đợi VI/EN độc lập; staff và current user dùng chung |
@@ -51,10 +51,10 @@
 - `src/cms/data/EditorialContentDataSource.ts`: contract theo locale cho News, Static Pages, Services và Events.
 - `src/cms/data/demoEditorialContentDataSource.ts`: gom fixture nội dung vào demo adapter; chỉ có VI để kiểm chứng không fallback sang VI khi workspace là EN.
 - News, Static Pages, Services và Events không còn import fixture trực tiếp trong manager/form; demo adapter chỉ được tải trong lazy boundary của từng module.
-- `src/cms/data/CatalogDataSource.ts`: contract theo locale cho Products và Product Settings.
-- `src/cms/data/demoCatalogDataSource.ts`: gom fixture catalog/master data vào adapter VI; Products, Product Settings và Usage Impact không còn import fixture trực tiếp.
-- `src/cms/data/PresentationDataSource.ts`: contract theo locale cho Menu, Banners và Content Blocks.
-- `src/cms/data/demoPresentationDataSource.ts`: gom fixture presentation vào adapter VI; manager và drawer con không còn import fixture trực tiếp.
+- `src/cms/data/CatalogDataSource.ts`: Products/taxonomy theo locale; staff/routing/impact/audit là global.
+- `src/cms/data/demoCatalogDataSource.ts`: demo taxonomy VI và governance sản phẩm dùng chung.
+- `src/cms/data/PresentationDataSource.ts`: Menu/Banners theo locale; Content Blocks ở trạng thái unscoped.
+- `src/cms/data/demoPresentationDataSource.ts`: demo presentation theo contract trên; manager và drawer con không import fixture trực tiếp.
 - `src/cms/data/MediaDataSource.ts`: contract record album/ảnh độc lập theo workspace locale.
 - `src/cms/data/demoMediaDataSource.ts`: adapter demo theo locale; Media manager không còn import fixture trực tiếp.
 - `src/cms/data/ContactsDataSource.ts`: contract hàng đợi độc lập theo workspace; staff/current user là global.

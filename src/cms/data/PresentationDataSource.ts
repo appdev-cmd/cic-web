@@ -30,5 +30,5 @@ export interface ContentBlocksModuleData {
 export interface PresentationDataSource {
   menuByLocale: Partial<Record<CmsLocale, MenuModuleData>>;
   bannersByLocale: Partial<Record<CmsLocale, BannersModuleData>>;
-  contentBlocksByLocale: Partial<Record<CmsLocale, ContentBlocksModuleData>>;
+  contentBlocksUnscoped: ContentBlocksModuleData;
 }

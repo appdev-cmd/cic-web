@@ -24,7 +24,6 @@ import {
   Languages,
 } from 'lucide-react';
 import { BlockItem, MainTabType, SavedFilterView, ScopeRule, BlockVersion, ConflictIssue } from './types';
-import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ContentBlocksModuleData } from '../../data/PresentationDataSource';
 import { ContentBlocksListView } from './ContentBlocksListView';
 import { ContentBlocksPlacementView } from './ContentBlocksPlacementView';
@@ -36,12 +35,12 @@ import { ConflictGuardModal } from './ConflictGuardModal';
 import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { DuplicateModal } from './DuplicateModal';
 
-interface ContentBlocksManagerProps { workspaceLocale: CmsLocale; data?: ContentBlocksModuleData; }
+interface ContentBlocksManagerProps { data: ContentBlocksModuleData; }
 
-export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ workspaceLocale, data }) => {
+export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data }) => {
   // State
-  const [blocks, setBlocks] = useState<BlockItem[]>(data?.blocks ?? []);
-  const [issues, setIssues] = useState<ConflictIssue[]>(data?.issues ?? []);
+  const [blocks, setBlocks] = useState<BlockItem[]>(data.blocks);
+  const [issues, setIssues] = useState<ConflictIssue[]>(data.issues);
   const [activeTab, setActiveTab] = useState<MainTabType>('all');
   const [viewMode, setViewMode] = useState<'list' | 'placement'>('list');
   const [savedFilter, setSavedFilter] = useState<SavedFilterView>('all');
@@ -126,7 +125,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
   };
 
   const handleCreateBlockInPlacement = (plcId: string) => {
-    const targetPlc = data?.placements.find((placement) => placement.id === plcId);
+    const targetPlc = data.placements.find((placement) => placement.id === plcId);
     setEditingBlock({
       id: `blk_${Date.now()}`,
       title: 'Khối mới tại vị trí',
@@ -306,7 +305,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Quản Lý Khối Nội Dung (Content Blocks) · {workspaceLocale.toUpperCase()}
+              Quản lý khối nội dung
             </h1>
             <span className="text-xs font-bold uppercase bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 px-2.5 py-0.5 rounded-full border border-orange-200 dark:border-orange-900">
               KHỐI NỘI DUNG
@@ -342,7 +341,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
         <div className="flex items-center gap-1">
           {[
             { id: 'all', label: 'Tất cả khối', count: blocks.filter((b) => !b.deleted_at).length },
-            { id: 'placement_view', label: 'Phân loại theo vị trí', count: data?.placements.length ?? 0 },
+            { id: 'placement_view', label: 'Phân loại theo vị trí', count: data.placements.length },
             { id: 'my_tasks', label: 'Việc của tôi', count: blocks.filter((b) => !b.deleted_at && b.owner_name === 'Nguyễn Văn Minh').length },
             { id: 'pending_queue', label: 'Hàng chờ duyệt', count: blocks.filter((b) => !b.deleted_at && b.workflow_status === 'pending_review').length },
             { id: 'issues', label: 'Cần khắc phục', count: issues.length },
@@ -486,7 +485,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
         />
       ) : (
         <ContentBlocksPlacementView
-          placements={data?.placements ?? []}
+          placements={data.placements}
           blocks={filteredBlocks}
           onEditBlock={handleEditBlock}
           onOpenPreview={(b) => {
@@ -502,7 +501,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
         isOpen={isEditorOpen}
         onClose={() => setIsEditorOpen(false)}
         block={editingBlock}
-        placements={data?.placements ?? []}
+        placements={data.placements}
         onSave={handleSaveBlock}
         onOpenScopePicker={(scope, saveCb) => {
           setActiveScope(scope);
@@ -519,7 +518,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
         isOpen={isScopePickerOpen}
         onClose={() => setIsScopePickerOpen(false)}
         scope={activeScope || { site_id: 'main_site', apply_all_pages: false, included_pages: [], excluded_pages: [] }}
-        pageTree={data?.pageTree ?? []}
+        pageTree={data.pageTree}
         onSaveScope={(newScope) => {
           if (scopeSaveCallback) scopeSaveCallback(newScope);
         }}
@@ -555,7 +554,7 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ work
         isOpen={isVersionHistoryOpen}
         onClose={() => setIsVersionHistoryOpen(false)}
         block={versionHistoryBlock}
-        versions={data?.versions ?? []}
+        versions={data.versions}
         onRollback={handleRollbackVersion}
       />
 

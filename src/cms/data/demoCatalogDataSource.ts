@@ -28,16 +28,18 @@ export const demoCatalogDataSource: CatalogDataSource = {
       currentUserId: 'usr_002',
     },
   },
-  productSettingsByLocale: {
+  productTaxonomyByLocale: {
     vi: {
       categories: mockMasterCategories,
       brands: mockMasterBrands,
       applications: mockMasterApplications,
       productTypes: mockMasterProductTypes,
-      salesStaff: mockMasterSalesStaff,
-      routingRules: mockMasterRoutingRules,
-      activityLogs: mockMasterActivityLogs,
-      usageImpactRecords: mockUsageImpactRecords,
     },
+  },
+  productSettingsGlobal: {
+    salesStaff: mockMasterSalesStaff,
+    routingRules: mockMasterRoutingRules,
+    activityLogs: mockMasterActivityLogs,
+    usageImpactRecords: mockUsageImpactRecords,
   },
 };
