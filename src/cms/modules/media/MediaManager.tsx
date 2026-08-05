@@ -107,7 +107,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
 
     // Saved View Pills
     if (savedFilter === 'my_uploads' && ast.owner_name !== data?.currentUserName) return false;
-    if (savedFilter === 'missing_alt' && !Object.values(ast.alt_text).some((v) => !String(v || '').trim())) return false;
+    if (savedFilter === 'missing_alt' && ast.alt_text.trim()) return false;
     if (savedFilter === 'unused' && ast.used_by_count > 0) return false;
     if (savedFilter === 'issues' && !issues.some((i) => i.asset_id === ast.id)) return false;
 
@@ -165,7 +165,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
       file_size_kb: item.file_size_kb,
       width: 1920,
       height: 1080,
-      alt_text: { vi: item.title || item.file_name, en: '', ja: '' },
+      alt_text: item.title || item.file_name,
       folder_id: 'f_products',
       folder_name: 'Sản phẩm & Vật liệu',
       album_ids: [],

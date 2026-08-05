@@ -79,9 +79,9 @@ export interface MediaAsset {
   height?: number;
   duration_sec?: number; // for video
   
-  // Accessibility & Localization
-  alt_text: { vi: string; en: string; ja: string };
-  caption?: { vi: string; en: string };
+  // Nội dung mô tả thuộc workspace hiện tại
+  alt_text: string;
+  caption?: string;
 
   // Rights & License
   credit_author?: string;

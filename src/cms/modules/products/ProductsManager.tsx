@@ -289,7 +289,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Quản lý danh mục sản phẩm · {workspaceLocale.toUpperCase()}
+                Quản lý sản phẩm
               </h1>
               <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
                 {products.filter((product) => product.editorial_status !== 'archived').length} Sản phẩm

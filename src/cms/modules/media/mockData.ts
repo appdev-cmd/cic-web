@@ -1,5 +1,10 @@
 import { MediaAsset, MediaAlbum, MediaFolder, MediaIssue } from './types';
 
+export type DemoMediaAsset = Omit<MediaAsset, 'alt_text' | 'caption'> & {
+  alt_text: { vi: string; en: string; ja: string };
+  caption?: { vi: string; en: string };
+};
+
 export const MOCK_FOLDERS: MediaFolder[] = [
   { id: 'f_all', name: 'Tất cả thư mục', code_alias: 'root', icon: 'Folder', count: 48 },
   { id: 'f_products', name: 'Sản phẩm & Vật liệu', code_alias: 'products', icon: 'Package', count: 18 },
@@ -222,7 +227,7 @@ export const MOCK_ALBUMS: MediaAlbum[] = [
   },
 ];
 
-export const INITIAL_ASSETS: MediaAsset[] = [
+export const INITIAL_ASSETS: DemoMediaAsset[] = [
   {
     id: 'ast_01',
     filename: 'du-an-cau-nhat-tan-cic-admixtures.jpg',

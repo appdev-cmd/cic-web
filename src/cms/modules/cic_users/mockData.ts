@@ -32,7 +32,7 @@ export const rolesMock: RoleOption[] = [
   {
     id: 'role_translator',
     name: 'Localization Translator',
-    description: 'Dịch chuỗi giao diện và nội dung đa ngôn ngữ',
+    description: 'Biên soạn và duyệt chuỗi giao diện website',
     permissions_count: 12,
     badge_color: 'bg-teal-100 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300 border-teal-200 dark:border-teal-800',
   },
@@ -278,7 +278,7 @@ export const cicUsersMock: CicUser[] = [
     phone: '0977 444 333',
     country: 'Việt Nam',
     address: '37 Lê Thanh Nghị, Hai Bà Trưng, Hà Nội',
-    summary: 'Chuyên viên bản địa hóa nội dung đa ngôn ngữ (Việt - Anh).',
+    summary: 'Chuyên viên biên soạn chuỗi giao diện website.',
     avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
     published: true,
     status: 'pending_invite',

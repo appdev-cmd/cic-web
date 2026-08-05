@@ -327,14 +327,14 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                   <Newspaper className="w-5 h-5" />
                 </div>
                 <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-                  Quản lý bài viết và tin tức · {workspaceLocale.toUpperCase()}
+                  Quản lý bài viết và tin tức
                 </h1>
                 <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
                   {articles.filter((article) => !article.in_trash).length} tin bài
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Tạo, biên tập, dịch đa ngôn ngữ, duyệt phân quyền, lên lịch xuất bản và lưu trữ bài viết công khai CIC.
+                Tạo, biên tập, duyệt, lên lịch xuất bản và lưu trữ bài viết công khai CIC.
               </p>
             </div>
 

@@ -134,7 +134,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Dashboard · {workspaceLocale === 'vi' ? 'Tiếng Việt' : 'English'}
+              Tổng quan
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Màn hình trung tâm tổng hợp thông số vận hành, yêu cầu xử lý và lịch sử hoạt động CIC Technology
@@ -182,7 +182,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
             <Globe className="h-3.5 w-3.5" />
-            <span>Vùng dữ liệu: {workspaceLocale.toUpperCase()}</span>
           </div>
         </div>
 
@@ -213,7 +212,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     Thao tác nhanh hệ thống
                   </h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                    [{workspaceLocale.toUpperCase()}]
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-400 hidden sm:inline">Phím tắt: Ctrl + K để mở Command Palette</span>

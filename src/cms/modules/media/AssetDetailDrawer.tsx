@@ -254,59 +254,13 @@ export const AssetDetailDrawer: React.FC<AssetDetailDrawerProps> = ({
                   <span className="text-[10px] text-slate-400">WCAG 2.2 AA Standard</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Tiếng Việt (VI) *
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAsset.alt_text.vi}
-                      onChange={(e) =>
-                        setEditedAsset({
-                          ...editedAsset,
-                          alt_text: { ...editedAsset.alt_text, vi: e.target.value },
-                        })
-                      }
-                      className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      English (EN)
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAsset.alt_text.en}
-                      onChange={(e) =>
-                        setEditedAsset({
-                          ...editedAsset,
-                          alt_text: { ...editedAsset.alt_text, en: e.target.value },
-                        })
-                      }
-                      className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      日本語 (JA)
-                    </label>
-                    <input
-                      type="text"
-                      value={editedAsset.alt_text.ja}
-                      onChange={(e) =>
-                        setEditedAsset({
-                          ...editedAsset,
-                          alt_text: { ...editedAsset.alt_text, ja: e.target.value },
-                        })
-                      }
-                      placeholder="Thiếu bản dịch..."
-                      className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
+                <input
+                  type="text"
+                  value={editedAsset.alt_text}
+                  onChange={(e) => setEditedAsset({ ...editedAsset, alt_text: e.target.value })}
+                  placeholder="Mô tả ngắn nội dung hình ảnh"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                />
               </div>
 
               {/* License & Rights */}

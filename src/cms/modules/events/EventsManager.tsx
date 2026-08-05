@@ -423,7 +423,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               <CalendarDays className="w-5 h-5" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Quản lý Sự kiện & Hội thảo · {workspaceLocale.toUpperCase()}
+              Quản lý sự kiện và hội thảo
             </h1>
             <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
               {events.length} sự kiện
