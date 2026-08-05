@@ -24,6 +24,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { CmsRole, RoleRiskLevel, RoleStatus, RoleCategory } from './types';
+import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface RolesOverviewTabProps {
   roles: CmsRole[];
@@ -311,41 +312,42 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                     <td className="p-3 text-right pr-5 whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1">
                         {/* Edit Draft */}
-                        <button
+                        <CmsIconButton
                           onClick={() => onOpenEdit(role)}
-                          className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
+                          icon={<Edit />}
+                          size="sm"
+                          aria-label="Sửa vai trò"
                           title="Sửa bản nháp & Ma trận quyền"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                        />
 
                         {/* Clone Role */}
-                        <button
+                        <CmsIconButton
                           onClick={() => onCloneRole(role)}
-                          className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors cursor-pointer"
-                          title="Nhân bản role (Clone template)"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
+                          icon={<Copy />}
+                          size="sm"
+                          aria-label="Nhân bản vai trò"
+                          title="Nhân bản vai trò"
+                        />
 
                         {/* Review Access */}
-                        <button
+                        <CmsIconButton
                           onClick={() => onSelectRoleForReview(role)}
-                          className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
-                          title="Thực hiện Rà soát Access Review"
-                        >
-                          <Clock className="w-4 h-4" />
-                        </button>
+                          icon={<Clock />}
+                          size="sm"
+                          aria-label="Rà soát vai trò"
+                          title="Rà soát vai trò"
+                        />
 
                         {/* Archive Role */}
                         {role.status !== 'archived' && (
-                          <button
+                          <CmsIconButton
                             onClick={() => setArchiveTargetRole(role)}
-                            className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Đưa vào lưu trữ (Archive)"
-                          >
-                            <Archive className="w-4 h-4" />
-                          </button>
+                            icon={<Archive />}
+                            size="sm"
+                            variant="danger"
+                            aria-label="Lưu trữ vai trò"
+                            title="Lưu trữ vai trò"
+                          />
                         )}
                       </div>
                     </td>

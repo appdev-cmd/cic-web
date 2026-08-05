@@ -42,6 +42,7 @@ import { ActivityAuditTab } from './ActivityAuditTab';
 import { CompareDiffModal } from './CompareDiffModal';
 import { SecretRotateModal } from './SecretRotateModal';
 import { AssetPickerModal } from './AssetPickerModal';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 interface SystemConfigurationProps {
   websiteData?: SystemConfigurationData;
@@ -318,7 +319,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-5 animate-in fade-in duration-200">
       {/* TOAST NOTIFICATION BANNER */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
@@ -335,27 +336,11 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
         </div>
       )}
 
-      {/* MODULE HEADER BANNER */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-2xl shadow-md shadow-orange-500/20 shrink-0">
-            <Settings className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                CẤU HÌNH HỆ THỐNG
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Cấu hình hệ thống
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Quản lý cấu hình chung, tìm kiếm, thương hiệu, enjiCAD và các kết nối của hệ thống.
-            </p>
-          </div>
-        </div>
-      </div>
+      <CmsPageHeader
+        icon={<Settings />}
+        title="Cấu hình hệ thống"
+        description="Quản lý cấu hình chung, tìm kiếm, thương hiệu, enjiCAD và các kết nối của hệ thống."
+      />
 
       {/* MODULE TOP NAVIGATION TABS */}
       <div className="flex flex-nowrap md:flex-wrap items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 text-xs font-bold [scrollbar-width:thin] snap-x">

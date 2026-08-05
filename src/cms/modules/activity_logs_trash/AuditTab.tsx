@@ -17,6 +17,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { AuditEvent, AuditCategory, AuditSeverity, SavedViewFilter } from './types';
+import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface AuditTabProps {
   logs: AuditEvent[];
@@ -305,13 +306,14 @@ export const AuditTab: React.FC<AuditTabProps> = ({
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <button
+                      <CmsIconButton
                         onClick={() => onOpenEventDetail(log)}
-                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-orange-500 hover:text-white text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1 ml-auto"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Xem Event</span>
-                      </button>
+                        icon={<Eye />}
+                        size="sm"
+                        className="ml-auto"
+                        aria-label="Xem chi tiết hoạt động"
+                        title="Xem chi tiết hoạt động"
+                      />
                     </td>
                   </tr>
                 ))

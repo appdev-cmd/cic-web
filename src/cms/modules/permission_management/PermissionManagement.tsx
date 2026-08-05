@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Clock,
   Layers,
-  Plus,
 } from 'lucide-react';
 import type { PermissionsGovernanceData } from '../../data/GovernanceDataSource';
 import {
@@ -25,6 +24,8 @@ import { RoleEditorModal } from './RoleEditorModal';
 import { AssignmentsTab } from './AssignmentsTab';
 import { PolicyIssuesTab } from './PolicyIssuesTab';
 import { AccessReviewsTab } from './AccessReviewsTab';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }> = ({ data }) => {
   // Tabs State: 'roles' (Module 15 Main) | 'assignments' | 'issues' | 'reviews' | 'matrix' | 'tasks'
@@ -223,43 +224,28 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
         </div>
       )}
 
-      {/* TOP HEADER & MODULE 15 SUMMARY */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
-                <Shield className="w-6 h-6" />
-              </span>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Vai trò & quyền</span>
-                </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Quản lý vòng đời Vai trò (RBAC), Ma trận Quyền (Permission Matrix), Phạm vi Scope, Tách biệt Trách nhiệm (SoD) & Audit Review.
-                </p>
-              </div>
-            </div>
-          </div>
+      <CmsPageHeader
+        icon={<Shield />}
+        title="Vai trò và quyền"
+        description="Quản lý vai trò, phạm vi truy cập, cảnh báo xung đột quyền và các đợt rà soát."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{roles.filter((role) => role.status !== 'archived').length} vai trò</span>}
+        actions={(
+          <CmsButton onClick={handleOpenCreateRole} variant="primary" size="sm" leadingIcon={<Shield />}>
+            Thêm vai trò
+          </CmsButton>
+        )}
+      />
 
-          {/* QUICK CREATE ROLE BUTTON */}
-          <button
-            onClick={handleOpenCreateRole}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-600/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tạo Vai trò & Policy mới</span>
-          </button>
-        </div>
+      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
 
         {/* STAT KPI CARDS */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tổng Vai trò (Roles)</div>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tổng vai trò</div>
             <div className="text-xl font-extrabold text-slate-900 dark:text-white font-mono">
               {roles.filter((r) => r.status !== 'archived').length}
               <span className="text-xs text-slate-400 font-normal ml-1">
-                ({roles.filter((r) => r.category === 'system').length} System / {roles.filter((r) => r.category === 'custom' && r.status !== 'archived').length} Custom)
+                ({roles.filter((r) => r.category === 'system').length} hệ thống / {roles.filter((r) => r.category === 'custom' && r.status !== 'archived').length} tùy chỉnh)
               </span>
             </div>
           </div>
@@ -273,7 +259,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
           </div>
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cảnh báo SoD / Issue</div>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Xung đột quyền</div>
             <div className="text-xl font-extrabold text-red-600 dark:text-red-400 font-mono flex items-center gap-1">
               <span>{issues.length}</span>
               {issues.length > 0 && <AlertTriangle className="w-4 h-4 text-red-500" />}
@@ -281,7 +267,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
           </div>
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Access Review Chờ</div>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Chờ rà soát</div>
             <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400 font-mono">
               {reviews.filter((r) => r.status === 'pending').length}
               <span className="text-xs text-slate-400 font-normal ml-1">lượt</span>
@@ -300,7 +286,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             }`}
           >
             <Shield className="w-4 h-4" />
-            <span>Danh sách Vai trò & Policy</span>
+            <span>Danh sách vai trò</span>
           </button>
 
           <button
@@ -312,7 +298,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Phân gán Role & Simulator ({assignments.length})</span>
+            <span>Gán vai trò ({assignments.length})</span>
           </button>
 
           <button
@@ -324,7 +310,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             }`}
           >
             <AlertTriangle className="w-4 h-4 text-red-400" />
-            <span>Cảnh báo SoD & Risk ({issues.length})</span>
+            <span>Xung đột quyền ({issues.length})</span>
           </button>
 
           <button
@@ -336,7 +322,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             }`}
           >
             <Clock className="w-4 h-4 text-amber-400" />
-            <span>Rà soát Access Review ({reviews.filter((r) => r.status === 'pending').length})</span>
+            <span>Đợt rà soát ({reviews.filter((r) => r.status === 'pending').length})</span>
           </button>
 
           <button
@@ -348,7 +334,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             }`}
           >
             <Sliders className="w-4 h-4" />
-            <span>Ma trận Quyền theo User (Chi tiết)</span>
+            <span>Ma trận quyền</span>
           </button>
 
           <button
@@ -360,7 +346,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Task Definition Catalogue</span>
+            <span>Danh mục chức năng</span>
           </button>
         </div>
       </div>

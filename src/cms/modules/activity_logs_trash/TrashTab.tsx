@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { TrashedItem, TrashCategory } from './types';
+import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface TrashTabProps {
   items: TrashedItem[];
@@ -303,31 +304,31 @@ export const TrashTab: React.FC<TrashTabProps> = ({
 
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          <button
+                          <CmsIconButton
                             onClick={() => onOpenItemDetail(item)}
-                            className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg cursor-pointer transition-all"
-                            title="Xem chi tiết & Snapshot"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
+                            icon={<Eye />}
+                            size="sm"
+                            aria-label="Xem chi tiết mục đã xóa"
+                            title="Xem chi tiết mục đã xóa"
+                          />
 
-                          <button
+                          <CmsIconButton
                             onClick={() => onQuickRestore(item)}
-                            className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg flex items-center gap-1 cursor-pointer transition-all shadow-xs"
-                            title="Phục hồi bài viết"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>Phục hồi</span>
-                          </button>
+                            icon={<RotateCcw />}
+                            size="sm"
+                            aria-label="Khôi phục mục"
+                            title="Khôi phục mục"
+                          />
 
-                          <button
+                          <CmsIconButton
                             onClick={() => onOpenPermanentDelete(item)}
                             disabled={item.isLegalHold}
-                            className="p-1.5 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 text-red-600 rounded-lg cursor-pointer transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            icon={<Trash2 />}
+                            size="sm"
+                            variant="danger"
+                            aria-label="Xóa vĩnh viễn"
                             title="Xóa vĩnh viễn"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          />
                         </div>
                       </td>
                     </tr>

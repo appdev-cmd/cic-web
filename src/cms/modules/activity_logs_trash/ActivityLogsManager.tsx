@@ -17,6 +17,7 @@ import type { AuditGovernanceData } from '../../data/GovernanceDataSource';
 import { AuditTab } from './AuditTab';
 import { EventDetailDrawer } from './EventDetailDrawer';
 import { ExportJobsDrawer } from './ExportJobsDrawer';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ data }) => {
   // State lists
@@ -59,7 +60,7 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ d
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-5 animate-in fade-in duration-200">
       {/* TOAST NOTIFICATION */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
@@ -70,27 +71,12 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ d
         </div>
       )}
 
-      {/* MODULE HEADER */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-2xl shadow-md shadow-purple-600/20 shrink-0">
-            <Shield className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                QUẢN TRỊ HỆ THỐNG — AUDIT LOGS
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Nhật ký Hoạt động (Activity Audit Logs)
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Truy vết an ninh bất biến, che khuất dữ liệu nhạy cảm ISO 27001, ghi nhận thao tác phân quyền & xuất bản
-            </p>
-          </div>
-        </div>
-      </div>
+      <CmsPageHeader
+        icon={<Shield />}
+        title="Nhật ký hoạt động"
+        description="Theo dõi các thao tác quản trị, thay đổi quyền và hoạt động xuất bản trong hệ thống."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{auditLogs.length} bản ghi</span>}
+      />
 
       {/* AUDIT LOGS TAB VIEW */}
       <AuditTab
