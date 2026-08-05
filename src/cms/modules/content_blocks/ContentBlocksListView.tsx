@@ -76,7 +76,6 @@ export const ContentBlocksListView: React.FC<ContentBlocksListViewProps> = ({
               <th className="py-3 px-4 min-w-[260px]">Tên Khối & Loại Hiển Thị</th>
               <th className="py-3 px-4 min-w-[200px]">Vị Trí Cấu Hình (Placement)</th>
               <th className="py-3 px-4 min-w-[160px]">Phạm Vi Sử Dụng (Scope)</th>
-              <th className="py-3 px-4 min-w-[120px] text-center">Đa Ngôn Ngữ</th>
               <th className="py-3 px-4 min-w-[130px]">Trạng Thái (Workflow)</th>
               <th className="py-3 px-4 min-w-[100px] text-center">Thứ Tự / Ưu Tiên</th>
               <th className="py-3 px-4 min-w-[150px]">Người Quản Lý</th>
@@ -165,27 +164,6 @@ export const ContentBlocksListView: React.FC<ContentBlocksListViewProps> = ({
                         </span>
                       </div>
                     </button>
-                  </td>
-
-                  {/* Locales badges */}
-                  <td className="py-3.5 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      {Object.entries(b.locale_status).map(([loc, st]) => (
-                        <span
-                          key={loc}
-                          title={`${loc.toUpperCase()}: ${st}`}
-                          className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
-                            st === 'complete'
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                              : st === 'in_progress'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                              : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
-                          }`}
-                        >
-                          {loc}
-                        </span>
-                      ))}
-                    </div>
                   </td>
 
                   {/* Workflow Status */}

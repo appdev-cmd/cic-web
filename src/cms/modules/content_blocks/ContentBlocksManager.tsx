@@ -21,7 +21,6 @@ import {
   Sparkles,
   HelpCircle,
   FileCode,
-  Languages,
 } from 'lucide-react';
 import { BlockItem, MainTabType, SavedFilterView, ScopeRule, BlockVersion, ConflictIssue } from './types';
 import type { ContentBlocksModuleData } from '../../data/PresentationDataSource';
@@ -103,7 +102,6 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
     if (savedFilter === 'pending' && b.workflow_status !== 'pending_review') return false;
     if (savedFilter === 'unused' && b.used_by_count > 0) return false;
     if (savedFilter === 'conflicts' && !issues.some((i) => i.block_id === b.id)) return false;
-    if (savedFilter === 'missing_translation' && !Object.values(b.locale_status).some((s) => s === 'missing' || s === 'outdated')) return false;
 
     // Search query
     if (searchQuery.trim()) {
@@ -145,7 +143,6 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
       start_time: new Date().toISOString(),
       end_time: '2026-12-31T23:59:59Z',
       auto_deactivate: true,
-      locale_status: { vi: 'complete', en: 'missing', ja: 'missing' },
       workflow_status: 'draft',
       effective_status: 'inactive',
       live_version: '-',
@@ -417,7 +414,6 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
             { id: 'pending', label: 'Chờ duyệt' },
             { id: 'unused', label: 'Chưa gắn vị trí (Orphan)' },
             { id: 'conflicts', label: 'Có xung đột' },
-            { id: 'missing_translation', label: 'Thiếu bản dịch' },
           ].map((pill) => (
             <button
               key={pill.id}

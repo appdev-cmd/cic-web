@@ -10,10 +10,8 @@ export type BlockType =
 
 export type WorkflowStatus = 'draft' | 'pending_review' | 'approved' | 'published' | 'archived';
 export type EffectiveStatus = 'running' | 'upcoming' | 'ended' | 'conflict' | 'inactive';
-export type TranslationStatus = 'complete' | 'in_progress' | 'missing' | 'outdated';
-
 export type MainTabType = 'all' | 'placement_view' | 'my_tasks' | 'pending_queue' | 'issues' | 'trash';
-export type SavedFilterView = 'all' | 'high_usage' | 'pending' | 'unused' | 'conflicts' | 'missing_translation';
+export type SavedFilterView = 'all' | 'high_usage' | 'pending' | 'unused' | 'conflicts';
 
 export interface ScopeRule {
   site_id: string;
@@ -88,9 +86,6 @@ export interface BlockItem {
   end_time: string;
   auto_deactivate: boolean;
 
-  // Locale
-  locale_status: Record<string, TranslationStatus>; // e.g. { vi: 'complete', en: 'in_progress' }
-
   // Workflow & Versioning
   workflow_status: WorkflowStatus;
   effective_status: EffectiveStatus;
@@ -122,7 +117,7 @@ export interface ConflictIssue {
   placement_id: string;
   placement_name: string;
   severity: 'high' | 'medium' | 'low';
-  issue_type: 'capacity_exceeded' | 'schedule_overlap' | 'orphan_unused' | 'missing_translation' | 'outdated_translation';
+  issue_type: 'capacity_exceeded' | 'schedule_overlap' | 'orphan_unused';
   description: string;
   affected_pages: string[];
 }

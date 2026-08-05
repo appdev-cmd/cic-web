@@ -9,7 +9,6 @@ import {
   Layers,
   Palette,
   Calendar,
-  Languages,
   ShieldCheck,
   Eye,
   Plus,
@@ -22,7 +21,7 @@ import {
   Sliders,
   Check,
 } from 'lucide-react';
-import { BlockItem, BlockType, ScopeRule, WorkflowStatus, TranslationStatus, PlacementZone } from './types';
+import { BlockItem, BlockType, ScopeRule, WorkflowStatus, PlacementZone } from './types';
 
 interface ContentBlockEditorDrawerProps {
   isOpen: boolean;
@@ -45,7 +44,6 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
 }) => {
   const [formData, setFormData] = useState<Partial<BlockItem>>({});
   const [activeTab, setActiveTab] = useState<string>('general');
-  const [activeLocale, setActiveLocale] = useState<'vi' | 'en' | 'ja'>('vi');
 
   useEffect(() => {
     if (block) {
@@ -86,7 +84,6 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
         start_time: new Date().toISOString(),
         end_time: '2026-12-31T23:59:59Z',
         auto_deactivate: true,
-        locale_status: { vi: 'complete', en: 'missing', ja: 'missing' },
         workflow_status: 'draft',
         effective_status: 'inactive',
         live_version: '-',
@@ -252,7 +249,6 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
             { id: 'styling', label: '4. Trình Bày' },
             { id: 'placement', label: '5. Vị Trí & Scope' },
             { id: 'schedule', label: '6. Thứ Tự & Lịch' },
-            { id: 'translation', label: '7. Bản Dịch' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -690,50 +686,6 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
             </div>
           )}
 
-          {/* SECTION 7: BẢN DỊCH */}
-          {activeTab === 'translation' && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
-                <Languages className="w-4 h-4 text-orange-500" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                  Quản Lý Bản Dịch Đa Ngôn Ngữ (Multi-Locale Editor)
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {(['vi', 'en', 'ja'] as const).map((loc) => (
-                  <button
-                    key={loc}
-                    type="button"
-                    onClick={() => setActiveLocale(loc)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5 transition-colors ${
-                      activeLocale === loc
-                        ? 'bg-orange-600 text-white shadow-xs'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>{loc}</span>
-                    <span className="text-[10px] opacity-75 font-normal">
-                      ({formData.locale_status?.[loc] || 'missing'})
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 space-y-3">
-                <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase">
-                  Nội dung bản dịch Tiếng ({activeLocale.toUpperCase()})
-                </span>
-                <input
-                  type="text"
-                  placeholder={`Headline (${activeLocale.toUpperCase()})...`}
-                  value={formData.content?.headline || ''}
-                  onChange={(e) => updateContentField('headline', e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white"
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
