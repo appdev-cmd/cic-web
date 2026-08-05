@@ -28,7 +28,8 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { EventItem, EventCategory, EditorialStatus, EventProgressStatus } from './types';
-import { mockEvents, mockEventCategories } from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { EventsModuleData } from '../../data/EditorialContentDataSource';
 import { EventsFormView } from './EventsFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { EventPreviewModal } from './EventPreviewModal';
@@ -53,10 +54,12 @@ function formatEventDateTime(dateStr: string): string {
   }
 }
 
-export const EventsManager: React.FC = () => {
+interface EventsManagerProps { workspaceLocale: CmsLocale; data?: EventsModuleData; }
+
+export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, data }) => {
   // Main Data States
-  const [events, setEvents] = useState<EventItem[]>(mockEvents);
-  const [categories] = useState<EventCategory[]>(mockEventCategories);
+  const [events, setEvents] = useState<EventItem[]>(data?.events ?? []);
+  const [categories] = useState<EventCategory[]>(data?.categories ?? []);
 
   // Form View & Modal Mode States
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -333,6 +336,9 @@ export const EventsManager: React.FC = () => {
       <EventsFormView
         eventToEdit={eventToEdit}
         categories={categories}
+        relatedEvents={data?.events ?? []}
+        relatedArticles={data?.relatedArticles ?? []}
+        relatedProducts={data?.relatedProducts ?? []}
         onSave={handleSaveEvent}
         onCancel={() => {
           setIsFormOpen(false);
@@ -417,7 +423,7 @@ export const EventsManager: React.FC = () => {
               <CalendarDays className="w-5 h-5" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Quản lý Sự kiện & Hội thảo
+              Quản lý Sự kiện & Hội thảo · {workspaceLocale.toUpperCase()}
             </h1>
             <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
               {events.length} sự kiện
@@ -785,4 +791,3 @@ export const EventsManager: React.FC = () => {
     </div>
   );
 };
-

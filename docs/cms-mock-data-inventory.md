@@ -6,7 +6,7 @@
 
 - 18 file fixture `mockData.ts/mockCmsData.ts`.
 - Baseline ban đầu có 36 runtime import tham chiếu trực tiếp tới fixture.
-- Sau khi tách thêm Contacts qua operational data boundary, gate vẫn ghi nhận 37 dependency path tới demo/mock. Hai import trực tiếp trong Contacts được thay bằng demo adapter và lazy boundary; gate vẫn chặn để ngăn phát hành nhầm.
+- Sau khi tách thêm Events vào editorial boundary, gate giảm từ 37 còn 36 dependency path tới demo/mock. Events Manager/Form không còn import fixture trực tiếp hoặc import chéo News fixture.
 - Production gate phải fail cho tới khi runtime không còn import mock.
 - TypeScript/build pass không đồng nghĩa production data readiness pass.
 
@@ -48,9 +48,9 @@
 
 - `src/cms/data/CmsDataSource.ts`: contract cho current user, navigation, notification và Dashboard data.
 - `src/cms/data/demoCmsDataSource.ts`: adapter demo duy nhất của App Shell/Dashboard; vẫn bị production gate nhận diện.
-- `src/cms/data/EditorialContentDataSource.ts`: contract theo locale cho News, Static Pages và Services.
+- `src/cms/data/EditorialContentDataSource.ts`: contract theo locale cho News, Static Pages, Services và Events.
 - `src/cms/data/demoEditorialContentDataSource.ts`: gom fixture nội dung vào demo adapter; chỉ có VI để kiểm chứng không fallback sang VI khi workspace là EN.
-- News, Static Pages và Services không còn import fixture trực tiếp trong manager/form; demo adapter chỉ được tải trong lazy boundary của từng module.
+- News, Static Pages, Services và Events không còn import fixture trực tiếp trong manager/form; demo adapter chỉ được tải trong lazy boundary của từng module.
 - `src/cms/data/CatalogDataSource.ts`: contract theo locale cho Products và Product Settings.
 - `src/cms/data/demoCatalogDataSource.ts`: gom fixture catalog/master data vào adapter VI; Products, Product Settings và Usage Impact không còn import fixture trực tiếp.
 - `src/cms/data/PresentationDataSource.ts`: contract theo locale cho Menu, Banners và Content Blocks.
@@ -59,5 +59,5 @@
 - `src/cms/data/demoMediaDataSource.ts`: adapter demo cho shared library; Media manager không còn import fixture trực tiếp.
 - `src/cms/data/ContactsDataSource.ts`: contract hàng đợi vận hành dùng chung, mỗi contact có `source_locale` bất biến.
 - `src/cms/data/demoContactsDataSource.ts`: adapter demo cho contacts/staff/current user; manager và reassign modal không còn import fixture.
-- Bước tiếp theo: tạo boundary theo locale cho Events.
+- Bước tiếp theo: tạo governance boundary cho Users, Permission, Configuration và Audit/Trash.
 - Runtime contract đã được bổ sung tại `docs/cms-locale-runtime-contract.md`: Dashboard EN thiếu dữ liệu hiển thị empty state và không fallback KPI/list/chart VI.

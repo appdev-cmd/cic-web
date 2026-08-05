@@ -34,12 +34,15 @@ import {
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { SearchableSelect, SearchableMultiSelect } from '../../components/SearchableSelect';
 import { EventItem, EventCategory, EditorialStatus, EventProgressStatus, EventSpeaker } from './types';
-import { mockEventCategories, mockEvents, mockEventProducts } from './mockData';
-import { mockArticles } from '../news/mockData';
+import type { NewsArticle } from '../news/types';
+import type { RelatedProductItem } from './types';
 
 interface EventsFormViewProps {
   eventToEdit: EventItem | null;
   categories: EventCategory[];
+  relatedEvents: EventItem[];
+  relatedArticles: NewsArticle[];
+  relatedProducts: RelatedProductItem[];
   onSave: (data: Partial<EventItem>) => void;
   onCancel: () => void;
 }
@@ -60,6 +63,9 @@ function slugify(text: string): string {
 export const EventsFormView: React.FC<EventsFormViewProps> = ({
   eventToEdit,
   categories,
+  relatedEvents,
+  relatedArticles,
+  relatedProducts,
   onSave,
   onCancel,
 }) => {
@@ -514,7 +520,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   Sự kiện liên quan
                 </label>
                 <SearchableMultiSelect
-                  options={mockEvents.map((ev) => ({
+                  options={relatedEvents.map((ev) => ({
                     id: ev.id,
                     label: ev.title,
                     subLabel: `Mã: ${ev.id}`,
@@ -533,7 +539,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   Tin tức & Bài viết liên quan
                 </label>
                 <SearchableMultiSelect
-                  options={mockArticles.map((art) => ({
+                  options={relatedArticles.map((art) => ({
                     id: art.id,
                     label: art.title,
                     subLabel: `Mã: ${art.id}`,
@@ -552,7 +558,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   Sản phẩm phần mềm liên quan
                 </label>
                 <SearchableMultiSelect
-                  options={mockEventProducts.map((prod) => ({
+                  options={relatedProducts.map((prod) => ({
                     id: prod.id,
                     label: prod.name,
                     subLabel: `Mã SP: ${prod.code}`,
@@ -840,4 +846,3 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     </form>
   );
 };
-

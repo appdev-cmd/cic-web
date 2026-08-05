@@ -48,7 +48,12 @@ const NewsManager = lazy(async () => {
     ),
   };
 });
-const EventsManager = lazy(() => import('../modules/events/EventsManager').then((module) => ({ default: module.EventsManager })));
+const EventsManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/events/EventsManager'), import('../data/demoEditorialContentDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.EventsManager workspaceLocale={workspaceLocale} data={dataModule.demoEditorialContentDataSource.eventsByLocale[workspaceLocale]} />
+  ) };
+});
 const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
 const BannersManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/banners/BannersManager'), import('../data/demoPresentationDataSource')]);
@@ -258,7 +263,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'news' ? (
             <NewsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'events' ? (
-            <EventsManager />
+            <EventsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'email_templates' ? (
             <EmailTemplatesManager />
           ) : activeModule === 'banners' ? (

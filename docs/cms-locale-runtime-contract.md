@@ -24,8 +24,9 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - `CmsDataSource.availableLocales`: locale workspace mà shell có thể chọn.
 - `CmsDataSource.dashboardByLocale`: dữ liệu Dashboard theo locale, sử dụng `Partial<Record<...>>` để biểu diễn locale chưa có dữ liệu.
 - Demo adapter hiện chỉ có Dashboard VI. EN cố ý không có data để kiểm tra no-fallback behavior.
-- `EditorialContentDataSource` tách dữ liệu News, Static Pages và Services theo `CmsLocale`; từng module chỉ nhận dataset của workspace đang mở.
-- Demo adapter nội dung hiện chỉ khai báo VI. Khi chuyển sang EN, ba module hiển thị danh sách rỗng và không dùng nội dung, lookup hoặc owner của VI.
+- `EditorialContentDataSource` tách dữ liệu News, Static Pages, Services và Events theo `CmsLocale`; từng module chỉ nhận dataset của workspace đang mở.
+- Demo adapter nội dung hiện chỉ khai báo VI. Khi chuyển sang EN, bốn module hiển thị danh sách rỗng và không dùng nội dung, lookup hoặc owner của VI.
+- Event Form nhận related events/articles/products từ cùng dataset locale; không import chéo fixture News.
 - Adapter demo nội dung được tải cùng lazy boundary của module, không nằm trong entry bundle của CMS.
 - `CatalogDataSource` tách Products và Product Settings theo workspace locale, bao gồm sản phẩm, taxonomy, owner, routing, impact và audit liên quan.
 - Demo catalog chỉ có VI. Workspace EN không sử dụng sản phẩm hoặc master data VI; các component con nhận dữ liệu từ manager thay vì tự import fixture.
@@ -39,4 +40,4 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 
 ## Bước tiếp theo
 
-Tiếp tục với Events theo dataset độc lập từng workspace locale. UI Localization chỉ quản lý resource string, không làm nguồn cho business record.
+Tiếp tục với nhóm governance: Users, Permission, Configuration và Audit/Trash. UI Localization chỉ quản lý resource string, không làm nguồn cho business record.
