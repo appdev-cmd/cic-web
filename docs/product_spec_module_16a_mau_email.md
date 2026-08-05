@@ -462,13 +462,12 @@ Module Mẫu email được xác định là thư viện nội dung giao tiếp 
 
 Thiết kế này cho phép tái sử dụng template giữa nhiều sự kiện, quản lý VI/EN độc lập, thay đổi phiên bản an toàn và cung cấp đủ trạng thái cho UI Designer, Frontend, Backend workflow và QA tiếp tục triển khai.
 
-## Quyết định cần hoàn tất ở tài liệu kế tiếp
+## Tài liệu tích hợp kế tiếp
 
-Product Specification này chưa tự xác định template nào được dùng cho sự kiện nào. Tài liệu tiếp theo bắt buộc là ma trận:
+Product Specification này không tự xác định template nào được dùng cho sự kiện nào. Ma trận tích hợp đã được lập tại `docs/email-event-template-routing-matrix.md`:
 
 ```text
 Sự kiện → Đối tượng nhận → Routing → Template → Nhóm biến → Kết quả cần ghi nhận
 ```
 
-Ma trận đó là điều kiện để nối Mẫu email với Sản phẩm và Yêu cầu khách hàng mà không đưa routing trở lại template.
-
+Ma trận này là baseline để nối Mẫu email với Sản phẩm và Yêu cầu khách hàng mà không đưa routing trở lại template. Các điểm được đánh dấu cần nghiệp vụ xác nhận phải được chốt trước khi bật gửi tự động tương ứng.

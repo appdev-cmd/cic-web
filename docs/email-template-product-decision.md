@@ -62,7 +62,7 @@ Gửi email thành công hoặc thất bại không tự động thay đổi own
 - Module 12 hiển thị lịch sử gửi và mẫu đã sử dụng trong ngữ cảnh yêu cầu khách hàng.
 - Module 16 chỉ quản lý hạ tầng gửi email.
 - Cần tạo Product Specification riêng cho Mẫu email.
-- Cần tạo ma trận sự kiện–người nhận–template–routing trước khi triển khai tích hợp.
+- Ma trận sự kiện–người nhận–template–routing được quản lý tại `docs/email-event-template-routing-matrix.md` và phải được xác nhận trước khi triển khai tích hợp.
 
 ## 7. Ngoài phạm vi quyết định này
 
@@ -79,4 +79,3 @@ Gửi email thành công hoặc thất bại không tự động thay đổi own
 - Danh sách biến của từng loại template được xác nhận.
 - Quyền xem, sửa, duyệt, kích hoạt và lưu trữ được xác nhận.
 - Kế hoạch đối chiếu 13 mẫu cũ và consumer hiện tại được hoàn thành.
-
