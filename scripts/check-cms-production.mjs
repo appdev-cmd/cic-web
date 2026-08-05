@@ -37,8 +37,8 @@ const copyViolations = [];
 
 for (const filePath of runtimeFiles) {
   const source = await readFile(filePath, 'utf8');
-  const importPattern = /from\s+['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource|demoEditorialContentDataSource))['"]/g;
-  const dynamicImportPattern = /import\(\s*['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource|demoEditorialContentDataSource))['"]\s*\)/g;
+  const importPattern = /from\s+['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource|demoEditorialContentDataSource|demoCatalogDataSource))['"]/g;
+  const dynamicImportPattern = /import\(\s*['"]([^'"]*(?:mockData|mockCmsData|demoCmsDataSource|demoEditorialContentDataSource|demoCatalogDataSource))['"]\s*\)/g;
 
   for (const pattern of [importPattern, dynamicImportPattern]) {
     for (const match of source.matchAll(pattern)) {

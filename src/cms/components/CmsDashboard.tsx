@@ -51,8 +51,36 @@ const NewsManager = lazy(async () => {
 const EventsManager = lazy(() => import('../modules/events/EventsManager').then((module) => ({ default: module.EventsManager })));
 const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
 const BannersManager = lazy(() => import('../modules/banners/BannersManager').then((module) => ({ default: module.BannersManager })));
-const ProductSettingsManager = lazy(() => import('../modules/product_settings/ProductSettingsManager').then((module) => ({ default: module.ProductSettingsManager })));
-const ProductsManager = lazy(() => import('../modules/products/ProductsManager').then((module) => ({ default: module.ProductsManager })));
+const ProductSettingsManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/product_settings/ProductSettingsManager'),
+    import('../data/demoCatalogDataSource'),
+  ]);
+
+  return {
+    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+      <module.ProductSettingsManager
+        workspaceLocale={workspaceLocale}
+        data={dataModule.demoCatalogDataSource.productSettingsByLocale[workspaceLocale]}
+      />
+    ),
+  };
+});
+const ProductsManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/products/ProductsManager'),
+    import('../data/demoCatalogDataSource'),
+  ]);
+
+  return {
+    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+      <module.ProductsManager
+        workspaceLocale={workspaceLocale}
+        data={dataModule.demoCatalogDataSource.productsByLocale[workspaceLocale]}
+      />
+    ),
+  };
+});
 const ServicesManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([
     import('../modules/services/ServicesManager'),
@@ -211,9 +239,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'banners' ? (
             <BannersManager />
           ) : activeModule === 'product_settings' ? (
-            <ProductSettingsManager />
+            <ProductSettingsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'products' ? (
-            <ProductsManager />
+            <ProductsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'services' ? (
             <ServicesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'menu' ? (

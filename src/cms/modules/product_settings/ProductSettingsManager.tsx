@@ -51,19 +51,9 @@ import {
   MasterSalesStaffItem,
   MasterRoutingRuleItem,
   MasterDataActivityLog,
-  OverviewMetrics,
 } from './types';
-
-import {
-  mockMasterCategories,
-  mockMasterBrands,
-  mockMasterApplications,
-  mockMasterProductTypes,
-  mockMasterSalesStaff,
-  mockMasterRoutingRules,
-  mockMasterActivityLogs,
-  mockOverviewMetrics,
-} from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { ProductSettingsModuleData } from '../../data/CatalogDataSource';
 
 import { UsageImpactDrawer } from './UsageImpactDrawer';
 import { RoutingSimulatorModal } from './RoutingSimulatorModal';
@@ -73,15 +63,20 @@ import { MasterDataFormDrawer } from './MasterDataFormDrawer';
 
 type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
 
-export const ProductSettingsManager: React.FC = () => {
+interface ProductSettingsManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: ProductSettingsModuleData;
+}
+
+export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ workspaceLocale, data }) => {
   // Master Datasets State
-  const [categories, setCategories] = useState<MasterCategoryItem[]>(mockMasterCategories);
-  const [brands, setBrands] = useState<MasterBrandItem[]>(mockMasterBrands);
-  const [applications, setApplications] = useState<MasterApplicationItem[]>(mockMasterApplications);
-  const [productTypes, setProductTypes] = useState<MasterProductTypeItem[]>(mockMasterProductTypes);
-  const [salesStaff, setSalesStaff] = useState<MasterSalesStaffItem[]>(mockMasterSalesStaff);
-  const [routingRules, setRoutingRules] = useState<MasterRoutingRuleItem[]>(mockMasterRoutingRules);
-  const [activityLogs, setActivityLogs] = useState<MasterDataActivityLog[]>(mockMasterActivityLogs);
+  const [categories, setCategories] = useState<MasterCategoryItem[]>(data?.categories ?? []);
+  const [brands, setBrands] = useState<MasterBrandItem[]>(data?.brands ?? []);
+  const [applications, setApplications] = useState<MasterApplicationItem[]>(data?.applications ?? []);
+  const [productTypes, setProductTypes] = useState<MasterProductTypeItem[]>(data?.productTypes ?? []);
+  const [salesStaff, setSalesStaff] = useState<MasterSalesStaffItem[]>(data?.salesStaff ?? []);
+  const [routingRules, setRoutingRules] = useState<MasterRoutingRuleItem[]>(data?.routingRules ?? []);
+  const [activityLogs] = useState<MasterDataActivityLog[]>(data?.activityLogs ?? []);
 
   // Navigation State
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('taxonomy');
@@ -273,7 +268,7 @@ export const ProductSettingsManager: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Thiết lập danh mục sản phẩm
+                Thiết lập danh mục sản phẩm · {workspaceLocale.toUpperCase()}
               </h1>
               <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
                 Master Data Workspace
@@ -877,6 +872,7 @@ export const ProductSettingsManager: React.FC = () => {
       <UsageImpactDrawer
         isOpen={!!impactDrawerItem}
         item={impactDrawerItem}
+        records={data?.usageImpactRecords ?? []}
         onClose={() => setImpactDrawerItem(null)}
       />
 

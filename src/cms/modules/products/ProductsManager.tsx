@@ -39,13 +39,8 @@ import {
   EditorialStatus,
   CatalogStatus,
 } from './types';
-import {
-  mockProducts,
-  mockProductCategories,
-  mockProductBrands,
-  mockProductOwners,
-  mockProductActivityLogs,
-} from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { ProductsModuleData } from '../../data/CatalogDataSource';
 import { ProductsFormView } from './ProductsFormView';
 import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
@@ -56,16 +51,21 @@ import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal'
 
 type SystemViewTab = 'all' | 'my' | 'pending' | 'low_quality' | 'active' | 'archived';
 
-export const ProductsManager: React.FC = () => {
+interface ProductsManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: ProductsModuleData;
+}
+
+export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocale, data }) => {
   // Main Products List State
-  const [products, setProducts] = useState<ProductItem[]>(mockProducts);
-  const [categories] = useState<ProductCategory[]>(mockProductCategories);
-  const [brands] = useState<ProductBrand[]>(mockProductBrands);
-  const [owners] = useState(mockProductOwners);
-  const [activityLogs, setActivityLogs] = useState<ProductActivityLog[]>(mockProductActivityLogs);
+  const [products, setProducts] = useState<ProductItem[]>(data?.products ?? []);
+  const [categories] = useState<ProductCategory[]>(data?.categories ?? []);
+  const [brands] = useState<ProductBrand[]>(data?.brands ?? []);
+  const [owners] = useState(data?.owners ?? []);
+  const [activityLogs] = useState<ProductActivityLog[]>(data?.activityLogs ?? []);
 
   // Current User context (mock current logged in user)
-  const currentUserId = 'usr_002'; // Lê Hoàng Nam
+  const currentUserId = data?.currentUserId;
 
   // Navigation State: 'list' | 'create' | 'edit'
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
@@ -290,10 +290,10 @@ export const ProductsManager: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Quản lý danh mục sản phẩm
+                Quản lý danh mục sản phẩm · {workspaceLocale.toUpperCase()}
               </h1>
               <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
-                282+ Sản phẩm
+                {products.filter((product) => product.editorial_status !== 'archived').length} Sản phẩm
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">

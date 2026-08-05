@@ -12,11 +12,11 @@ import {
   FileSpreadsheet,
 } from 'lucide-react';
 import { AnyMasterItem, UsageImpactRecord } from './types';
-import { mockUsageImpactRecords } from './mockData';
 
 interface UsageImpactDrawerProps {
   isOpen: boolean;
   item: AnyMasterItem | null;
+  records: UsageImpactRecord[];
   onClose: () => void;
   onOpenHandover?: (item: AnyMasterItem) => void;
 }
@@ -24,12 +24,11 @@ interface UsageImpactDrawerProps {
 export const UsageImpactDrawer: React.FC<UsageImpactDrawerProps> = ({
   isOpen,
   item,
+  records,
   onClose,
   onOpenHandover,
 }) => {
   if (!isOpen || !item) return null;
-
-  const records = mockUsageImpactRecords;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">

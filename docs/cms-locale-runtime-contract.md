@@ -27,8 +27,10 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - `EditorialContentDataSource` tách dữ liệu News, Static Pages và Services theo `CmsLocale`; từng module chỉ nhận dataset của workspace đang mở.
 - Demo adapter nội dung hiện chỉ khai báo VI. Khi chuyển sang EN, ba module hiển thị danh sách rỗng và không dùng nội dung, lookup hoặc owner của VI.
 - Adapter demo nội dung được tải cùng lazy boundary của module, không nằm trong entry bundle của CMS.
+- `CatalogDataSource` tách Products và Product Settings theo workspace locale, bao gồm sản phẩm, taxonomy, owner, routing, impact và audit liên quan.
+- Demo catalog chỉ có VI. Workspace EN không sử dụng sản phẩm hoặc master data VI; các component con nhận dữ liệu từ manager thay vì tự import fixture.
 - All-locales mode đã bị ẩn cho tới khi permission và breakdown được triển khai thật.
 
 ## Bước tiếp theo
 
-Tiếp tục áp dụng data-source boundary nhận `CmsLocale` cho Products/Product Settings, sau đó Menu/Banners/Content Blocks. Module Contacts là operational record dùng source locale, không nhân đôi một contact cho VI/EN.
+Tiếp tục áp dụng data-source boundary nhận `CmsLocale` cho Menu/Banners/Content Blocks. Module Contacts là operational record dùng source locale, không nhân đôi một contact cho VI/EN.
