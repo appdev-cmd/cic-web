@@ -51,6 +51,7 @@ export const MOCK_STAFF_MEMBERS: StaffMember[] = [
 export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   {
     id: 'REQ-2026-0891',
+    source_locale: 'vi',
     source: 'product_registration',
     form_title: 'Đăng ký nhận báo giá & dùng thử EnjiCAD Network',
     sender_name: 'Trần Văn Quốc',
@@ -122,6 +123,7 @@ export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   },
   {
     id: 'REQ-2026-0890',
+    source_locale: 'vi',
     source: 'product_registration',
     form_title: 'Đăng ký tư vấn giải pháp CSI ETABS Ultimate',
     sender_name: 'Phạm Hồng Thái',
@@ -173,6 +175,7 @@ export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   },
   {
     id: 'REQ-2026-0889',
+    source_locale: 'en',
     source: 'general_contact',
     form_title: 'Form Liên hệ chung toàn hệ thống',
     sender_name: 'Nguyễn Thị Mai',
@@ -205,6 +208,7 @@ export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   },
   {
     id: 'REQ-2026-0888',
+    source_locale: 'vi',
     source: 'technical_support',
     form_title: 'Yêu cầu Hỗ trợ Kỹ thuật & Khóa cứng',
     sender_name: 'Hoàng Minh Đức',
@@ -264,6 +268,7 @@ export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   },
   {
     id: 'REQ-2026-0887',
+    source_locale: 'vi',
     source: 'service_inquiry',
     form_title: 'Đăng ký Khảo sát Dịch vụ Chống thấm Công trình',
     sender_name: 'Lê Tuấn Kiệt',
@@ -327,6 +332,7 @@ export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   },
   {
     id: 'REQ-2026-0886',
+    source_locale: 'en',
     source: 'general_contact',
     form_title: 'Thư Rác Tự Động (Spam Bot Detection)',
     sender_name: 'Seo Expert Crypto',
@@ -358,6 +364,7 @@ export const INITIAL_CONTACT_REQUESTS: ContactRequest[] = [
   },
   {
     id: 'REQ-2026-0885',
+    source_locale: 'vi',
     source: 'product_registration',
     form_title: 'Đăng ký tư vấn trùng lặp (Duplicate Entry)',
     sender_name: 'Trần Văn Quốc',

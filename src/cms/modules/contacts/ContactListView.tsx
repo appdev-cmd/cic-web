@@ -179,9 +179,14 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
 
                       {/* Source */}
                       <td className={rowPadding}>
-                        <span className={`px-2.5 py-1 text-[11px] font-medium rounded-full border ${sourceInfo.colorClass}`}>
-                          {sourceInfo.label}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={`px-2.5 py-1 text-[11px] font-medium rounded-full border ${sourceInfo.colorClass}`}>
+                            {sourceInfo.label}
+                          </span>
+                          <span className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            {contact.source_locale}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Related Object */}

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { UserCheck, X, AlertCircle } from 'lucide-react';
 import { ContactRequest, StaffMember } from './types';
-import { MOCK_STAFF_MEMBERS } from './mockData';
 
 interface ContactReassignModalProps {
   isOpen: boolean;
   contact: ContactRequest | null;
+  staffMembers: StaffMember[];
   onClose: () => void;
   onConfirmReassign: (targetStaff: StaffMember, reason: string) => void;
 }
@@ -13,6 +13,7 @@ interface ContactReassignModalProps {
 export const ContactReassignModal: React.FC<ContactReassignModalProps> = ({
   isOpen,
   contact,
+  staffMembers,
   onClose,
   onConfirmReassign,
 }) => {
@@ -32,7 +33,7 @@ export const ContactReassignModal: React.FC<ContactReassignModalProps> = ({
       setError('Vui lòng nhập lý do chuyển giao công việc.');
       return;
     }
-    const staff = MOCK_STAFF_MEMBERS.find((s) => s.id === selectedStaffId);
+    const staff = staffMembers.find((member) => member.id === selectedStaffId);
     if (staff) {
       onConfirmReassign(staff, reason);
       setSelectedStaffId('');
@@ -90,7 +91,7 @@ export const ContactReassignModal: React.FC<ContactReassignModalProps> = ({
               Chọn nhân sự phụ trách mới <span className="text-rose-500">*</span>
             </label>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {MOCK_STAFF_MEMBERS.map((staff) => (
+              {staffMembers.map((staff) => (
                 <label
                   key={staff.id}
                   className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all ${

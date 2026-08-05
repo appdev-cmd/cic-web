@@ -33,8 +33,10 @@ Trong baseline hiện tại, UI language vẫn cố định ở tiếng Việt v
 - Demo presentation chỉ có VI; editor/drawer nhận dữ liệu qua props và xử lý an toàn khi workspace EN chưa có placement hoặc page tree.
 - `MediaDataSource` cung cấp một thư viện asset dùng chung cho mọi workspace nhằm tránh nhân đôi file vật lý. `CmsLocale` chỉ xác định metadata bản địa hóa đang thao tác.
 - Asset, variant, license và folder là dữ liệu dùng chung; alt text, caption và usage reference phải giữ locale rõ ràng khi nối production adapter.
+- `ContactsDataSource` cung cấp một hàng đợi vận hành dùng chung. Mỗi `ContactRequest` bắt buộc có `source_locale` bất biến ghi nhận locale của form/page gửi yêu cầu.
+- Đổi workspace không lọc mất, fallback hoặc nhân đôi contact; giao diện hiển thị locale nguồn trên từng dòng và vẫn giữ toàn bộ workflow/assignment chung.
 - All-locales mode đã bị ẩn cho tới khi permission và breakdown được triển khai thật.
 
 ## Bước tiếp theo
 
-Tiếp tục với Contacts theo mô hình operational record có source locale, không nhân đôi một contact cho VI/EN.
+Tiếp tục với Events theo dataset độc lập từng workspace locale. UI Localization chỉ quản lý resource string, không làm nguồn cho business record.

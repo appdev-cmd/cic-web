@@ -65,6 +65,7 @@ export interface TimelineEvent {
 
 export interface ContactRequest {
   id: string; // e.g. REQ-2026-0891
+  source_locale: 'vi' | 'en'; // Locale của form/page tại thời điểm gửi; không đổi theo CMS workspace
   source: ContactSource;
   form_title: string; // e.g. "Yêu cầu báo giá EnjiCAD Network"
   
