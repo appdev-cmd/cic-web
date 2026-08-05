@@ -32,19 +32,13 @@ import {
   BannerPlacementConfig,
   ScheduleConflict,
   BannerVersion,
-  BannerActivityLog,
   MainTabType,
   SavedFilterView,
   WorkflowStatus,
 } from './types';
 
-import {
-  mockBanners,
-  mockPlacements,
-  mockConflicts,
-  mockVersions,
-  mockActivityLogs,
-} from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { BannersModuleData } from '../../data/PresentationDataSource';
 
 import { BannerListView } from './BannerListView';
 import { BannerCalendarView } from './BannerCalendarView';
@@ -55,12 +49,14 @@ import { BannerVersionDrawer } from './BannerVersionDrawer';
 import { BannerPlacementModal } from './BannerPlacementModal';
 import { BannerDuplicateModal } from './BannerDuplicateModal';
 
-export const BannersManager: React.FC = () => {
+interface BannersManagerProps { workspaceLocale: CmsLocale; data?: BannersModuleData; }
+
+export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale, data }) => {
   // Main Items & Data States
-  const [items, setItems] = useState<BannerContent[]>(mockBanners);
-  const [placements, setPlacements] = useState<BannerPlacementConfig[]>(mockPlacements);
-  const [conflicts, setConflicts] = useState<ScheduleConflict[]>(mockConflicts);
-  const [versions, setVersions] = useState<BannerVersion[]>(mockVersions);
+  const [items, setItems] = useState<BannerContent[]>(data?.banners ?? []);
+  const [placements, setPlacements] = useState<BannerPlacementConfig[]>(data?.placements ?? []);
+  const [conflicts, setConflicts] = useState<ScheduleConflict[]>(data?.conflicts ?? []);
+  const [versions, setVersions] = useState<BannerVersion[]>(data?.versions ?? []);
 
   // Sub-Navigation Tabs & Views
   const [activeMainTab, setActiveMainTab] = useState<MainTabType>('all');
@@ -242,7 +238,7 @@ export const BannersManager: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  Quản lý Banner & Slideshow Quảng bá
+                  Quản lý Banner & Slideshow Quảng bá · {workspaceLocale.toUpperCase()}
                 </h1>
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                   TRÌNH BÀY WEBSITE

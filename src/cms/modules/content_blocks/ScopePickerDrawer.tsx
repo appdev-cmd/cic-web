@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { X, Search, ChevronRight, ChevronDown, CheckSquare, Square, ShieldAlert, Plus, Trash2, Check } from 'lucide-react';
 import { PageTreeNode, ScopeRule } from './types';
-import { MOCK_PAGE_TREE } from './mockData';
 
 interface ScopePickerDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   scope: ScopeRule;
+  pageTree: PageTreeNode[];
   onSaveScope: (newScope: ScopeRule) => void;
 }
 
@@ -14,6 +14,7 @@ export const ScopePickerDrawer: React.FC<ScopePickerDrawerProps> = ({
   isOpen,
   onClose,
   scope,
+  pageTree,
   onSaveScope,
 }) => {
   const [applyAll, setApplyAll] = useState(scope.apply_all_pages);
@@ -206,7 +207,7 @@ export const ScopePickerDrawer: React.FC<ScopePickerDrawerProps> = ({
 
               {/* Tree view list */}
               <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-2 max-h-72 overflow-y-auto space-y-1 bg-white dark:bg-slate-900">
-                {MOCK_PAGE_TREE.map((node) => renderTreeNode(node))}
+                {pageTree.map((node) => renderTreeNode(node))}
               </div>
             </div>
           )}

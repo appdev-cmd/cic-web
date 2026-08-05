@@ -22,13 +22,13 @@ import {
   Sliders,
   Check,
 } from 'lucide-react';
-import { BlockItem, BlockType, ScopeRule, WorkflowStatus, TranslationStatus } from './types';
-import { MOCK_PLACEMENTS } from './mockData';
+import { BlockItem, BlockType, ScopeRule, WorkflowStatus, TranslationStatus, PlacementZone } from './types';
 
 interface ContentBlockEditorDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   block: BlockItem | null;
+  placements: PlacementZone[];
   onSave: (updatedBlock: BlockItem, action: 'draft' | 'submit' | 'publish') => void;
   onOpenScopePicker: (scope: ScopeRule, onSave: (s: ScopeRule) => void) => void;
   onOpenPreview: (block: BlockItem) => void;
@@ -38,6 +38,7 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
   isOpen,
   onClose,
   block,
+  placements,
   onSave,
   onOpenScopePicker,
   onOpenPreview,
@@ -63,8 +64,8 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
         show_title: true,
         layout_variant: 'standard',
         site_id: 'main_site',
-        placement_id: MOCK_PLACEMENTS[0].id,
-        placement_name: MOCK_PLACEMENTS[0].name,
+        placement_id: placements[0]?.id ?? '',
+        placement_name: placements[0]?.name ?? '',
         scope: {
           site_id: 'main_site',
           apply_all_pages: false,
@@ -140,7 +141,7 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
   };
 
   const handlePlacementChange = (plcId: string) => {
-    const selectedPlc = MOCK_PLACEMENTS.find((p) => p.id === plcId);
+    const selectedPlc = placements.find((placement) => placement.id === plcId);
     setFormData((prev) => ({
       ...prev,
       placement_id: plcId,
@@ -590,7 +591,7 @@ export const ContentBlockEditorDrawer: React.FC<ContentBlockEditorDrawerProps> =
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:outline-none font-semibold"
                 >
                   <option value="">-- Chọn Vị Trí Hiển Thị --</option>
-                  {MOCK_PLACEMENTS.map((p) => (
+                  {placements.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} ({p.code})
                     </option>

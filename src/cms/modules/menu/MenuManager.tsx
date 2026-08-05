@@ -25,14 +25,8 @@ import {
 } from 'lucide-react';
 
 import { MenuGroup, MenuItem, ValidationIssue, MenuVersion, DiffChange, MenuActivityLog } from './types';
-import {
-  mockMenuGroups,
-  mockMenuItems,
-  mockValidationIssues,
-  mockMenuVersions,
-  mockDiffChanges,
-  mockMenuActivityLogs,
-} from './mockData';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import type { MenuModuleData } from '../../data/PresentationDataSource';
 
 import { MenuTreeEditor } from './MenuTreeEditor';
 import { MenuTableView } from './MenuTableView';
@@ -44,15 +38,17 @@ import { MenuPreviewModal } from './MenuPreviewModal';
 import { MenuVersionHistoryDrawer } from './MenuVersionHistoryDrawer';
 import { MenuActivityLogDrawer } from './MenuActivityLogDrawer';
 
-export const MenuManager: React.FC = () => {
+interface MenuManagerProps { workspaceLocale: CmsLocale; data?: MenuModuleData; }
+
+export const MenuManager: React.FC<MenuManagerProps> = ({ workspaceLocale, data }) => {
   // Main Data States
-  const [groups, setGroups] = useState<MenuGroup[]>(mockMenuGroups);
-  const [activeGroupId, setActiveGroupId] = useState<string>('grp_header_main');
-  const [items, setItems] = useState<MenuItem[]>(mockMenuItems);
-  const [issues, setIssues] = useState<ValidationIssue[]>(mockValidationIssues);
-  const [versions, setVersions] = useState<MenuVersion[]>(mockMenuVersions);
-  const [diffs, setDiffs] = useState<DiffChange[]>(mockDiffChanges);
-  const [activityLogs, setActivityLogs] = useState<MenuActivityLog[]>(mockMenuActivityLogs);
+  const [groups, setGroups] = useState<MenuGroup[]>(data?.groups ?? []);
+  const [activeGroupId, setActiveGroupId] = useState<string>(data?.groups[0]?.id ?? '');
+  const [items, setItems] = useState<MenuItem[]>(data?.items ?? []);
+  const [issues, setIssues] = useState<ValidationIssue[]>(data?.issues ?? []);
+  const [versions, setVersions] = useState<MenuVersion[]>(data?.versions ?? []);
+  const [diffs, setDiffs] = useState<DiffChange[]>(data?.diffs ?? []);
+  const [activityLogs, setActivityLogs] = useState<MenuActivityLog[]>(data?.activityLogs ?? []);
 
   // UI View Mode & Modal States
   const [viewMode, setViewMode] = useState<'tree' | 'table'>('tree');
@@ -272,7 +268,7 @@ export const MenuManager: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  Quản lý Menu & Cấu trúc Điều hướng
+                  Quản lý Menu & Cấu trúc Điều hướng · {workspaceLocale.toUpperCase()}
                 </h1>
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
                   ĐIỀU HƯỚNG WEBSITE

@@ -1,12 +1,12 @@
 import React from 'react';
 import { X, History, RotateCcw, CheckCircle, Clock, FileDiff, Sparkles } from 'lucide-react';
 import { BlockVersion, BlockItem } from './types';
-import { MOCK_VERSIONS } from './mockData';
 
 interface VersionHistoryDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   block: BlockItem | null;
+  versions: BlockVersion[];
   onRollback: (version: BlockVersion) => void;
 }
 
@@ -14,11 +14,12 @@ export const VersionHistoryDrawer: React.FC<VersionHistoryDrawerProps> = ({
   isOpen,
   onClose,
   block,
+  versions,
   onRollback,
 }) => {
   if (!isOpen || !block) return null;
 
-  const versions = MOCK_VERSIONS.filter((v) => v.block_id === block.id || block.id === 'blk_001') || [];
+  const blockVersions = versions.filter((version) => version.block_id === block.id);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end">
@@ -59,7 +60,7 @@ export const VersionHistoryDrawer: React.FC<VersionHistoryDrawerProps> = ({
 
           {/* Version list timeline */}
           <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-3 space-y-6">
-            {versions.map((ver) => (
+            {blockVersions.map((ver) => (
               <div key={ver.version_id} className="relative pl-6">
                 {/* Point */}
                 <div

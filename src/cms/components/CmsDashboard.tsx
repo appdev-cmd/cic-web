@@ -50,7 +50,12 @@ const NewsManager = lazy(async () => {
 });
 const EventsManager = lazy(() => import('../modules/events/EventsManager').then((module) => ({ default: module.EventsManager })));
 const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
-const BannersManager = lazy(() => import('../modules/banners/BannersManager').then((module) => ({ default: module.BannersManager })));
+const BannersManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/banners/BannersManager'), import('../data/demoPresentationDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.BannersManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.bannersByLocale[workspaceLocale]} />
+  ) };
+});
 const ProductSettingsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([
     import('../modules/product_settings/ProductSettingsManager'),
@@ -96,8 +101,18 @@ const ServicesManager = lazy(async () => {
     ),
   };
 });
-const MenuManager = lazy(() => import('../modules/menu/MenuManager').then((module) => ({ default: module.MenuManager })));
-const ContentBlocksManager = lazy(() => import('../modules/content_blocks/ContentBlocksManager').then((module) => ({ default: module.ContentBlocksManager })));
+const MenuManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/menu/MenuManager'), import('../data/demoPresentationDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.MenuManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.menuByLocale[workspaceLocale]} />
+  ) };
+});
+const ContentBlocksManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/content_blocks/ContentBlocksManager'), import('../data/demoPresentationDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.ContentBlocksManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.contentBlocksByLocale[workspaceLocale]} />
+  ) };
+});
 const MediaManager = lazy(() => import('../modules/media/MediaManager').then((module) => ({ default: module.MediaManager })));
 const ContactsManager = lazy(() => import('../modules/contacts/ContactsManager').then((module) => ({ default: module.ContactsManager })));
 const LocalizationManager = lazy(() => import('../modules/localization/LocalizationManager').then((module) => ({ default: module.LocalizationManager })));
@@ -237,7 +252,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'email_templates' ? (
             <EmailTemplatesManager />
           ) : activeModule === 'banners' ? (
-            <BannersManager />
+            <BannersManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'product_settings' ? (
             <ProductSettingsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'products' ? (
@@ -245,9 +260,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'services' ? (
             <ServicesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'menu' ? (
-            <MenuManager />
+            <MenuManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'content_blocks' ? (
-            <ContentBlocksManager />
+            <ContentBlocksManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'media' ? (
             <MediaManager />
           ) : activeModule === 'contacts' ? (
