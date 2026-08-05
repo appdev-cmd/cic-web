@@ -121,10 +121,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
   const [ownerId, setOwnerId] = useState(product?.owner_id || owners[0]?.id || '');
   const [inquiryRouting, setInquiryRouting] = useState(product?.inquiry_routing || 'Phòng Kinh doanh Phần mềm');
 
-  // Localization
-  const [enTitle, setEnTitle] = useState(product?.translations?.EN?.title || '');
-  const [enDesc, setEnDesc] = useState(product?.translations?.EN?.short_description || '');
-
   // Publishing & Catalog
   const [editorialStatus, setEditorialStatus] = useState<EditorialStatus>(product?.editorial_status || 'draft');
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatus>(product?.catalog_status || 'inactive');
@@ -212,9 +208,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
       owner_name: selectedOwner ? selectedOwner.name : 'Chuyên viên CIC',
       owner_avatar: selectedOwner?.avatar,
       inquiry_routing: inquiryRouting,
-      translations: {
-        EN: { locale: 'EN', locale_name: 'English', status: enTitle ? 'complete' : 'missing', progress: enTitle ? 100 : 0, title: enTitle, short_description: enDesc }
-      },
       editorial_status: editorialStatus,
       catalog_status: catalogStatus,
       published: editorialStatus === 'published',
@@ -1074,7 +1067,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             )}
           </div>
 
-          {/* SECTION 10: BẢN DỊCH (LOCALIZATION) */}
+          {/* SECTION 10: XUẤT BẢN & CATALOG PLACEMENT */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
             <div
               onClick={() => toggleSection('sec_10')}
@@ -1082,52 +1075,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">10</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">10. Đa ngôn ngữ & Bản dịch (Localization)</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">10. Cấu hình Xuất bản & Catalog Placement</h3>
               </div>
               {collapsedSections['sec_10'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
 
             {!collapsedSections['sec_10'] && (
-              <div className="p-5 space-y-4 text-xs">
-                <div>
-                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                    Bản dịch Tiếng Anh (English - EN)
-                  </label>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={enTitle}
-                      onChange={(e) => setEnTitle(e.target.value)}
-                      placeholder="English product title..."
-                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                    <textarea
-                      rows={2}
-                      value={enDesc}
-                      onChange={(e) => setEnDesc(e.target.value)}
-                      placeholder="English short description..."
-                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* SECTION 11: XUẤT BẢN & CATALOG PLACEMENT */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
-            <div
-              onClick={() => toggleSection('sec_11')}
-              className="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center">11</span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">11. Cấu hình Xuất bản & Catalog Placement</h3>
-              </div>
-              {collapsedSections['sec_11'] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-            </div>
-
-            {!collapsedSections['sec_11'] && (
               <div className="p-5 space-y-4 text-xs">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

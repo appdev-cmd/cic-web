@@ -89,7 +89,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
     category: true,
     brand: true,
     owner: true,
-    translations: true,
     editorial_status: true,
     catalog_status: true,
     updated_time: true,
@@ -501,9 +500,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                 {/* Owner */}
                 {columnVisibility.owner && <th className="py-3 px-4 min-w-[150px]">Người phụ trách</th>}
 
-                {/* Translation Progress */}
-                {columnVisibility.translations && <th className="py-3 px-4 min-w-[130px]">Bản dịch</th>}
-
                 {/* Completeness */}
                 {columnVisibility.completeness && <th className="py-3 px-4 min-w-[120px]">Chất lượng (%)</th>}
 
@@ -606,20 +602,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                               <User className="w-4 h-4 text-slate-400" />
                             )}
                             <span className="font-bold text-slate-800 dark:text-slate-200">{p.owner_name}</span>
-                          </div>
-                        </td>
-                      )}
-
-                      {/* Translation Progress */}
-                      {columnVisibility.translations && (
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-1">
-                            <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 font-mono text-[9px] font-bold rounded">
-                              VI 100%
-                            </span>
-                            <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-600 font-mono text-[9px] font-bold rounded">
-                              EN {p.translations?.EN?.progress || 0}%
-                            </span>
                           </div>
                         </td>
                       )}
@@ -807,7 +789,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
             category: true,
             brand: true,
             owner: true,
-            translations: true,
             editorial_status: true,
             catalog_status: true,
             updated_time: true,

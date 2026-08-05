@@ -7,7 +7,6 @@ export interface ColumnVisibility {
   category: boolean;
   brand: boolean;
   owner: boolean;
-  translations: boolean;
   editorial_status: boolean;
   catalog_status: boolean;
   updated_time: boolean;
@@ -41,7 +40,6 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'category', label: 'Danh mục & Loại sản phẩm', desc: 'Phân loại catalog' },
     { key: 'brand', label: 'Hãng sản xuất', desc: 'Thương hiệu / Đối tác' },
     { key: 'owner', label: 'Người phụ trách', desc: 'Chuyên viên quản lý sản phẩm' },
-    { key: 'translations', label: 'Tiến độ bản dịch (Locale)', desc: 'VI, EN, JA, KR progress' },
     { key: 'editorial_status', label: 'Trạng thái Biên tập', desc: 'Draft, Pending, Approved, Published' },
     { key: 'catalog_status', label: 'Trạng thái Kinh doanh', desc: 'Active, Inactive, Archived' },
     { key: 'completeness', label: 'Điểm hoàn thiện (%)', desc: 'Completeness checklist score' },

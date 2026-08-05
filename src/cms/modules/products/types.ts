@@ -7,8 +7,6 @@ export type EditorialStatus = 'draft' | 'pending_review' | 'approved' | 'publish
 
 export type CatalogStatus = 'active' | 'inactive' | 'archived';
 
-export type LocaleStatus = 'missing' | 'in_progress' | 'review' | 'outdated' | 'complete';
-
 export type AvailabilitySignal = 'in_stock' | 'pre_order' | 'contact' | 'out_of_stock';
 
 export interface TechSpecParam {
@@ -26,16 +24,6 @@ export interface ProductDocument {
   file_size: string;
   version: string;
   access: 'public' | 'require_email';
-}
-
-export interface TranslationLocaleProgress {
-  locale: 'EN' | 'JA' | 'KR' | string;
-  locale_name: string;
-  status: LocaleStatus;
-  progress: number; // 0-100%
-  title?: string;
-  short_description?: string;
-  updated_time?: string;
 }
 
 export interface ProductItem {
@@ -88,9 +76,6 @@ export interface ProductItem {
   owner_name: string;
   owner_avatar?: string;
   inquiry_routing: string; // Bộ phận tiếp nhận liên hệ
-
-  // Localization
-  translations: Record<string, TranslationLocaleProgress>;
 
   // Dual Statuses
   editorial_status: EditorialStatus;

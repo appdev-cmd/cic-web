@@ -86,11 +86,6 @@ export const mockProducts: ProductItem[] = [
     owner_name: 'Lê Hoàng Nam',
     owner_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     inquiry_routing: 'Phòng Kinh doanh Phần mềm CSI',
-    translations: {
-      EN: { locale: 'EN', locale_name: 'English', status: 'complete', progress: 100, title: 'CSI ETABS Ultimate v21 - Structural Analysis & Design' },
-      JA: { locale: 'JA', locale_name: 'Japanese', status: 'in_progress', progress: 50, title: 'CSI ETABS Ultimate v21 構造解析ソフト' },
-      KR: { locale: 'KR', locale_name: 'Korean', status: 'missing', progress: 0 }
-    },
     editorial_status: 'published',
     catalog_status: 'active',
     published: true,
@@ -98,7 +93,6 @@ export const mockProducts: ProductItem[] = [
     ordering: 1,
     site_placement: ['home_featured', 'catalog_grid', 'top_recommendation'],
     completeness_score: 95,
-    missing_fields: ['Bản dịch Tiếng Hàn (KR)'],
     created_time: '2026-01-10 08:30:00',
     updated_time: '2026-07-30 14:20:00',
     published_time: '2026-01-12 10:00:00'
@@ -154,9 +148,6 @@ export const mockProducts: ProductItem[] = [
     owner_name: 'Nguyễn Văn Quản Trị',
     owner_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     inquiry_routing: 'Phòng Phần mềm Xây dựng CIC',
-    translations: {
-      EN: { locale: 'EN', locale_name: 'English', status: 'in_progress', progress: 40, title: 'ESCON Cost Estimation Software 2026' }
-    },
     editorial_status: 'published',
     catalog_status: 'active',
     published: true,
@@ -202,7 +193,6 @@ export const mockProducts: ProductItem[] = [
     owner_name: 'Phạm Minh Tuấn',
     owner_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
     inquiry_routing: 'Phòng Địa kỹ thuật & Hạ tầng',
-    translations: {},
     editorial_status: 'pending_review',
     catalog_status: 'inactive',
     published: false,
@@ -252,7 +242,6 @@ export const mockProducts: ProductItem[] = [
     owner_name: 'Trần Thị Thu Thảo',
     owner_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     inquiry_routing: 'Phòng Kinh doanh CAD/BIM',
-    translations: {},
     editorial_status: 'draft',
     catalog_status: 'inactive',
     published: false,
@@ -298,7 +287,6 @@ export const mockProducts: ProductItem[] = [
     owner_name: 'Lê Hoàng Nam',
     owner_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     inquiry_routing: 'Phòng Kinh doanh Phần mềm CSI',
-    translations: {},
     editorial_status: 'published',
     catalog_status: 'active',
     published: true,
