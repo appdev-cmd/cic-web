@@ -34,6 +34,8 @@ import { NewsArticle, NewsCategory, WorkflowStatus } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { NewsModuleData } from '../../data/EditorialContentDataSource';
 import { NewsFormView } from './NewsFormView';
+import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ArticlePreviewModal } from './components/ArticlePreviewModal';
 import { QuickEditModal } from './components/QuickEditModal';
@@ -320,32 +322,19 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
       ) : (
         <>
           {/* HEADER BAR */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-2xl">
-                  <Newspaper className="w-5 h-5" />
-                </div>
-                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-                  Quản lý bài viết và tin tức
-                </h1>
-                <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-                  {articles.filter((article) => !article.in_trash).length} tin bài
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Tạo, biên tập, duyệt, lên lịch xuất bản và lưu trữ bài viết công khai CIC.
-              </p>
-            </div>
-
-            <button
+          <CmsPageHeader
+            icon={<Newspaper />}
+            title="Tin tức"
+            description="Tạo, biên tập, duyệt, lên lịch xuất bản và lưu trữ bài viết công khai."
+            meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{articles.filter((article) => !article.in_trash).length} tin bài</span>}
+            actions={<CmsButton
               onClick={handleOpenCreateForm}
-              className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              variant="primary"
+              leadingIcon={<Plus />}
             >
-              <Plus className="w-4 h-4" />
-              <span>Thêm tin tức mới</span>
-            </button>
-          </div>
+              Thêm tin tức
+            </CmsButton>}
+          />
 
           {/* VIEW SCOPE NAVIGATION TABS (SECTION 4.1) */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-2xs">
@@ -677,48 +666,51 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
 
                           {/* Actions */}
                           {columnVisibility.actions && (
-                            <td className={`p-3 text-right space-x-1 sticky right-0 bg-white dark:bg-slate-900 ${getRowPadding()}`}>
-                              <button
+                            <td className={`p-3 text-right sticky right-0 bg-white dark:bg-slate-900 ${getRowPadding()}`}>
+                              <div className="flex items-center justify-end gap-1">
+                              <CmsIconButton
                                 onClick={() => setPreviewArticle(art)}
-                                className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
+                                icon={<Eye />}
+                                size="sm"
+                                aria-label="Xem trước tin tức"
                                 title="Xem trước"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
+                              />
 
-                              <button
+                              <CmsIconButton
                                 onClick={() => setQuickEditArticle(art)}
-                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg transition-colors cursor-pointer"
-                                title="Sửa nhanh (Quick Edit)"
-                              >
-                                <Sparkles className="w-4 h-4" />
-                              </button>
+                                icon={<Sparkles />}
+                                size="sm"
+                                aria-label="Sửa nhanh tin tức"
+                                title="Sửa nhanh"
+                              />
 
-                              <button
+                              <CmsIconButton
                                 onClick={() => handleOpenEditForm(art)}
-                                className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
+                                icon={<Edit />}
+                                size="sm"
+                                aria-label="Chỉnh sửa tin tức"
                                 title="Chỉnh sửa toàn bộ"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
+                              />
 
                               {art.in_trash ? (
-                                <button
+                                <CmsIconButton
                                   onClick={() => handleRestoreFromTrash(art)}
-                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                                  icon={<RotateCcw />}
+                                  size="sm"
+                                  aria-label="Khôi phục tin tức"
                                   title="Khôi phục"
-                                >
-                                  <RotateCcw className="w-4 h-4" />
-                                </button>
+                                />
                               ) : (
-                                <button
+                                <CmsIconButton
                                   onClick={() => handleMoveToTrash(art)}
-                                  className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
+                                  icon={<Trash2 />}
+                                  size="sm"
+                                  variant="danger"
+                                  aria-label="Chuyển tin tức vào thùng rác"
                                   title="Chuyển vào thùng rác"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                />
                               )}
+                              </div>
                             </td>
                           )}
                         </tr>

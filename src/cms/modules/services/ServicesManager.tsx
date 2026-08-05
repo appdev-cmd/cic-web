@@ -38,6 +38,8 @@ import {
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ServicesModuleData } from '../../data/EditorialContentDataSource';
 import { ServiceFormView } from './ServiceFormView';
+import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { ServicePreviewModal } from './ServicePreviewModal';
 import { QuickEditModal } from './QuickEditModal';
 import { ImpactWarningModal } from './ImpactWarningModal';
@@ -292,31 +294,19 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       )}
 
       {/* Header & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-orange-100 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 rounded-xl">
-            <Layers className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              Quản lý dịch vụ
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
-                {filteredServices.length} dịch vụ
-              </span>
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Quản trị catalog dịch vụ công khai, nội dung giới thiệu, người phụ trách, CTA và trạng thái cung cấp.
-            </p>
-          </div>
-        </div>
-
-        <button
+      <CmsPageHeader
+        icon={<Layers />}
+        title="Dịch vụ"
+        description="Quản lý nội dung giới thiệu, người phụ trách, lời kêu gọi hành động và trạng thái cung cấp dịch vụ."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{filteredServices.length} dịch vụ</span>}
+        actions={<CmsButton
           onClick={handleCreateNew}
-          className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 transition-transform active:scale-95 shrink-0"
+          variant="primary"
+          leadingIcon={<Plus />}
         >
-          <Plus className="w-4 h-4" /> Tạo dịch vụ mới
-        </button>
-      </div>
+          Thêm dịch vụ
+        </CmsButton>}
+      />
 
       {/* View Tabs */}
       <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1 scrollbar-none">
@@ -636,55 +626,56 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                       {/* Actions Sticky Right */}
                       <td className="p-3 text-right sticky right-0 bg-white dark:bg-slate-900 z-10">
                         <div className="flex items-center justify-end gap-1">
-                          <button
+                          <CmsIconButton
                             onClick={() => setPreviewService(item)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                            title="Xem trước Live"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                            icon={<Eye />}
+                            size="sm"
+                            aria-label="Xem trước dịch vụ"
+                            title="Xem trước"
+                          />
 
-                          <button
+                          <CmsIconButton
                             onClick={() => setEditingService(item)}
-                            className="p-1.5 text-orange-600 hover:text-orange-700 dark:hover:text-orange-400 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950/40"
+                            icon={<Edit />}
+                            size="sm"
+                            aria-label="Chỉnh sửa dịch vụ"
                             title="Chỉnh sửa chi tiết"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
+                          />
 
-                          <button
+                          <CmsIconButton
                             onClick={() => setQuickEditService(item)}
-                            className="p-1.5 text-blue-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40"
-                            title="Sửa nhanh (Quick Edit)"
-                          >
-                            <SlidersHorizontal className="w-4 h-4" />
-                          </button>
+                            icon={<SlidersHorizontal />}
+                            size="sm"
+                            aria-label="Sửa nhanh dịch vụ"
+                            title="Sửa nhanh"
+                          />
 
-                          <button
+                          <CmsIconButton
                             onClick={() =>
                               setImpactModalState({
                                 service: item,
                                 actionType: item.service_status === 'active' ? 'deactivate' : 'archive',
                               })
                             }
-                            className="p-1.5 text-amber-600 hover:text-amber-700 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40"
-                            title={item.service_status === 'active' ? 'Deactivate' : 'Archive'}
-                          >
-                            <Archive className="w-4 h-4" />
-                          </button>
+                            icon={<Archive />}
+                            size="sm"
+                            aria-label={item.service_status === 'active' ? 'Ngừng cung cấp dịch vụ' : 'Lưu trữ dịch vụ'}
+                            title={item.service_status === 'active' ? 'Ngừng cung cấp' : 'Lưu trữ'}
+                          />
 
-                          <button
+                          <CmsIconButton
                             onClick={() =>
                               setImpactModalState({
                                 service: item,
                                 actionType: 'delete',
                               })
                             }
-                            className="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                            icon={<Trash2 />}
+                            size="sm"
+                            variant="danger"
+                            aria-label="Xóa dịch vụ"
                             title="Xóa dịch vụ"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          />
                         </div>
                       </td>
                     </tr>

@@ -38,6 +38,8 @@ import { StaticPage, StaticPageCategory, WorkflowStatus } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { StaticPagesModuleData } from '../../data/EditorialContentDataSource';
 import { StaticPageFormView } from './StaticPageFormView';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { TreeView } from './TreeView';
 import { UsedByDrawer } from './UsedByDrawer';
@@ -354,26 +356,12 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
       )}
 
       {/* Module 03 Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
-              <FileText className="w-5 h-5" />
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-              Trang nội dung
-            </h1>
-            <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full">
-              {pages.filter((p) => !p.in_trash).length} trang
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Quản lý trang dài hạn (Giới thiệu, Chính sách, Điều khoản, Landing pages). Tách biệt khỏi Tin tức & Dịch vụ.
-          </p>
-        </div>
-
-        {/* Top Right Actions */}
-        <div className="flex items-center gap-3 shrink-0">
+      <CmsPageHeader
+        icon={<FileText />}
+        title="Trang nội dung"
+        description="Quản lý các trang giới thiệu, chính sách, điều khoản và trang đích của website."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{pages.filter((p) => !p.in_trash).length} trang</span>}
+        actions={<>
           {/* View Switcher: List Mode vs Tree Mode */}
           <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center gap-1 border border-slate-200 dark:border-slate-700">
             <button
@@ -398,18 +386,18 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
             </button>
           </div>
 
-          <button
+          <CmsButton
             onClick={() => {
               setPageToEdit(null);
               setIsFormOpen(true);
             }}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+            variant="primary"
+            leadingIcon={<Plus />}
           >
-            <Plus className="w-4 h-4" />
-            <span>Tạo trang mới</span>
-          </button>
-        </div>
-      </div>
+            Thêm trang
+          </CmsButton>
+        </>}
+      />
 
       {/* Saved View Tabs Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">

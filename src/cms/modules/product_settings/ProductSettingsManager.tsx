@@ -59,7 +59,7 @@ import { RoutingSimulatorModal } from './RoutingSimulatorModal';
 import { ColumnSettingModal, ProductSettingsColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { MasterDataFormDrawer } from './MasterDataFormDrawer';
-import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
@@ -735,32 +735,33 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                           {/* Sticky Actions */}
                           <td className="py-3 px-4 sticky right-0 z-10 bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800 text-center">
                             <div className="flex items-center justify-center gap-1">
-                              <button
+                              <CmsIconButton
                                 onClick={() => {
                                   setFormDrawerItem(item);
                                   setIsFormDrawerOpen(true);
                                 }}
-                                className="p-1.5 text-slate-400 hover:text-orange-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                                icon={<Zap />}
+                                size="sm"
+                                aria-label="Chỉnh sửa thiết lập"
                                 title="Chỉnh sửa"
-                              >
-                                <Zap className="w-4 h-4" />
-                              </button>
+                              />
 
-                              <button
+                              <CmsIconButton
                                 onClick={() => setImpactDrawerItem(item)}
-                                className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                                icon={<Eye />}
+                                size="sm"
+                                aria-label="Xem nơi đang sử dụng"
                                 title="Xem nơi đang sử dụng"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
+                              />
 
-                              <button
+                              <CmsIconButton
                                 onClick={() => setItemToDelete(item)}
-                                className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                                icon={<Trash2 />}
+                                size="sm"
+                                variant="danger"
+                                aria-label="Ngừng sử dụng hoặc lưu trữ"
                                 title="Ngừng dùng / Lưu trữ"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              />
                             </div>
                           </td>
                         </tr>

@@ -48,7 +48,7 @@ import { ProductPreviewModal } from './ProductPreviewModal';
 import { ProductQuickEditModal } from './ProductQuickEditModal';
 import { ProductActivityDrawer } from './ProductActivityDrawer';
 import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal';
-import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 type SystemViewTab = 'all' | 'my' | 'pending' | 'low_quality' | 'active' | 'archived';
@@ -657,49 +657,50 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                       <td className="py-3 px-4 sticky right-0 z-10 bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800 text-center">
                         <div className="flex items-center justify-center gap-1">
                           {/* Quick Edit */}
-                          <button
+                          <CmsIconButton
                             onClick={() => setProductToQuickEdit(p)}
-                            className="p-1.5 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            icon={<Zap />}
+                            size="sm"
+                            aria-label="Sửa nhanh sản phẩm"
                             title="Sửa nhanh thuộc tính"
-                          >
-                            <Zap className="w-4 h-4" />
-                          </button>
+                          />
 
                           {/* Preview */}
-                          <button
+                          <CmsIconButton
                             onClick={() => setProductToPreview(p)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            icon={<Eye />}
+                            size="sm"
+                            aria-label="Xem thử sản phẩm"
                             title="Xem thử giao diện công khai"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                          />
 
                           {/* Audit History */}
-                          <button
+                          <CmsIconButton
                             onClick={() => setProductForActivity(p)}
-                            className="p-1.5 text-slate-400 hover:text-purple-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                            title="Lịch sử phiên bản & Audit"
-                          >
-                            <History className="w-4 h-4" />
-                          </button>
+                            icon={<History />}
+                            size="sm"
+                            aria-label="Xem lịch sử sản phẩm"
+                            title="Lịch sử phiên bản"
+                          />
 
                           {/* Duplicate */}
-                          <button
+                          <CmsIconButton
                             onClick={() => setProductToDuplicate(p)}
-                            className="p-1.5 text-slate-400 hover:text-orange-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            icon={<Copy />}
+                            size="sm"
+                            aria-label="Nhân bản sản phẩm"
                             title="Nhân bản sản phẩm"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
+                          />
 
                           {/* Archive/Delete */}
-                          <button
+                          <CmsIconButton
                             onClick={() => setProductToDelete(p)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                            title="Lưu trữ hoặc Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                            icon={<Trash2 />}
+                            size="sm"
+                            variant="danger"
+                            aria-label="Lưu trữ hoặc xóa sản phẩm"
+                            title="Lưu trữ hoặc xóa"
+                          />
                         </div>
                       </td>
                     </tr>

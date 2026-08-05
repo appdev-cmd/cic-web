@@ -53,10 +53,11 @@ interface CmsIconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonE
   'aria-label': string;
   icon: React.ReactNode;
   variant?: 'default' | 'danger';
+  size?: 'sm' | 'md';
 }
 
 export const CmsIconButton = React.forwardRef<HTMLButtonElement, CmsIconButtonProps>(function CmsIconButton(
-  { icon, variant = 'default', className = '', type = 'button', ...props },
+  { icon, variant = 'default', size = 'md', className = '', type = 'button', ...props },
   ref
 ) {
   const color = variant === 'danger'
@@ -67,7 +68,7 @@ export const CmsIconButton = React.forwardRef<HTMLButtonElement, CmsIconButtonPr
     <button
       ref={ref}
       type={type}
-      className={`inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4 ${color} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4 ${size === 'sm' ? 'size-8' : 'size-9'} ${color} ${className}`}
       {...props}
     >
       {icon}
