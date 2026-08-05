@@ -1,6 +1,6 @@
 # CMS PRODUCTION MODULE REGISTRY
 
-> Baseline ngày 2026-08-04. Registry dùng để kiểm soát cleanup; mục `VERIFY` chưa được phép xóa hoặc đưa vào production navigation.
+> Baseline cập nhật ngày 2026-08-05. Registry dùng để kiểm soát cleanup và phạm vi navigation production.
 
 | Spec | Phạm vi sản phẩm | Thư mục hiện tại | Canonical path | Quyết định cleanup |
 |---:|---|---|---|---|
@@ -21,7 +21,7 @@
 | 14 | Người dùng | `cic_users` | `/cms/users` | KEEP |
 | 15 | Vai trò & quyền | `permission_management` | `/cms/permissions` | KEEP |
 | 16 | Cấu hình hệ thống | `system_configuration` | `/cms/settings` | KEEP |
-| 16/VERIFY | Mẫu email | `email_templates` | `/cms/email-templates` | VERIFY; có route nhưng không có sidebar entry, cần chốt là subview Cấu hình hay loại bỏ |
+| 16A | Mẫu email | `email_templates` | `/cms/email-templates` | KEEP; module độc lập, workspace VI/EN; navigation mục tiêu thuộc nhóm Khách hàng sau Yêu cầu khách hàng |
 | 17 | Nhật ký hoạt động | `activity_logs_trash` | `/cms/activity-logs` | KEEP; menu độc lập trong Governance |
 | 17 | Thùng rác | `activity_logs_trash` | `/cms/trash` | KEEP; menu độc lập trong Governance |
 | 17 | Lịch sử CIC cũ | Đã loại bỏ | `/cms/activity-logs` | MERGED; prototype `cic_history` không có consumer và trùng Nhật ký hoạt động chuẩn |
@@ -35,8 +35,9 @@
 - Registry runtime nằm tại `src/cms/routing.ts`; route không xác định hiển thị Not Found và không fallback về Dashboard.
 - Page manager được lazy-load theo module để không tải toàn bộ CMS ngay khi mở một route.
 
-## Quyết định đang chờ
+## Quyết định đã chốt về Mẫu email
 
-1. `email_templates`: subview Cấu hình/Notification hay loại khỏi production.
-
-Cho tới khi quyết định này được chốt, không thêm Email Templates vào navigation mới và không xóa dữ liệu/file liên quan.
+- Không gộp Mẫu email vào Cấu hình hệ thống hoặc Thiết lập sản phẩm.
+- Cấu hình hệ thống quản lý SMTP/sender; Thiết lập sản phẩm quản lý routing; Mẫu email quản lý nội dung và lifecycle của template.
+- Chưa bật navigation runtime cho tới khi Product Specification và acceptance criteria được duyệt.
+- Căn cứ chi tiết: `docs/email-template-product-decision.md`.

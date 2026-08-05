@@ -23,7 +23,7 @@
 | Customer operations | Contacts | Hàng đợi VI/EN độc lập; staff và current user dùng chung |
 | UI localization | Localization | Chỉ Source–Target cho UI strings; không làm nguồn cho business records |
 | Governance | Users, Permission, Configuration, Audit/Trash | Users/Permission/Audit/Trash global; cấu hình website theo locale, EnjiCAD global |
-| Email templates | Email Templates | Giữ ở trạng thái VERIFY; chưa đưa vào navigation production |
+| Email templates | Email Templates | KEEP; module workspace độc lập, chỉ đưa vào navigation production sau khi Product Specification và adapter thật sẵn sàng |
 
 ## Quy tắc chuyển đổi từng module
 
