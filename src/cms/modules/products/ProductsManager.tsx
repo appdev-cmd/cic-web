@@ -48,6 +48,8 @@ import { ProductPreviewModal } from './ProductPreviewModal';
 import { ProductQuickEditModal } from './ProductQuickEditModal';
 import { ProductActivityDrawer } from './ProductActivityDrawer';
 import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 type SystemViewTab = 'all' | 'my' | 'pending' | 'low_quality' | 'active' | 'archived';
 
@@ -281,39 +283,24 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
       )}
 
       {/* 1. TOP MODULE HEADER CARD */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-orange-500/10 text-orange-600 rounded-2xl shrink-0">
-            <Package className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Quản lý sản phẩm
-              </h1>
-              <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
-                {products.filter((product) => product.editorial_status !== 'archived').length} Sản phẩm
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Quản trị toàn bộ vòng đời sản phẩm, phân loại taxonomy, giá niêm yết & chất lượng dữ liệu catalog
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <button
+      <CmsPageHeader
+        icon={<Package />}
+        title="Sản phẩm"
+        description="Quản lý thông tin, phân loại, giá bán, trạng thái xuất bản và chất lượng dữ liệu sản phẩm."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{products.filter((product) => product.editorial_status !== 'archived').length} sản phẩm</span>}
+        actions={(
+          <CmsButton
             onClick={() => {
               setSelectedProductForForm(null);
               setViewMode('form');
             }}
-            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 cursor-pointer transition-all"
+            variant="primary"
+            leadingIcon={<Plus />}
           >
-            <Plus className="w-4 h-4" />
-            <span>Thêm sản phẩm mới</span>
-          </button>
-        </div>
-      </div>
+            Thêm sản phẩm
+          </CmsButton>
+        )}
+      />
 
       {/* 2. SAVED SYSTEM VIEWS TABS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">

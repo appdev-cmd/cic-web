@@ -19,6 +19,33 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* CMS interaction baseline: consistent icon alignment, focus visibility and readable wrapping. */
+.cms-shell button svg,
+.cms-shell a svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.cms-shell button {
+  line-height: 1.25;
+}
+
+.cms-shell button:focus-visible,
+.cms-shell a:focus-visible,
+.cms-shell input:focus-visible,
+.cms-shell select:focus-visible,
+.cms-shell textarea:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+.cms-shell h1,
+.cms-shell h2,
+.cms-shell h3 {
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
 /* Custom background patterns for high-tech feel */
 .bg-tech-grid {
   background-image: radial-gradient(circle at 1px 1px, rgba(234, 88, 12, 0.1) 1px, transparent 0);

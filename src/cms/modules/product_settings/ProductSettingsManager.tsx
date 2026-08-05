@@ -59,6 +59,8 @@ import { RoutingSimulatorModal } from './RoutingSimulatorModal';
 import { ColumnSettingModal, ProductSettingsColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { MasterDataFormDrawer } from './MasterDataFormDrawer';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
 
@@ -274,47 +276,32 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       )}
 
       {/* 1. TOP MODULE HEADER CARD */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-orange-600 text-white rounded-2xl shrink-0 shadow-md shadow-orange-600/20">
-            <FolderTree className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Thiết lập sản phẩm
-              </h1>
-              <span className="px-2.5 py-0.5 bg-orange-500/10 text-orange-600 font-bold text-[11px] rounded-full border border-orange-500/20">
-                Dữ liệu dùng chung
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Quản lý các danh mục, hãng, loại sản phẩm, người phụ trách và nơi nhận liên hệ dùng trong biểu mẫu sản phẩm.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <button
+      <CmsPageHeader
+        icon={<FolderTree />}
+        title="Thiết lập sản phẩm"
+        description="Quản lý danh mục, hãng, loại sản phẩm, người phụ trách và nơi nhận liên hệ dùng trong biểu mẫu sản phẩm."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">Dữ liệu dùng chung</span>}
+        actions={<>
+          <CmsButton
             onClick={() => setIsSimulatorOpen(true)}
-            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center gap-2 cursor-pointer transition-all"
+            variant="secondary"
+            leadingIcon={<Zap />}
           >
-            <Zap className="w-4 h-4 text-amber-500" />
-            <span>Kiểm tra nơi nhận email</span>
-          </button>
+            Kiểm tra nơi nhận email
+          </CmsButton>
 
-          <button
+          <CmsButton
             onClick={() => {
               setFormDrawerItem(null);
               setIsFormDrawerOpen(true);
             }}
-            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 cursor-pointer transition-all"
+            variant="primary"
+            leadingIcon={<Plus />}
           >
-            <Plus className="w-4 h-4" />
-            <span>{createLabels[activeDataType]}</span>
-          </button>
-        </div>
-      </div>
+            {createLabels[activeDataType]}
+          </CmsButton>
+        </>}
+      />
 
       {/* 2. SITEMAP SECTIONS TABS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
