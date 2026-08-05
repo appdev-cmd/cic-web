@@ -28,8 +28,6 @@ export type WorkflowStatus =
   | 'published'
   | 'archived';
 
-export type TranslationState = 'missing' | 'in_progress' | 'review' | 'complete' | 'outdated';
-
 export interface ArticleVersion {
   id: string;
   version_number: number;
@@ -94,22 +92,6 @@ export interface NewsArticle {
   seo_keyword: string;
   seo_description: string;
 
-  // Localization
-  primary_locale: 'vi' | 'en';
-  translation_progress: {
-    vi: TranslationState;
-    en: TranslationState;
-  };
-  translations?: {
-    en?: {
-      title: string;
-      summary: string;
-      content: string;
-      seo_title?: string;
-      seo_description?: string;
-    };
-  };
-
   // Versioning & Working Copies
   working_version_number: number;
   published_version_number?: number;
@@ -124,4 +106,3 @@ export interface NewsArticle {
   created_time: string;
   updated_time?: string;
 }
-

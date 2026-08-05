@@ -3,7 +3,6 @@ import { X, SlidersHorizontal, Eye, EyeOff, LayoutList, AlignJustify, MoveVertic
 
 export interface ColumnVisibility {
   category: boolean;
-  localization: boolean;
   author: boolean;
   status: boolean;
   publish_time: boolean;
@@ -36,7 +35,6 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
 
   const columns: { key: keyof ColumnVisibility; label: string; fixed?: boolean }[] = [
     { key: 'category', label: 'Danh mục bài viết' },
-    { key: 'localization', label: 'Ngôn ngữ & Tiến độ dịch' },
     { key: 'author', label: 'Tác giả & Phụ trách' },
     { key: 'status', label: 'Trạng thái quy trình' },
     { key: 'publish_time', label: 'Thời gian xuất bản / Lịch' },

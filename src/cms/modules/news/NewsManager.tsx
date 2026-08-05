@@ -83,7 +83,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
   const [tableDensity, setTableDensity] = useState<TableDensity>('normal');
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     category: true,
-    localization: true,
     author: true,
     status: true,
     publish_time: true,
@@ -153,8 +152,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         matchSavedView = item.workflow_status === 'pending';
       } else if (activeSavedView === 'scheduled') {
         matchSavedView = item.workflow_status === 'scheduled';
-      } else if (activeSavedView === 'missing_en') {
-        matchSavedView = item.translation_progress?.en !== 'complete';
       }
 
       return matchSearch && matchCat && matchWorkflow && matchSavedView;
@@ -278,8 +275,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         seo_description: formData.seo_description || formData.summary || '',
         created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
         author: { name: 'Nguyễn Văn Nam' },
-        primary_locale: 'vi',
-        translation_progress: { vi: 'complete', en: 'in_progress' },
         working_version_number: 1,
       };
       setArticles([newArticle, ...articles]);
@@ -460,16 +455,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
             >
               Đã lên lịch xuất bản
             </button>
-            <button
-              onClick={() => setActiveSavedView(activeSavedView === 'missing_en' ? null : 'missing_en')}
-              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
-                activeSavedView === 'missing_en'
-                  ? 'bg-purple-600 text-white border-purple-600'
-                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-purple-500'
-              }`}
-            >
-              Thiếu bản dịch Tiếng Anh
-            </button>
           </div>
 
           {/* SEARCH & FILTERS TOOLBAR */}
@@ -560,7 +545,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                     </th>
                     <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
                     {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
-                    {columnVisibility.localization && <th className="p-3 min-w-[120px]">Ngôn ngữ / Dịch</th>}
                     {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả & Phụ trách</th>}
                     {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
                     {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
@@ -642,25 +626,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                               <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px] rounded-lg border border-slate-200 dark:border-slate-700">
                                 {getCategoryName(art.category_id)}
                               </span>
-                            </td>
-                          )}
-
-                          {/* Languages & Progress */}
-                          {columnVisibility.localization && (
-                            <td className={`p-3 ${getRowPadding()}`}>
-                              <div className="flex items-center gap-1.5">
-                                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-400 font-extrabold text-[10px] rounded">
-                                  VI
-                                </span>
-                                <span className={`px-1.5 py-0.5 font-extrabold text-[10px] rounded ${
-                                  art.translation_progress?.en === 'complete' ? 'bg-emerald-100 text-emerald-800' :
-                                  art.translation_progress?.en === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                  art.translation_progress?.en === 'review' ? 'bg-amber-100 text-amber-800' :
-                                  'bg-slate-200 text-slate-600'
-                                }`}>
-                                  EN ({art.translation_progress?.en || 'missing'})
-                                </span>
-                              </div>
                             </td>
                           )}
 
@@ -798,7 +763,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
           setTableDensity('normal');
           setColumnVisibility({
             category: true,
-            localization: true,
             author: true,
             status: true,
             publish_time: true,

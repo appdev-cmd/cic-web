@@ -24,7 +24,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   ChevronRight,
-  Split,
   MessageSquare,
   Share2,
 } from 'lucide-react';
@@ -64,7 +63,7 @@ function getYoutubeVideoId(url: string): string | null {
   return match && match[2].length === 11 ? match[2] : null;
 }
 
-type ActiveTab = 'content' | 'taxonomy' | 'media' | 'seo' | 'localization' | 'publishing';
+type ActiveTab = 'content' | 'taxonomy' | 'media' | 'seo' | 'publishing';
 
 export const NewsFormView: React.FC<NewsFormViewProps> = ({
   articleToEdit,
@@ -118,16 +117,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
   const [isNew, setIsNew] = useState(articleToEdit?.is_new ?? true);
   const [showInHomepage, setShowInHomepage] = useState(articleToEdit?.show_in_homepage ?? true);
   const [ordering, setOrdering] = useState(articleToEdit?.ordering || 1);
-
-  // Localization State (Source/Target Split view)
-  const [activeLocale, setActiveLocale] = useState<'vi' | 'en'>('en');
-  const [splitViewMode, setSplitViewMode] = useState(true);
-  const [enTitle, setEnTitle] = useState(articleToEdit?.translations?.en?.title || '');
-  const [enSummary, setEnSummary] = useState(articleToEdit?.translations?.en?.summary || '');
-  const [enContent, setEnContent] = useState(articleToEdit?.translations?.en?.content || '');
-  const [translationStatus, setTranslationStatus] = useState<'missing' | 'in_progress' | 'review' | 'complete'>(
-    articleToEdit?.translation_progress?.en || 'in_progress'
-  );
 
   // Auto-Save & Versioning State
   const [autoSaveText, setAutoSaveText] = useState('Đã tự động lưu nháp lúc 21:37');
@@ -205,17 +194,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       assignee: { name: assigneeName },
       reviewer: { name: reviewerName },
       return_comment: returnComment,
-      translations: {
-        en: {
-          title: enTitle,
-          summary: enSummary,
-          content: enContent,
-        },
-      },
-      translation_progress: {
-        vi: 'complete',
-        en: translationStatus,
-      },
     });
   };
 
@@ -228,7 +206,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     { label: 'Có thẻ Alt cho ảnh đại diện', passed: Boolean(imageAlt) },
     { label: 'Mô tả tóm tắt từ 100-300 ký tự', passed: summary.length >= 80 },
     { label: 'Có từ khóa SEO', passed: Boolean(seoKeyword) },
-    { label: 'Đã hoàn tất bản dịch Tiếng Anh', passed: translationStatus === 'complete' },
   ];
 
   return (
@@ -395,19 +372,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
 
         <button
           type="button"
-          onClick={() => setActiveTab('localization')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
-            activeTab === 'localization'
-              ? 'bg-orange-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Split className="w-4 h-4" />
-          <span>5. Bản dịch (VI / EN)</span>
-        </button>
-
-        <button
-          type="button"
           onClick={() => setActiveTab('publishing')}
           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'publishing'
@@ -416,7 +380,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>6. Xuất bản & Quy trình</span>
+          <span>5. Xuất bản & Quy trình</span>
         </button>
       </div>
 
@@ -702,88 +666,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
             </div>
           )}
 
-          {/* TAB 5: BẢN DỊCH (LOCALIZATION SPLIT VIEW) */}
-          {activeTab === 'localization' && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 bg-blue-500/10 text-blue-600 font-bold text-xs rounded-lg">
-                    Chế độ dịch song song (Source-Target Split View)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Trạng thái bản dịch EN:</label>
-                  <select
-                    value={translationStatus}
-                    onChange={(e) => setTranslationStatus(e.target.value as any)}
-                    className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700"
-                  >
-                    <option value="missing">Chưa dịch (Missing)</option>
-                    <option value="in_progress">Đang dịch (In Progress)</option>
-                    <option value="review">Chờ duyệt dịch (Review)</option>
-                    <option value="complete">Hoàn tất (Complete)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Split View Editor */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Source Column (VI) */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
-                  <div className="flex items-center justify-between font-bold text-xs text-slate-900 dark:text-white border-b pb-2">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-red-500" /> Bản gốc Tiếng Việt (VI)
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">Chỉ xem</span>
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400">Tiêu đề:</p>
-                      <p className="font-bold text-slate-800 dark:text-slate-200">{title}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400">Tóm tắt:</p>
-                      <p className="text-slate-600 dark:text-slate-300">{summary}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Target Column (EN) */}
-                <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-500/30 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between font-bold text-xs text-indigo-600 dark:text-indigo-400 border-b pb-2">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500" /> Bản dịch Tiếng Anh (EN)
-                    </span>
-                    <span className="text-[10px] font-mono text-indigo-400">Có thể chỉnh sửa</span>
-                  </div>
-                  <div className="space-y-3 text-xs">
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700 dark:text-slate-300">English Title</label>
-                      <input
-                        type="text"
-                        value={enTitle}
-                        onChange={(e) => setEnTitle(e.target.value)}
-                        placeholder="Enter English Article Title..."
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-1 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-700 dark:text-slate-300">English Summary</label>
-                      <textarea
-                        rows={3}
-                        value={enSummary}
-                        onChange={(e) => setEnSummary(e.target.value)}
-                        placeholder="Enter English Summary..."
-                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-xs rounded-xl border border-slate-200 dark:border-slate-700 resize-none focus:ring-1 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 6: XUẤT BẢN & QUY TRÌNH */}
+          {/* TAB 5: XUẤT BẢN & QUY TRÌNH */}
           {activeTab === 'publishing' && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
