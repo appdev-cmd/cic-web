@@ -18,7 +18,6 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
-  Globe,
   Sparkles,
   CheckCircle2,
   Move,
@@ -149,12 +148,6 @@ export const MenuTreeEditor: React.FC<MenuTreeEditorProps> = ({
                   </span>
                 )}
 
-                {/* Missing Translation */}
-                {node.translation_status === 'missing' && (
-                  <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-0.5">
-                    <Globe className="w-2.5 h-2.5 text-amber-500" /> Thiếu EN
-                  </span>
-                )}
               </div>
 
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">

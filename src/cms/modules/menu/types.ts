@@ -9,8 +9,6 @@ export type NavigationTargetType =
 
 export type EditorialStatus = 'draft' | 'pending' | 'approved' | 'published';
 export type LinkHealthStatus = 'valid' | 'warning' | 'broken' | 'unchecked';
-export type TranslationStatus = 'complete' | 'outdated' | 'missing';
-
 export interface MenuItem {
   id: string;
   group_id: string;
@@ -18,12 +16,6 @@ export interface MenuItem {
   depth: number; // 0 (root level 1), 1 (level 2), 2 (level 3)
   display_order: number;
   label: string;
-  locales: {
-    vi: string;
-    en?: string;
-    ja?: string;
-  };
-  translation_status: TranslationStatus;
   target_type: NavigationTargetType;
   target_content_id?: string;
   target_content_name?: string;
@@ -65,7 +57,7 @@ export interface ValidationIssue {
   item_id: string;
   item_label: string;
   severity: 'critical' | 'warning' | 'info';
-  code: 'loop' | 'orphan' | 'depth_exceeded' | 'broken_link' | 'missing_translation' | 'label_too_long';
+  code: 'loop' | 'orphan' | 'depth_exceeded' | 'broken_link' | 'label_too_long';
   message: string;
   suggested_action: string;
 }

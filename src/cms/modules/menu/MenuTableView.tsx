@@ -117,7 +117,6 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
               <th className="p-3.5">Tên nhãn & Phân cấp</th>
               <th className="p-3.5">Loại đích đến</th>
               <th className="p-3.5">URL Target Canonical</th>
-              <th className="p-3.5">Bản dịch EN/JA</th>
               <th className="p-3.5">Link Health</th>
               <th className="p-3.5">Trạng thái</th>
               <th className="p-3.5 text-right">Thao tác</th>
@@ -154,15 +153,6 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
                     </span>
                   </td>
                   <td className="p-3.5 font-mono text-slate-600 dark:text-slate-400">{item.url}</td>
-                  <td className="p-3.5">
-                    {item.locales.en ? (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                        EN: {item.locales.en}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-amber-500 font-semibold">Chưa dịch</span>
-                    )}
-                  </td>
                   <td className="p-3.5">
                     {item.link_health === 'valid' && (
                       <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center gap-1 w-max">

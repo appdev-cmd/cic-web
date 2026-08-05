@@ -36,7 +36,7 @@ export const MenuValidationPanel: React.FC<MenuValidationPanelProps> = ({
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Kiểm tra Cấu trúc & Link Health</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Phát hiện liên kết gãy 404, lặp vòng (loop), vượt độ sâu hoặc thiếu bản dịch.
+                Phát hiện liên kết gãy, cấu trúc lặp vòng hoặc menu vượt quá độ sâu cho phép.
               </p>
             </div>
           </div>

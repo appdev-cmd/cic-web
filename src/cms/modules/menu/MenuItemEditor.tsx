@@ -42,7 +42,6 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<MenuItem>>({
     label: '',
-    locales: { vi: '', en: '', ja: '' },
     target_type: 'static_page',
     url: '/',
     open_in_new_tab: false,
@@ -60,12 +59,10 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
     if (item) {
       setFormData({
         ...item,
-        locales: item.locales || { vi: item.label, en: '', ja: '' },
       });
     } else {
       setFormData({
         label: '',
-        locales: { vi: '', en: '', ja: '' },
         target_type: 'static_page',
         url: '/',
         open_in_new_tab: false,
@@ -119,12 +116,6 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
       depth: item ? item.depth : 0,
       display_order: item ? item.display_order : 99,
       label: formData.label || '',
-      locales: {
-        vi: formData.locales?.vi || formData.label || '',
-        en: formData.locales?.en || '',
-        ja: formData.locales?.ja || '',
-      },
-      translation_status: formData.locales?.en ? 'complete' : 'missing',
       target_type: formData.target_type || 'static_page',
       target_content_id: formData.target_content_id,
       target_content_name: formData.target_content_name,
@@ -182,7 +173,7 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
             }`}
           >
             <Globe className="w-4 h-4" />
-            <span>Nội dung & Bản dịch</span>
+            <span>Nội dung</span>
           </button>
 
           <button
@@ -226,71 +217,19 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           {activeTab === 'general' && (
             <div className="space-y-4">
-              {/* Primary Label (VI) */}
+              {/* Display label */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Nhãn hiển thị (Tiếng Việt) <span className="text-red-500">*</span>
+                  Nhãn hiển thị <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.label || ''}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      label: e.target.value,
-                      locales: { ...formData.locales, vi: e.target.value },
-                    })
-                  }
+                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                   placeholder="Ví dụ: Sản phẩm & Giải pháp, Liên hệ"
                   className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
                 />
-              </div>
-
-              {/* Locale Translations */}
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <Globe className="w-4 h-4 text-orange-500" /> Multi-locale Translations
-                  </span>
-                  <span className="text-[11px] text-slate-500">Auto-synced on publish</span>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    English Label (en)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.locales?.en || ''}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        locales: { ...formData.locales!, en: e.target.value },
-                      })
-                    }
-                    placeholder="e.g. Products & Solutions"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    Japanese Label (ja)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.locales?.ja || ''}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        locales: { ...formData.locales!, ja: e.target.value },
-                      })
-                    }
-                    placeholder="e.g. 製品とソリューション"
-                    className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  />
-                </div>
               </div>
 
               {/* Parent Selector */}
