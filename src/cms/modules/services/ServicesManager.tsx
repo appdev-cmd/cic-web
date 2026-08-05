@@ -42,6 +42,7 @@ import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { ServicePreviewModal } from './ServicePreviewModal';
 import { QuickEditModal } from './QuickEditModal';
 import { ImpactWarningModal } from './ImpactWarningModal';
@@ -656,45 +657,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         </div>
 
         {/* Table Footer & Pagination */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-2 text-slate-500">
-            <span>Hiển thị</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span>dịch vụ trên mỗi trang (Tổng số: {filteredServices.length})</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="p-1.5 text-slate-500 hover:text-slate-800 disabled:opacity-40 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="font-semibold text-slate-700 dark:text-slate-300">
-              Trang {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="p-1.5 text-slate-500 hover:text-slate-800 disabled:opacity-40 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredServices.length} itemLabel="dịch vụ" pageSizeOptions={[10, 25, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
 
       {/* Overlays & Drawers */}

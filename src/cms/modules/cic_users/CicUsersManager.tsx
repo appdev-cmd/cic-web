@@ -564,10 +564,8 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         </div>
 
         {/* Table Footer */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <span>
-            Hiển thị <strong>{filteredUsers.length}</strong> / <strong>{users.length}</strong> người dùng
-          </span>
+        <div className="cms-list-footer">
+          <p className="cms-list-summary">Hiển thị <strong>{filteredUsers.length}</strong> trong <strong>{users.length}</strong> tài khoản</p>
           {selectedIds.length > 0 && (
             <span className="text-orange-600 font-bold">
               Đã chọn {selectedIds.length} mục

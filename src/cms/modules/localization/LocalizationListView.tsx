@@ -22,6 +22,7 @@ import { TranslationItem, TranslationStatus } from './types';
 import { validatePlaceholders } from './utils';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface LocalizationListViewProps {
   items: TranslationItem[];
@@ -157,7 +158,7 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
         <div>
           Hiển thị <span className="font-bold text-slate-800 dark:text-slate-200">{paginatedItems.length}</span> trên tổng số <span className="font-bold text-slate-800 dark:text-slate-200">{items.length}</span> chuỗi/nội dung
         </div>
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-0.5">
             <button
               onClick={() => setDensity('comfortable')}
@@ -177,22 +178,7 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center gap-1">
-            <span>Hiển thị/Trang:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="px-2 py-1 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold outline-none"
-            >
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
           </div>
-        </div>
       </div>
 
       {/* FULL-WIDTH DATA TABLE */}
@@ -447,41 +433,7 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
         </div>
 
         {/* PAGINATION FOOTER */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <span className="text-slate-500">
-            Trang <span className="font-bold text-slate-800 dark:text-slate-200">{currentPage}</span> / <span className="font-bold text-slate-800 dark:text-slate-200">{totalPages}</span>
-          </span>
-
-          <div className="flex items-center gap-1">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }).map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentPage(idx + 1)}
-                className={`w-8 h-8 rounded-xl font-bold text-xs transition-colors cursor-pointer ${
-                  currentPage === idx + 1
-                    ? 'bg-orange-500 text-white shadow-xs'
-                    : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-                }`}
-              >
-                {idx + 1}
-              </button>
-            ))}
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={items.length} itemLabel="nội dung dịch" pageSizeOptions={[25, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
     </div>
   );

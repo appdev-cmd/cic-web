@@ -63,6 +63,7 @@ import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
 
@@ -744,46 +745,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             </div>
 
             {/* Pagination Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-500">
-              <div>
-                Hiển thị {filteredList.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} -{' '}
-                {Math.min(currentPage * pageSize, filteredList.length)} / Tổng số {filteredList.length} mục
-              </div>
-
-              <div className="flex items-center gap-3">
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-bold cursor-pointer"
-                >
-                  <option value={25}>25 hàng/trang</option>
-                  <option value={50}>50 hàng/trang</option>
-                </select>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="px-2 font-bold text-slate-800 dark:text-slate-200">
-                    Trang {currentPage} / {totalPages}
-                  </span>
-                  <button
-                    disabled={currentPage >= totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredList.length} itemLabel="mục thiết lập" pageSizeOptions={[25, 50]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
           </div>
 
         </div>

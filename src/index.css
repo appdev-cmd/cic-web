@@ -123,6 +123,88 @@ body {
   }
 }
 
+.cms-shell .cms-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e2e8f0;
+  background: rgb(248 250 252 / 0.8);
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.dark .cms-shell .cms-list-footer {
+  border-color: #1e293b;
+  background: rgb(30 41 59 / 0.5);
+}
+
+.cms-shell .cms-list-summary {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.cms-shell .cms-pagination-controls,
+.cms-shell .cms-page-size,
+.cms-shell .cms-page-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cms-shell .cms-page-size select,
+.cms-shell .cms-page-navigation button {
+  height: 2rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: white;
+}
+
+.cms-shell .cms-page-size select {
+  min-width: 4rem;
+  padding: 0 0.5rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.cms-shell .cms-page-navigation button {
+  display: inline-flex;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+}
+
+.cms-shell .cms-page-navigation button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.cms-shell .cms-page-navigation button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+@media (max-width: 639px) {
+  .cms-shell .cms-list-footer,
+  .cms-shell .cms-pagination-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cms-shell .cms-list-summary {
+    text-align: center;
+  }
+
+  .cms-shell .cms-page-size,
+  .cms-shell .cms-page-navigation {
+    justify-content: space-between;
+  }
+}
+
 .cms-sticky-action {
   position: sticky;
   top: calc(var(--cms-header-height) + var(--cms-sticky-gap));

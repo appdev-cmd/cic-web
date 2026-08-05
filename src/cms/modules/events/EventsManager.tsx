@@ -705,25 +705,8 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         </div>
 
         {/* FOOTER PAGINATION SUMMARY */}
-        <div className="p-4 bg-slate-50/80 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <span>
-            Hiển thị <strong>{filteredEvents.length}</strong> / <strong>{events.length}</strong> sự kiện
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              disabled
-              className="p-1 rounded-lg border border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="font-bold text-slate-800 dark:text-slate-200">Trang 1 / 1</span>
-            <button
-              disabled
-              className="p-1 rounded-lg border border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+        <div className="cms-list-footer">
+          <p className="cms-list-summary">Hiển thị <strong>{filteredEvents.length}</strong> trong <strong>{events.length}</strong> sự kiện</p>
         </div>
       </div>
     </div>
