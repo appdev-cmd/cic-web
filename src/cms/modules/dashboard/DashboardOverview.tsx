@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  LayoutDashboard,
   Package,
   Newspaper,
   FileText,
@@ -122,35 +123,44 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       )}
 
       {/* 1. PAGE HEADER */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="p-3.5 bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-2xl shadow-md shadow-orange-500/20 shrink-0">
-            <Sparkles className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                TỔNG QUAN
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Tổng quan
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Màn hình trung tâm tổng hợp thông số vận hành, yêu cầu xử lý và lịch sử hoạt động CIC Technology
-            </p>
-          </div>
-        </div>
+      <div className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xs">
+        {/* Decorative subtle background accents */}
+        <div className="absolute -right-12 -top-12 w-60 h-60 bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-1/3 -bottom-12 w-40 h-40 bg-orange-500/5 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Right Header Actions */}
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <button
-            onClick={() => setIsCustomizerOpen(true)}
-            className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
-          >
-            <Sliders className="w-4 h-4 text-orange-500" />
-            <span>Tùy chỉnh</span>
-          </button>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="flex items-center gap-4">
+            {/* Crafted Dashboard Icon Container */}
+            <div className="relative shrink-0 group">
+              <div className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 ring-4 ring-orange-500/10 dark:ring-orange-500/20 group-hover:scale-105 transition-transform duration-300">
+                <LayoutDashboard className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-xs" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-xs" title="Hệ thống đang hoạt động bình thường">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              </div>
+            </div>
+
+            <div>
+              {/* Title & Description */}
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                Tổng Quan Vận Hành
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                Trung tâm giám sát thông số thời gian thực, tiếp nhận yêu cầu tư vấn và theo dõi nhật ký hoạt động CIC Technology
+              </p>
+            </div>
+          </div>
+
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
+            <button
+              onClick={() => setIsCustomizerOpen(true)}
+              className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs active:scale-95"
+            >
+              <Sliders className="w-4 h-4 text-orange-500" />
+              <span>Tùy chỉnh giao diện</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -212,6 +222,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     Thao tác nhanh hệ thống
                   </h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                    QUICK ACTIONS
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-400 hidden sm:inline">Phím tắt: Ctrl + K để mở Command Palette</span>

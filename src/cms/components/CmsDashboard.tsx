@@ -167,7 +167,10 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [activePath, setActivePath] = useState(() => window.location.pathname || '/cms/dashboard');
+  const [activePath, setActivePath] = useState(() => {
+    const p = window.location.pathname;
+    return p && p.startsWith('/cms') && p !== '/cms' ? p : '/cms/dashboard';
+  });
   const [currentPageTitle, setCurrentPageTitle] = useState('Tổng quan CMS');
 
   // Command Palette & Right Drawer

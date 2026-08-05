@@ -71,9 +71,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         </button>
 
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={onSwitchToWebsite}>
-          <div className="w-8 h-8 rounded-lg bg-orange-600 text-white font-black flex items-center justify-center text-base shadow-sm tracking-tighter">
-            CIC
-          </div>
+          <img src="/LOGO - 1990-08.png" alt="CIC Logo" className="h-9 w-auto object-contain shrink-0" />
           <div className="hidden sm:flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">

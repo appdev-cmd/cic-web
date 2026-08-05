@@ -32,9 +32,7 @@ import { TermsOfUseView } from '@web/components/TermsOfUseView';
 import { SearchView } from '@web/components/SearchView';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'cms'>(() =>
-    window.location.pathname.startsWith('/cms') ? 'cms' : 'home'
-  );
+  const [currentView, setCurrentView] = useState<'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'cms'>('cms');
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
