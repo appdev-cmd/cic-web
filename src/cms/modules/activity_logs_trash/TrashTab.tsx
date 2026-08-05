@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { TrashedItem, TrashCategory } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface TrashTabProps {
   items: TrashedItem[];
@@ -170,37 +172,16 @@ export const TrashTab: React.FC<TrashTabProps> = ({
       </div>
 
       {/* BULK SELECTION BAR */}
-      {selectedItemIds.length > 0 && (
-        <div className="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center justify-between text-xs animate-in fade-in duration-200">
-          <div className="font-bold">
-            Đã chọn <strong>{selectedItemIds.length}</strong> mục đối tượng
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
+      <CmsBulkActionBar selectedCount={selectedItemIds.length} itemLabel="mục đã xóa" onClear={() => setSelectedItemIds([])} actions={[
+        { label: 'Phục hồi', icon: RotateCcw, variant: 'primary', onClick: () => {
                 onBulkRestore(selectedItemIds);
                 setSelectedItemIds([]);
-              }}
-              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Phục hồi Hàng loạt</span>
-            </button>
-
-            <button
-              onClick={() => {
+              } },
+        { label: 'Xóa vĩnh viễn', icon: Trash2, variant: 'danger', onClick: () => {
                 onBulkDelete(selectedItemIds);
                 setSelectedItemIds([]);
-              }}
-              className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center gap-1.5 cursor-pointer"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Xóa Vĩnh viễn Hàng loạt</span>
-            </button>
-          </div>
-        </div>
-      )}
+              } },
+      ]} />
 
       {/* ITEMS DATA TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
@@ -209,11 +190,11 @@ export const TrashTab: React.FC<TrashTabProps> = ({
             <thead>
               <tr className="bg-slate-100/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
                 <th className="py-3 px-4 w-10 text-center">
-                  <input
-                    type="checkbox"
+                  <CmsSelectionCheckbox
                     checked={selectedItemIds.length === filteredItems.length && filteredItems.length > 0}
+                    indeterminate={selectedItemIds.length > 0 && selectedItemIds.length < filteredItems.length}
                     onChange={toggleSelectAll}
-                    className="accent-orange-500 cursor-pointer"
+                    label="Chọn tất cả mục trong thùng rác"
                   />
                 </th>
                 <th className="py-3 px-4">Tên Đối tượng</th>
@@ -243,11 +224,10 @@ export const TrashTab: React.FC<TrashTabProps> = ({
                       }`}
                     >
                       <td className="py-3.5 px-4 text-center">
-                        <input
-                          type="checkbox"
+                        <CmsSelectionCheckbox
                           checked={isSelected}
                           onChange={() => toggleSelectItem(item.id)}
-                          className="accent-orange-500 cursor-pointer"
+                          label={`Chọn mục ${item.title}`}
                         />
                       </td>
 

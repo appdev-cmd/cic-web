@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { TranslationItem, TranslationStatus } from './types';
 import { validatePlaceholders } from './utils';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface LocalizationListViewProps {
   items: TranslationItem[];
@@ -31,6 +33,7 @@ interface LocalizationListViewProps {
   onOpenSourceDiff: (item: TranslationItem) => void;
   onBulkAssign: () => void;
   onBulkStatus: (status: TranslationStatus) => void;
+  onClearSelection: () => void;
   currentUserId: string;
 }
 
@@ -44,6 +47,7 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
   onOpenSourceDiff,
   onBulkAssign,
   onBulkStatus,
+  onClearSelection,
   currentUserId,
 }) => {
   // Density mode state
@@ -142,41 +146,11 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
   return (
     <div className="space-y-3">
       {/* BULK SELECTION ACTION TOOLBAR */}
-      {selectedIds.length > 0 && (
-        <div className="bg-slate-900 text-white rounded-2xl p-3 px-4 flex flex-wrap items-center justify-between gap-3 shadow-xl animate-in fade-in slide-in-from-top-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-[11px]">
-              {selectedIds.length}
-            </span>
-            <span className="font-semibold">mục đã chọn trong danh sách</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onBulkAssign}
-              className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Phân công hàng loạt</span>
-            </button>
-
-            <button
-              onClick={() => onBulkStatus('review')}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 transition-colors cursor-pointer"
-            >
-              Gửi Chờ Review
-            </button>
-
-            <button
-              onClick={() => onBulkStatus('complete')}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors cursor-pointer"
-            >
-              Đánh dấu Hoàn thành
-            </button>
-
-          </div>
-        </div>
-      )}
+      <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="nội dung dịch" onClear={onClearSelection} actions={[
+        { label: 'Phân công', onClick: onBulkAssign, icon: UserCheck, variant: 'primary' },
+        { label: 'Chờ duyệt', onClick: () => onBulkStatus('review'), icon: Clock },
+        { label: 'Hoàn thành', onClick: () => onBulkStatus('complete'), icon: CheckCircle2 },
+      ]} />
 
       {/* DENSITY & PAGINATION TOP BAR */}
       <div className="flex items-center justify-between text-xs text-slate-500 px-1">
@@ -228,11 +202,11 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-[10px]">
                 <th className="p-3.5 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800 z-10">
-                  <input
-                    type="checkbox"
+                  <CmsSelectionCheckbox
                     checked={paginatedItems.length > 0 && selectedIds.length === paginatedItems.length}
+                    indeterminate={selectedIds.length > 0 && selectedIds.length < paginatedItems.length}
                     onChange={onToggleSelectAll}
-                    className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                    label="Chọn tất cả nội dung dịch trên trang"
                   />
                 </th>
                 <th className="p-3.5 min-w-[200px] sticky left-10 bg-slate-50 dark:bg-slate-800 z-10 border-r border-slate-200/60 dark:border-slate-800/60">
@@ -270,11 +244,10 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
                         }`}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <input
-                          type="checkbox"
+                        <CmsSelectionCheckbox
                           checked={isSelected}
                           onChange={() => onToggleSelectOne(item.id)}
-                          className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                          label={`Chọn nội dung ${item.key}`}
                         />
                       </td>
 

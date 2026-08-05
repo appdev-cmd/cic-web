@@ -614,6 +614,7 @@ export const LocalizationManager: React.FC = () => {
             onOpenSourceDiff={(item) => setDiffItem(item)}
             onBulkAssign={() => setIsBatchAssignOpen(true)}
             onBulkStatus={handleBulkStatus}
+            onClearSelection={() => setSelectedIds([])}
             currentUserId={CURRENT_LOCALIZATION_USER_ID}
           />
         </div>

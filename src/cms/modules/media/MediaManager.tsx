@@ -42,6 +42,7 @@ import {
 import type { MediaModuleData } from '../../data/MediaDataSource';
 import { MediaGridView } from './MediaGridView';
 import { MediaListView } from './MediaListView';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { AssetDetailDrawer } from './AssetDetailDrawer';
 import { AlbumsView } from './AlbumsView';
 import { UploadQueueDrawer } from './UploadQueueDrawer';
@@ -485,22 +486,9 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
             </div>
 
             {/* Bulk Actions */}
-            {selectedAssetIds.length > 0 && (
-              <div className="bg-orange-950 text-white p-3 rounded-xl flex items-center justify-between animate-in fade-in duration-150">
-                <span className="text-xs font-bold">
-                  Đã chọn {selectedAssetIds.length} tệp media
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBulkDelete}
-                    className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" /> Thùng Rác Hàng Loạt
-                  </button>
-                </div>
-              </div>
-            )}
+            <CmsBulkActionBar selectedCount={selectedAssetIds.length} itemLabel="tệp media" onClear={() => setSelectedAssetIds([])} actions={[
+              { label: 'Chuyển vào thùng rác', onClick: handleBulkDelete, icon: Trash2, variant: 'danger' },
+            ]} />
 
             {/* View Render */}
             {viewMode === 'grid' ? (

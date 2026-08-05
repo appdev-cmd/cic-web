@@ -14,6 +14,7 @@ import {
   Download,
 } from 'lucide-react';
 import { MediaAsset } from './types';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface MediaGridViewProps {
   assets: MediaAsset[];
@@ -114,11 +115,10 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
                   isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                 }`}
               >
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isSelected}
                   onChange={() => onToggleSelectAsset(asset.id)}
-                  className="w-5 h-5 rounded border-slate-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                  label={`Chọn tệp ${asset.title}`}
                 />
               </div>
 

@@ -25,6 +25,7 @@ import {
 import { BlockItem, MainTabType, SavedFilterView, ScopeRule, BlockVersion, ConflictIssue } from './types';
 import type { ContentBlocksModuleData } from '../../data/PresentationDataSource';
 import { ContentBlocksListView } from './ContentBlocksListView';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { ContentBlocksPlacementView } from './ContentBlocksPlacementView';
 import { ContentBlockEditorDrawer } from './ContentBlockEditorDrawer';
 import { ScopePickerDrawer } from './ScopePickerDrawer';
@@ -424,30 +425,10 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
       </div>
 
       {/* Bulk Action Bar */}
-      {selectedBlockIds.length > 0 && (
-        <div className="bg-orange-950 text-white p-3 rounded-xl flex items-center justify-between animate-in fade-in duration-150">
-          <span className="text-xs font-bold">
-            Đã chọn {selectedBlockIds.length} khối nội dung
-          </span>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleBulkPublish}
-              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" /> Xuất Bản Hàng Loạt
-            </button>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
-            >
-              <Trash2 className="w-3.5 h-3.5" /> Thùng Rác
-            </button>
-          </div>
-        </div>
-      )}
+      <CmsBulkActionBar selectedCount={selectedBlockIds.length} itemLabel="khối nội dung" onClear={() => setSelectedBlockIds([])} actions={[
+        { label: 'Xuất bản', onClick: handleBulkPublish, icon: CheckCircle2, variant: 'primary' },
+        { label: 'Chuyển vào thùng rác', onClick: handleBulkDelete, icon: Trash2, variant: 'danger' },
+      ]} />
 
       {/* Main View Display */}
       {viewMode === 'list' ? (

@@ -20,6 +20,8 @@ import { EmailTemplatesFormView } from './EmailTemplatesFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 export const EmailTemplatesManager: React.FC = () => {
   // Templates State
@@ -312,42 +314,15 @@ export const EmailTemplatesManager: React.FC = () => {
                 <span>
                   Hiển thị: <strong>{filteredTemplates.length}</strong> / {templates.length} mẫu email
                 </span>
-                {selectedIds.length > 0 && (
-                  <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
-                    Đã chọn: {selectedIds.length} dòng
-                  </span>
-                )}
               </div>
 
               {/* Batch Action buttons - Only show when items are selected */}
-              {selectedIds.length > 0 && (
-                <div className="flex items-center flex-wrap gap-2">
-                  <button
-                    onClick={() => handleBatchSetPublished(true)}
-                    className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Xuất bản ({selectedIds.length})</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleBatchSetPublished(false)}
-                    className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100"
-                  >
-                    <EyeOff className="w-3.5 h-3.5" />
-                    <span>Ẩn ({selectedIds.length})</span>
-                  </button>
-
-                  <button
-                    onClick={handleTriggerDeleteBatch}
-                    className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-100"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Xóa ({selectedIds.length})</span>
-                  </button>
-                </div>
-              )}
             </div>
+            <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="mẫu email" onClear={() => setSelectedIds([])} actions={[
+              { label: 'Xuất bản', onClick: () => handleBatchSetPublished(true), icon: Eye, variant: 'primary' },
+              { label: 'Ẩn', onClick: () => handleBatchSetPublished(false), icon: EyeOff },
+              { label: 'Xóa', onClick: handleTriggerDeleteBatch, icon: Trash2, variant: 'danger' },
+            ]} />
           </div>
 
           {/* TABLE LIST */}
@@ -358,16 +333,7 @@ export const EmailTemplatesManager: React.FC = () => {
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     {/* Checkbox Header */}
                     <th className="p-3.5 w-10 text-center">
-                      <button
-                        onClick={handleToggleSelectAll}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      >
-                        {selectedIds.length === filteredTemplates.length && filteredTemplates.length > 0 ? (
-                          <CheckSquare className="w-4 h-4 text-orange-600" />
-                        ) : (
-                          <Square className="w-4 h-4" />
-                        )}
-                      </button>
+                      <CmsSelectionCheckbox checked={filteredTemplates.length > 0 && selectedIds.length === filteredTemplates.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredTemplates.length} onChange={handleToggleSelectAll} label="Chọn tất cả mẫu email" />
                     </th>
                     <th className="p-3.5 min-w-[300px]">Tên mẫu email</th>
                     <th className="p-3.5 w-60">Loại email</th>
@@ -395,16 +361,7 @@ export const EmailTemplatesManager: React.FC = () => {
                         >
                           {/* Checkbox */}
                           <td className="p-3.5 text-center">
-                            <button
-                              onClick={() => handleToggleSelectRow(tpl.id)}
-                              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                            >
-                              {isSelected ? (
-                                <CheckSquare className="w-4 h-4 text-orange-600" />
-                              ) : (
-                                <Square className="w-4 h-4" />
-                              )}
-                            </button>
+                            <CmsSelectionCheckbox checked={isSelected} onChange={() => handleToggleSelectRow(tpl.id)} label={`Chọn mẫu email ${tpl.name}`} />
                           </td>
 
                           {/* Tên mẫu (bold) */}

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { BlockItem, BlockType } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface ContentBlocksListViewProps {
   blocks: BlockItem[];
@@ -67,11 +68,11 @@ export const ContentBlocksListView: React.FC<ContentBlocksListViewProps> = ({
           <thead>
             <tr className="bg-slate-50/80 dark:bg-slate-850 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 select-none">
               <th className="py-3 px-4 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isAllSelected}
+                  indeterminate={selectedBlockIds.length > 0 && !isAllSelected}
                   onChange={onToggleSelectAll}
-                  className="rounded text-orange-600 focus:ring-orange-500 w-4 h-4 cursor-pointer"
+                  label="Chọn tất cả khối nội dung"
                 />
               </th>
               <th className="py-3 px-4 min-w-[260px]">Tên Khối & Loại Hiển Thị</th>
@@ -99,11 +100,10 @@ export const ContentBlocksListView: React.FC<ContentBlocksListViewProps> = ({
                 >
                   {/* Sticky Checkbox */}
                   <td className="py-3.5 px-4 sticky left-0 bg-white dark:bg-slate-900 z-10">
-                    <input
-                      type="checkbox"
+                    <CmsSelectionCheckbox
                       checked={isSelected}
                       onChange={() => onToggleSelectBlock(b.id)}
-                      className="rounded text-orange-600 focus:ring-orange-500 w-4 h-4 cursor-pointer"
+                      label={`Chọn khối ${b.title}`}
                     />
                   </td>
 

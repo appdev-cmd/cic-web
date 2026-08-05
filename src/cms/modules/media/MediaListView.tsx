@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MediaAsset } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 interface MediaListViewProps {
   assets: MediaAsset[];
@@ -60,11 +61,11 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-850 z-10">
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isAllSelected}
+                  indeterminate={selectedAssetIds.length > 0 && !isAllSelected}
                   onChange={onToggleSelectAll}
-                  className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                  label="Chọn tất cả tệp media"
                 />
               </th>
               <th className="p-3 min-w-[220px]">Tệp Media & Tiêu đề</th>
@@ -94,11 +95,10 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
                 >
                   {/* Selection */}
                   <td className="p-3 text-center sticky left-0 bg-white dark:bg-slate-900 z-10">
-                    <input
-                      type="checkbox"
+                    <CmsSelectionCheckbox
                       checked={isSelected}
                       onChange={() => onToggleSelectAsset(asset.id)}
-                      className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                      label={`Chọn tệp ${asset.title}`}
                     />
                   </td>
 

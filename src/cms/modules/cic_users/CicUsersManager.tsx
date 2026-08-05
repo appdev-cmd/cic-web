@@ -31,6 +31,8 @@ import type { UsersGovernanceData } from '../../data/GovernanceDataSource';
 import { CicUserFormModal } from './CicUserFormModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
+import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data }) => {
   // Main Users State
@@ -371,39 +373,14 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
           <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
             <span>Hiển thị: <strong>{filteredUsers.length}</strong> / {users.length} tài khoản</span>
-            {selectedIds.length > 0 && (
-              <span className="px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg">
-                Đã chọn: {selectedIds.length} dòng
-              </span>
-            )}
           </div>
 
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleBatchStatusChange('active')}
-                className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <Unlock className="w-3.5 h-3.5" />
-                <span>Kích hoạt ({selectedIds.length})</span>
-              </button>
-              <button
-                onClick={() => handleBatchStatusChange('suspended')}
-                className="px-3 py-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Tạm khóa ({selectedIds.length})</span>
-              </button>
-              <button
-                onClick={() => handleBatchStatusChange('deactivated')}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <UserX className="w-3.5 h-3.5" />
-                <span>Ngừng dùng ({selectedIds.length})</span>
-              </button>
-            </div>
-          )}
         </div>
+        <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="tài khoản" onClear={() => setSelectedIds([])} actions={[
+          { label: 'Kích hoạt', onClick: () => handleBatchStatusChange('active'), icon: Unlock, variant: 'primary' },
+          { label: 'Tạm khóa', onClick: () => handleBatchStatusChange('suspended'), icon: Lock },
+          { label: 'Ngừng sử dụng', onClick: () => handleBatchStatusChange('deactivated'), icon: UserX, variant: 'danger' },
+        ]} />
       </div>
 
       {/* DATA TABLE VIEW */}
@@ -413,17 +390,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="p-3 w-10 text-center">
-                  <button
-                    type="button"
-                    onClick={handleSelectAll}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                  >
-                    {filteredUsers.length > 0 && selectedIds.length === filteredUsers.length ? (
-                      <CheckSquare className="w-4 h-4 text-orange-600" />
-                    ) : (
-                      <Square className="w-4 h-4" />
-                    )}
-                  </button>
+                  <CmsSelectionCheckbox checked={filteredUsers.length > 0 && selectedIds.length === filteredUsers.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredUsers.length} onChange={handleSelectAll} label="Chọn tất cả tài khoản" />
                 </th>
                 <th className="p-3 w-12 text-center">Avatar</th>
                 <th className="p-3">Tài khoản (Username)</th>
@@ -456,17 +423,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                     >
                       {/* Checkbox */}
                       <td className="p-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleSelectOne(user.id)}
-                          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        >
-                          {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-orange-600" />
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
+                        <CmsSelectionCheckbox checked={isSelected} onChange={() => handleSelectOne(user.id)} label={`Chọn tài khoản ${user.username}`} />
                       </td>
 
                       {/* Avatar */}
