@@ -33,7 +33,6 @@ import {
   SlaStatus,
   StaffMember,
 } from './types';
-import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ContactsModuleData } from '../../data/ContactsDataSource';
 import { filterContactRequests } from './utils';
 import { ContactListView } from './ContactListView';
@@ -43,13 +42,14 @@ import { ContactSpamDuplicateModal } from './ContactSpamDuplicateModal';
 import { ContactPiiAuditModal } from './ContactPiiAuditModal';
 
 interface ContactsManagerProps {
-  workspaceLocale: CmsLocale;
-  data: ContactsModuleData;
+  data?: ContactsModuleData;
+  staffMembers: StaffMember[];
+  currentUserId?: string;
 }
 
-export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocale, data }) => {
+export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMembers, currentUserId }) => {
   // Main Data State
-  const [contacts, setContacts] = useState<ContactRequest[]>(data.contacts);
+  const [contacts, setContacts] = useState<ContactRequest[]>(data?.contacts ?? []);
   const [activeTab, setActiveTab] = useState<MainTabType>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -110,7 +110,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
   // Tab count calculations
   const counts = useMemo(() => {
     const all = contacts.filter((c) => c.status !== 'spam' && c.status !== 'duplicate' && !c.deleted_at).length;
-    const myQueue = contacts.filter((c) => c.owner_id === data.currentUserId && c.status !== 'closed' && !c.deleted_at).length;
+    const myQueue = contacts.filter((c) => c.owner_id === currentUserId && c.status !== 'closed' && !c.deleted_at).length;
     const unassigned = contacts.filter((c) => !c.owner_id && c.status !== 'spam' && c.status !== 'duplicate' && !c.deleted_at).length;
     const overdue = contacts.filter((c) => c.sla_status === 'overdue' && c.status !== 'resolved' && c.status !== 'closed' && !c.deleted_at).length;
     const general = contacts.filter((c) => c.source === 'general_contact' && !c.deleted_at).length;
@@ -124,11 +124,11 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
 
   // Apply tab filter on top of search/filter state
   const displayedContacts = useMemo(() => {
-    let result = filterContactRequests(contacts, filter, data.currentUserId ?? '');
+    let result = filterContactRequests(contacts, filter, currentUserId ?? '');
 
     switch (activeTab) {
       case 'my_queue':
-        result = result.filter((c) => c.owner_id === data.currentUserId && !c.deleted_at);
+        result = result.filter((c) => c.owner_id === currentUserId && !c.deleted_at);
         break;
       case 'unassigned':
         result = result.filter((c) => !c.owner_id && c.status !== 'spam' && c.status !== 'duplicate' && !c.deleted_at);
@@ -219,10 +219,10 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
     setContacts((prev) =>
       prev.map((c) => {
         if (c.id === contactId) {
-          const currentUser = data.staffMembers.find((staff) => staff.id === data.currentUserId);
+          const currentUser = staffMembers.find((staff) => staff.id === currentUserId);
           return {
             ...c,
-            owner_id: data.currentUserId,
+            owner_id: currentUserId,
             owner_name: currentUser?.name || 'Nguyễn Văn Minh',
             owner_avatar: currentUser?.avatar,
             assigned_team: currentUser?.team || 'Sales CAD/BIM',
@@ -263,7 +263,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
               ...c.internal_notes,
               {
                 id: `note_${Date.now()}`,
-                author_id: data.currentUserId ?? '',
+                author_id: currentUserId ?? '',
                 author_name: 'Nguyễn Văn Minh',
                 author_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
                 content: `Chuyển giao cho ${targetStaff.name}. Lý do: ${reason}`,
@@ -333,7 +333,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
         if (c.id === contactId) {
           const newNote = {
             id: `note_${Date.now()}`,
-            author_id: data.currentUserId ?? '',
+            author_id: currentUserId ?? '',
             author_name: 'Nguyễn Văn Minh',
             author_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
             content: noteContent,
@@ -456,7 +456,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
         selectedIds.includes(c.id)
           ? {
               ...c,
-              owner_id: data.currentUserId,
+              owner_id: currentUserId,
               owner_name: 'Nguyễn Văn Minh',
               assigned_team: 'Sales CAD/BIM',
               status: c.status === 'new' ? 'assigned' : c.status,
@@ -492,11 +492,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
           </button>
         </div>
       )}
-
-      <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300">
-        <span>Hàng đợi liên hệ dùng chung toàn hệ thống; ngôn ngữ nguồn được giữ trên từng yêu cầu.</span>
-        <span className="font-bold uppercase">Workspace {workspaceLocale}</span>
-      </div>
 
       {/* 1. HEADER STATS SUMMARY CARDS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -722,7 +717,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
                 <option value="all">Tất cả nhân sự</option>
                 <option value="me">Chỉ việc của tôi</option>
                 <option value="unassigned">Chưa phân công (Unassigned)</option>
-                {data.staffMembers.map((s) => (
+                {staffMembers.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.team})
                   </option>
@@ -790,7 +785,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
           setIsDetailOpen(false);
           setSelectedContact(null);
         }}
-        currentUserId={data.currentUserId ?? ''}
+        currentUserId={currentUserId ?? ''}
         onClaim={handleClaim}
         onOpenReassign={(c) => setReassignContact(c)}
         onUpdateStatus={handleUpdateStatus}
@@ -809,7 +804,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ workspaceLocal
       <ContactReassignModal
         isOpen={!!reassignContact}
         contact={reassignContact}
-        staffMembers={data.staffMembers}
+        staffMembers={staffMembers}
         onClose={() => setReassignContact(null)}
         onConfirmReassign={handleConfirmReassign}
       />

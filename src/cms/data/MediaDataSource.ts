@@ -1,6 +1,6 @@
 import type { MediaAlbum, MediaAsset, MediaFolder, MediaIssue } from '../modules/media/types';
+import type { CmsLocale } from './CmsDataSource';
 
-/** Binary assets are shared; localized metadata is edited in an explicit workspace locale. */
 export interface MediaModuleData {
   assets: MediaAsset[];
   albums: MediaAlbum[];
@@ -10,5 +10,5 @@ export interface MediaModuleData {
 }
 
 export interface MediaDataSource {
-  sharedLibrary: MediaModuleData;
+  mediaByLocale: Partial<Record<CmsLocale, MediaModuleData>>;
 }

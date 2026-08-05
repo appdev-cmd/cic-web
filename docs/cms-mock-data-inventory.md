@@ -18,8 +18,8 @@
 | Nội dung | News, Static Pages, Events, Services, Content Blocks | Adapter theo locale workspace; VI/EN là dataset độc lập |
 | Catalog | Products, Product Settings | Adapter theo locale và taxonomy policy; không mặc định dùng chung record |
 | Presentation | Menu, Banners | Adapter theo site + locale; Draft/Live độc lập từng locale |
-| Media | Media mock | Chờ quyết định asset global hay locale-aware; picker phải giữ locale context |
-| Customer operations | Contacts | Một operational record, giữ source locale; không nhân bản contact theo VI/EN |
+| Media | Media mock | Record album/ảnh theo locale; lớp file storage có thể dùng chung |
+| Customer operations | Contacts | Hàng đợi VI/EN độc lập; staff và current user dùng chung |
 | UI localization | Localization | Chỉ Source–Target cho UI strings; không làm nguồn cho business records |
 | Governance | Users, Permission, Configuration, Audit/Trash | Identity global; permission/config/audit có locale scope theo policy |
 | Email templates | Email Templates | Giữ ở trạng thái VERIFY; chưa đưa vào navigation production |
@@ -55,9 +55,9 @@
 - `src/cms/data/demoCatalogDataSource.ts`: gom fixture catalog/master data vào adapter VI; Products, Product Settings và Usage Impact không còn import fixture trực tiếp.
 - `src/cms/data/PresentationDataSource.ts`: contract theo locale cho Menu, Banners và Content Blocks.
 - `src/cms/data/demoPresentationDataSource.ts`: gom fixture presentation vào adapter VI; manager và drawer con không còn import fixture trực tiếp.
-- `src/cms/data/MediaDataSource.ts`: contract thư viện asset dùng chung; localized metadata sử dụng workspace locale hiện hành.
-- `src/cms/data/demoMediaDataSource.ts`: adapter demo cho shared library; Media manager không còn import fixture trực tiếp.
-- `src/cms/data/ContactsDataSource.ts`: contract hàng đợi vận hành dùng chung, mỗi contact có `source_locale` bất biến.
+- `src/cms/data/MediaDataSource.ts`: contract record album/ảnh độc lập theo workspace locale.
+- `src/cms/data/demoMediaDataSource.ts`: adapter demo theo locale; Media manager không còn import fixture trực tiếp.
+- `src/cms/data/ContactsDataSource.ts`: contract hàng đợi độc lập theo workspace; staff/current user là global.
 - `src/cms/data/demoContactsDataSource.ts`: adapter demo cho contacts/staff/current user; manager và reassign modal không còn import fixture.
 - Bước tiếp theo: tạo governance boundary cho Users, Permission, Configuration và Audit/Trash.
 - Runtime contract đã được bổ sung tại `docs/cms-locale-runtime-contract.md`: Dashboard EN thiếu dữ liệu hiển thị empty state và không fallback KPI/list/chart VI.
