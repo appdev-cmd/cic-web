@@ -22,6 +22,7 @@ import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 export const EmailTemplatesManager: React.FC = () => {
   // Templates State
@@ -435,6 +436,7 @@ export const EmailTemplatesManager: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            <CmsListFooter visibleCount={filteredTemplates.length} totalCount={templates.length} itemLabel="mẫu email" />
           </div>
         </>
       )}

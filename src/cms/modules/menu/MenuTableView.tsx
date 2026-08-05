@@ -16,6 +16,7 @@ import {
   Search,
 } from 'lucide-react';
 import { MenuItem } from './types';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface MenuTableViewProps {
   items: MenuItem[];
@@ -202,6 +203,7 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
           </tbody>
         </table>
       </div>
+      <CmsListFooter visibleCount={filteredData.length} totalCount={flatData.length} itemLabel="mục menu" />
     </div>
   );
 };

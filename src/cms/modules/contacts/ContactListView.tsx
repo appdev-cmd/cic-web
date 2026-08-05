@@ -19,6 +19,7 @@ import { ContactRequest, ContactStatus, PriorityLevel, StaffMember } from './typ
 import { getPriorityBadge, getSlaRemainingText, getSourceBadge, getStatusBadge, maskEmail, maskName } from './utils';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface ContactListViewProps {
   contacts: ContactRequest[];
@@ -301,6 +302,7 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
             </tbody>
           </table>
         </div>
+        <CmsListFooter visibleCount={contacts.length} itemLabel="yêu cầu" />
       </div>
 
       {/* STICKY BULK ACTION BAR WHEN ITEMS ARE SELECTED */}

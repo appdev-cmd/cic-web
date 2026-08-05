@@ -43,6 +43,7 @@ import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { TreeView } from './TreeView';
 import { UsedByDrawer } from './UsedByDrawer';
@@ -755,6 +756,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
               </tbody>
             </table>
           </div>
+          <CmsListFooter visibleCount={filteredPages.length} totalCount={pages.length} itemLabel="trang nội dung" />
         </div>
       )}
 

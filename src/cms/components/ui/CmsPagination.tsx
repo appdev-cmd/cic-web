@@ -11,6 +11,20 @@ interface CmsPaginationProps {
   pageSizeOptions?: number[];
 }
 
+interface CmsListFooterProps {
+  visibleCount: number;
+  totalCount?: number;
+  itemLabel: string;
+  trailing?: React.ReactNode;
+}
+
+export const CmsListFooter: React.FC<CmsListFooterProps> = ({ visibleCount, totalCount = visibleCount, itemLabel, trailing }) => (
+  <footer className="cms-list-footer">
+    <p className="cms-list-summary">Hiển thị <strong>{visibleCount}</strong> trong <strong>{totalCount}</strong> {itemLabel}</p>
+    {trailing}
+  </footer>
+);
+
 export const CmsPagination: React.FC<CmsPaginationProps> = ({
   currentPage,
   pageSize,

@@ -18,6 +18,7 @@ import {
   ConfigValueRecord,
   SensitivityLevel,
 } from './types';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface SettingsTableViewProps {
   scopes: ConfigScope[];
@@ -231,6 +232,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
             </tbody>
           </table>
         </div>
+        <CmsListFooter visibleCount={filteredItems.length} totalCount={items.length} itemLabel="thiết lập" />
       </div>
     </div>
   );

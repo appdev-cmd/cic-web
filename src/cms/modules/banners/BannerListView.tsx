@@ -22,6 +22,7 @@ import {
 import { BannerContent, SavedFilterView, WorkflowStatus, EffectiveStatus, slideshowPurposeOptions } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface BannerListViewProps {
   items: BannerContent[];
@@ -338,6 +339,7 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
           </tbody>
         </table>
       </div>
+      <CmsListFooter visibleCount={items.length} itemLabel="slideshow" />
     </div>
   );
 };

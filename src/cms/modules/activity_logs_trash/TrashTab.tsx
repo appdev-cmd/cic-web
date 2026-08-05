@@ -19,6 +19,7 @@ import { TrashedItem, TrashCategory } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface TrashTabProps {
   items: TrashedItem[];
@@ -318,6 +319,7 @@ export const TrashTab: React.FC<TrashTabProps> = ({
             </tbody>
           </table>
         </div>
+        <CmsListFooter visibleCount={filteredItems.length} totalCount={items.length} itemLabel="mục đã xóa" />
       </div>
     </div>
   );

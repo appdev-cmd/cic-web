@@ -22,6 +22,7 @@ import {
 import { BlockItem, BlockType } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface ContentBlocksListViewProps {
   blocks: BlockItem[];
@@ -247,6 +248,7 @@ export const ContentBlocksListView: React.FC<ContentBlocksListViewProps> = ({
           </tbody>
         </table>
       </div>
+      <CmsListFooter visibleCount={blocks.length} itemLabel="khối nội dung" />
     </div>
   );
 };

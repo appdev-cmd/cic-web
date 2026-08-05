@@ -44,6 +44,7 @@ import { VersionHistoryDrawer } from './components/VersionHistoryDrawer';
 import { ActivityLogDrawer } from './components/ActivityLogDrawer';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 type ViewScopeTab = 'all' | 'my_work' | 'pending' | 'scheduled' | 'trash';
 
@@ -704,6 +705,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                 </tbody>
               </table>
             </div>
+            <CmsListFooter visibleCount={filteredArticles.length} totalCount={articles.length} itemLabel="bài viết" />
           </div>
         </>
       )}

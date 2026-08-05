@@ -16,6 +16,7 @@ import {
 import { MediaAsset } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface MediaListViewProps {
   assets: MediaAsset[];
@@ -252,6 +253,7 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
           </tbody>
         </table>
       </div>
+      <CmsListFooter visibleCount={assets.length} itemLabel="tệp media" />
     </div>
   );
 };

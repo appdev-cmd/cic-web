@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { AuditEvent, AuditCategory, AuditSeverity, SavedViewFilter } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsListFooter } from '../../components/ui/CmsPagination';
 
 interface AuditTabProps {
   logs: AuditEvent[];
@@ -321,6 +322,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
             </tbody>
           </table>
         </div>
+        <CmsListFooter visibleCount={filteredLogs.length} totalCount={logs.length} itemLabel="hoạt động" />
       </div>
     </div>
   );
