@@ -6,14 +6,22 @@ interface CmsPageHeaderProps {
   description?: string;
   meta?: React.ReactNode;
   actions?: React.ReactNode;
+  showStatus?: boolean;
 }
 
-export const CmsPageHeader: React.FC<CmsPageHeaderProps> = ({ icon, title, description, meta, actions }) => (
+export const CmsPageHeader: React.FC<CmsPageHeaderProps> = ({ icon, title, description, meta, actions, showStatus }) => (
   <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 sm:p-5">
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-orange-600 text-white shadow-sm shadow-orange-600/20 [&>svg]:size-5">
-          {icon}
+        <div className="relative shrink-0">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-orange-600 text-white shadow-sm shadow-orange-600/20 [&>svg]:size-5">
+            {icon}
+          </div>
+          {showStatus && (
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-2xs" title="Hệ thống đang hoạt động bình thường">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            </div>
+          )}
         </div>
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
