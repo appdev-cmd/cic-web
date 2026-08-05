@@ -100,7 +100,7 @@ Một template cho khách hàng không được tái sử dụng nguyên trạng
 
 ## 7. Nhóm biến được phép
 
-Tài liệu chỉ chốt nhóm dữ liệu; token cụ thể được quản lý trong Variable Catalog ở bước tiếp theo.
+Token cụ thể, phạm vi audience/event và cách xử lý dữ liệu thiếu được quản lý tại `docs/email-template-variable-catalog.md`.
 
 | Nhóm biến | Ví dụ ý nghĩa | Dùng cho |
 |---|---|---|
@@ -249,4 +249,3 @@ Các trạng thái email nằm trong timeline/communication status, không thay 
 7. Mức bằng chứng delivery từ nhà cung cấp email có sẵn hay chỉ biết dispatch accepted/failed.
 
 Các điểm chưa xác nhận không chặn thiết kế module Mẫu email, nhưng chặn việc bật gửi tự động tương ứng trong production.
-

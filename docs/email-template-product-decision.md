@@ -63,6 +63,7 @@ Gửi email thành công hoặc thất bại không tự động thay đổi own
 - Module 16 chỉ quản lý hạ tầng gửi email.
 - Cần tạo Product Specification riêng cho Mẫu email.
 - Ma trận sự kiện–người nhận–template–routing được quản lý tại `docs/email-event-template-routing-matrix.md` và phải được xác nhận trước khi triển khai tích hợp.
+- Danh mục token, phạm vi sử dụng và quy tắc dữ liệu thiếu được quản lý tại `docs/email-template-variable-catalog.md`.
 
 ## 7. Ngoài phạm vi quyết định này
 
