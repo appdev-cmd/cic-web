@@ -44,11 +44,8 @@ import {
   Search,
   RotateCcw,
   Inbox,
-  Star,
-  Pin,
-  PinOff,
 } from 'lucide-react';
-import { CmsMenuGroup, CmsMenuItem } from '../types';
+import { CmsMenuGroup } from '../types';
 
 interface CmsSidebarProps {
   isCollapsed: boolean;
@@ -131,14 +128,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     'menu_banners_slideshow',
   ]);
 
-  // Pinned/Favorite item IDs (Max 6)
-  const [pinnedItemIds, setPinnedItemIds] = useState<string[]>([
-    'menu_dashboard',
-    'menu_news',
-    'menu_products_group',
-    'menu_contact_messages',
-  ]);
-
   const [searchKeyword, setSearchKeyword] = useState('');
 
   const toggleGroup = (groupId: string) => {
@@ -156,19 +145,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     );
   };
 
-  const togglePinItem = (itemId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPinnedItemIds((prev) => {
-      if (prev.includes(itemId)) {
-        return prev.filter((id) => id !== itemId);
-      }
-      if (prev.length >= 6) {
-        return prev; // limit max 6 pinned
-      }
-      return [...prev, itemId];
-    });
-  };
-
   const getBadgeStyle = (variant?: 'danger' | 'warning' | 'info') => {
     switch (variant) {
       case 'danger':
@@ -180,16 +156,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
     }
   };
-
-  // Find all items across groups for quick lookup in pinned section
-  const allItems: CmsMenuItem[] = [];
-  menuGroups.forEach((g) => {
-    g.items.forEach((item) => {
-      allItems.push(item);
-    });
-  });
-
-  const pinnedItems = allItems.filter((i) => pinnedItemIds.includes(i.id));
 
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between select-none">
@@ -230,88 +196,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
 
       {/* Navigation Links Area */}
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4 custom-scrollbar">
-        {/* FAVORITE / PINNED SECTION */}
-        {!searchKeyword && pinnedItems.length > 0 && (
-          <div className="space-y-1 pb-2 border-b border-slate-200/80 dark:border-slate-800/80">
-            {!isCollapsed ? (
-              <div className="px-2 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <Star className="w-3 h-3 fill-orange-500 text-orange-500" />
-                  MỤC YÊU THÍCH ({pinnedItems.length}/6)
-                </span>
-              </div>
-            ) : (
-              <div className="w-full text-center py-1">
-                <Star className="w-3.5 h-3.5 mx-auto text-orange-500 fill-orange-500" />
-              </div>
-            )}
-
-            <div className="space-y-0.5">
-              {pinnedItems.map((item) => {
-                const isActive = activePath === item.path;
-                return (
-                  <div key={`pinned_${item.id}`} className="relative group">
-                    <div
-                      className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2.5 ${
-                        isActive
-                          ? 'bg-orange-600 text-white shadow-xs font-semibold'
-                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
-                      } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (item.path) {
-                            onSelectMenu(item.path, item.title);
-                            if (isMobileOpen) onCloseMobile();
-                          }
-                        }}
-                        className="flex-1 flex items-center gap-2.5 text-left min-w-0 bg-transparent border-0 p-0 cursor-pointer"
-                      >
-                        <span className={isActive ? 'text-white' : 'text-orange-500 dark:text-orange-400'}>
-                          {renderIcon(item.iconName, 'w-4 h-4')}
-                        </span>
-
-                        {!isCollapsed && (
-                          <span className="truncate flex-1 text-left">{item.title}</span>
-                        )}
-
-                        {!isCollapsed && item.badgeCount !== undefined && (
-                          <span
-                            className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full border ${getBadgeStyle(
-                              item.badgeVariant
-                            )} ${isActive ? 'bg-white/20 text-white border-transparent' : ''}`}
-                          >
-                            {item.badgeCount}
-                          </span>
-                        )}
-                      </button>
-
-                      {!isCollapsed && (
-                        <button
-                          type="button"
-                          onClick={(e) => togglePinItem(item.id, e)}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 transition-opacity cursor-pointer shrink-0"
-                          title="Bỏ ghim"
-                        >
-                          <PinOff className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Tooltip when Collapsed */}
-                    {isCollapsed && (
-                      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-medium rounded shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 border border-slate-700">
-                        {item.title} (Yêu thích)
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* GROUPS LIST */}
         {menuGroups.map((group) => {
           const isGroupOpen = expandedGroupIds.includes(group.id);
@@ -352,7 +236,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                   {(searchKeyword ? filteredItems : group.items).map((item) => {
                     const hasChildren = !!item.children && item.children.length > 0;
                     const isSubExpanded = expandedSubItemIds.includes(item.id) || !!searchKeyword;
-                    const isPinned = pinnedItemIds.includes(item.id);
 
                     // Check if parent or any child is active
                     const isParentActive = activePath === item.path;
@@ -403,22 +286,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                               </span>
                             )}
                           </button>
-
-                          {/* Pin Toggle Button */}
-                          {!isCollapsed && (
-                            <button
-                              type="button"
-                              onClick={(e) => togglePinItem(item.id, e)}
-                              className={`p-0.5 transition-opacity cursor-pointer shrink-0 ${
-                                isPinned
-                                  ? 'text-orange-300 opacity-100'
-                                  : 'opacity-0 group-hover:opacity-100 text-slate-400 hover:text-orange-500'
-                              }`}
-                              title={isPinned ? 'Bỏ ghim khỏi Mục yêu thích' : 'Ghim vào Mục yêu thích'}
-                            >
-                              <Pin className={`w-3 h-3 ${isPinned ? 'fill-orange-400 text-orange-400' : ''}`} />
-                            </button>
-                          )}
 
                           {/* Nested Sub-Menu Toggle Arrow */}
                           {!isCollapsed && hasChildren && (

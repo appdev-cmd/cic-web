@@ -59,7 +59,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 h-15 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors px-4 lg:px-6 flex items-center justify-between shadow-xs">
+    <header className="sticky top-0 z-40 h-15 w-full overflow-visible bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors px-3 sm:px-4 lg:px-6 flex items-center justify-between shadow-xs">
       {/* Left: Mobile Menu Toggle + Logo */}
       <div className="flex items-center gap-3">
         <button
@@ -74,7 +74,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
           <div className="w-8 h-8 rounded-lg bg-orange-600 text-white font-black flex items-center justify-center text-base shadow-sm tracking-tighter">
             CIC
           </div>
-          <div className="flex flex-col">
+          <div className="hidden sm:flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">
                 CIC CMS
@@ -104,7 +104,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
       </div>
 
       {/* Right Controls: Quick Action, Notifs, Lang, Theme, User */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex min-w-0 items-center gap-1 sm:gap-2 lg:gap-3">
         {/* Mobile Search trigger */}
         <button
           onClick={onOpenCommandPalette}
@@ -269,7 +269,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         {/* Workspace locale switch. UI language is a separate user preference. */}
         <button
           onClick={onToggleWorkspaceLocale}
-          className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+          className="hidden sm:flex px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors items-center gap-1 cursor-pointer"
           title="Chuyển vùng dữ liệu CMS"
           aria-label={`Vùng dữ liệu hiện tại: ${workspaceLocale === 'vi' ? 'Tiếng Việt' : 'English'}`}
         >
@@ -280,7 +280,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         {/* Theme Toggle Light/Dark */}
         <button
           onClick={onToggleTheme}
-          className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="hidden sm:inline-flex p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           title={isDarkMode ? 'Chuyển Chế độ Sáng' : 'Chuyển Chế độ Tối'}
         >
           {isDarkMode ? (
@@ -291,7 +291,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         </button>
 
         {/* User Menu Avatar */}
-        <div className="relative">
+        <div className="relative hidden sm:block">
           <button
             onClick={() => {
               setIsUserMenuOpen(!isUserMenuOpen);

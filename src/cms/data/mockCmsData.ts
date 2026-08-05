@@ -373,13 +373,12 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Sản phẩm',
         iconName: 'Package',
         path: '/cms/products',
-        children: [
-          {
-            id: 'menu_product_settings',
-            title: 'Thiết lập sản phẩm',
-            path: '/cms/product-settings',
-          },
-        ],
+      },
+      {
+        id: 'menu_product_settings',
+        title: 'Thiết lập sản phẩm',
+        iconName: 'FolderTree',
+        path: '/cms/product-settings',
       },
       {
         id: 'menu_services',

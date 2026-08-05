@@ -348,17 +348,17 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Cấu hình Hệ thống (System Configuration & Site Scopes)
+              Cấu hình hệ thống
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Hợp nhất Cấu hình chung, SEO, Thương hiệu & enjiCAD theo Site/Scope với Kế thừa, Quản lý Nháp (Draft), Review & Phục hồi
+              Quản lý cấu hình chung, tìm kiếm, thương hiệu, enjiCAD và các kết nối của hệ thống.
             </p>
           </div>
         </div>
       </div>
 
       {/* MODULE TOP NAVIGATION TABS */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800 text-xs font-bold">
+      <div className="flex flex-nowrap md:flex-wrap items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 text-xs font-bold [scrollbar-width:thin] snap-x">
         <button
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
@@ -368,7 +368,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span>Overview Tổng quan</span>
+          <span>Tổng quan</span>
         </button>
 
         <button
@@ -380,7 +380,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           }`}
         >
           <Sliders className="w-4 h-4" />
-          <span>Editor Theo Site/Scope</span>
+          <span>Chỉnh sửa cấu hình</span>
         </button>
 
         <button
@@ -392,7 +392,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           }`}
         >
           <TableIcon className="w-4 h-4" />
-          <span>Bảng Cấu hình (Data Table)</span>
+          <span>Bảng cấu hình</span>
         </button>
 
         <button

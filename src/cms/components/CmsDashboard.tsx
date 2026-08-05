@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { CheckCircle2, RotateCcw } from 'lucide-react';
 
 import { CmsHeader } from './CmsHeader';
@@ -167,7 +167,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [activePath, setActivePath] = useState('/cms/dashboard');
+  const [activePath, setActivePath] = useState(() => window.location.pathname || '/cms/dashboard');
   const [currentPageTitle, setCurrentPageTitle] = useState('Tổng quan CMS');
 
   // Command Palette & Right Drawer
@@ -184,6 +184,18 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [registrations, setRegistrations] = useState<ProductRegistration[]>(demoCmsDataSource.dashboardByLocale.vi?.productRegistrations ?? []);
   const [pendingItems, setPendingItems] = useState<PendingContent[]>(demoCmsDataSource.dashboardByLocale.vi?.pendingContents ?? []);
   const activeModule = resolveCmsModule(activePath);
+
+  useEffect(() => {
+    const handlePopState = () => setActivePath(window.location.pathname || '/cms/dashboard');
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateToCmsPath = (path: string, title: string) => {
+    window.history.pushState({}, '', path);
+    setActivePath(path);
+    setCurrentPageTitle(title);
+  };
 
   // Status updates handler
   const handleUpdateStatus = (type: string, id: string, newStatus: string) => {
@@ -228,8 +240,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         activePath={activePath}
         onSelectMenu={(path, title) => {
-          setActivePath(path);
-          setCurrentPageTitle(title);
+          navigateToCmsPath(path, title);
         }}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
@@ -313,8 +324,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
               workspaceLocale={workspaceLocale}
               data={dashboardData}
               onNavigate={(path, title) => {
-                setActivePath(path);
-                setCurrentPageTitle(title);
+                navigateToCmsPath(path, title);
               }}
               onOpenDrawerItem={(type, data) => setDrawerItem({ type, data })}
             />
@@ -327,8 +337,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
               <button
                 type="button"
                 onClick={() => {
-                  setActivePath('/cms/dashboard');
-                  setCurrentPageTitle('Tổng quan CMS');
+                  navigateToCmsPath('/cms/dashboard', 'Tổng quan CMS');
                 }}
                 className="mt-5 rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
               >
@@ -348,8 +357,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         onSelectAction={(path, label) => {
-          setActivePath(path);
-          setCurrentPageTitle(label);
+          navigateToCmsPath(path, label);
           setToastMessage(`Đã chuyển sang: ${label}`);
           setTimeout(() => setToastMessage(null), 3000);
         }}

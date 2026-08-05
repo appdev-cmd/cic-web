@@ -98,32 +98,32 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* LEFT: SCOPE SWITCHER */}
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-start gap-3">
             <span className="p-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl shrink-0">
               <Globe className="w-6 h-6" />
             </span>
-            <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">Đang chỉnh sửa Phạm vi Cấu hình (Scope):</div>
-              <div className="flex items-center gap-2 mt-0.5">
+            <div className="min-w-0 flex-1">
+              <div className="text-xs text-slate-500 dark:text-slate-400">Phạm vi đang chỉnh sửa:</div>
+              <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
                 <select
                   value={activeScopeId}
                   onChange={(e) => onSelectScope(e.target.value as any)}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+                  className="min-w-0 max-w-full flex-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
                 >
                   {scopes.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name} ({s.domain}) {s.isDefault ? '[SCOPE GỐC]' : ''}
+                      {s.name} — {s.domain} {s.isDefault ? '[Mặc định]' : ''}
                     </option>
                   ))}
                 </select>
 
                 <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  LIVE {activeScope.liveVersion}
+                  Đang dùng {activeScope.liveVersion}
                 </span>
 
                 {draftModifiedCount > 0 && (
                   <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
-                    Draft ({draftModifiedCount} thay đổi)
+                    Bản nháp: {draftModifiedCount} thay đổi
                   </span>
                 )}
               </div>
@@ -138,7 +138,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
             >
               <GitCompare className="w-4 h-4 text-blue-500" />
-              <span>So sánh (Draft vs Live)</span>
+              <span>So sánh thay đổi</span>
             </button>
 
             <button
@@ -146,7 +146,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               className="px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer"
             >
               <Save className="w-4 h-4 text-orange-400" />
-              <span>Lưu Bản nháp (Draft)</span>
+              <span>Lưu bản nháp</span>
             </button>
 
             <button
