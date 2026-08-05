@@ -33,6 +33,8 @@ import { ContentBlockPreviewModal } from './ContentBlockPreviewModal';
 import { ConflictGuardModal } from './ConflictGuardModal';
 import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { DuplicateModal } from './DuplicateModal';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 interface ContentBlocksManagerProps { data: ContentBlocksModuleData; }
 
@@ -298,40 +300,29 @@ export const ContentBlocksManager: React.FC<ContentBlocksManagerProps> = ({ data
       )}
 
       {/* Module Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Quản lý khối nội dung
-            </h1>
-            <span className="text-xs font-bold uppercase bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 px-2.5 py-0.5 rounded-full border border-orange-200 dark:border-orange-900">
-              KHỐI NỘI DUNG
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Quản trị các đơn vị nội dung tái sử dụng (Hero, Banner, CTA, FAQ, Feature Grid), phân vùng vị trí, phạm vi hiển thị và quản lý phiên bản.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
+      <CmsPageHeader
+        icon={<Grid />}
+        title="Khối nội dung"
+        description="Quản lý các khối nội dung dùng lại, vị trí hiển thị, phạm vi áp dụng và phiên bản."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{blocks.filter((block) => !block.deleted_at).length} khối</span>}
+        actions={<>
+          <CmsButton
             onClick={() => setIsConflictGuardOpen(true)}
-            className="px-3 py-2 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+            variant="secondary"
+            leadingIcon={<ShieldAlert />}
           >
-            <ShieldAlert className="w-4 h-4 text-amber-500" />
-            <span>Audit Xung Đột ({issues.length})</span>
-          </button>
+            Kiểm tra xung đột ({issues.length})
+          </CmsButton>
 
-          <button
-            type="button"
+          <CmsButton
             onClick={handleCreateNew}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5"
+            variant="primary"
+            leadingIcon={<Plus />}
           >
-            <Plus className="w-4 h-4" /> + Tạo Khối Nội Dung Mới
-          </button>
-        </div>
-      </div>
+            Thêm khối nội dung
+          </CmsButton>
+        </>}
+      />
 
       {/* Main Navigation Tabs */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto scrollbar-none">

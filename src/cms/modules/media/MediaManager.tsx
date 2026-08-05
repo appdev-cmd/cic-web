@@ -46,6 +46,8 @@ import { AssetDetailDrawer } from './AssetDetailDrawer';
 import { AlbumsView } from './AlbumsView';
 import { UploadQueueDrawer } from './UploadQueueDrawer';
 import { ReplaceArchiveModal } from './ReplaceArchiveModal';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 interface MediaManagerProps {
   data?: MediaModuleData;
@@ -269,40 +271,29 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
       )}
 
       {/* Module Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Thư viện tệp
-            </h1>
-            <span className="text-xs font-bold uppercase bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 px-2.5 py-0.5 rounded-full border border-orange-200 dark:border-orange-900">
-              THƯ VIỆN MEDIA
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Nguồn tài nguyên hình ảnh, video và tài liệu dùng chung toàn CMS; bảo toàn 14 Album khảo sát, hỗ trợ crop variant, used-by & thay thế tệp an toàn.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
+      <CmsPageHeader
+        icon={<ImageIcon />}
+        title="Thư viện tệp"
+        description="Quản lý hình ảnh, video và tài liệu dùng chung trong toàn bộ CMS."
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{assets.filter((asset) => !asset.deleted_at).length} tệp</span>}
+        actions={<>
+          <CmsButton
             onClick={() => setActiveTab('albums')}
-            className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
+            variant="secondary"
+            leadingIcon={<FolderKanban />}
           >
-            <FolderKanban className="w-4 h-4 text-orange-500" />
-            <span>14 Albums Khảo Sát</span>
-          </button>
+            {albums.length} bộ sưu tập
+          </CmsButton>
 
-          <button
-            type="button"
+          <CmsButton
             onClick={handleOpenUpload}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5"
+            variant="primary"
+            leadingIcon={<UploadCloud />}
           >
-            <UploadCloud className="w-4 h-4" /> + Upload Media Mới
-          </button>
-        </div>
-      </div>
+            Tải tệp lên
+          </CmsButton>
+        </>}
+      />
 
       {/* Main Navigation Tabs */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto scrollbar-none">

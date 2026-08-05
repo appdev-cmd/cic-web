@@ -48,6 +48,8 @@ import { BannerConflictModal } from './BannerConflictModal';
 import { BannerVersionDrawer } from './BannerVersionDrawer';
 import { BannerPlacementModal } from './BannerPlacementModal';
 import { BannerDuplicateModal } from './BannerDuplicateModal';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 interface BannersManagerProps { workspaceLocale: CmsLocale; data?: BannersModuleData; }
 
@@ -227,46 +229,30 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
       )}
 
       {/* Top Header Banner */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
-              <ImageIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  Quản lý banner và slideshow
-                </h1>
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
-                  TRÌNH BÀY WEBSITE
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Hợp nhất quản lý 100+ banner và 9 slideshow luân phiên theo Vị trí, Lịch chạy, Locale và Versioning.
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
+      <div className="space-y-3">
+        <CmsPageHeader
+          icon={<ImageIcon />}
+          title="Banner và slideshow"
+          description="Quản lý nội dung trình chiếu theo vị trí hiển thị, lịch chạy và phiên bản."
+          meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{items.filter((item) => !item.deleted_at).length} nội dung</span>}
+          actions={<>
+            <CmsButton
               onClick={() => handleCreateNew('banner')}
-              className="px-3.5 py-2 text-xs font-bold text-white bg-orange-600 hover:bg-orange-500 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+              variant="primary"
+              leadingIcon={<Plus />}
             >
-              <Plus className="w-4 h-4" />
-              <span>+ Tạo Banner đơn</span>
-            </button>
+              Thêm banner
+            </CmsButton>
 
-            <button
+            <CmsButton
               onClick={() => handleCreateNew('slideshow')}
-              className="px-3.5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+              variant="secondary"
+              leadingIcon={<Sliders />}
             >
-              <Sliders className="w-4 h-4" />
-              <span>+ Tạo Slideshow</span>
-            </button>
-          </div>
-        </div>
+              Thêm slideshow
+            </CmsButton>
+          </>}
+        />
 
         {/* Global Toolbar Status Summary & Tools */}
         <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">

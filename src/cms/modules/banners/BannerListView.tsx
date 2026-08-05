@@ -20,6 +20,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { BannerContent, SavedFilterView, WorkflowStatus, EffectiveStatus } from './types';
+import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface BannerListViewProps {
   items: BannerContent[];
@@ -293,37 +294,38 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
                     {/* Actions */}
                     <td className="p-3 text-right sticky right-0 bg-white dark:bg-slate-900">
                       <div className="flex items-center justify-end gap-1">
-                        <button
+                        <CmsIconButton
                           onClick={() => onPreview(item)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition"
-                          title="Xem trước Live Preview"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                          icon={<Eye />}
+                          size="sm"
+                          aria-label="Xem trước banner"
+                          title="Xem trước"
+                        />
 
-                        <button
+                        <CmsIconButton
                           onClick={() => onEdit(item)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition"
-                          title="Chỉnh sửa nội dung / slides"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                          icon={<Edit />}
+                          size="sm"
+                          aria-label="Chỉnh sửa banner"
+                          title="Chỉnh sửa"
+                        />
 
-                        <button
+                        <CmsIconButton
                           onClick={() => onDuplicate(item)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition"
-                          title="Sao chép (Duplicate)"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
+                          icon={<Copy />}
+                          size="sm"
+                          aria-label="Nhân bản banner"
+                          title="Nhân bản"
+                        />
 
-                        <button
+                        <CmsIconButton
                           onClick={() => onDelete(item.id)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
+                          icon={<Trash2 />}
+                          size="sm"
+                          variant="danger"
+                          aria-label="Xóa banner"
                           title="Xóa vào thùng rác"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        />
                       </div>
                     </td>
                   </tr>

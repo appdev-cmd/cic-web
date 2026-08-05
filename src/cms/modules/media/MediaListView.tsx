@@ -14,6 +14,7 @@ import {
   Download,
 } from 'lucide-react';
 import { MediaAsset } from './types';
+import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface MediaListViewProps {
   assets: MediaAsset[];
@@ -221,30 +222,28 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
                   {/* Action Sticky Right */}
                   <td className="p-3 text-right whitespace-nowrap sticky right-0 bg-white dark:bg-slate-900 z-10">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
+                      <CmsIconButton
                         onClick={() => onOpenPreview(asset)}
-                        className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                        icon={<Eye />}
+                        size="sm"
+                        aria-label="Xem chi tiết tệp"
                         title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
+                      />
+                      <CmsIconButton
                         onClick={() => onOpenDetail(asset)}
-                        className="p-1.5 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition-colors"
-                        title="Chỉnh sửa metadata"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
+                        icon={<Edit />}
+                        size="sm"
+                        aria-label="Chỉnh sửa thông tin tệp"
+                        title="Chỉnh sửa thông tin"
+                      />
+                      <CmsIconButton
                         onClick={() => onDeleteAsset(asset.id)}
-                        className="p-1.5 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+                        icon={<Trash2 />}
+                        size="sm"
+                        variant="danger"
+                        aria-label="Xóa tệp"
                         title="Xóa tệp"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      />
                     </div>
                   </td>
                 </tr>

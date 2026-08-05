@@ -37,6 +37,8 @@ import { MenuValidationPanel } from './MenuValidationPanel';
 import { MenuPreviewModal } from './MenuPreviewModal';
 import { MenuVersionHistoryDrawer } from './MenuVersionHistoryDrawer';
 import { MenuActivityLogDrawer } from './MenuActivityLogDrawer';
+import { CmsIconButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
 interface MenuManagerProps { workspaceLocale: CmsLocale; data?: MenuModuleData; }
 
@@ -259,29 +261,16 @@ export const MenuManager: React.FC<MenuManagerProps> = ({ workspaceLocale, data 
       )}
 
       {/* Top Banner & Group Selector */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
-              <FolderTree className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  Quản lý menu website
-                </h1>
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800">
-                  ĐIỀU HƯỚNG WEBSITE
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Thiết lập cây navigation theo Nhóm, Site và Locale. Mọi chỉnh sửa lưu ở bản thảo Draft trước khi Publish.
-              </p>
-            </div>
-          </div>
+      <div className="space-y-3">
+        <CmsPageHeader
+          icon={<FolderTree />}
+          title="Menu website"
+          description="Thiết lập cấu trúc điều hướng theo từng nhóm menu và quản lý bản nháp trước khi xuất bản."
+          meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{groups.length} nhóm menu</span>}
+        />
 
           {/* Group Switcher Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-800 dark:bg-slate-900 [scrollbar-width:thin]">
             {groups.map((g) => {
               const isActive = g.id === activeGroupId;
               return (
@@ -303,18 +292,16 @@ export const MenuManager: React.FC<MenuManagerProps> = ({ workspaceLocale, data 
               );
             })}
 
-            <button
+            <CmsIconButton
               onClick={() => {
                 setEditingGroup(null);
                 setIsGroupModalOpen(true);
               }}
-              className="p-2 text-slate-500 hover:text-orange-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-xl transition"
+              icon={<Plus />}
+              aria-label="Thêm nhóm menu"
               title="Tạo nhóm menu mới"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+            />
           </div>
-        </div>
 
         {/* Active Group Version & Workflow Status Bar */}
         <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-3">

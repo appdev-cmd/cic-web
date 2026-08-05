@@ -20,6 +20,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { BlockItem, BlockType } from './types';
+import { CmsIconButton } from '../../components/ui/CmsButton';
 
 interface ContentBlocksListViewProps {
   blocks: BlockItem[];
@@ -209,38 +210,35 @@ export const ContentBlocksListView: React.FC<ContentBlocksListViewProps> = ({
                   {/* Actions column */}
                   <td className="py-3.5 px-4 text-right sticky right-0 bg-white dark:bg-slate-900 z-10">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
+                      <CmsIconButton
                         onClick={() => onOpenPreview(b)}
+                        icon={<Eye />}
+                        size="sm"
+                        aria-label="Xem trước khối nội dung"
                         title="Xem Context Preview Live"
-                        className="p-1.5 text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
+                      />
+                      <CmsIconButton
                         onClick={() => onEditBlock(b)}
+                        icon={<Edit3 />}
+                        size="sm"
+                        aria-label="Chỉnh sửa khối nội dung"
                         title="Chỉnh sửa chi tiết"
-                        className="p-1.5 text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
+                      />
+                      <CmsIconButton
                         onClick={() => onDuplicateBlock(b)}
+                        icon={<Copy />}
+                        size="sm"
+                        aria-label="Nhân bản khối nội dung"
                         title="Nhân bản khối"
-                        className="p-1.5 text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
+                      />
+                      <CmsIconButton
                         onClick={() => onDeleteBlock(b.id)}
-                        title="Chuyển vào Thùng Rác"
-                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        icon={<Trash2 />}
+                        size="sm"
+                        variant="danger"
+                        aria-label="Chuyển khối nội dung vào thùng rác"
+                        title="Chuyển vào thùng rác"
+                      />
                     </div>
                   </td>
                 </tr>
