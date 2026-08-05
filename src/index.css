@@ -52,6 +52,77 @@ body {
   scroll-padding-top: calc(var(--cms-header-height) + var(--cms-sticky-gap));
 }
 
+/* Shared density and alignment for CMS list views. Opt-in keeps editor/preview tables untouched. */
+.cms-shell .cms-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cms-shell .cms-data-table th {
+  height: 2.75rem;
+  padding: 0.625rem 0.875rem;
+  vertical-align: middle;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+.cms-shell .cms-data-table td {
+  padding: 0.75rem 0.875rem;
+  vertical-align: middle;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+/* The second column is consistently the record identity in main CMS lists. */
+.cms-shell .cms-data-table th:nth-child(2),
+.cms-shell .cms-data-table td:nth-child(2) {
+  min-width: 15rem;
+}
+
+.cms-shell .cms-data-table td:nth-child(2) {
+  white-space: normal;
+}
+
+.cms-shell .cms-data-table tbody tr {
+  min-height: 3.25rem;
+}
+
+.cms-shell .cms-data-table td button,
+.cms-shell .cms-data-table th button {
+  vertical-align: middle;
+}
+
+.cms-shell .cms-data-table td:last-child,
+.cms-shell .cms-data-table th:last-child {
+  min-width: 7rem;
+  white-space: nowrap;
+}
+
+.cms-shell .cms-data-table td:last-child button {
+  display: inline-flex;
+  min-width: 2rem;
+  min-height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-shell .cms-data-table td > span,
+.cms-shell .cms-data-table td > div > span {
+  vertical-align: middle;
+}
+
+@media (max-width: 767px) {
+  .cms-shell .cms-data-table th,
+  .cms-shell .cms-data-table td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
 .cms-sticky-action {
   position: sticky;
   top: calc(var(--cms-header-height) + var(--cms-sticky-gap));

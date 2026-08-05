@@ -57,7 +57,7 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
       <div className="overflow-x-auto scrollbar-thin">
-        <table className="w-full text-left border-collapse min-w-[900px]">
+        <table className="cms-data-table min-w-[900px] text-left">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-850 z-10">

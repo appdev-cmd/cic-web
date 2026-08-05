@@ -198,7 +198,7 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
       {/* FULL-WIDTH DATA TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto scrollbar-thin">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="cms-data-table text-left">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider text-[10px]">
                 <th className="p-3.5 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800 z-10">

@@ -511,7 +511,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
           {/* DATA TABLE */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
+              <table className="cms-data-table text-left">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3 w-10 text-center">

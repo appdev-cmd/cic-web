@@ -447,7 +447,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       {/* Main Full-Width Data Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="cms-data-table text-left">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800 z-10">

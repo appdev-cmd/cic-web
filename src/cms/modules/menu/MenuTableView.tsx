@@ -102,7 +102,7 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
 
       {/* Table Content */}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
-        <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+        <table className="cms-data-table text-left text-slate-600 dark:text-slate-300">
           <thead className="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
             <tr>
               <th className="p-3.5 w-10">

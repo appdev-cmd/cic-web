@@ -147,7 +147,7 @@ export const BannerListView: React.FC<BannerListViewProps> = ({
 
       {/* Main Table */}
       <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
-        <table className="w-full text-left border-collapse">
+        <table className="cms-data-table text-left">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
               <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800">

@@ -126,7 +126,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
       {/* DATA TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="cms-data-table text-left">
             <thead>
               <tr className="bg-slate-100/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
                 <th className="py-3 px-4">Tên Cấu hình & Path</th>

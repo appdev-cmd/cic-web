@@ -530,7 +530,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           {/* MAIN UNIFIED MASTER DATA TABLE */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="cms-data-table text-left">
                 <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     {/* Checkbox Sticky Left */}
