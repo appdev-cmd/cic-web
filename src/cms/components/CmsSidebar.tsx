@@ -44,6 +44,9 @@ import {
   Search,
   RotateCcw,
   Inbox,
+  MousePointer2,
+  FileCheck2,
+  MessageSquareText,
 } from 'lucide-react';
 import { CmsMenuGroup } from '../types';
 
@@ -98,6 +101,9 @@ const renderIcon = (iconName: string, className: string = 'w-4 h-4') => {
     case 'Command': return <Command className={className} />;
     case 'RotateCcw': return <RotateCcw className={className} />;
     case 'Inbox': return <Inbox className={className} />;
+    case 'MousePointer2': return <MousePointer2 className={className} />;
+    case 'FileCheck2': return <FileCheck2 className={className} />;
+    case 'MessageSquareText': return <MessageSquareText className={className} />;
     default: return <FileText className={className} />;
   }
 };
@@ -116,6 +122,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     'grp_noi_dung',
     'grp_danh_muc_kinh_doanh',
     'grp_trinh_bay_website',
+    'grp_tuong_tac_khach_hang',
     'grp_media',
     'grp_khach_hang',
     'grp_ban_dia_hoa',

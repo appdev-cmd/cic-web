@@ -18,6 +18,9 @@ export type CmsModuleKey =
   | 'media'
   | 'contacts'
   | 'localization'
+  | 'cta'
+  | 'forms'
+  | 'customer_requests'
   | 'not_found';
 
 interface CmsRouteDefinition {
@@ -111,6 +114,22 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
     canonicalPath: '/cms/translation-strings',
     aliases: ['/cms/translation-progress', '/cms/localization', '/cms/translations'],
     nestedPrefixes: ['/cms/translation-strings/', '/cms/translation-progress/', '/cms/localization/'],
+  },
+  {
+    module: 'cta',
+    canonicalPath: '/cms/cta',
+    nestedPrefixes: ['/cms/cta/'],
+  },
+  {
+    module: 'forms',
+    canonicalPath: '/cms/forms',
+    nestedPrefixes: ['/cms/forms/'],
+  },
+  {
+    module: 'customer_requests',
+    canonicalPath: '/cms/customer-requests',
+    aliases: ['/cms/requests'],
+    nestedPrefixes: ['/cms/customer-requests/', '/cms/customer-requests/detail/', '/cms/requests/', '/cms/requests/detail/'],
   },
 ];
 

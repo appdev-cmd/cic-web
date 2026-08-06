@@ -157,6 +157,11 @@ const ContactsManager = lazy(async () => {
 const LocalizationManager = lazy(() => import('../modules/localization/LocalizationManager').then((module) => ({ default: module.LocalizationManager })));
 const DashboardOverview = lazy(() => import('../modules/dashboard/DashboardOverview').then((module) => ({ default: module.DashboardOverview })));
 
+// Customer Interaction Modules
+const CtaManager = lazy(() => import('../modules/customer_interaction/cta/CtaManager').then((module) => ({ default: module.CtaManager })));
+const FormManager = lazy(() => import('../modules/customer_interaction/forms/FormManager').then((module) => ({ default: module.FormManager })));
+const CustomerRequestManager = lazy(() => import('../modules/customer_interaction/customer_requests/CustomerRequestManager').then((module) => ({ default: module.CustomerRequestManager })));
+
 interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
 }
@@ -322,6 +327,12 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <ContactsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'localization' ? (
             <LocalizationManager />
+          ) : activeModule === 'cta' ? (
+            <CtaManager />
+          ) : activeModule === 'forms' ? (
+            <FormManager />
+          ) : activeModule === 'customer_requests' ? (
+            <CustomerRequestManager />
           ) : activeModule === 'dashboard' ? (
             <DashboardOverview
               workspaceLocale={workspaceLocale}

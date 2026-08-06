@@ -425,17 +425,35 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     ],
   },
   {
+    id: 'grp_tuong_tac_khach_hang',
+    groupTitle: 'TƯƠNG TÁC KHÁCH HÀNG',
+    items: [
+      {
+        id: 'menu_cta',
+        title: 'CTA',
+        iconName: 'MousePointer2',
+        path: '/cms/cta',
+      },
+      {
+        id: 'menu_forms',
+        title: 'Biểu mẫu',
+        iconName: 'FileCheck2',
+        path: '/cms/forms',
+      },
+      {
+        id: 'menu_customer_requests',
+        title: 'Yêu cầu khách hàng',
+        iconName: 'MessageSquareText',
+        path: '/cms/customer-requests',
+        badgeCount: 5,
+        badgeVariant: 'warning',
+      },
+    ],
+  },
+  {
     id: 'grp_khach_hang',
     groupTitle: 'KHÁCH HÀNG',
     items: [
-      {
-        id: 'menu_all_requests',
-        title: 'Yêu cầu khách hàng',
-        iconName: 'Inbox',
-        path: '/cms/contact-requests',
-        badgeCount: 8,
-        badgeVariant: 'warning',
-      },
       {
         id: 'menu_email_templates',
         title: 'Mẫu email',

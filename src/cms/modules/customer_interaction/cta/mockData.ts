@@ -1,0 +1,263 @@
+// Mock data for CTA Module
+
+import { CtaItem } from './types';
+import { ActionType } from '../shared/constants/actionTypes';
+import { CtaStatus } from '../shared/constants/statusTypes';
+
+export const MOCK_CTAS: CtaItem[] = [
+  {
+    id: 'cta_001',
+    adminName: 'CTA - Tư vấn ERP',
+    displayText: 'Nhận tư vấn',
+    description: 'CTA chính cho trang giải pháp ERP',
+    code: 'cta_tuvan_erp',
+    icon: 'MessageSquare',
+    actionConfig: {
+      type: 'open_form',
+      formId: 'form_001',
+    },
+    status: 'active',
+    usedByCount: 5,
+    usedByPages: [
+      {
+        pageId: 'page_001',
+        pageTitle: 'Giải pháp ERP',
+        pagePath: '/giai-phap-erp',
+        placementKey: 'hero_primary_cta',
+      },
+      {
+        pageId: 'page_002',
+        pageTitle: 'Trang chủ',
+        pagePath: '/',
+        placementKey: 'hero_secondary_cta',
+      },
+    ],
+    analytics: {
+      impressions: 45230,
+      clicks: 3845,
+      ctr: 8.5,
+      trend: 'up',
+    },
+    createdBy: 'Nguyễn Văn Minh',
+    createdAt: '2026-01-10T08:30:00Z',
+    updatedAt: '2026-02-01T10:15:00Z',
+  },
+  {
+    id: 'cta_002',
+    adminName: 'CTA - Báo giá CMS IntelliCAD',
+    displayText: 'Nhận báo giá',
+    description: 'CTA cho trang sản phẩm IntelliCAD',
+    code: 'cta_baogia_intellicad',
+    icon: 'FileText',
+    actionConfig: {
+      type: 'open_form',
+      formId: 'form_002',
+    },
+    status: 'active',
+    usedByCount: 3,
+    usedByPages: [
+      {
+        pageId: 'page_003',
+        pageTitle: 'Chi tiết sản phẩm IntelliCAD',
+        pagePath: '/san-pham/intellicad',
+        placementKey: 'product_primary_cta',
+      },
+    ],
+    analytics: {
+      impressions: 32100,
+      clicks: 2430,
+      ctr: 7.6,
+      trend: 'flat',
+    },
+    createdBy: 'Trần Thị Thu',
+    createdAt: '2026-01-15T09:00:00Z',
+    updatedAt: '2026-02-02T14:20:00Z',
+  },
+  {
+    id: 'cta_003',
+    adminName: 'CTA - Tải Catalogue sản phẩm',
+    displayText: 'Tài liệu',
+    description: 'CTA tải catalogue cho trang sản phẩm',
+    code: 'cta_tai_catalogue',
+    icon: 'Download',
+    actionConfig: {
+      type: 'download_file',
+      fileId: 'file_001',
+    },
+    status: 'active',
+    usedByCount: 8,
+    usedByPages: [
+      {
+        pageId: 'page_004',
+        pageTitle: 'Sản phẩm',
+        pagePath: '/san-pham',
+        placementKey: 'sidebar_cta',
+      },
+      {
+        pageId: 'page_005',
+        pageTitle: 'Dịch vụ',
+        pagePath: '/dich-vu',
+        placementKey: 'footer_cta',
+      },
+    ],
+    analytics: {
+      impressions: 28500,
+      clicks: 1890,
+      ctr: 6.6,
+      trend: 'down',
+    },
+    createdBy: 'Lê Hoàng Nam',
+    createdAt: '2026-01-20T10:30:00Z',
+    updatedAt: '2026-02-03T11:45:00Z',
+  },
+  {
+    id: 'cta_004',
+    adminName: 'CTA - Gọi hotline',
+    displayText: 'Gọi ngay',
+    description: 'CTA gọi điện thoại cho header',
+    code: 'cta_goi_hotline',
+    icon: 'Phone',
+    actionConfig: {
+      type: 'call_phone',
+      phoneNumber: '0901234567',
+    },
+    status: 'active',
+    usedByCount: 12,
+    usedByPages: [
+      {
+        pageId: 'page_006',
+        pageTitle: 'Header',
+        pagePath: '/',
+        placementKey: 'header_contact',
+      },
+    ],
+    analytics: {
+      impressions: 125000,
+      clicks: 5670,
+      ctr: 4.5,
+      trend: 'up',
+    },
+    createdBy: 'Phạm Văn Hùng',
+    createdAt: '2026-01-25T11:00:00Z',
+    updatedAt: '2026-02-04T12:30:00Z',
+  },
+  {
+    id: 'cta_005',
+    adminName: 'CTA - Đăng ký Demo',
+    displayText: 'Đăng ký Demo',
+    description: 'CTA đăng ký dùng thử (Draft)',
+    code: 'cta_dangky_demo',
+    icon: 'PlayCircle',
+    actionConfig: {
+      type: 'open_form',
+      formId: 'form_003',
+    },
+    status: 'draft',
+    usedByCount: 0,
+    usedByPages: [],
+    analytics: {
+      impressions: 0,
+      clicks: 0,
+      ctr: 0,
+    },
+    createdBy: 'Nguyễn Thị Lan',
+    createdAt: '2026-02-05T09:15:00Z',
+    updatedAt: '2026-02-05T09:15:00Z',
+  },
+  {
+    id: 'cta_006',
+    adminName: 'CTA - Xem dự án',
+    displayText: 'Xem dự án',
+    description: 'CTA xem trang dự án (Lưu trữ)',
+    code: 'cta_xem_duan',
+    icon: 'Eye',
+    actionConfig: {
+      type: 'redirect_internal',
+      url: '/du-an',
+      openInNewTab: false,
+    },
+    status: 'archived',
+    usedByCount: 2,
+    usedByPages: [
+      {
+        pageId: 'page_007',
+        pageTitle: 'Trang chủ',
+        pagePath: '/',
+        placementKey: 'hero_secondary_cta',
+      },
+    ],
+    analytics: {
+      impressions: 15000,
+      clicks: 1200,
+      ctr: 8.0,
+      trend: 'flat',
+    },
+    createdBy: 'Trần Văn Minh',
+    createdAt: '2025-12-01T08:00:00Z',
+    updatedAt: '2026-01-01T10:00:00Z',
+  },
+  {
+    id: 'cta_007',
+    adminName: 'CTA - Liên hệ kinh doanh',
+    displayText: 'Liên hệ kinh doanh',
+    description: 'CTA gửi email cho team kinh doanh',
+    code: 'cta_lienhe_kinhdoanh',
+    icon: 'Mail',
+    actionConfig: {
+      type: 'send_email',
+      emailAddress: 'sales@techaz.com',
+    },
+    status: 'active',
+    usedByCount: 4,
+    usedByPages: [
+      {
+        pageId: 'page_008',
+        pageTitle: 'Giới thiệu',
+        pagePath: '/gioi-thieu',
+        placementKey: 'content_cta',
+      },
+    ],
+    analytics: {
+      impressions: 8500,
+      clicks: 340,
+      ctr: 4.0,
+      trend: 'up',
+    },
+    createdBy: 'Lê Thị Hương',
+    createdAt: '2026-01-30T14:00:00Z',
+    updatedAt: '2026-02-05T16:00:00Z',
+  },
+];
+
+export const MOCK_PLACEMENTS = [
+  {
+    id: 'placement_001',
+    code: 'HERO_PRIMARY_CTA',
+    name: 'CTA chính Hero',
+    description: 'Vị trí CTA chính trong section Hero',
+  },
+  {
+    id: 'placement_002',
+    code: 'HERO_SECONDARY_CTA',
+    name: 'CTA phụ Hero',
+    description: 'Vị trí CTA phụ trong section Hero',
+  },
+  {
+    id: 'placement_003',
+    code: 'PRODUCT_PRIMARY_CTA',
+    name: 'CTA chính trang sản phẩm',
+    description: 'Vị trí CTA chính trong trang chi tiết sản phẩm',
+  },
+  {
+    id: 'placement_004',
+    code: 'SIDEBAR_CTA',
+    name: 'CTA sidebar',
+    description: 'Vị trí CTA trong sidebar',
+  },
+  {
+    id: 'placement_005',
+    code: 'FOOTER_CTA',
+    name: 'CTA Footer',
+    description: 'Vị trí CTA trong Footer',
+  },
+];
