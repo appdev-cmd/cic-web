@@ -377,7 +377,6 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block group-hover:text-orange-600 dark:group-hover:text-orange-400">
                       {ft.label}
                     </span>
-                    <span className="text-[10px] text-slate-400">{ft.description}</span>
                   </div>
                   <Plus className="w-3.5 h-3.5 text-slate-300 group-hover:text-orange-500 transition-colors" />
                 </button>
@@ -459,7 +458,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                             </span>
                             {field.isRequired && <span className="text-red-500 font-bold">*</span>}
                             {field.isLocked && (
-                              <Lock className="w-3 h-3 text-amber-500" title="Đã khóa" />
+                              <span title="Đã khóa"><Lock className="w-3 h-3 text-amber-500" /></span>
                             )}
                           </div>
 
@@ -543,7 +542,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                   >
                     {FIELD_ROLE_TYPES.map((role) => (
                       <option key={role.value} value={role.value}>
-                        {role.label} ({role.description})
+                        {role.label}
                       </option>
                     ))}
                   </select>

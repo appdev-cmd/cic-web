@@ -45,5 +45,8 @@ export interface CtaFilterState {
   searchQuery: string;
   status?: CtaStatus;
   actionType?: ActionType;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: 'newest' | 'oldest' | 'clicks' | 'ctr' | 'name';
   tab: CtaListTabType;
 }

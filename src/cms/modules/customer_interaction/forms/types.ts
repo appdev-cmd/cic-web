@@ -90,5 +90,8 @@ export type FormListTabType = 'all' | 'active' | 'draft' | 'archived' | 'trash';
 export interface FormFilterState {
   searchQuery: string;
   status?: FormStatus;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: 'newest' | 'oldest' | 'submissions' | 'conversionRate' | 'name';
   tab: FormListTabType;
 }

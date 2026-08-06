@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import {
   Plus,
   Search,
-  Filter,
-  Grid,
-  List,
-  Download,
   FileCheck2,
+  Calendar,
+  X,
+  RotateCcw,
 } from 'lucide-react';
 import { FormItem, FormListTabType, FormFilterState, FormFormData } from './types';
 import { FormList } from './components/FormList';
@@ -14,7 +13,7 @@ import { FormBuilderView } from './FormBuilderView';
 import { FormPreviewModal } from './components/FormPreviewModal';
 import { FormSubmissionsModal } from './components/FormSubmissionsModal';
 import { MOCK_FORMS } from './mockData';
-import { FORM_STATUSES } from '../shared/constants/statusTypes';
+import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsTabs } from '../../../components/ui/CmsTabs';
@@ -33,33 +32,88 @@ export const FormManager: React.FC = () => {
   const [previewForm, setPreviewForm] = useState<FormItem | null>(null);
   const [submissionsForm, setSubmissionsForm] = useState<FormItem | null>(null);
 
-  // Filter forms based on current filters
-  const filteredForms = forms.filter((form) => {
-    // Tab filter
-    if (activeTab === 'trash') {
-      if (!form.deletedAt) return false;
-    } else {
-      if (form.deletedAt) return false;
-    }
+  // Filter & sort forms based on current filters
+  const filteredForms = forms
+    .filter((form) => {
+      // Tab filter
+      if (activeTab === 'trash') {
+        if (!form.deletedAt) return false;
+      } else {
+        if (form.deletedAt) return false;
+      }
 
-    if (activeTab === 'active' && form.status !== 'active') return false;
-    if (activeTab === 'draft' && form.status !== 'draft') return false;
-    if (activeTab === 'archived' && form.status !== 'archived') return false;
+      if (activeTab === 'active' && form.status !== 'active') return false;
+      if (activeTab === 'draft' && form.status !== 'draft') return false;
+      if (activeTab === 'archived' && form.status !== 'archived') return false;
 
-    // Search filter
-    if (filter.searchQuery.trim()) {
-      const query = filter.searchQuery.toLowerCase();
-      const matchAdminName = form.adminName.toLowerCase().includes(query);
-      const matchTitle = form.title.toLowerCase().includes(query);
-      const matchCode = form.code.toLowerCase().includes(query);
-      if (!matchAdminName && !matchTitle && !matchCode) return false;
-    }
+      // Status filter
+      if (filter.status && form.status !== filter.status) return false;
 
-    // Status filter
-    if (filter.status && form.status !== filter.status) return false;
+      // Search filter
+      if (filter.searchQuery.trim()) {
+        const query = filter.searchQuery.toLowerCase();
+        const matchAdminName = form.adminName.toLowerCase().includes(query);
+        const matchTitle = form.title.toLowerCase().includes(query);
+        const matchCode = form.code.toLowerCase().includes(query);
+        if (!matchAdminName && !matchTitle && !matchCode) return false;
+      }
 
-    return true;
-  });
+      // Date range filter
+      if (filter.dateFrom) {
+        const fromDate = new Date(filter.dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        const created = new Date(form.createdAt);
+        if (created < fromDate) return false;
+      }
+
+      if (filter.dateTo) {
+        const toDate = new Date(filter.dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        const created = new Date(form.createdAt);
+        if (created > toDate) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (filter.sortBy === 'oldest') {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      if (filter.sortBy === 'submissions') {
+        const subA = a.stats?.submissions || a.analytics?.clicks || 0;
+        const subB = b.stats?.submissions || b.analytics?.clicks || 0;
+        return subB - subA;
+      }
+      if (filter.sortBy === 'conversionRate') {
+        const crA = a.stats?.conversionRate || a.analytics?.ctr || 0;
+        const crB = b.stats?.conversionRate || b.analytics?.ctr || 0;
+        return crB - crA;
+      }
+      if (filter.sortBy === 'name') {
+        return a.title.localeCompare(b.title, 'vi');
+      }
+      // Default: newest first
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  const hasActiveFilters =
+    !!filter.searchQuery ||
+    !!filter.status ||
+    !!filter.dateFrom ||
+    !!filter.dateTo ||
+    !!filter.sortBy;
+
+  const handleResetFilters = () => {
+    setFilter({
+      searchQuery: '',
+      status: undefined,
+      dateFrom: undefined,
+      dateTo: undefined,
+      sortBy: undefined,
+      tab: 'all',
+    });
+    setActiveTab('all');
+  };
 
   // Handlers
   const handleToggleSelectAll = () => {
@@ -90,12 +144,6 @@ export const FormManager: React.FC = () => {
 
   const handleOpenPreview = (form: FormItem) => {
     setPreviewForm(form);
-  };
-
-  const handleOpenVersionHistory = (form: FormItem) => {
-    // Version history or edit
-    setEditingForm(form);
-    setPageMode('builder');
   };
 
   const handleDuplicateForm = (form: FormItem) => {
@@ -145,6 +193,35 @@ export const FormManager: React.FC = () => {
   const handleTabChange = (tab: FormListTabType) => {
     setActiveTab(tab);
     setSelectedFormIds([]);
+
+    // Map top tab selection directly to status filter
+    if (tab === 'active') {
+      setFilter((prev) => ({ ...prev, status: 'active' }));
+    } else if (tab === 'draft') {
+      setFilter((prev) => ({ ...prev, status: 'draft' }));
+    } else if (tab === 'archived') {
+      setFilter((prev) => ({ ...prev, status: 'archived' }));
+    } else {
+      setFilter((prev) => ({ ...prev, status: undefined }));
+    }
+  };
+
+  const handleStatusFilterChange = (statusVal: string) => {
+    const newStatus = statusVal ? (statusVal as FormStatus) : undefined;
+    setFilter((prev) => ({ ...prev, status: newStatus }));
+
+    // Synchronize tab when status filter changes
+    if (!statusVal) {
+      setActiveTab('all');
+    } else if (statusVal === 'active') {
+      setActiveTab('active');
+    } else if (statusVal === 'draft') {
+      setActiveTab('draft');
+    } else if (statusVal === 'archived') {
+      setActiveTab('archived');
+    } else {
+      setActiveTab('all');
+    }
   };
 
   const handleSaveForm = (formData: FormFormData, action: 'draft' | 'submit' | 'publish') => {
@@ -237,15 +314,25 @@ export const FormManager: React.FC = () => {
               placeholder="Tìm kiếm theo tên, mã, tiêu đề..."
               value={filter.searchQuery}
               onChange={(e) => setFilter({ ...filter, searchQuery: e.target.value })}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500 transition-colors"
             />
+            {filter.searchQuery && (
+              <button
+                type="button"
+                onClick={() => setFilter({ ...filter, searchQuery: '' })}
+                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          {/* Filter Dropdowns */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          {/* Filter Dropdowns & Controls */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs flex-wrap lg:flex-nowrap">
+            {/* Status Dropdown mapped to activeTab */}
             <select
               value={filter.status || ''}
-              onChange={(e) => setFilter({ ...filter, status: e.target.value as any || undefined })}
+              onChange={(e) => handleStatusFilterChange(e.target.value)}
               className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
               <option value="">Tất cả Trạng thái</option>
@@ -256,13 +343,54 @@ export const FormManager: React.FC = () => {
               ))}
             </select>
 
-            <button
-              type="button"
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl flex items-center gap-1.5 shrink-0 cursor-pointer"
+            {/* Date Range Inputs */}
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <Calendar className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+              <span className="text-[11px] text-slate-400">Từ:</span>
+              <input
+                type="date"
+                value={filter.dateFrom || ''}
+                onChange={(e) => setFilter({ ...filter, dateFrom: e.target.value || undefined })}
+                className="bg-transparent focus:outline-none text-xs text-slate-800 dark:text-slate-200 cursor-pointer"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <Calendar className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+              <span className="text-[11px] text-slate-400">Đến:</span>
+              <input
+                type="date"
+                value={filter.dateTo || ''}
+                onChange={(e) => setFilter({ ...filter, dateTo: e.target.value || undefined })}
+                className="bg-transparent focus:outline-none text-xs text-slate-800 dark:text-slate-200 cursor-pointer"
+              />
+            </div>
+
+            {/* Sort Dropdown */}
+            <select
+              value={filter.sortBy || 'newest'}
+              onChange={(e) => setFilter({ ...filter, sortBy: e.target.value as any })}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-orange-600" />
-              <span>Export</span>
-            </button>
+              <option value="newest">Mới nhất</option>
+              <option value="oldest">Cũ nhất</option>
+              <option value="submissions">Lượt gửi nhiều nhất</option>
+              <option value="conversionRate">Tỷ lệ chuyển đổi cao nhất</option>
+              <option value="name">Tên (A-Z)</option>
+            </select>
+
+            {/* Reset Filters Button */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl text-xs flex items-center gap-1 shrink-0 transition-all cursor-pointer"
+                title="Xóa tất cả điều kiện lọc"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Xóa bộ lọc</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

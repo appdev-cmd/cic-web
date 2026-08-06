@@ -63,7 +63,7 @@ export const CtaUsedByModal: React.FC<CtaUsedByModalProps> = ({
                   </div>
 
                   <a
-                    href={page.url}
+                    href={page.pagePath || '#'}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-1 text-[11px] font-semibold text-orange-600 hover:text-orange-500 dark:text-orange-400 cursor-pointer"

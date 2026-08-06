@@ -503,10 +503,10 @@ export const CustomerRequestManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleExportCSV}
-                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shrink-0 transition-all shadow-xs cursor-pointer"
+                  className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold rounded-xl text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition-all cursor-pointer"
                   title="Xuất file CSV danh sách yêu cầu đang lọc"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Xuất CSV ({filteredRequests.length})</span>
                 </button>
 
