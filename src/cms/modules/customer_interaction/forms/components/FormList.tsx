@@ -185,37 +185,37 @@ export const FormList: React.FC<FormListProps> = ({
                         onClick={() => onOpenPreview(form)}
                         icon={<Eye />}
                         size="sm"
-                        aria-label="Preview"
-                        title="Preview"
+                        aria-label="Xem trước biểu mẫu"
+                        title="Xem trước biểu mẫu"
                       />
                       <CmsIconButton
                         onClick={() => onOpenSubmissions(form)}
                         icon={<CheckCircle />}
                         size="sm"
-                        aria-label="Submissions"
-                        title="Submissions"
+                        aria-label="Yêu cầu đã gửi"
+                        title="Yêu cầu đã gửi"
                       />
                       <CmsIconButton
                         onClick={() => onDuplicateForm(form)}
                         icon={<Copy />}
                         size="sm"
-                        aria-label="Duplicate"
-                        title="Duplicate"
+                        aria-label="Nhân bản biểu mẫu"
+                        title="Nhân bản biểu mẫu"
                       />
                       <CmsIconButton
                         onClick={() => onEditForm(form)}
                         icon={<Edit3 />}
                         size="sm"
-                        aria-label="Edit"
-                        title="Edit"
+                        aria-label="Chỉnh sửa biểu mẫu"
+                        title="Chỉnh sửa biểu mẫu"
                       />
                       <CmsIconButton
                         onClick={() => onDeleteForm(form.id)}
                         icon={<Trash2 />}
                         size="sm"
                         variant="danger"
-                        aria-label="Delete"
-                        title="Delete"
+                        aria-label="Xóa biểu mẫu"
+                        title="Xóa biểu mẫu"
                       />
                     </div>
                   </td>

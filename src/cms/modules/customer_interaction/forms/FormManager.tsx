@@ -10,7 +10,9 @@ import {
 } from 'lucide-react';
 import { FormItem, FormListTabType, FormFilterState, FormFormData } from './types';
 import { FormList } from './components/FormList';
-import { FormBuilderModal } from './components/FormBuilderModal';
+import { FormBuilderView } from './FormBuilderView';
+import { FormPreviewModal } from './components/FormPreviewModal';
+import { FormSubmissionsModal } from './components/FormSubmissionsModal';
 import { MOCK_FORMS } from './mockData';
 import { FORM_STATUSES } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
@@ -22,13 +24,14 @@ export const FormManager: React.FC = () => {
   const [forms, setForms] = useState<FormItem[]>(MOCK_FORMS);
   const [selectedFormIds, setSelectedFormIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<FormListTabType>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [pageMode, setPageMode] = useState<'list' | 'builder'>('list');
   const [filter, setFilter] = useState<FormFilterState>({
     searchQuery: '',
     tab: 'all',
   });
-  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [editingForm, setEditingForm] = useState<FormItem | null>(null);
+  const [previewForm, setPreviewForm] = useState<FormItem | null>(null);
+  const [submissionsForm, setSubmissionsForm] = useState<FormItem | null>(null);
 
   // Filter forms based on current filters
   const filteredForms = forms.filter((form) => {
@@ -77,22 +80,22 @@ export const FormManager: React.FC = () => {
 
   const handleEditForm = (form: FormItem) => {
     setEditingForm(form);
-    setIsBuilderOpen(true);
+    setPageMode('builder');
   };
 
   const handleCreateNew = () => {
     setEditingForm(null);
-    setIsBuilderOpen(true);
+    setPageMode('builder');
   };
 
   const handleOpenPreview = (form: FormItem) => {
-    // TODO: Implement preview modal
-    console.log('Preview Form:', form);
+    setPreviewForm(form);
   };
 
   const handleOpenVersionHistory = (form: FormItem) => {
-    // TODO: Implement version history drawer
-    console.log('Version History:', form);
+    // Version history or edit
+    setEditingForm(form);
+    setPageMode('builder');
   };
 
   const handleDuplicateForm = (form: FormItem) => {
@@ -136,8 +139,7 @@ export const FormManager: React.FC = () => {
   };
 
   const handleOpenSubmissions = (form: FormItem) => {
-    console.log('Show submissions for Form:', form);
-    // TODO: Open submissions modal
+    setSubmissionsForm(form);
   };
 
   const handleTabChange = (tab: FormListTabType) => {
@@ -178,9 +180,22 @@ export const FormManager: React.FC = () => {
       setForms([newForm, ...forms]);
     }
 
-    setIsBuilderOpen(false);
+    setPageMode('list');
     setEditingForm(null);
   };
+
+  if (pageMode === 'builder') {
+    return (
+      <FormBuilderView
+        form={editingForm}
+        onSave={handleSaveForm}
+        onCancel={() => {
+          setPageMode('list');
+          setEditingForm(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -252,20 +267,6 @@ export const FormManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <CmsTabs
-        items={[
-          { id: 'all' as const, label: 'Tất cả', count: forms.filter((f) => !f.deletedAt).length },
-          { id: 'active' as const, label: 'Đang hoạt động', count: forms.filter((f) => !f.deletedAt && f.status === 'active').length },
-          { id: 'draft' as const, label: 'Bản nháp', count: forms.filter((f) => !f.deletedAt && f.status === 'draft').length },
-          { id: 'archived' as const, label: 'Lưu trữ', count: forms.filter((f) => !f.deletedAt && f.status === 'archived').length },
-          { id: 'trash' as const, label: 'Thùng rác', count: forms.filter((f) => f.deletedAt).length },
-        ]}
-        value={activeTab}
-        onChange={handleTabChange}
-        ariaLabel="Form status tabs"
-      />
-
       {/* Bulk Actions */}
       <CmsBulkActionBar
         selectedCount={selectedFormIds.length}
@@ -303,15 +304,17 @@ export const FormManager: React.FC = () => {
         onQuickStatusToggle={handleQuickStatusToggle}
       />
 
-      {/* Form Builder Modal */}
-      <FormBuilderModal
-        isOpen={isBuilderOpen}
-        form={editingForm}
-        onSave={handleSaveForm}
-        onCancel={() => {
-          setIsBuilderOpen(false);
-          setEditingForm(null);
-        }}
+      {/* Modals */}
+      <FormPreviewModal
+        isOpen={!!previewForm}
+        form={previewForm}
+        onClose={() => setPreviewForm(null)}
+      />
+
+      <FormSubmissionsModal
+        isOpen={!!submissionsForm}
+        form={submissionsForm}
+        onClose={() => setSubmissionsForm(null)}
       />
     </div>
   );

@@ -164,11 +164,11 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
   };
 
   // Selection Handlers
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedIds(filteredPages.map((p) => p.id));
-    } else {
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredPages.length && filteredPages.length > 0) {
       setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredPages.map((p) => p.id));
     }
   };
 

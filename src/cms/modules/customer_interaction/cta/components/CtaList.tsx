@@ -193,37 +193,37 @@ export const CtaList: React.FC<CtaListProps> = ({
                         onClick={() => onOpenPreview(cta)}
                         icon={<Eye />}
                         size="sm"
-                        aria-label="Preview"
-                        title="Preview"
+                        aria-label="Xem trước CTA"
+                        title="Xem trước CTA"
                       />
                       <CmsIconButton
                         onClick={() => onOpenUsedBy(cta)}
                         icon={<FileText />}
                         size="sm"
-                        aria-label="Used by"
-                        title="Used by"
+                        aria-label="Vị trí nhúng"
+                        title="Vị trí nhúng"
                       />
                       <CmsIconButton
                         onClick={() => onDuplicateCta(cta)}
                         icon={<Copy />}
                         size="sm"
-                        aria-label="Duplicate"
-                        title="Duplicate"
+                        aria-label="Nhân bản CTA"
+                        title="Nhân bản CTA"
                       />
                       <CmsIconButton
                         onClick={() => onEditCta(cta)}
                         icon={<Edit3 />}
                         size="sm"
-                        aria-label="Edit"
-                        title="Edit"
+                        aria-label="Chỉnh sửa CTA"
+                        title="Chỉnh sửa CTA"
                       />
                       <CmsIconButton
                         onClick={() => onDeleteCta(cta.id)}
                         icon={<Trash2 />}
                         size="sm"
                         variant="danger"
-                        aria-label="Delete"
-                        title="Delete"
+                        aria-label="Xóa CTA"
+                        title="Xóa CTA"
                       />
                     </div>
                   </td>

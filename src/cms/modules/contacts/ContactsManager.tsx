@@ -497,7 +497,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
       <CmsTabs
         ariaLabel="Nhóm yêu cầu khách hàng"
         value={activeTab}
-        onChange={setActiveTab}
+        onChange={(val) => setActiveTab(val as MainTabType)}
         items={[
           { id: 'all', label: 'Tất cả yêu cầu', count: counts.all },
           { id: 'my_queue', label: 'Việc của tôi', count: counts.myQueue },

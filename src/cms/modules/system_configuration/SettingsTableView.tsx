@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import {
   ConfigScope,
+  ConfigScopeId,
   ConfigGroupDef,
   ConfigItem,
   ConfigValueRecord,
@@ -140,10 +141,11 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {filteredItems.map((item) => {
-                const rec = currentValues[item.id] || {
+                const rec: ConfigValueRecord = currentValues[item.id] || {
                   settingId: item.id,
-                  scopeId: selectedScopeId,
+                  scopeId: selectedScopeId as ConfigScopeId,
                   liveValue: '',
+                  draftValue: undefined,
                   inheritanceState: selectedScopeId === 'global' ? 'default' : 'inherited',
                   effectiveValue: '',
                   lastUpdatedBy: 'system',

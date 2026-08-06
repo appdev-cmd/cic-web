@@ -229,7 +229,9 @@ export const AuditTab: React.FC<AuditTabProps> = ({
                           {log.action.label}
                         </span>
                         {log.action.isSensitive && (
-                          <Lock className="w-3 h-3 text-red-500 shrink-0" title="Thao tác nhạy cảm" />
+                          <span title="Thao tác nhạy cảm">
+                            <Lock className="w-3 h-3 text-red-500 shrink-0" />
+                          </span>
                         )}
                       </div>
                       <span className="font-mono text-[10px] text-slate-400 block">

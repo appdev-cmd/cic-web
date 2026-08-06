@@ -352,7 +352,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
               }}
               items={[
                 { id: 'all', label: 'Tất cả bài viết', count: articles.filter((a) => !a.in_trash).length },
-                { id: 'my_work', label: 'Việc của tôi', count: articles.filter((a) => !a.in_trash && (a.author_name?.includes('Minh') || a.author_id === 'usr_01')).length },
+                { id: 'my_work', label: 'Việc của tôi', count: articles.filter((a) => !a.in_trash && (a.author?.name?.includes('Minh') || a.author?.name?.includes('Editor'))).length },
                 { id: 'pending', label: 'Hàng chờ duyệt', count: articles.filter((a) => !a.in_trash && a.workflow_status === 'pending').length },
                 { id: 'scheduled', label: 'Lịch xuất bản', count: articles.filter((a) => !a.in_trash && a.workflow_status === 'scheduled').length },
                 { id: 'trash', label: 'Lưu trữ & thùng rác', count: articles.filter((a) => a.in_trash).length },

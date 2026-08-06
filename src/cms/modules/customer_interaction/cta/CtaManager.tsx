@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import { CtaItem, CtaListTabType, CtaFilterState, CtaFormData } from './types';
 import { CtaList } from './components/CtaList';
-import { CtaEditorModal } from './components/CtaEditorModal';
+import { CtaFormView } from './CtaFormView';
+import { CtaPreviewModal } from './components/CtaPreviewModal';
+import { CtaUsedByModal } from './components/CtaUsedByModal';
 import { MOCK_CTAS } from './mockData';
 import { CTA_STATUSES } from '../shared/constants/statusTypes';
 import { ACTION_TYPES } from '../shared/constants/actionTypes';
@@ -24,8 +26,10 @@ export const CtaManager: React.FC = () => {
     searchQuery: '',
     tab: 'all',
   });
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
   const [editingCta, setEditingCta] = useState<CtaItem | null>(null);
+  const [previewCta, setPreviewCta] = useState<CtaItem | null>(null);
+  const [usedByCta, setUsedByCta] = useState<CtaItem | null>(null);
 
   // Filter ctas based on current filters
   const filteredCtas = ctas.filter((cta) => {
@@ -77,22 +81,20 @@ export const CtaManager: React.FC = () => {
 
   const handleEditCta = (cta: CtaItem) => {
     setEditingCta(cta);
-    setIsEditorOpen(true);
+    setViewMode('form');
   };
 
   const handleCreateNew = () => {
     setEditingCta(null);
-    setIsEditorOpen(true);
+    setViewMode('form');
   };
 
   const handleOpenPreview = (cta: CtaItem) => {
-    console.log('Preview CTA:', cta);
-    // TODO: Implement preview modal
+    setPreviewCta(cta);
   };
 
   const handleOpenUsedBy = (cta: CtaItem) => {
-    console.log('Used by:', cta.usedByPages);
-    // TODO: Implement used by drawer
+    setUsedByCta(cta);
   };
 
   const handleDuplicateCta = (cta: CtaItem) => {
@@ -173,9 +175,22 @@ export const CtaManager: React.FC = () => {
       setCtas([newCta, ...ctas]);
     }
 
-    setIsEditorOpen(false);
+    setViewMode('list');
     setEditingCta(null);
   };
+
+  if (viewMode === 'form') {
+    return (
+      <CtaFormView
+        cta={editingCta}
+        onSave={handleSaveCta}
+        onCancel={() => {
+          setViewMode('list');
+          setEditingCta(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -297,15 +312,17 @@ export const CtaManager: React.FC = () => {
         onQuickStatusToggle={handleQuickStatusToggle}
       />
 
-      {/* CTA Editor Modal */}
-      <CtaEditorModal
-        isOpen={isEditorOpen}
-        cta={editingCta}
-        onSave={handleSaveCta}
-        onCancel={() => {
-          setIsEditorOpen(false);
-          setEditingCta(null);
-        }}
+      {/* Modals */}
+      <CtaPreviewModal
+        isOpen={!!previewCta}
+        cta={previewCta}
+        onClose={() => setPreviewCta(null)}
+      />
+
+      <CtaUsedByModal
+        isOpen={!!usedByCta}
+        cta={usedByCta}
+        onClose={() => setUsedByCta(null)}
       />
     </div>
   );

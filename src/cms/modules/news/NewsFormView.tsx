@@ -866,9 +866,19 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           news_related: newsRelated,
           products_related: productsRelated,
           start_time: startTime,
+          end_time: articleToEdit?.end_time || '',
+          is_hot: articleToEdit?.is_hot || false,
+          is_new: articleToEdit?.is_new || false,
+          show_in_homepage: articleToEdit?.show_in_homepage || false,
+          published: articleToEdit?.published || false,
+          ordering: ordering || 1,
           workflow_status: workflowStatus,
           author: { name: authorName },
-          created_time: new Date().toISOString(),
+          seo_title: seoTitle || '',
+          seo_keyword: seoKeyword || '',
+          seo_description: seoDescription || '',
+          working_version_number: articleToEdit?.working_version_number || 1,
+          created_time: articleToEdit?.created_time || new Date().toISOString(),
         }}
         onClose={() => setIsPreviewOpen(false)}
       />

@@ -347,7 +347,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       <CmsTabs
         ariaLabel="Các khu vực cấu hình hệ thống"
         value={activeTab}
-        onChange={setActiveTab}
+        onChange={(val) => setActiveTab(val as any)}
         items={[
           { id: 'overview', label: 'Tổng quan', icon: Globe },
           { id: 'editor', label: 'Chỉnh sửa', icon: Sliders },

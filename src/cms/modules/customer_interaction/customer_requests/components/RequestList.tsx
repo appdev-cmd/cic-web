@@ -124,11 +124,13 @@ export const RequestList: React.FC<RequestListProps> = ({
                   className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                 />
               </th>
-              <th className="p-3 min-w-[200px]">Khách hàng</th>
-              <th className="p-3 min-w-[150px]">Liên hệ</th>
-              <th className="p-3 min-w-[120px]">Nguồn</th>
+              <th className="p-3 min-w-[180px]">Khách hàng</th>
+              <th className="p-3 min-w-[120px]">Điện thoại</th>
+              <th className="p-3 min-w-[140px]">Biểu mẫu</th>
+              <th className="p-3 min-w-[130px]">CTA</th>
+              <th className="p-3 min-w-[150px]">Trang</th>
+              <th className="p-3 min-w-[120px]">Ngày gửi</th>
               <th className="p-3 min-w-[120px]">Trạng thái</th>
-              <th className="p-3 min-w-[100px]">Ngày tạo</th>
               <th className="p-3 w-28 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">Thao tác</th>
             </tr>
           </thead>
@@ -137,6 +139,9 @@ export const RequestList: React.FC<RequestListProps> = ({
             {requests.map((request) => {
               const isSelected = selectedRequestIds.includes(request.id);
               const StatusIcon = getStatusIcon(request.status);
+              const phone = getCustomerPhone(request);
+              const email = getCustomerEmail(request);
+              const name = getCustomerName(request);
 
               return (
                 <tr
@@ -155,54 +160,70 @@ export const RequestList: React.FC<RequestListProps> = ({
                     />
                   </td>
 
-                  {/* Customer Name */}
+                  {/* Khách hàng */}
                   <td className="p-3">
                     <button
                       type="button"
                       onClick={() => onViewRequest(request)}
                       className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 text-left line-clamp-1 transition-colors"
                     >
-                      {getCustomerName(request)}
+                      {name}
                     </button>
-                    {getCustomerCompany(request) && (
-                      <div className="text-[10px] text-slate-400 mt-1">
-                        {getCustomerCompany(request)}
+                    {email && (
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[160px]">
+                        {email}
                       </div>
                     )}
                   </td>
 
-                  {/* Contact Info */}
+                  {/* Điện thoại */}
                   <td className="p-3">
-                    <div className="space-y-1">
-                      {getCustomerEmail(request) && (
-                        <div className="flex items-center gap-1.5">
-                          <Mail className="w-3 h-3 text-slate-400" />
-                          <span className="text-[10px] text-slate-600 dark:text-slate-400 truncate max-w-[120px]">
-                            {getCustomerEmail(request)}
-                          </span>
-                        </div>
-                      )}
-                      {getCustomerPhone(request) && (
-                        <div className="flex items-center gap-1.5">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span className="text-[10px] text-slate-600 dark:text-slate-400">
-                            {getCustomerPhone(request)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    {phone ? (
+                      <a
+                        href={`tel:${phone}`}
+                        className="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400"
+                      >
+                        <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span>{phone}</span>
+                      </a>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
                   </td>
 
-                  {/* Source */}
+                  {/* Biểu mẫu */}
                   <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-slate-600 dark:text-slate-400">
-                        {request.sourceConfig.pageType}
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">
+                      {request.sourceConfig.formName || '—'}
+                    </span>
+                  </td>
+
+                  {/* CTA */}
+                  <td className="p-3">
+                    {request.sourceConfig.ctaName ? (
+                      <span className="inline-block bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-[11px] font-medium truncate max-w-[120px]">
+                        {request.sourceConfig.ctaName}
                       </span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
+
+                  {/* Trang */}
+                  <td className="p-3">
+                    <div className="line-clamp-1 font-medium text-slate-700 dark:text-slate-300" title={request.sourceConfig.pageUrl}>
+                      {request.sourceConfig.pageTitle || request.sourceConfig.pageUrl || '—'}
                     </div>
                   </td>
 
-                  {/* Status */}
+                  {/* Ngày gửi */}
+                  <td className="p-3">
+                    <div className="text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                      {formatRelativeTime(request.sourceConfig.submittedAt || request.createdAt)}
+                    </div>
+                  </td>
+
+                  {/* Trạng thái */}
                   <td className="p-3">
                     <button
                       type="button"
@@ -214,13 +235,6 @@ export const RequestList: React.FC<RequestListProps> = ({
                     </button>
                   </td>
 
-                  {/* Created Date */}
-                  <td className="p-3">
-                    <div className="text-slate-600 dark:text-slate-400">
-                      {formatRelativeTime(request.createdAt)}
-                    </div>
-                  </td>
-
                   {/* Actions */}
                   <td className="p-3 text-right sticky right-0 bg-white dark:bg-slate-900 z-10">
                     <div className="flex items-center justify-end gap-1">
@@ -228,23 +242,23 @@ export const RequestList: React.FC<RequestListProps> = ({
                         onClick={() => onViewRequest(request)}
                         icon={<Eye />}
                         size="sm"
-                        aria-label="View"
-                        title="View"
+                        aria-label="Xem chi tiết"
+                        title="Xem chi tiết"
                       />
                       <CmsIconButton
                         onClick={() => onDuplicateRequest(request)}
                         icon={<Copy />}
                         size="sm"
-                        aria-label="Duplicate"
-                        title="Duplicate"
+                        aria-label="Nhân bản"
+                        title="Nhân bản"
                       />
                       <CmsIconButton
                         onClick={() => onDeleteRequest(request.id)}
                         icon={<Trash2 />}
                         size="sm"
                         variant="danger"
-                        aria-label="Delete"
-                        title="Delete"
+                        aria-label="Xóa"
+                        title="Xóa"
                       />
                     </div>
                   </td>

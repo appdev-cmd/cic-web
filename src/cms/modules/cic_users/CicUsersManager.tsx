@@ -115,11 +115,11 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
   };
 
   // Batch Select Handlers
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedIds(filteredUsers.map((u) => u.id));
-    } else {
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredUsers.length && filteredUsers.length > 0) {
       setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredUsers.map((u) => u.id));
     }
   };
 

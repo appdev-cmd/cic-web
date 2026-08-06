@@ -327,7 +327,7 @@ export const BannersManager: React.FC<BannersManagerProps> = ({ workspaceLocale,
       <CmsTabs
         ariaLabel="Chế độ quản lý banner và slideshow"
         value={activeMainTab}
-        onChange={setActiveMainTab}
+        onChange={(val) => setActiveMainTab(val as MainTabType)}
         items={[
           { id: 'all', label: 'Tất cả', count: items.filter((item) => !item.deleted_at).length },
           { id: 'schedule', label: 'Lịch hiển thị' },
