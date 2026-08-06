@@ -13,6 +13,8 @@ export interface CtaActionConfig {
   fileId?: string;
   phoneNumber?: string;
   emailAddress?: string;
+  emailTemplateId?: string;
+  reviewBeforeSend?: boolean;
   customAction?: string;
 }
 

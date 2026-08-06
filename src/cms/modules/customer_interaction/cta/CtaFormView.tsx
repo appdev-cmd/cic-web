@@ -23,12 +23,15 @@ import {
   Tag,
   Copy,
   Info,
+  X,
 } from 'lucide-react';
 import { CtaItem, CtaFormData, CtaActionConfig } from './types';
 import { ActionType, ACTION_TYPES } from '../shared/constants/actionTypes';
 import { CtaStatus, CTA_STATUSES } from '../shared/constants/statusTypes';
 import { generateCode } from '../shared/utils/validationHelpers';
 import { CmsButton } from '../../../components/ui/CmsButton';
+import { mockEmailTemplates } from '../../email_templates/mockData';
+import { EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES } from '../../email_templates/types';
 
 interface CtaFormViewProps {
   cta: CtaItem | null;
@@ -72,6 +75,30 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
   const [buttonSize, setButtonSize] = useState<'sm' | 'md' | 'lg'>('md');
   const [previewHovered, setPreviewHovered] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  const selectedEmailTemplate = mockEmailTemplates.find((template) => template.id === formData.actionConfig.emailTemplateId);
+  const renderEmailSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce((text, [token, sample]) => text.split(token).join(sample), value);
+
+  const handleSave = (action: 'draft' | 'publish') => {
+    if (action === 'publish' && formData.actionConfig.type === 'send_email') {
+      if (!formData.actionConfig.emailAddress?.trim() || !formData.actionConfig.emailTemplateId) {
+        setSaveError('CTA gửi email phải có địa chỉ nhận và mẫu email trước khi xuất bản.');
+        return;
+      }
+      if (!selectedEmailTemplate || selectedEmailTemplate.status !== 'active') {
+        setSaveError('Chỉ được xuất bản CTA khi mẫu email đã ở trạng thái Đang sử dụng.');
+        return;
+      }
+      if (formData.actionConfig.reviewBeforeSend !== true) {
+        setSaveError('CTA gửi email trực tiếp phải bật bước xem trước trước khi gửi.');
+        return;
+      }
+    }
+    setSaveError('');
+    onSave(formData, action);
+  };
 
   useEffect(() => {
     if (cta) {
@@ -122,6 +149,8 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
         fileId: type === 'download_file' ? 'file_001' : undefined,
         phoneNumber: type === 'call_phone' ? '024 3976 1381' : undefined,
         emailAddress: type === 'send_email' ? 'info@cic.com.vn' : undefined,
+        emailTemplateId: type === 'send_email' ? '' : undefined,
+        reviewBeforeSend: type === 'send_email' ? true : undefined,
       },
     }));
   };
@@ -195,7 +224,7 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
           <CmsButton
             variant="secondary"
             size="sm"
-            onClick={() => onSave(formData, 'draft')}
+            onClick={() => handleSave('draft')}
             leadingIcon={<Save className="w-4 h-4 text-slate-500" />}
           >
             Lưu bản nháp
@@ -203,13 +232,15 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
           <CmsButton
             variant="primary"
             size="sm"
-            onClick={() => onSave(formData, 'publish')}
+            onClick={() => handleSave('publish')}
             leadingIcon={<Play className="w-4 h-4" />}
           >
             Xuất bản ngay
           </CmsButton>
         </div>
       </div>
+
+      {saveError && <div role="alert" className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"><AlertCircle className="size-4"/>{saveError}</div>}
 
       {/* Main Grid Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -556,7 +587,8 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
               )}
 
               {formData.actionConfig.type === 'send_email' && (
-                <div>
+                <div className="space-y-4">
+                  <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     Địa chỉ email nhận thư <span className="text-red-500">*</span>
                   </label>
@@ -572,6 +604,30 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                     placeholder="truyenthong@cic.com.vn"
                     className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium"
                   />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Mẫu email sử dụng <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.actionConfig.emailTemplateId || ''}
+                      onChange={(e) => setFormData({ ...formData, actionConfig: { ...formData.actionConfig, emailTemplateId: e.target.value } })}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      <option value="">Chọn mẫu email</option>
+                      {mockEmailTemplates.filter((template) => template.workspace === 'vi' && template.audience === 'internal').map((template) => {
+                        const eventName = EMAIL_EVENTS.find((event) => event.value === template.event)?.label;
+                        return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
+                      })}
+                    </select>
+                  </div>
+                  <label className="flex items-start gap-2 rounded-lg border border-orange-200 bg-orange-50 p-3 text-xs text-orange-800 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-200">
+                    <input type="checkbox" checked disabled className="mt-0.5 size-4 accent-orange-600" />
+                    <span><strong>Xem lại trước khi gửi là bắt buộc.</strong><br/>Người dùng phải xem người nhận, tiêu đề và nội dung đã điền biến rồi mới xác nhận gửi.</span>
+                  </label>
+                  <CmsButton size="sm" variant="secondary" leadingIcon={<Eye/>} disabled={!selectedEmailTemplate} onClick={() => setIsEmailPreviewOpen(true)}>
+                    Xem trước email
+                  </CmsButton>
                 </div>
               )}
             </div>
@@ -710,6 +766,19 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
           )}
         </div>
       </div>
+
+      {isEmailPreviewOpen && selectedEmailTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="cta-email-preview-title">
+          <div className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-start justify-between border-b border-slate-200 p-4 dark:border-slate-800">
+              <div><p className="text-xs font-semibold text-orange-600">Email sẽ được xem lại trước khi gửi</p><h2 id="cta-email-preview-title" className="mt-1 text-base font-bold text-slate-900 dark:text-white">{renderEmailSample(selectedEmailTemplate.subject)}</h2><p className="mt-1 text-xs text-slate-500">Tới: {formData.actionConfig.emailAddress || 'Chưa nhập địa chỉ nhận'}</p></div>
+              <button type="button" onClick={() => setIsEmailPreviewOpen(false)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng xem trước"><X className="size-4"/></button>
+            </div>
+            <div className="whitespace-pre-wrap p-6 text-sm leading-7 text-slate-700 dark:text-slate-300">{renderEmailSample(selectedEmailTemplate.content)}</div>
+            <div className="flex justify-end border-t border-slate-200 p-4 dark:border-slate-800"><CmsButton onClick={() => setIsEmailPreviewOpen(false)}>Đóng xem trước</CmsButton></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

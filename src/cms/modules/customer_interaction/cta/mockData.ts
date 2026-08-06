@@ -206,8 +206,10 @@ export const MOCK_CTAS: CtaItem[] = [
     actionConfig: {
       type: 'send_email',
       emailAddress: 'sales@techaz.com',
+      emailTemplateId: 'vi-product_contact-internal',
+      reviewBeforeSend: true,
     },
-    status: 'active',
+    status: 'draft',
     usedByCount: 4,
     usedByPages: [
       {

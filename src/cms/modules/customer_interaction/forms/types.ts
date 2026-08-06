@@ -51,6 +51,7 @@ export interface FormSubmitConfig {
   confirmationEmailTemplate?: string;
   adminEmailTemplate?: string;
   successMessage: string;
+  submitButtonText?: string;
   redirectUrl?: string;
   allowFileDownload?: boolean;
   downloadFileId?: string;

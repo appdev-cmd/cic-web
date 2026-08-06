@@ -65,6 +65,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
       confirmationEmailTemplate: '',
       adminEmailTemplate: '',
       successMessage: 'Cảm ơn bạn đã gửi thông tin! Chúng tôi sẽ liên hệ lại trong vòng 24 giờ.',
+      submitButtonText: 'Gửi thông tin',
       redirectUrl: '',
       allowFileDownload: false,
       webhookUrl: '',
@@ -164,6 +165,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
           sendConfirmationEmail: false,
           confirmationEmailTemplate: 'Cảm ơn quý khách đã gửi thông tin.',
           successMessage: 'Cảm ơn bạn đã gửi thông tin thành công!',
+          submitButtonText: 'Gửi thông tin',
           redirectUrl: '',
           allowFileDownload: false,
           webhookUrl: '',
@@ -894,6 +896,21 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
 
               <div>
                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Chữ trên nút gửi biểu mẫu
+                </label>
+                <input
+                  type="text"
+                  value={formData.submitConfig.submitButtonText || ''}
+                  onChange={(e) => setFormData({ ...formData, submitConfig: { ...formData.submitConfig, submitButtonText: e.target.value } })}
+                  placeholder="Ví dụ: Gửi yêu cầu, Nhận báo giá, Đăng ký ngay"
+                  maxLength={60}
+                  className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs bg-white dark:bg-slate-800 font-medium"
+                />
+                <p className="mt-1 text-[11px] text-slate-400">Nên dùng động từ mô tả đúng kết quả sau khi gửi.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Câu thông báo thành công (Success Message)
                 </label>
                 <input
@@ -1039,7 +1056,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                     type="button"
                     className="w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 mt-2"
                   >
-                    Gửi thông tin ngay
+                    {formData.submitConfig.submitButtonText?.trim() || 'Gửi thông tin'}
                   </button>
                 </div>
               </div>
