@@ -6,6 +6,8 @@ import { CtaStatus } from '../../shared/constants/statusTypes';
 import { ACTION_TYPES } from '../../shared/constants/actionTypes';
 import { CTA_STATUSES } from '../../shared/constants/statusTypes';
 import { generateCode } from '../../shared/utils/validationHelpers';
+import { mockEmailTemplates } from '../../../email_templates/mockData';
+import { EMAIL_EVENTS, TEMPLATE_STATUSES } from '../../../email_templates/types';
 
 interface CtaEditorModalProps {
   isOpen: boolean;
@@ -81,6 +83,8 @@ export const CtaEditorModal: React.FC<CtaEditorModalProps> = ({
         fileId: undefined,
         phoneNumber: undefined,
         emailAddress: undefined,
+        emailTemplateId: type === 'send_email' ? '' : undefined,
+        reviewBeforeSend: type === 'send_email' ? true : undefined,
         customAction: undefined,
       },
     });
@@ -384,6 +388,29 @@ export const CtaEditorModal: React.FC<CtaEditorModalProps> = ({
                   placeholder="sales@company.com"
                   className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
+                <label className="mb-1.5 mt-4 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Mẫu email sử dụng <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.actionConfig.emailTemplateId || ''}
+                  onChange={(event) => setFormData({
+                    ...formData,
+                    actionConfig: { ...formData.actionConfig, emailTemplateId: event.target.value },
+                  })}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="">Chọn mẫu email...</option>
+                  {mockEmailTemplates
+                    .filter((template) => template.workspace === 'vi' && template.audience === 'internal')
+                    .map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.name} · {EMAIL_EVENTS.find((item) => item.value === template.event)?.label} · {TEMPLATE_STATUSES[template.status].label}
+                      </option>
+                    ))}
+                </select>
+                <p className="mt-3 rounded-lg border border-orange-200 bg-orange-50 p-3 text-xs text-orange-800 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-200">
+                  Bắt buộc xem lại người nhận, tiêu đề và nội dung trước khi xác nhận gửi.
+                </p>
               </div>
             )}
 
