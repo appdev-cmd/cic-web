@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Archive, Check, Copy, Edit, Eye, MailCheck, Plus, Search, Send, X } from 'lucide-react';
+import { Archive, Check, Copy, Edit, ExternalLink, Eye, FileText, Link2, MailCheck, MapPin, Plus, Search, Send, X } from 'lucide-react';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsListFooter } from '../../components/ui/CmsPagination';
@@ -7,15 +7,42 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { EmailTemplatesFormView } from './EmailTemplatesFormView';
 import { mockEmailTemplates } from './mockData';
 import { EmailAudience, EmailEvent, EmailTemplate, EmailTemplateStatus, EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES } from './types';
+import { MOCK_FORMS } from '../customer_interaction/forms/mockData';
+import { MOCK_CTAS } from '../customer_interaction/cta/mockData';
 
 interface Props { workspaceLocale: 'vi' | 'en'; }
 const renderSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce((text, [token, sample]) => text.split(token).join(sample), value);
+
+interface TemplateUsage {
+  formId: string;
+  formName: string;
+  formCode: string;
+  formStatus: string;
+  purpose: 'confirmation' | 'internal';
+  ctas: Array<{ id: string; name: string; status: string; pages: Array<{ title: string; path: string; placement: string }> }>;
+}
+
+const getTemplateUsage = (templateId: string): TemplateUsage[] => MOCK_FORMS.flatMap((form) => {
+  const purpose = form.submitConfig.confirmationEmailTemplate === templateId
+    ? 'confirmation'
+    : form.submitConfig.adminEmailTemplate === templateId ? 'internal' : null;
+  if (!purpose) return [];
+  const ctas = MOCK_CTAS.filter((cta) => cta.actionConfig.type === 'open_form' && cta.actionConfig.formId === form.id)
+    .map((cta) => ({
+      id: cta.id,
+      name: cta.adminName,
+      status: cta.status,
+      pages: cta.usedByPages.map((page) => ({ title: page.pageTitle, path: page.pagePath, placement: page.placementKey })),
+    }));
+  return [{ formId: form.id, formName: form.adminName, formCode: form.code, formStatus: form.status, purpose, ctas }];
+});
 
 export const EmailTemplatesManager: React.FC<Props> = ({ workspaceLocale }) => {
   const [templates, setTemplates] = useState(mockEmailTemplates);
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editing, setEditing] = useState<EmailTemplate | null>(null);
   const [previewing, setPreviewing] = useState<EmailTemplate | null>(null);
+  const [usageTemplate, setUsageTemplate] = useState<EmailTemplate | null>(null);
   const [query, setQuery] = useState('');
   const [event, setEvent] = useState<'all' | EmailEvent>('all');
   const [audience, setAudience] = useState<'all' | EmailAudience>('all');
@@ -47,7 +74,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({ workspaceLocale }) => {
 
   return <div className="space-y-5">
     {toast && <div role="status" className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-2xl"><Check className="size-4 text-emerald-400"/>{toast}</div>}
-    <CmsPageHeader icon={<MailCheck/>} title="Mẫu email" description="Soạn, duyệt và quản lý phiên bản nội dung email theo từng sự kiện. Người nhận và cấu hình gửi được quản lý riêng." actions={<CmsButton variant="primary" size="sm" leadingIcon={<Plus/>} onClick={() => { setEditing(null); setView('form'); }}>Thêm mẫu email</CmsButton>} />
+    <CmsPageHeader icon={<MailCheck/>} title="Mẫu email" description="Soạn, duyệt và quản lý nội dung email. Biểu mẫu chọn mẫu cần gửi và tổng hợp nơi đang sử dụng." actions={<CmsButton variant="primary" size="sm" leadingIcon={<Plus/>} onClick={() => { setEditing(null); setView('form'); }}>Thêm mẫu email</CmsButton>} />
 
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
       <div className="grid gap-3 md:grid-cols-12">
@@ -60,9 +87,11 @@ export const EmailTemplatesManager: React.FC<Props> = ({ workspaceLocale }) => {
     </section>
 
     <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900"><div className="overflow-x-auto"><table className="cms-data-table min-w-[980px] text-left"><thead><tr><th className="w-10 p-3 text-center"><CmsSelectionCheckbox checked={allSelected} indeterminate={selected.length > 0 && !allSelected} onChange={() => setSelected(allSelected ? [] : rows.map((item) => item.id))} label="Chọn tất cả"/></th><th className="min-w-[300px] p-3">Tên mẫu</th><th className="w-48 p-3">Sự kiện</th><th className="w-28 p-3">Đối tượng</th><th className="w-32 p-3">Trạng thái</th><th className="w-24 p-3">Phiên bản</th><th className="w-40 p-3 text-right">Thao tác</th></tr></thead><tbody>
-      {rows.length === 0 ? <tr><td colSpan={7} className="p-12 text-center text-sm text-slate-500">Không có mẫu email phù hợp trong workspace này.</td></tr> : rows.map((item) => { const eventInfo = EMAIL_EVENTS.find((option) => option.value === item.event)!; const state = TEMPLATE_STATUSES[item.status]; return <tr key={item.id}><td className="p-3 text-center"><CmsSelectionCheckbox checked={selected.includes(item.id)} onChange={() => setSelected((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])} label={`Chọn ${item.name}`}/></td><td className="p-3"><button className="max-w-[420px] truncate text-left font-semibold text-slate-900 hover:text-orange-600 dark:text-white" onClick={() => { setEditing(item); setView('form'); }}>{item.name}</button><p className="mt-1 max-w-[420px] truncate text-[11px] text-slate-500">{item.subject}</p></td><td className="p-3 text-xs">{workspaceLocale === 'vi' ? eventInfo.label : eventInfo.labelEn}</td><td className="p-3 text-xs">{item.audience === 'customer' ? 'Khách hàng' : 'Nội bộ'}</td><td className="p-3"><span className={`rounded-md px-2 py-1 text-[11px] font-semibold ${state.className}`}>{state.label}</span></td><td className="p-3 text-xs">v{item.version}<span className="ml-2 text-slate-400">· {item.usageCount} nơi dùng</span></td><td className="p-3"><div className="flex justify-end gap-1"><CmsIconButton size="sm" aria-label="Xem trước" title="Xem trước" icon={<Eye/>} onClick={() => setPreviewing(item)}/><CmsIconButton size="sm" aria-label="Nhân bản" title="Nhân bản" icon={<Copy/>} onClick={() => { duplicate(item); notify('Đã tạo bản sao ở trạng thái Bản nháp.'); }}/><CmsIconButton size="sm" aria-label="Sửa" title="Sửa" icon={<Edit/>} onClick={() => { setEditing(item); setView('form'); }}/>{item.status === 'draft' && <CmsIconButton size="sm" aria-label="Gửi duyệt" title="Gửi duyệt" icon={<Send/>} onClick={() => changeStatus(item, 'review')}/>} {item.status === 'review' && <CmsIconButton size="sm" aria-label="Kích hoạt" title="Kích hoạt" icon={<Check/>} onClick={() => changeStatus(item, 'active')}/>}</div></td></tr>; })}
+      {rows.length === 0 ? <tr><td colSpan={7} className="p-12 text-center text-sm text-slate-500">Không có mẫu email phù hợp trong workspace này.</td></tr> : rows.map((item) => { const eventInfo = EMAIL_EVENTS.find((option) => option.value === item.event)!; const state = TEMPLATE_STATUSES[item.status]; const usageCount = getTemplateUsage(item.id).length; return <tr key={item.id}><td className="p-3 text-center"><CmsSelectionCheckbox checked={selected.includes(item.id)} onChange={() => setSelected((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])} label={`Chọn ${item.name}`}/></td><td className="p-3"><button className="max-w-[420px] truncate text-left font-semibold text-slate-900 hover:text-orange-600 dark:text-white" onClick={() => { setEditing(item); setView('form'); }}>{item.name}</button><p className="mt-1 max-w-[420px] truncate text-[11px] text-slate-500">{item.subject}</p></td><td className="p-3 text-xs">{workspaceLocale === 'vi' ? eventInfo.label : eventInfo.labelEn}</td><td className="p-3 text-xs">{item.audience === 'customer' ? 'Khách hàng' : 'Nội bộ'}</td><td className="p-3"><span className={`rounded-md px-2 py-1 text-[11px] font-semibold ${state.className}`}>{state.label}</span></td><td className="p-3 text-xs">v{item.version}<button className="ml-2 font-semibold text-orange-600 hover:underline disabled:text-slate-400 disabled:no-underline" disabled={usageCount === 0} onClick={() => setUsageTemplate(item)}>{usageCount} biểu mẫu dùng</button></td><td className="p-3"><div className="flex justify-end gap-1"><CmsIconButton size="sm" aria-label="Xem trước" title="Xem trước" icon={<Eye/>} onClick={() => setPreviewing(item)}/><CmsIconButton size="sm" aria-label="Xem nơi sử dụng" title="Xem nơi sử dụng" icon={<Link2/>} onClick={() => setUsageTemplate(item)}/><CmsIconButton size="sm" aria-label="Nhân bản" title="Nhân bản" icon={<Copy/>} onClick={() => { duplicate(item); notify('Đã tạo bản sao ở trạng thái Bản nháp.'); }}/><CmsIconButton size="sm" aria-label="Sửa" title="Sửa" icon={<Edit/>} onClick={() => { setEditing(item); setView('form'); }}/>{item.status === 'draft' && <CmsIconButton size="sm" aria-label="Gửi duyệt" title="Gửi duyệt" icon={<Send/>} onClick={() => changeStatus(item, 'review')}/>} {item.status === 'review' && <CmsIconButton size="sm" aria-label="Kích hoạt" title="Kích hoạt" icon={<Check/>} onClick={() => changeStatus(item, 'active')}/>}</div></td></tr>; })}
     </tbody></table></div><CmsListFooter visibleCount={rows.length} totalCount={workspaceTemplates.length} itemLabel="mẫu email"/></section>
 
     {previewing && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4" role="dialog" aria-modal="true" aria-labelledby="email-preview-title"><div className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900"><header className="sticky top-0 flex items-start justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><div><p className="text-xs font-semibold text-orange-600">Xem trước bằng dữ liệu mẫu</p><h2 id="email-preview-title" className="mt-1 text-base font-bold">{renderSample(previewing.subject)}</h2></div><CmsIconButton aria-label="Đóng xem trước" icon={<X/>} onClick={() => setPreviewing(null)}/></header><div className="whitespace-pre-wrap p-6 text-sm leading-7 text-slate-700 dark:text-slate-300">{renderSample(previewing.content)}</div></div></div>}
+
+    {usageTemplate && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4" role="dialog" aria-modal="true" aria-labelledby="email-usage-title"><div className="max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900"><header className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><div><p className="text-xs font-semibold text-orange-600">Nơi sử dụng</p><h2 id="email-usage-title" className="mt-1 text-base font-bold text-slate-900 dark:text-white">{usageTemplate.name}</h2><p className="mt-1 text-xs text-slate-500">Trang/vị trí → CTA → Biểu mẫu → Mẫu email</p></div><CmsIconButton aria-label="Đóng nơi sử dụng" icon={<X/>} onClick={() => setUsageTemplate(null)}/></header><div className="space-y-3 p-5">{getTemplateUsage(usageTemplate.id).length === 0 ? <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700">Mẫu email này chưa được biểu mẫu nào sử dụng.</div> : getTemplateUsage(usageTemplate.id).map((usage) => <article key={`${usage.formId}-${usage.purpose}`} className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"><div className="flex flex-wrap items-start justify-between gap-2"><div className="flex gap-3"><div className="flex size-9 items-center justify-center rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-950/40"><FileText className="size-4"/></div><div><h3 className="text-sm font-bold text-slate-900 dark:text-white">{usage.formName}</h3><p className="mt-0.5 font-mono text-[11px] text-slate-500">{usage.formCode}</p></div></div><div className="flex gap-2 text-[11px]"><span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600 dark:bg-slate-800 dark:text-slate-300">{usage.purpose === 'confirmation' ? 'Gửi khách hàng' : 'Thông báo quản trị'}</span><span className="rounded-md bg-emerald-50 px-2 py-1 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">{usage.formStatus}</span></div></div>{usage.ctas.length === 0 ? <p className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800">Biểu mẫu chưa được CTA nào mở.</p> : <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">{usage.ctas.map((cta) => <div key={cta.id} className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/60"><div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200"><Link2 className="size-3.5 text-orange-500"/>{cta.name}<span className="font-normal text-slate-400">({cta.status})</span></div>{cta.pages.length === 0 ? <p className="mt-2 pl-5 text-[11px] text-slate-500">CTA chưa được đặt trên trang nào.</p> : <ul className="mt-2 space-y-1 pl-5">{cta.pages.map((page) => <li key={`${page.path}-${page.placement}`} className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400"><MapPin className="size-3"/><span className="font-semibold">{page.title}</span><span>· {page.placement}</span><span className="inline-flex items-center gap-1 font-mono text-slate-400"><ExternalLink className="size-3"/>{page.path}</span></li>)}</ul>}</div>)}</div>}</article>)}</div></div></div>}
   </div>;
 };

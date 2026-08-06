@@ -49,6 +49,7 @@ export interface FormSubmitConfig {
   adminEmails: string[];
   sendConfirmationEmail: boolean;
   confirmationEmailTemplate?: string;
+  adminEmailTemplate?: string;
   successMessage: string;
   redirectUrl?: string;
   allowFileDownload?: boolean;

@@ -35,6 +35,8 @@ import { FIELD_TYPES, FieldType, FIELD_ROLE_TYPES, FieldRoleType } from '../shar
 import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { generateCode } from '../shared/utils/validationHelpers';
 import { CmsButton } from '../../../components/ui/CmsButton';
+import { mockEmailTemplates } from '../../email_templates/mockData';
+import { EMAIL_EVENTS, TEMPLATE_STATUSES } from '../../email_templates/types';
 
 interface FormBuilderViewProps {
   form: FormItem | null;
@@ -60,7 +62,8 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
       sendAdminEmail: true,
       adminEmails: ['sales@cic.com.vn', 'cskh@cic.com.vn'],
       sendConfirmationEmail: false,
-      confirmationEmailTemplate: 'Cảm ơn quý khách đã gửi thông tin. Đội ngũ CIC sẽ liên hệ trong thời gian sớm nhất!',
+      confirmationEmailTemplate: '',
+      adminEmailTemplate: '',
       successMessage: 'Cảm ơn bạn đã gửi thông tin! Chúng tôi sẽ liên hệ lại trong vòng 24 giờ.',
       redirectUrl: '',
       allowFileDownload: false,
@@ -812,7 +815,8 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
               </label>
 
               {formData.submitConfig.sendAdminEmail && (
-                <div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Danh sách Email nhận thông báo (phân cách bằng dấu phẩy)
                   </label>
@@ -831,8 +835,55 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                     placeholder="sales@cic.com.vn, cskh@cic.com.vn"
                     className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs bg-white dark:bg-slate-800"
                   />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Mẫu thông báo quản trị
+                    </label>
+                    <select
+                      value={formData.submitConfig.adminEmailTemplate || ''}
+                      onChange={(e) => setFormData({ ...formData, submitConfig: { ...formData.submitConfig, adminEmailTemplate: e.target.value || undefined } })}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                    >
+                      <option value="">Không gửi bằng mẫu</option>
+                      {mockEmailTemplates.filter((template) => template.workspace === 'vi' && template.audience === 'internal').map((template) => {
+                        const eventName = EMAIL_EVENTS.find((item) => item.value === template.event)?.label;
+                        return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
+                      })}
+                    </select>
+                  </div>
                 </div>
               )}
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={formData.submitConfig.sendConfirmationEmail}
+                  onChange={(e) => setFormData({ ...formData, submitConfig: { ...formData.submitConfig, sendConfirmationEmail: e.target.checked } })}
+                  className="h-4 w-4 rounded text-orange-600 focus:ring-orange-500"
+                />
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <Send className="h-4 w-4 text-orange-500" />
+                  Gửi email xác nhận cho người điền biểu mẫu
+                </span>
+              </label>
+              {formData.submitConfig.sendConfirmationEmail && <div>
+                <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">Mẫu gửi khách hàng</label>
+                <select
+                  value={formData.submitConfig.confirmationEmailTemplate || ''}
+                  onChange={(e) => setFormData({ ...formData, submitConfig: { ...formData.submitConfig, confirmationEmailTemplate: e.target.value || undefined } })}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                >
+                  <option value="">Chọn mẫu email</option>
+                  {mockEmailTemplates.filter((template) => template.workspace === 'vi' && template.audience === 'customer').map((template) => {
+                    const eventName = EMAIL_EVENTS.find((item) => item.value === template.event)?.label;
+                    return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
+                  })}
+                </select>
+                <p className="mt-1.5 text-[11px] text-slate-500">Chỉ mẫu Đang sử dụng mới được phép gửi khi kết nối production. Mẫu nháp vẫn hiển thị để đối chiếu cấu hình demo.</p>
+              </div>}
             </div>
 
             {/* Confirmation Response Message */}
