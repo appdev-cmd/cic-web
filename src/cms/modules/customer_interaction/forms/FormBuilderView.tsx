@@ -36,7 +36,7 @@ import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { generateCode } from '../shared/utils/validationHelpers';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { mockEmailTemplates } from '../../email_templates/mockData';
-import { EMAIL_EVENTS, TEMPLATE_STATUSES } from '../../email_templates/types';
+import { EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES } from '../../email_templates/types';
 
 interface FormBuilderViewProps {
   form: FormItem | null;
@@ -78,6 +78,13 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   const [copiedCode, setCopiedCode] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [previewEmailTemplateId, setPreviewEmailTemplateId] = useState<string | null>(null);
+
+  const previewEmailTemplate = mockEmailTemplates.find((template) => template.id === previewEmailTemplateId);
+  const renderEmailSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce(
+    (text, [token, sample]) => text.split(token).join(sample),
+    value,
+  );
 
   useEffect(() => {
     if (form) {
@@ -853,6 +860,17 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                         return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
                       })}
                     </select>
+                    <CmsButton
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      className="mt-2"
+                      leadingIcon={<Eye className="size-4" />}
+                      disabled={!formData.submitConfig.adminEmailTemplate}
+                      onClick={() => setPreviewEmailTemplateId(formData.submitConfig.adminEmailTemplate || null)}
+                    >
+                      Xem trước email quản trị
+                    </CmsButton>
                   </div>
                 </div>
               )}
@@ -884,6 +902,17 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                     return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
                   })}
                 </select>
+                <CmsButton
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="mt-2"
+                  leadingIcon={<Eye className="size-4" />}
+                  disabled={!formData.submitConfig.confirmationEmailTemplate}
+                  onClick={() => setPreviewEmailTemplateId(formData.submitConfig.confirmationEmailTemplate || null)}
+                >
+                  Xem trước email gửi khách hàng
+                </CmsButton>
                 <p className="mt-1.5 text-[11px] text-slate-500">Chỉ mẫu Đang sử dụng mới được phép gửi khi kết nối production. Mẫu nháp vẫn hiển thị để đối chiếu cấu hình demo.</p>
               </div>}
             </div>
@@ -974,6 +1003,45 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
               <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
                 {form?.stats?.conversionRate || form?.analytics.ctr || 0}%
               </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewEmailTemplate && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="form-email-preview-title"
+        >
+          <div className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-start justify-between border-b border-slate-200 p-4 dark:border-slate-800">
+              <div>
+                <p className="text-xs font-semibold text-orange-600">Xem trước bằng dữ liệu mẫu</p>
+                <h2 id="form-email-preview-title" className="mt-1 text-base font-bold text-slate-900 dark:text-white">
+                  {renderEmailSample(previewEmailTemplate.subject)}
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Tới: {previewEmailTemplate.audience === 'internal'
+                    ? (formData.submitConfig.adminEmails || []).join(', ') || 'Chưa nhập email quản trị'
+                    : 'Email người điền biểu mẫu (dữ liệu mẫu)'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewEmailTemplateId(null)}
+                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                aria-label="Đóng xem trước email"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="whitespace-pre-wrap p-6 text-sm leading-7 text-slate-700 dark:text-slate-300">
+              {renderEmailSample(previewEmailTemplate.content)}
+            </div>
+            <div className="flex justify-end border-t border-slate-200 p-4 dark:border-slate-800">
+              <CmsButton type="button" onClick={() => setPreviewEmailTemplateId(null)}>Đóng xem trước</CmsButton>
             </div>
           </div>
         </div>
