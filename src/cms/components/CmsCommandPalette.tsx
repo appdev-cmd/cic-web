@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Package, FileText, Newspaper, Image as ImageIcon, Users, Settings, Plus, ExternalLink, X, ArrowRight } from 'lucide-react';
+import { Search, Package, FileText, Newspaper, Users, Settings, Plus, ExternalLink, X, ArrowRight } from 'lucide-react';
 
 interface CmsCommandPaletteProps {
   isOpen: boolean;
@@ -39,7 +39,6 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
     { label: 'Quản lý Sản phẩm phần mềm', category: 'Sản phẩm', path: '/cms/products', icon: Package },
     { label: 'Tin tức & Bài viết chuyên ngành', category: 'Nội dung', path: '/cms/news', icon: Newspaper },
     { label: 'Yêu cầu từ khách hàng', category: 'Khách hàng', path: '/cms/contact-requests', icon: FileText },
-    { label: 'Quản lý Banner quảng cáo', category: 'Nội dung', path: '/cms/banners', icon: ImageIcon },
     { label: 'Quản trị viên & Phân quyền', category: 'Hệ thống', path: '/cms/users', icon: Users },
     { label: 'Cấu hình chung hệ thống CMS', category: 'Cấu hình', path: '/cms/settings', icon: Settings },
   ];

@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Sparkles,
   Layers,
-  Image as ImageIcon,
   Clock,
   Shield,
   RotateCcw,
@@ -210,7 +209,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   { label: 'Dịch vụ mới', icon: Layers, path: '/cms/services', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
                   { label: 'Tin tức mới', icon: Newspaper, path: '/cms/news', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
                   { label: 'Trang nội dung mới', icon: FileText, path: '/cms/static-pages', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                  { label: 'Banner mới', icon: ImageIcon, path: '/cms/banners', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
                   { label: 'Slideshow mới', icon: Sliders, path: '/cms/slideshows', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
                 ].map((act, i) => {
                   const IconComponent = act.icon;

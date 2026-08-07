@@ -75,12 +75,6 @@ const EventsManager = lazy(async () => {
   ) };
 });
 const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
-const BannersManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/banners/BannersManager'), import('../data/demoPresentationDataSource')]);
-  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-    <module.BannersManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.bannersByLocale[workspaceLocale]} />
-  ) };
-});
 const ProductSettingsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([
     import('../modules/product_settings/ProductSettingsManager'),
@@ -130,12 +124,6 @@ const MenuManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/menu/MenuManager'), import('../data/demoPresentationDataSource')]);
   return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
     <module.MenuManager workspaceLocale={workspaceLocale} data={dataModule.demoPresentationDataSource.menuByLocale[workspaceLocale]} />
-  ) };
-});
-const ContentBlocksManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/content_blocks/ContentBlocksManager'), import('../data/demoPresentationDataSource')]);
-  return { default: () => (
-    <module.ContentBlocksManager data={dataModule.demoPresentationDataSource.contentBlocksUnscoped} />
   ) };
 });
 const MediaManager = lazy(async () => {
@@ -309,8 +297,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <EventsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'email_templates' ? (
             <EmailTemplatesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
-          ) : activeModule === 'banners' ? (
-            <BannersManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'product_settings' ? (
             <ProductSettingsManager workspaceLocale={workspaceLocale} />
           ) : activeModule === 'products' ? (
@@ -319,8 +305,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <ServicesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'menu' ? (
             <MenuManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
-          ) : activeModule === 'content_blocks' ? (
-            <ContentBlocksManager />
           ) : activeModule === 'media' ? (
             <MediaManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'contacts' ? (

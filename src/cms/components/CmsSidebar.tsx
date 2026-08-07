@@ -132,7 +132,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   // Nested sub-item expand state
   const [expandedSubItemIds, setExpandedSubItemIds] = useState<string[]>([
     'menu_products_group',
-    'menu_banners_slideshow',
   ]);
 
   const [searchKeyword, setSearchKeyword] = useState('');

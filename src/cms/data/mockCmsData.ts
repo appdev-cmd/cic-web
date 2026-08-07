@@ -398,18 +398,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         iconName: 'Menu',
         path: '/cms/frontend-menus',
       },
-      {
-        id: 'menu_banners_slideshow',
-        title: 'Banner & Slideshow',
-        iconName: 'Image',
-        path: '/cms/banners',
-      },
-      {
-        id: 'menu_home_blocks',
-        title: 'Khối nội dung',
-        iconName: 'Grid',
-        path: '/cms/home-blocks',
-      },
     ],
   },
   {

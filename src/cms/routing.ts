@@ -9,12 +9,10 @@ export type CmsModuleKey =
   | 'news'
   | 'events'
   | 'email_templates'
-  | 'banners'
   | 'product_settings'
   | 'products'
   | 'services'
   | 'menu'
-  | 'content_blocks'
   | 'media'
   | 'contacts'
   | 'localization'
@@ -57,12 +55,6 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
   { module: 'events', canonicalPath: '/cms/events', nestedPrefixes: ['/cms/events/'] },
   { module: 'email_templates', canonicalPath: '/cms/email-templates', nestedPrefixes: ['/cms/email-templates/'] },
   {
-    module: 'banners',
-    canonicalPath: '/cms/banners',
-    aliases: ['/cms/slideshows'],
-    nestedPrefixes: ['/cms/banners/', '/cms/slideshows/'],
-  },
-  {
     module: 'product_settings',
     canonicalPath: '/cms/product-settings',
     aliases: [
@@ -90,12 +82,6 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
     canonicalPath: '/cms/frontend-menus',
     aliases: ['/cms/menu', '/cms/navigation'],
     nestedPrefixes: ['/cms/frontend-menus/', '/cms/menu/'],
-  },
-  {
-    module: 'content_blocks',
-    canonicalPath: '/cms/home-blocks',
-    aliases: ['/cms/content-blocks', '/cms/blocks'],
-    nestedPrefixes: ['/cms/home-blocks/', '/cms/content-blocks/'],
   },
   {
     module: 'media',
