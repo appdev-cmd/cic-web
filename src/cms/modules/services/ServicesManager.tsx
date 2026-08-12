@@ -268,21 +268,28 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
   // If in Form View
   if (editingService) {
     return (
-      <ServiceFormView
-        service={editingService}
-        groups={groups}
-        owners={ownersList}
-        activityLogs={data?.activityLogs ?? []}
-        versions={data?.versions ?? []}
-        usedByReferences={data?.usedByReferences ?? []}
-        relatedContacts={data?.relatedContacts ?? []}
-        onBack={() => setEditingService(null)}
-        onSave={(updated) => {
-          handleSaveServiceFromForm(updated);
-          setEditingService(updated);
-        }}
-        onOpenPreview={(item) => setPreviewService(item)}
-      />
+      <>
+        <ServiceFormView
+          service={editingService}
+          groups={groups}
+          owners={ownersList}
+          activityLogs={data?.activityLogs ?? []}
+          versions={data?.versions ?? []}
+          usedByReferences={data?.usedByReferences ?? []}
+          relatedContacts={data?.relatedContacts ?? []}
+          onBack={() => setEditingService(null)}
+          onSave={(updated) => {
+            handleSaveServiceFromForm(updated);
+            setEditingService(updated);
+          }}
+          onOpenPreview={(item) => setPreviewService(item)}
+        />
+        <ServicePreviewModal
+          isOpen={Boolean(previewService)}
+          onClose={() => setPreviewService(null)}
+          service={previewService}
+        />
+      </>
     );
   }
 

@@ -261,18 +261,26 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   // If in Form View
   if (viewMode === 'form') {
     return (
-      <ProductsFormView
-        product={selectedProductForForm}
-        categories={categories}
-        brands={brands}
-        owners={owners}
-        onSave={handleSaveProductFromForm}
-        onCancel={() => {
-          setViewMode('list');
-          setSelectedProductForForm(null);
-        }}
-        onOpenPreview={(prod) => setProductToPreview(prod)}
-      />
+      <>
+        <ProductsFormView
+          product={selectedProductForForm}
+          categories={categories}
+          brands={brands}
+          owners={owners}
+          onSave={handleSaveProductFromForm}
+          onCancel={() => {
+            setViewMode('list');
+            setSelectedProductForForm(null);
+          }}
+          onOpenPreview={(prod) => setProductToPreview(prod)}
+        />
+        <ProductPreviewModal
+          isOpen={!!productToPreview}
+          product={productToPreview}
+          categories={categories}
+          onClose={() => setProductToPreview(null)}
+        />
+      </>
     );
   }
 
