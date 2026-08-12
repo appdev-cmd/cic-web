@@ -20,6 +20,7 @@ export interface ServiceItem {
   title: string; // Tên dịch vụ
   slug: string;
   summary: string; // Tóm tắt ngắn
+  tags?: string; // fs_services.tags
   
   // Phân loại
   group_id: string;

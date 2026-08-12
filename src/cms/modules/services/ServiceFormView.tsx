@@ -9,7 +9,6 @@ import {
   FileText,
   Layers,
   Image as ImageIcon,
-  PhoneCall,
   Search,
   Clock,
   History,
@@ -27,7 +26,6 @@ import {
   ServiceItem,
   ServiceGroup,
   EditorialStatus,
-  ServiceStatus,
   ServiceActivityLog,
   ServiceVersion,
   ServiceUsedByReference,
@@ -37,6 +35,8 @@ import { ActivityLogDrawer } from './ActivityLogDrawer';
 import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { UsedByDrawer } from './UsedByDrawer';
 import { RelatedContactsDrawer } from './RelatedContactsDrawer';
+import { RichTextEditor } from '../static_pages/RichTextEditor';
+import { findPageBuilderImage, pageBuilderImages, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 
 interface ServiceFormViewProps {
   service: ServiceItem;
@@ -68,6 +68,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
   const [lastAutosaved, setLastAutosaved] = useState<string>('vừa xong');
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
 
   // Drawers
   const [isLogsDrawerOpen, setIsLogsDrawerOpen] = useState(false);
@@ -312,12 +313,12 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <FileText className="w-5 h-5 text-orange-600" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                1. Thông tin chung dịch vụ
+                Thông tin chung dịch vụ
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
+            <div>
+              <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Tên dịch vụ <span className="text-rose-500">*</span>
                 </label>
@@ -330,23 +331,11 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Mã dịch vụ <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.code}
-                  onChange={(e) => handleChange('code', e.target.value)}
-                  placeholder="e.g. DV-BIM-01"
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Đường dẫn tĩnh (Slug)
+                Đường dẫn (Alias)
               </label>
               <input
                 type="text"
@@ -377,15 +366,13 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
           >
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Layers className="w-5 h-5 text-orange-600" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                2. Phân loại & Phạm vi áp dụng
-              </h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Phân loại dịch vụ</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Nhóm dịch vụ chính
+                  Danh mục dịch vụ
                 </label>
                 <select
                   value={formData.group_id}
@@ -410,26 +397,13 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Phạm vi áp dụng (Scope)
+                  Thẻ nội dung (Tags)
                 </label>
                 <input
                   type="text"
-                  value={formData.scope}
-                  onChange={(e) => handleChange('scope', e.target.value)}
-                  placeholder="e.g. Toàn quốc, Miền Bắc, Tập đoàn FDI"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Quan hệ nghiệp vụ
-                </label>
-                <input
-                  type="text"
-                  value={formData.business_relation}
-                  onChange={(e) => handleChange('business_relation', e.target.value)}
-                  placeholder="e.g. Dịch vụ độc lập, Đi kèm phần mềm"
+                  value={formData.tags || ''}
+                  onChange={(e) => handleChange('tags', e.target.value)}
+                  placeholder="Ví dụ: BIM, tư vấn, chuyển đổi số"
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
                 />
               </div>
@@ -444,7 +418,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <FileText className="w-5 h-5 text-orange-600" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                3. Nội dung mô tả chi tiết
+                Nội dung mô tả chi tiết
               </h3>
             </div>
 
@@ -452,39 +426,9 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Mô tả chi tiết nội dung dịch vụ (RichText HTML Editor)
               </label>
-              <textarea
-                rows={8}
-                value={formData.description}
-                onChange={(e) => handleChange('description', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-              />
+              <RichTextEditor value={formData.description} onChange={(value) => handleChange('description', value)} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Lợi ích & Quy trình thực hiện
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.benefits_process}
-                  onChange={(e) => handleChange('benefits_process', e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Nội dung bổ trợ / Điều khoản / FAQ
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.supplementary_content}
-                  onChange={(e) => handleChange('supplementary_content', e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-            </div>
           </div>
 
           {/* SECTION 4: MEDIA */}
@@ -495,161 +439,26 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <ImageIcon className="w-5 h-5 text-orange-600" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                4. Hình ảnh & Video truyền thông
+                Ảnh đại diện
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Ảnh đại diện (Thumbnail URL)
-                </label>
-                <input
-                  type="text"
-                  value={formData.thumbnail_url}
-                  onChange={(e) => handleChange('thumbnail_url', e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-                {formData.thumbnail_url && (
-                  <img
-                    src={formData.thumbnail_url}
-                    alt="Thumbnail preview"
-                    className="mt-2 h-24 w-auto rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                  />
-                )}
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Ảnh chính</label>
+                <button type="button" onClick={() => setIsMediaPickerOpen(true)} className="group w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800">
+                  {formData.thumbnail_url ? (
+                    <><img src={formData.thumbnail_url} alt="Ảnh đại diện dịch vụ" className="aspect-[16/7] w-full object-cover" /><span className="block px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">Chọn ảnh khác từ Thư viện Media</span></>
+                  ) : (
+                    <span className="flex min-h-32 flex-col items-center justify-center gap-2 p-4 text-xs font-semibold text-slate-500"><ImageIcon className="h-7 w-7" />Chọn ảnh từ Thư viện Media</span>
+                  )}
+                </button>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Ảnh bìa lớn (Banner Header URL)
-                </label>
-                <input
-                  type="text"
-                  value={formData.banner_url}
-                  onChange={(e) => handleChange('banner_url', e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-                {formData.banner_url && (
-                  <img
-                    src={formData.banner_url}
-                    alt="Banner preview"
-                    className="mt-2 h-24 w-auto rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                  />
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Video giới thiệu (YouTube / Vimeo URL)
-                </label>
-                <input
-                  type="text"
-                  value={formData.video_url || ''}
-                  onChange={(e) => handleChange('video_url', e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Mô tả thay thế Alt Text (Accessibility Metadata)
-                </label>
-                <input
-                  type="text"
-                  value={formData.media_alt}
-                  onChange={(e) => handleChange('media_alt', e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
             </div>
           </div>
 
-          {/* SECTION 5: LIÊN HỆ & CHUYỂN ĐỔI */}
-          <div
-            id="section_conversion"
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4"
-          >
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
-              <PhoneCall className="w-5 h-5 text-orange-600" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                5. Nút Kêu gọi Hành động (CTA) & Phụ trách
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Nhãn nút Call To Action (CTA Label)
-                </label>
-                <input
-                  type="text"
-                  value={formData.cta_label}
-                  onChange={(e) => handleChange('cta_label', e.target.value)}
-                  placeholder="e.g. Đăng ký Tư vấn 1:1"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Liên kết khi nhấn nút CTA (CTA Link)
-                </label>
-                <input
-                  type="text"
-                  value={formData.cta_link}
-                  onChange={(e) => handleChange('cta_link', e.target.value)}
-                  placeholder="e.g. /lien-he?service=DV-BIM-01"
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Người phụ trách chuyên môn (Owner)
-                </label>
-                <select
-                  value={formData.owner_id}
-                  onChange={(e) => {
-                    const sel = owners.find((o) => o.id === e.target.value);
-                    setFormData((prev) => ({
-                      ...prev,
-                      owner_id: e.target.value,
-                      owner_name: sel ? sel.name : prev.owner_name,
-                      owner_email: sel ? sel.email : prev.owner_email,
-                    }));
-                    setIsDirty(true);
-                  }}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                >
-                  {owners.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.name} ({o.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Quy trình điều hướng yêu cầu khách hàng
-                </label>
-                <input
-                  type="text"
-                  value={formData.request_routing}
-                  onChange={(e) => handleChange('request_routing', e.target.value)}
-                  placeholder="e.g. Bộ phận Tư vấn BIM (bim_consulting@cic.com.vn)"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION 6: SEO & CHIA SẺ */}
+          {/* SECTION 5: SEO */}
           <div
             id="section_seo"
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4"
@@ -657,7 +466,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Search className="w-5 h-5 text-orange-600" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                6. Cấu hình SEO & Chia sẻ Meta
+                Cấu hình SEO
               </h3>
             </div>
 
@@ -685,8 +494,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+            <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Meta Keywords
                 </label>
@@ -698,25 +506,13 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Open Graph Share Image URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.og_image}
-                  onChange={(e) => handleChange('og_image', e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
             </div>
           </div>
 
-        </div>
 
         {/* Publishing sidebar */}
         <div className="lg:col-span-4 space-y-5">
-          {/* SECTION 7: XUẤT BẢN & HIỂN THỊ */}
+          {/* XUẤT BẢN & HIỂN THỊ */}
           <div
             id="section_publishing"
             className="cms-sticky-aside bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4"
@@ -724,7 +520,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Globe className="w-5 h-5 text-orange-600" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                7. Trạng thái Xuất bản & Vị trí Hiển thị
+                Xuất bản & Hiển thị
               </h3>
             </div>
 
@@ -745,20 +541,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Trạng thái Cung cấp (Service Status)
-                </label>
-                <select
-                  value={formData.service_status}
-                  onChange={(e) => handleChange('service_status', e.target.value as ServiceStatus)}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-bold"
-                >
-                  <option value="active">Active (Đang hoạt động)</option>
-                  <option value="inactive">Inactive (Tạm ngừng)</option>
-                  <option value="archived">Archived (Lưu trữ)</option>
-                </select>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -774,30 +556,14 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Thời gian đặt lịch xuất bản (Publish At)
-                </label>
-                <input
-                  type="text"
-                  value={formData.publish_at || ''}
-                  onChange={(e) => handleChange('publish_at', e.target.value)}
-                  placeholder="YYYY-MM-DD HH:mm:ss"
-                  className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Vị trí hiển thị nổi bật (Placement Section)
+                Hiển thị tại trang chủ
               </label>
               <div className="space-y-2">
-                {[
-                  { key: 'home_featured', label: 'Khối Dịch vụ Nổi bật Trang chủ' },
-                  { key: 'services_page', label: 'Trang Catalog Dịch vụ Chính' },
-                  { key: 'footer_links', label: 'Liên kết Footer Chân trang' },
-                ].map((p) => (
+                {[{ key: 'home_featured', label: 'Hiển thị dịch vụ trên trang chủ' }].map((p) => (
                   <label
                     key={p.key}
                     className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer"
@@ -854,6 +620,16 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         serviceTitle={formData.title}
         contacts={relatedContacts}
       />
+      {isMediaPickerOpen && (
+        <PageMediaPickerModal
+          currentId={pageBuilderImages.find((asset) => asset.url === formData.thumbnail_url || asset.thumbnail_url === formData.thumbnail_url)?.id || ''}
+          onClose={() => setIsMediaPickerOpen(false)}
+          onConfirm={(mediaId) => {
+            const asset = findPageBuilderImage(mediaId);
+            if (asset) handleChange('thumbnail_url', asset.url);
+          }}
+        />
+      )}
     </div>
   );
 };
