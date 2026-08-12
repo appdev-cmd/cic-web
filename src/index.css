@@ -492,6 +492,37 @@ input[type="button"],
   animation: marquee 30s linear infinite;
 }
 
+.cms-rich-editor:empty::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
 
+.cms-rich-reference {
+  border-radius: 0.625rem;
+  display: inline-block;
+  margin: 0.25rem 0;
+  padding: 0.55rem 0.8rem;
+  user-select: all;
+}
+
+.cms-rich-cta {
+  background: #ea580c;
+  color: white;
+  font-weight: 700;
+}
+
+.cms-rich-form {
+  background: #f8fafc;
+  border: 1px dashed #94a3b8;
+  color: #334155;
+  display: block;
+}
+
+.dark .cms-rich-form {
+  background: #0f172a;
+  border-color: #475569;
+  color: #e2e8f0;
+}
 
 
