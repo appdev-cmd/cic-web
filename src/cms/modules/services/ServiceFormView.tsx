@@ -276,6 +276,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 type="text"
                 value={formData.slug}
                 onChange={(e) => handleChange('slug', e.target.value)}
+                placeholder="vi-du: tu-van-chuyen-doi-so-bim"
                 className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
               />
             </div>
@@ -322,6 +323,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                   }}
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
                 >
+                  <option value="" disabled>Chọn danh mục dịch vụ</option>
                   {groups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
@@ -413,6 +415,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 type="text"
                 value={formData.meta_title}
                 onChange={(e) => handleChange('meta_title', e.target.value)}
+                placeholder="Ví dụ: Tư vấn chuyển đổi số BIM | CIC"
                 className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
               />
             </div>
@@ -425,6 +428,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 rows={2}
                 value={formData.meta_description}
                 onChange={(e) => handleChange('meta_description', e.target.value)}
+                placeholder="Mô tả ngắn nội dung dịch vụ hiển thị trên kết quả tìm kiếm..."
                 className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
               />
             </div>
@@ -437,6 +441,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                   type="text"
                   value={formData.meta_keywords}
                   onChange={(e) => handleChange('meta_keywords', e.target.value)}
+                  placeholder="Ví dụ: BIM, tư vấn, chuyển đổi số"
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
                 />
               </div>
