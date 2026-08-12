@@ -31,6 +31,7 @@ import {
   MediaEmbed,
   Paragraph,
   PasteFromOffice,
+  Plugin,
   RemoveFormat,
   SourceEditing,
   Strikethrough,
@@ -42,6 +43,8 @@ import {
   TableToolbar,
   Underline,
   Undo,
+  Widget,
+  toWidget,
 } from 'ckeditor5';
 import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
@@ -87,6 +90,87 @@ function UploadAdapterPlugin(editor: Editor) {
   editor.plugins.get('FileRepository').createUploadAdapter = (loader: FileLoader) => new UploadAdapter(loader);
 }
 
+type CmsReferenceType = 'cta' | 'form';
+
+interface CmsReferenceAttributes extends Record<string, unknown> {
+  referenceType: CmsReferenceType;
+  referenceId: string;
+  label: string;
+  description: string;
+}
+
+class CmsReferencePlugin extends Plugin {
+  static get requires() {
+    return [Widget] as const;
+  }
+
+  init() {
+    const editor = this.editor;
+
+    editor.model.schema.register('cmsReference', {
+      inheritAllFrom: '$blockObject',
+      allowAttributes: ['referenceType', 'referenceId', 'label', 'description'],
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'div',
+        attributes: { 'data-cms-reference': /^(cta|form)$/ },
+      },
+      model: (viewElement, { writer }) => {
+        const referenceType = viewElement.getAttribute('data-cms-reference') as CmsReferenceType;
+        const referenceId = viewElement.getAttribute(`data-${referenceType}-id`) || '';
+        const label = viewElement.getAttribute('data-reference-label') || '';
+        const description = viewElement.getAttribute('data-reference-description') || '';
+
+        return writer.createElement('cmsReference', { referenceType, referenceId, label, description });
+      },
+      converterPriority: 'high',
+    });
+
+    editor.conversion.for('dataDowncast').elementToElement({
+      model: 'cmsReference',
+      view: (modelElement, { writer }) => {
+        const referenceType = modelElement.getAttribute('referenceType') as CmsReferenceType;
+        const referenceId = String(modelElement.getAttribute('referenceId') || '');
+        const label = String(modelElement.getAttribute('label') || '');
+        const description = String(modelElement.getAttribute('description') || '');
+        const container = writer.createContainerElement('div', {
+          class: `cms-rich-reference cms-rich-${referenceType}`,
+          'data-cms-reference': referenceType,
+          [`data-${referenceType}-id`]: referenceId,
+          'data-reference-label': label,
+          'data-reference-description': description,
+        });
+        writer.insert(writer.createPositionAt(container, 0), writer.createText(label));
+
+        return container;
+      },
+    });
+
+    editor.conversion.for('editingDowncast').elementToElement({
+      model: 'cmsReference',
+      view: (modelElement, { writer }) => {
+        const referenceType = modelElement.getAttribute('referenceType') as CmsReferenceType;
+        const referenceId = String(modelElement.getAttribute('referenceId') || '');
+        const label = String(modelElement.getAttribute('label') || '');
+        const description = String(modelElement.getAttribute('description') || '');
+        const visibleText = description ? `${label} · ${description}` : label;
+        const container = writer.createContainerElement('div', {
+          class: `cms-rich-reference cms-rich-${referenceType}`,
+          'data-cms-reference': referenceType,
+          [`data-${referenceType}-id`]: referenceId,
+        });
+        writer.insert(writer.createPositionAt(container, 0), writer.createText(visibleText));
+
+        return toWidget(container, writer, {
+          label: `${referenceType === 'cta' ? 'CTA' : 'Biểu mẫu'}: ${label}`,
+        });
+      },
+    });
+  }
+}
+
 const editorPlugins: PluginConstructor<Editor>[] = [
   Essentials, Paragraph, Heading, Autoformat, Undo,
   Bold, Italic, Underline, Strikethrough, RemoveFormat,
@@ -95,7 +179,7 @@ const editorPlugins: PluginConstructor<Editor>[] = [
   List, ListProperties, Link, PasteFromOffice,
   Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageInsert, ImageResize, LinkImage, AutoImage,
   Table, TableToolbar, TableCaption, TableProperties, TableCellProperties, TableColumnResize,
-  MediaEmbed, SourceEditing, GeneralHtmlSupport,
+  MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin,
 ];
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, minHeight = '280px' }) => {
@@ -152,12 +236,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     placeholder: 'Nhập nội dung tại đây…',
   }), []);
 
-  const insertReference = (html: string) => {
+  const insertReference = (attributes: CmsReferenceAttributes) => {
     const editor = editorRef.current;
     if (!editor) return;
-    const viewFragment = editor.data.processor.toView(html);
-    const modelFragment = editor.data.toModel(viewFragment);
-    editor.model.insertContent(modelFragment);
+    editor.model.change((writer) => {
+      const reference = writer.createElement('cmsReference', attributes);
+      editor.model.insertObject(reference, null, null, { setSelection: 'after' });
+    });
     onChange(editor.getData());
     editor.editing.view.focus();
   };
@@ -165,14 +250,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const insertCta = () => {
     const cta = activeCtas.find((item) => item.id === selectedCtaId);
     if (!cta) return;
-    insertReference(`<p><a class="cms-rich-reference cms-rich-cta" data-cms-reference="cta" data-cta-id="${cta.id}" href="#">${cta.displayText}</a></p>`);
+    insertReference({
+      referenceType: 'cta',
+      referenceId: cta.id,
+      label: cta.displayText,
+      description: cta.adminName,
+    });
     setSelectedCtaId('');
   };
 
   const insertForm = (formId = selectedFormId) => {
     const form = activeForms.find((item) => item.id === formId);
     if (!form) return;
-    insertReference(`<div class="cms-rich-reference cms-rich-form" data-cms-reference="form" data-form-id="${form.id}"><p><strong>${form.title}</strong></p><p>${form.adminName}</p></div><p>&nbsp;</p>`);
+    insertReference({
+      referenceType: 'form',
+      referenceId: form.id,
+      label: form.title,
+      description: form.adminName,
+    });
     setSelectedFormId('');
   };
 

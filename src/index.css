@@ -503,7 +503,25 @@ input[type="button"],
   display: inline-block;
   margin: 0.25rem 0;
   padding: 0.55rem 0.8rem;
-  user-select: all;
+  user-select: none;
+}
+
+.cms-ckeditor .cms-rich-reference.ck-widget {
+  cursor: pointer;
+  position: relative;
+}
+
+.cms-ckeditor .cms-rich-reference.ck-widget::after {
+  content: "Chọn để xóa cả khối";
+  font-size: 0.625rem;
+  font-weight: 600;
+  margin-left: 0.75rem;
+  opacity: 0.72;
+}
+
+.cms-ckeditor .cms-rich-reference.ck-widget_selected {
+  outline: 3px solid rgba(249, 115, 22, 0.35);
+  outline-offset: 2px;
 }
 
 .cms-rich-cta {
