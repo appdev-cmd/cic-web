@@ -6,7 +6,89 @@ import type {
   SectionDefinition,
 } from './pageBuilderTypes';
 
-export const pageBuilderPagesMock = rawMockData.pages as PageBuilderPage[];
+const sourcePages = rawMockData.pages as Omit<PageBuilderPage, 'templateKey' | 'systemDefined'>[];
+
+function clonePage(page: Omit<PageBuilderPage, 'templateKey' | 'systemDefined'>): PageBuilderPage {
+  return JSON.parse(JSON.stringify(page)) as PageBuilderPage;
+}
+
+function withSectionPrefix(page: PageBuilderPage, idPrefix: string): PageBuilderPage {
+  const mapVersion = (version: PageBuilderPage['draft']) => ({
+    ...version,
+    sections: version.sections.map((section, index) => ({ ...section, id: `${idPrefix}_${index + 1}` })),
+  });
+  return { ...page, draft: mapVersion(page.draft), published: mapVersion(page.published) };
+}
+
+const sourceHome = clonePage(sourcePages.find((page) => page.code === 'home')!);
+const sourceAbout = clonePage(sourcePages.find((page) => page.code === 'about')!);
+const sourcePrivacy = clonePage(sourcePages.find((page) => page.code === 'privacy_policy')!);
+
+const homePage: PageBuilderPage = { ...sourceHome, templateKey: 'home', systemDefined: true };
+const aboutSectionKeys = new Set(['about.hero', 'about.overview', 'about.timeline', 'about.strategy', 'about.offerings', 'about.awards', 'about.partners', 'about.contact_cta']);
+const aboutPage: PageBuilderPage = {
+  ...sourceAbout,
+  templateKey: 'about',
+  systemDefined: true,
+  draft: { ...sourceAbout.draft, sections: sourceAbout.draft.sections.filter((section) => aboutSectionKeys.has(section.sectionKey)) },
+  published: { ...sourceAbout.published, sections: sourceAbout.published.sections.filter((section) => aboutSectionKeys.has(section.sectionKey)) },
+};
+
+const organizationPage = withSectionPrefix({
+  ...sourceAbout,
+  id: 'page_organization_vi',
+  code: 'organization',
+  slug: '/gioi-thieu/co-cau-to-chuc',
+  name: 'Cơ cấu tổ chức',
+  pageType: 'organization',
+  templateKey: 'organization',
+  systemDefined: true,
+  draft: { ...sourceAbout.draft, sections: sourceAbout.draft.sections.filter((section) => ['about.hero', 'about.organization'].includes(section.sectionKey)) },
+  published: { ...sourceAbout.published, sections: sourceAbout.published.sections.filter((section) => ['about.hero', 'about.organization'].includes(section.sectionKey)) },
+}, 'organization');
+
+const capacityPage = withSectionPrefix({
+  ...sourceAbout,
+  id: 'page_capacity_experience_vi',
+  code: 'capacity_experience',
+  slug: '/gioi-thieu/nang-luc-kinh-nghiem',
+  name: 'Năng lực & Kinh nghiệm',
+  pageType: 'capacity_experience',
+  templateKey: 'capacity_experience',
+  systemDefined: true,
+  draft: { ...sourceAbout.draft, sections: sourceAbout.draft.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(section.sectionKey)) },
+  published: { ...sourceAbout.published, sections: sourceAbout.published.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(section.sectionKey)) },
+}, 'capacity');
+
+const privacyPage: PageBuilderPage = { ...sourcePrivacy, templateKey: 'legal_standard', systemDefined: true };
+
+export function createLegalPage(input: { id: string; code: string; name: string; slug: string }): PageBuilderPage {
+  const now = new Date().toISOString();
+  const page = withSectionPrefix({
+    ...sourcePrivacy,
+    ...input,
+    pageType: 'legal',
+    templateKey: 'legal_standard',
+    systemDefined: false,
+    draft: { ...sourcePrivacy.draft, version: 1, status: 'draft', updatedAt: now },
+    published: { ...sourcePrivacy.published, version: 0, status: 'published', updatedAt: now, publishedAt: undefined },
+  }, input.code);
+  page.draft.seo = { ...page.draft.seo, title: input.name, description: '' };
+  page.draft.sections = page.draft.sections.map((section, index, sections) => {
+    if (index === 0) return { ...section, sectionKey: 'legal.header', config: { ...section.config, categoryTag: 'Trang nội dung', title: input.name, subtitle: `Thông tin về ${input.name.toLowerCase()}.` } };
+    if (index === sections.length - 1) return { ...section, sectionKey: 'legal.assistance' };
+    return { ...section, sectionKey: `legal.content.${index}`, config: { ...section.config, title: `Nội dung ${index}`, blocks: [{ type: 'paragraph', text: 'Nhập nội dung tại đây.' }] } };
+  });
+  page.published = JSON.parse(JSON.stringify(page.draft)) as PageBuilderPage['published'];
+  page.published.version = 0;
+  page.published.status = 'published';
+  return page;
+}
+
+const termsPage = createLegalPage({ id: 'page_terms_vi', code: 'terms_of_use', name: 'Điều khoản sử dụng', slug: '/dieu-khoan-su-dung' });
+termsPage.systemDefined = true;
+
+export const pageBuilderPagesMock: PageBuilderPage[] = [homePage, aboutPage, organizationPage, capacityPage, privacyPage, termsPage];
 
 export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
   { id: 'product_ai_platform', label: 'Nền tảng AI CIC', description: 'Sản phẩm · AI và dữ liệu', entityType: 'product' },

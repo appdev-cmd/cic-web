@@ -10,6 +10,13 @@
 
 Một Page là một trang chính/nội dung tĩnh do module **Trang nội dung** quản lý.
 
+Phạm vi giao diện hiện tại gồm hai nhóm:
+
+- Thiết kế riêng, do code định nghĩa: Trang chủ, Giới thiệu, Cơ cấu tổ chức, Năng lực & Kinh nghiệm.
+- Template nội dung chuẩn dùng chung: Chính sách bảo mật, Điều khoản sử dụng và các trang do CMS tạo mới. Trang mới chỉ nhập nội dung/config trong các section cố định của template; hệ thống sinh slug/link riêng sau khi xuất bản.
+
+CMS không cho tạo thêm trang thuộc nhóm thiết kế riêng. Việc tạo trang mới chỉ áp dụng cho template `legal_standard`, không đồng nghĩa với Add Section hoặc Custom Layout.
+
 ```ts
 type Page = {
   id: string;

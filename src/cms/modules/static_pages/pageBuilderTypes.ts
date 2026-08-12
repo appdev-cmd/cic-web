@@ -45,10 +45,12 @@ export interface PageBuilderVersion {
 
 export interface PageBuilderPage {
   id: string;
-  code: 'home' | 'about' | 'contact' | 'privacy_policy';
+  code: string;
   slug: string;
   name: string;
-  pageType: 'home' | 'about' | 'contact' | 'legal';
+  pageType: 'home' | 'about' | 'organization' | 'capacity_experience' | 'legal';
+  templateKey: 'home' | 'about' | 'organization' | 'capacity_experience' | 'legal_standard';
+  systemDefined: boolean;
   draft: PageBuilderVersion;
   published: PageBuilderVersion;
 }

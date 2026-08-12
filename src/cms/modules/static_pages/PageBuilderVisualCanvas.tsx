@@ -1,13 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AboutView } from '../../../web/components/AboutView';
-import { ContactView } from '../../../web/components/ContactView';
 import { HomeView } from '../../../web/components/HomeView';
-import { PrivacyPolicyView } from '../../../web/components/PrivacyPolicyView';
 import type { PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 
 interface PageBuilderVisualCanvasProps {
-  pageCode: PageBuilderPage['code'];
+  page: PageBuilderPage;
   sections: PageBuilderSection[];
   selectedId: string;
   issueIds: Set<string>;
@@ -17,22 +15,50 @@ interface PageBuilderVisualCanvasProps {
 
 const noop = () => undefined;
 
-function WebsitePage({ pageCode }: { pageCode: PageBuilderPage['code'] }) {
-  if (pageCode === 'home') {
-    return <HomeView setCurrentView={noop} setActiveLink={noop} setActiveServiceId={noop} setActiveProjectId={noop} setPreSelectedNewsCategory={noop} setAboutSubTab={noop} setActiveEventId={noop} setIsRegisteringEvent={noop} />;
-  }
-  if (pageCode === 'about') return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} />;
-  if (pageCode === 'contact') return <ContactView onNavigateHome={noop} />;
-  return <PrivacyPolicyView onNavigateHome={noop} />;
+function LegalPage({ sections }: { sections: PageBuilderSection[] }) {
+  const [header, ...content] = sections;
+  return <div className="min-h-screen bg-slate-50 px-4 py-10 text-slate-800 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl rounded-3xl bg-white p-6 shadow-sm sm:p-10">
+      <header className="border-b border-slate-200 pb-7">
+        <p className="text-sm font-bold uppercase tracking-wider text-orange-600">{String(header?.config.categoryTag ?? 'Thông tin pháp lý')}</p>
+        <h1 className="mt-3 text-3xl font-black sm:text-4xl">{String(header?.config.title ?? '')}</h1>
+        <p className="mt-3 max-w-3xl text-slate-600">{String(header?.config.subtitle ?? '')}</p>
+        <p className="mt-4 text-xs text-slate-500">Cập nhật: {String(header?.config.lastUpdated ?? '')} · {String(header?.config.readingTime ?? '')}</p>
+      </header>
+      <article className="mt-8 space-y-8">
+        {content.map((section) => <section key={section.id}>
+          <h2 className="text-xl font-black text-slate-900">{String(section.config.title ?? '')}</h2>
+          <div className="mt-3 space-y-3 text-sm leading-7 text-slate-600">
+            {Array.isArray(section.config.blocks) ? section.config.blocks.map((block, index) => {
+              if (!block || typeof block !== 'object' || Array.isArray(block)) return null;
+              const item = block as Record<string, unknown>;
+              if (Array.isArray(item.items)) return <ul key={index} className="list-disc space-y-1 pl-5">{item.items.map((value) => <li key={String(value)}>{String(value)}</li>)}</ul>;
+              return <p key={index}>{String(item.text ?? '')}</p>;
+            }) : <p>{String(section.config.description ?? '')}</p>}
+          </div>
+        </section>)}
+      </article>
+    </div>
+  </div>;
 }
 
-function editableNodes(root: HTMLElement, pageCode: PageBuilderPage['code']): HTMLElement[] {
-  if (pageCode === 'home' || pageCode === 'about') return Array.from(root.querySelectorAll<HTMLElement>('section'));
-  if (pageCode === 'privacy_policy') {
-    const header = root.querySelector<HTMLElement>('.max-w-6xl > .bg-white');
+function WebsitePage({ page }: { page: PageBuilderPage }) {
+  if (page.pageType === 'home') {
+    return <HomeView setCurrentView={noop} setActiveLink={noop} setActiveServiceId={noop} setActiveProjectId={noop} setPreSelectedNewsCategory={noop} setAboutSubTab={noop} setActiveEventId={noop} setIsRegisteringEvent={noop} />;
+  }
+  if (page.pageType === 'about') return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} />;
+  if (page.pageType === 'organization') return <AboutView activeTab="structure" setActiveTab={noop} onNavigateToContact={noop} />;
+  if (page.pageType === 'capacity_experience') return <AboutView activeTab="experience" setActiveTab={noop} onNavigateToContact={noop} />;
+  if (page.pageType === 'legal') return <LegalPage sections={page.draft.sections} />;
+  return <LegalPage sections={page.draft.sections} />;
+}
+
+function editableNodes(root: HTMLElement, page: PageBuilderPage): HTMLElement[] {
+  if (page.pageType === 'home' || page.pageType === 'about' || page.pageType === 'organization' || page.pageType === 'capacity_experience') return Array.from(root.querySelectorAll<HTMLElement>('section'));
+  if (page.pageType === 'legal') {
+    const header = root.querySelector<HTMLElement>('header');
     const articleSections = Array.from(root.querySelectorAll<HTMLElement>('article section'));
-    const assistance = root.querySelector<HTMLElement>('article > div.mt-10');
-    return [header, ...articleSections, assistance].filter((node): node is HTMLElement => Boolean(node));
+    return [header, ...articleSections].filter((node): node is HTMLElement => Boolean(node));
   }
   const pageRoot = root.querySelector<HTMLElement>('.max-w-7xl');
   if (!pageRoot) return [];
@@ -42,7 +68,7 @@ function editableNodes(root: HTMLElement, pageCode: PageBuilderPage['code']): HT
   return [header, ...columnChildren].filter((node): node is HTMLElement => Boolean(node));
 }
 
-export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = ({ pageCode, sections, selectedId, issueIds, viewport, onSelect }) => {
+export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = ({ page, sections, selectedId, issueIds, viewport, onSelect }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [frameBody, setFrameBody] = useState<HTMLElement | null>(null);
@@ -51,7 +77,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const nodes = editableNodes(root, pageCode);
+    const nodes = editableNodes(root, page);
     nodes.forEach((node, index) => {
       const section = sections[index];
       if (!section) return;
@@ -67,7 +93,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       node.style.outlineOffset = '';
       node.style.boxShadow = '';
     });
-  }, [frameBody, issueIds, pageCode, sections, selectedId]);
+  }, [frameBody, issueIds, page, sections, selectedId]);
 
   useEffect(() => {
     if (!frameBody || !rootRef.current) return;
@@ -76,7 +102,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     observer.observe(rootRef.current);
     updateHeight();
     return () => observer.disconnect();
-  }, [frameBody, pageCode]);
+  }, [frameBody, page]);
 
   const viewportWidth = viewport === 'mobile' ? 390 : viewport === 'tablet' ? 768 : 1440;
   const scale = viewport === 'desktop' ? 0.62 : viewport === 'tablet' ? 0.72 : 0.92;
@@ -102,7 +128,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         event.stopPropagation();
         onSelect(sectionNode.dataset.pageBuilderSectionId ?? '');
       }}>
-        <WebsitePage pageCode={pageCode} />
+        <WebsitePage page={{ ...page, draft: { ...page.draft, sections } }} />
       </div>, frameBody)}
   </div>;
 };

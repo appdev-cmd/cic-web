@@ -19,7 +19,7 @@ export const PageBuilderPreviewModal: React.FC<PageBuilderPreviewModalProps> = (
         <div className="flex items-center gap-3"><div className="flex rounded-xl border border-slate-700 bg-slate-900 p-1">{([{ id: 'desktop', icon: Monitor }, { id: 'tablet', icon: Tablet }, { id: 'mobile', icon: Smartphone }] as const).map(({ id, icon: Icon }) => <button key={id} onClick={() => setViewport(id)} className={`rounded-lg p-2 ${viewport === id ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'}`} aria-label={id}><Icon className="h-4 w-4" /></button>)}</div><button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Đóng"><X className="h-5 w-5" /></button></div>
       </div>
       <div className="flex flex-1 justify-center overflow-auto p-4 sm:p-7">
-        <PageBuilderVisualCanvas pageCode={page.code} sections={page.draft.sections} selectedId="" issueIds={new Set()} viewport={viewport} onSelect={() => undefined} />
+        <PageBuilderVisualCanvas page={page} sections={page.draft.sections} selectedId="" issueIds={new Set()} viewport={viewport} onSelect={() => undefined} />
       </div>
     </div>
   );

@@ -181,7 +181,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
             </div>
           </div>
           <div className="max-h-[calc(100vh-190px)] overflow-auto rounded-xl bg-slate-300/60 p-3 dark:bg-slate-900">
-            <PageBuilderVisualCanvas pageCode={workingPage.code} sections={workingPage.draft.sections} selectedId={selectedSectionId} issueIds={new Set(Object.keys(issues))} viewport={viewport} onSelect={setSelectedSectionId} />
+            <PageBuilderVisualCanvas page={workingPage} sections={workingPage.draft.sections} selectedId={selectedSectionId} issueIds={new Set(Object.keys(issues))} viewport={viewport} onSelect={setSelectedSectionId} />
           </div>
         </section>
 
