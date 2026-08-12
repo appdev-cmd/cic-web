@@ -10,15 +10,12 @@ import {
   FileCheck,
   ChevronRight,
   Sliders,
-  Plus,
   CheckCircle2,
   Sparkles,
-  Layers,
   Clock,
   Shield,
   RotateCcw,
   Globe,
-  Filter,
 } from 'lucide-react';
 
 import {
@@ -184,45 +181,85 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       ) : sortedWidgetIds.map((widgetId) => {
         if (!isWidgetVisible(widgetId)) return null;
 
-        // SECTION: QUICK ACTIONS
+        // SECTION: CURRENT WORK — derived only from workflows that exist in the CMS
         if (widgetId === 'quick_actions') {
+          const currentWork = [
+            ...pendingItems
+              .filter((item) => item.status !== 'published')
+              .map((item) => ({
+                id: item.id,
+                title: item.title,
+                meta: `${item.author_name} · ${item.status === 'pending' ? 'Chờ duyệt' : 'Bản nháp'}`,
+                time: item.created_time,
+                icon: item.content_type === 'product' ? Package : item.content_type === 'news' ? Newspaper : FileText,
+                tone: item.status === 'pending' ? 'amber' : 'slate',
+                path: item.content_type === 'product' ? '/cms/products' : item.content_type === 'news' ? '/cms/news' : '/cms/static-pages',
+                moduleName: item.content_type === 'product' ? 'Sản phẩm' : item.content_type === 'news' ? 'Tin tức' : 'Trang nội dung',
+              })),
+            ...contacts
+              .filter((item) => item.status === 'unread' || item.status === 'processing')
+              .map((item) => ({
+                id: item.id,
+                title: item.subject,
+                meta: `${item.sender_name} · ${item.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý'}`,
+                time: item.created_time,
+                icon: MessageSquare,
+                tone: item.status === 'unread' ? 'red' : 'orange',
+                path: '/cms/customer-requests',
+                moduleName: 'Yêu cầu khách hàng',
+              })),
+            ...registrations
+              .filter((item) => item.status === 'pending')
+              .map((item) => ({
+                id: item.id,
+                title: `Báo giá ${item.product_name}`,
+                meta: `${item.customer_name} · ${item.company_name}`,
+                time: item.created_time,
+                icon: FileCheck,
+                tone: 'amber',
+                path: '/cms/customer-requests',
+                moduleName: 'Yêu cầu khách hàng',
+              })),
+          ]
+            .sort((a, b) => b.time.localeCompare(a.time))
+            .slice(0, 6);
+
           return (
             <div
               key={widgetId}
               className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs"
             >
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Thao tác nhanh hệ thống
-                  </h3>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                    QUICK ACTIONS
-                  </span>
+                  <div className="rounded-xl bg-orange-500/10 p-2 text-orange-600"><Clock className="h-4 w-4" /></div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Công việc hiện tại</h3>
+                    <p className="text-[11px] text-slate-400">Bản nháp, nội dung chờ duyệt và yêu cầu khách hàng cần tiếp tục xử lý</p>
+                  </div>
                 </div>
-                <span className="text-[11px] text-slate-400 hidden sm:inline">Phím tắt: Ctrl + K để mở Command Palette</span>
+                <span className="shrink-0 rounded-lg bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-700 dark:bg-orange-950/30 dark:text-orange-300">{currentWork.length} việc gần nhất</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {[
-                  { label: 'Sản phẩm mới', icon: Package, path: '/cms/products', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                  { label: 'Dịch vụ mới', icon: Layers, path: '/cms/services', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                  { label: 'Tin tức mới', icon: Newspaper, path: '/cms/news', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                  { label: 'Trang nội dung mới', icon: FileText, path: '/cms/static-pages', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                  { label: 'Slideshow mới', icon: Sliders, path: '/cms/slideshows', color: 'hover:border-orange-500 hover:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' },
-                ].map((act, i) => {
-                  const IconComponent = act.icon;
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {currentWork.map((work) => {
+                  const IconComponent = work.icon;
+                  const toneClass = work.tone === 'red' ? 'bg-red-50 text-red-600 dark:bg-red-950/30' : work.tone === 'amber' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/30' : work.tone === 'orange' ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/30' : 'bg-slate-100 text-slate-600 dark:bg-slate-800';
                   return (
                     <button
-                      key={i}
-                      onClick={() => onNavigate(act.path, act.label.replace('+ ', 'Quản lý '))}
-                      className={`px-3.5 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs hover:scale-[1.02] ${act.color}`}
+                      key={`${work.moduleName}-${work.id}`}
+                      onClick={() => onNavigate(work.path, work.moduleName)}
+                      className="group flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-3 text-left transition-all hover:border-orange-400 hover:bg-orange-50/30 dark:border-slate-800 dark:hover:bg-orange-950/10"
                     >
-                      <IconComponent className="w-4 h-4 shrink-0" />
-                      <span className="truncate">{act.label}</span>
+                      <span className={`rounded-lg p-2 ${toneClass}`}><IconComponent className="h-4 w-4" /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-bold text-slate-800 group-hover:text-orange-700 dark:text-slate-100 dark:group-hover:text-orange-300">{work.title}</span>
+                        <span className="mt-0.5 block truncate text-[10px] text-slate-500">{work.meta}</span>
+                      </span>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 group-hover:text-orange-500" />
                     </button>
                   );
                 })}
+                {currentWork.length === 0 && <p className="col-span-full rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500 dark:border-slate-700">Hiện không có công việc nào cần tiếp tục xử lý.</p>}
               </div>
             </div>
           );

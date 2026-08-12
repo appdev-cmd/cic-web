@@ -16,7 +16,7 @@ export const defaultDashboardPreference: DashboardPreference = {
   timeRange: '7',
   density: 'comfortable',
   widgets: [
-    { id: 'quick_actions', name: 'Thao tác nhanh hệ thống', category: 'Quick Actions', visible: true, order: 1 },
+    { id: 'quick_actions', name: 'Công việc hiện tại', category: 'Action Required', visible: true, order: 1 },
     { id: 'kpi_cards', name: 'Sáu chỉ số KPI tổng quan', category: 'KPI', visible: true, order: 2 },
     { id: 'action_required', name: 'Khối việc cần xử lý ngay', category: 'Action Required', visible: true, order: 3 },
     { id: 'analytics_charts', name: 'Biểu đồ phân tích lượt truy cập & nội dung', category: 'Analytics', visible: true, order: 4 },
