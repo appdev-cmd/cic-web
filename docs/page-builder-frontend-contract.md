@@ -14,6 +14,7 @@ Phạm vi giao diện hiện tại gồm hai nhóm:
 
 - Thiết kế riêng, do code định nghĩa: Trang chủ, Giới thiệu, Cơ cấu tổ chức, Năng lực & Kinh nghiệm.
 - Template nội dung chuẩn dùng chung: Chính sách bảo mật, Điều khoản sử dụng và các trang do CMS tạo mới. Trang mới chỉ nhập nội dung/config trong các section cố định của template; hệ thống sinh slug/link riêng sau khi xuất bản.
+- Slug trang mới được sinh tự động từ tối đa sáu từ đầu của tên, giới hạn 42 ký tự. Nếu trùng, hệ thống thêm hậu tố số ngắn (`-2`, `-3`, ...); không dùng ID dài trong URL.
 
 CMS không cho tạo thêm trang thuộc nhóm thiết kế riêng. Việc tạo trang mới chỉ áp dụng cho template `legal_standard`, không đồng nghĩa với Add Section hoặc Custom Layout.
 

@@ -97,11 +97,18 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
 
   useEffect(() => {
     if (!frameBody || !rootRef.current) return;
-    const updateHeight = () => setContentHeight(Math.max(600, rootRef.current?.scrollHeight ?? 0));
+    let animationFrame = 0;
+    const updateHeight = () => {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(() => {
+        const nextHeight = Math.max(600, rootRef.current?.scrollHeight ?? 0);
+        setContentHeight((current) => Math.abs(current - nextHeight) >= 8 ? nextHeight : current);
+      });
+    };
     const observer = new ResizeObserver(updateHeight);
     observer.observe(rootRef.current);
     updateHeight();
-    return () => observer.disconnect();
+    return () => { cancelAnimationFrame(animationFrame); observer.disconnect(); };
   }, [frameBody, page]);
 
   const viewportWidth = viewport === 'mobile' ? 390 : viewport === 'tablet' ? 768 : 1440;
@@ -118,7 +125,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     setFrameBody(frameDocument.body);
   };
 
-  return <div className="relative mx-auto overflow-hidden rounded-xl bg-white shadow-2xl" style={{ width: viewportWidth * scale, height: contentHeight * scale }}>
+  return <div className="relative mx-auto overflow-hidden rounded-xl bg-white shadow-2xl transition-[width] duration-200" style={{ width: viewportWidth * scale, height: contentHeight * scale }}>
     <iframe ref={frameRef} title={`Giao diện ${viewport}`} onLoad={handleFrameLoad} className="absolute left-0 top-0 border-0 bg-white" style={{ width: viewportWidth, height: contentHeight, transform: `scale(${scale})`, transformOrigin: 'top left' }} />
     {frameBody && createPortal(<div ref={rootRef} onClickCapture={(event) => {
         const target = event.target as HTMLElement;

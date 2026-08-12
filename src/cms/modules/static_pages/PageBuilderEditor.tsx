@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft, CheckCircle2, Eye, FileCode2, Image, Link2, Monitor, Save, Send, Smartphone, Tablet } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Eye, FileCode2, Image, Link2, Monitor, Save, Send, Smartphone, Tablet } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { entityTypeLabels, pageBuilderEntityOptions, sectionDefinitions } from './pageBuilderData';
 import { PageEntityPickerModal } from './PageEntityPickerModal';
@@ -134,6 +134,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
   const [picker, setPicker] = useState<{ sectionId: string; entityType: PageBuilderEntityType; selectedIds: string[]; limit: number } | null>(null);
   const [mediaPicker, setMediaPicker] = useState<{ sectionId: string; path: Array<string | number>; currentId: string } | null>(null);
   const [showValidation, setShowValidation] = useState(false);
+  const [showMobileCanvas, setShowMobileCanvas] = useState(false);
   const issues = useMemo(() => validate(workingPage), [workingPage]);
   const issueCount = Object.values(issues).reduce((total, values) => total + values.length, 0);
 
@@ -176,11 +177,11 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
         <section className="min-w-0 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-xs dark:border-slate-800 dark:bg-slate-950">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
             <div><h2 className="text-sm font-bold text-slate-900 dark:text-white">Giao diện Draft trực tiếp</h2><p className="text-xs text-slate-500">Click vào Section trên giao diện để chỉnh nội dung.</p></div>
-            <div className="flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center gap-2"><button type="button" onClick={() => setShowMobileCanvas((value) => !value)} className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-slate-600 lg:hidden dark:border-slate-700 dark:bg-slate-900">{showMobileCanvas ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}{showMobileCanvas ? 'Thu gọn' : 'Hiện xem trước'}</button><div className="hidden rounded-lg border border-slate-200 bg-white p-1 sm:flex dark:border-slate-700 dark:bg-slate-900">
               {([['desktop', Monitor, 'Desktop'], ['tablet', Tablet, 'Tablet'], ['mobile', Smartphone, 'Mobile']] as const).map(([value, Icon, label]) => <button key={value} type="button" title={label} aria-label={label} onClick={() => setViewport(value)} className={`rounded-md p-2 ${viewport === value ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}><Icon className="h-4 w-4" /></button>)}
-            </div>
+            </div></div>
           </div>
-          <div className="max-h-[calc(100vh-190px)] overflow-auto rounded-xl bg-slate-300/60 p-3 dark:bg-slate-900">
+          <div className={`${showMobileCanvas ? 'block' : 'hidden'} max-h-[70vh] overflow-auto rounded-xl bg-slate-300/60 p-3 lg:block lg:max-h-[calc(100vh-190px)] dark:bg-slate-900`}>
             <PageBuilderVisualCanvas page={workingPage} sections={workingPage.draft.sections} selectedId={selectedSectionId} issueIds={new Set(Object.keys(issues))} viewport={viewport} onSelect={setSelectedSectionId} />
           </div>
         </section>
