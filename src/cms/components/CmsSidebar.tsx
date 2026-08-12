@@ -125,7 +125,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     'grp_tuong_tac_khach_hang',
     'grp_media',
     'grp_khach_hang',
-    'grp_ban_dia_hoa',
     'grp_quan_tri',
   ]);
 

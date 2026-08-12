@@ -1,0 +1,331 @@
+{
+  "pages": [
+    {
+      "id": "page_home_vi",
+      "code": "home",
+      "slug": "/",
+      "name": "Trang chủ",
+      "pageType": "home",
+      "draft": {
+        "version": 4,
+        "status": "draft",
+        "updatedAt": "2026-08-10T09:30:00+07:00",
+        "seo": {
+          "title": "CIC Technology — Giải pháp công nghệ cho ngành xây dựng",
+          "description": "Phần mềm, thiết bị và giải pháp số cho ngành xây dựng.",
+          "imageId": "media_home_social"
+        },
+        "sections": [
+          {
+            "id": "home_hero",
+            "sectionKey": "home.hero",
+            "sectionType": "hero_carousel",
+            "position": 1,
+            "config": {
+              "badge": "Leading Innovation since 1990",
+              "slides": [
+                {
+                  "title": "Dẫn đầu chuyển đổi số ngành xây dựng",
+                  "subtitle": "Đồng hành cùng doanh nghiệp bằng các giải pháp công nghệ chuyên sâu.",
+                  "backgroundImageId": "media_hero_01",
+                  "primaryCtaId": "cta_explore_products",
+                  "secondaryCtaId": "cta_about_cic"
+                },
+                {
+                  "title": "Hệ sinh thái giải pháp số toàn diện",
+                  "subtitle": "Kết nối phần mềm, thiết bị, BIM và Digital Twins.",
+                  "backgroundImageId": "media_hero_02",
+                  "primaryCtaId": "cta_explore_products",
+                  "secondaryCtaId": "cta_about_cic"
+                }
+              ],
+              "tickerItems": [
+                "CIC đồng hành cùng chuyển đổi số ngành xây dựng",
+                "Cập nhật các giải pháp BIM và Digital Twins"
+              ]
+            }
+          },
+          {
+            "id": "home_intro",
+            "sectionKey": "home.intro",
+            "sectionType": "company_intro",
+            "position": 2,
+            "config": {
+              "eyebrow": "Về chúng tôi",
+              "title": "Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam",
+              "paragraphs": [
+                "CIC, tiền thân là Trung tâm Tin học thuộc Bộ Xây dựng, được thành lập năm 1990.",
+                "CIC cung cấp phần mềm, thiết bị và giải pháp số chuyên sâu cho doanh nghiệp."
+              ],
+              "imageId": "media_home_intro",
+              "videoUrl": "https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s",
+              "primaryCtaId": "cta_about_cic",
+              "downloadMediaId": "media_company_profile"
+            }
+          },
+          {
+            "id": "home_stats",
+            "sectionKey": "home.stats",
+            "sectionType": "statistics",
+            "position": 3,
+            "config": {
+              "items": [
+                { "value": 35, "suffix": "+", "label": "Năm kinh nghiệm" },
+                { "value": 150, "suffix": "+", "label": "Nhân sự" },
+                { "value": 100, "suffix": "+", "label": "Đối tác toàn cầu" },
+                { "value": 5000, "suffix": "+", "label": "Dự án thành công" }
+              ]
+            }
+          },
+          {
+            "id": "home_awards",
+            "sectionKey": "home.awards",
+            "sectionType": "award_slider",
+            "position": 4,
+            "config": {
+              "title": "Thành tựu & Giải thưởng",
+              "subtitle": "Minh chứng cho nỗ lực không ngừng nghỉ",
+              "items": [
+                { "name": "Huân chương Lao động hạng 3", "imageId": "media_award_01" },
+                { "name": "Giải thưởng Sao Khuê 2014", "imageId": "media_award_02" },
+                { "name": "Giải thưởng Sao Khuê 2015", "imageId": "media_award_03" }
+              ]
+            }
+          },
+          {
+            "id": "home_ecosystem",
+            "sectionKey": "home.ecosystem",
+            "sectionType": "technology_ecosystem",
+            "position": 5,
+            "config": {
+              "title": "Hệ sinh thái Công nghệ CIC",
+              "subtitle": "Phần mềm, thiết bị, AI, BIM, Digital Twins và tư vấn đào tạo",
+              "slots": [
+                { "slotKey": "primary", "title": "AI & Công nghệ thông minh", "description": "Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa." },
+                { "slotKey": "secondary", "title": "BIM & Digital Twins", "description": "Đào tạo, tạo lập và thẩm tra mô hình BIM." },
+                { "slotKey": "small_1", "title": "Phần mềm kỹ thuật bản quyền", "description": "Hệ sinh thái CAD, BIM, kết cấu và hạ tầng." },
+                { "slotKey": "small_2", "title": "Thiết bị công nghệ", "description": "Thiết bị khảo sát, kiểm định, UAV, LiDAR và GPR." },
+                { "slotKey": "small_3", "title": "Net Zero và phát triển bền vững", "description": "Kiểm kê phát thải, LCA, EPD và CBAM." },
+                { "slotKey": "small_4", "title": "Tư vấn & Đào tạo", "description": "Đào tạo và chuyển giao công nghệ chuyên sâu." },
+                { "slotKey": "full", "title": "Giải pháp theo ngành", "description": "Xây dựng, giao thông, khai thác, môi trường và công nghiệp." }
+              ]
+            },
+            "references": [
+              { "entityType": "product", "entityIds": ["product_ai_platform", "product_software_catalog", "product_equipment_catalog", "product_industry_solutions"] },
+              { "entityType": "service", "entityIds": ["service_tu_van_bim", "service_digital_transformation", "service_training"] }
+            ]
+          },
+          {
+            "id": "home_projects",
+            "sectionKey": "home.projects",
+            "sectionType": "project_highlight",
+            "position": 6,
+            "config": {
+              "title": "Dự án tiêu biểu",
+              "subtitle": "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện"
+            },
+            "references": [
+              { "entityType": "project", "entityIds": ["project_landmark_81", "project_cao_toc_bac_nam", "project_dien_gio_mui_dinh"] }
+            ]
+          },
+          {
+            "id": "home_events",
+            "sectionKey": "home.events",
+            "sectionType": "event_highlight",
+            "position": 7,
+            "config": {
+              "title": "Sự kiện nổi bật",
+              "subtitle": "Kết nối chuyên gia và cập nhật công nghệ"
+            },
+            "references": [
+              { "entityType": "event", "entityIds": ["event_bentley_2026", "event_bim_enterprise", "event_net_zero", "event_ai_construction"] }
+            ]
+          },
+          {
+            "id": "home_news",
+            "sectionKey": "home.news",
+            "sectionType": "news_highlight",
+            "position": 8,
+            "config": {
+              "title": "Tin tức và Góc nhìn",
+              "subtitle": "Cập nhật xu hướng công nghệ và chuyển đổi số mới nhất"
+            },
+            "references": [
+              { "entityType": "news", "entityIds": ["news_05", "news_02", "news_08"] }
+            ]
+          },
+          {
+            "id": "home_partners",
+            "sectionKey": "home.partners",
+            "sectionType": "partner_marquee",
+            "position": 9,
+            "config": {
+              "title": "Đối tác chiến lược",
+              "subtitle": "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới"
+            },
+            "references": [
+              { "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi", "partner_plaxis"] }
+            ]
+          },
+          {
+            "id": "home_contact_cta",
+            "sectionKey": "home.contact_cta",
+            "sectionType": "contact_cta_form",
+            "position": 10,
+            "config": {
+              "title": "Sẵn sàng kiến tạo Tương lai số",
+              "description": "Đội ngũ chuyên gia CIC sẵn sàng lắng nghe và tư vấn giải pháp phù hợp.",
+              "phone": "024 3976 1381",
+              "email": "info@cic.com.vn",
+              "formId": "form_home_consultation",
+              "submitLabel": "Gửi thông tin ngay"
+            }
+          }
+        ]
+      },
+      "published": {
+        "version": 3,
+        "status": "published",
+        "updatedAt": "2026-08-09T16:00:00+07:00",
+        "publishedAt": "2026-08-09T16:05:00+07:00",
+        "seo": {
+          "title": "CIC Technology — Giải pháp công nghệ cho ngành xây dựng",
+          "description": "Phần mềm, thiết bị và giải pháp số cho ngành xây dựng.",
+          "imageId": "media_home_social"
+        },
+        "sections": [
+          { "id": "home_hero", "sectionKey": "home.hero", "sectionType": "hero_carousel", "position": 1, "config": { "badge": "Leading Innovation since 1990", "slides": [{ "title": "Dẫn đầu chuyển đổi số ngành xây dựng", "subtitle": "Đồng hành cùng doanh nghiệp bằng các giải pháp công nghệ chuyên sâu.", "backgroundImageId": "media_hero_01", "primaryCtaId": "cta_explore_products", "secondaryCtaId": "cta_about_cic" }], "tickerItems": ["CIC đồng hành cùng chuyển đổi số ngành xây dựng"] } },
+          { "id": "home_intro", "sectionKey": "home.intro", "sectionType": "company_intro", "position": 2, "config": { "eyebrow": "Về chúng tôi", "title": "Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam", "paragraphs": ["CIC được thành lập năm 1990 và cung cấp giải pháp công nghệ chuyên sâu cho ngành xây dựng."], "imageId": "media_home_intro", "videoUrl": "https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s", "primaryCtaId": "cta_about_cic", "downloadMediaId": "media_company_profile" } },
+          { "id": "home_stats", "sectionKey": "home.stats", "sectionType": "statistics", "position": 3, "config": { "items": [{ "value": 35, "suffix": "+", "label": "Năm kinh nghiệm" }, { "value": 150, "suffix": "+", "label": "Nhân sự" }, { "value": 100, "suffix": "+", "label": "Đối tác toàn cầu" }, { "value": 5000, "suffix": "+", "label": "Dự án thành công" }] } },
+          { "id": "home_awards", "sectionKey": "home.awards", "sectionType": "award_slider", "position": 4, "config": { "title": "Thành tựu & Giải thưởng", "subtitle": "Minh chứng cho nỗ lực không ngừng nghỉ", "items": [{ "name": "Huân chương Lao động hạng 3", "imageId": "media_award_01" }, { "name": "Giải thưởng Sao Khuê 2014", "imageId": "media_award_02" }] } },
+          { "id": "home_ecosystem", "sectionKey": "home.ecosystem", "sectionType": "technology_ecosystem", "position": 5, "config": { "title": "Hệ sinh thái Công nghệ CIC", "subtitle": "Phần mềm, thiết bị, AI, BIM, Digital Twins và tư vấn đào tạo", "slots": [{ "slotKey": "primary", "title": "AI & Công nghệ thông minh", "description": "Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa." }, { "slotKey": "secondary", "title": "BIM & Digital Twins", "description": "Đào tạo, tạo lập và thẩm tra mô hình BIM." }, { "slotKey": "small_1", "title": "Phần mềm kỹ thuật bản quyền", "description": "Hệ sinh thái CAD, BIM, kết cấu và hạ tầng." }, { "slotKey": "small_2", "title": "Thiết bị công nghệ", "description": "Thiết bị khảo sát, kiểm định, UAV, LiDAR và GPR." }, { "slotKey": "small_3", "title": "Net Zero và phát triển bền vững", "description": "Kiểm kê phát thải, LCA, EPD và CBAM." }, { "slotKey": "small_4", "title": "Tư vấn & Đào tạo", "description": "Đào tạo và chuyển giao công nghệ chuyên sâu." }, { "slotKey": "full", "title": "Giải pháp theo ngành", "description": "Xây dựng, giao thông, khai thác, môi trường và công nghiệp." }] }, "references": [{ "entityType": "product", "entityIds": ["product_ai_platform", "product_software_catalog", "product_equipment_catalog", "product_industry_solutions"] }, { "entityType": "service", "entityIds": ["service_tu_van_bim", "service_digital_transformation", "service_training"] }] },
+          { "id": "home_projects", "sectionKey": "home.projects", "sectionType": "project_highlight", "position": 6, "config": { "title": "Dự án tiêu biểu", "subtitle": "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện" }, "references": [{ "entityType": "project", "entityIds": ["project_landmark_81", "project_cao_toc_bac_nam", "project_dien_gio_mui_dinh"] }] },
+          { "id": "home_events", "sectionKey": "home.events", "sectionType": "event_highlight", "position": 7, "config": { "title": "Sự kiện nổi bật", "subtitle": "Kết nối chuyên gia và cập nhật công nghệ" }, "references": [{ "entityType": "event", "entityIds": ["event_bentley_2026", "event_bim_enterprise", "event_net_zero", "event_ai_construction"] }] },
+          { "id": "home_news", "sectionKey": "home.news", "sectionType": "news_highlight", "position": 8, "config": { "title": "Tin tức và Góc nhìn", "subtitle": "Cập nhật xu hướng công nghệ và chuyển đổi số mới nhất" }, "references": [{ "entityType": "news", "entityIds": ["news_05", "news_02", "news_08"] }] },
+          { "id": "home_partners", "sectionKey": "home.partners", "sectionType": "partner_marquee", "position": 9, "config": { "title": "Đối tác chiến lược", "subtitle": "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" }, "references": [{ "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi", "partner_plaxis"] }] },
+          { "id": "home_contact_cta", "sectionKey": "home.contact_cta", "sectionType": "contact_cta_form", "position": 10, "config": { "title": "Sẵn sàng kiến tạo Tương lai số", "description": "Đội ngũ chuyên gia CIC sẵn sàng lắng nghe và tư vấn giải pháp phù hợp.", "phone": "024 3976 1381", "email": "info@cic.com.vn", "formId": "form_home_consultation", "submitLabel": "Gửi thông tin ngay" } }
+        ]
+      }
+    },
+    {
+      "id": "page_about_vi",
+      "code": "about",
+      "slug": "/gioi-thieu",
+      "name": "Giới thiệu",
+      "pageType": "about",
+      "draft": {
+        "version": 2,
+        "status": "draft",
+        "updatedAt": "2026-08-10T10:00:00+07:00",
+        "seo": { "title": "Giới thiệu CIC", "description": "Lịch sử, năng lực và định hướng phát triển của CIC." },
+        "sections": [
+          { "id": "about_hero", "sectionKey": "about.hero", "sectionType": "about_hero", "position": 1, "config": { "title": "CIC Technology", "subtitle": "Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam", "backgroundImageId": "media_about_hero" } },
+          { "id": "about_overview", "sectionKey": "about.overview", "sectionType": "company_overview", "position": 2, "config": { "title": "Tổng quan doanh nghiệp", "paragraphs": ["CIC phát triển và cung cấp các giải pháp công nghệ chuyên sâu cho ngành xây dựng."], "imageId": "media_about_overview", "videoUrl": "https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s" } },
+          { "id": "about_timeline", "sectionKey": "about.timeline", "sectionType": "company_timeline", "position": 3, "config": { "title": "Tiến trình phát triển", "milestones": [{ "year": "1990", "title": "Thành lập", "description": "Thành lập Trung tâm Tin học thuộc Bộ Xây dựng." }, { "year": "2006", "title": "Cổ phần hóa", "description": "Chuyển đổi thành Công ty Cổ phần Tin học và Tư vấn Xây dựng." }, { "year": "2019", "title": "Đổi tên và phát triển", "description": "Trở thành Công ty Cổ phần Công nghệ và Tư vấn CIC." }, { "year": "2025", "title": "Đổi mới", "description": "Mở rộng AI và các giải pháp phát triển bền vững." }] } },
+          { "id": "about_strategy", "sectionKey": "about.strategy", "sectionType": "company_strategy", "position": 4, "config": { "title": "Định hướng chiến lược", "subtitle": "Tầm nhìn kiến tạo giá trị công nghệ bền vững", "vision": "Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.", "mission": "Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.", "coreValues": ["Cam kết về chất lượng", "Tận tụy với khách hàng", "Đổi mới không ngừng", "Tinh thần tập thể", "Khích lệ - hài hòa"] } },
+          { "id": "about_offerings", "sectionKey": "about.offerings", "sectionType": "offering_grid", "position": 5, "config": { "title": "Sản phẩm và dịch vụ cung cấp", "subtitle": "Các giải pháp công nghệ cốt lõi" }, "references": [{ "entityType": "product", "entityIds": ["product_software_catalog", "product_equipment_catalog"] }, { "entityType": "service", "entityIds": ["service_bim", "service_smart_technology", "service_sustainability", "service_consulting"] }] },
+          { "id": "about_awards", "sectionKey": "about.awards", "sectionType": "award_slider", "position": 6, "config": { "title": "Thành tựu & Giải thưởng", "subtitle": "Minh chứng cho nỗ lực không ngừng nghỉ", "items": [{ "name": "Huân chương Lao động hạng 3", "imageId": "media_award_01" }, { "name": "Giải thưởng Sao Khuê", "imageId": "media_award_02" }] } },
+          { "id": "about_partners", "sectionKey": "about.partners", "sectionType": "partner_marquee", "position": 7, "config": { "title": "Đối tác chiến lược", "subtitle": "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" }, "references": [{ "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi", "partner_plaxis"] }] },
+          { "id": "about_organization", "sectionKey": "about.organization", "sectionType": "organization_chart", "position": 8, "config": { "title": "Cơ cấu tổ chức" } },
+          { "id": "about_capacity", "sectionKey": "about.capacity", "sectionType": "company_capacity", "position": 9, "config": { "title": "Tiềm lực vững vàng, vươn tầm quốc tế", "description": "CIC có đội ngũ nhân sự chất lượng cao và mạng lưới đối tác toàn cầu.", "metrics": [{ "value": "150+", "label": "Nhân sự chất lượng cao" }, { "value": "100+", "label": "Đối tác toàn cầu" }, { "value": "5.000+", "label": "Dự án thành công" }, { "value": "35+", "label": "Năm kinh nghiệm" }] } },
+          { "id": "about_experience", "sectionKey": "about.experience", "sectionType": "experience_registry", "position": 10, "config": { "title": "Năng lực & Kinh nghiệm", "categoryKeys": ["telecom", "bim", "software", "construction"] } },
+          { "id": "about_software_partners", "sectionKey": "about.software_partners", "sectionType": "partner_list", "position": 11, "config": { "title": "Đối tác phần mềm" }, "references": [{ "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi"] }] },
+          { "id": "about_hardware_partners", "sectionKey": "about.hardware_partners", "sectionType": "partner_list", "position": 12, "config": { "title": "Đối tác thiết bị" }, "references": [{ "entityType": "partner", "entityIds": ["partner_piletest", "partner_ids", "partner_instantel"] }] },
+          { "id": "about_contact_cta", "sectionKey": "about.contact_cta", "sectionType": "contact_cta", "position": 13, "config": { "title": "Kết nối cùng chuyên gia CIC", "description": "Trao đổi với CIC về nhu cầu công nghệ của doanh nghiệp.", "ctaId": "cta_contact" } }
+        ]
+      },
+      "published": {
+        "version": 1,
+        "status": "published",
+        "updatedAt": "2026-08-08T09:00:00+07:00",
+        "publishedAt": "2026-08-08T09:10:00+07:00",
+        "seo": { "title": "Giới thiệu CIC", "description": "Lịch sử, năng lực và định hướng phát triển của CIC." },
+        "sections": [
+          { "id": "about_hero", "sectionKey": "about.hero", "sectionType": "about_hero", "position": 1, "config": { "title": "CIC Technology", "subtitle": "Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam", "backgroundImageId": "media_about_hero" } },
+          { "id": "about_overview", "sectionKey": "about.overview", "sectionType": "company_overview", "position": 2, "config": { "title": "Tổng quan doanh nghiệp", "paragraphs": ["CIC phát triển và cung cấp các giải pháp công nghệ chuyên sâu cho ngành xây dựng."], "imageId": "media_about_overview", "videoUrl": "https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s" } },
+          { "id": "about_timeline", "sectionKey": "about.timeline", "sectionType": "company_timeline", "position": 3, "config": { "title": "Tiến trình phát triển", "milestones": [{ "year": "1990", "title": "Thành lập", "description": "Thành lập Trung tâm Tin học thuộc Bộ Xây dựng." }, { "year": "2006", "title": "Cổ phần hóa", "description": "Chuyển đổi thành Công ty Cổ phần Tin học và Tư vấn Xây dựng." }, { "year": "2019", "title": "Đổi tên và phát triển", "description": "Trở thành Công ty Cổ phần Công nghệ và Tư vấn CIC." }, { "year": "2025", "title": "Đổi mới", "description": "Mở rộng AI và các giải pháp phát triển bền vững." }] } },
+          { "id": "about_strategy", "sectionKey": "about.strategy", "sectionType": "company_strategy", "position": 4, "config": { "title": "Định hướng chiến lược", "subtitle": "Tầm nhìn kiến tạo giá trị công nghệ bền vững", "vision": "Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.", "mission": "Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.", "coreValues": ["Cam kết về chất lượng", "Tận tụy với khách hàng", "Đổi mới không ngừng", "Tinh thần tập thể", "Khích lệ - hài hòa"] } },
+          { "id": "about_offerings", "sectionKey": "about.offerings", "sectionType": "offering_grid", "position": 5, "config": { "title": "Sản phẩm và dịch vụ cung cấp", "subtitle": "Các giải pháp công nghệ cốt lõi" }, "references": [{ "entityType": "product", "entityIds": ["product_software_catalog", "product_equipment_catalog"] }, { "entityType": "service", "entityIds": ["service_bim", "service_smart_technology", "service_sustainability", "service_consulting"] }] },
+          { "id": "about_awards", "sectionKey": "about.awards", "sectionType": "award_slider", "position": 6, "config": { "title": "Thành tựu & Giải thưởng", "subtitle": "Minh chứng cho nỗ lực không ngừng nghỉ", "items": [{ "name": "Huân chương Lao động hạng 3", "imageId": "media_award_01" }, { "name": "Giải thưởng Sao Khuê", "imageId": "media_award_02" }] } },
+          { "id": "about_partners", "sectionKey": "about.partners", "sectionType": "partner_marquee", "position": 7, "config": { "title": "Đối tác chiến lược", "subtitle": "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" }, "references": [{ "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi", "partner_plaxis"] }] },
+          { "id": "about_organization", "sectionKey": "about.organization", "sectionType": "organization_chart", "position": 8, "config": { "title": "Cơ cấu tổ chức" } },
+          { "id": "about_capacity", "sectionKey": "about.capacity", "sectionType": "company_capacity", "position": 9, "config": { "title": "Tiềm lực vững vàng, vươn tầm quốc tế", "description": "CIC có đội ngũ nhân sự chất lượng cao và mạng lưới đối tác toàn cầu.", "metrics": [{ "value": "150+", "label": "Nhân sự chất lượng cao" }, { "value": "100+", "label": "Đối tác toàn cầu" }, { "value": "5.000+", "label": "Dự án thành công" }, { "value": "35+", "label": "Năm kinh nghiệm" }] } },
+          { "id": "about_experience", "sectionKey": "about.experience", "sectionType": "experience_registry", "position": 10, "config": { "title": "Năng lực & Kinh nghiệm", "categoryKeys": ["telecom", "bim", "software", "construction"] } },
+          { "id": "about_software_partners", "sectionKey": "about.software_partners", "sectionType": "partner_list", "position": 11, "config": { "title": "Đối tác phần mềm" }, "references": [{ "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi"] }] },
+          { "id": "about_hardware_partners", "sectionKey": "about.hardware_partners", "sectionType": "partner_list", "position": 12, "config": { "title": "Đối tác thiết bị" }, "references": [{ "entityType": "partner", "entityIds": ["partner_piletest", "partner_ids", "partner_instantel"] }] },
+          { "id": "about_contact_cta", "sectionKey": "about.contact_cta", "sectionType": "contact_cta", "position": 13, "config": { "title": "Kết nối cùng chuyên gia CIC", "description": "Trao đổi với CIC về nhu cầu công nghệ của doanh nghiệp.", "ctaId": "cta_contact" } }
+        ]
+      }
+    },
+    {
+      "id": "page_contact_vi",
+      "code": "contact",
+      "slug": "/lien-he",
+      "name": "Liên hệ",
+      "pageType": "contact",
+      "draft": {
+        "version": 2,
+        "status": "draft",
+        "updatedAt": "2026-08-10T10:30:00+07:00",
+        "seo": { "title": "Liên hệ CIC", "description": "Kết nối với đội ngũ chuyên gia CIC." },
+        "sections": [
+          { "id": "contact_header", "sectionKey": "contact.header", "sectionType": "contact_header", "position": 1, "config": { "title": "Kết nối chuyên gia CIC", "subtitle": "Văn phòng hỗ trợ khách hàng của CIC sẵn sàng tiếp nhận nhu cầu tư vấn." } },
+          { "id": "contact_branches", "sectionKey": "contact.branches", "sectionType": "branch_map", "position": 2, "config": { "title": "Bản đồ & Chi nhánh", "branches": [{ "key": "hn", "name": "Trụ sở chính Hà Nội", "address": "Tầng 4, Tòa nhà VG Building, số 235 Nguyễn Trãi, Thanh Xuân, Hà Nội", "phone": "024 3976 1381", "email": "info@cic.com.vn", "workingHours": "Thứ 2 - Thứ 6: 08:00 - 17:30 | Thứ Bảy: 08:00 - 12:00", "mapUrl": "https://www.google.com/maps/embed?pb=mock-hanoi" }, { "key": "hcm", "name": "Chi nhánh TP. Hồ Chí Minh", "address": "Số 36 Nguyễn Huy Lượng, Phường 14, Quận Bình Thạnh, TP. Hồ Chí Minh", "phone": "088 645 2020 - 028 628 99022 - 028 628 99033", "email": "cichcm@cic.com.vn", "workingHours": "Thứ 2 - Thứ 6: 08:00 - 17:30", "mapUrl": "https://www.google.com/maps/embed?pb=mock-hcm" }] } },
+          { "id": "contact_form", "sectionKey": "contact.form", "sectionType": "contact_form", "position": 3, "config": { "title": "Gửi phiếu yêu cầu tư vấn", "formId": "form_contact_request", "submitLabel": "Gửi yêu cầu ngay", "successTitle": "Gửi yêu cầu thành công", "successMessage": "Yêu cầu của bạn đã được ghi nhận." } },
+          { "id": "contact_security", "sectionKey": "contact.security", "sectionType": "security_notice", "position": 4, "config": { "title": "Chính sách bảo mật & Tiêu chuẩn ISO", "description": "Thông tin gửi qua biểu mẫu được xử lý theo chính sách bảo mật của CIC.", "policyPageId": "page_privacy_vi" } }
+        ]
+      },
+      "published": {
+        "version": 1,
+        "status": "published",
+        "updatedAt": "2026-08-08T14:00:00+07:00",
+        "publishedAt": "2026-08-08T14:10:00+07:00",
+        "seo": { "title": "Liên hệ CIC", "description": "Kết nối với đội ngũ chuyên gia CIC." },
+        "sections": [
+          { "id": "contact_header", "sectionKey": "contact.header", "sectionType": "contact_header", "position": 1, "config": { "title": "Kết nối chuyên gia CIC", "subtitle": "Văn phòng hỗ trợ khách hàng của CIC sẵn sàng tiếp nhận nhu cầu tư vấn." } },
+          { "id": "contact_branches", "sectionKey": "contact.branches", "sectionType": "branch_map", "position": 2, "config": { "title": "Bản đồ & Chi nhánh", "branches": [{ "key": "hn", "name": "Trụ sở chính Hà Nội", "address": "Tầng 4, Tòa nhà VG Building, số 235 Nguyễn Trãi, Thanh Xuân, Hà Nội", "phone": "024 3976 1381", "email": "info@cic.com.vn", "workingHours": "Thứ 2 - Thứ 6: 08:00 - 17:30 | Thứ Bảy: 08:00 - 12:00", "mapUrl": "https://www.google.com/maps/embed?pb=mock-hanoi" }, { "key": "hcm", "name": "Chi nhánh TP. Hồ Chí Minh", "address": "Số 36 Nguyễn Huy Lượng, Phường 14, Quận Bình Thạnh, TP. Hồ Chí Minh", "phone": "088 645 2020", "email": "cichcm@cic.com.vn", "workingHours": "Thứ 2 - Thứ 6: 08:00 - 17:30", "mapUrl": "https://www.google.com/maps/embed?pb=mock-hcm" }] } },
+          { "id": "contact_form", "sectionKey": "contact.form", "sectionType": "contact_form", "position": 3, "config": { "title": "Gửi phiếu yêu cầu tư vấn", "formId": "form_contact_request", "submitLabel": "Gửi yêu cầu ngay", "successTitle": "Gửi yêu cầu thành công", "successMessage": "Yêu cầu của bạn đã được ghi nhận." } },
+          { "id": "contact_security", "sectionKey": "contact.security", "sectionType": "security_notice", "position": 4, "config": { "title": "Chính sách bảo mật & Tiêu chuẩn ISO", "description": "Thông tin gửi qua biểu mẫu được xử lý theo chính sách bảo mật của CIC.", "policyPageId": "page_privacy_vi" } }
+        ]
+      }
+    },
+    {
+      "id": "page_privacy_vi",
+      "code": "privacy_policy",
+      "slug": "/chinh-sach-bao-mat",
+      "name": "Chính sách bảo mật",
+      "pageType": "legal",
+      "draft": {
+        "version": 2,
+        "status": "draft",
+        "updatedAt": "2026-08-10T11:00:00+07:00",
+        "seo": { "title": "Chính sách bảo mật thông tin", "description": "Chính sách thu thập, sử dụng và bảo vệ dữ liệu cá nhân tại CIC." },
+        "sections": [
+          { "id": "privacy_header", "sectionKey": "legal.header", "sectionType": "legal_header", "position": 1, "config": { "categoryTag": "Chính sách pháp lý", "title": "Chính sách bảo mật thông tin", "subtitle": "Thông tin về việc CIC thu thập, sử dụng và bảo vệ dữ liệu cá nhân.", "lastUpdated": "10/08/2026", "readingTime": "3 phút" } },
+          { "id": "privacy_collection", "sectionKey": "privacy.collection", "sectionType": "legal_content", "position": 2, "config": { "title": "Mục đích và phạm vi thu thập thông tin", "blocks": [{ "type": "paragraph", "text": "CIC chỉ thu thập thông tin cần thiết để tiếp nhận và xử lý yêu cầu của khách hàng." }, { "type": "bulletList", "items": ["Thông tin định danh và liên hệ do khách hàng cung cấp.", "Nội dung yêu cầu hỗ trợ hoặc tư vấn."] }] } },
+          { "id": "privacy_usage", "sectionKey": "privacy.usage", "sectionType": "legal_content", "position": 3, "config": { "title": "Phạm vi sử dụng thông tin", "blocks": [{ "type": "paragraph", "text": "Thông tin được sử dụng để phản hồi yêu cầu, cung cấp dịch vụ và thực hiện nghĩa vụ pháp lý áp dụng." }] } },
+          { "id": "privacy_retention", "sectionKey": "privacy.retention", "sectionType": "legal_content", "position": 4, "config": { "title": "Thời gian lưu trữ thông tin", "blocks": [{ "type": "paragraph", "text": "Dữ liệu được lưu trong thời gian cần thiết theo mục đích xử lý và quy định pháp luật." }] } },
+          { "id": "privacy_access", "sectionKey": "privacy.access", "sectionType": "legal_content", "position": 5, "config": { "title": "Phương tiện tiếp cận và chỉnh sửa dữ liệu cá nhân", "blocks": [{ "type": "paragraph", "text": "Khách hàng có thể liên hệ CIC để yêu cầu tiếp cận hoặc cập nhật dữ liệu cá nhân của mình." }] } },
+          { "id": "privacy_commitment", "sectionKey": "privacy.commitment", "sectionType": "legal_content", "position": 6, "config": { "title": "Cam kết bảo mật thông tin cá nhân khách hàng", "blocks": [{ "type": "paragraph", "text": "CIC áp dụng các biện pháp phù hợp để bảo vệ thông tin cá nhân trong phạm vi quản lý." }] } },
+          { "id": "privacy_assistance", "sectionKey": "legal.assistance", "sectionType": "legal_assistance", "position": 7, "config": { "title": "Liên hệ giải đáp thắc mắc pháp lý", "description": "Vui lòng liên hệ Ban quản trị CIC khi cần hỗ trợ về chính sách này.", "phone": "024 3976 1381", "email": "info@cic.com.vn" } }
+        ]
+      },
+      "published": {
+        "version": 1,
+        "status": "published",
+        "updatedAt": "2026-08-08T10:00:00+07:00",
+        "publishedAt": "2026-08-08T10:10:00+07:00",
+        "seo": { "title": "Chính sách bảo mật thông tin", "description": "Chính sách thu thập, sử dụng và bảo vệ dữ liệu cá nhân tại CIC." },
+        "sections": [
+          { "id": "privacy_header", "sectionKey": "legal.header", "sectionType": "legal_header", "position": 1, "config": { "categoryTag": "Chính sách pháp lý", "title": "Chính sách bảo mật thông tin", "subtitle": "Thông tin về việc CIC thu thập, sử dụng và bảo vệ dữ liệu cá nhân.", "lastUpdated": "19/07/2026", "readingTime": "3 phút" } },
+          { "id": "privacy_collection", "sectionKey": "privacy.collection", "sectionType": "legal_content", "position": 2, "config": { "title": "Mục đích và phạm vi thu thập thông tin", "blocks": [{ "type": "paragraph", "text": "CIC chỉ thu thập thông tin cần thiết để tiếp nhận và xử lý yêu cầu của khách hàng." }, { "type": "bulletList", "items": ["Thông tin định danh và liên hệ do khách hàng cung cấp.", "Nội dung yêu cầu hỗ trợ hoặc tư vấn."] }] } },
+          { "id": "privacy_usage", "sectionKey": "privacy.usage", "sectionType": "legal_content", "position": 3, "config": { "title": "Phạm vi sử dụng thông tin", "blocks": [{ "type": "paragraph", "text": "Thông tin được sử dụng để phản hồi yêu cầu, cung cấp dịch vụ và thực hiện nghĩa vụ pháp lý áp dụng." }] } },
+          { "id": "privacy_retention", "sectionKey": "privacy.retention", "sectionType": "legal_content", "position": 4, "config": { "title": "Thời gian lưu trữ thông tin", "blocks": [{ "type": "paragraph", "text": "Dữ liệu được lưu trong thời gian cần thiết theo mục đích xử lý và quy định pháp luật." }] } },
+          { "id": "privacy_access", "sectionKey": "privacy.access", "sectionType": "legal_content", "position": 5, "config": { "title": "Phương tiện tiếp cận và chỉnh sửa dữ liệu cá nhân", "blocks": [{ "type": "paragraph", "text": "Khách hàng có thể liên hệ CIC để yêu cầu tiếp cận hoặc cập nhật dữ liệu cá nhân của mình." }] } },
+          { "id": "privacy_commitment", "sectionKey": "privacy.commitment", "sectionType": "legal_content", "position": 6, "config": { "title": "Cam kết bảo mật thông tin cá nhân khách hàng", "blocks": [{ "type": "paragraph", "text": "CIC áp dụng các biện pháp phù hợp để bảo vệ thông tin cá nhân trong phạm vi quản lý." }] } },
+          { "id": "privacy_assistance", "sectionKey": "legal.assistance", "sectionType": "legal_assistance", "position": 7, "config": { "title": "Liên hệ giải đáp thắc mắc pháp lý", "description": "Vui lòng liên hệ Ban quản trị CIC khi cần hỗ trợ về chính sách này.", "phone": "024 3976 1381", "email": "info@cic.com.vn" } }
+        ]
+      }
+    }
+  ]
+}

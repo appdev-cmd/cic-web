@@ -451,18 +451,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     ],
   },
   {
-    id: 'grp_ban_dia_hoa',
-    groupTitle: 'BẢN ĐỊA HÓA',
-    items: [
-      {
-        id: 'menu_translation_strings',
-        title: 'Chuỗi giao diện',
-        iconName: 'Sparkles',
-        path: '/cms/translation-strings',
-      },
-    ],
-  },
-  {
     id: 'grp_quan_tri',
     groupTitle: 'QUẢN TRỊ',
     items: [
@@ -483,6 +471,12 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Cấu hình hệ thống',
         iconName: 'Settings',
         path: '/cms/settings',
+      },
+      {
+        id: 'menu_translation_strings',
+        title: 'Ngôn ngữ giao diện',
+        iconName: 'Sparkles',
+        path: '/cms/translation-strings',
       },
       {
         id: 'menu_activity_logs',

@@ -28,7 +28,6 @@ import {
   MasterApplicationItem,
   MasterProductTypeItem,
   MasterSalesStaffItem,
-  MasterRoutingRuleItem,
 } from './types';
 
 interface MasterDataFormDrawerProps {
@@ -52,8 +51,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   onSave,
   onClose,
 }) => {
-  if (!isOpen) return null;
-
   const isEdit = !!item;
   const typeLabels: Record<MasterDataType, string> = {
     categories: 'danh mục sản phẩm',
@@ -61,7 +58,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
     applications: 'lĩnh vực ứng dụng',
     product_types: 'loại sản phẩm',
     sales_staff: 'người phụ trách',
-    routing_rules: 'quy tắc nhận liên hệ',
   };
 
   // Active form tab
@@ -89,8 +85,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [logoUrl, setLogoUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
-  const [contactPerson, setContactPerson] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
 
   // Application Specifics
   const [sectorGroup, setSectorGroup] = useState('Kết cấu Dân dụng & Công nghiệp');
@@ -112,14 +106,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [assignedBrandIds, setAssignedBrandIds] = useState<string[]>([]);
   const [capacityInquiries, setCapacityInquiries] = useState(50);
 
-  // Routing Rule Specifics
-  const [priority, setPriority] = useState(1);
-  const [scopeCatIds, setScopeCatIds] = useState<string[]>([]);
-  const [scopeBrandIds, setScopeBrandIds] = useState<string[]>([]);
-  const [triggerKeywords, setTriggerKeywords] = useState('etabs, sap2000, safe');
-  const [primarySalesId, setPrimarySalesId] = useState(staff[0]?.id || 'staff_001');
-  const [fallbackEmail, setFallbackEmail] = useState('phongkinhdoanh@cic.com.vn');
-  const [notifyCcEmails, setNotifyCcEmails] = useState('admin@cic.com.vn, hotro@cic.com.vn');
 
   // Populate state on edit
   useEffect(() => {
@@ -146,8 +132,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         setLogoUrl(brd.logo || '');
         setWebsiteUrl(brd.website || '');
         setIsFeatured(brd.is_featured || false);
-        setContactPerson(brd.contact_person || '');
-        setContactEmail(brd.contact_email || '');
       } else if (item.type === 'applications') {
         const app = item as MasterApplicationItem;
         setSectorGroup(app.sector_group || 'Kết cấu Dân dụng & Công nghiệp');
@@ -169,15 +153,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         setAssignedCategoryIds(st.assigned_category_ids || []);
         setAssignedBrandIds(st.assigned_brand_ids || []);
         setCapacityInquiries(st.monthly_capacity_inquiries || 50);
-      } else if (item.type === 'routing_rules') {
-        const rr = item as MasterRoutingRuleItem;
-        setPriority(rr.priority || 1);
-        setScopeCatIds(rr.scope_category_ids || []);
-        setScopeBrandIds(rr.scope_brand_ids || []);
-        setTriggerKeywords((rr.trigger_keywords || []).join(', '));
-        setPrimarySalesId(rr.primary_sales_id || staff[0]?.id || 'staff_001');
-        setFallbackEmail(rr.fallback_email || 'phongkinhdoanh@cic.com.vn');
-        setNotifyCcEmails((rr.notify_cc_emails || []).join(', '));
       }
     } else {
       // Reset defaults for Create new
@@ -198,8 +173,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       setLogoUrl('');
       setWebsiteUrl('');
       setIsFeatured(false);
-      setContactPerson('');
-      setContactEmail('');
       setSectorGroup('Kết cấu Dân dụng & Công nghiệp');
       setColorBadge('bg-blue-500/10 text-blue-600 border-blue-500/20');
       setTypeCode('software_desktop');
@@ -214,13 +187,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       setAssignedCategoryIds([]);
       setAssignedBrandIds([]);
       setCapacityInquiries(50);
-      setPriority(1);
-      setScopeCatIds([]);
-      setScopeBrandIds([]);
-      setTriggerKeywords('etabs, sap2000');
-      setPrimarySalesId(staff[0]?.id || 'staff_001');
-      setFallbackEmail('phongkinhdoanh@cic.com.vn');
-      setNotifyCcEmails('admin@cic.com.vn');
     }
   }, [item, targetType]);
 
@@ -282,8 +248,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         logo: logoUrl,
         website: websiteUrl,
         is_featured: isFeatured,
-        contact_person: contactPerson,
-        contact_email: contactEmail,
       } as MasterBrandItem;
     } else if (targetType === 'applications') {
       resultObj = {
@@ -316,24 +280,12 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         assigned_brand_ids: assignedBrandIds,
         monthly_capacity_inquiries: Number(capacityInquiries) || 50,
       } as MasterSalesStaffItem;
-    } else {
-      const selectedStaffObj = staff.find((s) => s.id === primarySalesId);
-      resultObj = {
-        ...baseObj,
-        type: 'routing_rules',
-        priority: Number(priority) || 1,
-        scope_category_ids: scopeCatIds,
-        scope_brand_ids: scopeBrandIds,
-        trigger_keywords: triggerKeywords.split(',').map((k) => k.trim()).filter(Boolean),
-        primary_sales_id: primarySalesId,
-        primary_sales_name: selectedStaffObj?.name || 'Lê Hoàng Nam',
-        fallback_email: fallbackEmail,
-        notify_cc_emails: notifyCcEmails.split(',').map((k) => k.trim()).filter(Boolean),
-      } as MasterRoutingRuleItem;
-    }
+    } else return;
 
     onSave(resultObj);
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
@@ -374,7 +326,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            1. Thông tin cơ bản
+            Thông tin cơ bản
           </button>
 
           {targetType === 'categories' && (
@@ -387,23 +339,10 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              2. Tìm kiếm và hiển thị công khai
+              Tìm kiếm và hiển thị công khai
             </button>
           )}
 
-          {(targetType === 'sales_staff' || targetType === 'routing_rules') && (
-            <button
-              type="button"
-              onClick={() => setActiveTab('routing')}
-              className={`py-3 px-3 font-bold border-b-2 -mb-px cursor-pointer transition-all ${
-                activeTab === 'routing'
-                  ? 'border-orange-600 text-orange-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
-            >
-              2. Phân công và nhận liên hệ
-            </button>
-          )}
         </div>
 
         {/* Drawer Form Body */}
@@ -512,6 +451,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                       />
                     </div>
                   </div>
+
                 </div>
               )}
 
@@ -618,6 +558,15 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                       />
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Số điện thoại công việc:</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none" /></div>
+                    <div><label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Năng lực tiếp nhận mỗi tháng:</label><input type="number" min={0} value={capacityInquiries} onChange={(e) => setCapacityInquiries(Number(e.target.value))} className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none" /></div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <fieldset className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"><legend className="px-1 font-bold text-slate-700 dark:text-slate-300">Danh mục phụ trách</legend><div className="mt-2 max-h-36 space-y-2 overflow-y-auto">{categories.map((category) => <label key={category.id} className="flex items-center gap-2"><input type="checkbox" checked={assignedCategoryIds.includes(category.id)} onChange={() => setAssignedCategoryIds((current) => current.includes(category.id) ? current.filter((id) => id !== category.id) : [...current, category.id])} /><span>{category.name}</span></label>)}</div></fieldset>
+                    <fieldset className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"><legend className="px-1 font-bold text-slate-700 dark:text-slate-300">Hãng phụ trách</legend><div className="mt-2 max-h-36 space-y-2 overflow-y-auto">{brands.map((brand) => <label key={brand.id} className="flex items-center gap-2"><input type="checkbox" checked={assignedBrandIds.includes(brand.id)} onChange={() => setAssignedBrandIds((current) => current.includes(brand.id) ? current.filter((id) => id !== brand.id) : [...current, brand.id])} /><span>{brand.name}</span></label>)}</div></fieldset>
+                  </div>
                 </div>
               )}
 
@@ -678,93 +627,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none"
                 />
               </div>
-            </div>
-          )}
-
-          {/* TAB 3: ROUTING & SCOPE CONFIG (For Routing Rules & Sales Staff) */}
-          {activeTab === 'routing' && (targetType === 'routing_rules' || targetType === 'sales_staff') && (
-            <div className="space-y-4">
-              {targetType === 'routing_rules' && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Thứ tự ưu tiên quy tắc (Priority #):
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={priority}
-                        onChange={(e) => setPriority(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none"
-                      />
-                      <span className="text-[10px] text-slate-400 mt-1 block">
-                        Số nhỏ hơn có thứ tự ưu tiên cao hơn
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Người phụ trách chính tiếp nhận:
-                      </label>
-                      <select
-                        value={primarySalesId}
-                        onChange={(e) => setPrimarySalesId(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold cursor-pointer focus:outline-none"
-                      >
-                        {staff.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name} ({s.staff_code})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                      Từ khóa Kích hoạt (Trigger Keywords):
-                    </label>
-                    <input
-                      type="text"
-                      value={triggerKeywords}
-                      onChange={(e) => setTriggerKeywords(e.target.value)}
-                      placeholder="etabs, sap2000, safe, bao gia..."
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                    />
-                    <span className="text-[10px] text-slate-400 mt-1 block">
-                      Phân cách bằng dấu phẩy. Dùng dấu * cho quy tắc mặc định.
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Email Fallback khi trùng lỗi:
-                      </label>
-                      <input
-                        type="email"
-                        value={fallbackEmail}
-                        onChange={(e) => setFallbackEmail(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Email CC nhận thông báo đồng thời:
-                      </label>
-                      <input
-                        type="text"
-                        value={notifyCcEmails}
-                        onChange={(e) => setNotifyCcEmails(e.target.value)}
-                        placeholder="admin@cic.com.vn, hotro@cic.com.vn"
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
             </div>
           )}
 

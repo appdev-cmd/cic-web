@@ -39,17 +39,10 @@ const TrashManager = lazy(async () => {
   return { default: () => <module.TrashManager data={dataModule.demoGovernanceDataSource.trash} /> };
 });
 const StaticPagesManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([
-    import('../modules/static_pages/StaticPagesManager'),
-    import('../data/demoEditorialContentDataSource'),
-  ]);
-
+  const module = await import('../modules/static_pages/StaticPagesManager');
   return {
     default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-      <module.StaticPagesManager
-        workspaceLocale={workspaceLocale}
-        data={dataModule.demoEditorialContentDataSource.staticPagesByLocale[workspaceLocale]}
-      />
+      <module.StaticPagesManager workspaceLocale={workspaceLocale} />
     ),
   };
 });

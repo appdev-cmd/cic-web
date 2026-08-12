@@ -12,7 +12,6 @@ import {
   mockMasterBrands,
   mockMasterCategories,
   mockMasterProductTypes,
-  mockMasterRoutingRules,
   mockMasterSalesStaff,
   mockUsageImpactRecords,
 } from '../modules/product_settings/mockData';
@@ -38,7 +37,6 @@ export const demoCatalogDataSource: CatalogDataSource = {
   },
   productSettingsGlobal: {
     salesStaff: mockMasterSalesStaff,
-    routingRules: mockMasterRoutingRules,
     activityLogs: mockMasterActivityLogs,
     usageImpactRecords: mockUsageImpactRecords,
   },

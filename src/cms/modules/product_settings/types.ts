@@ -1,6 +1,6 @@
 /**
  * Module 06: Thiết lập danh mục sản phẩm (Product Master Data & Settings Specification)
- * Unified Master Data & Routing Engine for Products Taxonomy, Brands, Applications, Product Types, Sales Staff & Contact Email Routing.
+ * Product taxonomy, brands, applications, product types and product owners.
  */
 
 export type MasterDataType = 
@@ -8,8 +8,7 @@ export type MasterDataType =
   | 'brands' 
   | 'applications' 
   | 'product_types' 
-  | 'sales_staff' 
-  | 'routing_rules';
+  | 'sales_staff';
 
 export type MasterItemStatus = 'active' | 'inactive' | 'archived';
 
@@ -48,8 +47,6 @@ export interface MasterBrandItem extends BaseMasterItem {
   country: string;
   website?: string;
   is_featured: boolean;
-  contact_person?: string;
-  contact_email?: string;
 }
 
 // 3. Application Area / Lĩnh vực ứng dụng
@@ -104,8 +101,7 @@ export type AnyMasterItem =
   | MasterBrandItem 
   | MasterApplicationItem 
   | MasterProductTypeItem 
-  | MasterSalesStaffItem 
-  | MasterRoutingRuleItem;
+  | MasterSalesStaffItem;
 
 export interface UsageImpactRecord {
   id: string;

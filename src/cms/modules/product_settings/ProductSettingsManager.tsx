@@ -49,13 +49,11 @@ import {
   MasterApplicationItem,
   MasterProductTypeItem,
   MasterSalesStaffItem,
-  MasterRoutingRuleItem,
   MasterDataActivityLog,
 } from './types';
 import type { ProductSettingsGlobalData, ProductTaxonomyModuleData } from '../../data/CatalogDataSource';
 
 import { UsageImpactDrawer } from './UsageImpactDrawer';
-import { RoutingSimulatorModal } from './RoutingSimulatorModal';
 import { ColumnSettingModal, ProductSettingsColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { MasterDataFormDrawer } from './MasterDataFormDrawer';
@@ -65,7 +63,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
-type MainTab = 'overview' | 'taxonomy' | 'assignments' | 'archived' | 'audit';
+type MainTab = 'overview' | 'taxonomy' | 'archived' | 'audit';
 
 interface ProductSettingsManagerProps {
   taxonomy?: ProductTaxonomyModuleData;
@@ -79,7 +77,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     applications: 'Thêm lĩnh vực ứng dụng',
     product_types: 'Thêm loại sản phẩm',
     sales_staff: 'Thêm người phụ trách',
-    routing_rules: 'Thêm quy tắc nhận liên hệ',
   };
   // Master Datasets State
   const [categories, setCategories] = useState<MasterCategoryItem[]>(taxonomy?.categories ?? []);
@@ -87,7 +84,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   const [applications, setApplications] = useState<MasterApplicationItem[]>(taxonomy?.applications ?? []);
   const [productTypes, setProductTypes] = useState<MasterProductTypeItem[]>(taxonomy?.productTypes ?? []);
   const [salesStaff, setSalesStaff] = useState<MasterSalesStaffItem[]>(globalData.salesStaff);
-  const [routingRules, setRoutingRules] = useState<MasterRoutingRuleItem[]>(globalData.routingRules);
   const [activityLogs] = useState<MasterDataActivityLog[]>(globalData.activityLogs);
 
   useEffect(() => {
@@ -112,7 +108,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
   // Modals & Drawers State
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [impactDrawerItem, setImpactDrawerItem] = useState<AnyMasterItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<AnyMasterItem | null>(null);
   const [formDrawerItem, setFormDrawerItem] = useState<AnyMasterItem | null>(null);
@@ -151,7 +146,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         ...applications,
         ...productTypes,
         ...salesStaff,
-        ...routingRules,
       ];
       return all.filter((i) => i.status === 'archived');
     }
@@ -162,10 +156,9 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     else if (activeDataType === 'applications') source = applications;
     else if (activeDataType === 'product_types') source = productTypes;
     else if (activeDataType === 'sales_staff') source = salesStaff;
-    else if (activeDataType === 'routing_rules') source = routingRules;
 
     return source.filter((i) => i.status !== 'archived');
-  }, [activeMainTab, activeDataType, categories, brands, applications, productTypes, salesStaff, routingRules]);
+  }, [activeMainTab, activeDataType, categories, brands, applications, productTypes, salesStaff]);
 
   // Filter Logic
   const filteredList = useMemo(() => {
@@ -230,7 +223,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     else if (savedItem.type === 'applications') setApplications((prev) => updateDataset(prev, savedItem as MasterApplicationItem));
     else if (savedItem.type === 'product_types') setProductTypes((prev) => updateDataset(prev, savedItem as MasterProductTypeItem));
     else if (savedItem.type === 'sales_staff') setSalesStaff((prev) => updateDataset(prev, savedItem as MasterSalesStaffItem));
-    else if (savedItem.type === 'routing_rules') setRoutingRules((prev) => updateDataset(prev, savedItem as MasterRoutingRuleItem));
 
     showToast(`Đã lưu thành công mục "${savedItem.name}"!`);
     setIsFormDrawerOpen(false);
@@ -247,7 +239,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     setApplications((prev) => prev.map((i) => updateStatus(i) as MasterApplicationItem));
     setProductTypes((prev) => prev.map((i) => updateStatus(i) as MasterProductTypeItem));
     setSalesStaff((prev) => prev.map((i) => updateStatus(i) as MasterSalesStaffItem));
-    setRoutingRules((prev) => prev.map((i) => updateStatus(i) as MasterRoutingRuleItem));
 
     showToast(`Đã ngừng sử dụng ${selectedIds.length} mục đã chọn.`);
     setSelectedIds([]);
@@ -262,7 +253,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     setApplications((prev) => prev.map((i) => updateStatus(i) as MasterApplicationItem));
     setProductTypes((prev) => prev.map((i) => updateStatus(i) as MasterProductTypeItem));
     setSalesStaff((prev) => prev.map((i) => updateStatus(i) as MasterSalesStaffItem));
-    setRoutingRules((prev) => prev.map((i) => updateStatus(i) as MasterRoutingRuleItem));
 
     showToast(`Đã chuyển ${selectedIds.length} mục vào Thùng rác Lưu trữ!`);
     setSelectedIds([]);
@@ -282,17 +272,8 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       <CmsPageHeader
         icon={<FolderTree />}
         title="Thiết lập sản phẩm"
-        description="Quản lý danh mục, hãng, loại sản phẩm, người phụ trách và nơi nhận liên hệ dùng trong biểu mẫu sản phẩm."
+        description="Quản lý danh mục, hãng, lĩnh vực ứng dụng, loại sản phẩm và người phụ trách sản phẩm."
         actions={<>
-          <CmsButton
-            onClick={() => setIsSimulatorOpen(true)}
-            variant="secondary"
-            size="sm"
-            leadingIcon={<Zap />}
-          >
-            Kiểm tra nơi nhận email
-          </CmsButton>
-
           <CmsButton
             onClick={() => {
               setFormDrawerItem(null);
@@ -310,11 +291,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       {/* 2. SITEMAP SECTIONS TABS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
         {[
-          { id: 'overview', label: '1. Tổng quan' },
-          { id: 'taxonomy', label: '2. Phân loại sản phẩm' },
-          { id: 'assignments', label: '3. Phụ trách và nhận liên hệ' },
-          { id: 'archived', label: '4. Mục đã lưu trữ' },
-          { id: 'audit', label: '5. Lịch sử thay đổi' },
+          { id: 'overview', label: 'Tổng quan' },
+          { id: 'taxonomy', label: 'Dữ liệu thiết lập' },
+          { id: 'archived', label: 'Mục đã lưu trữ' },
+          { id: 'audit', label: 'Lịch sử thay đổi' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -337,14 +317,13 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       {activeMainTab === 'overview' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Summary Metric Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
               { label: 'Danh mục sản phẩm', count: categories.length, type: 'categories', icon: Building2, color: 'text-blue-600 bg-blue-500/10' },
               { label: 'Hãng sản xuất', count: brands.length, type: 'brands', icon: Globe, color: 'text-emerald-600 bg-emerald-500/10' },
               { label: 'Lĩnh vực ứng dụng', count: applications.length, type: 'applications', icon: Cpu, color: 'text-purple-600 bg-purple-500/10' },
               { label: 'Loại sản phẩm', count: productTypes.length, type: 'product_types', icon: Layers, color: 'text-amber-600 bg-amber-500/10' },
               { label: 'Nhân viên phụ trách', count: salesStaff.length, type: 'sales_staff', icon: UserCheck, color: 'text-orange-600 bg-orange-500/10' },
-              { label: 'Quy tắc nhận email', count: routingRules.length, type: 'routing_rules', icon: Zap, color: 'text-rose-600 bg-rose-500/10' },
             ].map((stat, idx) => {
               const IconComp = stat.icon;
               return (
@@ -355,7 +334,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                       setActiveMainTab('taxonomy');
                       setActiveDataType(stat.type as MasterDataType);
                     } else {
-                      setActiveMainTab('assignments');
+                      setActiveMainTab('taxonomy');
                       setActiveDataType(stat.type as MasterDataType);
                     }
                   }}
@@ -406,42 +385,19 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         </div>
       )}
 
-      {/* 4. DATA TABLES AREA (Taxonomy, Assignments, Archived) */}
-      {['taxonomy', 'assignments', 'archived'].includes(activeMainTab) && (
+      {/* DATA TABLES AREA */}
+      {['taxonomy', 'archived'].includes(activeMainTab) && (
         <div className="space-y-4">
           
           {/* Sub-type Selectors Bar */}
           {activeMainTab === 'taxonomy' && (
             <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
               {[
-                { type: 'categories', label: '1. Danh mục sản phẩm' },
-                { type: 'brands', label: '2. Hãng sản xuất' },
-                { type: 'applications', label: '3. Lĩnh vực ứng dụng' },
-                { type: 'product_types', label: '4. Loại sản phẩm' },
-              ].map((sub) => (
-                <button
-                  key={sub.type}
-                  onClick={() => {
-                    setActiveDataType(sub.type as MasterDataType);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-3.5 py-2 font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap border ${
-                    activeDataType === sub.type
-                      ? 'bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-800 shadow-2xs ring-2 ring-orange-500/10'
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {sub.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {activeMainTab === 'assignments' && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-              {[
-                { type: 'sales_staff', label: '1. Người phụ trách kinh doanh' },
-                { type: 'routing_rules', label: '2. Quy tắc nhận liên hệ' },
+                { type: 'categories', label: 'Danh mục sản phẩm' },
+                { type: 'brands', label: 'Hãng sản xuất' },
+                { type: 'applications', label: 'Lĩnh vực ứng dụng' },
+                { type: 'product_types', label: 'Loại sản phẩm' },
+                { type: 'sales_staff', label: 'Người phụ trách kinh doanh' },
               ].map((sub) => (
                 <button
                   key={sub.type}
@@ -662,11 +618,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                   <span>{(item as MasterSalesStaffItem).email}</span>
                                 </span>
                               )}
-                              {item.type === 'routing_rules' && (
-                                <span className="text-[11px] font-mono text-slate-600 dark:text-slate-300">
-                                  Nội bộ: {(item as MasterRoutingRuleItem).primary_sales_name}
-                                </span>
-                              )}
                               {['categories', 'applications', 'product_types'].includes(item.type) && (
                                 <span className="text-slate-400 italic">Mặc định Toàn quốc</span>
                               )}
@@ -804,14 +755,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         onClose={() => setImpactDrawerItem(null)}
       />
 
-      <RoutingSimulatorModal
-        isOpen={isSimulatorOpen}
-        rules={routingRules}
-        categories={categories}
-        brands={brands}
-        staff={salesStaff}
-        onClose={() => setIsSimulatorOpen(false)}
-      />
 
       <ColumnSettingModal
         isOpen={isColumnModalOpen}

@@ -16,7 +16,6 @@ import {
   Package,
   Image as ImageIcon,
   Calendar,
-  Sparkles,
   ExternalLink,
 } from 'lucide-react';
 import { CmsUser, NotificationItem } from '../types';
@@ -30,7 +29,7 @@ interface CmsHeaderProps {
   workspaceLocale: CmsLocale;
   onToggleWorkspaceLocale: () => void;
   onOpenCommandPalette: () => void;
-  onQuickAction: (type: 'product' | 'news' | 'banner' | 'event' | 'static_page') => void;
+  onQuickAction: (type: 'product' | 'news' | 'banner' | 'event') => void;
   onToggleMobileSidebar: () => void;
   onSwitchToWebsite?: () => void;
 }
@@ -154,16 +153,6 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               >
                 <FileText className="w-4 h-4 text-orange-500" />
                 <span>Bài viết mới</span>
-              </button>
-              <button
-                onClick={() => {
-                  onQuickAction('static_page');
-                  setIsQuickActionOpen(false);
-                }}
-                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-purple-500" />
-                <span>Trang nội dung mới</span>
               </button>
               <button
                 onClick={() => {
