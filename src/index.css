@@ -525,4 +525,72 @@ input[type="button"],
   color: #e2e8f0;
 }
 
+/* CKEditor 5 — modern CMS skin, toolbar wraps instead of collapsing. */
+.cms-ckeditor {
+  --ck-border-radius: 0;
+  --ck-color-base-border: transparent;
+  --ck-color-base-background: #fff;
+  --ck-color-toolbar-background: #f8fafc;
+  --ck-color-button-default-hover-background: #e2e8f0;
+  --ck-color-button-on-background: #ffedd5;
+  --ck-color-button-on-color: #c2410c;
+  --ck-color-focus-border: #f97316;
+  --ck-focus-ring: 1px solid #f97316;
+}
+
+.cms-ckeditor .ck.ck-toolbar {
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem;
+}
+
+.cms-ckeditor .ck-toolbar__items {
+  align-items: center;
+  flex-wrap: wrap !important;
+  row-gap: 0.35rem;
+}
+
+.cms-ckeditor .ck.ck-editor__main > .ck-editor__editable {
+  border: 0;
+  box-shadow: none;
+  min-height: var(--cms-editor-min-height, 280px);
+  padding: 1.25rem 1.5rem;
+}
+
+.cms-ckeditor .ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable) {
+  border: 0;
+  box-shadow: none;
+}
+
+.cms-ckeditor .ck-content {
+  color: #1e293b;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.cms-ckeditor .ck-source-editing-area textarea {
+  background: #fff;
+  color: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  min-height: var(--cms-editor-min-height, 280px);
+}
+
+.dark .cms-ckeditor {
+  --ck-color-base-background: #0f172a;
+  --ck-color-base-foreground: #1e293b;
+  --ck-color-base-border: #334155;
+  --ck-color-toolbar-background: #1e293b;
+  --ck-color-text: #e2e8f0;
+  --ck-color-button-default-hover-background: #334155;
+}
+
+.dark .cms-ckeditor .ck.ck-toolbar {
+  border-bottom-color: #334155;
+}
+
+.dark .cms-ckeditor .ck-content,
+.dark .cms-ckeditor .ck-source-editing-area textarea {
+  background: #0f172a;
+  color: #e2e8f0;
+}
 
