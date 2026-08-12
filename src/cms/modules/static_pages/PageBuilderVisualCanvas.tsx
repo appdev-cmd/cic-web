@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AboutView } from '../../../web/components/AboutView';
 import { ContactView } from '../../../web/components/ContactView';
 import { HomeView } from '../../../web/components/HomeView';
@@ -43,6 +44,9 @@ function editableNodes(root: HTMLElement, pageCode: PageBuilderPage['code']): HT
 
 export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = ({ pageCode, sections, selectedId, issueIds, viewport, onSelect }) => {
   const rootRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const [frameBody, setFrameBody] = useState<HTMLElement | null>(null);
+  const [contentHeight, setContentHeight] = useState(900);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -63,14 +67,34 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       node.style.outlineOffset = '';
       node.style.boxShadow = '';
     });
-  }, [issueIds, pageCode, sections, selectedId]);
+  }, [frameBody, issueIds, pageCode, sections, selectedId]);
 
-  const widthClass = viewport === 'mobile' ? 'w-[390px]' : viewport === 'tablet' ? 'w-[768px]' : 'w-[1440px]';
+  useEffect(() => {
+    if (!frameBody || !rootRef.current) return;
+    const updateHeight = () => setContentHeight(Math.max(600, rootRef.current?.scrollHeight ?? 0));
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(rootRef.current);
+    updateHeight();
+    return () => observer.disconnect();
+  }, [frameBody, pageCode]);
+
+  const viewportWidth = viewport === 'mobile' ? 390 : viewport === 'tablet' ? 768 : 1440;
   const scale = viewport === 'desktop' ? 0.62 : viewport === 'tablet' ? 0.72 : 0.92;
 
-  return <div className="relative mx-auto overflow-hidden rounded-xl bg-white shadow-2xl" style={{ width: `calc(${viewport === 'desktop' ? 1440 : viewport === 'tablet' ? 768 : 390}px * ${scale})` }}>
-    <div className={`${widthClass} origin-top-left bg-white`} style={{ transform: `scale(${scale})` }}>
-      <div ref={rootRef} onClickCapture={(event) => {
+  const handleFrameLoad = () => {
+    const frameDocument = frameRef.current?.contentDocument;
+    if (!frameDocument) return;
+    frameDocument.documentElement.lang = document.documentElement.lang || 'vi';
+    frameDocument.body.className = document.body.className;
+    frameDocument.body.style.margin = '0';
+    frameDocument.head.innerHTML = '';
+    document.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => frameDocument.head.appendChild(node.cloneNode(true)));
+    setFrameBody(frameDocument.body);
+  };
+
+  return <div className="relative mx-auto overflow-hidden rounded-xl bg-white shadow-2xl" style={{ width: viewportWidth * scale, height: contentHeight * scale }}>
+    <iframe ref={frameRef} title={`Giao diện ${viewport}`} onLoad={handleFrameLoad} className="absolute left-0 top-0 border-0 bg-white" style={{ width: viewportWidth, height: contentHeight, transform: `scale(${scale})`, transformOrigin: 'top left' }} />
+    {frameBody && createPortal(<div ref={rootRef} onClickCapture={(event) => {
         const target = event.target as HTMLElement;
         const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
         if (!sectionNode) return;
@@ -79,7 +103,6 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         onSelect(sectionNode.dataset.pageBuilderSectionId ?? '');
       }}>
         <WebsitePage pageCode={pageCode} />
-      </div>
-    </div>
+      </div>, frameBody)}
   </div>;
 };
