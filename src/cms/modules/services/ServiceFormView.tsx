@@ -300,10 +300,10 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         </button>
       </div>
 
-      {/* Main Layout Grid */}
-      <div>
-        {/* Form Body */}
-        <div className="space-y-6">
+      {/* Main two-column layout, aligned with the Product form */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Main form content */}
+        <div className="lg:col-span-8 space-y-5">
           {/* SECTION 1: THÔNG TIN CHUNG */}
           <div
             id="section_general"
@@ -712,10 +712,14 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             </div>
           </div>
 
+        </div>
+
+        {/* Publishing sidebar */}
+        <div className="lg:col-span-4 space-y-5">
           {/* SECTION 7: XUẤT BẢN & HIỂN THỊ */}
           <div
             id="section_publishing"
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4"
+            className="cms-sticky-aside bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4"
           >
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Globe className="w-5 h-5 text-orange-600" />
@@ -724,7 +728,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Trạng thái Biên tập (Editorial Status)
@@ -757,7 +761,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Thứ tự ưu tiên hiển thị (Display Order)
@@ -788,7 +792,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Vị trí hiển thị nổi bật (Placement Section)
               </label>
-              <div className="flex flex-wrap gap-4">
+              <div className="space-y-2">
                 {[
                   { key: 'home_featured', label: 'Khối Dịch vụ Nổi bật Trang chủ' },
                   { key: 'services_page', label: 'Trang Catalog Dịch vụ Chính' },
