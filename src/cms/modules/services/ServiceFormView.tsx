@@ -18,7 +18,6 @@ import {
   Inbox,
   AlertTriangle,
   Sparkles,
-  ChevronRight,
   MoreHorizontal,
   BadgeCheck,
   ShieldCheck,
@@ -66,7 +65,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
 }) => {
   const [formData, setFormData] = useState<ServiceItem>({ ...service });
   const [activeTab, setActiveTab] = useState<'form' | 'used_by' | 'contacts' | 'versions' | 'logs'>('form');
-  const [activeSection, setActiveSection] = useState<string>('section_general');
   const [lastAutosaved, setLastAutosaved] = useState<string>('vừa xong');
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -149,16 +147,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
-
-  const sections = [
-    { id: 'section_general', title: '1. Thông tin chung', icon: FileText },
-    { id: 'section_classification', title: '2. Phân loại dịch vụ', icon: Layers },
-    { id: 'section_content', title: '3. Nội dung mô tả', icon: FileText },
-    { id: 'section_media', title: '4. Hình ảnh & Video', icon: ImageIcon },
-    { id: 'section_conversion', title: '5. Liên hệ & Chuyển đổi', icon: PhoneCall },
-    { id: 'section_seo', title: '6. SEO & Chia sẻ Meta', icon: Search },
-    { id: 'section_publishing', title: '7. Xuất bản & Hiển thị', icon: Globe },
-  ];
 
   return (
     <div className="space-y-6 pb-20">
@@ -313,38 +301,9 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
       </div>
 
       {/* Main Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Sticky Navigation Menu */}
-        <div className="lg:col-span-1">
-          <div className="cms-sticky-aside bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 space-y-1">
-            <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Cấu trúc Form 8 nhóm
-            </div>
-            {sections.map((sec) => {
-              const IconComp = sec.icon;
-              return (
-                <a
-                  key={sec.id}
-                  href={`#${sec.id}`}
-                  onClick={() => setActiveSection(sec.id)}
-                  className={`w-full px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-colors ${
-                    activeSection === sec.id
-                      ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 font-bold border border-orange-200/50 dark:border-orange-800/50'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <IconComp className="w-4 h-4 shrink-0" /> {sec.title}
-                  </span>
-                  <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-50" />
-                </a>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right Form Body */}
-        <div className="lg:col-span-3 space-y-6">
+      <div>
+        {/* Form Body */}
+        <div className="space-y-6">
           {/* SECTION 1: THÔNG TIN CHUNG */}
           <div
             id="section_general"
