@@ -11,16 +11,9 @@ import {
   Image as ImageIcon,
   Search,
   Clock,
-  History,
-  GitCommit,
-  Link2,
-  Inbox,
   AlertTriangle,
   Sparkles,
-  MoreHorizontal,
   BadgeCheck,
-  ShieldCheck,
-  Zap,
 } from 'lucide-react';
 import {
   ServiceItem,
@@ -31,10 +24,6 @@ import {
   ServiceUsedByReference,
   ServiceRelatedContact,
 } from './types';
-import { ActivityLogDrawer } from './ActivityLogDrawer';
-import { VersionHistoryDrawer } from './VersionHistoryDrawer';
-import { UsedByDrawer } from './UsedByDrawer';
-import { RelatedContactsDrawer } from './RelatedContactsDrawer';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { findPageBuilderImage, pageBuilderImages, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 
@@ -54,27 +43,15 @@ interface ServiceFormViewProps {
 export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
   service,
   groups,
-  owners,
-  activityLogs,
-  versions,
-  usedByReferences,
-  relatedContacts,
   onBack,
   onSave,
   onOpenPreview,
 }) => {
   const [formData, setFormData] = useState<ServiceItem>({ ...service });
-  const [activeTab, setActiveTab] = useState<'form' | 'used_by' | 'contacts' | 'versions' | 'logs'>('form');
   const [lastAutosaved, setLastAutosaved] = useState<string>('vừa xong');
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-
-  // Drawers
-  const [isLogsDrawerOpen, setIsLogsDrawerOpen] = useState(false);
-  const [isVersionsDrawerOpen, setIsVersionsDrawerOpen] = useState(false);
-  const [isUsedByDrawerOpen, setIsUsedByDrawerOpen] = useState(false);
-  const [isContactsDrawerOpen, setIsContactsDrawerOpen] = useState(false);
 
   useEffect(() => {
     setFormData({ ...service });
@@ -148,6 +125,19 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  const completenessChecks = [
+    { label: 'Tên dịch vụ', complete: Boolean(formData.title.trim()), weight: 15 },
+    { label: 'Đường dẫn (Alias)', complete: Boolean(formData.slug.trim()), weight: 10 },
+    { label: 'Tóm tắt', complete: Boolean(formData.summary.trim()), weight: 15 },
+    { label: 'Danh mục dịch vụ', complete: Boolean(formData.group_id), weight: 10 },
+    { label: 'Thẻ nội dung', complete: Boolean(formData.tags?.trim()), weight: 5 },
+    { label: 'Nội dung chi tiết', complete: formData.description.trim().length > 50, weight: 20 },
+    { label: 'Ảnh đại diện', complete: Boolean(formData.thumbnail_url), weight: 15 },
+    { label: 'SEO title và description', complete: Boolean(formData.meta_title.trim() && formData.meta_description.trim()), weight: 10 },
+  ];
+  const completenessScore = completenessChecks.reduce((score, item) => score + (item.complete ? item.weight : 0), 0);
+  const missingFields = completenessChecks.filter((item) => !item.complete).map((item) => item.label);
 
   return (
     <div className="space-y-6 pb-20">
@@ -244,61 +234,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <CheckCircle2 className="w-3.5 h-3.5" /> Xuất bản & Active
           </button>
         </div>
-      </div>
-
-      {/* Audit Stats Quick Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <button
-          onClick={() => setIsUsedByDrawerOpen(true)}
-          className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-orange-500 transition-all text-left flex items-center justify-between group"
-        >
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">Nơi sử dụng (Used-By)</div>
-            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
-              {formData.used_by_count} vị trí
-            </div>
-          </div>
-          <Link2 className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
-        </button>
-
-        <button
-          onClick={() => setIsContactsDrawerOpen(true)}
-          className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-orange-500 transition-all text-left flex items-center justify-between group"
-        >
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">Yêu cầu báo giá liên quan</div>
-            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
-              {formData.open_contacts_count} yêu cầu
-            </div>
-          </div>
-          <Inbox className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-        </button>
-
-        <button
-          onClick={() => setIsVersionsDrawerOpen(true)}
-          className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-orange-500 transition-all text-left flex items-center justify-between group"
-        >
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">Phiên bản Working Draft</div>
-            <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
-              v{formData.version_count}.0 {formData.working_version_exists ? '(Có bản thảo)' : ''}
-            </div>
-          </div>
-          <GitCommit className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
-        </button>
-
-        <button
-          onClick={() => setIsLogsDrawerOpen(true)}
-          className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-orange-500 transition-all text-left flex items-center justify-between group"
-        >
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">Chất lượng nội dung (Audit)</div>
-            <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-              {formData.quality_score}/100 Điểm
-            </div>
-          </div>
-          <ShieldCheck className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
-        </button>
       </div>
 
       {/* Main two-column layout, aligned with the Product form */}
@@ -511,11 +446,34 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
 
 
         {/* Publishing sidebar */}
-        <div className="lg:col-span-4 space-y-5">
+        <div className="cms-sticky-aside lg:col-span-4 space-y-5">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Chất lượng dữ liệu</h3>
+              <span className="text-lg font-black text-orange-600 dark:text-orange-400">{completenessScore}%</span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${completenessScore >= 80 ? 'bg-emerald-500' : completenessScore >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                style={{ width: `${completenessScore}%` }}
+              />
+            </div>
+            {missingFields.length > 0 ? (
+              <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded-xl space-y-1.5 text-xs text-red-800 dark:text-red-300">
+                <p className="font-bold text-[11px] flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 text-red-600" />Cần bổ sung ({missingFields.length} mục):</p>
+                <ul className="text-[10px] list-disc pl-4 space-y-0.5">{missingFields.map((field) => <li key={field}>{field}</li>)}</ul>
+              </div>
+            ) : (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />Dữ liệu đạt chuẩn chất lượng 100%!
+              </div>
+            )}
+          </div>
+
           {/* XUẤT BẢN & HIỂN THỊ */}
           <div
             id="section_publishing"
-            className="cms-sticky-aside bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4"
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4"
           >
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Globe className="w-5 h-5 text-orange-600" />
@@ -583,43 +541,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         </div>
       </div>
 
-      {/* Drawers */}
-      <ActivityLogDrawer
-        isOpen={isLogsDrawerOpen}
-        onClose={() => setIsLogsDrawerOpen(false)}
-        serviceTitle={formData.title}
-        logs={activityLogs}
-      />
-
-      <VersionHistoryDrawer
-        isOpen={isVersionsDrawerOpen}
-        onClose={() => setIsVersionsDrawerOpen(false)}
-        serviceTitle={formData.title}
-        versions={versions}
-        onRestoreVersion={(ver) => {
-          setFormData((prev) => ({
-            ...prev,
-            title: ver.title,
-            updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-          }));
-          setIsVersionsDrawerOpen(false);
-          showToast(`Đã khôi phục thành công bản thảo v${ver.version_number}.0!`);
-        }}
-      />
-
-      <UsedByDrawer
-        isOpen={isUsedByDrawerOpen}
-        onClose={() => setIsUsedByDrawerOpen(false)}
-        serviceTitle={formData.title}
-        references={usedByReferences}
-      />
-
-      <RelatedContactsDrawer
-        isOpen={isContactsDrawerOpen}
-        onClose={() => setIsContactsDrawerOpen(false)}
-        serviceTitle={formData.title}
-        contacts={relatedContacts}
-      />
       {isMediaPickerOpen && (
         <PageMediaPickerModal
           currentId={pageBuilderImages.find((asset) => asset.url === formData.thumbnail_url || asset.thumbnail_url === formData.thumbnail_url)?.id || ''}
