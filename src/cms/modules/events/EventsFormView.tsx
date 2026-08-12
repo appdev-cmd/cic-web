@@ -216,7 +216,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* HEADER BAR */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs">
+      <div className="cms-sticky-action flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-md">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-lg flex items-center gap-1">
