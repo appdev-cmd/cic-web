@@ -337,18 +337,27 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Render Form View if opened
   if (isFormOpen) {
     return (
-      <EventsFormView
-        eventToEdit={eventToEdit}
-        categories={categories}
-        relatedEvents={data?.events ?? []}
-        relatedArticles={data?.relatedArticles ?? []}
-        relatedProducts={data?.relatedProducts ?? []}
-        onSave={handleSaveEvent}
-        onCancel={() => {
-          setIsFormOpen(false);
-          setEventToEdit(null);
-        }}
-      />
+      <>
+        <EventsFormView
+          eventToEdit={eventToEdit}
+          categories={categories}
+          relatedEvents={data?.events ?? []}
+          relatedArticles={data?.relatedArticles ?? []}
+          relatedProducts={data?.relatedProducts ?? []}
+          onSave={handleSaveEvent}
+          onOpenPreview={setPreviewEvent}
+          onCancel={() => {
+            setIsFormOpen(false);
+            setEventToEdit(null);
+          }}
+        />
+        <EventPreviewModal
+          isOpen={!!previewEvent}
+          event={previewEvent}
+          categories={categories}
+          onClose={() => setPreviewEvent(null)}
+        />
+      </>
     );
   }
 
