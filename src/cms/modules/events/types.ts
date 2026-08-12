@@ -57,6 +57,8 @@ export interface EventItem {
   category_id: string;
   summary: string;
   content: string;
+  tags?: string[];
+  tawk_to?: string;
   image: string;
   time_event: string; // Start time, e.g. "2026-08-15T08:30"
   end_time: string;   // End time, e.g. "2026-08-15T17:00"

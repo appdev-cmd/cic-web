@@ -27,6 +27,39 @@ export interface ProductDocument {
 }
 
 export interface ProductItem {
+  name?: string;
+  code?: string;
+  other_languages1?: string;
+  icon?: string;
+  category_ids?: string[];
+  manufactory?: string;
+  application?: string[];
+  types?: string;
+  products_relates?: string[];
+  summary?: string;
+  description?: string;
+  feature_details?: string;
+  video?: string;
+  tawk_to?: string;
+  tags?: string[];
+  price_old?: string;
+  teamview?: boolean;
+  landing_page?: string;
+  seo_title?: string;
+  seo_keyword?: string;
+  seo_description?: string;
+  file_catalogue?: string;
+  file_price?: string;
+  link_catalogue?: string;
+  file_driver_name?: string;
+  file_driver?: string;
+  link_driver?: string;
+  file_name1?: string; file_download1?: string; link_download1?: string;
+  file_name2?: string; file_download2?: string; link_download2?: string;
+  file_name3?: string; file_download3?: string; link_download3?: string;
+  file_name4?: string; file_download4?: string; link_download4?: string;
+  file_name5?: string; file_download5?: string; link_download5?: string;
+  file_name6?: string; file_download6?: string; link_download6?: string;
   id: string;
   sku: string; // Mã sản phẩm / SKU
   title: string;

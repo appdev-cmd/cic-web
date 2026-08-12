@@ -51,6 +51,7 @@ export interface NewsArticle {
   id: string;
   title: string;
   alias: string;
+  other_languages1?: string;
   category_id: string;
   summary: string;
   content: string;
@@ -59,6 +60,8 @@ export interface NewsArticle {
   image_caption?: string;
   video: string;
   tags: string[];
+  tawk_to?: string;
+  file_upload?: string;
   news_related: string[];
   products_related: string[];
   start_time: string;
