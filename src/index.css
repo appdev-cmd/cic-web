@@ -524,6 +524,28 @@ input[type="button"],
   outline-offset: 2px;
 }
 
+.cms-ckeditor .cms-rich-media-embed {
+  aspect-ratio: 16 / 9;
+  background: #0f172a;
+  display: block;
+  margin: 1rem auto;
+  max-width: 100%;
+  overflow: hidden;
+  width: min(100%, 560px);
+}
+
+.cms-ckeditor .cms-rich-media-embed iframe {
+  border: 0;
+  height: 100%;
+  pointer-events: none;
+  width: 100%;
+}
+
+.cms-ckeditor .cms-rich-media-embed.ck-widget_selected {
+  outline: 3px solid rgba(249, 115, 22, 0.45);
+  outline-offset: 3px;
+}
+
 .cms-rich-cta {
   background: #ea580c;
   color: white;

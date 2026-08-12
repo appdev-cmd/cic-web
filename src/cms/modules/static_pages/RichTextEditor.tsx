@@ -99,6 +99,75 @@ interface CmsReferenceAttributes extends Record<string, unknown> {
   description: string;
 }
 
+const YOUTUBE_EMBED_SOURCE = /^https:\/\/(?:www\.)?(?:youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)[A-Za-z0-9_-]+(?:\?[^\s"<>]*)?$/;
+const MEDIA_IFRAME_ATTRIBUTES = ['src', 'title', 'width', 'height', 'frameborder', 'allow', 'referrerpolicy', 'allowfullscreen'] as const;
+
+class CmsMediaEmbedPlugin extends Plugin {
+  static get requires() {
+    return [Widget] as const;
+  }
+
+  init() {
+    const editor = this.editor;
+
+    editor.model.schema.register('cmsMediaEmbed', {
+      inheritAllFrom: '$blockObject',
+      allowAttributes: [...MEDIA_IFRAME_ATTRIBUTES],
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'iframe',
+        attributes: { src: YOUTUBE_EMBED_SOURCE },
+      },
+      model: (viewElement, { writer }) => {
+        const attributes = Object.fromEntries(
+          MEDIA_IFRAME_ATTRIBUTES.flatMap((name) => {
+            const value = viewElement.getAttribute(name);
+            return value === undefined ? [] : [[name, value]];
+          }),
+        );
+        return writer.createElement('cmsMediaEmbed', attributes);
+      },
+      converterPriority: 'high',
+    });
+
+    editor.conversion.for('dataDowncast').elementToElement({
+      model: 'cmsMediaEmbed',
+      view: (modelElement, { writer }) => {
+        const attributes = Object.fromEntries(
+          MEDIA_IFRAME_ATTRIBUTES.flatMap((name) => {
+            const value = modelElement.getAttribute(name);
+            return value === undefined ? [] : [[name, String(value)]];
+          }),
+        );
+        return writer.createContainerElement('iframe', attributes);
+      },
+    });
+
+    editor.conversion.for('editingDowncast').elementToElement({
+      model: 'cmsMediaEmbed',
+      view: (modelElement, { writer }) => {
+        const src = String(modelElement.getAttribute('src') || '');
+        const title = String(modelElement.getAttribute('title') || 'YouTube video player');
+        const allow = String(modelElement.getAttribute('allow') || 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        const wrapper = writer.createContainerElement('figure', { class: 'cms-rich-media-embed' });
+        const iframe = writer.createRawElement('iframe', {
+          src,
+          title,
+          allow,
+          referrerpolicy: String(modelElement.getAttribute('referrerpolicy') || 'strict-origin-when-cross-origin'),
+          allowfullscreen: 'allowfullscreen',
+          frameborder: String(modelElement.getAttribute('frameborder') || '0'),
+          tabindex: '-1',
+        });
+        writer.insert(writer.createPositionAt(wrapper, 0), iframe);
+        return toWidget(wrapper, writer, { label: `Video: ${title}` });
+      },
+    });
+  }
+}
+
 class CmsReferencePlugin extends Plugin {
   static get requires() {
     return [Widget] as const;
@@ -179,7 +248,7 @@ const editorPlugins: PluginConstructor<Editor>[] = [
   List, ListProperties, Link, PasteFromOffice,
   Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageInsert, ImageResize, LinkImage, AutoImage,
   Table, TableToolbar, TableCaption, TableProperties, TableCellProperties, TableColumnResize,
-  MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin,
+  MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin, CmsMediaEmbedPlugin,
 ];
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, minHeight = '280px' }) => {
