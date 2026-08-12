@@ -22,6 +22,7 @@ import {
   Type,
   Underline,
   Undo2,
+  X,
 } from 'lucide-react';
 import { MOCK_CTAS } from '../customer_interaction/cta/mockData';
 import { MOCK_FORMS } from '../customer_interaction/forms/mockData';
@@ -66,6 +67,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [activeTab, setActiveTab] = useState<EditorTab>('visual');
   const [selectedCtaId, setSelectedCtaId] = useState('');
   const [selectedFormId, setSelectedFormId] = useState('');
+  const [previewFormId, setPreviewFormId] = useState<string | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const savedRangeRef = useRef<Range | null>(null);
 
@@ -95,6 +97,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const selection = window.getSelection();
     selection?.removeAllRanges();
     if (savedRangeRef.current) selection?.addRange(savedRangeRef.current);
+    else {
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      selection?.addRange(range);
+      savedRangeRef.current = range.cloneRange();
+    }
   };
 
   const runCommand = (command: string, commandValue?: string) => {
@@ -130,8 +139,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setSelectedCtaId('');
   };
 
-  const insertForm = () => {
-    const form = MOCK_FORMS.find((item) => item.id === selectedFormId);
+  const insertFormReference = (formId: string) => {
+    const form = MOCK_FORMS.find((item) => item.id === formId);
     if (!form) return;
     insertHtml(
       `<div contenteditable="false" data-cms-reference="form" data-form-id="${form.id}" class="cms-rich-reference cms-rich-form"><strong>${form.title}</strong><br><small>${form.adminName}</small></div><p><br></p>`,
@@ -139,8 +148,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setSelectedFormId('');
   };
 
+  const insertForm = () => insertFormReference(selectedFormId);
+
   const activeCtas = MOCK_CTAS.filter((cta) => cta.status === 'active');
   const activeForms = MOCK_FORMS.filter((form) => form.status === 'active');
+  const previewForm = activeForms.find((form) => form.id === previewFormId) || null;
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-2xs transition-all focus-within:border-orange-500 dark:border-slate-700 dark:bg-slate-900">
@@ -210,6 +222,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               <option value="">Chọn biểu mẫu từ module Biểu mẫu</option>
               {activeForms.map((form) => <option key={form.id} value={form.id}>{form.adminName} · {form.title}</option>)}
             </select>
+            <button type="button" disabled={!selectedFormId} onClick={() => setPreviewFormId(selectedFormId)} className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"><Eye className="h-3.5 w-3.5" />Xem form</button>
             <button type="button" disabled={!selectedFormId} onMouseDown={(e) => e.preventDefault()} onClick={insertForm} className="flex items-center gap-1 rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-40 dark:bg-slate-600"><FileInput className="h-3.5 w-3.5" />Chèn Form</button>
           </div>
         </div>
@@ -219,7 +232,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         {activeTab === 'visual' ? (
           <div ref={editorRef} contentEditable suppressContentEditableWarning role="textbox" aria-label="Nội dung soạn thảo" aria-multiline="true" data-placeholder="Nhập nội dung tại đây..." onInput={emitVisualValue} onBlur={emitVisualValue} style={{ minHeight }} className="cms-rich-editor prose max-w-none rounded-lg border border-dashed border-slate-200 bg-transparent p-3 text-sm leading-relaxed text-slate-900 outline-none focus:border-orange-400 dark:prose-invert dark:border-slate-700 dark:text-slate-100" />
         ) : activeTab === 'code' ? (
-          <textarea value={value} onChange={(e) => onChange(e.target.value)} style={{ minHeight }} aria-label="Mã HTML nội dung" className="w-full resize-y rounded-lg border border-slate-200 bg-slate-950 p-3 font-mono text-xs leading-relaxed text-emerald-300 outline-none focus:border-orange-500 dark:border-slate-700" />
+          <textarea value={value} onChange={(e) => onChange(e.target.value)} style={{ minHeight }} aria-label="Mã HTML nội dung" className="w-full resize-y rounded-lg border border-slate-300 bg-white p-3 font-mono text-xs leading-relaxed text-slate-800 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-orange-950" />
         ) : (
           <div style={{ minHeight }} className="prose max-w-none rounded-lg border border-dashed border-slate-200 bg-slate-50/50 p-3 text-sm leading-relaxed text-slate-800 dark:prose-invert dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-200" dangerouslySetInnerHTML={{ __html: value || '<p class="text-slate-400 italic">Chưa có nội dung để xem trước...</p>' }} />
         )}
@@ -229,6 +242,50 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <span>{value.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length} từ</span>
         <span className="flex items-center gap-1 font-sans font-medium text-emerald-600 dark:text-emerald-400"><Check className="h-3 w-3" />Đã đồng bộ nội dung</span>
       </div>
+
+      {previewForm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4" role="dialog" aria-modal="true" aria-labelledby="rich-form-preview-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setPreviewFormId(null); }}>
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-900">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Xem trước biểu mẫu · {previewForm.code}</p>
+                <h3 id="rich-form-preview-title" className="mt-1 text-base font-bold text-slate-900 dark:text-white">{previewForm.title}</h3>
+                {previewForm.description && <p className="mt-1 text-xs text-slate-500">{previewForm.description}</p>}
+              </div>
+              <button type="button" onClick={() => setPreviewFormId(null)} aria-label="Đóng xem form" className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4 p-5">
+              {[...previewForm.fields].filter((field) => field.fieldType !== 'hidden').sort((a, b) => a.position - b.position).map((field) => (
+                <div key={field.id}>
+                  {field.fieldType === 'checkbox' || field.fieldType === 'consent' ? (
+                    <label className="flex items-start gap-2 text-xs font-medium text-slate-700 dark:text-slate-200"><input type="checkbox" disabled className="mt-0.5 rounded border-slate-300" /><span>{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</span></label>
+                  ) : (
+                    <>
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-200">{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</label>
+                      {field.fieldType === 'textarea' ? (
+                        <textarea disabled rows={3} placeholder={field.placeholder} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800" />
+                      ) : field.fieldType === 'select' ? (
+                        <select disabled className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800"><option>{field.placeholder || 'Chọn một giá trị'}</option>{field.options?.map((option) => <option key={option.value}>{option.label}</option>)}</select>
+                      ) : field.fieldType === 'radio' ? (
+                        <div className="space-y-1.5 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">{field.options?.map((option) => <label key={option.value} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300"><input type="radio" disabled />{option.label}</label>)}</div>
+                      ) : (
+                        <input disabled type={field.fieldType === 'email' ? 'email' : field.fieldType === 'phone' ? 'tel' : field.fieldType === 'number' ? 'number' : field.fieldType === 'date' ? 'date' : field.fieldType === 'file_upload' ? 'file' : 'text'} placeholder={field.placeholder} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800" />
+                      )}
+                      {field.helpText && <p className="mt-1 text-[10px] text-slate-500">{field.helpText}</p>}
+                    </>
+                  )}
+                </div>
+              ))}
+              <button type="button" disabled className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-xs font-bold text-white">{previewForm.submitConfig.submitButtonText || 'Gửi thông tin'}</button>
+              <p className="text-center text-[10px] text-slate-400">Đây là bản xem trước. Dữ liệu sẽ không được gửi.</p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-3 dark:border-slate-700">
+              <button type="button" onClick={() => setPreviewFormId(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 dark:border-slate-600 dark:text-slate-200">Đóng</button>
+              <button type="button" onClick={() => { insertFormReference(previewForm.id); setPreviewFormId(null); }} className="rounded-lg bg-orange-600 px-3 py-2 text-xs font-semibold text-white">Chèn biểu mẫu này</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
