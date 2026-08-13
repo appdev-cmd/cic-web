@@ -57,8 +57,8 @@ interface ServicesManagerProps {
 }
 
 export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocale, data }) => {
-  const [services, setServices] = useState<ServiceItem[]>(data?.services ?? []);
-  const [activeTab, setActiveTab] = useState<'all' | 'my_tasks' | 'pending' | 'active' | 'low_quality' | 'trash'>('all');
+  const [services, setServices] = useState<ServiceItem[]>(() => (data?.services ?? []).map((item) => ({ ...item, editorial_status: item.editorial_status === 'published' ? 'published' : 'draft' })));
+  const [activeTab, setActiveTab] = useState<'all' | 'my_tasks' | 'active' | 'low_quality' | 'trash'>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Search & Filter state
@@ -102,8 +102,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
     setFilterSavedView(viewKey);
     if (viewKey === 'view_active') {
       setFilterServiceStatus('active');
-    } else if (viewKey === 'view_pending') {
-      setFilterEditorialStatus('pending');
     } else {
       setFilterEditorialStatus('all');
       setFilterServiceStatus('all');
@@ -122,7 +120,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
       // Tab filters
       if (activeTab === 'my_tasks' && item.owner_id !== 'usr_002') return false;
-      if (activeTab === 'pending' && item.editorial_status !== 'pending') return false;
       if (activeTab === 'active' && item.service_status !== 'active') return false;
       if (activeTab === 'low_quality' && item.quality_score >= 70) return false;
 
@@ -314,7 +311,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         {[
           { id: 'all', label: 'Tất cả dịch vụ', count: services.filter((s) => !s.is_deleted).length },
           { id: 'my_tasks', label: 'Việc của tôi', count: services.filter((s) => !s.is_deleted && s.owner_id === 'usr_002').length },
-          { id: 'pending', label: 'Hàng chờ review', count: services.filter((s) => !s.is_deleted && s.editorial_status === 'pending').length },
           { id: 'active', label: 'Đang hoạt động (Active)', count: services.filter((s) => !s.is_deleted && s.service_status === 'active').length },
           { id: 'low_quality', label: 'Chất lượng nội dung thấp', count: services.filter((s) => !s.is_deleted && s.quality_score < 70).length },
           { id: 'trash', label: 'Thùng rác', count: services.filter((s) => s.is_deleted).length },
@@ -368,8 +364,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
           >
             <option value="all">Tất cả Editorial Status</option>
             <option value="draft">Draft (Nháp)</option>
-            <option value="pending">Pending (Chờ duyệt)</option>
-            <option value="approved">Approved (Đã duyệt)</option>
             <option value="published">Published (Đã xuất bản)</option>
           </select>
 
@@ -393,7 +387,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
           >
             <option value="all">Saved View: Mặc định</option>
             <option value="view_active">Saved View: Dịch vụ Active</option>
-            <option value="view_pending">Saved View: Chờ review</option>
           </select>
         </div>
 
@@ -524,10 +517,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             item.editorial_status === 'published'
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                              : item.editorial_status === 'pending'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                              : item.editorial_status === 'approved'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
                               : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                           }`}
                         >

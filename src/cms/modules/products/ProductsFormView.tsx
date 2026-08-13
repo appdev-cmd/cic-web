@@ -13,7 +13,7 @@ interface ProductsFormViewProps {
   categories: ProductCategory[];
   brands: ProductBrand[];
   owners: ProductOwnerOption[];
-  onSave: (productData: Partial<ProductItem>, actionType: 'draft' | 'submit' | 'approve' | 'publish') => void;
+  onSave: (productData: Partial<ProductItem>, actionType: 'draft' | 'publish') => void;
   onCancel: () => void;
   onOpenPreview: (productData: ProductItem) => void;
 }

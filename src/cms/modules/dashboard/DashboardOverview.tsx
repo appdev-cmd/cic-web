@@ -77,7 +77,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   // Lists state
   const contacts: ContactMessage[] = data?.contacts ?? [];
   const registrations: ProductRegistration[] = data?.productRegistrations ?? [];
-  const pendingItems: PendingContent[] = data?.pendingContents ?? [];
+  const pendingItems: PendingContent[] = (data?.pendingContents ?? []).map((item) => ({
+    ...item,
+    status: item.status === 'published' ? 'published' : 'draft',
+  }));
   const activityLogs: ActivityLog[] = data?.activityLogs ?? [];
 
   const showToast = (msg: string) => {
@@ -189,10 +192,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               .map((item) => ({
                 id: item.id,
                 title: item.title,
-                meta: `${item.author_name} · ${item.status === 'pending' ? 'Chờ duyệt' : 'Bản nháp'}`,
+                meta: `${item.author_name} · Bản nháp`,
                 time: item.created_time,
                 icon: item.content_type === 'product' ? Package : item.content_type === 'news' ? Newspaper : FileText,
-                tone: item.status === 'pending' ? 'amber' : 'slate',
+                tone: 'slate',
                 path: item.content_type === 'product' ? '/cms/products' : item.content_type === 'news' ? '/cms/news' : '/cms/static-pages',
                 moduleName: item.content_type === 'product' ? 'Sản phẩm' : item.content_type === 'news' ? 'Tin tức' : 'Trang nội dung',
               })),
@@ -234,7 +237,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="rounded-xl bg-orange-500/10 p-2 text-orange-600"><Clock className="h-4 w-4" /></div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Công việc hiện tại</h3>
-                    <p className="text-[11px] text-slate-400">Bản nháp, nội dung chờ duyệt và yêu cầu khách hàng cần tiếp tục xử lý</p>
+                    <p className="text-[11px] text-slate-400">Bản nháp và yêu cầu khách hàng cần tiếp tục xử lý</p>
                   </div>
                 </div>
                 <span className="shrink-0 rounded-lg bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-700 dark:bg-orange-950/30 dark:text-orange-300">{currentWork.length} việc gần nhất</span>

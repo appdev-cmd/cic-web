@@ -144,12 +144,7 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:ring-2 focus:ring-orange-500/50 outline-none"
               >
                 <option value="draft">Bản nháp (Draft)</option>
-                <option value="pending">Chờ duyệt (Pending)</option>
-                <option value="returned">Bị trả lại (Returned)</option>
-                <option value="approved">Đã duyệt (Approved)</option>
-                <option value="scheduled">Lên lịch (Scheduled)</option>
                 <option value="published">Đã xuất bản (Published)</option>
-                <option value="archived">Lưu trữ (Archived)</option>
               </select>
             </div>
           </div>

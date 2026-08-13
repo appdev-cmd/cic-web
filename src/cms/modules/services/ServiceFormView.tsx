@@ -13,7 +13,6 @@ import {
   Clock,
   AlertTriangle,
   Sparkles,
-  BadgeCheck,
 } from 'lucide-react';
 import {
   ServiceItem,
@@ -83,28 +82,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     showToast('Đã lưu bản nháp dịch vụ thành công!');
   };
 
-  const handleSubmitReview = () => {
-    const updated: ServiceItem = {
-      ...formData,
-      editorial_status: 'pending',
-      updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    };
-    onSave(updated);
-    setIsDirty(false);
-    showToast('Đã gửi dịch vụ vào hàng chờ phê duyệt (Pending Review)!');
-  };
-
-  const handleApprove = () => {
-    const updated: ServiceItem = {
-      ...formData,
-      editorial_status: 'approved',
-      updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    };
-    onSave(updated);
-    setIsDirty(false);
-    showToast('Đã phê duyệt nội dung dịch vụ!');
-  };
-
   const handlePublishAndActivate = () => {
     const updated: ServiceItem = {
       ...formData,
@@ -162,8 +139,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                   formData.editorial_status === 'published'
                     ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                    : formData.editorial_status === 'pending'
-                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
                     : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                 }`}
               >
@@ -204,24 +179,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
           >
             <Save className="w-3.5 h-3.5" /> Lưu nháp
           </button>
-
-          {formData.editorial_status === 'draft' && (
-            <button
-              onClick={handleSubmitReview}
-              className="hidden px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl items-center gap-1.5 transition-colors shadow-2xs"
-            >
-              <Send className="w-3.5 h-3.5" /> Gửi Review
-            </button>
-          )}
-
-          {formData.editorial_status === 'pending' && (
-            <button
-              onClick={handleApprove}
-              className="hidden px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl items-center gap-1.5 transition-colors shadow-2xs"
-            >
-              <BadgeCheck className="w-3.5 h-3.5" /> Phê duyệt
-            </button>
-          )}
 
           <button
             onClick={handlePublishAndActivate}
@@ -468,8 +425,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-bold"
                 >
                   <option value="draft">Draft (Nháp)</option>
-                  <option value="pending">Pending Review (Chờ duyệt)</option>
-                  <option value="approved">Approved (Đã duyệt)</option>
                   <option value="published">Published (Đã xuất bản)</option>
                 </select>
               </div>

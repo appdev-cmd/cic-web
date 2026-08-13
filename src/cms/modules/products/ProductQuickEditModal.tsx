@@ -229,11 +229,7 @@ export const ProductQuickEditModal: React.FC<ProductQuickEditModalProps> = ({
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer font-bold"
               >
                 <option value="draft">Bản nháp</option>
-                <option value="pending_review">Chờ duyệt (Pending)</option>
-                <option value="approved">Đã duyệt (Approved)</option>
                 <option value="published">Xuất bản (Published)</option>
-                <option value="rejected">Bị trả lại (Rejected)</option>
-                <option value="archived">Lưu trữ</option>
               </select>
             </div>
 

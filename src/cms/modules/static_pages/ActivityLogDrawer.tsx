@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Activity, User, Clock, FileText, CheckCircle2, RotateCcw, AlertCircle, Send } from 'lucide-react';
+import { X, Activity, User, Clock, FileText, CheckCircle2, RotateCcw } from 'lucide-react';
 import { StaticPage } from './types';
 
 interface ActivityLogDrawerProps {
@@ -11,7 +11,7 @@ interface ActivityLogDrawerProps {
 export const ActivityLogDrawer: React.FC<ActivityLogDrawerProps> = ({ isOpen, page, onClose }) => {
   if (!isOpen || !page) return null;
 
-  const activities = page.activities || [
+  const activities = (page.activities || [
     {
       id: 'act1',
       timestamp: page.created_time,
@@ -22,11 +22,15 @@ export const ActivityLogDrawer: React.FC<ActivityLogDrawerProps> = ({ isOpen, pa
     {
       id: 'act2',
       timestamp: page.updated_time || page.created_time,
-      actor_name: page.reviewer?.name || page.author?.name || 'Hệ thống',
+      actor_name: page.author?.name || 'Hệ thống',
       action_type: page.published ? ('publish' as const) : ('update' as const),
-      details: page.published ? 'Duyệt và xuất bản trang' : 'Cập nhật nội dung bản thảo',
+      details: page.published ? 'Xuất bản trang' : 'Cập nhật nội dung bản thảo',
     },
-  ];
+  ]).map((activity) => ({
+    ...activity,
+    action_type: activity.action_type === 'approve' ? 'publish' : activity.action_type === 'submit' || activity.action_type === 'return' ? 'update' : activity.action_type,
+    details: /duyệt|review|phê duyệt|trả lại/i.test(activity.details) ? 'Nội dung trang đã được cập nhật' : activity.details,
+  }));
 
   const getActionBadge = (type: string) => {
     switch (type) {
@@ -34,13 +38,8 @@ export const ActivityLogDrawer: React.FC<ActivityLogDrawerProps> = ({ isOpen, pa
         return <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-[10px] rounded flex items-center gap-1"><FileText className="w-3 h-3" /> Tạo mới</span>;
       case 'update':
         return <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold text-[10px] rounded flex items-center gap-1"><Clock className="w-3 h-3" /> Cập nhật</span>;
-      case 'submit':
-        return <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-[10px] rounded flex items-center gap-1"><Send className="w-3 h-3" /> Gửi duyệt</span>;
-      case 'approve':
       case 'publish':
         return <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] rounded flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Xuất bản</span>;
-      case 'return':
-        return <span className="px-2 py-0.5 bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold text-[10px] rounded flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Trả về</span>;
       default:
         return <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 text-[10px] rounded">{type}</span>;
     }

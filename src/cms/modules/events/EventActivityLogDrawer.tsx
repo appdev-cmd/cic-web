@@ -55,12 +55,6 @@ export const EventActivityLogDrawer: React.FC<EventActivityLogDrawerProps> = ({
     switch (status) {
       case 'published':
         return <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 font-bold text-[10px] rounded">Xuất bản</span>;
-      case 'approved':
-        return <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 font-bold text-[10px] rounded">Đã duyệt</span>;
-      case 'pending_review':
-        return <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 font-bold text-[10px] rounded">Chờ duyệt</span>;
-      case 'rejected':
-        return <span className="px-2 py-0.5 bg-red-500/10 text-red-600 font-bold text-[10px] rounded">Trả lại</span>;
       case 'archived':
         return <span className="px-2 py-0.5 bg-slate-500/10 text-slate-600 font-bold text-[10px] rounded">Lưu trữ</span>;
       default:

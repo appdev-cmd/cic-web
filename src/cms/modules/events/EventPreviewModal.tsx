@@ -40,12 +40,6 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
     switch (status) {
       case 'published':
         return <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs rounded-lg border border-emerald-500/20">Đã xuất bản</span>;
-      case 'approved':
-        return <span className="px-2.5 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-xs rounded-lg border border-blue-500/20">Đã duyệt</span>;
-      case 'pending_review':
-        return <span className="px-2.5 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-xs rounded-lg border border-amber-500/20">Chờ duyệt</span>;
-      case 'rejected':
-        return <span className="px-2.5 py-1 bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-xs rounded-lg border border-red-500/20">Bị trả lại</span>;
       case 'archived':
         return <span className="px-2.5 py-1 bg-slate-500/10 text-slate-600 dark:text-slate-400 font-bold text-xs rounded-lg border border-slate-500/20">Lưu trữ</span>;
       default:

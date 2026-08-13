@@ -174,10 +174,7 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
                   className="w-full px-3 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold rounded-lg border border-slate-300 dark:border-slate-700 focus:outline-none cursor-pointer"
                 >
                   <option value="draft">Bản nháp (Draft)</option>
-                  <option value="pending_review">Chờ duyệt (Pending Review)</option>
-                  <option value="approved">Đã duyệt (Approved)</option>
                   <option value="published">Đã xuất bản (Published)</option>
-                  <option value="rejected">Bị trả lại (Rejected)</option>
                   <option value="archived">Lưu trữ (Archived)</option>
                 </select>
               </div>

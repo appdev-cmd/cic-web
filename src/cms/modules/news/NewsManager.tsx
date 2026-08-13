@@ -49,7 +49,7 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsListFooter } from '../../components/ui/CmsPagination';
 import { NewsCategoryManager } from './NewsCategoryManager';
 
-type ViewScopeTab = 'all' | 'my_work' | 'pending' | 'scheduled' | 'trash';
+type ViewScopeTab = 'all' | 'my_work' | 'trash';
 
 interface NewsManagerProps {
   workspaceLocale: CmsLocale;
@@ -58,7 +58,20 @@ interface NewsManagerProps {
 
 export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data }) => {
   // Articles State
-  const [articles, setArticles] = useState<NewsArticle[]>(data?.articles ?? []);
+  const [articles, setArticles] = useState<NewsArticle[]>(() =>
+    (data?.articles ?? []).map((item) => ({
+      ...item,
+      workflow_status: item.published ? 'published' : 'draft',
+      reviewer: undefined,
+      quality_warnings: item.quality_warnings?.filter((warning) => !/duyệt|trả lại/i.test(warning)),
+      versions: item.versions?.map((version) => ({ ...version, note: /duyệt|review/i.test(version.note) ? 'Cập nhật phiên bản nội dung' : version.note })),
+      activity_logs: item.activity_logs?.map((log) => ({
+        ...log,
+        action: /duyệt|review|trả lại/i.test(log.action) ? 'Cập nhật nội dung' : log.action,
+        details: log.details && /duyệt|review|trả lại/i.test(log.details) ? 'Nội dung đã được cập nhật' : log.details,
+      })),
+    })),
+  );
   const [categories, setCategories] = useState<NewsCategory[]>(data?.categories ?? []);
 
   // View Mode: 'list' or 'form'
@@ -67,7 +80,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
 
   // Scope Tabs
   const [activeScopeTab, setActiveScopeTab] = useState<ViewScopeTab>('all');
-  const [myWorkSubFilter, setMyWorkSubFilter] = useState<'all' | 'draft' | 'returned' | 'assigned'>('all');
+  const [myWorkSubFilter, setMyWorkSubFilter] = useState<'all' | 'draft' | 'assigned'>('all');
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -120,16 +133,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         const isMyArticle = item.author?.name?.includes('Nam') || item.assignee?.name?.includes('Nam');
         if (!isMyArticle) return false;
         if (myWorkSubFilter === 'draft') return item.workflow_status === 'draft';
-        if (myWorkSubFilter === 'returned') return item.workflow_status === 'returned';
         return true;
-      }
-
-      if (activeScopeTab === 'pending') {
-        return item.workflow_status === 'pending';
-      }
-
-      if (activeScopeTab === 'scheduled') {
-        return item.workflow_status === 'scheduled';
       }
 
       return true;
@@ -156,10 +160,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
       let matchSavedView = true;
       if (activeSavedView === 'mine') {
         matchSavedView = Boolean(item.author?.name?.includes('Nam'));
-      } else if (activeSavedView === 'pending') {
-        matchSavedView = item.workflow_status === 'pending';
-      } else if (activeSavedView === 'scheduled') {
-        matchSavedView = item.workflow_status === 'scheduled';
       }
 
       return matchSearch && matchCat && matchWorkflow && matchSavedView;
@@ -343,7 +343,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
           <CmsPageHeader
             icon={<Newspaper />}
             title="Tin tức"
-            description="Tạo, biên tập, duyệt, lên lịch xuất bản và lưu trữ bài viết công khai."
+            description="Tạo, biên tập, lưu nháp và xuất bản bài viết công khai."
             meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{articles.filter((article) => !article.in_trash).length} tin bài</span>}
             actions={<>
               <CmsButton onClick={openCategories} variant="secondary" size="sm" leadingIcon={<FolderTree />}>Quản lý danh mục</CmsButton>
@@ -363,8 +363,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
               items={[
                 { id: 'all', label: 'Tất cả bài viết', count: articles.filter((a) => !a.in_trash).length },
                 { id: 'my_work', label: 'Việc của tôi', count: articles.filter((a) => !a.in_trash && (a.author?.name?.includes('Minh') || a.author?.name?.includes('Editor'))).length },
-                { id: 'pending', label: 'Hàng chờ duyệt', count: articles.filter((a) => !a.in_trash && a.workflow_status === 'pending').length },
-                { id: 'scheduled', label: 'Lịch xuất bản', count: articles.filter((a) => !a.in_trash && a.workflow_status === 'scheduled').length },
                 { id: 'trash', label: 'Lưu trữ & thùng rác', count: articles.filter((a) => a.in_trash).length },
               ]}
             />
@@ -393,26 +391,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
               }`}
             >
               Bài của tôi
-            </button>
-            <button
-              onClick={() => setActiveSavedView(activeSavedView === 'pending' ? null : 'pending')}
-              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
-                activeSavedView === 'pending'
-                  ? 'bg-amber-600 text-white border-amber-600'
-                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-amber-500'
-              }`}
-            >
-              Chờ phê duyệt
-            </button>
-            <button
-              onClick={() => setActiveSavedView(activeSavedView === 'scheduled' ? null : 'scheduled')}
-              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
-                activeSavedView === 'scheduled'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-blue-500'
-              }`}
-            >
-              Đã lên lịch xuất bản
             </button>
           </div>
 
@@ -453,12 +431,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                 >
                   <option value="ALL">-- Tất cả Trạng thái Quy trình --</option>
                   <option value="draft">Bản nháp (Draft)</option>
-                  <option value="pending">Chờ duyệt (Pending)</option>
-                  <option value="returned">Bị trả lại (Returned)</option>
-                  <option value="approved">Đã duyệt (Approved)</option>
-                  <option value="scheduled">Lên lịch (Scheduled)</option>
                   <option value="published">Đã xuất bản (Published)</option>
-                  <option value="archived">Lưu trữ (Archived)</option>
                 </select>
               </div>
             </div>
@@ -591,9 +564,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                             <td className={`p-3 text-center ${getRowPadding()}`}>
                               <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${
                                 art.workflow_status === 'published' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' :
-                                art.workflow_status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400' :
-                                art.workflow_status === 'returned' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' :
-                                art.workflow_status === 'scheduled' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400' :
                                 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                               }`}>
                                 {art.workflow_status || 'draft'}

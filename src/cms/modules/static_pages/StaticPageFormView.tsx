@@ -17,7 +17,6 @@ import {
   BookOpen,
   Sliders,
   AlignLeft,
-  Send,
   CheckCircle2,
   AlertCircle,
   History,
@@ -128,7 +127,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
   );
   const [published, setPublished] = useState(pageToEdit?.published ?? false);
   const [workingVersionNumber] = useState(pageToEdit?.working_version_number || 1);
-  const [returnComment, setReturnComment] = useState(pageToEdit?.return_comment || '');
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
 
   // Drawers & Modals
@@ -205,7 +203,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
       return;
     }
 
-    const isPublished = targetStatus === 'published' || targetStatus === 'approved';
+    const isPublished = targetStatus === 'published';
 
     onSave({
       title: title.trim(),
@@ -322,17 +320,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
               <span>Lưu Nháp</span>
             </button>
 
-            {/* Submit for Review */}
-            <button
-              type="button"
-              onClick={() => handleSaveForm('pending')}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-600/20 transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <Send className="w-4 h-4" />
-              <span>Gửi duyệt</span>
-            </button>
-
-            {/* Approve & Publish */}
+            {/* Publish */}
             <button
               type="button"
               onClick={() => handleSaveForm('published')}
@@ -416,7 +404,7 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
-            <UserCheck className="w-4 h-4" /> 6. Quy trình & Duyệt
+            <UserCheck className="w-4 h-4" /> 6. Xuất bản
           </button>
         </div>
 
@@ -894,19 +882,19 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
             </div>
           )}
 
-          {/* TAB 6: XUẤT BẢN & QUY TRÌNH */}
+          {/* TAB 6: XUẤT BẢN */}
           {activeTab === 'workflow' && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xs">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-orange-600" />
-                <span>Quy trình duyệt và phân công</span>
+                <span>Trạng thái xuất bản</span>
               </h3>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Trạng thái Quy trình (Workflow Status)
+                      Trạng thái nội dung
                     </label>
                     <select
                       value={workflowStatus}
@@ -914,9 +902,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
                       className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700"
                     >
                       <option value="draft">Bản nháp (Draft)</option>
-                      <option value="pending">Hàng chờ duyệt (Pending Review)</option>
-                      <option value="returned">Yêu cầu sửa (Returned)</option>
-                      <option value="approved">Đã duyệt (Approved)</option>
                       <option value="published">Đã xuất bản (Published)</option>
                       <option value="archived">Lưu trữ (Archived)</option>
                     </select>
@@ -935,16 +920,6 @@ export const StaticPageFormView: React.FC<StaticPageFormViewProps> = ({
                   </div>
                 </div>
 
-                {workflowStatus === 'returned' && (
-                  <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl space-y-2">
-                    <label className="text-xs font-bold text-red-800 dark:text-red-300 flex items-center gap-1.5">
-                      <AlertCircle className="w-4 h-4" /> Ghi chú phản hồi từ Người duyệt (Return Comment)
-                    </label>
-                    <p className="text-xs text-red-700 dark:text-red-300 font-medium italic">
-                      "{returnComment || pageToEdit?.return_comment || 'Cần bổ sung chi tiết theo yêu cầu.'}"
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           )}

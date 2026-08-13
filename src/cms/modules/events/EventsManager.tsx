@@ -62,7 +62,19 @@ interface EventsManagerProps { workspaceLocale: CmsLocale; data?: EventsModuleDa
 
 export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, data }) => {
   // Main Data States
-  const [events, setEvents] = useState<EventItem[]>(data?.events ?? []);
+  const [events, setEvents] = useState<EventItem[]>(() =>
+    (data?.events ?? []).map((item) => ({
+      ...item,
+      editorial_status: item.editorial_status === 'published' ? 'published' : 'draft',
+      activity_logs: item.activity_logs?.map((log) => ({
+        ...log,
+        previous_editorial_status: log.previous_editorial_status === 'published' ? 'published' : 'draft',
+        new_editorial_status: log.new_editorial_status === 'published' ? 'published' : 'draft',
+        action: /duyệt|review|phê duyệt|trả lại/i.test(log.action) ? 'Cập nhật nội dung' : log.action,
+        note: log.note && /duyệt|review|phê duyệt|trả lại/i.test(log.note) ? 'Nội dung sự kiện đã được cập nhật.' : log.note,
+      })),
+    })),
+  );
   const [categories] = useState<EventCategory[]>(data?.categories ?? []);
 
   // Form View & Modal Mode States
@@ -298,12 +310,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     switch (status) {
       case 'published':
         return <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] rounded-lg border border-emerald-500/20">Xuất bản</span>;
-      case 'approved':
-        return <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-[10px] rounded-lg border border-blue-500/20">Đã duyệt</span>;
-      case 'pending_review':
-        return <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[10px] rounded-lg border border-amber-500/20">Chờ duyệt</span>;
-      case 'rejected':
-        return <span className="px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-[10px] rounded-lg border border-red-500/20">Bị trả lại</span>;
       case 'archived':
         return <span className="px-2 py-0.5 bg-slate-500/10 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded-lg border border-slate-500/20">Lưu trữ</span>;
       default:
@@ -462,10 +468,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             >
               <option value="all">TT Biên tập: Tất cả</option>
               <option value="draft">Bản nháp</option>
-              <option value="pending_review">Chờ duyệt</option>
-              <option value="approved">Đã duyệt</option>
               <option value="published">Đã xuất bản</option>
-              <option value="rejected">Bị trả lại</option>
               <option value="archived">Lưu trữ</option>
             </select>
           </div>

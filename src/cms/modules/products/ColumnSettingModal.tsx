@@ -40,7 +40,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'category', label: 'Danh mục & Loại sản phẩm', desc: 'Phân loại catalog' },
     { key: 'brand', label: 'Hãng sản xuất', desc: 'Thương hiệu / Đối tác' },
     { key: 'owner', label: 'Người phụ trách', desc: 'Chuyên viên quản lý sản phẩm' },
-    { key: 'editorial_status', label: 'Trạng thái biên tập', desc: 'Bản nháp, chờ duyệt, đã duyệt hoặc đã xuất bản' },
+    { key: 'editorial_status', label: 'Trạng thái nội dung', desc: 'Bản nháp hoặc đã xuất bản' },
     { key: 'catalog_status', label: 'Trạng thái kinh doanh', desc: 'Đang kinh doanh, ngừng kinh doanh hoặc lưu trữ' },
     { key: 'completeness', label: 'Điểm hoàn thiện (%)', desc: 'Completeness checklist score' },
     { key: 'updated_time', label: 'Thời gian cập nhật', desc: 'Người sửa & thời điểm gần nhất' },

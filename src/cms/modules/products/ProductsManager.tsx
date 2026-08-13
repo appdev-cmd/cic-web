@@ -55,7 +55,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
-type SystemViewTab = 'all' | 'my' | 'pending' | 'low_quality' | 'active' | 'archived';
+type SystemViewTab = 'all' | 'my' | 'low_quality' | 'active' | 'archived';
 
 interface ProductsManagerProps {
   workspaceLocale: CmsLocale;
@@ -64,11 +64,17 @@ interface ProductsManagerProps {
 
 export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocale, data }) => {
   // Main Products List State
-  const [products, setProducts] = useState<ProductItem[]>(data?.products ?? []);
+  const [products, setProducts] = useState<ProductItem[]>(() => (data?.products ?? []).map((item) => ({ ...item, editorial_status: item.editorial_status === 'published' ? 'published' : 'draft' })));
   const [categories] = useState<ProductCategory[]>(data?.categories ?? []);
   const [brands] = useState<ProductBrand[]>(data?.brands ?? []);
   const [owners] = useState(data?.owners ?? []);
-  const [activityLogs] = useState<ProductActivityLog[]>(data?.activityLogs ?? []);
+  const [activityLogs] = useState<ProductActivityLog[]>(() =>
+    (data?.activityLogs ?? []).map((log) => ({
+      ...log,
+      action: log.action === 'review_submit' || log.action === 'approve' || log.action === 'reject' ? 'update' : log.action,
+      details: /duyệt|review|phê duyệt|trả lại/i.test(log.details) ? 'Đã cập nhật dữ liệu sản phẩm.' : log.details,
+    })),
+  );
 
   // Current User context (mock current logged in user)
   const currentUserId = data?.currentUserId;
@@ -129,7 +135,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
     return products.filter((p) => {
       // System View Tab
       if (activeTab === 'my' && p.owner_id !== currentUserId) return false;
-      if (activeTab === 'pending' && p.editorial_status !== 'pending_review') return false;
       if (activeTab === 'low_quality' && p.completeness_score >= 75) return false;
       if (activeTab === 'active' && p.catalog_status !== 'active') return false;
       if (activeTab === 'archived' && p.editorial_status !== 'archived' && p.catalog_status !== 'archived') return false;
@@ -325,7 +330,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
         items={[
           { id: 'all', label: 'Tất cả sản phẩm', count: products.filter((p) => p.editorial_status !== 'archived').length },
           { id: 'my', label: 'Việc của tôi', count: products.filter((p) => p.owner_id === currentUserId).length },
-          { id: 'pending', label: 'Chờ duyệt', count: products.filter((p) => p.editorial_status === 'pending_review').length },
           { id: 'low_quality', label: 'Chất lượng dưới 75%', count: products.filter((p) => p.completeness_score < 75).length },
           { id: 'active', label: 'Đang kinh doanh', count: products.filter((p) => p.catalog_status === 'active').length },
           { id: 'archived', label: 'Lưu trữ và thùng rác', count: products.filter((p) => p.editorial_status === 'archived' || p.catalog_status === 'archived').length },
@@ -393,10 +397,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
             >
               <option value="all">Tất cả Biên tập</option>
               <option value="draft">Bản nháp</option>
-              <option value="pending_review">Chờ duyệt (Pending)</option>
-              <option value="approved">Đã duyệt (Approved)</option>
               <option value="published">Đã xuất bản (Published)</option>
-              <option value="rejected">Bị trả lại (Rejected)</option>
             </select>
 
             {/* Column Setting Button */}
@@ -577,8 +578,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                             className={`px-2.5 py-1 text-[10px] font-bold rounded-full border uppercase tracking-wider ${
                               p.editorial_status === 'published'
                                 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : p.editorial_status === 'pending_review'
-                                ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
                                 : p.editorial_status === 'draft'
                                 ? 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                                 : 'bg-red-500/10 text-red-600 border-red-500/20'
