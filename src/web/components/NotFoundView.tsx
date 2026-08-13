@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Home, Search, ShieldQuestion } from 'lucide-react';
+import { History, Home, Search, ShieldQuestion } from 'lucide-react';
 
 export interface NotFoundContent {
   title: string;
@@ -67,7 +67,6 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
               >
                 <Home className="h-4 w-4" />
                 {value.ctaLabel}
-                <ArrowRight className="h-4 w-4" />
               </button>
               {!embedded && (
                 <button
@@ -75,7 +74,7 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
                   onClick={onGoBack || (() => window.history.back())}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <History className="h-4 w-4" />
                   Quay lại trang trước
                 </button>
               )}
@@ -84,7 +83,7 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
             {!embedded && (
               <p className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400 lg:justify-start">
                 <Search className="h-3.5 w-3.5" />
-                Kiểm tra lại đường dẫn hoặc sử dụng menu phía trên để tiếp tục.
+                Bạn có thể kiểm tra lại đường dẫn hoặc trở về Trang chủ để tiếp tục.
               </p>
             )}
           </div>
