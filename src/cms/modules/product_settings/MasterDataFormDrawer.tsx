@@ -668,7 +668,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         </form>
 
         {/* Drawer Footer */}
-        <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+        {presentation !== 'page' && <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
           <button
             type="button"
             onClick={onClose}
@@ -685,7 +685,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
             <Save className="w-4 h-4" />
             <span>{isEdit ? 'Lưu thay đổi' : `Thêm ${typeLabels[targetType]}`}</span>
           </button>
-        </div>
+        </div>}
 
       </div>
     </div>
