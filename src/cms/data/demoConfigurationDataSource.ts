@@ -14,6 +14,7 @@ const supportedGroupIds = new Set(['general', 'seo', 'company', 'footer_social',
 const excludedItemIds = new Set([
   'gen_brand_color',
   'gen_default_lang',
+  'gen_tagline',
   'measure_tiktok_pixel',
   'measure_linkedin',
   'measure_clarity',

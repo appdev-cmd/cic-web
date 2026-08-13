@@ -20,7 +20,7 @@ Luồng nội dung: `Lưu nháp → Xem trước → Xuất bản`. Public websi
 
 ### Thương hiệu
 
-- Tên website, đuôi tiêu đề, slogan.
+- Tên website và đuôi tiêu đề.
 - Logo nền sáng, logo nền tối, favicon và ảnh chia sẻ mặc định.
 
 Màu sắc, font, spacing và layout thuộc design system trong code.
@@ -62,7 +62,7 @@ Chỉ lưu mã định danh theo schema, không lưu script. TikTok Pixel, Linke
 
 ## Các trường đã loại khỏi CMS mới
 
-- Màu thương hiệu và ngôn ngữ mặc định.
+- Slogan, màu thương hiệu và ngôn ngữ mặc định.
 - Media/watermark/fallback asset không có consumer xác nhận.
 - Gemini, Zalo ZNS, VNPay và tích hợp chưa có backend thật.
 - SMTP và danh sách người nhận email; dữ liệu này thuộc module email/routing vận hành.

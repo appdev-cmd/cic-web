@@ -64,7 +64,7 @@ export const configGroupsMock: ConfigGroupDef[] = [
   {
     id: 'general',
     title: 'Thương hiệu',
-    description: 'Tên hệ thống, Logo, Favicon, Slogan, Tông màu chủ đạo & Tài nguyên thương hiệu',
+    description: 'Tên hệ thống, logo, favicon và tài nguyên thương hiệu đang được website sử dụng',
     iconName: 'Globe',
   },
   {
