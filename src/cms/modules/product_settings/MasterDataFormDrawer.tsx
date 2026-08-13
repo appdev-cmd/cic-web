@@ -55,9 +55,16 @@ function ProductAssignmentField({
   onChange: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const [query, setQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(50);
   const filtered = options.filter((product) => (product.name || product.id).toLowerCase().includes(query.toLowerCase()));
+  const visibleProducts = filtered.slice(0, visibleCount);
+  const visibleSelectedIds = selectedIds.slice(0, 6);
   const selectableIds = filtered.map((product) => product.id);
   const hasUnselectedVisibleProduct = selectableIds.some((id) => !selectedIds.includes(id));
+
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [query]);
 
   const handleSelectVisible = () => {
     onChange((current) => Array.from(new Set([...current, ...selectableIds])));
@@ -77,7 +84,7 @@ function ProductAssignmentField({
       </div>
       {selectedIds.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
-          {selectedIds.map((id) => {
+          {visibleSelectedIds.map((id) => {
             const product = options.find((option) => option.id === id);
             return (
               <span key={id} className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-orange-700">
@@ -88,6 +95,11 @@ function ProductAssignmentField({
               </span>
             );
           })}
+          {selectedIds.length > visibleSelectedIds.length && (
+            <span className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              +{selectedIds.length - visibleSelectedIds.length} sản phẩm khác
+            </span>
+          )}
         </div>
       )}
       <div className="relative mb-3">
@@ -95,11 +107,16 @@ function ProductAssignmentField({
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm sản phẩm..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
       </div>
       <div className="max-h-48 space-y-1 overflow-y-auto pr-1">
-        {filtered.map((product) => <label key={product.id} className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800">
+        {visibleProducts.map((product) => <label key={product.id} className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800">
           <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => onChange((current) => current.includes(product.id) ? current.filter((id) => id !== product.id) : [...current, product.id])} className="mt-0.5 h-4 w-4 rounded text-orange-600" />
           <span className="leading-5 text-slate-700 dark:text-slate-300">{product.name || product.id}</span>
         </label>)}
         {filtered.length === 0 && <div className="py-4 text-center text-[11px] text-slate-400">Không tìm thấy sản phẩm</div>}
+        {visibleCount < filtered.length && (
+          <button type="button" onClick={() => setVisibleCount((count) => count + 50)} className="w-full rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-bold text-slate-500 hover:border-orange-300 hover:text-orange-600 dark:border-slate-700">
+            Hiển thị thêm 50 sản phẩm ({filtered.length - visibleCount} còn lại)
+          </button>
+        )}
       </div>
     </fieldset>
   );
