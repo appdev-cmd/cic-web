@@ -1,12 +1,11 @@
 import React from 'react';
-import { AlertTriangle, Trash2, Archive, PauseCircle, X, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Trash2, PauseCircle, X, ShieldAlert } from 'lucide-react';
 import { AnyMasterItem } from './types';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   item: AnyMasterItem | null;
   onConfirmDeactivate: () => void;
-  onConfirmArchive: () => void;
   onConfirmPermanentDelete: () => void;
   onClose: () => void;
 }
@@ -15,7 +14,6 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   isOpen,
   item,
   onConfirmDeactivate,
-  onConfirmArchive,
   onConfirmPermanentDelete,
   onClose,
 }) => {
@@ -83,23 +81,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               </div>
             </button>
 
-            {/* Action 2: Archive */}
-            <button
-              onClick={onConfirmArchive}
-              className="w-full p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-left flex items-start gap-3 cursor-pointer transition-all"
-            >
-              <Archive className="w-5 h-5 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5" />
-              <div>
-                <strong className="font-bold text-slate-800 dark:text-slate-200 block">
-                  2. Chuyển vào lưu trữ
-                </strong>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Đưa vào danh mục thùng rác lưu trữ. Có thể phục hồi (Restore) lại bất cứ lúc nào.
-                </p>
-              </div>
-            </button>
-
-            {/* Action 3: Permanent Delete */}
+            {/* Action 2: Permanent Delete */}
             <button
               disabled={hasUsage}
               onClick={onConfirmPermanentDelete}
@@ -112,7 +94,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               <Trash2 className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
               <div>
                 <strong className="font-bold block">
-                  3. Xóa vĩnh viễn khỏi hệ thống (Delete)
+                  2. Xóa vĩnh viễn khỏi hệ thống (Delete)
                 </strong>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   {hasUsage

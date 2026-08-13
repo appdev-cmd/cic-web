@@ -48,7 +48,6 @@ import {
   MasterApplicationItem,
   MasterProductTypeItem,
   MasterSalesStaffItem,
-  MasterDataActivityLog,
 } from './types';
 import type { ProductSettingsGlobalData, ProductTaxonomyModuleData } from '../../data/CatalogDataSource';
 
@@ -62,7 +61,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
-type MainTab = 'overview' | 'taxonomy' | 'archived' | 'audit';
+type MainTab = 'overview' | 'taxonomy';
 
 interface ProductSettingsManagerProps {
   taxonomy?: ProductTaxonomyModuleData;
@@ -83,7 +82,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   const [applications, setApplications] = useState<MasterApplicationItem[]>(taxonomy?.applications ?? []);
   const [productTypes, setProductTypes] = useState<MasterProductTypeItem[]>(taxonomy?.productTypes ?? []);
   const [salesStaff, setSalesStaff] = useState<MasterSalesStaffItem[]>(globalData.salesStaff);
-  const [activityLogs] = useState<MasterDataActivityLog[]>(globalData.activityLogs);
 
   useEffect(() => {
     setCategories(taxonomy?.categories ?? []);
@@ -138,17 +136,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
   // Current Active List Array based on activeDataType
   const currentActiveList: AnyMasterItem[] = useMemo(() => {
-    if (activeMainTab === 'archived') {
-      const all: AnyMasterItem[] = [
-        ...categories,
-        ...brands,
-        ...applications,
-        ...productTypes,
-        ...salesStaff,
-      ];
-      return all.filter((i) => i.status === 'archived');
-    }
-
     let source: AnyMasterItem[] = [];
     if (activeDataType === 'categories') source = categories;
     else if (activeDataType === 'brands') source = brands;
@@ -157,7 +144,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     else if (activeDataType === 'sales_staff') source = salesStaff;
 
     return source.filter((i) => i.status !== 'archived');
-  }, [activeMainTab, activeDataType, categories, brands, applications, productTypes, salesStaff]);
+  }, [activeDataType, categories, brands, applications, productTypes, salesStaff]);
 
   // Filter Logic
   const filteredList = useMemo(() => {
@@ -243,20 +230,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     setSelectedIds([]);
   };
 
-  const handleBatchArchive = () => {
-    const updateStatus = (item: AnyMasterItem) =>
-      selectedIds.includes(item.id) ? { ...item, status: 'archived' as const } : item;
-
-    setCategories((prev) => prev.map((i) => updateStatus(i) as MasterCategoryItem));
-    setBrands((prev) => prev.map((i) => updateStatus(i) as MasterBrandItem));
-    setApplications((prev) => prev.map((i) => updateStatus(i) as MasterApplicationItem));
-    setProductTypes((prev) => prev.map((i) => updateStatus(i) as MasterProductTypeItem));
-    setSalesStaff((prev) => prev.map((i) => updateStatus(i) as MasterSalesStaffItem));
-
-    showToast(`Đã chuyển ${selectedIds.length} mục vào Thùng rác Lưu trữ!`);
-    setSelectedIds([]);
-  };
-
   if (isFormDrawerOpen && activeDataType === 'sales_staff') {
     return (
       <MasterDataFormDrawer
@@ -311,18 +284,25 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
         {[
           { id: 'overview', label: 'Tổng quan' },
-          { id: 'taxonomy', label: 'Dữ liệu thiết lập' },
-          { id: 'archived', label: 'Mục đã lưu trữ' },
-          { id: 'audit', label: 'Lịch sử thay đổi' },
+          { id: 'categories', label: 'Danh mục sản phẩm' },
+          { id: 'brands', label: 'Hãng sản xuất' },
+          { id: 'applications', label: 'Lĩnh vực ứng dụng' },
+          { id: 'product_types', label: 'Loại sản phẩm' },
+          { id: 'sales_staff', label: 'Người phụ trách kinh doanh' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => {
-              setActiveMainTab(tab.id as MainTab);
+              if (tab.id === 'overview') {
+                setActiveMainTab('overview');
+              } else {
+                setActiveMainTab('taxonomy');
+                setActiveDataType(tab.id as MasterDataType);
+              }
               setCurrentPage(1);
             }}
             className={`px-4 py-2.5 font-bold text-xs rounded-t-xl transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border-b-2 -mb-px ${
-              activeMainTab === tab.id
+              (tab.id === 'overview' && activeMainTab === 'overview') || (tab.id !== 'overview' && activeMainTab === 'taxonomy' && activeDataType === tab.id)
                 ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/20'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
@@ -405,37 +385,8 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       )}
 
       {/* DATA TABLES AREA */}
-      {['taxonomy', 'archived'].includes(activeMainTab) && (
+      {activeMainTab === 'taxonomy' && (
         <div className="space-y-4">
-          
-          {/* Sub-type Selectors Bar */}
-          {activeMainTab === 'taxonomy' && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-              {[
-                { type: 'categories', label: 'Danh mục sản phẩm' },
-                { type: 'brands', label: 'Hãng sản xuất' },
-                { type: 'applications', label: 'Lĩnh vực ứng dụng' },
-                { type: 'product_types', label: 'Loại sản phẩm' },
-                { type: 'sales_staff', label: 'Người phụ trách kinh doanh' },
-              ].map((sub) => (
-                <button
-                  key={sub.type}
-                  onClick={() => {
-                    setActiveDataType(sub.type as MasterDataType);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-3.5 py-2 font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap border ${
-                    activeDataType === sub.type
-                      ? 'bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-800 shadow-2xs ring-2 ring-orange-500/10'
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {sub.label}
-                </button>
-              ))}
-            </div>
-          )}
-
           {/* TOOLBAR & FILTERS */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -498,7 +449,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             {/* Bulk actions bar */}
             <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="mục thiết lập" onClear={() => setSelectedIds([])} actions={[
               { label: 'Ngừng sử dụng', onClick: handleBatchDeactivate, icon: Archive },
-              { label: 'Lưu trữ', onClick: handleBatchArchive, icon: Trash2, variant: 'danger' },
             ]} />
           </div>
 
@@ -720,52 +670,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         </div>
       )}
 
-      {/* 5. AUDIT TRAIL LOGS TAB */}
-      {activeMainTab === 'audit' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <div>
-              <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                Lịch sử thay đổi dữ liệu sản phẩm
-              </h2>
-              <p className="text-xs text-slate-500">Truy vết ai đã chỉnh sửa, activate hoặc deactivate danh mục master data</p>
-            </div>
-            <span className="px-2.5 py-1 bg-purple-500/10 text-purple-600 font-bold text-xs rounded-lg border border-purple-500/20">
-              {activityLogs.length} Bản ghi
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {activityLogs.map((log) => (
-              <div
-                key={log.id}
-                className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex items-start justify-between gap-4 text-xs"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 shrink-0 mt-0.5">
-                    {log.user_name.charAt(0)}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-white">{log.user_name}</span>
-                      <span className="px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-mono text-[9px] font-bold rounded uppercase">
-                        {log.action}
-                      </span>
-                      <span className="font-bold text-orange-600">{log.item_name}</span>
-                    </div>
-                    <p className="text-slate-600 dark:text-slate-300">{log.details}</p>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0 text-[10px] text-slate-400 font-mono">
-                  {log.timestamp}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* AUXILIARY DRAWERS & MODALS */}
       <UsageImpactDrawer
         isOpen={!!impactDrawerItem}
@@ -803,12 +707,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         onConfirmDeactivate={() => {
           if (itemToDelete) {
             showToast(`Đã ngừng sử dụng mục "${itemToDelete.name}".`);
-            setItemToDelete(null);
-          }
-        }}
-        onConfirmArchive={() => {
-          if (itemToDelete) {
-            showToast(`Đã chuyển mục "${itemToDelete.name}" sang Thùng rác Lưu trữ.`);
             setItemToDelete(null);
           }
         }}
