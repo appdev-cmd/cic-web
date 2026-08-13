@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FileText,
   Video,
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MediaAsset } from './types';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface MediaGridViewProps {
   assets: MediaAsset[];
@@ -37,6 +38,13 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
   onDeleteAsset,
   cardSize = 'md',
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const paginatedAssets = assets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(assets.length / pageSize));
+    if (currentPage > lastPage) setCurrentPage(lastPage);
+  }, [assets.length, currentPage, pageSize]);
   if (assets.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center">
@@ -61,8 +69,9 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
       : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
 
   return (
+    <div className="space-y-4">
     <div className={`grid ${gridColsClass} gap-4`}>
-      {assets.map((asset) => {
+      {paginatedAssets.map((asset) => {
         const isSelected = selectedAssetIds.includes(asset.id);
         const isDoc = asset.type === 'document';
         const isVid = asset.type === 'video';
@@ -206,6 +215,8 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
           </div>
         );
       })}
+    </div>
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"><CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={assets.length} itemLabel="tệp media" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} /></div>
     </div>
   );
 };

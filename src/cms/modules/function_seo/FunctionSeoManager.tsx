@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, ChevronDown, ChevronRight, CircleDot, Edit3, ExternalLink, FileText, FolderTree, Globe2, Search, SearchCheck, X } from 'lucide-react';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { functionSeoByLocale } from './mockData';
 import type { FunctionSeoRecord, SeoOwnerStatus } from './types';
 
@@ -15,7 +16,14 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale }) => {
   const [editing, setEditing] = useState<FunctionSeoRecord | null>(null);
   const [expandedIds, setExpandedIds] = useState(() => new Set(records.map((item) => item.id)));
   const [toast, setToast] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const filtered = useMemo(() => records.filter((item) => `${item.label} ${item.path} ${item.module} ${item.intent}`.toLowerCase().includes(query.trim().toLowerCase())), [query, records]);
+  const paginatedRecords = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (currentPage > lastPage) setCurrentPage(lastPage);
+  }, [currentPage, filtered.length, pageSize]);
 
   const save = () => {
     if (!editing || !editing.title.trim() || !editing.description.trim()) return;
@@ -34,7 +42,7 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale }) => {
 
     <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm module hoặc đường dẫn..." className={`${inputClass} pl-9`} /></div></section>
 
-    <div className="space-y-3">{filtered.map((item) => {
+    <div className="space-y-3">{paginatedRecords.map((item) => {
       const expanded = expandedIds.has(item.id);
       return <section key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <button type="button" onClick={() => toggle(item.id)} className="flex w-full items-center justify-between gap-4 p-4 text-left sm:p-5" aria-expanded={expanded}>
@@ -49,6 +57,7 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale }) => {
       </section>;
     })}</div>
     {filtered.length === 0 && <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center text-sm text-slate-500">Không tìm thấy module phù hợp.</div>}
+    {filtered.length > 0 && <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"><CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filtered.length} itemLabel="module" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} /></div>}
 
     {editing && <SeoEditor value={editing} onChange={setEditing} onClose={() => setEditing(null)} onSave={save} />}
   </div>;

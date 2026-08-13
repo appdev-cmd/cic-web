@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, Clock3, Code2, Globe2, History, Languages, Search, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { INITIAL_DICTIONARY_ENTRIES, type DictionaryApplication, type DictionaryEntry, type DictionaryLocale, type DictionaryStatus } from './uiDictionaryData';
 
 const statusMeta: Record<DictionaryStatus, { label: string; className: string }> = {
@@ -38,6 +38,8 @@ export const LocalizationManager: React.FC = () => {
   const [locale, setLocale] = useState<DictionaryLocale>('en');
   const [draft, setDraft] = useState('');
   const [toast, setToast] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const selected = items.find((item) => item.id === selectedId) ?? null;
   const errors = selected ? validate(selected, draft) : [];
   const namespaces = [...new Set(items.map((item) => `${item.application}.${item.namespace}`))];
@@ -49,6 +51,11 @@ export const LocalizationManager: React.FC = () => {
       && (status === 'all' || item.status === status)
       && (!onlyMissing || !item.values.en.trim());
   }), [application, items, namespace, onlyMissing, query, status]);
+  const paginatedItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (currentPage > lastPage) setCurrentPage(lastPage);
+  }, [currentPage, filtered.length, pageSize]);
 
   const openEditor = (entry: DictionaryEntry, nextLocale: DictionaryLocale = locale) => { setSelectedId(entry.id); setLocale(nextLocale); setDraft(entry.values[nextLocale]); };
   const switchLocale = (nextLocale: DictionaryLocale) => { if (!selected) return; setLocale(nextLocale); setDraft(selected.values[nextLocale]); };
@@ -88,9 +95,9 @@ export const LocalizationManager: React.FC = () => {
     </section>
 
     <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
-      <div className="overflow-x-auto"><table className="cms-data-table min-w-[1050px] text-left"><thead><tr><th className="p-3">Key</th><th className="p-3">Phạm vi</th><th className="p-3">Tiếng Việt</th><th className="p-3">Tiếng Anh</th><th className="p-3">Trạng thái</th><th className="p-3">Cập nhật</th></tr></thead><tbody>{filtered.map((item) => <tr key={item.id} onClick={() => openEditor(item)} className="cursor-pointer border-t border-slate-100 hover:bg-orange-50/40"><td className="p-3"><code className="text-xs font-bold text-orange-700">{item.key}</code><p className="mt-1 max-w-xs truncate text-[11px] text-slate-500">{item.description}</p></td><td className="p-3"><span className="rounded bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase">{item.application}</span><p className="mt-1 text-xs text-slate-500">{item.namespace}</p></td><td className="max-w-xs p-3 text-sm">{item.values.vi}</td><td className="max-w-xs p-3 text-sm">{item.values.en || <span className="font-semibold text-red-600">Chưa có bản dịch</span>}</td><td className="p-3"><span className={`rounded-md px-2 py-1 text-xs font-bold ${statusMeta[item.status].className}`}>{statusMeta[item.status].label}</span></td><td className="p-3 text-xs text-slate-500">{new Date(item.updatedAt).toLocaleDateString('vi-VN')}<p className="mt-1 text-[11px]">{item.updatedBy}</p></td></tr>)}</tbody></table></div>
+      <div className="overflow-x-auto"><table className="cms-data-table min-w-[1050px] text-left"><thead><tr><th className="p-3">Key</th><th className="p-3">Phạm vi</th><th className="p-3">Tiếng Việt</th><th className="p-3">Tiếng Anh</th><th className="p-3">Trạng thái</th><th className="p-3">Cập nhật</th></tr></thead><tbody>{paginatedItems.map((item) => <tr key={item.id} onClick={() => openEditor(item)} className="cursor-pointer border-t border-slate-100 hover:bg-orange-50/40"><td className="p-3"><code className="text-xs font-bold text-orange-700">{item.key}</code><p className="mt-1 max-w-xs truncate text-[11px] text-slate-500">{item.description}</p></td><td className="p-3"><span className="rounded bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase">{item.application}</span><p className="mt-1 text-xs text-slate-500">{item.namespace}</p></td><td className="max-w-xs p-3 text-sm">{item.values.vi}</td><td className="max-w-xs p-3 text-sm">{item.values.en || <span className="font-semibold text-red-600">Chưa có bản dịch</span>}</td><td className="p-3"><span className={`rounded-md px-2 py-1 text-xs font-bold ${statusMeta[item.status].className}`}>{statusMeta[item.status].label}</span></td><td className="p-3 text-xs text-slate-500">{new Date(item.updatedAt).toLocaleDateString('vi-VN')}<p className="mt-1 text-[11px]">{item.updatedBy}</p></td></tr>)}</tbody></table></div>
       {filtered.length === 0 && <div className="py-12 text-center text-sm text-slate-500">Không tìm thấy key phù hợp.</div>}
-      <CmsListFooter visibleCount={filtered.length} totalCount={items.length} itemLabel="key" />
+      <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filtered.length} itemLabel="key" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
     </section>
 
     {selected && <div className="fixed inset-0 z-[70] flex justify-end bg-slate-950/45" role="dialog" aria-modal="true"><button className="absolute inset-0" onClick={() => setSelectedId(null)} aria-label="Đóng" /><aside className="relative h-full w-full max-w-xl overflow-y-auto bg-white shadow-2xl"><div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-5"><div><p className="text-xs font-bold uppercase text-orange-600">Chỉnh sửa bản dịch</p><h2 className="mt-1 font-mono text-sm font-bold text-slate-950">{selected.key}</h2></div><button onClick={() => setSelectedId(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button></div><div className="space-y-5 p-5">

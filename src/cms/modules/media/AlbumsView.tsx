@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FolderKanban,
   Plus,
@@ -18,6 +18,7 @@ import {
   Check,
 } from 'lucide-react';
 import { MediaAlbum, MediaAsset } from './types';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface AlbumsViewProps {
   albums: MediaAlbum[];
@@ -39,6 +40,8 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [editingAlbum, setEditingAlbum] = useState<MediaAlbum | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const filteredAlbums = albums.filter((alb) => {
     if (!searchQuery.trim()) return true;
@@ -49,6 +52,11 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
       alb.description.toLowerCase().includes(q)
     );
   });
+  const paginatedAlbums = filteredAlbums.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(filteredAlbums.length / pageSize));
+    if (currentPage > lastPage) setCurrentPage(lastPage);
+  }, [currentPage, filteredAlbums.length, pageSize]);
 
   const handleEdit = (alb: MediaAlbum) => {
     setEditingAlbum({ ...alb });
@@ -98,7 +106,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
 
       {/* Album Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredAlbums.map((alb) => {
+        {paginatedAlbums.map((alb) => {
           return (
             <div
               key={alb.id}
@@ -173,6 +181,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
           );
         })}
       </div>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"><CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredAlbums.length} itemLabel="album" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} /></div>
 
       {/* ALBUM EDITOR DRAWER */}
       {isEditorOpen && editingAlbum && (
