@@ -347,7 +347,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       <div className={presentation === 'page' ? 'flex min-h-[calc(100vh-7rem)] w-full flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900' : 'w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between animate-in slide-in-from-right duration-250'}>
         
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white p-3 sm:p-4 dark:border-slate-800 dark:bg-slate-900">
+        <div className={`flex flex-wrap items-center justify-between gap-3 border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur sm:p-4 dark:border-slate-800 dark:bg-slate-900/95 ${presentation === 'page' ? 'cms-sticky-action rounded-xl' : 'border-x-0 border-t-0'}`}>
           <div className="flex items-center gap-3">
             {presentation === 'page' ? (
               <button type="button" onClick={onClose} className="rounded-xl bg-slate-100 p-2 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" title="Quay lại danh sách">
