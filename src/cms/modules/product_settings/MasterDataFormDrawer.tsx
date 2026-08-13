@@ -58,7 +58,7 @@ function ProductAssignmentField({
   const filtered = options.filter((product) => (product.name || product.id).toLowerCase().includes(query.toLowerCase()));
 
   return (
-    <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <fieldset className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
       <legend className="px-1 font-bold text-slate-700 dark:text-slate-300">{label}</legend>
       <div className="mb-3 flex items-center justify-between gap-3 text-xs">
         <span className="text-slate-400">Đã chọn {selectedIds.length} sản phẩm</span>
@@ -83,7 +83,7 @@ function ProductAssignmentField({
         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm sản phẩm..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
       </div>
-      <div className="max-h-56 space-y-1 overflow-y-auto pr-1">
+      <div className="max-h-48 space-y-1 overflow-y-auto pr-1">
         {filtered.map((product) => <label key={product.id} className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800">
           <input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => onChange((current) => current.includes(product.id) ? current.filter((id) => id !== product.id) : [...current, product.id])} className="mt-0.5 h-4 w-4 rounded text-orange-600" />
           <span className="leading-5 text-slate-700 dark:text-slate-300">{product.name || product.id}</span>
@@ -344,14 +344,20 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
 
   return (
     <div className={presentation === 'page' ? 'min-h-[calc(100vh-7rem)] animate-in fade-in duration-200' : 'fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200'}>
-      <div className={presentation === 'page' ? 'flex min-h-[calc(100vh-7rem)] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900' : 'w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between animate-in slide-in-from-right duration-250'}>
+      <div className={presentation === 'page' ? 'flex min-h-[calc(100vh-7rem)] w-full flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900' : 'w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between animate-in slide-in-from-right duration-250'}>
         
         {/* Header */}
-        <div className={`p-5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/80 ${presentation === 'page' ? 'cms-sticky-action z-20' : ''}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white p-3 sm:p-4 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-orange-600 text-white rounded-xl shadow-md shadow-orange-600/20">
-              <Plus className="w-5 h-5" />
-            </div>
+            {presentation === 'page' ? (
+              <button type="button" onClick={onClose} className="rounded-xl bg-slate-100 p-2 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" title="Quay lại danh sách">
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            ) : (
+              <div className="rounded-xl bg-orange-600 p-2.5 text-white shadow-md shadow-orange-600/20">
+                <Plus className="h-5 w-5" />
+              </div>
+            )}
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">
                 {isEdit ? `Chỉnh sửa ${typeLabels[targetType]}` : `Thêm ${typeLabels[targetType]}`}
@@ -363,14 +369,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-slate-600 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-white cursor-pointer"
-            >
-              {presentation === 'page' ? <ArrowLeft className="w-4 h-4" /> : <X className="w-5 h-5" />}
-              {presentation === 'page' && <span className="text-xs font-bold">Quay lại danh sách</span>}
-            </button>
+            {presentation !== 'page' && <button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"><X className="h-5 w-5" /></button>}
             {presentation === 'page' && (
               <button
                 type="submit"
@@ -415,7 +414,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         </div>
 
         {/* Drawer Form Body */}
-        <form id="masterDataForm" onSubmit={handleSubmit} className={`flex-1 overflow-y-auto space-y-5 text-xs ${presentation === 'page' ? 'w-full p-6 lg:p-8' : 'p-6'}`}>
+        <form id="masterDataForm" onSubmit={handleSubmit} className={`flex-1 space-y-5 text-xs ${presentation === 'page' ? 'mx-auto w-full max-w-6xl p-5 sm:p-6' : 'overflow-y-auto p-6'}`}>
           
           {/* TAB 1: BASIC INFO */}
           {activeTab === 'basic' && (
@@ -669,7 +668,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         </form>
 
         {/* Drawer Footer */}
-        <div className={`p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-3 ${presentation === 'page' ? 'sticky bottom-0' : ''}`}>
+        <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
           <button
             type="button"
             onClick={onClose}
