@@ -115,7 +115,7 @@ export const ServicePreviewModal: React.FC<ServicePreviewModalProps> = ({
               <div className="space-y-2 text-white max-w-2xl">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white">
-                    {service.group_name}
+                    Dịch vụ CIC
                   </span>
                   <span className="text-xs text-slate-300">Mã: {service.code}</span>
                 </div>

@@ -63,7 +63,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterGroupId, setFilterGroupId] = useState('all');
   const [filterEditorialStatus, setFilterEditorialStatus] = useState<string>('all');
   const [filterServiceStatus, setFilterServiceStatus] = useState<string>('all');
   const [filterOwnerId, setFilterOwnerId] = useState('all');
@@ -91,7 +90,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const groups = data?.groups ?? [];
   const ownersList = data?.owners ?? [];
 
   const showToast = (msg: string) => {
@@ -106,12 +104,9 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       setFilterServiceStatus('active');
     } else if (viewKey === 'view_pending') {
       setFilterEditorialStatus('pending');
-    } else if (viewKey === 'view_unlinked') {
-      setFilterGroupId('all');
     } else {
       setFilterEditorialStatus('all');
       setFilterServiceStatus('all');
-      setFilterGroupId('all');
     }
   };
 
@@ -140,9 +135,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         if (!matchTitle && !matchCode && !matchOwner) return false;
       }
 
-      // Group filter
-      if (filterGroupId !== 'all' && item.group_id !== filterGroupId) return false;
-
       // Editorial status filter
       if (filterEditorialStatus !== 'all' && item.editorial_status !== filterEditorialStatus)
         return false;
@@ -160,7 +152,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
     services,
     activeTab,
     searchTerm,
-    filterGroupId,
     filterEditorialStatus,
     filterServiceStatus,
     filterOwnerId,
@@ -271,7 +262,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       <>
         <ServiceFormView
           service={editingService}
-          groups={groups}
           owners={ownersList}
           activityLogs={data?.activityLogs ?? []}
           versions={data?.versions ?? []}
@@ -370,20 +360,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             />
           </div>
 
-          {/* Group Filter */}
-          <select
-            value={filterGroupId}
-            onChange={(e) => setFilterGroupId(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-          >
-            <option value="all">Tất cả Nhóm dịch vụ</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-
           {/* Editorial Status Filter */}
           <select
             value={filterEditorialStatus}
@@ -464,7 +440,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                 <th className="p-3 min-w-[280px] sticky left-10 bg-slate-50 dark:bg-slate-800 z-10">
                   Dịch vụ & Mã
                 </th>
-                <th className="p-3 min-w-[160px]">Nhóm dịch vụ</th>
                 <th className="p-3 min-w-[140px]">Người phụ trách</th>
                 <th className="p-3 min-w-[130px]">Editorial Status</th>
                 <th className="p-3 min-w-[130px]">Service Status</th>
@@ -527,11 +502,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                             </p>
                           </div>
                         </div>
-                      </td>
-
-                      {/* Group */}
-                      <td className="p-3 font-medium text-slate-800 dark:text-slate-200">
-                        {item.group_name}
                       </td>
 
                       {/* Owner */}
@@ -678,7 +648,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         isOpen={Boolean(quickEditService)}
         onClose={() => setQuickEditService(null)}
         service={quickEditService}
-        groups={groups}
         owners={ownersList}
         onSave={(updated) => {
           handleSaveServiceFromForm(updated);

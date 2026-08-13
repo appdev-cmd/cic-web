@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Calendar, Sparkles, MapPin, Clock } from 'lucide-react';
-import { EventItem, EventCategory, EditorialStatus, EventProgressStatus } from './types';
+import { EventItem, EditorialStatus, EventProgressStatus } from './types';
 
 interface EventQuickEditModalProps {
   isOpen: boolean;
   event: EventItem | null;
-  categories: EventCategory[];
   onSave: (updatedData: Partial<EventItem>) => void;
   onClose: () => void;
 }
@@ -13,13 +12,11 @@ interface EventQuickEditModalProps {
 export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
   isOpen,
   event,
-  categories,
   onSave,
   onClose,
 }) => {
   const [title, setTitle] = useState('');
   const [alias, setAlias] = useState('');
-  const [categoryId, setCategoryId] = useState('');
   const [timeEvent, setTimeEvent] = useState('');
   const [endTime, setEndTime] = useState('');
   const [place, setPlace] = useState('');
@@ -35,7 +32,6 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
     if (event) {
       setTitle(event.title || '');
       setAlias(event.alias || '');
-      setCategoryId(event.category_id || categories[0]?.id || '');
       setTimeEvent(event.time_event || '');
       setEndTime(event.end_time || '');
       setPlace(event.place || '');
@@ -47,7 +43,7 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
       setShowInHome(event.show_in_home ?? true);
       setOrdering(event.ordering || 1);
     }
-  }, [event, categories]);
+  }, [event]);
 
   if (!isOpen || !event) return null;
 
@@ -61,7 +57,6 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
     onSave({
       title,
       alias,
-      category_id: categoryId,
       time_event: timeEvent,
       end_time: endTime,
       place,
@@ -118,8 +113,8 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
             />
           </div>
 
-          {/* Alias & Category */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Alias */}
+          <div className="grid grid-cols-1 gap-3">
             <div className="space-y-1">
               <label className="font-semibold text-slate-700 dark:text-slate-300">
                 Đường dẫn phụ (Alias)
@@ -132,22 +127,6 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="font-semibold text-slate-700 dark:text-slate-300">
-                Danh mục sự kiện
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none cursor-pointer"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           {/* Time & Venue */}

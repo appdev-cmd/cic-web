@@ -3,7 +3,6 @@ import { X, Check, SlidersHorizontal, Eye } from 'lucide-react';
 
 export interface ColumnVisibility {
   title: boolean;
-  category: boolean;
   time_event: boolean;
   place: boolean;
   editorial_status: boolean;
@@ -36,7 +35,6 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
 
   const columnLabels: { key: keyof ColumnVisibility; label: string }[] = [
     { key: 'title', label: 'Tiêu đề sự kiện' },
-    { key: 'category', label: 'Danh mục sự kiện' },
     { key: 'time_event', label: 'Thời gian diễn ra' },
     { key: 'place', label: 'Địa điểm tổ chức' },
     { key: 'editorial_status', label: 'Trạng thái Biên tập' },

@@ -17,26 +17,23 @@ import {
   Globe,
   Building,
 } from 'lucide-react';
-import { EventItem, EventCategory, EditorialStatus, EventProgressStatus } from './types';
+import { EventItem, EditorialStatus, EventProgressStatus } from './types';
 
 interface EventPreviewModalProps {
   isOpen: boolean;
   event: EventItem | null;
-  categories: EventCategory[];
   onClose: () => void;
 }
 
 export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
   isOpen,
   event,
-  categories,
   onClose,
 }) => {
   const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   if (!isOpen || !event) return null;
 
-  const category = categories.find((c) => c.id === event.category_id);
 
   // Helper for status badge styling
   const getEditorialBadge = (status: EditorialStatus) => {
@@ -164,7 +161,7 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
               <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 text-white space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 bg-orange-600 text-white font-bold text-xs rounded-full">
-                    {category?.name || 'Sự kiện'}
+                    Sự kiện CIC
                   </span>
                   {event.is_hot && (
                     <span className="px-3 py-1 bg-amber-500 text-slate-950 font-bold text-xs rounded-full">

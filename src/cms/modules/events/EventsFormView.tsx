@@ -5,11 +5,10 @@ import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { findPageBuilderImage, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 import type { NewsArticle } from '../news/types';
-import type { EventCategory, EventItem, RelatedProductItem } from './types';
+import type { EventItem, RelatedProductItem } from './types';
 
 interface EventsFormViewProps {
   eventToEdit: EventItem | null;
-  categories: EventCategory[];
   relatedEvents: EventItem[];
   relatedArticles: NewsArticle[];
   relatedProducts: RelatedProductItem[];

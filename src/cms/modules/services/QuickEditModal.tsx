@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react';
-import { ServiceItem, ServiceGroup } from './types';
+import { ServiceItem } from './types';
 
 interface QuickEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   service: ServiceItem | null;
-  groups: ServiceGroup[];
   owners: { id: string; name: string }[];
   onSave: (updated: ServiceItem) => void;
 }
@@ -15,14 +14,12 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
   isOpen,
   onClose,
   service,
-  groups,
   owners,
   onSave,
 }) => {
   if (!isOpen || !service) return null;
 
   const [formData, setFormData] = useState({
-    group_id: service.group_id,
     display_order: service.display_order,
     owner_id: service.owner_id,
     placement: service.placement || [],
@@ -33,7 +30,6 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
 
   useEffect(() => {
     setFormData({
-      group_id: service.group_id,
       display_order: service.display_order,
       owner_id: service.owner_id,
       placement: service.placement || [],
@@ -59,7 +55,6 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
 
   const handleReset = () => {
     setFormData({
-      group_id: service.group_id,
       display_order: service.display_order,
       owner_id: service.owner_id,
       placement: service.placement || [],
@@ -69,13 +64,10 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedGroup = groups.find((g) => g.id === formData.group_id);
     const selectedOwner = owners.find((o) => o.id === formData.owner_id);
 
     const updatedService: ServiceItem = {
       ...service,
-      group_id: formData.group_id,
-      group_name: selectedGroup ? selectedGroup.name : service.group_name,
       display_order: Number(formData.display_order),
       owner_id: formData.owner_id,
       owner_name: selectedOwner ? selectedOwner.name : service.owner_name,
@@ -116,25 +108,7 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>Chỉ sửa các trường hiển thị & phân loại không có rủi ro nội dung.</span>
-          </div>
-
-          {/* Group */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Nhóm dịch vụ
-            </label>
-            <select
-              value={formData.group_id}
-              onChange={(e) => handleChange('group_id', e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-            >
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
+            <span>Chỉ sửa các trường hiển thị không có rủi ro nội dung.</span>
           </div>
 
           {/* Owner */}
@@ -176,7 +150,7 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
             <div className="space-y-2">
               {[
                 { key: 'home_featured', label: 'Dịch vụ nổi bật trang chủ' },
-                { key: 'services_page', label: 'Trang danh mục dịch vụ chính' },
+                { key: 'services_page', label: 'Trang dịch vụ chính' },
                 { key: 'footer_links', label: 'Khối liên kết chân trang (Footer)' },
               ].map((p) => (
                 <label

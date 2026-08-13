@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import {
   ServiceItem,
-  ServiceGroup,
   EditorialStatus,
   ServiceActivityLog,
   ServiceVersion,
@@ -29,7 +28,6 @@ import { findPageBuilderImage, pageBuilderImages, PageMediaPickerModal } from '.
 
 interface ServiceFormViewProps {
   service: ServiceItem;
-  groups: ServiceGroup[];
   owners: { id: string; name: string; email: string }[];
   activityLogs: ServiceActivityLog[];
   versions: ServiceVersion[];
@@ -42,7 +40,6 @@ interface ServiceFormViewProps {
 
 export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
   service,
-  groups,
   onBack,
   onSave,
   onOpenPreview,
@@ -130,7 +127,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     { label: 'Tên dịch vụ', complete: Boolean(formData.title.trim()), weight: 15 },
     { label: 'Đường dẫn (Alias)', complete: Boolean(formData.slug.trim()), weight: 10 },
     { label: 'Tóm tắt', complete: Boolean(formData.summary.trim()), weight: 15 },
-    { label: 'Danh mục dịch vụ', complete: Boolean(formData.group_id), weight: 10 },
     { label: 'Thẻ nội dung', complete: Boolean(formData.tags?.trim()), weight: 5 },
     { label: 'Nội dung chi tiết', complete: formData.description.trim().length > 50, weight: 20 },
     { label: 'Ảnh đại diện', complete: Boolean(formData.thumbnail_url), weight: 15 },
@@ -295,43 +291,17 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             </div>
           </div>
 
-          {/* SECTION 2: PHÂN LOẠI */}
+          {/* SECTION 2: THẺ NỘI DUNG */}
           <div
             id="section_classification"
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4"
           >
             <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <Layers className="w-5 h-5 text-orange-600" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Phân loại dịch vụ</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Thẻ nội dung</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Danh mục dịch vụ
-                </label>
-                <select
-                  value={formData.group_id}
-                  onChange={(e) => {
-                    const sel = groups.find((g) => g.id === e.target.value);
-                    setFormData((prev) => ({
-                      ...prev,
-                      group_id: e.target.value,
-                      group_name: sel ? sel.name : prev.group_name,
-                    }));
-                    setIsDirty(true);
-                  }}
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="" disabled>Chọn danh mục dịch vụ</option>
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Thẻ nội dung (Tags)

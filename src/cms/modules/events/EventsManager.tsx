@@ -78,7 +78,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Table Column Visibility & Density Config
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     title: true,
-    category: true,
     time_event: true,
     place: true,
     editorial_status: true,
@@ -91,7 +90,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
 
   // Filter States (Dual Statuses)
   const [searchTitle, setSearchTitle] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [editorialFilter, setEditorialFilter] = useState<string>('all');
   const [eventStatusFilter, setEventStatusFilter] = useState<string>('all');
 
@@ -113,7 +111,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Filtered Events
   const filteredEvents = events.filter((ev) => {
     const matchesTitle = ev.title.toLowerCase().includes(searchTitle.toLowerCase().trim());
-    const matchesCategory = selectedCategory === 'all' || ev.category_id === selectedCategory;
     
     // Dual Status Matching
     const currentEditorial = ev.editorial_status || (ev.published ? 'published' : 'draft');
@@ -122,7 +119,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     const matchesEditorial = editorialFilter === 'all' || currentEditorial === editorialFilter;
     const matchesEventStatus = eventStatusFilter === 'all' || currentEventStatus === eventStatusFilter;
 
-    return matchesTitle && matchesCategory && matchesEditorial && matchesEventStatus;
+    return matchesTitle && matchesEditorial && matchesEventStatus;
   });
 
   // Toggle Single Row Editorial Status directly from table
@@ -296,12 +293,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     setEventToEdit(null);
   };
 
-  // Helper function to resolve category name
-  const getCategoryBadge = (catId: string) => {
-    const cat = categories.find((c) => c.id === catId);
-    return cat ? cat.name : 'Chưa phân loại';
-  };
-
   // Editorial status badge helper
   const renderEditorialBadge = (status?: EditorialStatus) => {
     switch (status) {
@@ -340,7 +331,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
       <>
         <EventsFormView
           eventToEdit={eventToEdit}
-          categories={categories}
           relatedEvents={data?.events ?? []}
           relatedArticles={data?.relatedArticles ?? []}
           relatedProducts={data?.relatedProducts ?? []}
@@ -354,7 +344,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         <EventPreviewModal
           isOpen={!!previewEvent}
           event={previewEvent}
-          categories={categories}
           onClose={() => setPreviewEvent(null)}
         />
       </>
@@ -383,7 +372,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
       <EventPreviewModal
         isOpen={!!previewEvent}
         event={previewEvent}
-        categories={categories}
         onClose={() => setPreviewEvent(null)}
       />
 
@@ -391,7 +379,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
       <EventQuickEditModal
         isOpen={!!quickEditEvent}
         event={quickEditEvent}
-        categories={categories}
         onSave={handleSaveQuickEdit}
         onClose={() => setQuickEditEvent(null)}
       />
@@ -415,7 +402,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         onReset={() =>
           setColumnVisibility({
             title: true,
-            category: true,
             time_event: true,
             place: true,
             editorial_status: true,
@@ -465,22 +451,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               onChange={(e) => setSearchTitle(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
-          </div>
-
-          {/* Category filter dropdown */}
-          <div className="md:col-span-3 relative">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
-            >
-              <option value="all">-- Tất cả Danh mục ({categories.length}) --</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Dual Status Filter 1: Editorial */}
@@ -550,7 +520,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                   <CmsSelectionCheckbox checked={filteredEvents.length > 0 && selectedIds.length === filteredEvents.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredEvents.length} onChange={handleSelectAll} label="Chọn tất cả sự kiện" />
                 </th>
                 {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">Tiêu đề sự kiện</th>}
-                {columnVisibility.category && <th className="py-3 px-4 w-36">Danh mục</th>}
                 {columnVisibility.time_event && <th className="py-3 px-4 w-40">Thời gian sự kiện</th>}
                 {columnVisibility.place && <th className="py-3 px-4 min-w-[180px]">Địa điểm</th>}
                 {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">TT Biên tập</th>}
@@ -607,14 +576,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                         </td>
                       )}
 
-                      {/* Danh mục */}
-                      {columnVisibility.category && (
-                        <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4`}>
-                          <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 inline-block">
-                            {getCategoryBadge(ev.category_id)}
-                          </span>
-                        </td>
-                      )}
 
                       {/* Thời gian sự kiện */}
                       {columnVisibility.time_event && (
