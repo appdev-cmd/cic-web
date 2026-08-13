@@ -2,11 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { Check, Image as ImageIcon, Search, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { INITIAL_ASSETS } from '../media/mockData';
+import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
+
 
 interface PageMediaPickerModalProps {
   currentId: string;
   onClose: () => void;
   onConfirm: (mediaId: string) => void;
+  images?: CmsMediaPickerItem[];
+  returnValue?: 'id' | 'url';
 }
 
 export const pageBuilderImages = INITIAL_ASSETS.filter(
@@ -30,13 +34,21 @@ export function findPageBuilderImage(id: string) {
   return pageBuilderImages.find((asset) => asset.id === resolvedId);
 }
 
-export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({ currentId, onClose, onConfirm }) => {
+export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
+  currentId,
+  onClose,
+  onConfirm,
+  images = pageBuilderImages,
+  returnValue = 'id',
+}) => {
   const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState(legacyMockImageAliases[currentId] ?? currentId);
+  const initialAsset = images.find((asset) => asset.id === currentId || asset.url === currentId);
+  const [selectedId, setSelectedId] = useState(initialAsset?.id ?? legacyMockImageAliases[currentId] ?? currentId);
   const options = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return pageBuilderImages.filter((asset) => !normalized || asset.title.toLowerCase().includes(normalized) || asset.filename.toLowerCase().includes(normalized));
-  }, [query]);
+    return images.filter((asset) => !normalized || asset.title.toLowerCase().includes(normalized) || asset.filename.toLowerCase().includes(normalized));
+  }, [images, query]);
+  const selectedAsset = images.find((asset) => asset.id === selectedId);
 
   return (
     <div className="fixed inset-0 z-[75] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="Chọn ảnh">
@@ -59,7 +71,7 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({ curr
           })}
           {options.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-500">Không tìm thấy ảnh phù hợp.</p>}
         </div>
-        <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-slate-800"><CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton><CmsButton disabled={!selectedId || !findPageBuilderImage(selectedId)} onClick={() => { onConfirm(selectedId); onClose(); }}>Dùng ảnh đã chọn</CmsButton></div>
+        <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-slate-800"><CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton><CmsButton disabled={!selectedAsset} onClick={() => { if (selectedAsset) onConfirm(returnValue === 'url' ? selectedAsset.url : selectedAsset.id); onClose(); }}>Dùng ảnh đã chọn</CmsButton></div>
       </div>
     </div>
   );

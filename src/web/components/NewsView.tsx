@@ -55,10 +55,8 @@ import {
   Pause,
   X
 } from 'lucide-react';
-import { newsData, DetailedNewsItem, CompanyNewsItem, SpecialtyNewsItem, RecruitmentNewsItem, PromotionNewsItem, ShareholderNewsItem } from '../data/newsData';
-import { projectsData } from '../data/projectsData';
-import { eventsData } from '../data/eventsData';
-import { productsData } from '../data/mockData';
+import { getNewsData } from '../features/news/newsData';
+import type { DetailedNewsItem, CompanyNewsItem, SpecialtyNewsItem, RecruitmentNewsItem, PromotionNewsItem, ShareholderNewsItem } from '../features/news/types';
 
 interface NewsViewProps {
   key?: string | number;
@@ -110,6 +108,12 @@ export function NewsView({
   onNavigateHome,
   onNavigateToPrivacy
 }: NewsViewProps) {
+  const {
+    items: newsData,
+    relatedProducts: productsData,
+    relatedProjects: projectsData,
+    relatedEvents: eventsData,
+  } = React.useMemo(getNewsData, []);
   
   // Navigation states
   const [activeCategory, setActiveCategory] = useState<'all' | 'company' | 'specialty' | 'recruitment' | 'promotion' | 'shareholder'>('all');
@@ -174,7 +178,7 @@ export function NewsView({
 
   const breakingNewsList = React.useMemo(() => {
     return newsData.slice(0, 6);
-  }, []);
+  }, [newsData]);
 
   const renderNewsTicker = () => (
     <div className="relative my-3">
@@ -519,31 +523,8 @@ export function NewsView({
     ? productsData.filter(p => selectedItem.relatedProductIds?.includes(p.id))
     : [];
 
-  const effectiveLinkedProducts = React.useMemo(() => {
-    if (linkedProducts.length > 0) return linkedProducts;
-    if (!selectedItem) return [];
-
-    if (selectedItem.category === 'promotion') {
-      const pItem = selectedItem as PromotionNewsItem;
-      const searchText = (pItem.title + ' ' + (pItem.appliedTargets || []).join(' ') + ' ' + (pItem.tags || []).join(' ')).toLowerCase();
-      
-      const matched = productsData.filter(prod => {
-        const pName = prod.name.toLowerCase();
-        if (searchText.includes('enjicad') && pName.includes('enjicad')) return true;
-        if (searchText.includes('gstarcad') && pName.includes('gstarcad')) return true;
-        if (searchText.includes('prokon') && pName.includes('prokon')) return true;
-        if ((searchText.includes('bim') || searchText.includes('cde') || searchText.includes('gis')) && (pName.includes('enjicad') || pName.includes('prokon') || pName.includes('rdw') || pName.includes('vinasas'))) return true;
-        if (searchText.includes('quan trắc') || searchText.includes('geo-cic') || searchText.includes('thủy điện')) {
-          if (pName.includes('rô bốt') || pName.includes('địa chấn') || prod.productType === 'Thiết bị') return true;
-        }
-        return false;
-      });
-
-      return matched.length > 0 ? matched : productsData.slice(0, 3);
-    }
-
-    return [];
-  }, [selectedItem, linkedProducts]);
+  // Related entities are selected explicitly in CMS. Do not infer or auto-fill them.
+  const effectiveLinkedProducts = linkedProducts;
 
   const linkedProjects = selectedItem?.relatedProjectIds
     ? projectsData.filter(p => selectedItem.relatedProjectIds?.includes(p.id))
@@ -900,7 +881,9 @@ export function NewsView({
 
                   {/* RICH DETAILED ARTICLE TEXT WITH MARKDOWN SIMULATION */}
                   <div className="prose max-w-none text-slate-700 text-xs md:text-sm leading-relaxed space-y-4">
-                    {(() => {
+                    {/<[a-z][\s\S]*>/i.test(selectedItem.contentMarkdown) ? (
+                      <div className="ck-content" dangerouslySetInnerHTML={{ __html: selectedItem.contentMarkdown }} />
+                    ) : (() => {
                       type ContentBlock = {
                         type: 'h3' | 'h4' | 'ol' | 'ul' | 'quote' | 'p';
                         content: string;
@@ -1120,7 +1103,7 @@ export function NewsView({
                     </h3>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {(linkedEvents.length > 0 ? linkedEvents : eventsData.slice(0, 2)).map((evt) => (
+                      {linkedEvents.map((evt) => (
                         <div
                           key={evt.id}
                           onClick={() => {

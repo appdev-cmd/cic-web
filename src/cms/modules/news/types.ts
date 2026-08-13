@@ -87,7 +87,7 @@ export interface NewsArticle {
   seo_description: string;
 
   // Versioning & Working Copies
-  working_version_number: number;
+  working_version_number?: number;
   published_version_number?: number;
   has_unpublished_changes?: boolean;
   versions?: ArticleVersion[];

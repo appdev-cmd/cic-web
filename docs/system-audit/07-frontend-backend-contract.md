@@ -26,6 +26,15 @@
 
 ## 3. News detail
 
+### Data-access boundary đã áp dụng cho React mockup
+
+- `NewsView` đọc qua `getNewsData()`; route CMS đọc qua `getCmsNewsData(locale)`.
+- Hai function hiện đọc mock data. Component không import trực tiếp các file mock và không biết vị trí raw fixture.
+- Chưa tạo REST endpoint, HTTP client, repository interface hoặc backend giả. Khi chuyển Next.js, implementation của data function sẽ được thay bằng server-side data access/mapper.
+- View model frontend vẫn dùng tên rõ nghĩa như `shortDesc`, `img`; PostgreSQL sau này vẫn giữ `summary`, `image`, `alias`, `content` và mapper chịu trách nhiệm chuyển đổi.
+- CMS state tạo/sửa/xóa hiện chỉ phục vụ mockup. Server Action/service thật sẽ được nối sau khi chuyển Next.js; không giả lập persistence bằng HTTP trong React hiện tại.
+- Sản phẩm, dự án và sự kiện liên quan không được suy từ keyword hoặc tự lấy item mới nhất. Chỉ hiển thị ID được chọn thủ công.
+
 | Section/item | Nguồn cuối | Loại | Ghi chú |
 |---|---|---|---|
 | Breadcrumb | route + news category + title | Computed | Không lưu breadcrumb |
@@ -138,4 +147,3 @@
 ```
 
 Đây là shape minh họa; field module-specific nằm trong DTO riêng, không tạo một DTO khổng lồ chứa mọi field.
-

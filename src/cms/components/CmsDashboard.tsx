@@ -47,21 +47,7 @@ const StaticPagesManager = lazy(async () => {
     ),
   };
 });
-const NewsManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([
-    import('../modules/news/NewsManager'),
-    import('../data/demoEditorialContentDataSource'),
-  ]);
-
-  return {
-    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-      <module.NewsManager
-        workspaceLocale={workspaceLocale}
-        data={dataModule.demoEditorialContentDataSource.newsByLocale[workspaceLocale]}
-      />
-    ),
-  };
-});
+const NewsManager = lazy(() => import('../modules/news/NewsModulePage'));
 const EventsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/events/EventsManager'), import('../data/demoEditorialContentDataSource')]);
   return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (

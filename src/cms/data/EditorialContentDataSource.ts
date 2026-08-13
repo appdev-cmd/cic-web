@@ -1,5 +1,6 @@
 import type { CmsLocale } from './CmsDataSource';
 import type { NewsArticle, NewsCategory, RelatedProductItem } from '../modules/news/types';
+import type { CmsMediaPickerItem } from './MediaPickerDataSource';
 import type { EventItem, RelatedProductItem as EventRelatedProductItem } from '../modules/events/types';
 import type {
   ServiceActivityLog,
@@ -14,6 +15,7 @@ export interface NewsModuleData {
   articles: NewsArticle[];
   categories: NewsCategory[];
   relatedProducts: RelatedProductItem[];
+  mediaImages?: CmsMediaPickerItem[];
 }
 
 export interface ServicesModuleData {

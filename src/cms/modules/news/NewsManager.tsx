@@ -31,7 +31,6 @@ import {
   FolderTree,
 } from 'lucide-react';
 import { NewsArticle, NewsCategory } from './types';
-import type { CmsLocale } from '../../data/CmsDataSource';
 import type { NewsModuleData } from '../../data/EditorialContentDataSource';
 import { NewsFormView } from './NewsFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
@@ -51,11 +50,10 @@ import { NewsCategoryManager } from './NewsCategoryManager';
 type ViewScopeTab = 'all' | 'trash';
 
 interface NewsManagerProps {
-  workspaceLocale: CmsLocale;
   data?: NewsModuleData;
 }
 
-export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data }) => {
+export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
   // Articles State
   const [articles, setArticles] = useState<NewsArticle[]>(data?.articles ?? []);
   const [categories, setCategories] = useState<NewsCategory[]>(data?.categories ?? []);
@@ -229,12 +227,13 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
 
   const handleSaveArticleFromForm = (formData: Partial<NewsArticle>) => {
     if (editingArticle) {
+      const updatedArticle: NewsArticle = {
+        ...editingArticle,
+        ...formData,
+        updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      };
       setArticles((prev) =>
-        prev.map((a) =>
-          a.id === editingArticle.id
-            ? { ...a, ...formData, updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19) }
-            : a
-        )
+        prev.map((a) => a.id === editingArticle.id ? updatedArticle : a)
       );
       showToast(`Đã cập nhật bài viết thành công!`);
     } else {
@@ -245,13 +244,13 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         category_id: formData.category_id || categories[0]?.id || 'cat_news_tech',
         summary: formData.summary || '',
         content: formData.content || '',
-        image: formData.image || 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80',
+        image: formData.image || '',
         video: formData.video || '',
         tags: formData.tags || [],
         news_related: formData.news_related || [],
         products_related: formData.products_related || [],
         start_time: formData.start_time || new Date().toISOString().substring(0, 16),
-        end_time: formData.end_time || '2026-12-31T23:59',
+        end_time: formData.end_time || '',
         published: formData.published ?? false,
         is_hot: formData.is_hot ?? false,
         is_new: formData.is_new ?? true,
@@ -261,8 +260,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         seo_keyword: formData.seo_keyword || '',
         seo_description: formData.seo_description || formData.summary || '',
         created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        author: { name: 'Nguyễn Văn Nam' },
-        working_version_number: 1,
+        author: { name: '' },
       };
       setArticles([newArticle, ...articles]);
       showToast(`Đã thêm bài viết mới thành công!`);
@@ -296,8 +294,9 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         <NewsFormView
           articleToEdit={editingArticle}
           categories={categories}
-          relatedArticles={data?.articles ?? []}
+          relatedArticles={articles}
           relatedProducts={data?.relatedProducts ?? []}
+          mediaImages={data?.mediaImages ?? []}
           onSave={handleSaveArticleFromForm}
           onCancel={() => {
             setViewMode('list');
@@ -305,7 +304,9 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
           }}
         />
       ) : viewMode === 'categories' ? (
-        <NewsCategoryManager categories={categories} onChange={setCategories} onBack={closeCategories} onMessage={showToast} />
+        <NewsCategoryManager categories={categories} onChange={(next) => {
+          setCategories(next);
+        }} onBack={closeCategories} onMessage={showToast} />
       ) : (
         <>
           {/* HEADER BAR */}
