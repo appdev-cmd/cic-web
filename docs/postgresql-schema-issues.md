@@ -23,3 +23,11 @@ Mỗi issue cần ngắn gọn theo bốn ý: module, hiện trạng, ảnh hư�
 - Hiện trạng: `cic_news_categories_en.parent_id` tham chiếu `cic_news_categories(id)`.
 - Ảnh hưởng: Cây danh mục EN phụ thuộc dữ liệu VI, trái với mô hình hai workspace độc lập.
 - Hướng sửa: Đổi thành self-reference tới `cic_news_categories_en(id)` sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle.
+
+## Sự kiện
+
+### Migration `cic_event` chưa được xác minh thành công
+
+- Hiện trạng: `export_report.json` có 37 bản ghi VI và 20 bản ghi EN nhưng `migration_report.json` vẫn báo `cic_event: ERROR`.
+- Ảnh hưởng: Chưa thể coi bảng PostgreSQL Sự kiện là nguồn dữ liệu sẵn sàng cho backend.
+- Hướng sửa: Chạy lại migration/report theo schema hiện hành, giữ nguyên ID và đối soát số lượng, timestamp, boolean cùng các chuỗi related trước khi kết nối API.

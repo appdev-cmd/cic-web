@@ -13,6 +13,7 @@
 | Thùng rác | `trash-data-compatibility-plan.md` |
 | Tin tức | `news-data-backend-compatibility.md` |
 | Trang nội dung | `static-pages-page-builder-data-backend-plan.md` |
+| Sự kiện | `events-data-backend-compatibility.md` |
 | Các lỗi FK/schema PostgreSQL đã phát hiện | `postgresql-schema-issues.md` |
 | Module được kết luận giữ nguyên | `unchanged-modules-data-compatibility.md` — sẽ tạo khi có module đầu tiên được chốt giữ nguyên |
 
@@ -67,6 +68,12 @@ Dùng khi triển khai database/API cho module Trang nội dung mới, bao gồm
 
 Tài liệu này cũng xác định rõ public chỉ đọc Published, Preview đọc Draft và backend phải enforce template/giới hạn thay vì tin dữ liệu gửi từ frontend.
 
+### `events-data-backend-compatibility.md`
+
+Dùng khi triển khai database/API Sự kiện, bao gồm mapping field legacy, Draft/Published, quan hệ sự kiện/tin tức/sản phẩm có thứ tự, Media, audit và hai workspace VI/EN.
+
+Tài liệu chốt Sự kiện không có danh mục hoặc workflow duyệt; database mới chủ yếu chuẩn hóa cách lưu, không thêm field Marketing phải nhập.
+
 ### `unchanged-modules-data-compatibility.md`
 
 Đây sẽ là tài liệu chung cho những module sau khảo sát được kết luận:
@@ -115,6 +122,7 @@ Không viết SQL, migration hoặc backend trước khi tài liệu của modul
 | Thùng rác | Đã khảo sát; cần bảng mới và thay cơ chế hard-delete | `trash-data-compatibility-plan.md` |
 | Tin tức | Đã khảo sát; giữ bảng legacy, cần mapping API và sửa FK | `news-data-backend-compatibility.md`, `postgresql-schema-issues.md` |
 | Trang nội dung | Đã khảo sát; là Page Builder mới, không tái sử dụng mô hình `cic_contents` | `static-pages-page-builder-data-backend-plan.md` |
+| Sự kiện | Đã khảo sát và làm sạch frontend; giữ bảng legacy, chuẩn hóa relation/API | `events-data-backend-compatibility.md`, `postgresql-schema-issues.md` |
 | Các module còn lại | Chưa chốt | Phải báo cáo trước khi viết docs |
 
 ## Thứ tự đề xuất
