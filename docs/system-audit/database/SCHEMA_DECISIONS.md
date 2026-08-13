@@ -80,6 +80,8 @@
 **CMS impact:** No end input until requirement approved.  
 **Migration impact:** If approved later, add nullable `event_end_time`; legacy rows NULL.
 
+Implementation note: Events hiện chỉ map `time_event` thành thời điểm bắt đầu và tính Upcoming/Past. `created_time` không phải lịch xuất bản. Mock `agenda`, `speakers`, `targetAudience`, `status` và `isOpenRegistration` không phải bằng chứng thêm column; chúng lần lượt nằm trong Rich Text hoặc được derive. Ý nghĩa dữ liệu thực tế của legacy `end_time` phải được xác minh bằng dữ liệu/CMS cũ trước khi quyết định tái sử dụng hay thêm field mới.
+
 ## Decision 11 — No Level 4 breaking change in initial migration
 
 **Reason:** Additive schema plus application mapping solves current requirements.  

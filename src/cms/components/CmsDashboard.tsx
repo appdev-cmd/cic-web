@@ -55,9 +55,9 @@ const StaticPagesManager = lazy(async () => {
 });
 const NewsManager = lazy(() => import('../modules/news/NewsModulePage'));
 const EventsManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/events/EventsManager'), import('../data/demoEditorialContentDataSource')]);
+  const [module, dataModule] = await Promise.all([import('../modules/events/EventsManager'), import('../modules/events/eventsData')]);
   return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-    <module.EventsManager workspaceLocale={workspaceLocale} data={dataModule.demoEditorialContentDataSource.eventsByLocale[workspaceLocale]} />
+    <module.EventsManager workspaceLocale={workspaceLocale} data={dataModule.getCmsEventsData(workspaceLocale)} />
   ) };
 });
 const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));

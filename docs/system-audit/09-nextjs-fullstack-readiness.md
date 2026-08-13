@@ -40,14 +40,16 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | News website | `getNewsData()` | `NewsView` không import mock; relation liên quan chọn thủ công |
 | News CMS | `getCmsNewsData(locale)` | list/form/category/media nhận data qua props/data function |
 | Static Pages CMS | `getCmsStaticPagesData(locale)` | Page/entity/media đi qua một boundary; registry section cố định nằm trong code |
+| Events website | `getEventsData()` | list/detail và product relation không import raw fixture trong component |
+| Events CMS | `getCmsEventsData(locale)` | list/form/relation/media nhận dataset theo workspace qua props |
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
-- CMS Dashboard và các module Events, Services, Products, Product Settings, Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
+- CMS Dashboard và các module Services, Products, Product Settings, Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
 - CTA, Forms, Customer Requests và Email Templates còn import fixture trực tiếp ở manager/editor.
 - Function SEO và Translation Strings còn import mock trực tiếp.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
-- Website Home, Product, Service, Event, Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
+- Website Home (bao gồm event highlight riêng), Product, Service, Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
 
 Các module này được xử lý lần lượt theo thứ tự triển khai đã chốt; không refactor hàng loạt.
 

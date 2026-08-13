@@ -91,6 +91,15 @@
 
 ## 6. Event detail
 
+### Data-access boundary đã áp dụng cho React mockup
+
+- Website list/detail gọi `getEventsData()`; `EventsView` không import trực tiếp `eventsData` hoặc `productsData`.
+- CMS route gọi `getCmsEventsData(locale)` và truyền Events, News/Product relation options cùng Media images vào manager/form qua props.
+- VI và EN độc lập; khi chưa có fixture EN, CMS trả dataset rỗng thay vì fallback VI.
+- `editorial_status` là ViewModel suy từ `published`, không phải column mới. `created_time` là metadata thời gian tạo, không dùng làm lịch xuất bản.
+- Mapper Next.js tương lai chịu trách nhiệm đổi `summary → shortDesc`, `content → longDesc/contentHtml`, `time_event → startDate`, `place → location`, `chu_de → eventType`, `image → img` và resolve relation có thứ tự.
+- Các mock field `agenda`, `speakers`, `targetAudience` không tạo column riêng; nội dung biên tập nằm trong Rich Text. Gallery/document chỉ dùng Media relation khi có nguồn thật.
+
 | Section/item | Nguồn cuối | Loại | Ghi chú |
 |---|---|---|---|
 | Breadcrumb/title/slug | route + title/alias | Column/computed | |

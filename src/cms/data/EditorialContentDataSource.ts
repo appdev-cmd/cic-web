@@ -32,6 +32,7 @@ export interface EventsModuleData {
   events: EventItem[];
   relatedArticles: NewsArticle[];
   relatedProducts: EventRelatedProductItem[];
+  mediaImages?: CmsMediaPickerItem[];
 }
 
 export interface EditorialContentDataSource {

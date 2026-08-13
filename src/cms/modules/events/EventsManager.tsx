@@ -232,6 +232,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           ? {
               ...item,
               ...updatedFields,
+              ...(typeof updatedFields.published === 'boolean'
+                ? { editorial_status: updatedFields.published ? 'published' as const : 'draft' as const }
+                : {}),
               updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
             }
           : item
@@ -251,6 +254,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             ? ({
                 ...item,
                 ...data,
+                editorial_status: data.published ? 'published' : 'draft',
                 updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
               } as EventItem)
             : item
@@ -271,20 +275,20 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         specific_time: data.specific_time || '',
         chu_de: data.chu_de || '',
         link_dangky: data.link_dangky || '',
-        editorial_status: data.editorial_status || 'published',
+        editorial_status: data.published ? 'published' : 'draft',
         event_related: data.event_related || [],
         news_related: data.news_related || [],
         products_related: data.products_related || [],
         is_hot: data.is_hot ?? false,
         show_in_home: data.show_in_home ?? true,
-        published: data.published ?? true,
+        published: data.published ?? false,
         ordering: data.ordering || 1,
         seo_title: data.seo_title || '',
         seo_keyword: data.seo_keyword || '',
         seo_description: data.seo_description || '',
         created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
       };
-      setEvents([newItem, ...events]);
+      setEvents((current) => [newItem, ...current]);
       showToast(`Đã tạo sự kiện mới thành công!`);
     }
 
@@ -321,6 +325,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           relatedEvents={data?.events ?? []}
           relatedArticles={data?.relatedArticles ?? []}
           relatedProducts={data?.relatedProducts ?? []}
+          mediaImages={data?.mediaImages ?? []}
           onSave={handleSaveEvent}
           onOpenPreview={setPreviewEvent}
           onCancel={() => {

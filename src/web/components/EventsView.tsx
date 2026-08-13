@@ -33,8 +33,7 @@ import {
   Tag,
   Box
 } from 'lucide-react';
-import { eventsData } from '../data/eventsData';
-import { productsData } from '../data/mockData';
+import { getEventsData } from '../features/events/eventsData';
 import { EventItem, EventRegistration } from '@shared/types';
 
 interface EventsViewProps {
@@ -51,6 +50,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
   initialIsRegistering,
   onNavigateToProduct,
 }) => {
+  const { events: eventsData, relatedProducts: productsData } = React.useMemo(getEventsData, []);
   // Navigation & details state
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
 
