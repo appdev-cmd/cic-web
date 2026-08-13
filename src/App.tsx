@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Facebook, Linkedin, Bot, ChevronDown, ChevronUp, MessageSquare, X, Headphones, LayoutDashboard } from 'lucide-react';
 
@@ -30,11 +30,18 @@ import { ContactView } from '@web/components/ContactView';
 import { PrivacyPolicyView } from '@web/components/PrivacyPolicyView';
 import { TermsOfUseView } from '@web/components/TermsOfUseView';
 import { SearchView } from '@web/components/SearchView';
+import { NotFoundView } from '@web/components/NotFoundView';
+
+type WebsiteView = 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found' | 'cms';
+
+function getInitialView(): WebsiteView {
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/cms' || path.startsWith('/cms/')) return 'cms';
+  return path === '/' ? 'home' : 'not-found';
+}
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'cms'>(() =>
-    window.location.pathname === '/cms' || window.location.pathname.startsWith('/cms/') ? 'cms' : 'home'
-  );
+  const [currentView, setCurrentView] = useState<WebsiteView>(getInitialView);
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -47,6 +54,18 @@ export default function App() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
   const [isDesignTokensOpen, setIsDesignTokensOpen] = useState(false);
+
+  useEffect(() => {
+    const handlePopState = () => setCurrentView(getInitialView());
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (currentView !== 'not-found' && currentView !== 'cms' && window.location.pathname !== '/') {
+      window.history.replaceState({}, '', '/');
+    }
+  }, [currentView]);
 
   // View reset keys to ensure clicking header/footer menu returns from detail pages back to list pages
   const [productsResetKey, setProductsResetKey] = useState(0);
@@ -427,6 +446,15 @@ export default function App() {
             onNavigateHome={() => {
               setCurrentView('home');
               setActiveLink('');
+            }}
+          />
+        ) : currentView === 'not-found' ? (
+          <NotFoundView
+            onNavigateHome={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentView('home');
+              setActiveLink('');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
         ) : (

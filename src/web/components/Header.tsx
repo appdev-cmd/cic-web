@@ -20,7 +20,7 @@ import { ZaloIcon } from '@shared/components/Icons';
 import { navLinks } from '../data/mockData';
 
 interface HeaderProps {
-  currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search';
+  currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
   setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   activeLink: string;
   setActiveLink: (link: string) => void;
