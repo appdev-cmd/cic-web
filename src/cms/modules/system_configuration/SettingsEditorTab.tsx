@@ -92,6 +92,24 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
 
   const scopeIssues = issues.filter((i) => i.scopeId === activeScopeId);
 
+  const getPreviewValue = (settingId: string, fallback: string) => {
+    const record = valuesRecord[settingId];
+    if (!record) return fallback;
+    const value = record.draftValue !== undefined ? record.draftValue : record.effectiveValue;
+    return typeof value === 'string' && value.trim() ? value : fallback;
+  };
+
+  const errorPagePreview = {
+    title: getPreviewValue('error_404_title', 'Không tìm thấy trang'),
+    description: getPreviewValue(
+      'error_404_description',
+      'Trang bạn đang tìm kiếm không tồn tại hoặc đã được chuyển sang địa chỉ khác.',
+    ),
+    image: getPreviewValue('error_404_image', ''),
+    ctaLabel: getPreviewValue('error_404_cta_label', 'Về trang chủ'),
+    ctaUrl: getPreviewValue('error_404_cta_url', '/'),
+  };
+
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
       {/* SCOPE SELECTOR & ACTION HEADER */}
@@ -227,6 +245,66 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                 {groups.find((g) => g.id === activeGroupId)?.description}
               </p>
             </div>
+
+            {activeGroupId === 'error_page' && !searchTerm.trim() && (
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                      <Eye className="h-4 w-4 text-orange-500" />
+                      Mô phỏng nội dung trang 404
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-slate-500">
+                      Cập nhật ngay theo bản nháp đang nhập; bố cục thực tế do frontend quyết định.
+                    </p>
+                  </div>
+                  <span className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+                    DRAFT PREVIEW
+                  </span>
+                </div>
+
+                <div className="relative flex min-h-[310px] items-center justify-center overflow-hidden px-5 py-10 sm:px-10">
+                  <div className="absolute right-5 top-3 select-none text-[88px] font-black leading-none text-slate-200/70 dark:text-slate-800/70 sm:text-[120px]">
+                    404
+                  </div>
+                  <div className="relative grid w-full max-w-3xl items-center gap-7 md:grid-cols-2">
+                    <div className="order-2 text-center md:order-1 md:text-left">
+                      <div className="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-orange-600">Lỗi 404</div>
+                      <h4 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+                        {errorPagePreview.title}
+                      </h4>
+                      <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {errorPagePreview.description}
+                      </p>
+                      <a
+                        href={errorPagePreview.ctaUrl}
+                        onClick={(event) => event.preventDefault()}
+                        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm"
+                      >
+                        {errorPagePreview.ctaLabel}
+                        <ChevronRight className="h-4 w-4" />
+                      </a>
+                      <div className="mt-2 truncate font-mono text-[10px] text-slate-400">{errorPagePreview.ctaUrl}</div>
+                    </div>
+
+                    <div className="order-1 flex min-h-36 items-center justify-center md:order-2">
+                      {errorPagePreview.image ? (
+                        <img
+                          src={errorPagePreview.image}
+                          alt="Ảnh minh họa trang 404"
+                          className="max-h-52 w-full rounded-2xl object-contain"
+                        />
+                      ) : (
+                        <div className="flex h-36 w-full max-w-xs flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/70 text-slate-400 dark:border-slate-700 dark:bg-slate-900/70">
+                          <FileImage className="mb-2 h-7 w-7" />
+                          <span className="text-[11px] font-semibold">Chưa chọn ảnh minh họa</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* RENDER FIELD ITEMS */}
             {filteredItems.length === 0 ? (
