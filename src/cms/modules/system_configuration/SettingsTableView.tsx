@@ -19,7 +19,7 @@ import {
   ConfigValueRecord,
   SensitivityLevel,
 } from './types';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface SettingsTableViewProps {
   scopes: ConfigScope[];
@@ -40,6 +40,8 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
   const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
   const [selectedSensitivity, setSelectedSensitivity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const currentValues = valuesRecordMap[selectedScopeId] || {};
 
@@ -57,6 +59,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
     }
     return true;
   });
+  const paginatedItems = filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
@@ -140,7 +143,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {filteredItems.map((item) => {
+              {paginatedItems.map((item) => {
                 const rec: ConfigValueRecord = currentValues[item.id] || {
                   settingId: item.id,
                   scopeId: selectedScopeId as ConfigScopeId,
@@ -234,7 +237,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
             </tbody>
           </table>
         </div>
-        <CmsListFooter visibleCount={filteredItems.length} totalCount={items.length} itemLabel="thiết lập" />
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredItems.length} itemLabel="thiết lập" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
     </div>
   );

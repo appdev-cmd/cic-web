@@ -16,7 +16,7 @@ import {
   Search,
 } from 'lucide-react';
 import { MenuItem } from './types';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface MenuTableViewProps {
   items: MenuItem[];
@@ -33,6 +33,8 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
 }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filterHealth, setFilterHealth] = useState<'all' | 'valid' | 'broken' | 'warning'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Flatten nested items tree into linear array for data table
   const flattenItems = (itemList: MenuItem[], result: MenuItem[] = []): MenuItem[] => {
@@ -51,6 +53,7 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
     if (filterHealth === 'all') return true;
     return item.link_health === filterHealth;
   });
+  const paginatedData = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === filteredData.length) {
@@ -124,7 +127,7 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {filteredData.map((item) => {
+            {paginatedData.map((item) => {
               const isSelected = selectedIds.includes(item.id);
               return (
                 <tr
@@ -203,7 +206,7 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
           </tbody>
         </table>
       </div>
-      <CmsListFooter visibleCount={filteredData.length} totalCount={flatData.length} itemLabel="mục menu" />
+      <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredData.length} itemLabel="mục menu" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
     </div>
   );
 };

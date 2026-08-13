@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Eye,
   Edit3,
@@ -13,6 +13,7 @@ import {
 import { FormItem, FormListTabType } from '../types';
 import { FORM_STATUS_LABELS } from '../../shared/constants/statusTypes';
 import { CmsIconButton } from '../../../../components/ui/CmsButton';
+import { CmsPagination } from '../../../../components/ui/CmsPagination';
 
 interface FormListProps {
   forms: FormItem[];
@@ -42,6 +43,9 @@ export const FormList: React.FC<FormListProps> = ({
   onQuickStatusToggle,
 }) => {
   const isAllSelected = forms.length > 0 && selectedFormIds.length === forms.length;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const paginatedForms = forms.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -63,7 +67,7 @@ export const FormList: React.FC<FormListProps> = ({
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
+        <table className="cms-data-table text-left">
           <thead>
             <tr className="bg-slate-50/80 dark:bg-slate-850 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 select-none">
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
@@ -85,7 +89,7 @@ export const FormList: React.FC<FormListProps> = ({
           </thead>
 
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
-            {forms.map((form) => {
+            {paginatedForms.map((form) => {
               const isSelected = selectedFormIds.includes(form.id);
 
               return (
@@ -233,6 +237,7 @@ export const FormList: React.FC<FormListProps> = ({
           <p className="text-xs mt-1">Hãy tạo biểu mẫu mới để bắt đầu</p>
         </div>
       )}
+      {forms.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={forms.length} itemLabel="biểu mẫu" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
     </div>
   );
 };

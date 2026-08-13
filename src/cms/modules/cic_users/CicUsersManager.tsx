@@ -33,6 +33,7 @@ import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data }) => {
   // Main Users State
@@ -45,6 +46,8 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [agencyFilter, setAgencyFilter] = useState<string>('all');
   const [onlineFilter, setOnlineFilter] = useState<'all' | 'online' | 'offline'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Form Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,6 +111,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
       return matchSearch && matchStatus && matchRole && matchAgency && matchOnline;
     });
   }, [users, searchQuery, statusFilter, roleFilter, agencyFilter, onlineFilter]);
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Refresh Handler
   const handleRefresh = () => {
@@ -411,7 +415,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => {
+                paginatedUsers.map((user) => {
                   const isSelected = selectedIds.includes(user.id);
                   const userRoleObj = data.roles.find((r) => r.id === user.role_id);
                   return (
@@ -563,15 +567,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
           </table>
         </div>
 
-        {/* Table Footer */}
-        <div className="cms-list-footer">
-          <p className="cms-list-summary">Hiển thị <strong>{filteredUsers.length}</strong> trong <strong>{users.length}</strong> tài khoản</p>
-          {selectedIds.length > 0 && (
-            <span className="text-orange-600 font-bold">
-              Đã chọn {selectedIds.length} mục
-            </span>
-          )}
-        </div>
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredUsers.length} itemLabel="tài khoản" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
 
       {/* CREATE / EDIT MODAL */}

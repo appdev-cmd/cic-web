@@ -16,7 +16,7 @@ import {
 import { MediaAsset } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface MediaListViewProps {
   assets: MediaAsset[];
@@ -37,6 +37,9 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
   onOpenPreview,
   onDeleteAsset,
 }) => {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(20);
+  const paginatedAssets = assets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const isAllSelected = assets.length > 0 && selectedAssetIds.length === assets.length;
 
   if (assets.length === 0) {
@@ -82,7 +85,7 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
-            {assets.map((asset) => {
+            {paginatedAssets.map((asset) => {
               const isSelected = selectedAssetIds.includes(asset.id);
               const isDoc = asset.type === 'document';
               const isVid = asset.type === 'video';
@@ -253,7 +256,7 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
           </tbody>
         </table>
       </div>
-      <CmsListFooter visibleCount={assets.length} itemLabel="tệp media" />
+      <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={assets.length} itemLabel="tệp media" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
     </div>
   );
 };

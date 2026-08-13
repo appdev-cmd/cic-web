@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { CheckCircle2, Edit, Eye, FileText, Globe2, Plus, RefreshCw, Search, X } from 'lucide-react';
+import { CheckCircle2, Edit, Eye, FileText, Globe2, Plus, RefreshCw, X } from 'lucide-react';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
+import { CmsListToolbar } from '../../components/ui/CmsListToolbar';
 import { PageBuilderEditor } from './PageBuilderEditor';
 import { PageBuilderPreviewModal } from './PageBuilderPreviewModal';
 import { createLegalPage, pageBuilderPagesMock } from './pageBuilderData';
@@ -25,6 +26,9 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
   const [toast, setToast] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const showToast = (message: string) => { setToast(message); window.setTimeout(() => setToast(null), 3000); };
   const filteredPages = useMemo(() => pages.filter((page) => {
@@ -33,6 +37,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
     const matchesStatus = statusFilter === 'all' || (statusFilter === 'published' ? page.published.version > 0 : page.draft.version > page.published.version);
     return matchesQuery && matchesStatus;
   }), [pages, query, statusFilter]);
+  const paginatedPages = filteredPages.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const editingPage = pages.find((page) => page.id === editingId) ?? null;
   const suggestedSlug = useMemo(() => {
     const base = shortSlug(newPageName) || 'trang-noi-dung';
@@ -72,12 +77,12 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
   return <div className="space-y-5">
     {toast && <Toast message={toast} />}
     <CmsPageHeader icon={<FileText />} title="Trang nội dung" description="Quản lý các trang thiết kế riêng và tạo trang mới theo mẫu nội dung chuẩn." meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700">{pages.length} Page · {workspaceLocale.toUpperCase()}</span>} actions={<div className="flex flex-wrap gap-2"><CmsButton variant="secondary" leadingIcon={<RefreshCw />} onClick={() => showToast('Đã tải lại danh sách Page.')}>Làm mới</CmsButton><CmsButton leadingIcon={<Plus />} onClick={() => setCreateOpen(true)}>Tạo trang nội dung</CmsButton></div>} />
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"><div className="flex flex-col gap-3 md:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, code hoặc đường dẫn..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" /></div><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium outline-none dark:border-slate-700 dark:bg-slate-800"><option value="all">Tất cả trạng thái</option><option value="has_draft">Có thay đổi Draft</option><option value="published">Đã xuất bản</option></select></div></section>
+    <CmsListToolbar searchValue={query} onSearchChange={(value) => { setQuery(value); setCurrentPage(1); }} searchPlaceholder="Tìm theo tên, code hoặc đường dẫn..." filtersOpen={filtersOpen} onToggleFilters={() => setFiltersOpen((open) => !open)} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setQuery(''); setStatusFilter('all'); setCurrentPage(1); }} resetDisabled={!query && statusFilter === 'all'} filters={<label className="space-y-1.5 text-xs font-bold text-slate-700 dark:text-slate-300"><span>Trạng thái</span><select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setCurrentPage(1); }} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium outline-none dark:border-slate-700 dark:bg-slate-800"><option value="all">Tất cả trạng thái</option><option value="has_draft">Có thay đổi Draft</option><option value="published">Đã xuất bản</option></select></label>} activeFilters={statusFilter === 'all' ? [] : [{ id: 'status', label: statusFilter === 'published' ? 'Trạng thái: Đã xuất bản' : 'Trạng thái: Có thay đổi Draft', onRemove: () => setStatusFilter('all') }]} />
     <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
-      <div className="hidden overflow-x-auto md:block"><table className="cms-data-table min-w-[920px] text-left"><thead><tr><th className="p-3">Page</th><th className="p-3">Code / đường dẫn</th><th className="p-3">Section</th><th className="p-3">Draft</th><th className="p-3">Published</th><th className="p-3 text-right">Thao tác</th></tr></thead><tbody>{filteredPages.map((page) => <PageRow key={page.id} page={page} onPreview={setPreviewPage} onEdit={setEditingId} />)}</tbody></table></div>
-      <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">{filteredPages.map((page) => <PageCard key={page.id} page={page} onPreview={setPreviewPage} onEdit={setEditingId} />)}</div>
+      <div className="hidden overflow-x-auto md:block"><table className="cms-data-table min-w-[920px] text-left"><thead><tr><th className="p-3">Page</th><th className="p-3">Code / đường dẫn</th><th className="p-3">Section</th><th className="p-3">Draft</th><th className="p-3">Published</th><th className="p-3 text-right">Thao tác</th></tr></thead><tbody>{paginatedPages.map((page) => <PageRow key={page.id} page={page} onPreview={setPreviewPage} onEdit={setEditingId} />)}</tbody></table></div>
+      <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">{paginatedPages.map((page) => <PageCard key={page.id} page={page} onPreview={setPreviewPage} onEdit={setEditingId} />)}</div>
       {filteredPages.length === 0 && <div className="py-12 text-center text-sm text-slate-500">Không tìm thấy Page phù hợp.</div>}
-      <CmsListFooter visibleCount={filteredPages.length} totalCount={pages.length} itemLabel="Page" />
+      <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredPages.length} itemLabel="Page" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
     </section>
     <PageBuilderPreviewModal page={previewPage} onClose={() => setPreviewPage(null)} />
     {createOpen && <CreatePageModal name={newPageName} slug={suggestedSlug} onNameChange={setNewPageName} onClose={() => setCreateOpen(false)} onCreate={createPage} />}

@@ -70,7 +70,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(20);
 
   // Edit / Form Mode
   const [editingService, setEditingService] = useState<ServiceItem | null>(null);
@@ -388,6 +388,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             <option value="all">Saved View: Mặc định</option>
             <option value="view_active">Saved View: Dịch vụ Active</option>
           </select>
+          <button type="button" disabled={!searchTerm && filterEditorialStatus === 'all' && filterServiceStatus === 'all' && filterOwnerId === 'all' && filterSavedView === 'all'} onClick={() => { setSearchTerm(''); setFilterEditorialStatus('all'); setFilterServiceStatus('all'); setFilterOwnerId('all'); setFilterSavedView('all'); setCurrentPage(1); }} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
         </div>
 
         {/* Bulk Actions Bar if items selected */}
@@ -623,7 +624,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         </div>
 
         {/* Table Footer & Pagination */}
-        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredServices.length} itemLabel="dịch vụ" pageSizeOptions={[10, 25, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredServices.length} itemLabel="dịch vụ" pageSizeOptions={[10, 20, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
 
       {/* Overlays & Drawers */}

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { AuditEvent, AuditCategory, AuditSeverity, SavedViewFilter } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface AuditTabProps {
@@ -39,6 +39,8 @@ export const AuditTab: React.FC<AuditTabProps> = ({
   const [dateFilter, setDateFilter] = useState<'today' | '7days' | '30days' | 'all'>('30days');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [resultFilter, setResultFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Filter logic
   const filteredLogs = logs.filter((log) => {
@@ -68,6 +70,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
 
     return true;
   });
+  const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleApplyPreset = (preset: SavedViewFilter) => {
     setActiveCategory(preset.category as AuditCategory);
@@ -210,7 +213,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => (
+                paginatedLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3.5 px-4 font-mono text-slate-500 shrink-0">
                       {log.timestamp}
@@ -280,7 +283,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
             </tbody>
           </table>
         </div>
-        <CmsListFooter visibleCount={filteredLogs.length} totalCount={logs.length} itemLabel="hoạt động" />
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredLogs.length} itemLabel="hoạt động" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
     </div>
   );

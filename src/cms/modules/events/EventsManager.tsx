@@ -26,6 +26,7 @@ import {
   ExternalLink,
   Zap,
   CheckCircle,
+  RotateCcw,
 } from 'lucide-react';
 import { EventItem, EventCategory, EditorialStatus, EventProgressStatus } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
@@ -38,6 +39,7 @@ import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { EventActivityLogDrawer } from './EventActivityLogDrawer';
 import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
 
@@ -104,6 +106,8 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   const [searchTitle, setSearchTitle] = useState('');
   const [editorialFilter, setEditorialFilter] = useState<string>('all');
   const [eventStatusFilter, setEventStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Multi-Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -133,6 +137,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
 
     return matchesTitle && matchesEditorial && matchesEventStatus;
   });
+  const paginatedEvents = filteredEvents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Toggle Single Row Editorial Status directly from table
   const handleTogglePublished = (id: string) => {
@@ -454,7 +459,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               type="text"
               placeholder="Tìm kiếm sự kiện theo tiêu đề..."
               value={searchTitle}
-              onChange={(e) => setSearchTitle(e.target.value)}
+              onChange={(e) => { setSearchTitle(e.target.value); setCurrentPage(1); }}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
@@ -463,7 +468,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           <div className="md:col-span-2">
             <select
               value={editorialFilter}
-              onChange={(e) => setEditorialFilter(e.target.value)}
+              onChange={(e) => { setEditorialFilter(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="all">TT Biên tập: Tất cả</option>
@@ -477,7 +482,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           <div className="md:col-span-3 flex items-center gap-2">
             <select
               value={eventStatusFilter}
-              onChange={(e) => setEventStatusFilter(e.target.value)}
+              onChange={(e) => { setEventStatusFilter(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="all">TT Diễn ra: Tất cả</option>
@@ -495,6 +500,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             >
               <RefreshCw className="w-4 h-4" />
             </button>
+            <button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
           </div>
         </div>
 
@@ -532,7 +538,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredEvents.length > 0 ? (
-                filteredEvents.map((ev) => {
+                paginatedEvents.map((ev) => {
                   const isSelected = selectedIds.includes(ev.id);
                   const isCompact = density === 'compact';
                   return (
@@ -677,10 +683,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           </table>
         </div>
 
-        {/* FOOTER PAGINATION SUMMARY */}
-        <div className="cms-list-footer">
-          <p className="cms-list-summary">Hiển thị <strong>{filteredEvents.length}</strong> trong <strong>{events.length}</strong> sự kiện</p>
-        </div>
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredEvents.length} itemLabel="sự kiện" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
     </div>
   );

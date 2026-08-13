@@ -86,7 +86,7 @@ export const AccessReviewsTab: React.FC<AccessReviewsTabProps> = ({
       {/* REVIEWS TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs font-medium">
+          <table className="cms-data-table text-left font-medium">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="p-3">Vai trò Rà soát</th>

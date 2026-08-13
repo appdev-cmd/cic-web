@@ -134,7 +134,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(20);
 
   // Current Active List Array based on activeDataType
   const currentActiveList: AnyMasterItem[] = useMemo(() => {
@@ -464,6 +464,8 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   </div>
                 )}
 
+                <button type="button" disabled={!searchQuery && statusFilter === 'all' && usageFilter === 'all' && staffProductFilter === 'all'} onClick={() => { setSearchQuery(''); setStatusFilter('all'); setUsageFilter('all'); setStaffProductFilter('all'); setCurrentPage(1); }} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+
                 {/* Column settings button */}
                 {activeDataType !== 'sales_staff' && <button
                   onClick={() => setIsColumnModalOpen(true)}
@@ -693,7 +695,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             </div>
 
             {/* Pagination Footer */}
-            <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredList.length} itemLabel="mục thiết lập" pageSizeOptions={[25, 50]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
+            <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredList.length} itemLabel="mục thiết lập" pageSizeOptions={[10, 20, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
           </div>
 
         </div>

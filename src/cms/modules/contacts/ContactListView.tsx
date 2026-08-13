@@ -19,7 +19,7 @@ import { ContactRequest, ContactStatus, PriorityLevel, StaffMember } from './typ
 import { getPriorityBadge, getSlaRemainingText, getSourceBadge, getStatusBadge, maskEmail, maskName } from './utils';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface ContactListViewProps {
   contacts: ContactRequest[];
@@ -58,6 +58,9 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
   const [density, setDensity] = useState<'compact' | 'standard' | 'spacious'>('standard');
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const paginatedContacts = contacts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const isAllSelected = contacts.length > 0 && selectedIds.length === contacts.length;
 
@@ -135,7 +138,7 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
                   </td>
                 </tr>
               ) : (
-                contacts.map((contact) => {
+                paginatedContacts.map((contact) => {
                   const isSelected = selectedIds.includes(contact.id);
                   const sourceInfo = getSourceBadge(contact.source);
                   const statusInfo = getStatusBadge(contact.status);
@@ -302,7 +305,7 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
             </tbody>
           </table>
         </div>
-        <CmsListFooter visibleCount={contacts.length} itemLabel="yêu cầu" />
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={contacts.length} itemLabel="yêu cầu" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
 
       {/* STICKY BULK ACTION BAR WHEN ITEMS ARE SELECTED */}

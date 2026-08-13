@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Eye,
   Edit3,
@@ -16,6 +16,7 @@ import {
 import { CustomerRequest, RequestListTabType } from '../types';
 import { REQUEST_STATUS_LABELS } from '../../shared/constants/statusTypes';
 import { CmsIconButton } from '../../../../components/ui/CmsButton';
+import { CmsPagination } from '../../../../components/ui/CmsPagination';
 
 interface RequestListProps {
   requests: CustomerRequest[];
@@ -41,6 +42,9 @@ export const RequestList: React.FC<RequestListProps> = ({
   onQuickStatusToggle,
 }) => {
   const isAllSelected = requests.length > 0 && selectedRequestIds.length === requests.length;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const paginatedRequests = requests.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -113,7 +117,7 @@ export const RequestList: React.FC<RequestListProps> = ({
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
+        <table className="cms-data-table text-left">
           <thead>
             <tr className="bg-slate-50/80 dark:bg-slate-850 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 select-none">
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
@@ -136,7 +140,7 @@ export const RequestList: React.FC<RequestListProps> = ({
           </thead>
 
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
-            {requests.map((request) => {
+            {paginatedRequests.map((request) => {
               const isSelected = selectedRequestIds.includes(request.id);
               const StatusIcon = getStatusIcon(request.status);
               const phone = getCustomerPhone(request);
@@ -276,6 +280,7 @@ export const RequestList: React.FC<RequestListProps> = ({
           <p className="text-xs mt-1">Chưa có yêu cầu từ khách hàng</p>
         </div>
       )}
+      {requests.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={requests.length} itemLabel="yêu cầu" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
     </div>
   );
 };

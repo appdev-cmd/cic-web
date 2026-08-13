@@ -19,7 +19,7 @@ import { TrashedItem, TrashCategory } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface TrashTabProps {
@@ -42,6 +42,8 @@ export const TrashTab: React.FC<TrashTabProps> = ({
   const [activeCategory, setActiveCategory] = useState<TrashCategory>('all');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Filter items
   const filteredItems = items.filter((item) => {
@@ -70,6 +72,7 @@ export const TrashTab: React.FC<TrashTabProps> = ({
 
     return true;
   });
+  const paginatedItems = filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const toggleSelectItem = (id: string) => {
     setSelectedItemIds((prev) =>
@@ -170,7 +173,7 @@ export const TrashTab: React.FC<TrashTabProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredItems.map((item) => {
+                paginatedItems.map((item) => {
                   const isSelected = selectedItemIds.includes(item.id);
 
                   return (
@@ -275,7 +278,7 @@ export const TrashTab: React.FC<TrashTabProps> = ({
             </tbody>
           </table>
         </div>
-        <CmsListFooter visibleCount={filteredItems.length} totalCount={items.length} itemLabel="mục đã xóa" />
+        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredItems.length} itemLabel="mục đã xóa" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
     </div>
   );

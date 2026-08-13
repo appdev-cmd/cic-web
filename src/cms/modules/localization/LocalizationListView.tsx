@@ -59,7 +59,7 @@ export const LocalizationListView: React.FC<LocalizationListViewProps> = ({
   const [editingValue, setEditingValue] = useState<string>('');
 
   // Pagination state
-  const [pageSize, setPageSize] = useState<number>(50);
+  const [pageSize, setPageSize] = useState<number>(20);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const totalPages = Math.ceil(items.length / pageSize) || 1;

@@ -103,7 +103,7 @@ export const VersionHistoryTab: React.FC<VersionHistoryTabProps> = ({
 
                 {/* CHANGES TABLE */}
                 <div className="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-                  <table className="w-full text-left">
+                  <table className="cms-data-table text-left">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-bold text-[11px]">
                         <th className="py-2 px-3">Tên cài đặt</th>

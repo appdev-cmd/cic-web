@@ -45,7 +45,7 @@ import { VersionHistoryDrawer } from './components/VersionHistoryDrawer';
 import { ActivityLogDrawer } from './components/ActivityLogDrawer';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
-import { CmsListFooter } from '../../components/ui/CmsPagination';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 import { NewsCategoryManager } from './NewsCategoryManager';
 
 type ViewScopeTab = 'all' | 'trash';
@@ -84,6 +84,8 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [workflowFilter, setWorkflowFilter] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Selection for Batch Operations
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -147,6 +149,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
       return matchSearch && matchCat && matchWorkflow;
     });
   }, [scopeFilteredArticles, searchQuery, selectedCategory, workflowFilter]);
+  const paginatedArticles = filteredArticles.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Handle Select All
   const handleToggleSelectAll = () => {
@@ -360,7 +363,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
           {/* SEARCH & FILTERS TOOLBAR */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-              <div className="md:col-span-5 relative">
+              <div className="md:col-span-4 relative">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   type="text"
@@ -371,7 +374,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                 />
               </div>
 
-              <div className="md:col-span-4">
+              <div className="md:col-span-3">
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
@@ -397,6 +400,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                   <option value="published">Đã xuất bản (Published)</option>
                 </select>
               </div>
+              <button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && workflowFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setWorkflowFilter('ALL'); setCurrentPage(1); }} className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800 md:col-span-2"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
             </div>
 
             {/* BULK ACTIONS BAR */}
@@ -443,7 +447,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                       </td>
                     </tr>
                   ) : (
-                    filteredArticles.map((art) => {
+                    paginatedArticles.map((art) => {
                       const isSelected = selectedIds.includes(art.id);
                       return (
                         <tr
@@ -604,7 +608,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                 </tbody>
               </table>
             </div>
-            <CmsListFooter visibleCount={filteredArticles.length} totalCount={articles.length} itemLabel="bài viết" />
+            <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredArticles.length} itemLabel="bài viết" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
           </div>
         </>
       )}
