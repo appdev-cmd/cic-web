@@ -24,7 +24,6 @@ import {
   History,
   Activity,
   SlidersHorizontal,
-  Bookmark,
   User,
   ShieldCheck,
   Globe,
@@ -49,7 +48,7 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsListFooter } from '../../components/ui/CmsPagination';
 import { NewsCategoryManager } from './NewsCategoryManager';
 
-type ViewScopeTab = 'all' | 'my_work' | 'trash';
+type ViewScopeTab = 'all' | 'trash';
 
 interface NewsManagerProps {
   workspaceLocale: CmsLocale;
@@ -80,15 +79,11 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
 
   // Scope Tabs
   const [activeScopeTab, setActiveScopeTab] = useState<ViewScopeTab>('all');
-  const [myWorkSubFilter, setMyWorkSubFilter] = useState<'all' | 'draft' | 'assigned'>('all');
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [workflowFilter, setWorkflowFilter] = useState<string>('ALL');
-
-  // Saved Views Quick Filter
-  const [activeSavedView, setActiveSavedView] = useState<string | null>(null);
 
   // Selection for Batch Operations
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -129,16 +124,9 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
       if (activeScopeTab === 'trash') return Boolean(item.in_trash);
       if (item.in_trash) return false;
 
-      if (activeScopeTab === 'my_work') {
-        const isMyArticle = item.author?.name?.includes('Nam') || item.assignee?.name?.includes('Nam');
-        if (!isMyArticle) return false;
-        if (myWorkSubFilter === 'draft') return item.workflow_status === 'draft';
-        return true;
-      }
-
       return true;
     });
-  }, [articles, activeScopeTab, myWorkSubFilter]);
+  }, [articles, activeScopeTab]);
 
   // Final Filtered List
   const filteredArticles = useMemo(() => {
@@ -156,15 +144,9 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
       // Workflow
       const matchWorkflow = workflowFilter === 'ALL' || item.workflow_status === workflowFilter;
 
-      // Saved Views
-      let matchSavedView = true;
-      if (activeSavedView === 'mine') {
-        matchSavedView = Boolean(item.author?.name?.includes('Nam'));
-      }
-
-      return matchSearch && matchCat && matchWorkflow && matchSavedView;
+      return matchSearch && matchCat && matchWorkflow;
     });
-  }, [scopeFilteredArticles, searchQuery, selectedCategory, workflowFilter, activeSavedView]);
+  }, [scopeFilteredArticles, searchQuery, selectedCategory, workflowFilter]);
 
   // Handle Select All
   const handleToggleSelectAll = () => {
@@ -358,11 +340,9 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
               value={activeScopeTab}
               onChange={(tab) => {
                 setActiveScopeTab(tab as any);
-                setActiveSavedView(null);
               }}
               items={[
                 { id: 'all', label: 'Tất cả bài viết', count: articles.filter((a) => !a.in_trash).length },
-                { id: 'my_work', label: 'Việc của tôi', count: articles.filter((a) => !a.in_trash && (a.author?.name?.includes('Minh') || a.author?.name?.includes('Editor'))).length },
                 { id: 'trash', label: 'Lưu trữ & thùng rác', count: articles.filter((a) => a.in_trash).length },
               ]}
             />
@@ -374,23 +354,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Tùy chỉnh cột</span>
-            </button>
-          </div>
-
-          {/* SAVED VIEWS QUICK PILLS */}
-          <div className="flex items-center gap-2 overflow-x-auto text-xs">
-            <span className="text-slate-400 font-bold flex items-center gap-1 shrink-0">
-              <Bookmark className="w-3.5 h-3.5" /> Chế độ xem nhanh:
-            </span>
-            <button
-              onClick={() => setActiveSavedView(activeSavedView === 'mine' ? null : 'mine')}
-              className={`px-3 py-1 rounded-xl font-semibold border transition-all cursor-pointer shrink-0 ${
-                activeSavedView === 'mine'
-                  ? 'bg-orange-600 text-white border-orange-600'
-                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-orange-500'
-              }`}
-            >
-              Bài của tôi
             </button>
           </div>
 
