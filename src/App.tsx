@@ -250,7 +250,7 @@ export default function App() {
       </div>
 
       {/* Reusable Clean Header Component */}
-      <Header 
+      {currentView !== 'not-found' && <Header
         currentView={currentView}
         setCurrentView={setCurrentView}
         activeLink={activeLink}
@@ -275,7 +275,7 @@ export default function App() {
         onResetEvents={handleResetEvents}
         onSearch={(query) => setGlobalSearchQuery(query)}
         onOpenConsultation={() => setIsConsultationOpen(true)}
-      />
+      />}
 
       <main className="relative">
         {currentView === 'home' ? (

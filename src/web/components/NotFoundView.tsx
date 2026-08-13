@@ -37,14 +37,14 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
   return (
     <section
       className={`relative isolate overflow-hidden bg-white ${
-        embedded ? 'min-h-[430px]' : 'min-h-[calc(100vh-72px)] pt-20 sm:pt-24'
+        embedded ? 'min-h-[430px]' : 'min-h-screen'
       }`}
       aria-labelledby="not-found-title"
     >
       <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.12),transparent_34%),radial-gradient(circle_at_80%_75%,rgba(15,23,42,0.08),transparent_32%)]" />
       <div className="absolute inset-0 -z-10 opacity-[0.035] [background-image:linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] [background-size:32px_32px]" />
 
-      <div className={`mx-auto flex max-w-7xl items-center px-5 sm:px-8 ${embedded ? 'min-h-[430px] py-10' : 'min-h-[calc(100vh-160px)] py-12 lg:py-20'}`}>
+      <div className={`mx-auto flex max-w-7xl items-center px-5 sm:px-8 ${embedded ? 'min-h-[430px] py-10' : 'min-h-screen py-12 lg:py-20'}`}>
         <div className="grid w-full items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div className="order-2 text-center lg:order-1 lg:text-left">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-orange-700">
