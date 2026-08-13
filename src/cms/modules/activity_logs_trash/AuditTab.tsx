@@ -11,26 +11,23 @@ import {
   XCircle,
   AlertTriangle,
   Lock,
-  Bookmark,
   RefreshCw,
   Globe,
   SlidersHorizontal,
 } from 'lucide-react';
-import { AuditEvent, AuditCategory, AuditSeverity, SavedViewFilter } from './types';
+import { AuditEvent, AuditCategory } from './types';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface AuditTabProps {
   logs: AuditEvent[];
-  savedViews: SavedViewFilter[];
   onOpenEventDetail: (event: AuditEvent) => void;
   onOpenExportDrawer: () => void;
 }
 
 export const AuditTab: React.FC<AuditTabProps> = ({
   logs,
-  savedViews,
   onOpenEventDetail,
   onOpenExportDrawer,
 }) => {
@@ -71,12 +68,6 @@ export const AuditTab: React.FC<AuditTabProps> = ({
     return true;
   });
   const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  const handleApplyPreset = (preset: SavedViewFilter) => {
-    setActiveCategory(preset.category as AuditCategory);
-    setDateFilter(preset.dateRange);
-    if (preset.severity) setSeverityFilter(preset.severity);
-  };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
@@ -174,20 +165,6 @@ export const AuditTab: React.FC<AuditTabProps> = ({
           />
         </div>
 
-        {/* SAVED PRESETS */}
-        <div className="flex items-center gap-2 text-xs flex-wrap pt-1">
-          <Bookmark className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-          <span className="font-bold text-slate-500 text-[11px]">Saved Presets:</span>
-          {savedViews.map((sv) => (
-            <button
-              key={sv.id}
-              onClick={() => handleApplyPreset(sv)}
-              className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-medium transition-all cursor-pointer"
-            >
-              {sv.name}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* AUDIT LOGS DATA TABLE */}

@@ -111,13 +111,3 @@ export interface ExportJob {
   downloadUrl?: string;
   expiresAt: string;
 }
-
-export interface SavedViewFilter {
-  id: string;
-  name: string;
-  category: AuditCategory | TrashCategory;
-  dateRange: 'today' | '7days' | '30days' | 'all';
-  severity?: AuditSeverity;
-  result?: AuditResult;
-  searchKeyword?: string;
-}

@@ -10,7 +10,7 @@ import type {
   RoleAssignment,
   UserPermissionState,
 } from '../modules/permission_management/types';
-import type { AuditEvent, ExportJob, SavedViewFilter, TrashedItem } from '../modules/activity_logs_trash/types';
+import type { AuditEvent, ExportJob, TrashedItem } from '../modules/activity_logs_trash/types';
 
 export interface UsersGovernanceData {
   users: CicUser[];
@@ -36,7 +36,6 @@ export interface PermissionsGovernanceData {
 export interface AuditGovernanceData {
   auditLogs: AuditEvent[];
   exportJobs: ExportJob[];
-  savedViews: SavedViewFilter[];
 }
 
 export interface GovernanceDataSource {

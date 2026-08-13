@@ -125,21 +125,6 @@ Hỗ trợ chức năng tạo và tải báo cáo nhật ký.
 
 Job phải được xử lý bất đồng bộ khi dữ liệu lớn. Không đánh dấu `completed` ngay khi người dùng bấm tạo báo cáo.
 
-### 3.4. Saved preset
-
-Saved preset không phải audit event. Nếu cần lưu theo từng người dùng, dùng bảng preference chung:
-
-#### `cic_user_preferences`
-
-- `user_id`
-- `preference_key`
-- `preference_value` JSONB
-- `updated_at`
-
-Ví dụ key: `activity_logs.saved_filters`.
-
-Nếu chưa có backend preference, giữ các preset mặc định trong code. Không cần tạo bảng riêng chỉ cho module này.
-
 ## 4. Danh mục sự kiện
 
 `action_code` phải ổn định, không lấy trực tiếp từ câu tiếng Việt hiển thị.

@@ -11,7 +11,7 @@ import {
   policyIssuesMock,
   roleAssignmentsMock,
 } from '../modules/permission_management/mockData';
-import { initialAuditLogsMock, initialExportJobsMock, initialTrashedItemsMock, savedViewFiltersMock } from '../modules/activity_logs_trash/mockData';
+import { initialAuditLogsMock, initialExportJobsMock, initialTrashedItemsMock } from '../modules/activity_logs_trash/mockData';
 
 export const demoGovernanceDataSource: GovernanceDataSource = {
   users: {
@@ -36,7 +36,6 @@ export const demoGovernanceDataSource: GovernanceDataSource = {
   audit: {
     auditLogs: initialAuditLogsMock,
     exportJobs: initialExportJobsMock,
-    savedViews: savedViewFiltersMock,
   },
   trash: initialTrashedItemsMock,
 };

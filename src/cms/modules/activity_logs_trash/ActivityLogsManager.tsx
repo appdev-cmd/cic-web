@@ -9,7 +9,6 @@ import {
 import {
   AuditEvent,
   ExportJob,
-  SavedViewFilter,
 } from './types';
 
 import type { AuditGovernanceData } from '../../data/GovernanceDataSource';
@@ -23,7 +22,6 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ d
   // State lists
   const [auditLogs] = useState<AuditEvent[]>(data.auditLogs);
   const [exportJobs, setExportJobs] = useState<ExportJob[]>(data.exportJobs);
-  const [savedViews] = useState<SavedViewFilter[]>(data.savedViews);
 
   // Drawer states
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
@@ -81,7 +79,6 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ d
       {/* AUDIT LOGS TAB VIEW */}
       <AuditTab
         logs={auditLogs}
-        savedViews={savedViews}
         onOpenEventDetail={(evt) => {
           setSelectedEvent(evt);
           setEventDetailOpen(true);

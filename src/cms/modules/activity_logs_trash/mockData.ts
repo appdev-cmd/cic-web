@@ -1,4 +1,4 @@
-import { AuditEvent, TrashedItem, ExportJob, SavedViewFilter } from './types';
+import { AuditEvent, TrashedItem, ExportJob } from './types';
 
 export const initialAuditLogsMock: AuditEvent[] = [
   {
@@ -394,33 +394,5 @@ export const initialExportJobsMock: ExportJob[] = [
     fileSizeMb: 0.9,
     downloadUrl: '#download_export_002',
     expiresAt: '2026-08-10 16:22:00',
-  },
-];
-
-export const savedViewFiltersMock: SavedViewFilter[] = [
-  {
-    id: 'sv_01',
-    name: '🔴 Thao tác Nhạy cảm & Đăng nhập Lỗi',
-    category: 'sensitive',
-    dateRange: '7days',
-    severity: 'critical',
-  },
-  {
-    id: 'sv_02',
-    name: '⚙️ Thay đổi Cấu hình & Publish',
-    category: 'config_publish',
-    dateRange: '30days',
-  },
-  {
-    id: 'sv_03',
-    name: '⏳ Trash: Sắp hết hạn lưu giữ (< 7 ngày)',
-    category: 'expiring_soon',
-    dateRange: 'all',
-  },
-  {
-    id: 'sv_04',
-    name: '⚠️ Trash: Có xung đột / Đứt đứt gãy liên kết',
-    category: 'all',
-    dateRange: 'all',
   },
 ];
