@@ -420,7 +420,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
               </div>
 
               {/* Filters */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+              <div className={`flex items-center gap-2 text-xs ${activeDataType === 'sales_staff' ? 'overflow-visible' : 'overflow-x-auto pb-1'}`}>
                 {/* Status filter */}
                 <select
                   value={statusFilter}
