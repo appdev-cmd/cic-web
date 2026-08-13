@@ -20,6 +20,8 @@ export type ConfigGroupId =
   | 'seo'
   | 'company'
   | 'footer_social'
+  | 'measurement'
+  | 'error_page'
   | 'media_assets'
   | 'integrations'
   | 'email_notif'
@@ -53,6 +55,8 @@ export interface ConfigItem {
   placeholder?: string;
   validationRegex?: string;
   unit?: string;
+  usedBy?: string[];
+  futureNote?: string;
 }
 
 export interface ConfigValueRecord {
@@ -88,12 +92,11 @@ export interface ConfigDraft {
   scopeId: ConfigScopeId;
   scopeName: string;
   versionNumber: string;
-  status: 'draft' | 'pending_review' | 'returned' | 'approved';
+  status: 'draft';
   changedCount: number;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
-  reviewNotes?: string;
   changesSummary: {
     settingId: string;
     label: string;
@@ -126,7 +129,7 @@ export interface ConfigActivityLog {
   actor: string;
   scopeId: ConfigScopeId;
   scopeName: string;
-  action: 'save_draft' | 'submit_review' | 'approve_draft' | 'publish_version' | 'override_field' | 'reset_inherited' | 'secret_rotated' | 'restore_version';
+  action: 'save_draft' | 'publish_version' | 'override_field' | 'reset_inherited' | 'secret_rotated' | 'restore_version';
   settingPath?: string;
   details: string;
   ipAddress: string;

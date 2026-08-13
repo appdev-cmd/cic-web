@@ -5,7 +5,6 @@ import {
   Sliders,
   Table as TableIcon,
   ShieldAlert,
-  Clock,
   History,
   Shield,
   Layers,
@@ -35,7 +34,6 @@ import { OverviewTab } from './OverviewTab';
 import { SettingsEditorTab } from './SettingsEditorTab';
 import { SettingsTableView } from './SettingsTableView';
 import { ValidationIssuesTab } from './ValidationIssuesTab';
-import { PendingDraftsTab } from './PendingDraftsTab';
 import { VersionHistoryTab } from './VersionHistoryTab';
 import { ActivityAuditTab } from './ActivityAuditTab';
 
@@ -57,7 +55,15 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     return {
       scopes: uniqueById([...localized.scopes, ...globalData.scopes]),
       groups: uniqueById([...localized.groups, ...globalData.groups]),
-      items: uniqueById([...localized.items, ...globalData.items]),
+      items: uniqueById([...localized.items, ...globalData.items]).map((item) => {
+        if (item.futureNote) return item;
+        if (item.id === 'gen_brand_color') return { ...item, futureNote: 'Tạm giữ để đối chiếu. Có thể bỏ vì màu sắc phải theo design system trong code.' };
+        if (item.id === 'gen_default_lang') return { ...item, futureNote: 'Có thể bỏ khi VI và EN được vận hành như hai workspace độc lập.' };
+        if (item.groupId === 'integrations') return { ...item, futureNote: 'Tạm thời giữ trường; chỉ sử dụng khi backend đã có tích hợp thực tế. Có thể bỏ nếu không triển khai.' };
+        if (item.groupId === 'email_notif') return { ...item, futureNote: 'Đang giữ để khảo sát. Sau này có thể chuyển sang cấu hình vận hành hoặc module Email.' };
+        if (item.groupId === 'advanced') return { ...item, futureNote: 'Cấu hình kỹ thuật; có thể bỏ khỏi giao diện Marketing sau khi backend được triển khai.' };
+        return item;
+      }),
       values: { ...localized.values, ...globalData.values },
       issues: uniqueById([...localized.issues, ...globalData.issues]),
       drafts: uniqueById([...localized.drafts, ...globalData.drafts]),
@@ -66,7 +72,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     };
   }, [websiteData, globalData]);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'editor' | 'table' | 'issues' | 'drafts' | 'versions' | 'audit'
+    'overview' | 'editor' | 'table' | 'issues' | 'versions' | 'audit'
   >('editor');
 
   const [scopes, setScopes] = useState<ConfigScope[]>(mergedData.scopes);
@@ -227,14 +233,14 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     showToast(`Đã lưu Bản nháp cấu hình thành công cho Scope ${activeScope.name}!`);
   };
 
-  const handleSubmitReview = () => {
+  const handlePublish = () => {
     // Check if there are draft values
     const changedKeys = Object.keys(currentScopeValues).filter(
       (k) => currentScopeValues[k]?.draftValue !== undefined
     );
 
     if (changedKeys.length === 0) {
-      showToast('Hiện tại chưa có thay đổi nào trong Bản nháp để gửi duyệt!', 'info');
+      showToast('Hiện tại chưa có thay đổi nào trong Bản nháp để xuất bản!', 'info');
       return;
     }
 
@@ -243,7 +249,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       scopeId: activeScopeId,
       scopeName: activeScope.name,
       versionNumber: `${activeScope.liveVersion}-next`,
-      status: 'pending_review',
+      status: 'draft',
       changedCount: changedKeys.length,
       createdBy: 'admin_cic',
       createdAt: new Date().toLocaleString(),
@@ -257,8 +263,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       })),
     };
 
-    setDrafts((prev) => [newDraft, ...prev]);
-    showToast(`Đã gửi Bản nháp cho Quản trị viên duyệt!`);
+    handlePublishDraft(newDraft);
   };
 
   const handlePublishDraft = (draft: ConfigDraft) => {
@@ -339,8 +344,8 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
 
       <CmsPageHeader
         icon={<Settings />}
-        title="Cấu hình hệ thống"
-        description="Quản lý cấu hình chung, tìm kiếm, thương hiệu, enjiCAD và các kết nối của hệ thống."
+        title="Cấu hình chung"
+        description="Quản lý thông tin thương hiệu, liên hệ, SEO, đo lường và các thiết lập dùng chung trên website."
       />
 
       {/* MODULE TOP NAVIGATION TABS */}
@@ -353,7 +358,6 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           { id: 'editor', label: 'Chỉnh sửa', icon: Sliders },
           { id: 'table', label: 'Bảng cấu hình', icon: TableIcon },
           { id: 'issues', label: 'Cảnh báo', count: issues.length, icon: ShieldAlert },
-          { id: 'drafts', label: 'Chờ duyệt', count: drafts.length, icon: Clock },
           { id: 'versions', label: 'Phiên bản', icon: History },
           { id: 'audit', label: 'Nhật ký', icon: Shield },
         ]}
@@ -371,7 +375,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
             setActiveScopeId(sId);
             setActiveTab('editor');
           }}
-          onGoToDrafts={() => setActiveTab('drafts')}
+          onGoToDrafts={() => setActiveTab('editor')}
           onGoToIssues={() => setActiveTab('issues')}
         />
       )}
@@ -403,7 +407,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
             setCompareModalOpen(true);
           }}
           onSaveDraft={handleSaveDraft}
-          onSubmitReview={handleSubmitReview}
+          onPublish={handlePublish}
         />
       )}
 
@@ -427,25 +431,6 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           onRunRevalidation={() => {
             showToast('Đã quét lại toàn bộ hệ thống! Đã phát hiện 3 sự cố cảnh báo.');
           }}
-        />
-      )}
-
-      {activeTab === 'drafts' && (
-        <PendingDraftsTab
-          drafts={drafts}
-          scopes={scopes}
-          onOpenCompare={(draft) => {
-            setCompareDraftData(draft.changesSummary);
-            setCompareModalOpen(true);
-          }}
-          onApproveDraft={(draftId) => {
-            showToast(`Đã duyệt Bản nháp ${draftId}! Sẵn sàng Xuất bản.`);
-          }}
-          onReturnDraft={(draftId, notes) => {
-            setDrafts((prev) => prev.filter((d) => d.id !== draftId));
-            showToast(`Đã trả bản nháp về cho biên tập viên kèm ghi chú: ${notes}`);
-          }}
-          onPublishDraft={handlePublishDraft}
         />
       )}
 

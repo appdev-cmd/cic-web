@@ -46,7 +46,7 @@ interface SettingsEditorTabProps {
   onOpenAssetPicker: (title: string, type: 'image' | 'file', onSelect: (url: string) => void) => void;
   onOpenCompareModal: () => void;
   onSaveDraft: () => void;
-  onSubmitReview: () => void;
+  onPublish: () => void;
 }
 
 export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
@@ -64,7 +64,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
   onOpenAssetPicker,
   onOpenCompareModal,
   onSaveDraft,
-  onSubmitReview,
+  onPublish,
 }) => {
   const [activeGroupId, setActiveGroupId] = useState<ConfigGroupId>('general');
   const [searchTerm, setSearchTerm] = useState('');
@@ -150,11 +150,11 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
             </button>
 
             <button
-              onClick={onSubmitReview}
+              onClick={onPublish}
               className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 transition-all cursor-pointer"
             >
               <Send className="w-4 h-4" />
-              <span>Gửi Duyệt & Xuất bản</span>
+              <span>Xuất bản</span>
             </button>
           </div>
         </div>
@@ -364,6 +364,21 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {item.description}
                     </p>
+
+                    {item.usedBy && item.usedBy.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                        <span className="font-bold">Hiển thị tại:</span>
+                        {item.usedBy.map((place) => (
+                          <span key={place} className="rounded-md bg-slate-100 px-2 py-0.5 font-semibold dark:bg-slate-800">{place}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    {item.futureNote && (
+                      <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-2 text-[11px] text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/20 dark:text-blue-300">
+                        <span className="font-bold">Ghi chú triển khai:</span> {item.futureNote}
+                      </div>
+                    )}
 
                     {item.impactDescription && (
                       <div className="p-2 bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-lg text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5">

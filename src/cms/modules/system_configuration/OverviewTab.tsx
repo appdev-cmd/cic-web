@@ -38,7 +38,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 }) => {
   const totalIssues = issues.length;
   const criticalIssues = issues.filter((i) => i.severity === 'critical').length;
-  const pendingDraftsCount = drafts.filter((d) => d.status === 'pending_review' || d.status === 'draft').length;
+  const pendingDraftsCount = scopes.filter((scope) => Boolean(scope.draftVersion)).length;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -61,12 +61,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
         <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between">
           <div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Bản nháp Chờ duyệt</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Bản nháp cấu hình</div>
             <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
               {pendingDraftsCount} <span className="text-xs font-normal text-slate-400">Bản nháp</span>
             </div>
             <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-1 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" /> Cần Review trước khi Xuất bản
+              <Clock className="w-3.5 h-3.5" /> Có thể xem lại và xuất bản trực tiếp
             </div>
           </div>
           <span className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
@@ -195,14 +195,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         </div>
       </div>
 
-      {/* LOWER SECTION: CRITICAL ISSUES & PENDING DRAFTS PREVIEW */}
+      {/* LOWER SECTION: DRAFTS & VALIDATION ISSUES */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* PENDING DRAFTS LIST */}
+        {/* DRAFTS LIST */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
-              <span>Bản nháp Cấu hình Chờ duyệt</span>
+              <span>Bản nháp cấu hình gần đây</span>
             </h4>
             <button
               onClick={onGoToDrafts}
@@ -235,7 +235,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                   onClick={onGoToDrafts}
                   className="px-3 py-1 bg-white dark:bg-slate-700 hover:bg-orange-50 dark:hover:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-bold rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer"
                 >
-                  Duyệt ngay
+                  Mở chỉnh sửa
                 </button>
               </div>
             ))}
