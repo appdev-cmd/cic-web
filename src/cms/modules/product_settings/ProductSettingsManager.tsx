@@ -60,6 +60,7 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 type MainTab = 'overview' | 'taxonomy';
 
@@ -98,6 +99,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [usageFilter, setUsageFilter] = useState<'all' | 'used' | 'unused'>('all');
+  const [staffProductFilter, setStaffProductFilter] = useState('all');
   const [viewFormat, setViewFormat] = useState<'list' | 'tree'>('list');
 
   // Selected Checkboxes
@@ -165,9 +167,21 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       if (usageFilter === 'used' && item.usage_count === 0) return false;
       if (usageFilter === 'unused' && item.usage_count > 0) return false;
 
+      if (activeDataType === 'sales_staff' && staffProductFilter !== 'all') {
+        const staffItem = item as MasterSalesStaffItem;
+        const assignedProductIds = [
+          ...(staffItem.contact_product_ids ?? []),
+          ...(staffItem.sales_product_ids ?? []),
+          ...(staffItem.technical_support_product_ids ?? []),
+          ...(staffItem.north_sales_product_ids ?? []),
+          ...(staffItem.south_sales_product_ids ?? []),
+        ];
+        if (!assignedProductIds.includes(staffProductFilter)) return false;
+      }
+
       return true;
     });
-  }, [currentActiveList, searchQuery, statusFilter, usageFilter]);
+  }, [currentActiveList, searchQuery, statusFilter, usageFilter, activeDataType, staffProductFilter]);
 
   // Paginated Output
   const paginatedList = useMemo(() => {
@@ -265,7 +279,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         icon={<FolderTree />}
         title="Thiết lập sản phẩm"
         description="Quản lý danh mục, hãng, lĩnh vực ứng dụng, loại sản phẩm và người phụ trách sản phẩm."
-        actions={<>
+        actions={activeMainTab === 'taxonomy' ? <>
           <CmsButton
             onClick={() => {
               setFormDrawerItem(null);
@@ -277,7 +291,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           >
             {createLabels[activeDataType]}
           </CmsButton>
-        </>}
+        </> : undefined}
       />
 
       {/* 2. SITEMAP SECTIONS TABS */}
@@ -434,6 +448,21 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   <option value="used">Đang được dùng (&gt;0)</option>
                   <option value="unused">Chưa sử dụng (=0)</option>
                 </select>}
+
+                {activeDataType === 'sales_staff' && (
+                  <div className="w-64 shrink-0">
+                    <SearchableSelect
+                      options={[{ id: 'all', name: 'Tất cả sản phẩm' }, ...globalData.productOptions]}
+                      selectedId={staffProductFilter}
+                      onChange={(productId) => {
+                        setStaffProductFilter(productId);
+                        setCurrentPage(1);
+                      }}
+                      placeholder="Lọc theo sản phẩm"
+                      searchPlaceholder="Tìm tên sản phẩm..."
+                    />
+                  </div>
+                )}
 
                 {/* Column settings button */}
                 {activeDataType !== 'sales_staff' && <button
