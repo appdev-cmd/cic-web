@@ -508,17 +508,17 @@ export const configItemsMock: ConfigItem[] = [
   {
     id: 'measure_tiktok_pixel', path: 'system.measurement.tiktok_pixel_id', label: 'TikTok Pixel ID', groupId: 'measurement',
     description: 'Chỉ có hiệu lực khi adapter TikTok đã được frontend hỗ trợ.', type: 'text', sensitivity: 'standard', isShared: false,
-    usedBy: ['Toàn website'], futureNote: 'Có thể bỏ nếu dự án không triển khai TikTok Ads.',
+    usedBy: ['Toàn website'],
   },
   {
     id: 'measure_linkedin', path: 'system.measurement.linkedin_partner_id', label: 'LinkedIn Partner ID', groupId: 'measurement',
     description: 'Mã LinkedIn Insight Tag; không nhập source code.', type: 'text', sensitivity: 'standard', isShared: false,
-    usedBy: ['Toàn website'], futureNote: 'Có thể bỏ nếu không có chiến dịch LinkedIn.',
+    usedBy: ['Toàn website'],
   },
   {
     id: 'measure_clarity', path: 'system.measurement.microsoft_clarity_id', label: 'Microsoft Clarity Project ID', groupId: 'measurement',
     description: 'Mã project dùng cho heatmap và session recording.', type: 'text', sensitivity: 'standard', isShared: false,
-    usedBy: ['Toàn website'], futureNote: 'Cần xác nhận chính sách cookie trước khi bật.',
+    usedBy: ['Toàn website'],
   },
 
   // Structured 404 content; no HTML is stored.

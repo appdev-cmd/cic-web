@@ -374,12 +374,6 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                       </div>
                     )}
 
-                    {item.futureNote && (
-                      <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-2 text-[11px] text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/20 dark:text-blue-300">
-                        <span className="font-bold">Ghi chú triển khai:</span> {item.futureNote}
-                      </div>
-                    )}
-
                     {item.impactDescription && (
                       <div className="p-2 bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-lg text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />

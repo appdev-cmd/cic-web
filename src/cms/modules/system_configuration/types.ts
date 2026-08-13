@@ -56,7 +56,6 @@ export interface ConfigItem {
   validationRegex?: string;
   unit?: string;
   usedBy?: string[];
-  futureNote?: string;
 }
 
 export interface ConfigValueRecord {

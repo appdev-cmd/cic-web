@@ -55,15 +55,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     return {
       scopes: uniqueById([...localized.scopes, ...globalData.scopes]),
       groups: uniqueById([...localized.groups, ...globalData.groups]),
-      items: uniqueById([...localized.items, ...globalData.items]).map((item) => {
-        if (item.futureNote) return item;
-        if (item.id === 'gen_brand_color') return { ...item, futureNote: 'Tạm giữ để đối chiếu. Có thể bỏ vì màu sắc phải theo design system trong code.' };
-        if (item.id === 'gen_default_lang') return { ...item, futureNote: 'Có thể bỏ khi VI và EN được vận hành như hai workspace độc lập.' };
-        if (item.groupId === 'integrations') return { ...item, futureNote: 'Tạm thời giữ trường; chỉ sử dụng khi backend đã có tích hợp thực tế. Có thể bỏ nếu không triển khai.' };
-        if (item.groupId === 'email_notif') return { ...item, futureNote: 'Đang giữ để khảo sát. Sau này có thể chuyển sang cấu hình vận hành hoặc module Email.' };
-        if (item.groupId === 'advanced') return { ...item, futureNote: 'Cấu hình kỹ thuật; có thể bỏ khỏi giao diện Marketing sau khi backend được triển khai.' };
-        return item;
-      }),
+      items: uniqueById([...localized.items, ...globalData.items]),
       values: { ...localized.values, ...globalData.values },
       issues: uniqueById([...localized.issues, ...globalData.issues]),
       drafts: uniqueById([...localized.drafts, ...globalData.drafts]),
