@@ -24,7 +24,7 @@ import {
 import { productsData, newsItems } from '../data/mockData';
 import { projectsData } from '../data/projectsData';
 import { servicesData } from '../data/servicesData';
-import { eventsData } from '../data/eventsData';
+import { getEventsData } from '../features/events/eventsData';
 
 interface SearchViewProps {
   initialQuery?: string;
@@ -58,6 +58,7 @@ export function SearchView({
   onNavigateToEvent,
   onNavigateHome
 }: SearchViewProps) {
+  const { events: eventsData } = useMemo(getEventsData, []);
   const [query, setQuery] = useState(initialQuery);
   const [searchInputValue, setSearchInputValue] = useState(initialQuery);
   const [activeTab, setActiveTab] = useState<ResultType>('all');

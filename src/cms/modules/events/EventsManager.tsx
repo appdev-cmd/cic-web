@@ -536,11 +536,17 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                       {columnVisibility.title && (
                         <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4`}>
                           <div className="flex items-start gap-3">
-                            <img
-                              src={ev.image}
-                              alt=""
-                              className="w-12 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 mt-0.5"
-                            />
+                            {ev.image ? (
+                              <img
+                                src={ev.image}
+                                alt=""
+                                className="w-12 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 mt-0.5"
+                              />
+                            ) : (
+                              <span className="flex h-10 w-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800">
+                                <Calendar className="h-4 w-4" />
+                              </span>
+                            )}
                             <div className="space-y-1">
                               <h4
                                 onClick={() => handleEdit(ev)}
