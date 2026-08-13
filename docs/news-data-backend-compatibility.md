@@ -156,7 +156,7 @@ Không tạo bảng duyệt riêng cho Tin tức. Các action chính cần audit
 
 `migration_report.json` cũ đang báo lỗi với news/category trong khi `export_report.json` có số lượng dữ liệu. Vì vậy phải chạy lại báo cáo migrate theo schema hiện hành trước khi triển khai backend.
 
-Các lỗi FK/schema được tách riêng tại `postgresql-news-fk-issues.md` để xử lý độc lập.
+Các lỗi FK/schema được ghi tại tài liệu dùng chung `postgresql-schema-issues.md` để xử lý độc lập.
 
 ## Acceptance criteria
 

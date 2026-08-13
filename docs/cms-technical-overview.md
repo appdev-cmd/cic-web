@@ -12,7 +12,7 @@
 | Nhật ký hoạt động | `activity-audit-log-data-plan.md` |
 | Thùng rác | `trash-data-compatibility-plan.md` |
 | Tin tức | `news-data-backend-compatibility.md` |
-| Xử lý FK PostgreSQL của Tin tức | `postgresql-news-fk-issues.md` |
+| Các lỗi FK/schema PostgreSQL đã phát hiện | `postgresql-schema-issues.md` |
 | Module được kết luận giữ nguyên | `unchanged-modules-data-compatibility.md` — sẽ tạo khi có module đầu tiên được chốt giữ nguyên |
 
 ## Nội dung của từng tài liệu
@@ -58,7 +58,7 @@ Tài liệu giải thích vì sao không thể tiếp tục dùng trực tiếp 
 
 Dùng khi triển khai database/API cho bài viết và danh mục Tin tức, bao gồm field legacy, mapping kiểu dữ liệu, Draft/Published, VI/EN và public contract.
 
-Các lỗi khóa ngoại PostgreSQL được tách tại `postgresql-news-fk-issues.md` để có thể xử lý schema độc lập.
+Các lỗi khóa ngoại PostgreSQL được ghi chung tại `postgresql-schema-issues.md` để xử lý schema độc lập và tránh tạo nhiều file issue theo module.
 
 ### `unchanged-modules-data-compatibility.md`
 
@@ -106,7 +106,7 @@ Không viết SQL, migration hoặc backend trước khi tài liệu của modul
 | Vai trò & Quyền | Đã khảo sát; cần mô hình mới nhưng giữ dữ liệu quyền cũ | `users-roles-permissions-data-compatibility-plan.md` |
 | Nhật ký hoạt động | Đã khảo sát; cần bảng mới | `activity-audit-log-data-plan.md` |
 | Thùng rác | Đã khảo sát; cần bảng mới và thay cơ chế hard-delete | `trash-data-compatibility-plan.md` |
-| Tin tức | Đã khảo sát; giữ bảng legacy, cần mapping API và sửa FK | `news-data-backend-compatibility.md`, `postgresql-news-fk-issues.md` |
+| Tin tức | Đã khảo sát; giữ bảng legacy, cần mapping API và sửa FK | `news-data-backend-compatibility.md`, `postgresql-schema-issues.md` |
 | Các module còn lại | Chưa chốt | Phải báo cáo trước khi viết docs |
 
 ## Thứ tự đề xuất
