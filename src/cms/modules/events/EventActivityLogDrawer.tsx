@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, History, User, Clock, CheckCircle, AlertCircle, FileText, Send, Sparkles } from 'lucide-react';
-import { EventItem, EventActivityLog, EditorialStatus, EventProgressStatus } from './types';
+import { X, History, Send } from 'lucide-react';
+import { EventItem, EventActivityLog, EditorialStatus } from './types';
 
 interface EventActivityLogDrawerProps {
   isOpen: boolean;
@@ -40,7 +40,7 @@ export const EventActivityLogDrawer: React.FC<EventActivityLogDrawerProps> = ({
       onAddLog({
         user: 'Quản trị viên (Hiện tại)',
         role: 'Content Manager',
-        action: 'Ghi chú biên tập',
+        action: 'Thêm ghi chú thay đổi',
         previous_editorial_status: event.editorial_status,
         new_editorial_status: event.editorial_status,
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
@@ -55,8 +55,6 @@ export const EventActivityLogDrawer: React.FC<EventActivityLogDrawerProps> = ({
     switch (status) {
       case 'published':
         return <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 font-bold text-[10px] rounded">Xuất bản</span>;
-      case 'archived':
-        return <span className="px-2 py-0.5 bg-slate-500/10 text-slate-600 font-bold text-[10px] rounded">Lưu trữ</span>;
       default:
         return <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] rounded">Bản nháp</span>;
     }
@@ -80,7 +78,7 @@ export const EventActivityLogDrawer: React.FC<EventActivityLogDrawerProps> = ({
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Nhật ký Biên tập & Thay đổi
+                  Nhật ký thay đổi
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 max-w-[240px]">
                   {event.title}
@@ -140,14 +138,14 @@ export const EventActivityLogDrawer: React.FC<EventActivityLogDrawerProps> = ({
           {/* Drawer Footer Add Note Form */}
           <form onSubmit={handleAddNote} className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 space-y-2">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Thêm ghi chú biên tập mới
+              Thêm ghi chú mới
             </label>
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Nhập phản hồi, lý do duyệt hoặc ghi chú..."
+                placeholder="Nhập ghi chú thay đổi..."
                 className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
               />
               <button

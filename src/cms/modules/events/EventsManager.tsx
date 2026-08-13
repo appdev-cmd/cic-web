@@ -28,7 +28,7 @@ import {
   CheckCircle,
   RotateCcw,
 } from 'lucide-react';
-import { EventItem, EventCategory, EditorialStatus, EventProgressStatus } from './types';
+import { EventItem, EditorialStatus } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { EventsModuleData } from '../../data/EditorialContentDataSource';
 import { EventsFormView } from './EventsFormView';
@@ -62,6 +62,13 @@ function formatEventDateTime(dateStr: string): string {
 
 interface EventsManagerProps { workspaceLocale: CmsLocale; data?: EventsModuleData; }
 
+type EventProgressStatus = 'upcoming' | 'ended';
+
+function getEventProgressStatus(event: EventItem): EventProgressStatus {
+  const startsAt = new Date(event.time_event).getTime();
+  return Number.isFinite(startsAt) && startsAt <= Date.now() ? 'ended' : 'upcoming';
+}
+
 export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, data }) => {
   // Main Data States
   const [events, setEvents] = useState<EventItem[]>(() =>
@@ -72,12 +79,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         ...log,
         previous_editorial_status: log.previous_editorial_status === 'published' ? 'published' : 'draft',
         new_editorial_status: log.new_editorial_status === 'published' ? 'published' : 'draft',
-        action: /duyệt|review|phê duyệt|trả lại/i.test(log.action) ? 'Cập nhật nội dung' : log.action,
-        note: log.note && /duyệt|review|phê duyệt|trả lại/i.test(log.note) ? 'Nội dung sự kiện đã được cập nhật.' : log.note,
       })),
     })),
   );
-  const [categories] = useState<EventCategory[]>(data?.categories ?? []);
 
   // Form View & Modal Mode States
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -95,7 +99,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     time_event: true,
     place: true,
     editorial_status: true,
-    event_status: true,
+    progress_status: true,
     is_hot: true,
     ordering: true,
     created_time: false,
@@ -130,7 +134,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     
     // Dual Status Matching
     const currentEditorial = ev.editorial_status || (ev.published ? 'published' : 'draft');
-    const currentEventStatus = ev.event_status || 'upcoming';
+    const currentEventStatus = getEventProgressStatus(ev);
 
     const matchesEditorial = editorialFilter === 'all' || currentEditorial === editorialFilter;
     const matchesEventStatus = eventStatusFilter === 'all' || currentEventStatus === eventStatusFilter;
@@ -186,23 +190,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         return item;
       })
     );
-    showToast(`Đã đổi trạng thái biên tập ${selectedIds.length} sự kiện sang "${status}"`);
-  };
-
-  const handleBatchChangeEventStatus = (status: EventProgressStatus) => {
-    if (selectedIds.length === 0) return;
-    setEvents((prev) =>
-      prev.map((item) => {
-        if (selectedIds.includes(item.id)) {
-          return {
-            ...item,
-            event_status: status,
-          };
-        }
-        return item;
-      })
-    );
-    showToast(`Đã đổi trạng thái diễn ra ${selectedIds.length} sự kiện sang "${status}"`);
+    showToast(`Đã đổi trạng thái nội dung ${selectedIds.length} sự kiện sang "${status}"`);
   };
 
   const handleOpenBatchDelete = () => {
@@ -275,24 +263,18 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         id: `ev_${Date.now()}`,
         title: data.title || '',
         alias: data.alias || '',
-        category_id: data.category_id || categories[0]?.id || '',
         summary: data.summary || '',
         content: data.content || '',
         image: data.image || '',
         time_event: data.time_event || '',
-        end_time: data.end_time || '',
         place: data.place || '',
         specific_time: data.specific_time || '',
         chu_de: data.chu_de || '',
         link_dangky: data.link_dangky || '',
-        organizer: data.organizer || '',
-        speakers: data.speakers || [],
         editorial_status: data.editorial_status || 'published',
-        event_status: data.event_status || 'upcoming',
         event_related: data.event_related || [],
         news_related: data.news_related || [],
         products_related: data.products_related || [],
-        is_new: data.is_new ?? true,
         is_hot: data.is_hot ?? false,
         show_in_home: data.show_in_home ?? true,
         published: data.published ?? true,
@@ -315,8 +297,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     switch (status) {
       case 'published':
         return <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] rounded-lg border border-emerald-500/20">Xuất bản</span>;
-      case 'archived':
-        return <span className="px-2 py-0.5 bg-slate-500/10 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded-lg border border-slate-500/20">Lưu trữ</span>;
       default:
         return <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] rounded-lg">Bản nháp</span>;
     }
@@ -325,12 +305,8 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Event progress status badge helper
   const renderEventStatusBadge = (status?: EventProgressStatus) => {
     switch (status) {
-      case 'ongoing':
-        return <span className="px-2 py-0.5 bg-emerald-600 text-white font-bold text-[10px] rounded-lg shadow-xs animate-pulse">Đang diễn ra</span>;
       case 'ended':
         return <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded-lg">Kết thúc</span>;
-      case 'cancelled':
-        return <span className="px-2 py-0.5 bg-red-600 text-white font-bold text-[10px] rounded-lg">Đã hủy</span>;
       default:
         return <span className="px-2 py-0.5 bg-orange-600 text-white font-bold text-[10px] rounded-lg">Sắp diễn ra</span>;
     }
@@ -416,7 +392,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             time_event: true,
             place: true,
             editorial_status: true,
-            event_status: true,
+            progress_status: true,
             is_hot: true,
             ordering: true,
             created_time: false,
@@ -471,10 +447,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               onChange={(e) => { setEditorialFilter(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">TT Biên tập: Tất cả</option>
+              <option value="all">Trạng thái: Tất cả</option>
               <option value="draft">Bản nháp</option>
               <option value="published">Đã xuất bản</option>
-              <option value="archived">Lưu trữ</option>
             </select>
           </div>
 
@@ -487,9 +462,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             >
               <option value="all">TT Diễn ra: Tất cả</option>
               <option value="upcoming">Sắp diễn ra</option>
-              <option value="ongoing">Đang diễn ra</option>
               <option value="ended">Đã kết thúc</option>
-              <option value="cancelled">Đã hủy</option>
             </select>
 
             <button
@@ -514,7 +487,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         </div>
         <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="sự kiện" onClear={() => setSelectedIds([])} actions={[
           { label: 'Xuất bản', onClick: () => handleBatchChangeEditorialStatus('published'), icon: Eye, variant: 'primary' },
-          { label: 'Lưu trữ', onClick: () => handleBatchChangeEditorialStatus('archived'), icon: EyeOff },
           { label: 'Xóa', onClick: handleOpenBatchDelete, icon: Trash2, variant: 'danger' },
         ]} />
       </div>
@@ -531,8 +503,8 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                 {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">Tiêu đề sự kiện</th>}
                 {columnVisibility.time_event && <th className="py-3 px-4 w-40">Thời gian sự kiện</th>}
                 {columnVisibility.place && <th className="py-3 px-4 min-w-[180px]">Địa điểm</th>}
-                {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">TT Biên tập</th>}
-                {columnVisibility.event_status && <th className="py-3 px-4 w-32 text-center">TT Diễn ra</th>}
+                {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">Trạng thái</th>}
+                {columnVisibility.progress_status && <th className="py-3 px-4 w-32 text-center">TT Diễn ra</th>}
                 <th className="py-3 px-4 w-28 text-center">Thao tác</th>
               </tr>
             </thead>
@@ -617,9 +589,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                       )}
 
                       {/* Event Progress Status */}
-                      {columnVisibility.event_status && (
+                      {columnVisibility.progress_status && (
                         <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
-                          {renderEventStatusBadge(ev.event_status || 'upcoming')}
+                          {renderEventStatusBadge(getEventProgressStatus(ev))}
                         </td>
                       )}
 

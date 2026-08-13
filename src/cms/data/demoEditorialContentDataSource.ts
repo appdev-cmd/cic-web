@@ -1,6 +1,6 @@
 import type { EditorialContentDataSource } from './EditorialContentDataSource';
 import { mockArticles, mockNewsCategories, mockRelatedProducts } from '../modules/news/mockData';
-import { mockEventCategories, mockEventProducts, mockEvents } from '../modules/events/mockData';
+import { mockEventProducts, mockEvents } from '../modules/events/mockData';
 import {
   mockServiceActivityLogs,
   mockServiceRelatedContacts,
@@ -36,7 +36,6 @@ export const demoEditorialContentDataSource: EditorialContentDataSource = {
   eventsByLocale: {
     vi: {
       events: mockEvents,
-      categories: mockEventCategories,
       relatedArticles: mockArticles,
       relatedProducts: mockEventProducts,
     },

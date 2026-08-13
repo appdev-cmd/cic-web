@@ -6,7 +6,6 @@ import {
   MapPin,
   Clock,
   User,
-  Users,
   CheckCircle,
   Tag,
   Share2,
@@ -15,9 +14,8 @@ import {
   Tablet,
   Smartphone,
   Globe,
-  Building,
 } from 'lucide-react';
-import { EventItem, EditorialStatus, EventProgressStatus } from './types';
+import { EventItem, EditorialStatus } from './types';
 
 interface EventPreviewModalProps {
   isOpen: boolean;
@@ -40,25 +38,12 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
     switch (status) {
       case 'published':
         return <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs rounded-lg border border-emerald-500/20">Đã xuất bản</span>;
-      case 'archived':
-        return <span className="px-2.5 py-1 bg-slate-500/10 text-slate-600 dark:text-slate-400 font-bold text-xs rounded-lg border border-slate-500/20">Lưu trữ</span>;
       default:
         return <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-xs rounded-lg">Bản nháp</span>;
     }
   };
 
-  const getEventStatusBadge = (status: EventProgressStatus) => {
-    switch (status) {
-      case 'ongoing':
-        return <span className="px-2.5 py-1 bg-emerald-600 text-white font-bold text-xs rounded-lg shadow-sm animate-pulse flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-white"></span> Đang diễn ra</span>;
-      case 'ended':
-        return <span className="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs rounded-lg">Đã kết thúc</span>;
-      case 'cancelled':
-        return <span className="px-2.5 py-1 bg-red-600 text-white font-bold text-xs rounded-lg">Đã hủy</span>;
-      default:
-        return <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-xs rounded-lg flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Sắp diễn ra</span>;
-    }
-  };
+  const eventHasStarted = new Date(event.time_event).getTime() <= Date.now();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
@@ -73,7 +58,7 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
               <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Xem trước giao diện Sự kiện / Webinar</span>
                 {getEditorialBadge(event.editorial_status || (event.published ? 'published' : 'draft'))}
-                {getEventStatusBadge(event.event_status || 'upcoming')}
+                <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-xs rounded-lg">{eventHasStarted ? 'Đã diễn ra' : 'Sắp diễn ra'}</span>
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                 /su-kien/{event.alias}
@@ -181,15 +166,6 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
                       <p>{event.specific_time || event.time_event}</p>
                     </div>
                   </div>
-                  {event.organizer && (
-                    <div className="flex items-start gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      <Building className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-bold text-slate-900 dark:text-white">Đơn vị tổ chức:</p>
-                        <p>{event.organizer}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -217,34 +193,6 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
                 </div>
               </div>
 
-              {/* Event Speakers Section (if any) */}
-              {event.speakers && event.speakers.length > 0 && (
-                <div className="space-y-3 pt-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <Users className="w-4 h-4 text-orange-600" />
-                    <span>Diễn giả & Chuyên gia khách mời</span>
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {event.speakers.map((spk) => (
-                      <div
-                        key={spk.id}
-                        className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-3"
-                      >
-                        <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-600 font-bold flex items-center justify-center shrink-0">
-                          {spk.name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-bold text-xs text-slate-900 dark:text-white">{spk.name}</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">{spk.title}</p>
-                          {spk.company && (
-                            <p className="text-[10px] text-orange-600 font-semibold">{spk.company}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Event Summary / Lead */}
               {event.summary && (

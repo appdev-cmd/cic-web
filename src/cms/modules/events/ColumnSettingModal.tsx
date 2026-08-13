@@ -6,7 +6,7 @@ export interface ColumnVisibility {
   time_event: boolean;
   place: boolean;
   editorial_status: boolean;
-  event_status: boolean;
+  progress_status: boolean;
   is_hot: boolean;
   ordering: boolean;
   created_time: boolean;
@@ -37,8 +37,8 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'title', label: 'Tiêu đề sự kiện' },
     { key: 'time_event', label: 'Thời gian diễn ra' },
     { key: 'place', label: 'Địa điểm tổ chức' },
-    { key: 'editorial_status', label: 'Trạng thái Biên tập' },
-    { key: 'event_status', label: 'Trạng thái Diễn ra' },
+    { key: 'editorial_status', label: 'Trạng thái nội dung' },
+    { key: 'progress_status', label: 'Trạng thái diễn ra (tự tính)' },
     { key: 'is_hot', label: 'Hội thảo / Sự kiện Nổi bật (Hot)' },
     { key: 'ordering', label: 'Thứ tự hiển thị (Ordering)' },
     { key: 'created_time', label: 'Ngày tạo dữ liệu' },
