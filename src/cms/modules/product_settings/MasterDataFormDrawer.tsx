@@ -56,9 +56,11 @@ function ProductAssignmentField({
 }) {
   const [query, setQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(50);
+  const [showAllSelected, setShowAllSelected] = useState(false);
+  const [selectedVisibleCount, setSelectedVisibleCount] = useState(50);
   const filtered = options.filter((product) => (product.name || product.id).toLowerCase().includes(query.toLowerCase()));
   const visibleProducts = filtered.slice(0, visibleCount);
-  const visibleSelectedIds = selectedIds.slice(0, 6);
+  const visibleSelectedIds = selectedIds.slice(0, showAllSelected ? selectedVisibleCount : 6);
   const selectableIds = filtered.map((product) => product.id);
   const hasUnselectedVisibleProduct = selectableIds.some((id) => !selectedIds.includes(id));
 
@@ -83,22 +85,30 @@ function ProductAssignmentField({
         </div>
       </div>
       {selectedIds.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
-          {visibleSelectedIds.map((id) => {
-            const product = options.find((option) => option.id === id);
-            return (
-              <span key={id} className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-orange-700">
-                <span className="max-w-80 truncate">{product?.name || id}</span>
-                <button type="button" onClick={() => onChange((current) => current.filter((currentId) => currentId !== id))} aria-label={`Bỏ chọn ${product?.name || id}`} className="rounded p-0.5 hover:bg-orange-100">
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            );
-          })}
-          {selectedIds.length > visibleSelectedIds.length && (
-            <span className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              +{selectedIds.length - visibleSelectedIds.length} sản phẩm khác
-            </span>
+        <div className={`mb-3 ${showAllSelected ? 'max-h-48 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50' : ''}`}>
+          <div className="flex flex-wrap gap-2">
+            {visibleSelectedIds.map((id) => {
+              const product = options.find((option) => option.id === id);
+              return (
+                <span key={id} className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-orange-700">
+                  <span className="max-w-80 truncate">{product?.name || id}</span>
+                  <button type="button" onClick={() => onChange((current) => current.filter((currentId) => currentId !== id))} aria-label={`Bỏ chọn ${product?.name || id}`} className="rounded p-0.5 hover:bg-orange-100">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              );
+            })}
+            {!showAllSelected && selectedIds.length > visibleSelectedIds.length && (
+              <button type="button" onClick={() => setShowAllSelected(true)} className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:border-orange-300 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                Xem {selectedIds.length - visibleSelectedIds.length} sản phẩm khác
+              </button>
+            )}
+          </div>
+          {showAllSelected && (
+            <div className="mt-3 flex items-center justify-end gap-3 border-t border-slate-200 pt-2 dark:border-slate-700">
+              {selectedVisibleCount < selectedIds.length && <button type="button" onClick={() => setSelectedVisibleCount((count) => count + 50)} className="text-xs font-bold text-orange-600 hover:underline">Hiển thị thêm 50</button>}
+              <button type="button" onClick={() => { setShowAllSelected(false); setSelectedVisibleCount(50); }} className="text-xs font-bold text-slate-500 hover:underline">Thu gọn</button>
+            </div>
           )}
         </div>
       )}
