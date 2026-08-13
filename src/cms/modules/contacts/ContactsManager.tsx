@@ -111,7 +111,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
   // Tab count calculations
   const counts = useMemo(() => {
     const all = contacts.filter((c) => c.status !== 'spam' && c.status !== 'duplicate' && !c.deleted_at).length;
-    const myQueue = contacts.filter((c) => c.owner_id === currentUserId && c.status !== 'closed' && !c.deleted_at).length;
     const unassigned = contacts.filter((c) => !c.owner_id && c.status !== 'spam' && c.status !== 'duplicate' && !c.deleted_at).length;
     const overdue = contacts.filter((c) => c.sla_status === 'overdue' && c.status !== 'resolved' && c.status !== 'closed' && !c.deleted_at).length;
     const general = contacts.filter((c) => c.source === 'general_contact' && !c.deleted_at).length;
@@ -120,7 +119,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
     const spam = contacts.filter((c) => (c.status === 'spam' || c.status === 'duplicate') && !c.deleted_at).length;
     const trash = contacts.filter((c) => !!c.deleted_at).length;
 
-    return { all, myQueue, unassigned, overdue, general, product, resolved, spam, trash };
+    return { all, unassigned, overdue, general, product, resolved, spam, trash };
   }, [contacts]);
 
   // Apply tab filter on top of search/filter state
@@ -128,9 +127,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
     let result = filterContactRequests(contacts, filter, currentUserId ?? '');
 
     switch (activeTab) {
-      case 'my_queue':
-        result = result.filter((c) => c.owner_id === currentUserId && !c.deleted_at);
-        break;
       case 'unassigned':
         result = result.filter((c) => !c.owner_id && c.status !== 'spam' && c.status !== 'duplicate' && !c.deleted_at);
         break;
@@ -165,11 +161,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
   const applySavedView = (view: SavedFilterView) => {
     setActiveSavedView(view);
     switch (view) {
-      case 'my_urgent':
-        setActiveTab('my_queue');
-        setFilter((prev) => ({ ...prev, priority: ['urgent', 'high'] }));
-        showToast('Đã áp dụng góc nhìn "Việc khẩn cấp của tôi"');
-        break;
       case 'unassigned_today':
         setActiveTab('unassigned');
         setFilter((prev) => ({ ...prev, ownerId: 'unassigned' }));
@@ -500,7 +491,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
         onChange={(val) => setActiveTab(val as MainTabType)}
         items={[
           { id: 'all', label: 'Tất cả yêu cầu', count: counts.all },
-          { id: 'my_queue', label: 'Việc của tôi', count: counts.myQueue },
           { id: 'unassigned', label: 'Chưa phân công', count: counts.unassigned },
           { id: 'overdue', label: 'Quá hạn', count: counts.overdue },
           { id: 'general', label: 'Liên hệ chung', count: counts.general },
@@ -540,7 +530,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
               className="text-xs font-semibold px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl outline-none cursor-pointer"
             >
               <option value="all">👁️ Xem mặc định</option>
-              <option value="my_urgent">🔥 Việc khẩn cấp của tôi</option>
               <option value="unassigned_today">⏳ Yêu cầu chưa phân công</option>
               <option value="overdue_sales">⚠️ Cảnh báo quá hạn SLA</option>
               <option value="product_quotes">📦 Báo giá sản phẩm</option>
@@ -595,7 +584,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
                 className="w-full p-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="all">Tất cả nhân sự</option>
-                <option value="me">Chỉ việc của tôi</option>
                 <option value="unassigned">Chưa phân công (Unassigned)</option>
                 {staffMembers.map((s) => (
                   <option key={s.id} value={s.id}>

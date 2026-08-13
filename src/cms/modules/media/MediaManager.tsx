@@ -102,7 +102,6 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
     if (activeTab === 'images' && ast.type !== 'image') return false;
     if (activeTab === 'videos' && ast.type !== 'video') return false;
     if (activeTab === 'documents' && ast.type !== 'document') return false;
-    if (activeTab === 'my_uploads' && ast.owner_name !== data?.currentUserName) return false;
     if (activeTab === 'incomplete_metadata' && ast.metadata_status !== 'incomplete') return false;
     if (activeTab === 'issues') {
       const hasIssue = issues.some((i) => i.asset_id === ast.id);
@@ -110,7 +109,6 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
     }
 
     // Saved View Pills
-    if (savedFilter === 'my_uploads' && ast.owner_name !== data?.currentUserName) return false;
     if (savedFilter === 'missing_alt' && ast.alt_text.trim()) return false;
     if (savedFilter === 'unused' && ast.used_by_count > 0) return false;
     if (savedFilter === 'issues' && !issues.some((i) => i.asset_id === ast.id)) return false;
@@ -311,7 +309,6 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
             { id: 'videos', label: 'Video', count: assets.filter((a) => !a.deleted_at && a.type === 'video').length },
             { id: 'documents', label: 'Tài liệu PDF', count: assets.filter((a) => !a.deleted_at && a.type === 'document').length },
             { id: 'albums', label: 'Albums & Bộ sưu tập', count: albums.length },
-            { id: 'my_uploads', label: 'Uploads của tôi', count: assets.filter((a) => !a.deleted_at && a.owner_name === 'Nguyễn Văn Minh').length },
             { id: 'incomplete_metadata', label: 'Cần bổ sung Meta', count: assets.filter((a) => !a.deleted_at && a.metadata_status === 'incomplete').length },
             { id: 'issues', label: 'Trùng / Vấn đề', count: issues.length },
             { id: 'trash', label: 'Thùng rác', count: assets.filter((a) => a.deleted_at).length },
@@ -450,7 +447,6 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
               <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
                 {[
                   { id: 'all', label: 'Tất cả' },
-                  { id: 'my_uploads', label: 'Tệp của tôi' },
                   { id: 'missing_alt', label: 'Thiếu Alt' },
                   { id: 'unused', label: 'Chưa dùng (Unused)' },
                   { id: 'issues', label: 'Có xung đột' },

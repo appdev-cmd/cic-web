@@ -56,9 +56,22 @@ interface ServicesManagerProps {
   data?: ServicesModuleData;
 }
 
+const editorialStatusLabels: Record<EditorialStatus, string> = {
+  draft: 'Bản nháp',
+  pending: 'Chờ xử lý',
+  approved: 'Đã xác nhận',
+  published: 'Đã xuất bản',
+};
+
+const serviceStatusLabels: Record<ServiceStatus, string> = {
+  active: 'Đang hoạt động',
+  inactive: 'Tạm ngừng',
+  archived: 'Đã lưu trữ',
+};
+
 export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocale, data }) => {
   const [services, setServices] = useState<ServiceItem[]>(() => (data?.services ?? []).map((item) => ({ ...item, editorial_status: item.editorial_status === 'published' ? 'published' : 'draft' })));
-  const [activeTab, setActiveTab] = useState<'all' | 'my_tasks' | 'active' | 'low_quality' | 'trash'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'low_quality' | 'trash'>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Search & Filter state
@@ -66,7 +79,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
   const [filterEditorialStatus, setFilterEditorialStatus] = useState<string>('all');
   const [filterServiceStatus, setFilterServiceStatus] = useState<string>('all');
   const [filterOwnerId, setFilterOwnerId] = useState('all');
-  const [filterSavedView, setFilterSavedView] = useState('all');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,17 +109,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Saved views filter logic
-  const handleApplySavedView = (viewKey: string) => {
-    setFilterSavedView(viewKey);
-    if (viewKey === 'view_active') {
-      setFilterServiceStatus('active');
-    } else {
-      setFilterEditorialStatus('all');
-      setFilterServiceStatus('all');
-    }
-  };
-
   // Filtered Services list
   const filteredServices = useMemo(() => {
     return services.filter((item) => {
@@ -119,7 +120,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       }
 
       // Tab filters
-      if (activeTab === 'my_tasks' && item.owner_id !== 'usr_002') return false;
       if (activeTab === 'active' && item.service_status !== 'active') return false;
       if (activeTab === 'low_quality' && item.quality_score >= 70) return false;
 
@@ -239,7 +239,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       setServices((prev) =>
         prev.map((s) => (s.id === service.id ? { ...s, service_status: 'inactive' } : s))
       );
-      showToast(`Đã chuyển trạng thái dịch vụ ${service.code} sang Inactive.`);
+      showToast(`Đã chuyển dịch vụ ${service.code} sang trạng thái Tạm ngừng.`);
     } else if (actionType === 'archive') {
       setServices((prev) =>
         prev.map((s) => (s.id === service.id ? { ...s, service_status: 'archived' } : s))
@@ -310,8 +310,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1 scrollbar-none">
         {[
           { id: 'all', label: 'Tất cả dịch vụ', count: services.filter((s) => !s.is_deleted).length },
-          { id: 'my_tasks', label: 'Việc của tôi', count: services.filter((s) => !s.is_deleted && s.owner_id === 'usr_002').length },
-          { id: 'active', label: 'Đang hoạt động (Active)', count: services.filter((s) => !s.is_deleted && s.service_status === 'active').length },
+          { id: 'active', label: 'Đang hoạt động', count: services.filter((s) => !s.is_deleted && s.service_status === 'active').length },
           { id: 'low_quality', label: 'Chất lượng nội dung thấp', count: services.filter((s) => !s.is_deleted && s.quality_score < 70).length },
           { id: 'trash', label: 'Thùng rác', count: services.filter((s) => s.is_deleted).length },
         ].map((tab) => (
@@ -362,9 +361,9 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             onChange={(e) => setFilterEditorialStatus(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
           >
-            <option value="all">Tất cả Editorial Status</option>
-            <option value="draft">Draft (Nháp)</option>
-            <option value="published">Published (Đã xuất bản)</option>
+            <option value="all">Tất cả trạng thái nội dung</option>
+            <option value="draft">Bản nháp</option>
+            <option value="published">Đã xuất bản</option>
           </select>
 
           {/* Service Status Filter */}
@@ -373,22 +372,22 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             onChange={(e) => setFilterServiceStatus(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
           >
-            <option value="all">Tất cả Service Status</option>
-            <option value="active">Active (Đang hoạt động)</option>
-            <option value="inactive">Inactive (Tạm ngừng)</option>
-            <option value="archived">Archived (Lưu trữ)</option>
+            <option value="all">Tất cả trạng thái dịch vụ</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="inactive">Tạm ngừng</option>
+            <option value="archived">Đã lưu trữ</option>
           </select>
 
-          {/* Saved Views */}
+          {/* Owner Filter */}
           <select
-            value={filterSavedView}
-            onChange={(e) => handleApplySavedView(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-orange-300 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20 text-orange-800 dark:text-orange-300 font-semibold"
+            value={filterOwnerId}
+            onChange={(e) => setFilterOwnerId(e.target.value)}
+            className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
           >
-            <option value="all">Saved View: Mặc định</option>
-            <option value="view_active">Saved View: Dịch vụ Active</option>
+            <option value="all">Tất cả người phụ trách</option>
+            {ownersList.map((owner) => <option key={owner.id} value={owner.id}>{owner.name}</option>)}
           </select>
-          <button type="button" disabled={!searchTerm && filterEditorialStatus === 'all' && filterServiceStatus === 'all' && filterOwnerId === 'all' && filterSavedView === 'all'} onClick={() => { setSearchTerm(''); setFilterEditorialStatus('all'); setFilterServiceStatus('all'); setFilterOwnerId('all'); setFilterSavedView('all'); setCurrentPage(1); }} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+          <button type="button" disabled={!searchTerm && filterEditorialStatus === 'all' && filterServiceStatus === 'all' && filterOwnerId === 'all'} onClick={() => { setSearchTerm(''); setFilterEditorialStatus('all'); setFilterServiceStatus('all'); setFilterOwnerId('all'); setCurrentPage(1); }} className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
         </div>
 
         {/* Bulk Actions Bar if items selected */}
@@ -435,8 +434,8 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                   Dịch vụ & Mã
                 </th>
                 <th className="p-3 min-w-[140px]">Người phụ trách</th>
-                <th className="p-3 min-w-[130px]">Editorial Status</th>
-                <th className="p-3 min-w-[130px]">Service Status</th>
+                <th className="p-3 min-w-[130px]">Trạng thái nội dung</th>
+                <th className="p-3 min-w-[130px]">Trạng thái dịch vụ</th>
                 <th className="p-3 min-w-[150px]">Vị trí hiển thị</th>
                 <th className="p-3 min-w-[130px]">Cập nhật</th>
                 <th className="p-3 w-28 text-right sticky right-0 bg-slate-50 dark:bg-slate-800 z-10">
@@ -521,7 +520,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                               : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                           }`}
                         >
-                          {item.editorial_status}
+                          {editorialStatusLabels[item.editorial_status]}
                         </span>
                       </td>
 
@@ -536,7 +535,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                               : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                           }`}
                         >
-                          {item.service_status}
+                          {serviceStatusLabels[item.service_status]}
                         </span>
                       </td>
 

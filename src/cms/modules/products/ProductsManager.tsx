@@ -56,7 +56,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
-type SystemViewTab = 'all' | 'my' | 'low_quality' | 'active' | 'archived';
+type SystemViewTab = 'all' | 'low_quality' | 'active' | 'archived';
 
 interface ProductsManagerProps {
   workspaceLocale: CmsLocale;
@@ -78,7 +78,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   );
 
   // Current User context (mock current logged in user)
-  const currentUserId = data?.currentUserId;
 
   // Navigation State: 'list' | 'create' | 'edit'
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
@@ -135,7 +134,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       // System View Tab
-      if (activeTab === 'my' && p.owner_id !== currentUserId) return false;
       if (activeTab === 'low_quality' && p.completeness_score >= 75) return false;
       if (activeTab === 'active' && p.catalog_status !== 'active') return false;
       if (activeTab === 'archived' && p.editorial_status !== 'archived' && p.catalog_status !== 'archived') return false;
@@ -330,7 +328,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
         }}
         items={[
           { id: 'all', label: 'Tất cả sản phẩm', count: products.filter((p) => p.editorial_status !== 'archived').length },
-          { id: 'my', label: 'Việc của tôi', count: products.filter((p) => p.owner_id === currentUserId).length },
           { id: 'low_quality', label: 'Chất lượng dưới 75%', count: products.filter((p) => p.completeness_score < 75).length },
           { id: 'active', label: 'Đang kinh doanh', count: products.filter((p) => p.catalog_status === 'active').length },
           { id: 'archived', label: 'Lưu trữ và thùng rác', count: products.filter((p) => p.editorial_status === 'archived' || p.catalog_status === 'archived').length },

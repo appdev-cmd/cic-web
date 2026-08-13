@@ -10,7 +10,6 @@ export type MainTabType =
   | 'videos'
   | 'documents'
   | 'albums'
-  | 'my_uploads'
   | 'incomplete_metadata'
   | 'issues'
   | 'trash';
@@ -19,7 +18,6 @@ export type ViewMode = 'grid' | 'list';
 
 export type SavedFilterView =
   | 'all'
-  | 'my_uploads'
   | 'missing_alt'
   | 'unused'
   | 'processing'

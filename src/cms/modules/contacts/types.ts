@@ -115,7 +115,6 @@ export interface ContactRequest {
 
 export type MainTabType = 
   | 'all'           // Tất cả
-  | 'my_queue'      // Việc của tôi
   | 'unassigned'    // Chưa phân công
   | 'overdue'       // Quá hạn
   | 'general'       // Liên hệ chung
@@ -126,7 +125,6 @@ export type MainTabType =
 
 export type SavedFilterView = 
   | 'all'
-  | 'my_urgent'
   | 'unassigned_today'
   | 'overdue_sales'
   | 'product_quotes'
