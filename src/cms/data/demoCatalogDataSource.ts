@@ -37,6 +37,7 @@ export const demoCatalogDataSource: CatalogDataSource = {
   },
   productSettingsGlobal: {
     salesStaff: mockMasterSalesStaff,
+    productOptions: mockProducts.map(({ id, name }) => ({ id, name })),
     activityLogs: mockMasterActivityLogs,
     usageImpactRecords: mockUsageImpactRecords,
   },

@@ -69,16 +69,15 @@ export interface MasterProductTypeItem extends BaseMasterItem {
 // 5. Sales Representative / Nhân viên kinh doanh phụ trách
 export interface MasterSalesStaffItem extends BaseMasterItem {
   type: 'sales_staff';
-  staff_code: string;
-  email: string;
   phone: string;
-  role_title: string;
-  department: string;
-  avatar?: string;
-  assigned_category_ids: string[];
-  assigned_brand_ids: string[];
-  monthly_capacity_inquiries: number;
-  is_out_of_office?: boolean;
+  skype: string;
+  zalo: string;
+  alias: string;
+  contact_product_ids: string[];
+  sales_product_ids: string[];
+  technical_support_product_ids: string[];
+  north_sales_product_ids: string[];
+  south_sales_product_ids: string[];
 }
 
 // 6. Contact & Email Routing Rule / Quy tắc nhận liên hệ

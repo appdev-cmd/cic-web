@@ -35,7 +35,6 @@ import {
   List,
   ChevronDown,
   User,
-  Mail,
   Phone,
   FileCheck,
 } from 'lucide-react';
@@ -430,7 +429,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  placeholder="Tìm theo tên, mã hoặc mô tả..."
+                  placeholder={activeDataType === 'sales_staff' ? 'Tìm theo tên nhân viên...' : 'Tìm theo tên, mã hoặc mô tả...'}
                   className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
                 />
               </div>
@@ -452,7 +451,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                 </select>
 
                 {/* Usage filter */}
-                <select
+                {activeDataType !== 'sales_staff' && <select
                   value={usageFilter}
                   onChange={(e) => {
                     setUsageFilter(e.target.value as any);
@@ -463,16 +462,16 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   <option value="all">Tất cả Mức sử dụng</option>
                   <option value="used">Đang được dùng (&gt;0)</option>
                   <option value="unused">Chưa sử dụng (=0)</option>
-                </select>
+                </select>}
 
                 {/* Column settings button */}
-                <button
+                {activeDataType !== 'sales_staff' && <button
                   onClick={() => setIsColumnModalOpen(true)}
                   className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-orange-600" />
                   <span>Cấu hình cột</span>
-                </button>
+                </button>}
               </div>
             </div>
 
@@ -496,11 +495,11 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
                     {/* Name & Code (Sticky Left) */}
                     <th className="py-3 px-4 min-w-[260px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                      Tên và mã nhận diện
+                      {activeDataType === 'sales_staff' ? 'Tên nhân viên' : 'Tên và mã nhận diện'}
                     </th>
 
                     {/* Usage count */}
-                    {columnVisibility.usage_count && (
+                    {columnVisibility.usage_count && activeDataType !== 'sales_staff' && (
                       <th className="py-3 px-4 min-w-[140px]">Số SP / Đơn hàng dùng</th>
                     )}
 
@@ -511,7 +510,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
                     {/* Scope / Country / Email */}
                     {columnVisibility.scope_or_country && (
-                      <th className="py-3 px-4 min-w-[200px]">Phạm vi / Thông tin liên hệ</th>
+                      <th className="py-3 px-4 min-w-[200px]">{activeDataType === 'sales_staff' ? 'Số điện thoại / Skype / Zalo' : 'Phạm vi / Thông tin liên hệ'}</th>
                     )}
 
                     {/* Status */}
@@ -521,7 +520,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
                     {/* Updated Time */}
                     {columnVisibility.updated_time && (
-                      <th className="py-3 px-4 min-w-[140px]">Cập nhật</th>
+                      <th className="py-3 px-4 min-w-[140px]">{activeDataType === 'sales_staff' ? 'Ngày tạo / ID' : 'Cập nhật'}</th>
                     )}
 
                     {/* Sticky Right Actions */}
@@ -565,7 +564,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                              {item.type !== 'sales_staff' && <div className="flex items-center gap-2 text-[10px] text-slate-400">
                                 <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
                                   {item.code}
                                 </span>
@@ -575,12 +574,12 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                     <span className="line-clamp-1 max-w-[200px]">{item.description}</span>
                                   </>
                                 )}
-                              </div>
+                              </div>}
                             </div>
                           </td>
 
                           {/* Usage Count badge */}
-                          {columnVisibility.usage_count && (
+                          {columnVisibility.usage_count && item.type !== 'sales_staff' && (
                             <td className="py-3 px-4">
                               <button
                                 onClick={() => setImpactDrawerItem(item)}
@@ -613,10 +612,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                 </span>
                               )}
                               {item.type === 'sales_staff' && (
-                                <span className="flex items-center gap-1 font-mono text-[11px] text-orange-600">
-                                  <Mail className="w-3.5 h-3.5" />
-                                  <span>{(item as MasterSalesStaffItem).email}</span>
-                                </span>
+                                <div className="space-y-1 text-[11px]">
+                                  <span className="flex items-center gap-1 font-mono text-orange-600"><Phone className="w-3.5 h-3.5" />{(item as MasterSalesStaffItem).phone || '—'}</span>
+                                  <span className="block text-slate-500">Skype: {(item as MasterSalesStaffItem).skype || '—'} · Zalo: {(item as MasterSalesStaffItem).zalo || '—'}</span>
+                                </div>
                               )}
                               {['categories', 'applications', 'product_types'].includes(item.type) && (
                                 <span className="text-slate-400 italic">Mặc định Toàn quốc</span>
@@ -644,7 +643,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                           {/* Updated Time */}
                           {columnVisibility.updated_time && (
                             <td className="py-3 px-4 font-mono text-[10px] text-slate-500">
-                              {item.updated_time}
+                              {item.type === 'sales_staff' ? <><div>{item.created_time}</div><div className="mt-1 font-bold text-slate-700 dark:text-slate-300">ID: {item.id}</div></> : item.updated_time}
                             </td>
                           )}
 
@@ -809,6 +808,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         categories={categories}
         brands={brands}
         staff={salesStaff}
+        productOptions={globalData.productOptions}
         onSave={handleSaveMasterItem}
         onClose={() => {
           setIsFormDrawerOpen(false);
