@@ -1,10 +1,10 @@
 import { NewsCategory, NewsArticle, RelatedProductItem } from './types';
 
 export const mockNewsCategories: NewsCategory[] = [
-  { id: 'cat_news_tech', name: 'Tin công nghệ & Phần mềm', title: 'Tin công nghệ và phần mềm', slug: 'tin-cong-nghe-phan-mem', count: 4, parent_id: null, ordering: 1, published: true, show_in_homepage: true, is_hot: true, seo_title: 'Tin công nghệ và phần mềm | CIC', seo_keyword: 'tin công nghệ, phần mềm xây dựng, CIC', seo_description: 'Tin tức công nghệ và các sản phẩm phần mềm mới nhất từ CIC.', created_time: '2025-01-10T08:00:00.000Z' },
-  { id: 'cat_news_events', name: 'Sự kiện & Hội thảo', title: 'Sự kiện và hội thảo', slug: 'su-kien-hoi-thao', count: 2, parent_id: null, ordering: 2, published: true, show_in_homepage: true, is_hot: false, seo_title: 'Sự kiện và hội thảo | CIC', seo_keyword: 'sự kiện CIC, hội thảo công nghệ', seo_description: 'Thông tin sự kiện, hội thảo và webinar do CIC tổ chức hoặc đồng hành.', created_time: '2025-01-10T08:00:00.000Z' },
-  { id: 'cat_news_projects', name: 'Dự án & Khách hàng', title: 'Dự án và khách hàng', slug: 'du-an-khach-hang', count: 1, parent_id: null, ordering: 3, published: true, show_in_homepage: false, is_hot: false, seo_title: 'Dự án và khách hàng | CIC', seo_keyword: 'dự án CIC, khách hàng CIC', seo_description: 'Các dự án tiêu biểu và câu chuyện triển khai giải pháp cùng khách hàng CIC.', created_time: '2025-01-10T08:00:00.000Z' },
-  { id: 'cat_news_guides', name: 'Hướng dẫn & Kinh nghiệm', title: 'Hướng dẫn và kinh nghiệm', slug: 'huong-dan-kinh-nghiem', count: 1, parent_id: 'cat_news_tech', ordering: 1, published: true, show_in_homepage: true, is_hot: false, seo_title: 'Hướng dẫn và kinh nghiệm sử dụng phần mềm | CIC', seo_keyword: 'hướng dẫn phần mềm, kinh nghiệm sử dụng', seo_description: 'Hướng dẫn sử dụng phần mềm và kinh nghiệm ứng dụng giải pháp công nghệ CIC.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_tech', name: 'Tin công nghệ & Phần mềm', title: 'Tin công nghệ và phần mềm', alias: 'tin-cong-nghe-phan-mem', count: 4, parent_id: null, ordering: 1, published: true, show_in_homepage: true, seo_title: 'Tin công nghệ và phần mềm | CIC', seo_keyword: 'tin công nghệ, phần mềm xây dựng, CIC', seo_description: 'Tin tức công nghệ và các sản phẩm phần mềm mới nhất từ CIC.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_events', name: 'Sự kiện & Hội thảo', title: 'Sự kiện và hội thảo', alias: 'su-kien-hoi-thao', count: 2, parent_id: null, ordering: 2, published: true, show_in_homepage: true, seo_title: 'Sự kiện và hội thảo | CIC', seo_keyword: 'sự kiện CIC, hội thảo công nghệ', seo_description: 'Thông tin sự kiện, hội thảo và webinar do CIC tổ chức hoặc đồng hành.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_projects', name: 'Dự án & Khách hàng', title: 'Dự án và khách hàng', alias: 'du-an-khach-hang', count: 1, parent_id: null, ordering: 3, published: true, show_in_homepage: false, seo_title: 'Dự án và khách hàng | CIC', seo_keyword: 'dự án CIC, khách hàng CIC', seo_description: 'Các dự án tiêu biểu và câu chuyện triển khai giải pháp cùng khách hàng CIC.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_guides', name: 'Hướng dẫn & Kinh nghiệm', title: 'Hướng dẫn và kinh nghiệm', alias: 'huong-dan-kinh-nghiem', count: 1, parent_id: 'cat_news_tech', ordering: 1, published: true, show_in_homepage: true, seo_title: 'Hướng dẫn và kinh nghiệm sử dụng phần mềm | CIC', seo_keyword: 'hướng dẫn phần mềm, kinh nghiệm sử dụng', seo_description: 'Hướng dẫn sử dụng phần mềm và kinh nghiệm ứng dụng giải pháp công nghệ CIC.', created_time: '2025-01-10T08:00:00.000Z' },
 ];
 
 export const mockRelatedProducts: RelatedProductItem[] = [
@@ -56,20 +56,11 @@ export const mockArticles: NewsArticle[] = [
     is_new: true,
     show_in_homepage: true,
     published: true,
-    workflow_status: 'published',
     ordering: 1,
     author: {
       name: 'Nguyễn Văn Nam',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
       email: 'nam.nv@cic.com.vn',
-    },
-    assignee: {
-      name: 'Trần Thị Mai',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-    },
-    reviewer: {
-      name: 'Lê Hoàng Long (Content Manager)',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
     },
     seo_title: 'CIC phát hành phần mềm CIC-SAP2000 v25 chuẩn TCVN mới nhất',
     seo_keyword: 'SAP2000 v25, phan mem ket cau, TCVN 5574, CIC technology',
@@ -101,15 +92,15 @@ export const mockArticles: NewsArticle[] = [
         version_number: 3,
         created_at: '2026-08-01 09:15:00',
         created_by: 'Lê Hoàng Long',
-        note: 'Phê duyệt & Xuất bản phiên bản chính thức v3',
+        note: 'Xuất bản phiên bản chính thức v3',
         is_published_version: true,
         title: 'CIC chính thức phát hành phần mềm CIC-SAP2000 v25 hỗ trợ tiêu chuẩn TCVN mới nhất',
         summary: 'Phiên bản v25 mang đến hơn 50 cải tiến vượt bậc...',
       },
     ],
     activity_logs: [
-      { id: 'act_1', timestamp: '2026-08-01 09:15:00', user: 'Lê Hoàng Long', action: 'Phê duyệt & Xuất bản', details: 'Trạng thái chuyển thành Published' },
-      { id: 'act_2', timestamp: '2026-07-31 16:00:00', user: 'Nguyễn Văn Nam', action: 'Gửi duyệt bài viết', details: 'Chuyển trạng thái sang Pending Review' },
+      { id: 'act_1', timestamp: '2026-08-01 09:15:00', user: 'Lê Hoàng Long', action: 'Xuất bản', details: 'Bài viết đã được xuất bản' },
+      { id: 'act_2', timestamp: '2026-07-31 16:00:00', user: 'Nguyễn Văn Nam', action: 'Lưu nháp', details: 'Cập nhật nội dung bản nháp' },
     ],
     quality_warnings: [],
     created_time: '2026-08-01 09:15:00',
@@ -135,16 +126,11 @@ export const mockArticles: NewsArticle[] = [
     is_new: true,
     show_in_homepage: true,
     published: true,
-    workflow_status: 'published',
     ordering: 2,
     author: {
       name: 'Trần Thị Mai',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
       email: 'mai.tt@cic.com.vn',
-    },
-    reviewer: {
-      name: 'Lê Hoàng Long',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
     },
     seo_title: 'Hội thảo Chuyển đổi số BIM 2026 do CIC phối hợp tổ chức',
     seo_keyword: 'Hội thảo BIM 2026, chuyen doi so xay dung, CDE, CIC',
@@ -173,25 +159,18 @@ export const mockArticles: NewsArticle[] = [
     is_new: true,
     show_in_homepage: false,
     published: false,
-    workflow_status: 'pending',
     ordering: 3,
     author: {
       name: 'Phạm Đức Huy',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
       email: 'huy.pd@cic.com.vn',
     },
-    assignee: {
-      name: 'Lê Hoàng Long',
-    },
-    reviewer: {
-      name: 'Lê Hoàng Long',
-    },
     seo_title: 'Ứng dụng AI trong tự động hóa bóc tách khối lượng dự toán',
     seo_keyword: 'AI xay dung, boc tach khoi luong AI, du toan AI, CIC',
     seo_description: 'Giải pháp AI tiên phong đọc bản vẽ CAD/PDF và kết xuất khối lượng dự toán chuẩn xác.',
     working_version_number: 1,
     has_unpublished_changes: true,
-    quality_warnings: ['Đang chờ Content Manager phê duyệt', 'Thiếu thẻ Alt cho hình ảnh đại diện'],
+    quality_warnings: ['Thiếu thẻ Alt cho hình ảnh đại diện'],
     created_time: '2026-08-03 10:00:00',
   },
   {
@@ -213,23 +192,18 @@ export const mockArticles: NewsArticle[] = [
     is_new: false,
     show_in_homepage: false,
     published: false,
-    workflow_status: 'returned',
-    return_comment: 'Cần bổ sung thêm số liệu cụ thể về dự án Cao tốc Biên Hòa - Vũng Tàu và chỉnh sửa lại tiêu đề cho ngắn gọn hơn.',
     ordering: 4,
     author: {
       name: 'Nguyễn Văn Nam',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
       email: 'nam.nv@cic.com.vn',
     },
-    reviewer: {
-      name: 'Lê Hoàng Long',
-    },
     seo_title: 'Báo cáo giải pháp thiết kế công trình giao thông 2026',
     seo_keyword: 'thiet ke cao toc, CIC road, cao toc mien nam',
     seo_description: 'Báo cáo ứng dụng phần mềm CIC trong thiết kế hạ tầng cao tốc khu vực phía Nam.',
     working_version_number: 2,
     has_unpublished_changes: true,
-    quality_warnings: ['Bài viết bị trả lại: Cần bổ sung số liệu dự án'],
+    quality_warnings: ['Cần bổ sung số liệu dự án'],
     created_time: '2026-08-02 11:30:00',
   },
   {
@@ -251,14 +225,10 @@ export const mockArticles: NewsArticle[] = [
     is_new: true,
     show_in_homepage: true,
     published: false,
-    workflow_status: 'scheduled',
     ordering: 5,
     author: {
       name: 'Trần Thị Mai',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-    },
-    reviewer: {
-      name: 'Lê Hoàng Long',
     },
     seo_title: 'Lịch đào tạo trực tuyến phần mềm ETABS v21 miễn phí',
     seo_keyword: 'dao tao ETABS v21, webinar ETABS, CIC training',
@@ -266,7 +236,6 @@ export const mockArticles: NewsArticle[] = [
     working_version_number: 1,
     published_version_number: 1,
     has_unpublished_changes: false,
-    quality_warnings: ['Đã đặt lịch tự động xuất bản vào 15/08/2026 09:00'],
     created_time: '2026-08-01 16:45:00',
   },
   {
@@ -288,14 +257,10 @@ export const mockArticles: NewsArticle[] = [
     is_new: false,
     show_in_homepage: false,
     published: true,
-    workflow_status: 'published',
     ordering: 6,
     author: {
       name: 'Phạm Đức Huy',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
-    },
-    reviewer: {
-      name: 'Lê Hoàng Long',
     },
     seo_title: 'Hướng dẫn cài đặt CIC-Road v22 dùng thử bản quyền 30 ngày',
     seo_keyword: 'huong dan cai dat CIC Road, dung thu CIC Road, license CIC',
@@ -323,7 +288,6 @@ export const mockArticles: NewsArticle[] = [
     is_new: false,
     show_in_homepage: false,
     published: false,
-    workflow_status: 'draft',
     ordering: 99,
     author: {
       name: 'Nguyễn Văn Nam',

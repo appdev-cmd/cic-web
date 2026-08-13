@@ -1,8 +1,8 @@
 export interface NewsCategory {
   id: string;
   name: string;
-  slug: string;
-  description?: string;
+  alias: string;
+  summary?: string;
   count?: number;
   title?: string;
   image?: string;
@@ -10,7 +10,6 @@ export interface NewsCategory {
   ordering?: number;
   published?: boolean;
   show_in_homepage?: boolean;
-  is_hot?: boolean;
   seo_title?: string;
   seo_keyword?: string;
   seo_description?: string;
@@ -30,15 +29,6 @@ export interface RelatedNewsItem {
   title: string;
   image: string;
 }
-
-export type WorkflowStatus =
-  | 'draft'
-  | 'pending'
-  | 'returned'
-  | 'approved'
-  | 'scheduled'
-  | 'published'
-  | 'archived';
 
 export interface ArticleVersion {
   id: string;
@@ -83,7 +73,6 @@ export interface NewsArticle {
   is_new: boolean;
   show_in_homepage: boolean;
   published: boolean; // mapped to published vs working draft
-  workflow_status: WorkflowStatus;
   ordering: number;
   
   // Author & Workflow Roles
@@ -92,16 +81,6 @@ export interface NewsArticle {
     avatar?: string;
     email?: string;
   };
-  assignee?: {
-    name: string;
-    avatar?: string;
-  };
-  reviewer?: {
-    name: string;
-    avatar?: string;
-  };
-  return_comment?: string;
-
   // SEO Fields
   seo_title: string;
   seo_keyword: string;

@@ -30,7 +30,7 @@ import {
   AlertTriangle,
   FolderTree,
 } from 'lucide-react';
-import { NewsArticle, NewsCategory, WorkflowStatus } from './types';
+import { NewsArticle, NewsCategory } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { NewsModuleData } from '../../data/EditorialContentDataSource';
 import { NewsFormView } from './NewsFormView';
@@ -57,20 +57,7 @@ interface NewsManagerProps {
 
 export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data }) => {
   // Articles State
-  const [articles, setArticles] = useState<NewsArticle[]>(() =>
-    (data?.articles ?? []).map((item) => ({
-      ...item,
-      workflow_status: item.published ? 'published' : 'draft',
-      reviewer: undefined,
-      quality_warnings: item.quality_warnings?.filter((warning) => !/duyệt|trả lại/i.test(warning)),
-      versions: item.versions?.map((version) => ({ ...version, note: /duyệt|review/i.test(version.note) ? 'Cập nhật phiên bản nội dung' : version.note })),
-      activity_logs: item.activity_logs?.map((log) => ({
-        ...log,
-        action: /duyệt|review|trả lại/i.test(log.action) ? 'Cập nhật nội dung' : log.action,
-        details: log.details && /duyệt|review|trả lại/i.test(log.details) ? 'Nội dung đã được cập nhật' : log.details,
-      })),
-    })),
-  );
+  const [articles, setArticles] = useState<NewsArticle[]>(data?.articles ?? []);
   const [categories, setCategories] = useState<NewsCategory[]>(data?.categories ?? []);
 
   // View Mode: 'list' or 'form'
@@ -83,7 +70,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-  const [workflowFilter, setWorkflowFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
@@ -143,12 +130,11 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
       // Category
       const matchCat = selectedCategory === 'ALL' || item.category_id === selectedCategory;
 
-      // Workflow
-      const matchWorkflow = workflowFilter === 'ALL' || item.workflow_status === workflowFilter;
+      const matchStatus = statusFilter === 'ALL' || (statusFilter === 'published' ? item.published : !item.published);
 
-      return matchSearch && matchCat && matchWorkflow;
+      return matchSearch && matchCat && matchStatus;
     });
-  }, [scopeFilteredArticles, searchQuery, selectedCategory, workflowFilter]);
+  }, [scopeFilteredArticles, searchQuery, selectedCategory, statusFilter]);
   const paginatedArticles = filteredArticles.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Handle Select All
@@ -211,13 +197,12 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
     setItemsToDelete([]);
   };
 
-  // Batch Workflow Update
-  const handleBatchUpdateWorkflow = (targetStatus: WorkflowStatus) => {
+  const handleBatchUpdatePublished = (published: boolean) => {
     if (selectedIds.length === 0) return;
     setArticles((prev) =>
-      prev.map((a) => (selectedIds.includes(a.id) ? { ...a, workflow_status: targetStatus, published: targetStatus === 'published' } : a))
+      prev.map((a) => (selectedIds.includes(a.id) ? { ...a, published } : a))
     );
-    showToast(`Đã chuyển ${selectedIds.length} bài viết sang trạng thái ${targetStatus}!`);
+    showToast(`Đã chuyển ${selectedIds.length} bài viết sang ${published ? 'Đã xuất bản' : 'Bản nháp'}!`);
     setSelectedIds([]);
   };
 
@@ -267,8 +252,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
         products_related: formData.products_related || [],
         start_time: formData.start_time || new Date().toISOString().substring(0, 16),
         end_time: formData.end_time || '2026-12-31T23:59',
-        workflow_status: formData.workflow_status || 'draft',
-        published: formData.workflow_status === 'published',
+        published: formData.published ?? false,
         is_hot: formData.is_hot ?? false,
         is_new: formData.is_new ?? true,
         show_in_homepage: formData.show_in_homepage ?? true,
@@ -391,16 +375,16 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
 
               <div className="md:col-span-3">
                 <select
-                  value={workflowFilter}
-                  onChange={(e) => setWorkflowFilter(e.target.value)}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none"
                 >
-                  <option value="ALL">-- Tất cả Trạng thái Quy trình --</option>
+                  <option value="ALL">-- Tất cả trạng thái --</option>
                   <option value="draft">Bản nháp (Draft)</option>
                   <option value="published">Đã xuất bản (Published)</option>
                 </select>
               </div>
-              <button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && workflowFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setWorkflowFilter('ALL'); setCurrentPage(1); }} className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800 md:col-span-2"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+              <button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && statusFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setStatusFilter('ALL'); setCurrentPage(1); }} className="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800 md:col-span-2"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
             </div>
 
             {/* BULK ACTIONS BAR */}
@@ -409,8 +393,8 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
               itemLabel="bài viết"
               onClear={() => setSelectedIds([])}
               actions={[
-                { label: 'Xuất bản', onClick: () => handleBatchUpdateWorkflow('published'), icon: Check, variant: 'primary' },
-                { label: 'Chuyển về nháp', onClick: () => handleBatchUpdateWorkflow('draft'), icon: Edit },
+                { label: 'Xuất bản', onClick: () => handleBatchUpdatePublished(true), icon: Check, variant: 'primary' },
+                { label: 'Chuyển về nháp', onClick: () => handleBatchUpdatePublished(false), icon: Edit },
               ]}
             />
           </div>
@@ -431,7 +415,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                     </th>
                     <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
                     {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
-                    {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả & Phụ trách</th>}
+                    {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả</th>}
                     {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
                     {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
                     {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">Cập nhật</th>}
@@ -509,7 +493,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                             </td>
                           )}
 
-                          {/* Author & Assignee */}
+                          {/* Author */}
                           {columnVisibility.author && (
                             <td className={`p-3 ${getRowPadding()}`}>
                               <div className="space-y-0.5 text-xs">
@@ -517,28 +501,23 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ workspaceLocale, data 
                                   <User className="w-3 h-3 text-slate-400" />
                                   <span>{art.author?.name || 'Nguyễn Văn Nam'}</span>
                                 </p>
-                                {art.assignee && (
-                                  <p className="text-[10px] text-slate-400">
-                                    Giao: {art.assignee.name}
-                                  </p>
-                                )}
                               </div>
                             </td>
                           )}
 
-                          {/* Workflow Status Badge */}
+                          {/* Publication Status Badge */}
                           {columnVisibility.status && (
                             <td className={`p-3 text-center ${getRowPadding()}`}>
                               <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${
-                                art.workflow_status === 'published' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' :
+                                art.published ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' :
                                 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                               }`}>
-                                {art.workflow_status || 'draft'}
+                                {art.published ? 'Đã xuất bản' : 'Bản nháp'}
                               </span>
                             </td>
                           )}
 
-                          {/* Publish / Scheduled Time */}
+                          {/* Publish Time */}
                           {columnVisibility.publish_time && (
                             <td className={`p-3 text-slate-500 font-mono text-[11px] ${getRowPadding()}`}>
                               {art.start_time || art.created_time}

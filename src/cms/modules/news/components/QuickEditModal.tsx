@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, RotateCcw, AlertTriangle, Check, Layers, User, Calendar, Flame, Sparkles, Eye } from 'lucide-react';
-import { NewsArticle, NewsCategory, WorkflowStatus } from '../types';
+import { X, Save, RotateCcw, AlertTriangle, Flame, Sparkles, Eye } from 'lucide-react';
+import { NewsArticle, NewsCategory } from '../types';
 
 interface QuickEditModalProps {
   isOpen: boolean;
@@ -27,7 +27,6 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
         title: article.title,
         alias: article.alias,
         category_id: article.category_id,
-        workflow_status: article.workflow_status,
         published: article.published,
         is_hot: article.is_hot,
         is_new: article.is_new,
@@ -59,7 +58,6 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
     onSave({
       ...article,
       ...formData,
-      published: formData.workflow_status === 'published',
       updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
     });
     onClose();
@@ -135,12 +133,12 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = ({
               </select>
             </div>
 
-            {/* Workflow Status */}
+            {/* Publication Status */}
             <div className="space-y-1">
-              <label className="font-bold text-slate-700 dark:text-slate-300">Trạng thái quy trình</label>
+              <label className="font-bold text-slate-700 dark:text-slate-300">Trạng thái</label>
               <select
-                value={formData.workflow_status || 'draft'}
-                onChange={(e) => handleChange('workflow_status', e.target.value as WorkflowStatus)}
+                value={formData.published ? 'published' : 'draft'}
+                onChange={(e) => handleChange('published', e.target.value === 'published')}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:ring-2 focus:ring-orange-500/50 outline-none"
               >
                 <option value="draft">Bản nháp (Draft)</option>

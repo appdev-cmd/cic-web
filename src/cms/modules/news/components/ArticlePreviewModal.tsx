@@ -41,7 +41,7 @@ export const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Xem trước bài viết công khai</span>
                 <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                  {article.workflow_status}
+                  {article.published ? 'Đã xuất bản' : 'Bản nháp'}
                 </span>
               </h3>
               <p className="text-[11px] text-slate-400 truncate max-w-md">
