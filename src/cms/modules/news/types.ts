@@ -4,6 +4,18 @@ export interface NewsCategory {
   slug: string;
   description?: string;
   count?: number;
+  title?: string;
+  image?: string;
+  parent_id?: string | null;
+  ordering?: number;
+  published?: boolean;
+  show_in_homepage?: boolean;
+  is_hot?: boolean;
+  seo_title?: string;
+  seo_keyword?: string;
+  seo_description?: string;
+  created_time?: string;
+  updated_time?: string;
 }
 
 export interface RelatedProductItem {

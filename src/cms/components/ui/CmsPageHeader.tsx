@@ -37,7 +37,7 @@ export const CmsPageHeader: React.FC<CmsPageHeaderProps> = ({ icon, title, descr
           )}
         </div>
       </div>
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="flex w-full max-w-full flex-wrap items-center gap-2 md:w-auto md:shrink-0">{actions}</div>}
     </div>
   </section>
 );

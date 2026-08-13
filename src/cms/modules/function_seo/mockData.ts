@@ -14,7 +14,7 @@ const vi: FunctionSeoRecord[] = [
     id: 'seo_news_home', routeKey: 'news_index', path: '/tin-tuc', module: 'news', view: 'home', label: 'Tin tức',
     intent: 'Tin tức doanh nghiệp và kiến thức ngành', title: 'Tin tức và góc nhìn công nghệ | CIC', keywords: 'tin tức CIC, công nghệ xây dựng, BIM',
     description: 'Tin tức CIC, xu hướng công nghệ, BIM và chuyển đổi số trong ngành xây dựng.', canonicalPath: '/tin-tuc', indexable: true, updatedAt: '2026-08-12T08:00:00.000Z',
-    categoryPath: '', categoryPattern: '/tin-tuc/{danh-muc}', categoryOwner: 'Danh mục Tin tức chưa có màn quản lý SEO riêng', categoryStatus: 'missing',
+    categoryPath: '/cms/news/categories', categoryPattern: '/tin-tuc/{danh-muc}', categoryOwner: 'Tin tức → Quản lý danh mục', categoryStatus: 'available',
     detailPath: '/cms/news', detailPattern: '/tin-tuc/{bai-viet}', detailOwner: 'Tin tức → Form bài viết', detailStatus: 'available',
   },
   {

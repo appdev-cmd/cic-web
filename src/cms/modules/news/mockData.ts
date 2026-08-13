@@ -1,10 +1,10 @@
 import { NewsCategory, NewsArticle, RelatedProductItem } from './types';
 
 export const mockNewsCategories: NewsCategory[] = [
-  { id: 'cat_news_tech', name: 'Tin công nghệ & Phần mềm', slug: 'tin-cong-nghe-phan-mem', count: 4 },
-  { id: 'cat_news_events', name: 'Sự kiện & Hội thảo', slug: 'su-kien-hoi-thao', count: 2 },
-  { id: 'cat_news_projects', name: 'Dự án & Khách hàng', slug: 'du-an-khach-hang', count: 1 },
-  { id: 'cat_news_guides', name: 'Hướng dẫn & Kinh nghiệm', slug: 'huong-dan-kinh-nghiem', count: 1 },
+  { id: 'cat_news_tech', name: 'Tin công nghệ & Phần mềm', title: 'Tin công nghệ và phần mềm', slug: 'tin-cong-nghe-phan-mem', count: 4, parent_id: null, ordering: 1, published: true, show_in_homepage: true, is_hot: true, seo_title: 'Tin công nghệ và phần mềm | CIC', seo_keyword: 'tin công nghệ, phần mềm xây dựng, CIC', seo_description: 'Tin tức công nghệ và các sản phẩm phần mềm mới nhất từ CIC.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_events', name: 'Sự kiện & Hội thảo', title: 'Sự kiện và hội thảo', slug: 'su-kien-hoi-thao', count: 2, parent_id: null, ordering: 2, published: true, show_in_homepage: true, is_hot: false, seo_title: 'Sự kiện và hội thảo | CIC', seo_keyword: 'sự kiện CIC, hội thảo công nghệ', seo_description: 'Thông tin sự kiện, hội thảo và webinar do CIC tổ chức hoặc đồng hành.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_projects', name: 'Dự án & Khách hàng', title: 'Dự án và khách hàng', slug: 'du-an-khach-hang', count: 1, parent_id: null, ordering: 3, published: true, show_in_homepage: false, is_hot: false, seo_title: 'Dự án và khách hàng | CIC', seo_keyword: 'dự án CIC, khách hàng CIC', seo_description: 'Các dự án tiêu biểu và câu chuyện triển khai giải pháp cùng khách hàng CIC.', created_time: '2025-01-10T08:00:00.000Z' },
+  { id: 'cat_news_guides', name: 'Hướng dẫn & Kinh nghiệm', title: 'Hướng dẫn và kinh nghiệm', slug: 'huong-dan-kinh-nghiem', count: 1, parent_id: 'cat_news_tech', ordering: 1, published: true, show_in_homepage: true, is_hot: false, seo_title: 'Hướng dẫn và kinh nghiệm sử dụng phần mềm | CIC', seo_keyword: 'hướng dẫn phần mềm, kinh nghiệm sử dụng', seo_description: 'Hướng dẫn sử dụng phần mềm và kinh nghiệm ứng dụng giải pháp công nghệ CIC.', created_time: '2025-01-10T08:00:00.000Z' },
 ];
 
 export const mockRelatedProducts: RelatedProductItem[] = [
