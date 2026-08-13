@@ -56,13 +56,24 @@ function ProductAssignmentField({
 }) {
   const [query, setQuery] = useState('');
   const filtered = options.filter((product) => (product.name || product.id).toLowerCase().includes(query.toLowerCase()));
+  const selectableIds = filtered.map((product) => product.id);
+  const hasUnselectedVisibleProduct = selectableIds.some((id) => !selectedIds.includes(id));
+
+  const handleSelectVisible = () => {
+    onChange((current) => Array.from(new Set([...current, ...selectableIds])));
+  };
 
   return (
     <fieldset className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
       <legend className="px-1 font-bold text-slate-700 dark:text-slate-300">{label}</legend>
-      <div className="mb-3 flex items-center justify-between gap-3 text-xs">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs">
         <span className="text-slate-400">Đã chọn {selectedIds.length} sản phẩm</span>
-        {selectedIds.length > 0 && <button type="button" onClick={() => onChange([])} className="font-bold text-orange-600 hover:underline">Xóa chọn</button>}
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={handleSelectVisible} disabled={!hasUnselectedVisibleProduct} className="font-bold text-orange-600 hover:underline disabled:cursor-not-allowed disabled:text-slate-300 disabled:no-underline dark:disabled:text-slate-600">
+            {query.trim() ? 'Chọn tất cả kết quả' : 'Chọn tất cả'}
+          </button>
+          {selectedIds.length > 0 && <button type="button" onClick={() => onChange([])} className="font-bold text-slate-500 hover:text-red-600 hover:underline">Xóa chọn</button>}
+        </div>
       </div>
       {selectedIds.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
