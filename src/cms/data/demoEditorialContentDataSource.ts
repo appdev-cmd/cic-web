@@ -1,6 +1,5 @@
 import type { EditorialContentDataSource } from './EditorialContentDataSource';
 import { mockArticles, mockNewsCategories, mockRelatedProducts } from '../modules/news/mockData';
-import { staticPageCategoriesMock, staticPagesMock } from '../modules/static_pages/mockData';
 import { mockEventCategories, mockEventProducts, mockEvents } from '../modules/events/mockData';
 import {
   mockServiceActivityLogs,
@@ -17,12 +16,6 @@ export const demoEditorialContentDataSource: EditorialContentDataSource = {
       articles: mockArticles,
       categories: mockNewsCategories,
       relatedProducts: mockRelatedProducts,
-    },
-  },
-  staticPagesByLocale: {
-    vi: {
-      pages: staticPagesMock,
-      categories: staticPageCategoriesMock,
     },
   },
   servicesByLocale: {

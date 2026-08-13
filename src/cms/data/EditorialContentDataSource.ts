@@ -1,7 +1,6 @@
 import type { CmsLocale } from './CmsDataSource';
 import type { NewsArticle, NewsCategory, RelatedProductItem } from '../modules/news/types';
 import type { EventCategory, EventItem, RelatedProductItem as EventRelatedProductItem } from '../modules/events/types';
-import type { StaticPage, StaticPageCategory } from '../modules/static_pages/types';
 import type {
   ServiceActivityLog,
   ServiceGroup,
@@ -15,11 +14,6 @@ export interface NewsModuleData {
   articles: NewsArticle[];
   categories: NewsCategory[];
   relatedProducts: RelatedProductItem[];
-}
-
-export interface StaticPagesModuleData {
-  pages: StaticPage[];
-  categories: StaticPageCategory[];
 }
 
 export interface ServicesModuleData {
@@ -41,7 +35,6 @@ export interface EventsModuleData {
 
 export interface EditorialContentDataSource {
   newsByLocale: Partial<Record<CmsLocale, NewsModuleData>>;
-  staticPagesByLocale: Partial<Record<CmsLocale, StaticPagesModuleData>>;
   servicesByLocale: Partial<Record<CmsLocale, ServicesModuleData>>;
   eventsByLocale: Partial<Record<CmsLocale, EventsModuleData>>;
 }
