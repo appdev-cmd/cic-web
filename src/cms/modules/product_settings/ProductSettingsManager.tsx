@@ -257,6 +257,26 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     setSelectedIds([]);
   };
 
+  if (isFormDrawerOpen && activeDataType === 'sales_staff') {
+    return (
+      <MasterDataFormDrawer
+        isOpen
+        presentation="page"
+        item={formDrawerItem}
+        targetType="sales_staff"
+        categories={categories}
+        brands={brands}
+        staff={salesStaff}
+        productOptions={globalData.productOptions}
+        onSave={handleSaveMasterItem}
+        onClose={() => {
+          setIsFormDrawerOpen(false);
+          setFormDrawerItem(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-200">
       {/* Toast Notification */}

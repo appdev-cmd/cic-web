@@ -15,7 +15,7 @@ import {
   Search,
   Sparkles,
   AlertTriangle,
-  ArrowRight,
+  ArrowLeft,
   ShieldCheck,
   Plus,
   Trash2,
@@ -38,6 +38,7 @@ interface MasterDataFormDrawerProps {
   brands: MasterBrandItem[];
   staff: MasterSalesStaffItem[];
   productOptions: { id: string; name?: string }[];
+  presentation?: 'drawer' | 'page';
   onSave: (savedItem: AnyMasterItem) => void;
   onClose: () => void;
 }
@@ -63,6 +64,21 @@ function ProductAssignmentField({
         <span className="text-slate-400">Đã chọn {selectedIds.length} sản phẩm</span>
         {selectedIds.length > 0 && <button type="button" onClick={() => onChange([])} className="font-bold text-orange-600 hover:underline">Xóa chọn</button>}
       </div>
+      {selectedIds.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {selectedIds.map((id) => {
+            const product = options.find((option) => option.id === id);
+            return (
+              <span key={id} className="inline-flex max-w-full items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-2 py-1 text-[10px] font-semibold text-orange-700">
+                <span className="max-w-48 truncate">{product?.name || id}</span>
+                <button type="button" onClick={() => onChange((current) => current.filter((currentId) => currentId !== id))} aria-label={`Bỏ chọn ${product?.name || id}`} className="rounded p-0.5 hover:bg-orange-100">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            );
+          })}
+        </div>
+      )}
       <div className="relative mb-2">
         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm sản phẩm..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
@@ -86,6 +102,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   brands,
   staff,
   productOptions,
+  presentation = 'drawer',
   onSave,
   onClose,
 }) => {
@@ -326,8 +343,8 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between animate-in slide-in-from-right duration-250">
+    <div className={presentation === 'page' ? 'min-h-[calc(100vh-7rem)] animate-in fade-in duration-200' : 'fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200'}>
+      <div className={presentation === 'page' ? 'mx-auto flex min-h-[calc(100vh-7rem)] w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900' : 'w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between animate-in slide-in-from-right duration-250'}>
         
         {/* Header */}
         <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
@@ -340,16 +357,17 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                 {isEdit ? `Chỉnh sửa ${typeLabels[targetType]}` : `Thêm ${typeLabels[targetType]}`}
               </h2>
               <p className="text-xs text-orange-600 font-bold capitalize">
-                Dùng trong phần thiết lập sản phẩm
+                {presentation === 'page' ? 'Thiết lập sản phẩm / Người phụ trách kinh doanh' : 'Dùng trong phần thiết lập sản phẩm'}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+            className="flex items-center gap-1.5 p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            {presentation === 'page' ? <ArrowLeft className="w-5 h-5" /> : <X className="w-5 h-5" />}
+            {presentation === 'page' && <span className="text-xs font-bold">Quay lại danh sách</span>}
           </button>
         </div>
 
@@ -384,7 +402,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         </div>
 
         {/* Drawer Form Body */}
-        <form id="masterDataForm" onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-5 text-xs">
+        <form id="masterDataForm" onSubmit={handleSubmit} className={`p-6 flex-1 overflow-y-auto space-y-5 text-xs ${presentation === 'page' ? 'mx-auto w-full max-w-5xl' : ''}`}>
           
           {/* TAB 1: BASIC INFO */}
           {activeTab === 'basic' && (
@@ -565,13 +583,13 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                       <input type="text" value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Hệ thống tự động sinh" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none focus:border-orange-500" />
                     </div>
                   </div>
-                  {[
+                  <div className={presentation === 'page' ? 'grid grid-cols-1 gap-3 lg:grid-cols-2' : 'space-y-3'}>{[
                     ['Liên hệ', contactProductIds, setContactProductIds],
                     ['Liên hệ kinh doanh', salesProductIds, setSalesProductIds],
                     ['Liên hệ hỗ trợ kỹ thuật', technicalProductIds, setTechnicalProductIds],
                     ['Liên hệ kinh doanh Miền Bắc', northSalesProductIds, setNorthSalesProductIds],
                     ['Liên hệ kinh doanh Miền Nam', southSalesProductIds, setSouthSalesProductIds],
-                  ].map(([label, selected, setter]) => <ProductAssignmentField key={label as string} label={label as string} options={productOptions} selectedIds={selected as string[]} onChange={setter as React.Dispatch<React.SetStateAction<string[]>>} />)}
+                  ].map(([label, selected, setter]) => <ProductAssignmentField key={label as string} label={label as string} options={productOptions} selectedIds={selected as string[]} onChange={setter as React.Dispatch<React.SetStateAction<string[]>>} />)}</div>
                 </div>
               )}
 
@@ -638,7 +656,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         </form>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-3">
+        <div className={`p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-3 ${presentation === 'page' ? 'sticky bottom-0' : ''}`}>
           <button
             type="button"
             onClick={onClose}

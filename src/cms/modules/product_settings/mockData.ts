@@ -369,15 +369,15 @@ export const mockMasterSalesStaff: MasterSalesStaffItem[] = [
   {
     id: '32', type: 'sales_staff', name: 'Đức Thành', code: 'duc-thanh', alias: 'duc-thanh',
     phone: '0966904015', skype: '', zalo: '0966904015', status: 'active', ordering: 27, usage_count: 0,
-    contact_product_ids: ['prod_001'], sales_product_ids: ['prod_001'], technical_support_product_ids: [],
-    north_sales_product_ids: ['prod_001'], south_sales_product_ids: [],
+    contact_product_ids: ['prod_001', 'prod_demo_006'], sales_product_ids: ['prod_001', 'prod_demo_007'], technical_support_product_ids: ['prod_demo_008'],
+    north_sales_product_ids: ['prod_001', 'prod_demo_006', 'prod_demo_007'], south_sales_product_ids: [],
     created_time: '2025-08-26 08:00:00', updated_time: '2025-08-26 08:00:00',
   },
   {
     id: '31', type: 'sales_staff', name: 'Hiền Phạm', code: 'hien-pham', alias: 'hien-pham',
     phone: '0949249315', skype: '', zalo: '0949249315', status: 'active', ordering: 26, usage_count: 0,
-    contact_product_ids: ['prod_002'], sales_product_ids: ['prod_002'], technical_support_product_ids: [],
-    north_sales_product_ids: [], south_sales_product_ids: ['prod_002'],
+    contact_product_ids: ['prod_002', 'prod_demo_012'], sales_product_ids: ['prod_002', 'prod_demo_013'], technical_support_product_ids: ['prod_demo_012'],
+    north_sales_product_ids: [], south_sales_product_ids: ['prod_002', 'prod_demo_012', 'prod_demo_013'],
     created_time: '2025-02-06 08:00:00', updated_time: '2025-02-06 08:00:00',
   },
   {
