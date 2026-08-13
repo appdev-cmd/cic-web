@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { AlertCircle, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp, Eye, FileCode2, Image, Link2, Monitor, Save, Send, Smartphone, Tablet } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
-import { entityTypeLabels, pageBuilderEntityOptions, sectionDefinitions } from './pageBuilderData';
+import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
+import { entityTypeLabels, sectionDefinitions } from './pageBuilderRegistry';
 import { PageEntityPickerModal } from './PageEntityPickerModal';
 import { findPageBuilderImage, PageMediaPickerModal } from './PageMediaPickerModal';
 import { PageBuilderVisualCanvas } from './PageBuilderVisualCanvas';
-import type { PageBuilderConfigValue, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
+import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 
 interface PageBuilderEditorProps {
   page: PageBuilderPage;
@@ -13,6 +14,8 @@ interface PageBuilderEditorProps {
   onSaveDraft: (page: PageBuilderPage) => void;
   onPreview: (page: PageBuilderPage) => void;
   onPublish: (page: PageBuilderPage) => void;
+  entityOptions: PageBuilderEntityOption[];
+  mediaImages: CmsMediaPickerItem[];
 }
 
 const fieldLabels: Record<string, string> = {
@@ -48,7 +51,7 @@ function updateAtPath(config: Record<string, PageBuilderConfigValue>, path: Arra
 
 const imageKeys = new Set(['imageId', 'backgroundImageId']);
 
-function ConfigField({ fieldKey, value, path, onChange, onPickImage }: { fieldKey: string; value: PageBuilderConfigValue; path: Array<string | number>; onChange: (path: Array<string | number>, value: PageBuilderConfigValue) => void; onPickImage: (path: Array<string | number>, currentId: string) => void }) {
+function ConfigField({ fieldKey, value, path, onChange, onPickImage, mediaImages }: { fieldKey: string; value: PageBuilderConfigValue; path: Array<string | number>; onChange: (path: Array<string | number>, value: PageBuilderConfigValue) => void; onPickImage: (path: Array<string | number>, currentId: string) => void; mediaImages: CmsMediaPickerItem[] }) {
   if (Array.isArray(value)) {
     if (value.every((item) => typeof item === 'string')) {
       return (
@@ -67,9 +70,9 @@ function ConfigField({ fieldKey, value, path, onChange, onPickImage }: { fieldKe
             <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Mục {index + 1}</p>
             {typeof item === 'object' && item !== null ? (
               <div className="grid gap-3 md:grid-cols-2">
-                {Object.entries(item).map(([key, child]) => <ConfigField key={key} fieldKey={key} value={child} path={[...path, index, key]} onChange={onChange} onPickImage={onPickImage} />)}
+                {Object.entries(item).map(([key, child]) => <ConfigField key={key} fieldKey={key} value={child} path={[...path, index, key]} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} />)}
               </div>
-            ) : <ConfigField fieldKey={`${fieldKey}_${index + 1}`} value={item} path={[...path, index]} onChange={onChange} onPickImage={onPickImage} />}
+            ) : <ConfigField fieldKey={`${fieldKey}_${index + 1}`} value={item} path={[...path, index]} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} />}
           </div>
         ))}
       </div>
@@ -77,12 +80,12 @@ function ConfigField({ fieldKey, value, path, onChange, onPickImage }: { fieldKe
   }
 
   if (typeof value === 'object' && value !== null) {
-    return <div className="grid gap-3 md:grid-cols-2">{Object.entries(value).map(([key, child]) => <ConfigField key={key} fieldKey={key} value={child} path={[...path, key]} onChange={onChange} onPickImage={onPickImage} />)}</div>;
+    return <div className="grid gap-3 md:grid-cols-2">{Object.entries(value).map(([key, child]) => <ConfigField key={key} fieldKey={key} value={child} path={[...path, key]} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} />)}</div>;
   }
 
   if (imageKeys.has(fieldKey)) {
     const currentId = typeof value === 'string' ? value : '';
-    const asset = findPageBuilderImage(currentId);
+    const asset = findPageBuilderImage(currentId, mediaImages);
     return <div className="space-y-1.5"><span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"><Image className="h-3.5 w-3.5 text-slate-400" />{labelFor(fieldKey)}</span><button type="button" onClick={() => onPickImage(path, currentId)} className="group w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800">{asset ? <><img src={asset.thumbnail_url ?? asset.url} alt="" className="aspect-[16/7] w-full object-cover" /><span className="block truncate px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">{asset.title}</span></> : <span className="flex min-h-28 flex-col items-center justify-center gap-2 p-4 text-xs font-semibold text-slate-500"><Image className="h-7 w-7" />Chọn ảnh từ Thư viện Media</span>}</button></div>;
   }
 
@@ -100,7 +103,7 @@ function ConfigField({ fieldKey, value, path, onChange, onPickImage }: { fieldKe
   );
 }
 
-function validate(page: PageBuilderPage): Record<string, string[]> {
+function validate(page: PageBuilderPage, entityOptions: PageBuilderEntityOption[]): Record<string, string[]> {
   const issues: Record<string, string[]> = {};
   if (!page.draft.seo.title.trim()) issues.seo = ['SEO title không được để trống.'];
   page.draft.sections.forEach((section) => {
@@ -117,7 +120,7 @@ function validate(page: PageBuilderPage): Record<string, string[]> {
       if (limit && reference.entityIds.length > limit) sectionIssues.push(`${entityTypeLabels[reference.entityType]} vượt giới hạn ${limit} mục.`);
       if (new Set(reference.entityIds).size !== reference.entityIds.length) sectionIssues.push(`${entityTypeLabels[reference.entityType]} có mục bị trùng.`);
       const unavailableCount = reference.entityIds.filter((id) => {
-        const option = pageBuilderEntityOptions.find((item) => item.id === id && item.entityType === reference.entityType);
+        const option = entityOptions.find((item) => item.id === id && item.entityType === reference.entityType);
         return !option || (option.status ?? 'published') !== 'published';
       }).length;
       if (unavailableCount > 0) sectionIssues.push(`${unavailableCount} ${entityTypeLabels[reference.entityType].toLowerCase()} không còn khả dụng hoặc chưa publish.`);
@@ -127,7 +130,7 @@ function validate(page: PageBuilderPage): Record<string, string[]> {
   return issues;
 }
 
-export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBack, onSaveDraft, onPreview, onPublish }) => {
+export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBack, onSaveDraft, onPreview, onPublish, entityOptions, mediaImages }) => {
   const [workingPage, setWorkingPage] = useState(() => deepClone(page));
   const [selectedSectionId, setSelectedSectionId] = useState(page.draft.sections[0]?.id ?? '');
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -135,7 +138,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
   const [mediaPicker, setMediaPicker] = useState<{ sectionId: string; path: Array<string | number>; currentId: string } | null>(null);
   const [showValidation, setShowValidation] = useState(false);
   const [showMobileCanvas, setShowMobileCanvas] = useState(false);
-  const issues = useMemo(() => validate(workingPage), [workingPage]);
+  const issues = useMemo(() => validate(workingPage, entityOptions), [entityOptions, workingPage]);
   const issueCount = Object.values(issues).reduce((total, values) => total + values.length, 0);
 
   const updateSectionConfig = (sectionId: string, path: Array<string | number>, value: PageBuilderConfigValue) => {
@@ -195,10 +198,10 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
               <div className="flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-xs font-bold text-orange-700">{section.position}</span><div className="min-w-0"><h2 className="text-sm font-bold text-slate-950 dark:text-white">{definition.label}</h2><p className="mt-0.5 text-xs text-slate-500">{definition.description}</p><span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 font-mono text-[10px] text-slate-500 dark:bg-slate-800">{section.sectionType} · cố định</span></div></div>
             </div>
             <div className="space-y-5 p-4">
-              <div className="grid gap-4">{Object.entries(section.config).map(([key, value]) => <ConfigField key={key} fieldKey={key} value={value} path={[key]} onChange={(path, nextValue) => updateSectionConfig(section.id, path, nextValue)} onPickImage={(path, currentId) => setMediaPicker({ sectionId: section.id, path, currentId })} />)}</div>
+              <div className="grid gap-4">{Object.entries(section.config).map(([key, value]) => <ConfigField key={key} fieldKey={key} value={value} path={[key]} onChange={(path, nextValue) => updateSectionConfig(section.id, path, nextValue)} onPickImage={(path, currentId) => setMediaPicker({ sectionId: section.id, path, currentId })} mediaImages={mediaImages} />)}</div>
               {section.references?.map((reference) => {
                 const limit = definition.referenceLimit?.[reference.entityType] ?? 20;
-                return <div key={reference.entityType} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-slate-900 dark:text-white">{entityTypeLabels[reference.entityType]} đã chọn</p><p className="text-xs text-slate-500">{reference.entityIds.length}/{limit} mục · đúng thứ tự hiển thị</p></div><CmsButton size="sm" variant="secondary" leadingIcon={<Link2 />} onClick={() => setPicker({ sectionId: section.id, entityType: reference.entityType, selectedIds: reference.entityIds, limit })}>Chọn</CmsButton></div><div className="mt-3 space-y-1.5">{reference.entityIds.map((id, index) => <div key={id} className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{index + 1}. {pageBuilderEntityOptions.find((item) => item.id === id)?.label ?? id}</div>)}</div></div>;
+                return <div key={reference.entityType} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-bold text-slate-900 dark:text-white">{entityTypeLabels[reference.entityType]} đã chọn</p><p className="text-xs text-slate-500">{reference.entityIds.length}/{limit} mục · đúng thứ tự hiển thị</p></div><CmsButton size="sm" variant="secondary" leadingIcon={<Link2 />} onClick={() => setPicker({ sectionId: section.id, entityType: reference.entityType, selectedIds: reference.entityIds, limit })}>Chọn</CmsButton></div><div className="mt-3 space-y-1.5">{reference.entityIds.map((id, index) => <div key={id} className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{index + 1}. {entityOptions.find((item) => item.id === id)?.label ?? id}</div>)}</div></div>;
               })}
               {showValidation && issues[section.id]?.map((issue) => <p key={issue} className="flex items-center gap-1.5 text-xs font-semibold text-red-600"><AlertCircle className="h-3.5 w-3.5" />{issue}</p>)}
             </div>
@@ -206,8 +209,8 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
         })()}
       </div>
 
-      {picker && <PageEntityPickerModal isOpen entityType={picker.entityType} selectedIds={picker.selectedIds} limit={picker.limit} onClose={() => setPicker(null)} onConfirm={(ids) => updateReference(picker.sectionId, picker.entityType, ids)} />}
-      {mediaPicker && <PageMediaPickerModal currentId={mediaPicker.currentId} onClose={() => setMediaPicker(null)} onConfirm={(mediaId) => updateSectionConfig(mediaPicker.sectionId, mediaPicker.path, mediaId)} />}
+      {picker && <PageEntityPickerModal isOpen entityType={picker.entityType} selectedIds={picker.selectedIds} limit={picker.limit} options={entityOptions} onClose={() => setPicker(null)} onConfirm={(ids) => updateReference(picker.sectionId, picker.entityType, ids)} />}
+      {mediaPicker && <PageMediaPickerModal currentId={mediaPicker.currentId} images={mediaImages} onClose={() => setMediaPicker(null)} onConfirm={(mediaId) => updateSectionConfig(mediaPicker.sectionId, mediaPicker.path, mediaId)} />}
     </div>
   );
 };

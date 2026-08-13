@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Image as ImageIcon, Search, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
-import { INITIAL_ASSETS } from '../media/mockData';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
+import { INITIAL_ASSETS } from '../media/mockData';
 
 
 interface PageMediaPickerModalProps {
@@ -12,10 +12,6 @@ interface PageMediaPickerModalProps {
   images?: CmsMediaPickerItem[];
   returnValue?: 'id' | 'url';
 }
-
-export const pageBuilderImages = INITIAL_ASSETS.filter(
-  (asset) => asset.type === 'image' && asset.workflow_status === 'ready',
-);
 
 const legacyMockImageAliases: Record<string, string> = {
   media_home_social: 'ast_08',
@@ -29,9 +25,14 @@ const legacyMockImageAliases: Record<string, string> = {
   media_award_03: 'ast_10',
 };
 
-export function findPageBuilderImage(id: string) {
+/** Compatibility default for modules not migrated to an injected Media data source yet. */
+export const pageBuilderImages = INITIAL_ASSETS.filter(
+  (asset) => asset.type === 'image' && asset.workflow_status === 'ready',
+);
+
+export function findPageBuilderImage(id: string, images: CmsMediaPickerItem[] = pageBuilderImages) {
   const resolvedId = legacyMockImageAliases[id] ?? id;
-  return pageBuilderImages.find((asset) => asset.id === resolvedId);
+  return images.find((asset) => asset.id === resolvedId);
 }
 
 export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({

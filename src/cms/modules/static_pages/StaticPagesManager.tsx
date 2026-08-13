@@ -7,18 +7,19 @@ import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsListToolbar } from '../../components/ui/CmsListToolbar';
 import { PageBuilderEditor } from './PageBuilderEditor';
 import { PageBuilderPreviewModal } from './PageBuilderPreviewModal';
-import { createLegalPage, pageBuilderPagesMock } from './pageBuilderData';
+import { createLegalPage } from './pageBuilderData';
+import type { StaticPagesModuleData } from './staticPagesData';
 import type { PageBuilderPage } from './pageBuilderTypes';
 
-interface StaticPagesManagerProps { workspaceLocale: CmsLocale }
+interface StaticPagesManagerProps { workspaceLocale: CmsLocale; data: StaticPagesModuleData }
 
-const clonePages = () => JSON.parse(JSON.stringify(pageBuilderPagesMock)) as PageBuilderPage[];
+const clonePages = (pages: PageBuilderPage[]) => JSON.parse(JSON.stringify(pages)) as PageBuilderPage[];
 const formatTime = (value: string) => new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
 const slugify = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const shortSlug = (value: string) => slugify(value).split('-').slice(0, 6).join('-').slice(0, 42).replace(/-$/, '');
 
-export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspaceLocale }) => {
-  const [pages, setPages] = useState<PageBuilderPage[]>(clonePages);
+export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspaceLocale, data }) => {
+  const [pages, setPages] = useState<PageBuilderPage[]>(() => clonePages(data.pages));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewPage, setPreviewPage] = useState<PageBuilderPage | null>(null);
   const [query, setQuery] = useState('');
@@ -48,6 +49,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
   }, [newPageName, pages]);
 
   const createPage = () => {
+    if (!data.canCreateLegalPage) { showToast('Workspace này chưa có mẫu nội dung được duyệt.'); return; }
     const name = newPageName.trim();
     const slugPart = suggestedSlug;
     if (!name || !slugPart) return;
@@ -62,7 +64,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
 
   if (editingPage) return <>
     {toast && <Toast message={toast} />}
-    <PageBuilderEditor key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`} page={editingPage} onBack={() => setEditingId(null)} onSaveDraft={(nextPage) => {
+    <PageBuilderEditor key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`} page={editingPage} entityOptions={data.entityOptions} mediaImages={data.mediaImages} onBack={() => setEditingId(null)} onSaveDraft={(nextPage) => {
       const saved = { ...nextPage, draft: { ...nextPage.draft, version: nextPage.draft.version + 1, status: 'draft' as const, updatedAt: new Date().toISOString() } };
       setPages((current) => current.map((page) => page.id === saved.id ? saved : page)); showToast('Đã lưu bản nháp. Website chưa thay đổi.');
     }} onPreview={setPreviewPage} onPublish={(nextPage) => {
@@ -76,7 +78,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
 
   return <div className="space-y-5">
     {toast && <Toast message={toast} />}
-    <CmsPageHeader icon={<FileText />} title="Trang nội dung" description="Quản lý các trang thiết kế riêng và tạo trang mới theo mẫu nội dung chuẩn." meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700">{pages.length} Page · {workspaceLocale.toUpperCase()}</span>} actions={<div className="flex flex-wrap gap-2"><CmsButton variant="secondary" leadingIcon={<RefreshCw />} onClick={() => showToast('Đã tải lại danh sách Page.')}>Làm mới</CmsButton><CmsButton leadingIcon={<Plus />} onClick={() => setCreateOpen(true)}>Tạo trang nội dung</CmsButton></div>} />
+    <CmsPageHeader icon={<FileText />} title="Trang nội dung" description="Quản lý các trang thiết kế riêng và tạo trang mới theo mẫu nội dung chuẩn." meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700">{pages.length} Page · {workspaceLocale.toUpperCase()}</span>} actions={<div className="flex flex-wrap gap-2"><CmsButton variant="secondary" leadingIcon={<RefreshCw />} onClick={() => showToast('Đã tải lại danh sách Page.')}>Làm mới</CmsButton><CmsButton leadingIcon={<Plus />} disabled={!data.canCreateLegalPage} onClick={() => setCreateOpen(true)}>Tạo trang nội dung</CmsButton></div>} />
     <CmsListToolbar searchValue={query} onSearchChange={(value) => { setQuery(value); setCurrentPage(1); }} searchPlaceholder="Tìm theo tên, code hoặc đường dẫn..." filtersOpen={filtersOpen} onToggleFilters={() => setFiltersOpen((open) => !open)} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setQuery(''); setStatusFilter('all'); setCurrentPage(1); }} resetDisabled={!query && statusFilter === 'all'} filters={<label className="space-y-1.5 text-xs font-bold text-slate-700 dark:text-slate-300"><span>Trạng thái</span><select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value as typeof statusFilter); setCurrentPage(1); }} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium outline-none dark:border-slate-700 dark:bg-slate-800"><option value="all">Tất cả trạng thái</option><option value="has_draft">Có thay đổi Draft</option><option value="published">Đã xuất bản</option></select></label>} activeFilters={statusFilter === 'all' ? [] : [{ id: 'status', label: statusFilter === 'published' ? 'Trạng thái: Đã xuất bản' : 'Trạng thái: Có thay đổi Draft', onRemove: () => setStatusFilter('all') }]} />
     <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
       <div className="hidden overflow-x-auto md:block"><table className="cms-data-table min-w-[920px] text-left"><thead><tr><th className="p-3">Page</th><th className="p-3">Code / đường dẫn</th><th className="p-3">Section</th><th className="p-3">Draft</th><th className="p-3">Published</th><th className="p-3 text-right">Thao tác</th></tr></thead><tbody>{paginatedPages.map((page) => <PageRow key={page.id} page={page} onPreview={setPreviewPage} onEdit={setEditingId} />)}</tbody></table></div>

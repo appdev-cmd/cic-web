@@ -1,14 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Check, Search, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
-import { entityTypeLabels, pageBuilderEntityOptions } from './pageBuilderData';
-import type { PageBuilderEntityType } from './pageBuilderTypes';
+import { entityTypeLabels } from './pageBuilderRegistry';
+import type { PageBuilderEntityOption, PageBuilderEntityType } from './pageBuilderTypes';
 
 interface PageEntityPickerModalProps {
   isOpen: boolean;
   entityType: PageBuilderEntityType;
   selectedIds: string[];
   limit: number;
+  options: PageBuilderEntityOption[];
   onClose: () => void;
   onConfirm: (ids: string[]) => void;
 }
@@ -18,6 +19,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
   entityType,
   selectedIds,
   limit,
+  options,
   onClose,
   onConfirm,
 }) => {
@@ -31,9 +33,9 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
     }
   }, [isOpen, selectedIds]);
 
-  const options = useMemo(() => {
+  const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return pageBuilderEntityOptions.filter(
+    return options.filter(
       (item) =>
         item.entityType === entityType &&
         (item.status ?? 'published') === 'published' &&
@@ -41,7 +43,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
           item.label.toLowerCase().includes(normalizedQuery) ||
           item.description.toLowerCase().includes(normalizedQuery)),
     );
-  }, [entityType, query]);
+  }, [entityType, options, query]);
 
   if (!isOpen) return null;
 
@@ -82,7 +84,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Tìm ${entityTypeLabels[entityType].toLowerCase()}...`} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
             </div>
             <div className="max-h-[48vh] space-y-2 overflow-y-auto pr-1">
-              {options.map((item) => {
+              {filteredOptions.map((item) => {
                 const checked = draftIds.includes(item.id);
                 const disabled = !checked && draftIds.length >= limit;
                 return (
@@ -92,7 +94,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
                   </button>
                 );
               })}
-              {options.length === 0 && <p className="py-10 text-center text-sm text-slate-500">Không tìm thấy dữ liệu phù hợp.</p>}
+              {filteredOptions.length === 0 && <p className="py-10 text-center text-sm text-slate-500">Không tìm thấy dữ liệu phù hợp.</p>}
             </div>
           </div>
 
@@ -100,7 +102,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
             <div className="mb-3 flex items-center justify-between"><h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">Đã chọn và thứ tự hiển thị</h3><span className="text-xs font-semibold text-orange-600">{draftIds.length}/{limit}</span></div>
             <div className="max-h-[52vh] space-y-2 overflow-y-auto pr-1">
               {draftIds.map((id, index) => {
-                const item = pageBuilderEntityOptions.find((option) => option.id === id);
+                const item = options.find((option) => option.id === id);
                 return (
                   <div key={id} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-bold text-slate-500 dark:bg-slate-900">{index + 1}</span>

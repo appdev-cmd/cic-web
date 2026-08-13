@@ -1,0 +1,48 @@
+import type { PageBuilderEntityType, SectionDefinition } from './pageBuilderTypes';
+
+/** Labels and fixed section capabilities are code-owned, not database content. */
+export const entityTypeLabels: Record<PageBuilderEntityType, string> = {
+  product: 'Sản phẩm',
+  news: 'Tin tức',
+  service: 'Dịch vụ',
+  project: 'Dự án',
+  partner: 'Đối tác',
+  event: 'Sự kiện',
+};
+
+export const sectionDefinitions: Record<string, SectionDefinition> = {
+  'home.hero': { label: 'Hero', description: 'Carousel mở đầu của Trang chủ.' },
+  'home.intro': { label: 'Giới thiệu ngắn', description: 'Nội dung giới thiệu và video doanh nghiệp.' },
+  'home.stats': { label: 'Thống kê', description: 'Bốn chỉ số theo thiết kế hiện tại.' },
+  'home.awards': { label: 'Giải thưởng', description: 'Danh sách giải thưởng trong slider.' },
+  'home.ecosystem': { label: 'Hệ sinh thái công nghệ', description: 'Các slot sản phẩm và dịch vụ cố định.', referenceLimit: { product: 4, service: 3 } },
+  'home.projects': { label: 'Dự án tiêu biểu', description: 'Chọn thủ công tối đa 3 dự án.', referenceLimit: { project: 3 } },
+  'home.events': { label: 'Sự kiện nổi bật', description: 'Một sự kiện chính và tối đa 3 sự kiện phụ.', referenceLimit: { event: 4 } },
+  'home.news': { label: 'Tin tức và Góc nhìn', description: 'Chọn thủ công tối đa 3 bài viết.', referenceLimit: { news: 3 } },
+  'home.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 } },
+  'home.contact_cta': { label: 'CTA & Form tư vấn', description: 'Nội dung liên hệ và form cố định.' },
+  'about.hero': { label: 'Hero Giới thiệu', description: 'Tiêu đề và ảnh mở đầu.' },
+  'about.overview': { label: 'Tổng quan doanh nghiệp', description: 'Giới thiệu và video doanh nghiệp.' },
+  'about.timeline': { label: 'Tiến trình phát triển', description: 'Các mốc lịch sử theo thiết kế timeline.' },
+  'about.strategy': { label: 'Định hướng chiến lược', description: 'Tầm nhìn, sứ mệnh và giá trị cốt lõi.' },
+  'about.offerings': { label: 'Sản phẩm và dịch vụ cung cấp', description: 'Các entity được chọn cho grid cố định.', referenceLimit: { product: 2, service: 4 } },
+  'about.awards': { label: 'Thành tựu & Giải thưởng', description: 'Danh sách giải thưởng.' },
+  'about.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác.', referenceLimit: { partner: 12 } },
+  'about.organization': { label: 'Cơ cấu tổ chức', description: 'Sơ đồ và topology được giữ trong code.' },
+  'about.capacity': { label: 'Năng lực doanh nghiệp', description: 'Giới thiệu và bốn chỉ số năng lực.' },
+  'about.experience': { label: 'Năng lực & Kinh nghiệm', description: 'Danh mục kinh nghiệm theo thiết kế.' },
+  'about.software_partners': { label: 'Đối tác phần mềm', description: 'Danh sách đối tác phần mềm.', referenceLimit: { partner: 12 } },
+  'about.hardware_partners': { label: 'Đối tác thiết bị', description: 'Danh sách đối tác thiết bị.', referenceLimit: { partner: 12 } },
+  'about.contact_cta': { label: 'CTA liên hệ', description: 'Kêu gọi kết nối chuyên gia CIC.' },
+  'contact.header': { label: 'Header Liên hệ', description: 'Tiêu đề trang Liên hệ.' },
+  'contact.branches': { label: 'Chi nhánh & Bản đồ', description: 'Hai chi nhánh theo layout hiện tại.' },
+  'contact.form': { label: 'Form liên hệ', description: 'Form nghiệp vụ được tham chiếu bằng ID.' },
+  'contact.security': { label: 'Thông báo bảo mật', description: 'Nội dung dẫn tới chính sách bảo mật.' },
+  'legal.header': { label: 'Header chính sách', description: 'Thông tin đầu trang pháp lý.' },
+  'privacy.collection': { label: 'Mục đích thu thập', description: 'Mục 01 của chính sách.' },
+  'privacy.usage': { label: 'Phạm vi sử dụng', description: 'Mục 02 của chính sách.' },
+  'privacy.retention': { label: 'Thời gian lưu trữ', description: 'Mục 03 của chính sách.' },
+  'privacy.access': { label: 'Tiếp cận và chỉnh sửa', description: 'Mục 04 của chính sách.' },
+  'privacy.commitment': { label: 'Cam kết bảo mật', description: 'Mục 05 của chính sách.' },
+  'legal.assistance': { label: 'Hỗ trợ pháp lý', description: 'Thông tin liên hệ giải đáp.' },
+};

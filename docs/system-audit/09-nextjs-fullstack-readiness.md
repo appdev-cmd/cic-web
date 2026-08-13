@@ -25,6 +25,12 @@ Không tạo REST API/backend giả chỉ để mô phỏng kiến trúc tương
 - Interactive state ở component; dữ liệu đọc và mapping tách khỏi component khi hợp lý.
 - Không đổi layout, section, responsive hoặc design để phục vụ kiến trúc.
 
+## Documentation gate trước mỗi module
+
+Trước khi sửa một module, đối chiếu theo thứ tự: audit hiện trạng → field mapping → target database/schema decision → frontend/backend contract → implementation hiện tại. Nếu phát hiện sai hoặc thiếu nguồn dữ liệu, cập nhật tài liệu trong `docs/system-audit/` trước rồi mới thay code. Chỉ field được phân loại ADD và được duyệt mới có thể đi vào migration; mock/UI không phải bằng chứng thêm schema.
+
+Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nếu có, relation/media/SEO/Rich Text, mock fallback, locale/workspace, migration compatibility, typecheck và build. Một module chỉ được đánh dấu hoàn thành khi các điểm này có nguồn rõ ràng và UI không thay đổi đáng kể.
+
 ## Tình trạng module
 
 ### Boundary tốt
@@ -33,13 +39,14 @@ Không tạo REST API/backend giả chỉ để mô phỏng kiến trúc tương
 |---|---|---|
 | News website | `getNewsData()` | `NewsView` không import mock; relation liên quan chọn thủ công |
 | News CMS | `getCmsNewsData(locale)` | list/form/category/media nhận data qua props/data function |
+| Static Pages CMS | `getCmsStaticPagesData(locale)` | Page/entity/media đi qua một boundary; registry section cố định nằm trong code |
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
 - CMS Dashboard và các module Events, Services, Products, Product Settings, Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
 - CTA, Forms, Customer Requests và Email Templates còn import fixture trực tiếp ở manager/editor.
 - Function SEO và Translation Strings còn import mock trực tiếp.
-- Static Pages còn dùng Page Builder mock và một số picker/editor phụ thuộc fixture module khác.
+- Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
 - Website Home, Product, Service, Event, Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
 
 Các module này được xử lý lần lượt theo thứ tự triển khai đã chốt; không refactor hàng loạt.

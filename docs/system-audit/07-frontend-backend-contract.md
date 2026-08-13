@@ -109,6 +109,13 @@
 
 ## 7. Static page
 
+### Data-access boundary đã áp dụng cho React mockup
+
+- Route CMS lấy `StaticPagesModuleData` qua `getCmsStaticPagesData(locale)`; manager/editor/entity picker/media picker không tự import raw Page Builder fixture.
+- `sectionDefinitions` và giới hạn entity là registry do code sở hữu, không phải content lưu database.
+- VI và EN là dataset độc lập. Khi chưa có fixture/template EN, danh sách EN rỗng và không dùng nội dung VI làm fallback hoặc seed ngầm.
+- Draft/Publish hiện vẫn là local state phục vụ mockup. Backend tương lai phải validate template, section type/config, reference limit và transaction publish ở server.
+
 | Section/item | Nguồn cuối | Loại | Ghi chú |
 |---|---|---|---|
 | Page identity/URL/template | Page table | Column | `template_key` quyết định component code |

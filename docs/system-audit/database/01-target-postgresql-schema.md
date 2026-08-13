@@ -115,3 +115,4 @@ Không rename/drop. Chỉ sửa metadata schema sau validation:
 
 Giữ mô hình bảng VI/EN độc lập trong migration đầu. Bảng domain mới có `workspace varchar(10) NOT NULL` với allowlist (`vi`, `en`, ...). Không tự fallback/translate. Việc hợp nhất bảng legacy thành translation table là ngoài scope và sẽ là breaking migration riêng nếu sau này cần.
 
+Seed Page Builder cũng phải theo manifest riêng từng workspace. Không được dùng config/content VI để tự tạo Draft EN; workspace chưa có manifest được duyệt giữ rỗng hoặc chưa khả dụng.
