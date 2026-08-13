@@ -3,6 +3,7 @@ export type CmsModuleKey =
   | 'users'
   | 'permissions'
   | 'settings'
+  | 'function_seo'
   | 'activity_logs'
   | 'trash'
   | 'static_pages'
@@ -43,6 +44,7 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
     aliases: ['/cms/system-settings'],
     nestedPrefixes: ['/cms/settings/'],
   },
+  { module: 'function_seo', canonicalPath: '/cms/function-seo', aliases: ['/cms/seo-modules'], nestedPrefixes: ['/cms/function-seo/'] },
   {
     module: 'activity_logs',
     canonicalPath: '/cms/activity-logs',

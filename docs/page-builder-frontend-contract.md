@@ -18,6 +18,8 @@ Phạm vi giao diện hiện tại gồm hai nhóm:
 
 CMS không cho tạo thêm trang thuộc nhóm thiết kế riêng. Việc tạo trang mới chỉ áp dụng cho template `legal_standard`, không đồng nghĩa với Add Section hoặc Custom Layout.
 
+SEO của các trang danh sách nghiệp vụ như `/san-pham`, `/tin-tuc`, `/su-kien`, `/dich-vu`, `/du-an` không thuộc Page Builder. Các route này được quản lý tại **Cấu hình SEO chức năng**; SEO danh mục và SEO chi tiết vẫn thuộc module dữ liệu tương ứng để tránh trùng ownership.
+
 ```ts
 type Page = {
   id: string;

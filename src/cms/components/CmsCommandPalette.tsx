@@ -41,6 +41,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
     { label: 'Yêu cầu từ khách hàng', category: 'Khách hàng', path: '/cms/contact-requests', icon: FileText },
     { label: 'Quản trị viên & Phân quyền', category: 'Hệ thống', path: '/cms/users', icon: Users },
     { label: 'Cấu hình chung hệ thống CMS', category: 'Cấu hình', path: '/cms/settings', icon: Settings },
+    { label: 'Cấu hình SEO chức năng', category: 'Cấu hình', path: '/cms/function-seo', icon: Search },
   ];
 
   const filteredPages = quickPages.filter(p =>

@@ -473,6 +473,12 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         path: '/cms/settings',
       },
       {
+        id: 'menu_function_seo',
+        title: 'Cấu hình SEO chức năng',
+        iconName: 'Search',
+        path: '/cms/function-seo',
+      },
+      {
         id: 'menu_translation_strings',
         title: 'Ngôn ngữ giao diện',
         iconName: 'Sparkles',

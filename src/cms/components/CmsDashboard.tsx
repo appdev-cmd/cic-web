@@ -30,6 +30,7 @@ const SystemConfiguration = lazy(async () => {
     />
   ) };
 });
+const FunctionSeoManager = lazy(() => import('../modules/function_seo/FunctionSeoManager').then((module) => ({ default: module.FunctionSeoManager })));
 const ActivityLogsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/ActivityLogsManager'), import('../data/demoGovernanceDataSource')]);
   return { default: () => <module.ActivityLogsManager data={dataModule.demoGovernanceDataSource.audit} /> };
@@ -278,6 +279,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <PermissionManagement />
           ) : activeModule === 'settings' ? (
             <SystemConfiguration workspaceLocale={workspaceLocale} />
+          ) : activeModule === 'function_seo' ? (
+            <FunctionSeoManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'activity_logs' ? (
             <ActivityLogsManager />
           ) : activeModule === 'trash' ? (
