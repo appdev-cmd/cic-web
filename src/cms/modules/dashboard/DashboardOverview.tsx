@@ -82,6 +82,28 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     status: item.status === 'published' ? 'published' : 'draft',
   }));
   const activityLogs: ActivityLog[] = data?.activityLogs ?? [];
+  const customerRequests = [
+    ...contacts.map((item) => ({
+      id: item.id,
+      kind: 'contact' as const,
+      title: item.subject,
+      customer: item.sender_name,
+      secondary: item.sender_phone,
+      status: item.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý',
+      createdTime: item.created_time,
+      source: item,
+    })),
+    ...registrations.map((item) => ({
+      id: item.id,
+      kind: 'registration' as const,
+      title: item.product_name,
+      customer: item.company_name,
+      secondary: item.customer_name,
+      status: item.status === 'pending' ? 'Chờ báo giá' : 'Đã báo giá',
+      createdTime: item.created_time,
+      source: item,
+    })),
+  ].sort((a, b) => b.createdTime.localeCompare(a.createdTime));
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -268,10 +290,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           );
         }
 
-        // SECTION: 6 KPI CARDS
+        // SECTION: 5 KPI CARDS
         if (widgetId === 'kpi_cards') {
           return (
-            <div key={widgetId} className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
+            <div key={widgetId} className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5">
               {/* KPI 1: Published Products */}
               <div
                 onClick={() => onNavigate('/cms/products', 'Quản lý Sản phẩm')}
@@ -348,13 +370,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
               </div>
 
-              {/* KPI 5: Unprocessed Contact Messages */}
+              {/* KPI 5: Unified Customer Requests */}
               <div
-                onClick={() => onNavigate('/cms/contacts', 'Liên hệ & Khách hàng')}
+                onClick={() => onNavigate('/cms/customer-requests', 'Yêu cầu khách hàng')}
                 className="bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 rounded-2xl p-4 shadow-xs hover:border-red-500 transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Tin nhắn liên hệ</span>
+                  <span>Yêu cầu khách hàng</span>
                   <div className="p-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform">
                     <MessageSquare className="w-4 h-4" />
                   </div>
@@ -362,37 +384,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="mt-3">
                   <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-black text-red-600 dark:text-red-400">
-                      {data.kpi.unprocessed_contacts}
+                      {data.kpi.unprocessed_contacts + data.kpi.unprocessed_registrations}
                     </span>
                     <span className="px-1.5 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 text-[10px] font-bold rounded animate-pulse">
                       Chưa xử lý!
                     </span>
                   </div>
-                  <p className="text-[11px] text-red-500 font-semibold mt-0.5">Tin nhắn chưa xem</p>
-                </div>
-              </div>
-
-              {/* KPI 6: Unprocessed Product Consultation Requests */}
-              <div
-                onClick={() => onNavigate('/cms/contacts', 'Liên hệ & Khách hàng')}
-                className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-4 shadow-xs hover:border-amber-500 transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden group"
-              >
-                <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Yêu cầu tư vấn SP</span>
-                  <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
-                    <FileCheck className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-amber-600 dark:text-amber-400">
-                      {data.kpi.unprocessed_registrations}
-                    </span>
-                    <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-bold rounded animate-pulse">
-                      Chờ báo giá!
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-amber-600 font-semibold mt-0.5">Yêu cầu tư vấn sản phẩm</p>
+                  <p className="text-[11px] text-red-500 font-semibold mt-0.5">Yêu cầu đang chờ xử lý</p>
                 </div>
               </div>
             </div>
@@ -402,8 +400,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         // SECTION: ACTION REQUIRED BLOCKS (CẦN XỬ LÝ NGAY)
         if (widgetId === 'action_required') {
           return (
-            <div key={widgetId} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Block A: Tin nhắn liên hệ mới nhất chưa xử lý */}
+            <div key={widgetId} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Block A: Yêu cầu khách hàng hợp nhất */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-2.5">
@@ -412,13 +410,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </div>
                     <div>
                       <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                        Tin nhắn liên hệ mới
+                        Yêu cầu khách hàng
                       </h3>
-                      <p className="text-[11px] text-slate-400">5 yêu cầu mới nhất cần phản hồi</p>
+                      <p className="text-[11px] text-slate-400">Các yêu cầu mới nhất cần tiếp nhận và xử lý</p>
                     </div>
                   </div>
                   <button
-                    onClick={() => onNavigate('/cms/contacts', 'Liên hệ & Khách hàng')}
+                    onClick={() => onNavigate('/cms/customer-requests', 'Yêu cầu khách hàng')}
                     className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                   >
                     <span>Xem tất cả</span>
@@ -427,33 +425,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-800/80 flex-1">
-                  {contacts.slice(0, 5).map((msg) => (
+                  {customerRequests.slice(0, 6).map((request) => (
                     <div
-                      key={msg.id}
-                      onClick={() => onOpenDrawerItem('contact', msg)}
+                      key={`${request.kind}-${request.id}`}
+                      onClick={() => onOpenDrawerItem(request.kind, request.source)}
                       className={`py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl px-2 transition-colors cursor-pointer space-y-1 group ${
                         preference.density === 'compact' ? 'py-1.5' : 'py-3'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate max-w-[170px]">
-                          {msg.sender_name}
+                          {request.customer}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono">{msg.created_time.split(' ')[1]}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">{request.createdTime.split(' ')[1]}</span>
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium line-clamp-1 group-hover:text-orange-600 dark:group-hover:text-orange-400">
-                        {msg.subject}
+                        {request.title}
                       </p>
                       <div className="flex items-center justify-between text-[10px] text-slate-400">
-                        <span>{msg.sender_phone}</span>
-                        <span
-                          className={`px-1.5 py-0.2 font-semibold rounded ${
-                            msg.status === 'unread'
-                              ? 'bg-red-500/10 text-red-600 border border-red-500/20'
-                              : 'bg-orange-500/10 text-orange-600'
-                          }`}
-                        >
-                          {msg.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý'}
+                        <span>{request.secondary}</span>
+                        <span className={`px-1.5 py-0.2 font-semibold rounded ${request.kind === 'registration' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'}`}>
+                          {request.status}
                         </span>
                       </div>
                     </div>
@@ -461,59 +453,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
               </div>
 
-              {/* Block B: Yêu cầu tư vấn sản phẩm mới nhất */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-amber-500/10 text-amber-600 rounded-xl">
-                      <FileCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                        Yêu cầu tư vấn sản phẩm
-                      </h3>
-                      <p className="text-[11px] text-slate-400">5 đăng ký nhận báo giá mới nhất</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => onNavigate('/cms/contacts', 'Liên hệ & Khách hàng')}
-                    className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-0.5 cursor-pointer"
-                  >
-                    <span>Xem tất cả</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="divide-y divide-slate-100 dark:divide-slate-800/80 flex-1">
-                  {registrations.slice(0, 5).map((reg) => (
-                    <div
-                      key={reg.id}
-                      onClick={() => onOpenDrawerItem('registration', reg)}
-                      className={`py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl px-2 transition-colors cursor-pointer space-y-1 group ${
-                        preference.density === 'compact' ? 'py-1.5' : 'py-3'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate max-w-[170px]">
-                          {reg.company_name}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono">{reg.created_time.split(' ')[1]}</span>
-                      </div>
-                      <p className="text-[11px] font-semibold text-orange-600 dark:text-orange-400 line-clamp-1">
-                        {reg.product_name}
-                      </p>
-                      <div className="flex items-center justify-between text-[10px] text-slate-400">
-                        <span>{reg.customer_name}</span>
-                        <span className="px-1.5 py-0.2 bg-amber-500/10 text-amber-600 font-semibold rounded border border-amber-500/20">
-                          {reg.status === 'pending' ? 'Chờ báo giá' : 'Đã báo giá'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Block C: Nội dung mới cập nhật */}
+              {/* Block B: Nội dung mới cập nhật */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-2.5">
