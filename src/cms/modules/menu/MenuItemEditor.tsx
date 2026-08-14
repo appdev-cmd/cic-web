@@ -4,22 +4,12 @@ import {
   Check,
   Globe,
   Link,
-  ExternalLink,
-  Layers,
-  Package,
-  FileText,
-  Newspaper,
-  Hash,
   Eye,
-  Calendar,
   Sparkles,
-  AlertTriangle,
   FolderTree,
-  ChevronRight,
-  Shield,
   Trash2,
 } from 'lucide-react';
-import { MenuItem, NavigationTargetType } from './types';
+import { MenuItem } from './types';
 
 interface MenuItemEditorProps {
   item: MenuItem | null;
@@ -42,18 +32,14 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<MenuItem>>({
     label: '',
-    target_type: 'static_page',
     url: '/',
     open_in_new_tab: false,
     icon_name: '',
-    css_class: '',
     is_visible: true,
-    visibility_rule: 'all',
     parent_id: null,
   });
 
   const [activeTab, setActiveTab] = useState<'general' | 'target' | 'appearance' | 'visibility'>('general');
-  const [linkCheckStatus, setLinkCheckStatus] = useState<'idle' | 'checking' | 'valid' | 'broken'>('idle');
 
   useEffect(() => {
     if (item) {
@@ -63,47 +49,16 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
     } else {
       setFormData({
         label: '',
-        target_type: 'static_page',
         url: '/',
         open_in_new_tab: false,
         icon_name: '',
-        css_class: '',
         is_visible: true,
-        visibility_rule: 'all',
         parent_id: null,
       });
     }
-    setLinkCheckStatus('idle');
   }, [item, isOpen]);
 
   if (!isOpen) return null;
-
-  const handleTargetTypeChange = (type: NavigationTargetType) => {
-    let defaultUrl = formData.url || '/';
-    if (type === 'product_catalog') defaultUrl = '/san-pham';
-    else if (type === 'service_catalog') defaultUrl = '/dich-vu';
-    else if (type === 'news_category') defaultUrl = '/tin-tuc';
-    else if (type === 'external_link') defaultUrl = 'https://';
-    else if (type === 'section_header') defaultUrl = '#';
-    else if (type === 'anchor') defaultUrl = '#section';
-
-    setFormData((prev) => ({
-      ...prev,
-      target_type: type,
-      url: defaultUrl,
-    }));
-  };
-
-  const handleTestLink = () => {
-    setLinkCheckStatus('checking');
-    setTimeout(() => {
-      if (formData.url && (formData.url.startsWith('/') || formData.url.startsWith('https://') || formData.url.startsWith('#'))) {
-        setLinkCheckStatus('valid');
-      } else {
-        setLinkCheckStatus('broken');
-      }
-    }, 400);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,19 +71,10 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
       depth: item ? item.depth : 0,
       display_order: item ? item.display_order : 99,
       label: formData.label || '',
-      target_type: formData.target_type || 'static_page',
-      target_content_id: formData.target_content_id,
-      target_content_name: formData.target_content_name,
       url: formData.url || '/',
       open_in_new_tab: !!formData.open_in_new_tab,
       icon_name: formData.icon_name || '',
-      css_class: formData.css_class || '',
       is_visible: formData.is_visible !== false,
-      visibility_rule: formData.visibility_rule || 'all',
-      schedule_start: formData.schedule_start,
-      schedule_end: formData.schedule_end,
-      link_health: linkCheckStatus === 'broken' ? 'broken' : 'valid',
-      draft_status: item ? (item.draft_status === 'added' ? 'added' : 'modified') : 'added',
       children: item?.children || [],
     };
 
@@ -150,7 +96,7 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
                 {item ? `Chỉnh sửa Mục Menu: "${item.label}"` : 'Tạo mới Mục Điều Hướng'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Lưu thay đổi vào bản thảo Draft trước khi phát hành công khai.
+                Cập nhật thông tin mục menu.
               </p>
             </div>
           </div>
@@ -260,89 +206,21 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
 
           {activeTab === 'target' && (
             <div className="space-y-4">
-              {/* Target Type Picker */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Loại đích đến (Navigation Target Type)
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { type: 'static_page', label: 'Trang tĩnh (Static Page)', icon: FileText, desc: 'Về CIC, Giới thiệu, Tuyển dụng' },
-                    { type: 'product_catalog', label: 'Danh mục Sản phẩm', icon: Package, desc: 'ETABS, SAP2000, EnjiCAD' },
-                    { type: 'service_catalog', label: 'Dịch vụ & Tư vấn', icon: Layers, desc: 'BIM, Đào tạo, Thẩm tra' },
-                    { type: 'news_category', label: 'Danh mục Tin tức', icon: Newspaper, desc: 'Tin Xây dựng, Sự kiện' },
-                    { type: 'external_link', label: 'Liên kết ngoài (External)', icon: ExternalLink, desc: 'Website đối tác hoặc landing' },
-                    { type: 'section_header', label: 'Tiêu đề Nhóm (Header Only)', icon: FolderTree, desc: 'Menu cha không bấm được' },
-                    { type: 'anchor', label: 'Neo trang (#Anchor)', icon: Hash, desc: 'Cuộn đến ID trang' },
-                  ].map((t) => {
-                    const IconComp = t.icon;
-                    const isSelected = formData.target_type === t.type;
-                    return (
-                      <button
-                        key={t.type}
-                        type="button"
-                        onClick={() => handleTargetTypeChange(t.type as NavigationTargetType)}
-                        className={`p-3 text-left rounded-xl border transition flex items-start gap-2.5 ${
-                          isSelected
-                            ? 'border-orange-500 bg-orange-50/60 dark:bg-orange-950/30 ring-1 ring-orange-500'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800'
-                        }`}
-                      >
-                        <IconComp
-                          className={`w-4 h-4 mt-0.5 shrink-0 ${
-                            isSelected ? 'text-orange-600 dark:text-orange-400' : 'text-slate-500'
-                          }`}
-                        />
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">{t.label}</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400">{t.desc}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* URL Field & Link Checker */}
+              {/* URL Field */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Đường dẫn (Target URL) <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center gap-2">
+                <div>
                   <input
                     type="text"
                     required
                     value={formData.url || ''}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     placeholder="/san-pham hoặc https://domain.com"
-                    className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
-                  <button
-                    type="button"
-                    onClick={handleTestLink}
-                    className="px-3 py-2 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition flex items-center gap-1 shrink-0"
-                  >
-                    <Link className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Kiểm tra link</span>
-                  </button>
                 </div>
-
-                {/* Link health status display */}
-                {linkCheckStatus === 'checking' && (
-                  <p className="mt-1 text-[11px] text-orange-500 animate-pulse">
-                    Đang kiểm tra kết nối URL canonical...
-                  </p>
-                )}
-                {linkCheckStatus === 'valid' && (
-                  <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
-                    <Check className="w-3.5 h-3.5" /> Đường dẫn hợp lệ và sẵn sàng công khai.
-                  </p>
-                )}
-                {linkCheckStatus === 'broken' && (
-                  <p className="mt-1 text-[11px] text-red-600 dark:text-red-400 flex items-center gap-1 font-semibold">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Cảnh báo: Đường dẫn chưa đúng định dạng.
-                  </p>
-                )}
               </div>
 
               {/* Open target window */}
@@ -382,19 +260,6 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
                 </p>
               </div>
 
-              {/* Custom CSS Class */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Custom CSS Class (Lớp giao diện tùy biến)
-                </label>
-                <input
-                  type="text"
-                  value={formData.css_class || ''}
-                  onChange={(e) => setFormData({ ...formData, css_class: e.target.value })}
-                  placeholder="Ví dụ: font-bold text-orange-600 nav-highlight-btn"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
-                />
-              </div>
             </div>
           )}
 
@@ -416,48 +281,6 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
                 />
               </div>
 
-              {/* Audience Rule */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Quy tắc đối tượng đối soát (Visibility Audience Rule)
-                </label>
-                <select
-                  value={formData.visibility_rule || 'all'}
-                  onChange={(e) => setFormData({ ...formData, visibility_rule: e.target.value as any })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                >
-                  <option value="all">Tất cả khách truy cập (Public All Users)</option>
-                  <option value="logged_in">Chỉ khách đã đăng nhập (Logged-in Only)</option>
-                  <option value="guests">Chỉ khách vãng lai (Guests Only)</option>
-                  <option value="campaign_only">Chỉ hiển thị theo Campaign / UTM parameter</option>
-                </select>
-              </div>
-
-              {/* Schedule Dates */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-orange-500" /> Bắt đầu hiển thị từ
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.schedule_start || ''}
-                    onChange={(e) => setFormData({ ...formData, schedule_start: e.target.value })}
-                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-orange-500" /> Tự động ẩn từ lúc
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.schedule_end || ''}
-                    onChange={(e) => setFormData({ ...formData, schedule_end: e.target.value })}
-                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
-                  />
-                </div>
-              </div>
             </div>
           )}
         </form>

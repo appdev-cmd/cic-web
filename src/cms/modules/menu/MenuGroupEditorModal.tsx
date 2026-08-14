@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Layers, Sliders, Shield, Globe } from 'lucide-react';
+import { X, Check, Layers } from 'lucide-react';
 import { MenuGroup } from './types';
 
 interface MenuGroupEditorModalProps {
@@ -17,11 +17,8 @@ export const MenuGroupEditorModal: React.FC<MenuGroupEditorModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<MenuGroup>>({
     name: '',
-    code: '',
-    site: 'cic.com.vn',
-    locale: 'vi',
-    position_code: 'main_header',
-    max_depth: 3,
+    published: true,
+    ordering: 1,
   });
 
   useEffect(() => {
@@ -30,11 +27,8 @@ export const MenuGroupEditorModal: React.FC<MenuGroupEditorModalProps> = ({
     } else {
       setFormData({
         name: '',
-        code: `NAV-GROUP-${Date.now().toString().slice(-4)}`,
-        site: 'cic.com.vn',
-        locale: 'vi',
-        position_code: 'main_header',
-        max_depth: 3,
+        published: true,
+        ordering: 1,
       });
     }
   }, [group, isOpen]);
@@ -43,24 +37,13 @@ export const MenuGroupEditorModal: React.FC<MenuGroupEditorModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.code) return;
+    if (!formData.name) return;
 
     const saved: MenuGroup = {
       id: group ? group.id : `grp_${Date.now()}`,
-      code: formData.code || '',
       name: formData.name || '',
-      site: formData.site || 'cic.com.vn',
-      locale: formData.locale || 'vi',
-      position_code: formData.position_code || 'main_header',
-      max_depth: formData.max_depth || 3,
-      live_version: group ? group.live_version : 'v1.0.0',
-      draft_version: group ? group.draft_version : 'v1.0.0-draft',
-      editorial_status: group ? group.editorial_status : 'draft',
-      has_draft_changes: group ? group.has_draft_changes : true,
-      item_count: group ? group.item_count : 0,
-      issue_count: group ? group.issue_count : 0,
-      updated_at: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      updated_by: 'Trần Văn Mạnh (Admin)',
+      published: formData.published !== false,
+      ordering: Number(formData.ordering) || 1,
     };
 
     onSave(saved);
@@ -97,7 +80,7 @@ export const MenuGroupEditorModal: React.FC<MenuGroupEditorModalProps> = ({
               required
               value={formData.name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ví dụ: Header Main Menu, Footer Quick Links"
+              placeholder="Ví dụ: Menu chính, Liên kết chân trang"
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             />
           </div>
@@ -105,57 +88,27 @@ export const MenuGroupEditorModal: React.FC<MenuGroupEditorModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Mã định danh (Group Code) <span className="text-red-500">*</span>
+                Thứ tự
               </label>
               <input
-                type="text"
-                required
-                value={formData.code || ''}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-slate-900 dark:text-white"
+                type="number"
+                min={1}
+                value={formData.ordering || 1}
+                onChange={(e) => setFormData({ ...formData, ordering: Number(e.target.value) })}
+                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Site tên miền
-              </label>
-              <input
-                type="text"
-                value={formData.site || 'cic.com.vn'}
-                onChange={(e) => setFormData({ ...formData, site: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Vị trí hiển thị (Position Code)
+                Trạng thái
               </label>
               <select
-                value={formData.position_code || 'main_header'}
-                onChange={(e) => setFormData({ ...formData, position_code: e.target.value as any })}
+                value={formData.published === false ? '0' : '1'}
+                onChange={(e) => setFormData({ ...formData, published: e.target.value === '1' })}
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="main_header">Header Navigation Chính</option>
-                <option value="footer_links">Footer Navigation Chân Trang</option>
-                <option value="mobile_drawer">Mobile Drawer Sidebar</option>
-                <option value="campaign_banner">Campaign Landing Header</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Độ sâu tối đa (Max Depth)
-              </label>
-              <select
-                value={formData.max_depth || 3}
-                onChange={(e) => setFormData({ ...formData, max_depth: parseInt(e.target.value, 10) })}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              >
-                <option value={1}>1 cấp (Flat List)</option>
-                <option value={2}>2 cấp (Standard Dropdown)</option>
-                <option value={3}>3 cấp (Mega Menu Sub-categories)</option>
+                <option value="1">Hiển thị</option>
+                <option value="0">Ẩn</option>
               </select>
             </div>
           </div>

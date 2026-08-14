@@ -24,6 +24,14 @@ Mỗi issue cần ngắn gọn theo bốn ý: module, hiện trạng, ảnh hư�
 - Ảnh hưởng: Cây danh mục EN phụ thuộc dữ liệu VI, trái với mô hình hai workspace độc lập.
 - Hướng sửa: Đổi thành self-reference tới `cic_news_categories_en(id)` sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle.
 
+## Menu
+
+### Nhóm và parent của menu EN trỏ sang bảng VI
+
+- Hiện trạng: `cic_menus_items_en.group_id` tham chiếu `cic_menus_groups(id)` và `cic_menus_items_en.parent_id` tham chiếu `cic_menus_items(id)`.
+- Ảnh hưởng: Cây menu EN phụ thuộc ID của nhóm và mục menu VI, không đúng với mô hình hai workspace độc lập.
+- Hướng sửa: Đổi lần lượt sang `cic_menus_groups_en(id)` và self-reference `cic_menus_items_en(id)` sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle.
+
 ## Sự kiện
 
 ### Migration `cic_event` chưa được xác minh thành công

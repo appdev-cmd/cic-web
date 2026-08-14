@@ -35,7 +35,7 @@ export const MenuPreviewModal: React.FC<MenuPreviewModalProps> = ({
                 Xem Trước Giao Diện Điều Hướng (Live Preview Simulation)
               </h3>
               <p className="text-[11px] text-slate-500">
-                Nhóm: <strong className="text-slate-700 dark:text-slate-300">{group.name}</strong> ({group.site})
+                Nhóm: <strong className="text-slate-700 dark:text-slate-300">{group.name}</strong>
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ export const MenuPreviewModal: React.FC<MenuPreviewModalProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded bg-orange-600/30 text-orange-400 font-bold text-[10px]">
-                  Bản mẫu Preview (Draft)
+                  Bản xem trước
                 </span>
                 <Globe className="w-3.5 h-3.5 text-slate-400" />
                 <span>VIE</span>

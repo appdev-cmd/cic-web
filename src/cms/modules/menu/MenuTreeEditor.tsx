@@ -9,18 +9,9 @@ import {
   ArrowRight,
   Edit,
   Trash2,
-  ExternalLink,
-  FileText,
-  Package,
-  Layers,
-  Newspaper,
   Link,
   Eye,
   EyeOff,
-  AlertTriangle,
-  Sparkles,
-  CheckCircle2,
-  Move,
   CornerDownRight,
 } from 'lucide-react';
 import { MenuItem } from './types';
@@ -56,17 +47,6 @@ export const MenuTreeEditor: React.FC<MenuTreeEditorProps> = ({
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-  };
-
-  const getTargetIcon = (type: string) => {
-    switch (type) {
-      case 'product_catalog': return <Package className="w-3.5 h-3.5 text-blue-500" />;
-      case 'service_catalog': return <Layers className="w-3.5 h-3.5 text-purple-500" />;
-      case 'news_category': return <Newspaper className="w-3.5 h-3.5 text-emerald-500" />;
-      case 'external_link': return <ExternalLink className="w-3.5 h-3.5 text-orange-500" />;
-      case 'section_header': return <Sparkles className="w-3.5 h-3.5 text-amber-500" />;
-      default: return <FileText className="w-3.5 h-3.5 text-slate-500" />;
-    }
   };
 
   const renderTreeNode = (node: MenuItem, isLastChild: boolean = false) => {
@@ -114,7 +94,7 @@ export const MenuTreeEditor: React.FC<MenuTreeEditorProps> = ({
 
             {/* Target Type Icon */}
             <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 shrink-0">
-              {getTargetIcon(node.target_type)}
+              <Link className="w-3.5 h-3.5 text-slate-500" />
             </div>
 
             {/* Label and Path */}
@@ -123,30 +103,6 @@ export const MenuTreeEditor: React.FC<MenuTreeEditorProps> = ({
                 <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                   {node.label}
                 </span>
-
-                {/* Status Badges */}
-                {node.draft_status === 'added' && (
-                  <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
-                    + Thêm mới
-                  </span>
-                )}
-                {node.draft_status === 'modified' && (
-                  <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
-                    ✎ Đã sửa
-                  </span>
-                )}
-                {node.draft_status === 'moved' && (
-                  <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300">
-                    ↕ Đã chuyển
-                  </span>
-                )}
-
-                {/* Broken Link Alert */}
-                {node.link_health === 'broken' && (
-                  <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 flex items-center gap-0.5">
-                    <AlertTriangle className="w-2.5 h-2.5" /> Link 404
-                  </span>
-                )}
 
               </div>
 
