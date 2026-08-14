@@ -12,6 +12,15 @@ import { ContactMessage, ProductRegistration, PendingContent } from '../types';
 import { resolveCmsModule } from '../routing';
 import { demoCmsDataSource } from '../data/demoCmsDataSource';
 import type { CmsLocale } from '../data/CmsDataSource';
+import type { MasterDataType } from '../modules/product_settings/types';
+
+const getProductSettingsDataType = (path: string): MasterDataType => {
+  if (path.endsWith('/brands') || path === '/cms/manufacturers' || path === '/cms/products/brands') return 'brands';
+  if (path.endsWith('/applications') || path === '/cms/applications') return 'applications';
+  if (path.endsWith('/product-types') || path === '/cms/product-types') return 'product_types';
+  if (path.endsWith('/sales-staff') || path === '/cms/sales-staff') return 'sales_staff';
+  return 'categories';
+};
 
 const CicUsersManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/cic_users/CicUsersManager'), import('../data/demoGovernanceDataSource')]);
@@ -86,10 +95,11 @@ const ProductSettingsManager = lazy(async () => {
   ]);
 
   return {
-    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    default: ({ workspaceLocale, path }: { workspaceLocale: CmsLocale; path: string }) => (
       <module.ProductSettingsManager
         taxonomy={dataModule.demoCatalogDataSource.productTaxonomyByLocale[workspaceLocale]}
         globalData={dataModule.demoCatalogDataSource.productSettingsGlobal}
+        dataType={getProductSettingsDataType(path)}
       />
     ),
   };
@@ -319,13 +329,13 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'static_pages' ? (
             <StaticPagesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'news' ? (
-            <NewsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
+            <NewsManager key={`${workspaceLocale}:${activePath}`} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'events' ? (
             <EventsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'email_templates' ? (
             <EmailTemplatesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'product_settings' ? (
-            <ProductSettingsManager workspaceLocale={workspaceLocale} />
+            <ProductSettingsManager key={`${workspaceLocale}:${activePath}`} workspaceLocale={workspaceLocale} path={activePath} />
           ) : activeModule === 'products' ? (
             <ProductsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'services' ? (

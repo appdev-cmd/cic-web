@@ -28,7 +28,6 @@ import {
   ShieldCheck,
   Globe,
   AlertTriangle,
-  FolderTree,
 } from 'lucide-react';
 import { NewsArticle, NewsCategory } from './types';
 import type { NewsModuleData } from '../../data/EditorialContentDataSource';
@@ -210,16 +209,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
     setViewMode('form');
   };
 
-  const openCategories = () => {
-    window.history.pushState({}, '', '/cms/news/categories');
-    setViewMode('categories');
-  };
-
-  const closeCategories = () => {
-    window.history.pushState({}, '', '/cms/news');
-    setViewMode('list');
-  };
-
   const handleOpenEditForm = (article: NewsArticle) => {
     setEditingArticle(article);
     setViewMode('form');
@@ -306,7 +295,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
       ) : viewMode === 'categories' ? (
         <NewsCategoryManager categories={categories} onChange={(next) => {
           setCategories(next);
-        }} onBack={closeCategories} onMessage={showToast} />
+        }} onMessage={showToast} />
       ) : (
         <>
           {/* HEADER BAR */}
@@ -315,10 +304,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
             title="Tin tức"
             description="Tạo, biên tập, lưu nháp và xuất bản bài viết công khai."
             meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{articles.filter((article) => !article.in_trash).length} tin bài</span>}
-            actions={<>
-              <CmsButton onClick={openCategories} variant="secondary" size="sm" leadingIcon={<FolderTree />}>Quản lý danh mục</CmsButton>
-              <CmsButton onClick={handleOpenCreateForm} variant="primary" size="sm" leadingIcon={<Plus />}>Thêm tin tức</CmsButton>
-            </>}
+            actions={<CmsButton onClick={handleOpenCreateForm} variant="primary" size="sm" leadingIcon={<Plus />}>Thêm tin tức</CmsButton>}
           />
 
           {/* VIEW SCOPE NAVIGATION TABS */}

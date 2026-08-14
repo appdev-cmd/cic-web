@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   FolderTree,
-  Building2,
-  Cpu,
   Layers,
-  UserCheck,
   Zap,
   Plus,
   Search,
@@ -16,7 +13,6 @@ import {
   Square,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Eye,
   History,
   Copy,
@@ -62,14 +58,13 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { SearchableSelect } from '../../components/SearchableSelect';
 
-type MainTab = 'overview' | 'taxonomy';
-
 interface ProductSettingsManagerProps {
   taxonomy?: ProductTaxonomyModuleData;
   globalData: ProductSettingsGlobalData;
+  dataType?: MasterDataType;
 }
 
-export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ taxonomy, globalData }) => {
+export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ taxonomy, globalData, dataType = 'categories' }) => {
   const createLabels: Record<MasterDataType, string> = {
     categories: 'Thêm danh mục sản phẩm',
     brands: 'Thêm hãng sản xuất',
@@ -92,8 +87,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   }, [taxonomy]);
 
   // Navigation State
-  const [activeMainTab, setActiveMainTab] = useState<MainTab>('taxonomy');
-  const [activeDataType, setActiveDataType] = useState<MasterDataType>('categories');
+  const activeDataType = dataType;
 
   // Search & Filters State
   const [searchQuery, setSearchQuery] = useState('');
@@ -295,9 +289,9 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       {/* 1. TOP MODULE HEADER CARD */}
       <CmsPageHeader
         icon={<FolderTree />}
-        title="Thiết lập sản phẩm"
-        description="Quản lý danh mục, hãng, lĩnh vực ứng dụng, loại sản phẩm và người phụ trách sản phẩm."
-        actions={activeMainTab === 'taxonomy' ? <>
+        title={{ categories: 'Danh mục sản phẩm', brands: 'Hãng sản xuất', applications: 'Lĩnh vực ứng dụng', product_types: 'Loại sản phẩm', sales_staff: 'Người phụ trách kinh doanh' }[activeDataType]}
+        description={{ categories: 'Quản lý cấu trúc danh mục sản phẩm.', brands: 'Quản lý danh sách hãng sản xuất.', applications: 'Quản lý các lĩnh vực ứng dụng sản phẩm.', product_types: 'Quản lý các loại sản phẩm.', sales_staff: 'Quản lý người phụ trách kinh doanh sản phẩm.' }[activeDataType]}
+        actions={<>
           <CmsButton
             onClick={() => {
               setFormDrawerItem(null);
@@ -309,116 +303,11 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           >
             {createLabels[activeDataType]}
           </CmsButton>
-        </> : undefined}
+        </>}
       />
 
-      {/* 2. SITEMAP SECTIONS TABS */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
-        {[
-          { id: 'overview', label: 'Tổng quan' },
-          { id: 'categories', label: 'Danh mục sản phẩm' },
-          { id: 'brands', label: 'Hãng sản xuất' },
-          { id: 'applications', label: 'Lĩnh vực ứng dụng' },
-          { id: 'product_types', label: 'Loại sản phẩm' },
-          { id: 'sales_staff', label: 'Người phụ trách kinh doanh' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              if (tab.id === 'overview') {
-                setActiveMainTab('overview');
-              } else {
-                setActiveMainTab('taxonomy');
-                setActiveDataType(tab.id as MasterDataType);
-              }
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2.5 font-bold text-xs rounded-t-xl transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border-b-2 -mb-px ${
-              (tab.id === 'overview' && activeMainTab === 'overview') || (tab.id !== 'overview' && activeMainTab === 'taxonomy' && activeDataType === tab.id)
-                ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/20'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* 3. OVERVIEW TAB DASHBOARD */}
-      {activeMainTab === 'overview' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          {/* Summary Metric Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {[
-              { label: 'Danh mục sản phẩm', count: categories.length, type: 'categories', icon: Building2, color: 'text-blue-600 bg-blue-500/10' },
-              { label: 'Hãng sản xuất', count: brands.length, type: 'brands', icon: Globe, color: 'text-emerald-600 bg-emerald-500/10' },
-              { label: 'Lĩnh vực ứng dụng', count: applications.length, type: 'applications', icon: Cpu, color: 'text-purple-600 bg-purple-500/10' },
-              { label: 'Loại sản phẩm', count: productTypes.length, type: 'product_types', icon: Layers, color: 'text-amber-600 bg-amber-500/10' },
-              { label: 'Nhân viên phụ trách', count: salesStaff.length, type: 'sales_staff', icon: UserCheck, color: 'text-orange-600 bg-orange-500/10' },
-            ].map((stat, idx) => {
-              const IconComp = stat.icon;
-              return (
-                <div
-                  key={idx}
-                  onClick={() => {
-                    if (['categories', 'brands', 'applications', 'product_types'].includes(stat.type)) {
-                      setActiveMainTab('taxonomy');
-                      setActiveDataType(stat.type as MasterDataType);
-                    } else {
-                      setActiveMainTab('taxonomy');
-                      setActiveDataType(stat.type as MasterDataType);
-                    }
-                  }}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:border-orange-500/50 transition-all cursor-pointer shadow-2xs space-y-2 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className={`p-2 rounded-xl ${stat.color}`}>
-                      <IconComp className="w-4 h-4" />
-                    </div>
-                    <span className="text-xl font-black text-slate-900 dark:text-white font-mono">
-                      {stat.count}
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-orange-600 transition-colors">
-                    {stat.label}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Persistent Dependency & Health Banner */}
-          <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-amber-600 text-white rounded-xl shrink-0">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-bold text-amber-900 dark:text-amber-200 text-sm">
-                  Có 1 dữ liệu cần kiểm tra
-                </h3>
-                <p className="text-amber-700 dark:text-amber-300 mt-0.5">
-                  Hãng <strong>Glodon Company Limited</strong> đã ngừng sử dụng nhưng vẫn còn 8 sản phẩm đang dùng hãng này.
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                setActiveMainTab('taxonomy');
-                setActiveDataType('brands');
-              }}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shrink-0 cursor-pointer"
-            >
-              Xem chi tiết Hãng Glodon
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* DATA TABLES AREA */}
-      {activeMainTab === 'taxonomy' && (
-        <div className="space-y-4">
+      <div className="space-y-4">
           {/* TOOLBAR & FILTERS */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -708,8 +597,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
             <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredList.length} itemLabel="mục thiết lập" pageSizeOptions={[10, 20, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
           </div>
 
-        </div>
-      )}
+      </div>
 
       {/* AUXILIARY DRAWERS & MODALS */}
       <UsageImpactDrawer

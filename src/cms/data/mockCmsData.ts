@@ -351,6 +351,12 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         badgeVariant: 'info',
       },
       {
+        id: 'menu_news_categories',
+        title: 'Danh mục tin tức',
+        iconName: 'FolderTree',
+        path: '/cms/news/categories',
+      },
+      {
         id: 'menu_static_pages',
         title: 'Trang nội dung',
         iconName: 'FileText',
@@ -375,10 +381,34 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         path: '/cms/products',
       },
       {
-        id: 'menu_product_settings',
-        title: 'Thiết lập sản phẩm',
+        id: 'menu_product_categories',
+        title: 'Danh mục sản phẩm',
         iconName: 'FolderTree',
-        path: '/cms/product-settings',
+        path: '/cms/product-settings/categories',
+      },
+      {
+        id: 'menu_product_brands',
+        title: 'Hãng sản xuất',
+        iconName: 'Building2',
+        path: '/cms/product-settings/brands',
+      },
+      {
+        id: 'menu_product_applications',
+        title: 'Lĩnh vực ứng dụng',
+        iconName: 'Cpu',
+        path: '/cms/product-settings/applications',
+      },
+      {
+        id: 'menu_product_types',
+        title: 'Loại sản phẩm',
+        iconName: 'Layers',
+        path: '/cms/product-settings/product-types',
+      },
+      {
+        id: 'menu_product_sales_staff',
+        title: 'Người phụ trách kinh doanh',
+        iconName: 'UserCheck',
+        path: '/cms/product-settings/sales-staff',
       },
       {
         id: 'menu_services',
