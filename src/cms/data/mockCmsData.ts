@@ -368,6 +368,12 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         iconName: 'CalendarEvent',
         path: '/cms/events',
       },
+      {
+        id: 'menu_projects',
+        title: 'Dự án',
+        iconName: 'Building2',
+        path: '/cms/projects',
+      },
     ],
   },
   {

@@ -9,6 +9,7 @@ export type CmsModuleKey =
   | 'static_pages'
   | 'news'
   | 'events'
+  | 'projects'
   | 'email_templates'
   | 'product_settings'
   | 'products'
@@ -55,6 +56,7 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
   { module: 'static_pages', canonicalPath: '/cms/static-pages', aliases: ['/cms/pages'], nestedPrefixes: ['/cms/static-pages/'] },
   { module: 'news', canonicalPath: '/cms/news', aliases: ['/cms/articles'], nestedPrefixes: ['/cms/news/'] },
   { module: 'events', canonicalPath: '/cms/events', nestedPrefixes: ['/cms/events/'] },
+  { module: 'projects', canonicalPath: '/cms/projects', nestedPrefixes: ['/cms/projects/'] },
   { module: 'email_templates', canonicalPath: '/cms/email-templates', nestedPrefixes: ['/cms/email-templates/'] },
   {
     module: 'product_settings',

@@ -82,6 +82,12 @@ const EventsManager = lazy(async () => {
     <module.EventsManager workspaceLocale={workspaceLocale} data={dataModule.getCmsEventsData(workspaceLocale)} />
   ) };
 });
+const ProjectsManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/projects/ProjectsManager'), import('../modules/projects/projectsData')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.ProjectsManager data={dataModule.getCmsProjectsData(workspaceLocale)} />
+  ) };
+});
 const EmailTemplatesManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/email_templates/EmailTemplatesManager'), import('../data/demoCustomerInteractionDataSource')]);
   return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
@@ -332,6 +338,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <NewsManager key={`${workspaceLocale}:${activePath}`} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'events' ? (
             <EventsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
+          ) : activeModule === 'projects' ? (
+            <ProjectsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'email_templates' ? (
             <EmailTemplatesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'product_settings' ? (
