@@ -132,7 +132,12 @@ const LocalizationManager = lazy(() => import('../modules/localization/Localizat
 const DashboardOverview = lazy(() => import('../modules/dashboard/DashboardOverview').then((module) => ({ default: module.DashboardOverview })));
 
 // Customer Interaction Modules
-const CtaManager = lazy(() => import('../modules/customer_interaction/cta/CtaManager').then((module) => ({ default: module.CtaManager })));
+const CtaManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/customer_interaction/cta/CtaManager'), import('../data/demoCustomerInteractionDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.CtaManager workspaceLocale={workspaceLocale} data={dataModule.getDemoCtaModuleData(workspaceLocale)} />
+  ) };
+});
 const FormManager = lazy(() => import('../modules/customer_interaction/forms/FormManager').then((module) => ({ default: module.FormManager })));
 const CustomerRequestManager = lazy(() => import('../modules/customer_interaction/customer_requests/CustomerRequestManager').then((module) => ({ default: module.CustomerRequestManager })));
 
@@ -300,7 +305,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'localization' ? (
             <LocalizationManager />
           ) : activeModule === 'cta' ? (
-            <CtaManager />
+            <CtaManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'forms' ? (
             <FormManager />
           ) : activeModule === 'customer_requests' ? (

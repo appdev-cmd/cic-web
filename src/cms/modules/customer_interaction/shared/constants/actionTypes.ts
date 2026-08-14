@@ -8,7 +8,6 @@ export const ACTION_TYPES = [
   { value: 'download_file', label: 'Tải File' },
   { value: 'call_phone', label: 'Gọi điện' },
   { value: 'send_email', label: 'Gửi Email' },
-  { value: 'custom_action', label: 'Tùy chỉnh' },
 ] as const;
 
 export type ActionType = typeof ACTION_TYPES[number]['value'];
@@ -21,7 +20,6 @@ export const ACTION_TYPE_LABELS: Record<ActionType, string> = {
   download_file: 'Tải File',
   call_phone: 'Gọi điện',
   send_email: 'Gửi Email',
-  custom_action: 'Tùy chỉnh',
 };
 
 export const getActionTypeLabel = (type: ActionType): string => {

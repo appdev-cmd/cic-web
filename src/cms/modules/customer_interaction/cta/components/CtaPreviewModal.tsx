@@ -38,6 +38,13 @@ export const CtaPreviewModal: React.FC<CtaPreviewModalProps> = ({
   if (!isOpen || !cta) return null;
 
   const actionInfo = ACTION_TYPES.find((a) => a.value === cta.actionConfig.type);
+  const variantClass = cta.styleVariant === 'secondary'
+    ? 'bg-slate-800 hover:bg-slate-700 text-white shadow-slate-900/20'
+    : cta.styleVariant === 'outline'
+      ? 'border border-orange-600 bg-transparent text-orange-600 hover:bg-orange-50 shadow-none'
+      : cta.styleVariant === 'gradient'
+        ? 'bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white shadow-orange-600/25'
+        : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/25';
 
   const handleCopyShortcode = () => {
     navigator.clipboard.writeText(`{{cta:${cta.code}}}`);
@@ -116,7 +123,7 @@ export const CtaPreviewModal: React.FC<CtaPreviewModalProps> = ({
             <button
               type="button"
               onClick={handleTestClick}
-              className="inline-flex items-center justify-center gap-2 font-bold px-6 py-3.5 text-sm rounded-xl bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/25 transition-all cursor-pointer active:scale-95"
+              className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold shadow-lg transition-all cursor-pointer active:scale-95 ${variantClass}`}
             >
               {renderIcon(cta.icon)}
               <span>{cta.displayText}</span>

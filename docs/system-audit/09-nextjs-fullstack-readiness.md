@@ -51,11 +51,12 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | Frontend Menus CMS | `MenuModuleData` | group/item/validation/version/log nhận theo workspace qua Presentation data source; trạng thái chỉ còn Draft/Published |
 | Media CMS | `getDemoMediaModuleData(locale)` | Manager nhận asset/folder/album/issue theo workspace qua một boundary; workspace không fallback chéo ngôn ngữ |
 | Media picker | `getDemoMediaPickerItems(locale)` | News, Events và Static Pages dùng chung projection ảnh `ready`; component không import fixture Media trực tiếp |
+| CTA CMS | `getDemoCtaModuleData(locale)` | list/form/preview nhận CTA và các relation Form, Email Template, Media theo workspace; style variant được lưu trong ViewModel, action config dùng allowlist |
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
 - CMS Dashboard và các module Users, Permissions, Settings, Activity Logs, Trash, Contacts.
-- CTA, Forms, Customer Requests và Email Templates còn import fixture trực tiếp ở manager/editor.
+- Forms, Customer Requests và Email Templates còn import fixture trực tiếp ở manager/editor.
 - Function SEO và Translation Strings còn import mock trực tiếp.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
 - Website Home (bao gồm event/service highlight riêng), Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.

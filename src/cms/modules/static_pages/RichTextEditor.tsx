@@ -49,7 +49,7 @@ import {
 import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 import { Eye, FileInput, Megaphone, X } from 'lucide-react';
-import { MOCK_CTAS } from '../customer_interaction/cta/mockData';
+import { getDemoCtaModuleData } from '../../data/demoCustomerInteractionDataSource';
 import { MOCK_FORMS } from '../customer_interaction/forms/mockData';
 
 interface RichTextEditorProps {
@@ -257,7 +257,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const [selectedFormId, setSelectedFormId] = useState('');
   const [previewFormId, setPreviewFormId] = useState<string | null>(null);
 
-  const activeCtas = useMemo(() => MOCK_CTAS.filter((item) => item.status === 'active'), []);
+  const activeCtas = useMemo(() => getDemoCtaModuleData('vi').ctas.filter((item) => item.status === 'active'), []);
   const activeForms = useMemo(() => MOCK_FORMS.filter((item) => item.status === 'active'), []);
   const previewForm = activeForms.find((item) => item.id === previewFormId) || null;
 

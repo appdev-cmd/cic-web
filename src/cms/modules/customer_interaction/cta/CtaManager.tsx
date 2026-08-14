@@ -12,16 +12,22 @@ import { CtaList } from './components/CtaList';
 import { CtaFormView } from './CtaFormView';
 import { CtaPreviewModal } from './components/CtaPreviewModal';
 import { CtaUsedByModal } from './components/CtaUsedByModal';
-import { MOCK_CTAS } from './mockData';
 import { CTA_STATUSES, CTA_STATUS_LABELS, CtaStatus } from '../shared/constants/statusTypes';
 import { ACTION_TYPES } from '../shared/constants/actionTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsTabs } from '../../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
+import type { CmsLocale } from '../../../data/CmsDataSource';
+import type { CtaModuleData } from '../../../data/CustomerInteractionDataSource';
 
-export const CtaManager: React.FC = () => {
-  const [ctas, setCtas] = useState<CtaItem[]>(MOCK_CTAS);
+interface CtaManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: CtaModuleData;
+}
+
+export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data }) => {
+  const [ctas, setCtas] = useState<CtaItem[]>(data?.ctas ?? []);
   const [selectedCtaIds, setSelectedCtaIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<CtaListTabType>('all');
   const [filter, setFilter] = useState<CtaFilterState>({
@@ -226,7 +232,11 @@ export const CtaManager: React.FC = () => {
     }
   };
 
-  const handleSaveCta = (ctaData: CtaFormData, action: 'draft' | 'submit' | 'publish') => {
+  const handleSaveCta = (ctaData: CtaFormData, action: 'draft' | 'publish') => {
+    const normalizedData: CtaFormData = {
+      ...ctaData,
+      status: action === 'publish' ? 'active' : 'draft',
+    };
     if (editingCta) {
       // Update existing CTA
       setCtas(
@@ -234,7 +244,7 @@ export const CtaManager: React.FC = () => {
           c.id === editingCta.id
             ? {
                 ...c,
-                ...ctaData,
+                ...normalizedData,
                 updatedAt: new Date().toISOString(),
               }
             : c
@@ -244,7 +254,7 @@ export const CtaManager: React.FC = () => {
       // Create new CTA
       const newCta: CtaItem = {
         id: `cta_${Date.now()}`,
-        ...ctaData,
+        ...normalizedData,
         usedByCount: 0,
         usedByPages: [],
         analytics: {
@@ -267,6 +277,10 @@ export const CtaManager: React.FC = () => {
     return (
       <CtaFormView
         cta={editingCta}
+        workspaceLocale={workspaceLocale}
+        forms={data?.forms ?? []}
+        emailTemplates={data?.emailTemplates ?? []}
+        downloadFiles={data?.downloadFiles ?? []}
         onSave={handleSaveCta}
         onCancel={() => {
           setViewMode('list');

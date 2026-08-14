@@ -25,17 +25,23 @@ import {
   Info,
   X,
 } from 'lucide-react';
-import { CtaItem, CtaFormData, CtaActionConfig } from './types';
+import { CtaItem, CtaFormData, CtaActionConfig, CtaStyleVariant } from './types';
 import { ActionType, ACTION_TYPES } from '../shared/constants/actionTypes';
 import { CtaStatus, CTA_STATUSES } from '../shared/constants/statusTypes';
 import { generateCode } from '../shared/utils/validationHelpers';
 import { CmsButton } from '../../../components/ui/CmsButton';
-import { mockEmailTemplates } from '../../email_templates/mockData';
-import { EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES } from '../../email_templates/types';
+import { EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES, type EmailTemplate } from '../../email_templates/types';
+import type { CmsLocale } from '../../../data/CmsDataSource';
+import type { CtaDownloadFileOption } from '../../../data/CustomerInteractionDataSource';
+import type { FormItem } from '../forms/types';
 
 interface CtaFormViewProps {
   cta: CtaItem | null;
-  onSave: (ctaData: CtaFormData, action: 'draft' | 'submit' | 'publish') => void;
+  workspaceLocale: CmsLocale;
+  forms: FormItem[];
+  emailTemplates: EmailTemplate[];
+  downloadFiles: CtaDownloadFileOption[];
+  onSave: (ctaData: CtaFormData, action: 'draft' | 'publish') => void;
   onCancel: () => void;
 }
 
@@ -55,33 +61,57 @@ const ICON_OPTIONS = [
 
 export const CtaFormView: React.FC<CtaFormViewProps> = ({
   cta,
+  workspaceLocale,
+  forms,
+  emailTemplates,
+  downloadFiles,
   onSave,
   onCancel,
 }) => {
+  const defaultFormId = forms.find((form) => form.status === 'active')?.id ?? '';
+  const defaultDownloadFileId = downloadFiles[0]?.id ?? '';
   const [formData, setFormData] = useState<CtaFormData>({
     adminName: '',
     displayText: '',
     description: '',
     code: '',
     icon: 'MessageSquare',
+    styleVariant: 'primary',
     actionConfig: {
       type: 'open_form',
-      formId: 'form_001',
+      formId: defaultFormId,
     },
     status: 'draft',
   });
 
-  const [buttonVariant, setButtonVariant] = useState<'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient'>('primary');
+  const buttonVariant = formData.styleVariant;
   const [buttonSize, setButtonSize] = useState<'sm' | 'md' | 'lg'>('md');
   const [previewHovered, setPreviewHovered] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  const selectedEmailTemplate = mockEmailTemplates.find((template) => template.id === formData.actionConfig.emailTemplateId);
+  const selectedEmailTemplate = emailTemplates.find((template) => template.id === formData.actionConfig.emailTemplateId);
   const renderEmailSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce((text, [token, sample]) => text.split(token).join(sample), value);
 
   const handleSave = (action: 'draft' | 'publish') => {
+    if (action === 'publish') {
+      if (!formData.adminName.trim() || !formData.displayText.trim() || !formData.code.trim()) {
+        setSaveError('Tên quản trị, nội dung hiển thị và mã CTA là bắt buộc trước khi xuất bản.');
+        return;
+      }
+      const config = formData.actionConfig;
+      const missingActionValue =
+        (config.type === 'open_form' && !config.formId) ||
+        ((config.type === 'redirect_internal' || config.type === 'redirect_external') && !config.url?.trim()) ||
+        (config.type === 'scroll_to_section' && !config.sectionId?.trim()) ||
+        (config.type === 'download_file' && !config.fileId) ||
+        (config.type === 'call_phone' && !config.phoneNumber?.trim());
+      if (missingActionValue) {
+        setSaveError('Hãy điền đầy đủ cấu hình hành động trước khi xuất bản CTA.');
+        return;
+      }
+    }
     if (action === 'publish' && formData.actionConfig.type === 'send_email') {
       if (!formData.actionConfig.emailAddress?.trim() || !formData.actionConfig.emailTemplateId) {
         setSaveError('CTA gửi email phải có địa chỉ nhận và mẫu email trước khi xuất bản.');
@@ -108,6 +138,7 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
         description: cta.description || '',
         code: cta.code,
         icon: cta.icon || '',
+        styleVariant: cta.styleVariant ?? 'primary',
         actionConfig: cta.actionConfig,
         status: cta.status,
       });
@@ -118,9 +149,10 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
         description: '',
         code: '',
         icon: 'MessageSquare',
+        styleVariant: 'primary',
         actionConfig: {
           type: 'open_form',
-          formId: 'form_001',
+          formId: defaultFormId,
         },
         status: 'draft',
       });
@@ -142,11 +174,11 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
       ...prev,
       actionConfig: {
         type,
-        formId: type === 'open_form' ? 'form_001' : undefined,
+        formId: type === 'open_form' ? defaultFormId : undefined,
         url: type === 'redirect_internal' ? '/lien-he' : type === 'redirect_external' ? 'https://' : undefined,
         openInNewTab: type === 'redirect_external',
         sectionId: type === 'scroll_to_section' ? 'section_contact' : undefined,
-        fileId: type === 'download_file' ? 'file_001' : undefined,
+        fileId: type === 'download_file' ? defaultDownloadFileId : undefined,
         phoneNumber: type === 'call_phone' ? '024 3976 1381' : undefined,
         emailAddress: type === 'send_email' ? 'info@cic.com.vn' : undefined,
         emailTemplateId: type === 'send_email' ? '' : undefined,
@@ -374,7 +406,7 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                     <button
                       key={v.id}
                       type="button"
-                      onClick={() => setButtonVariant(v.id as any)}
+                      onClick={() => setFormData((current) => ({ ...current, styleVariant: v.id as CtaStyleVariant }))}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                         buttonVariant === v.id
                           ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 ring-2 ring-orange-500/20'
@@ -458,9 +490,10 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                     }
                     className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium cursor-pointer"
                   >
-                    <option value="form_001">Biểu mẫu - Đăng ký Tư vấn ERP (form_001)</option>
-                    <option value="form_002">Biểu mẫu - Yêu cầu Báo giá giải pháp (form_002)</option>
-                    <option value="form_003">Biểu mẫu - Liên hệ tư vấn trực tuyến (form_003)</option>
+                    <option value="">Chọn biểu mẫu</option>
+                    {forms.filter((form) => form.status === 'active').map((form) => (
+                      <option key={form.id} value={form.id}>{form.adminName} ({form.code})</option>
+                    ))}
                   </select>
                   <p className="text-[11px] text-slate-500 mt-1">
                     Khi người dùng nhấn CTA, hệ thống sẽ mở Popup chứa biểu mẫu này.
@@ -559,9 +592,10 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                     }
                     className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium cursor-pointer"
                   >
-                    <option value="file_001">Catalogue Giải pháp Chuyển đổi số CIC 2026.pdf</option>
-                    <option value="file_002">Hồ sơ năng lực Công ty CIC Technology.pdf</option>
-                    <option value="file_003">Bảng thông số kỹ thuật phần mềm IntelliCAD.xlsx</option>
+                    <option value="">Chọn tệp từ Thư viện Media</option>
+                    {downloadFiles.map((file) => (
+                      <option key={file.id} value={file.id}>{file.title} ({file.filename})</option>
+                    ))}
                   </select>
                 </div>
               )}
@@ -615,7 +649,7 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                       className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     >
                       <option value="">Chọn mẫu email</option>
-                      {mockEmailTemplates.filter((template) => template.workspace === 'vi' && template.audience === 'internal').map((template) => {
+                      {emailTemplates.filter((template) => template.workspace === workspaceLocale && template.audience === 'internal').map((template) => {
                         const eventName = EMAIL_EVENTS.find((event) => event.value === template.event)?.label;
                         return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
                       })}

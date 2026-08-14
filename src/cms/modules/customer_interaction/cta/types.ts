@@ -15,8 +15,9 @@ export interface CtaActionConfig {
   emailAddress?: string;
   emailTemplateId?: string;
   reviewBeforeSend?: boolean;
-  customAction?: string;
 }
+
+export type CtaStyleVariant = 'primary' | 'secondary' | 'outline' | 'gradient';
 
 export interface CtaItem extends BaseEntity {
   adminName: string;
@@ -24,6 +25,7 @@ export interface CtaItem extends BaseEntity {
   description?: string;
   code: string;
   icon?: string;
+  styleVariant?: CtaStyleVariant;
   actionConfig: CtaActionConfig;
   status: CtaStatus;
   usedByCount: number;
@@ -37,6 +39,7 @@ export interface CtaFormData {
   description?: string;
   code: string;
   icon?: string;
+  styleVariant: CtaStyleVariant;
   actionConfig: CtaActionConfig;
   status: CtaStatus;
 }
