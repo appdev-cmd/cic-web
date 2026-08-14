@@ -1,5 +1,5 @@
 export type DictionaryApplication = 'web' | 'cms';
-export type DictionaryStatus = 'active' | 'new' | 'missing' | 'needs_review' | 'deprecated';
+export type DictionaryStatus = 'active' | 'new' | 'missing' | 'needs_check' | 'deprecated';
 export type DictionaryLocale = 'vi' | 'en';
 
 export interface DictionaryHistory {

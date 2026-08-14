@@ -3,13 +3,13 @@ import { AlertCircle, CheckCircle2, Clock3, Code2, Globe2, History, Languages, S
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
-import { INITIAL_DICTIONARY_ENTRIES, type DictionaryApplication, type DictionaryEntry, type DictionaryLocale, type DictionaryStatus } from './uiDictionaryData';
+import type { DictionaryApplication, DictionaryEntry, DictionaryLocale, DictionaryStatus } from './uiDictionaryData';
 
 const statusMeta: Record<DictionaryStatus, { label: string; className: string }> = {
   active: { label: 'Đầy đủ', className: 'bg-emerald-50 text-emerald-700' },
   new: { label: 'Mới đồng bộ', className: 'bg-blue-50 text-blue-700' },
   missing: { label: 'Thiếu bản dịch', className: 'bg-red-50 text-red-700' },
-  needs_review: { label: 'Cần kiểm tra', className: 'bg-amber-50 text-amber-700' },
+  needs_check: { label: 'Cần kiểm tra', className: 'bg-amber-50 text-amber-700' },
   deprecated: { label: 'Đã ngừng sử dụng', className: 'bg-slate-100 text-slate-600' },
 };
 
@@ -27,8 +27,8 @@ function validate(entry: DictionaryEntry, value: string) {
   return errors;
 }
 
-export const LocalizationManager: React.FC = () => {
-  const [items, setItems] = useState(INITIAL_DICTIONARY_ENTRIES);
+export const LocalizationManager: React.FC<{ data: DictionaryEntry[] }> = ({ data }) => {
+  const [items, setItems] = useState(() => data);
   const [query, setQuery] = useState('');
   const [application, setApplication] = useState<'all' | DictionaryApplication>('all');
   const [namespace, setNamespace] = useState('all');
@@ -70,7 +70,7 @@ export const LocalizationManager: React.FC = () => {
       updatedBy: 'Nguyễn Văn Quản Trị',
       history: [{ id: `history_${Date.now()}`, locale, oldValue: item.values[locale], newValue: draft, changedBy: 'Nguyễn Văn Quản Trị', changedAt: now, source: 'cms' as const }, ...item.history],
     }));
-    setToast('Đã cập nhật bản dịch và làm mới Dictionary mock.');
+    setToast('Đã cập nhật bản dịch giao diện.');
     window.setTimeout(() => setToast(''), 3000);
   };
 

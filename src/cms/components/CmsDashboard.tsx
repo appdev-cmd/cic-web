@@ -146,7 +146,13 @@ const ContactsManager = lazy(async () => {
     />
   ) };
 });
-const LocalizationManager = lazy(() => import('../modules/localization/LocalizationManager').then((module) => ({ default: module.LocalizationManager })));
+const LocalizationManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/localization/LocalizationManager'),
+    import('../data/LocalizationDataSource'),
+  ]);
+  return { default: () => <module.LocalizationManager data={dataModule.getDemoLocalizationData()} /> };
+});
 const DashboardOverview = lazy(() => import('../modules/dashboard/DashboardOverview').then((module) => ({ default: module.DashboardOverview })));
 
 // Customer Interaction Modules
