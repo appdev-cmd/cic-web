@@ -24,6 +24,7 @@ const toCmsProject = (project: ReturnType<typeof getProjectsData>[number], order
     content: project.htmlContent ?? '',
     sector: project.sector,
     solution: project.solution,
+    technologies: project.appliedSolutions,
     customer_name: project.customer,
     location: project.location,
     ...period,

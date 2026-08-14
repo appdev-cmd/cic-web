@@ -37,6 +37,7 @@ Bảng dưới áp dụng giống nhau cho `cic_projects` và `cic_projects_en`.
 | `content` | `text` | NULL | không index B-tree | HTML Rich Text của bài dự án |
 | `sector` | `varchar(150)` | NULL | B-tree index | Lĩnh vực; filter list |
 | `solution` | `varchar(255)` | NULL | B-tree index | Nhãn giải pháp chính; filter list |
+| `technologies` | `text[]` | `NOT NULL DEFAULT '{}'` | không index mặc định | Danh sách tên công nghệ thực tế áp dụng, có thứ tự hiển thị; độc lập với sản phẩm liên quan |
 | `customer_name` | `varchar(255)` | NULL | B-tree index | Chủ đầu tư/khách hàng; filter list |
 | `location` | `varchar(255)` | NULL | không index mặc định | Địa điểm thực hiện; tham gia text search |
 | `start_year` | `smallint` | NULL | CHECK hợp lệ | Năm bắt đầu |
@@ -75,6 +76,7 @@ Không dùng `CASCADE` vì xóa user không được làm mất project.
 ### Không tạo FK cho các field sau
 
 - `sector`, `solution`, `customer_name`: hiện là nhãn nội dung/filter, chưa có master entity đúng nghĩa.
+- `technologies`: danh sách nhãn công nghệ của riêng dự án, không phải FK vì một công nghệ có thể không tồn tại như sản phẩm CMS.
 - `image`, `video_url`, `video_thumbnail`, `document_url`: cần giữ được URL/path mock và external URL hiện tại.
 - `gallery`: JSON có thứ tự, PostgreSQL không đảm bảo FK cho từng phần tử JSON.
 - `products_related`, `services_related`: PostgreSQL không khai báo FK cho từng phần tử array.
@@ -138,6 +140,7 @@ Alias được chuẩn hóa lowercase/kebab-case và kiểm tra ở application 
 | `htmlContent` | `content` | Rich Text, sanitize khi render |
 | `sector` | `sector` | direct, dùng filter |
 | `solution` | `solution` | direct, dùng filter |
+| `appliedSolutions` | `technologies` | danh sách công nghệ áp dụng có thứ tự; không map sang `products_related` |
 | `customer` | `customer_name` | rename ở mapper |
 | `location` | `location` | direct |
 | `time = 2022 - 2024` | `start_year=2022`, `end_year=2024` | deterministic parse |
@@ -150,7 +153,6 @@ Alias được chuẩn hóa lowercase/kebab-case và kiểm tra ở application 
 | `relatedLinks[product]` | `products_related` | lưu ID, label lấy từ Product |
 | `relatedLinks[service]` | `services_related` | lưu ID, label lấy từ Service |
 | `scope`, `results` | `content` | biên tập trong Rich Text |
-| `appliedSolutions` | `content` | Rich Text; chưa tạo column/JSON riêng |
 | testimonial cố định | frontend/page config | UI-only/shared content |
 | card `size`, hover state, số thứ tự 01/02/03 | frontend | UI-only |
 
@@ -171,7 +173,7 @@ Alias được chuẩn hóa lowercase/kebab-case và kiểm tra ở application 
 
 - Lookup bằng `alias` trong đúng workspace.
 - `content` là nguồn bài viết chính.
-- Factsheet lấy từ customer/location/year/sector/solution.
+- Factsheet lấy từ customer/location/year/sector/solution và `technologies`.
 - Related project hiện được derive theo cùng `sector`; không lưu `related_project_ids` ở giai đoạn này.
 
 ## 9. Validation CMS
@@ -183,6 +185,7 @@ Alias được chuẩn hóa lowercase/kebab-case và kiểm tra ở application 
 - Gallery chỉ nhận item hợp lệ và giữ thứ tự.
 - URL video/document phải dùng protocol/path được allowlist; không render embed URL tùy ý chưa sanitize.
 - Related product/service phải tồn tại trước khi lưu.
+- `technologies` loại bỏ dòng trống, trim từng giá trị và giữ thứ tự; không yêu cầu tồn tại trong Product.
 - `published=true` nên yêu cầu tối thiểu summary, content và image ở application validation; không ép NOT NULL trong DB để vẫn lưu Draft.
 
 ## 10. Migration và dữ liệu legacy

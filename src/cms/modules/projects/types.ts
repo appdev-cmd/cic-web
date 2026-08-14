@@ -7,6 +7,7 @@ export interface CmsProject {
   content: string;
   sector: string;
   solution: string;
+  technologies: string[];
   customer_name: string;
   location: string;
   start_year: number | null;
