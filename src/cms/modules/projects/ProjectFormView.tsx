@@ -58,7 +58,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
           <Field label="Dung lượng"><input className={inputClass} value={form.document_size} onChange={(e) => set('document_size', e.target.value)} /></Field>
           <Field label="URL tài liệu" wide><input className={inputClass} value={form.document_url} onChange={(e) => set('document_url', e.target.value)} /></Field>
         </div></Section>
-        <Section icon={<Link2 />} title="Nội dung liên quan"><div className="space-y-4"><Field label="Sản phẩm liên quan"><SearchableMultiSelect options={productOptions} selectedIds={form.products_related} onChange={(ids) => set('products_related', ids)} placeholder="Chọn sản phẩm liên quan..." /></Field><Field label="Dịch vụ liên quan"><SearchableMultiSelect options={serviceOptions} selectedIds={form.services_related} onChange={(ids) => set('services_related', ids)} placeholder="Chọn dịch vụ liên quan..." /></Field></div></Section>
+        <Section icon={<Link2 />} title="Nội dung liên quan"><div className="space-y-4"><div><span className={labelClass}>Sản phẩm liên quan</span><SearchableMultiSelect options={productOptions} selectedIds={form.products_related} onChange={(ids) => set('products_related', ids)} placeholder="Chọn sản phẩm liên quan..." /></div><div><span className={labelClass}>Dịch vụ liên quan</span><SearchableMultiSelect options={serviceOptions} selectedIds={form.services_related} onChange={(ids) => set('services_related', ids)} placeholder="Chọn dịch vụ liên quan..." /></div></div></Section>
       </div>
       <aside className="space-y-6">
         <Section icon={<Search />} title="Phân loại & factsheet"><div className="space-y-4">
@@ -77,5 +77,5 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
 };
 
 const Section: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"><h2 className="mb-4 flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white"><span className="text-orange-600 [&>svg]:size-4">{icon}</span>{title}</h2>{children}</section>;
-const Field: React.FC<{ label: string; wide?: boolean; children: React.ReactNode }> = ({ label, wide, children }) => <label className={wide ? 'md:col-span-2' : ''}><span className={labelClass}>{label}</span>{children}</label>;
+const Field: React.FC<{ label: string; wide?: boolean; children: React.ReactNode }> = ({ label, wide, children }) => <label className={wide ? 'block md:col-span-2' : 'block'}><span className={labelClass}>{label}</span>{children}</label>;
 const Check: React.FC<{ label: string; checked: boolean; onChange: (checked: boolean) => void }> = ({ label, checked, onChange }) => <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"><input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="size-4 accent-orange-600" />{label}</label>;
