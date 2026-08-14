@@ -29,7 +29,7 @@ import {
   Filter
 } from 'lucide-react';
 import { servicesData, ServiceDetail } from '../data/servicesData';
-import { productsData } from '../data/mockData';
+import { getProductsData } from '../features/products/productsData';
 import { Product } from '@shared/types';
 
 interface ServicesViewProps {
@@ -87,6 +87,7 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
 };
 
 export const ServicesView = ({ initialServiceId = null, onNavigateHome }: ServicesViewProps) => {
+  const { products: productsData } = useMemo(getProductsData, []);
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -124,7 +125,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [activeService]);
+  }, [activeService, productsData]);
 
   const categoryList = useMemo(() => {
     const rawCats = Array.from(new Set(servicesData.map(s => s.category)));

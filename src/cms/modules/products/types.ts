@@ -3,7 +3,7 @@
  * Strict specification compliance for dual status, taxonomy, commercial, 11 form sections, quality checklist & audit history.
  */
 
-export type EditorialStatus = 'draft' | 'pending_review' | 'approved' | 'published' | 'rejected' | 'archived';
+export type EditorialStatus = 'draft' | 'published' | 'archived';
 
 export type CatalogStatus = 'active' | 'inactive' | 'archived';
 
@@ -157,7 +157,7 @@ export interface ProductActivityLog {
   user_name: string;
   user_avatar?: string;
   user_role: string;
-  action: 'create' | 'update' | 'working_draft' | 'review_submit' | 'approve' | 'reject' | 'publish' | 'activate' | 'deactivate' | 'archive';
+  action: 'create' | 'update' | 'working_draft' | 'publish' | 'activate' | 'deactivate' | 'archive';
   details: string;
   timestamp: string;
   version_tag?: string;

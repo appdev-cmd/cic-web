@@ -22,7 +22,7 @@ import {
   Tag
 } from 'lucide-react';
 import { Product } from '@shared/types';
-import { productsData } from '../data/mockData';
+import { getProductsData } from '../features/products/productsData';
 import { ProductDetailView } from './ProductDetailView';
 
 const PROVINCES = [
@@ -113,6 +113,7 @@ const getProductType = (product: Product): string => {
 };
 
 export function ProductsView(_props?: ProductsViewProps) {
+  const { products: productsData } = useMemo(getProductsData, []);
   const [search, setSearch] = useState('');
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -731,6 +732,7 @@ export function ProductsView(_props?: ProductsViewProps) {
       <>
         <ProductDetailView 
           product={selectedProduct}
+          products={productsData}
           onBack={() => setSelectedProduct(null)}
           onContact={triggerContact}
           onDownload={triggerDownload}

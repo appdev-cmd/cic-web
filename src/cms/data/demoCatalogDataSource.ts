@@ -22,6 +22,8 @@ export const demoCatalogDataSource: CatalogDataSource = {
       products: mockProducts,
       categories: mockProductCategories,
       brands: mockProductBrands,
+      applications: mockMasterApplications,
+      productTypes: mockMasterProductTypes,
       owners: mockProductOwners,
       activityLogs: mockProductActivityLogs,
       currentUserId: 'usr_002',

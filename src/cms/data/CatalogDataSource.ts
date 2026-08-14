@@ -20,6 +20,8 @@ export interface ProductsModuleData {
   products: ProductItem[];
   categories: ProductCategory[];
   brands: ProductBrand[];
+  applications: MasterApplicationItem[];
+  productTypes: MasterProductTypeItem[];
   owners: ProductOwnerOption[];
   activityLogs: ProductActivityLog[];
   currentUserId?: string;

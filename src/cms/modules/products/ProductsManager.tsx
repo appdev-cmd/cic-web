@@ -65,17 +65,16 @@ interface ProductsManagerProps {
 
 export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocale, data }) => {
   // Main Products List State
-  const [products, setProducts] = useState<ProductItem[]>(() => (data?.products ?? []).map((item) => ({ ...item, editorial_status: item.editorial_status === 'published' ? 'published' : 'draft' })));
+  const [products, setProducts] = useState<ProductItem[]>(() => (data?.products ?? []).map((item) => ({
+    ...item,
+    editorial_status: item.editorial_status === 'published' || item.editorial_status === 'archived' ? item.editorial_status : 'draft',
+  })));
   const [categories] = useState<ProductCategory[]>(data?.categories ?? []);
   const [brands] = useState<ProductBrand[]>(data?.brands ?? []);
+  const [applications] = useState(data?.applications ?? []);
+  const [productTypes] = useState(data?.productTypes ?? []);
   const [owners] = useState(data?.owners ?? []);
-  const [activityLogs] = useState<ProductActivityLog[]>(() =>
-    (data?.activityLogs ?? []).map((log) => ({
-      ...log,
-      action: log.action === 'review_submit' || log.action === 'approve' || log.action === 'reject' ? 'update' : log.action,
-      details: /duyệt|review|phê duyệt|trả lại/i.test(log.details) ? 'Đã cập nhật dữ liệu sản phẩm.' : log.details,
-    })),
-  );
+  const [activityLogs] = useState<ProductActivityLog[]>(data?.activityLogs ?? []);
 
   // Current User context (mock current logged in user)
 
@@ -220,19 +219,73 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   // Form Save Handler
   const handleSaveProductFromForm = (
     productData: Partial<ProductItem>,
-    actionType: 'draft' | 'submit' | 'approve' | 'publish'
+    actionType: 'draft' | 'publish'
   ) => {
+    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const editorialStatus: EditorialStatus = actionType === 'publish' ? 'published' : 'draft';
     if (selectedProductForForm) {
       // Update
       setProducts((prev) =>
-        prev.map((p) => (p.id === selectedProductForForm.id ? { ...p, ...productData } as ProductItem : p))
+        prev.map((p) => (p.id === selectedProductForForm.id ? {
+          ...p,
+          ...productData,
+          title: productData.name || productData.title || p.title,
+          short_description: productData.summary ?? productData.short_description ?? p.short_description,
+          content_html: productData.description ?? productData.content_html ?? p.content_html,
+          editorial_status: editorialStatus,
+          published: editorialStatus === 'published',
+          published_time: editorialStatus === 'published' ? p.published_time || now : undefined,
+          updated_time: now,
+        } : p))
       );
-      showToast(`Đã cập nhật sản phẩm "${productData.title}"!`);
+      showToast(`Đã cập nhật sản phẩm "${productData.name || productData.title || selectedProductForForm.title}"!`);
     } else {
       // Create new
-      const newProd = productData as ProductItem;
+      const title = productData.name || productData.title || '';
+      const newProd: ProductItem = {
+        id: `prod_${Date.now()}`,
+        sku: productData.code || productData.sku || `SP-${Date.now()}`,
+        title,
+        alias: productData.alias || '',
+        short_description: productData.summary || productData.short_description || '',
+        product_type: productData.types || productData.product_type || '',
+        category_id: productData.category_ids?.[0] || productData.category_id || '',
+        brand_id: productData.manufactory || productData.brand_id || '',
+        brand_name: brands.find((brand) => brand.id === (productData.manufactory || productData.brand_id))?.name || '',
+        application_areas: productData.application || productData.application_areas || [],
+        price: productData.price_old || productData.price || '',
+        currency: productData.currency || 'VND',
+        unit: productData.unit || '',
+        origin: productData.origin || '',
+        warranty: productData.warranty || '',
+        availability_signal: productData.availability_signal || 'contact',
+        content_html: productData.description || productData.content_html || '',
+        highlights: productData.highlights || [],
+        tech_specs: productData.tech_specs || [],
+        image: productData.image || '',
+        gallery: productData.gallery || [],
+        documents: productData.documents || [],
+        meta_title: productData.seo_title || productData.meta_title || '',
+        meta_description: productData.seo_description || productData.meta_description || '',
+        meta_keywords: productData.seo_keyword || productData.meta_keywords || '',
+        canonical_url: productData.canonical_url || '',
+        owner_id: productData.owner_id || '',
+        owner_name: productData.owner_name || '',
+        inquiry_routing: productData.inquiry_routing || '',
+        editorial_status: editorialStatus,
+        catalog_status: productData.catalog_status || 'inactive',
+        published: editorialStatus === 'published',
+        is_hot: productData.is_hot || false,
+        ordering: productData.ordering || 1,
+        site_placement: productData.site_placement || ['catalog_grid'],
+        completeness_score: productData.completeness_score || 0,
+        created_time: now,
+        updated_time: now,
+        published_time: editorialStatus === 'published' ? now : undefined,
+        ...productData,
+      };
       setProducts((prev) => [newProd, ...prev]);
-      showToast(`Đã tạo mới sản phẩm "${newProd.title}"!`);
+      showToast(`Đã tạo mới sản phẩm "${title}"!`);
     }
     setViewMode('list');
     setSelectedProductForForm(null);
@@ -270,6 +323,9 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
           product={selectedProductForForm}
           categories={categories}
           brands={brands}
+          applications={applications}
+          productTypes={productTypes}
+          relatedProducts={products}
           owners={owners}
           onSave={handleSaveProductFromForm}
           onCancel={() => {

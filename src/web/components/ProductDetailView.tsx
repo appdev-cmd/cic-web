@@ -28,10 +28,10 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { Product } from '@shared/types';
-import { productsData } from '../data/mockData';
 
 interface ProductDetailViewProps {
   product: Product;
+  products: Product[];
   onBack: () => void;
   onContact: (product: Product) => void;
   onDownload: (product: Product) => void;
@@ -125,6 +125,7 @@ function CollapsibleContent({
 
 export function ProductDetailView({ 
   product, 
+  products,
   onBack, 
   onContact, 
   onDownload, 
@@ -159,10 +160,10 @@ export function ProductDetailView({
 
   // Filter 3 related products (same field or general)
   const relatedProducts = useMemo(() => {
-    return productsData
+    return products
       .filter((p) => p.id !== product.id)
       .slice(0, 3);
-  }, [product.id]);
+  }, [product.id, products]);
 
   return (
     <div className="bg-slate-50 min-h-screen pt-36 pb-24 relative overflow-hidden">

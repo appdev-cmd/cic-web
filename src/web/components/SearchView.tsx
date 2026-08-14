@@ -21,10 +21,11 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-import { productsData, newsItems } from '../data/mockData';
+import { newsItems } from '../data/mockData';
 import { projectsData } from '../data/projectsData';
 import { servicesData } from '../data/servicesData';
 import { getEventsData } from '../features/events/eventsData';
+import { getProductsData } from '../features/products/productsData';
 
 interface SearchViewProps {
   initialQuery?: string;
@@ -59,6 +60,7 @@ export function SearchView({
   onNavigateHome
 }: SearchViewProps) {
   const { events: eventsData } = useMemo(getEventsData, []);
+  const { products: productsData } = useMemo(getProductsData, []);
   const [query, setQuery] = useState(initialQuery);
   const [searchInputValue, setSearchInputValue] = useState(initialQuery);
   const [activeTab, setActiveTab] = useState<ResultType>('all');
