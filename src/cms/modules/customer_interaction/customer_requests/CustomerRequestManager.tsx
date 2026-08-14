@@ -18,17 +18,21 @@ import {
   Globe,
 } from 'lucide-react';
 import { CustomerRequest, RequestListTabType, RequestFilterState } from './types';
+import type { CustomerRequestModuleData } from '../../../data/CustomerInteractionDataSource';
 import { RequestList } from './components/RequestList';
 import { RequestDetailPage } from './components/RequestDetailPage';
-import { MOCK_CUSTOMER_REQUESTS } from './mockData';
 import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsTabs } from '../../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 
-export const CustomerRequestManager: React.FC = () => {
-  const [requests, setRequests] = useState<CustomerRequest[]>(MOCK_CUSTOMER_REQUESTS);
+interface CustomerRequestManagerProps {
+  data: CustomerRequestModuleData;
+}
+
+export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ data }) => {
+  const [requests, setRequests] = useState<CustomerRequest[]>(data.requests);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<RequestListTabType>('all');
   const [filter, setFilter] = useState<RequestFilterState>({
@@ -680,4 +684,3 @@ export const CustomerRequestManager: React.FC = () => {
     </div>
   );
 };
-

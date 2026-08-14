@@ -144,7 +144,12 @@ const FormManager = lazy(async () => {
     <module.FormManager workspaceLocale={workspaceLocale} data={dataModule.getDemoFormModuleData(workspaceLocale)} />
   ) };
 });
-const CustomerRequestManager = lazy(() => import('../modules/customer_interaction/customer_requests/CustomerRequestManager').then((module) => ({ default: module.CustomerRequestManager })));
+const CustomerRequestManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/customer_interaction/customer_requests/CustomerRequestManager'), import('../data/demoCustomerInteractionDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.CustomerRequestManager data={dataModule.getDemoCustomerRequestModuleData(workspaceLocale)} />
+  ) };
+});
 
 interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
@@ -314,7 +319,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
           ) : activeModule === 'forms' ? (
             <FormManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'customer_requests' ? (
-            <CustomerRequestManager />
+            <CustomerRequestManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'dashboard' ? (
             <DashboardOverview
               workspaceLocale={workspaceLocale}
