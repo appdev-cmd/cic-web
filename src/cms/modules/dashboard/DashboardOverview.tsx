@@ -82,28 +82,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     status: item.status === 'published' ? 'published' : 'draft',
   }));
   const activityLogs: ActivityLog[] = data?.activityLogs ?? [];
-  const customerRequests = [
-    ...contacts.map((item) => ({
-      id: item.id,
-      kind: 'contact' as const,
-      title: item.subject,
-      customer: item.sender_name,
-      secondary: item.sender_phone,
-      status: item.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý',
-      createdTime: item.created_time,
-      source: item,
-    })),
-    ...registrations.map((item) => ({
-      id: item.id,
-      kind: 'registration' as const,
-      title: item.product_name,
-      customer: item.company_name,
-      secondary: item.customer_name,
-      status: item.status === 'pending' ? 'Chờ báo giá' : 'Đã báo giá',
-      createdTime: item.created_time,
-      source: item,
-    })),
-  ].sort((a, b) => b.createdTime.localeCompare(a.createdTime));
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -399,6 +377,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         // SECTION: ACTION REQUIRED BLOCKS (CẦN XỬ LÝ NGAY)
         if (widgetId === 'action_required') {
+          const customerRequests = [
+            ...contacts.map((item) => ({ id: item.id, kind: 'contact' as const, title: item.subject, customer: item.sender_name, secondary: item.sender_phone, status: item.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý', createdTime: item.created_time, source: item })),
+            ...registrations.map((item) => ({ id: item.id, kind: 'registration' as const, title: item.product_name, customer: item.company_name, secondary: item.customer_name, status: item.status === 'pending' ? 'Chờ báo giá' : 'Đã báo giá', createdTime: item.created_time, source: item })),
+          ].sort((a, b) => b.createdTime.localeCompare(a.createdTime));
           return (
             <div key={widgetId} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Block A: Yêu cầu khách hàng hợp nhất */}
