@@ -14,6 +14,7 @@ import {
   Globe 
 } from 'lucide-react';
 import { ZaloIcon } from '@shared/components/Icons';
+import { getNavigationData, type FooterNavigationItem, type PublicNavigationView } from '../features/navigation/navigationData';
 
 interface FooterProps {
   setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'cms') => void;
@@ -34,6 +35,23 @@ export const Footer = ({
   onResetNews,
   onResetEvents
 }: FooterProps) => {
+  const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = getNavigationData();
+  const resetByView: Partial<Record<PublicNavigationView, (() => void) | undefined>> = {
+    products: onResetProducts,
+    services: onResetServices,
+    projects: onResetProjects,
+    news: onResetNews,
+    events: onResetEvents,
+  };
+
+  const handleNavigation = (event: React.MouseEvent<HTMLAnchorElement>, item: FooterNavigationItem) => {
+    if (item.preventDefault !== false) event.preventDefault();
+    setCurrentView(item.view);
+    setActiveLink(item.activeLabel);
+    if (item.reset) resetByView[item.view]?.();
+    if (item.scrollToTop !== false) window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer id="contact" className="bg-slate-950 text-slate-400 py-8 border-t border-white/5 relative z-10">
       <div className="max-w-7xl mx-auto px-6">
@@ -84,13 +102,11 @@ export const Footer = ({
           <div className="lg:col-span-2">
             <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Điều hướng</h3>
             <ul className="space-y-4 text-sm font-bold">
-              <li><a href="#home" onClick={() => { setCurrentView('home'); setActiveLink(''); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Trang chủ</a></li>
-              <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); if (onResetProducts) onResetProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Giải pháp</a></li>
-              <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); if (onResetServices) onResetServices(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dịch vụ</a></li>
-              <li><a href="#projects" onClick={(e) => { e.preventDefault(); setCurrentView('projects'); setActiveLink('Dự án'); if (onResetProjects) onResetProjects(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Dự án</a></li>
-              <li><a href="#events" onClick={(e) => { e.preventDefault(); setCurrentView('events'); setActiveLink('Sự kiện'); if (onResetEvents) onResetEvents(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Sự kiện</a></li>
-              <li><a href="#news" onClick={(e) => { e.preventDefault(); setCurrentView('news'); setActiveLink('Tin tức'); if (onResetNews) onResetNews(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Tin tức</a></li>
-              <li><a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentView('contact'); setActiveLink('Liên hệ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">Liên hệ</a></li>
+              {footerPrimaryLinks.map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">{item.label}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -100,20 +116,13 @@ export const Footer = ({
               <div>
                 <h4 className="text-white/60 text-xs font-black uppercase mb-4 tracking-tighter">Giải pháp</h4>
                 <ul className="space-y-3 text-xs font-bold">
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">AI & Công nghệ thông minh</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">BIM, Digital Twins & CDE</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Phần mềm kỹ thuật</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Thiết bị khoa học</a></li>
-                  <li><a href="#solutions" onClick={(e) => { e.preventDefault(); setCurrentView('products'); setActiveLink('Sản phẩm'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Net Zero & Bền vững</a></li>
+                  {footerSolutionLinks.map((item) => <li key={item.label}><a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all">{item.label}</a></li>)}
                 </ul>
               </div>
               <div>
                 <h4 className="text-white/60 text-xs font-black uppercase mb-4 tracking-tighter">Dịch vụ</h4>
                 <ul className="space-y-3 text-xs font-bold">
-                  <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Tư vấn chuyển đổi số</a></li>
-                  <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Đào tạo & Chuyển giao</a></li>
-                  <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Tư vấn phát triển bền vững</a></li>
-                  <li><a href="#services" onClick={(e) => { e.preventDefault(); setCurrentView('services'); setActiveLink('Dịch vụ'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-orange-600 transition-all">Phát triển phần mềm</a></li>
+                  {footerServiceLinks.map((item) => <li key={item.label}><a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all">{item.label}</a></li>)}
                 </ul>
               </div>
             </div>

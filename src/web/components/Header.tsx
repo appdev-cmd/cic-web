@@ -17,7 +17,7 @@ import {
   Globe 
 } from 'lucide-react';
 import { ZaloIcon } from '@shared/components/Icons';
-import { navLinks } from '../data/mockData';
+import { getNavigationData } from '../features/navigation/navigationData';
 
 interface HeaderProps {
   currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
@@ -54,6 +54,7 @@ export const Header = ({
   onSearch, 
   onOpenConsultation 
 }: HeaderProps) => {
+  const { headerLinks: navLinks } = getNavigationData();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);

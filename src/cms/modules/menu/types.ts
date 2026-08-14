@@ -7,7 +7,7 @@ export type NavigationTargetType =
   | 'section_header'
   | 'anchor';
 
-export type EditorialStatus = 'draft' | 'pending' | 'approved' | 'published';
+export type EditorialStatus = 'draft' | 'published';
 export type LinkHealthStatus = 'valid' | 'warning' | 'broken' | 'unchecked';
 export interface MenuItem {
   id: string;

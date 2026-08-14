@@ -45,7 +45,7 @@ export const mockMenuGroups: MenuGroup[] = [
     max_depth: 2,
     live_version: 'v1.2.0',
     draft_version: 'v1.3.0-draft',
-    editorial_status: 'pending',
+    editorial_status: 'draft',
     has_draft_changes: true,
     item_count: 12,
     issue_count: 1,
