@@ -12,15 +12,21 @@ import { FormList } from './components/FormList';
 import { FormBuilderView } from './FormBuilderView';
 import { FormPreviewModal } from './components/FormPreviewModal';
 import { FormSubmissionsModal } from './components/FormSubmissionsModal';
-import { MOCK_FORMS } from './mockData';
 import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsTabs } from '../../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
+import type { CmsLocale } from '../../../data/CmsDataSource';
+import type { FormModuleData } from '../../../data/CustomerInteractionDataSource';
 
-export const FormManager: React.FC = () => {
-  const [forms, setForms] = useState<FormItem[]>(MOCK_FORMS);
+interface FormManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: FormModuleData;
+}
+
+export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data }) => {
+  const [forms, setForms] = useState<FormItem[]>(data?.forms ?? []);
   const [selectedFormIds, setSelectedFormIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<FormListTabType>('all');
   const [pageMode, setPageMode] = useState<'list' | 'builder'>('list');
@@ -224,7 +230,11 @@ export const FormManager: React.FC = () => {
     }
   };
 
-  const handleSaveForm = (formData: FormFormData, action: 'draft' | 'submit' | 'publish') => {
+  const handleSaveForm = (formData: FormFormData, action: 'draft' | 'publish') => {
+    const normalizedData: FormFormData = {
+      ...formData,
+      status: action === 'publish' ? 'active' : 'draft',
+    };
     if (editingForm) {
       // Update existing form
       setForms(
@@ -232,7 +242,7 @@ export const FormManager: React.FC = () => {
           f.id === editingForm.id
             ? {
                 ...f,
-                ...formData,
+                ...normalizedData,
                 currentVersion: action === 'publish' ? f.currentVersion + 1 : f.currentVersion,
                 updatedAt: new Date().toISOString(),
               }
@@ -243,7 +253,7 @@ export const FormManager: React.FC = () => {
       // Create new form
       const newForm: FormItem = {
         id: `form_${Date.now()}`,
-        ...formData,
+        ...normalizedData,
         currentVersion: 1,
         analytics: {
           impressions: 0,
@@ -265,6 +275,8 @@ export const FormManager: React.FC = () => {
     return (
       <FormBuilderView
         form={editingForm}
+        workspaceLocale={workspaceLocale}
+        emailTemplates={data?.emailTemplates ?? []}
         onSave={handleSaveForm}
         onCancel={() => {
           setPageMode('list');

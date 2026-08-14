@@ -35,17 +35,21 @@ import { FIELD_TYPES, FieldType, FIELD_ROLE_TYPES, FieldRoleType } from '../shar
 import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { generateCode } from '../shared/utils/validationHelpers';
 import { CmsButton } from '../../../components/ui/CmsButton';
-import { mockEmailTemplates } from '../../email_templates/mockData';
-import { EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES } from '../../email_templates/types';
+import { EMAIL_EVENTS, SAMPLE_VALUES, TEMPLATE_STATUSES, type EmailTemplate } from '../../email_templates/types';
+import type { CmsLocale } from '../../../data/CmsDataSource';
 
 interface FormBuilderViewProps {
   form: FormItem | null;
-  onSave: (formData: FormFormData, action: 'draft' | 'submit' | 'publish') => void;
+  workspaceLocale: CmsLocale;
+  emailTemplates: EmailTemplate[];
+  onSave: (formData: FormFormData, action: 'draft' | 'publish') => void;
   onCancel: () => void;
 }
 
 export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   form,
+  workspaceLocale,
+  emailTemplates,
   onSave,
   onCancel,
 }) => {
@@ -79,8 +83,9 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [previewEmailTemplateId, setPreviewEmailTemplateId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState('');
 
-  const previewEmailTemplate = mockEmailTemplates.find((template) => template.id === previewEmailTemplateId);
+  const previewEmailTemplate = emailTemplates.find((template) => template.id === previewEmailTemplateId);
   const renderEmailSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce(
     (text, [token, sample]) => text.split(token).join(sample),
     value,
@@ -170,7 +175,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
           sendAdminEmail: true,
           adminEmails: ['sales@cic.com.vn'],
           sendConfirmationEmail: false,
-          confirmationEmailTemplate: 'Cảm ơn quý khách đã gửi thông tin.',
+          confirmationEmailTemplate: '',
           successMessage: 'Cảm ơn bạn đã gửi thông tin thành công!',
           submitButtonText: 'Gửi thông tin',
           redirectUrl: '',
@@ -193,6 +198,41 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
       title: newTitle,
       code: newCode,
     }));
+  };
+
+  const handleSave = (action: 'draft' | 'publish') => {
+    if (action === 'publish') {
+      if (!formData.adminName.trim() || !formData.title.trim() || !formData.code.trim()) {
+        setSaveError('Tên quản trị, tiêu đề và mã biểu mẫu là bắt buộc trước khi xuất bản.');
+        return;
+      }
+      if (formData.fields.length === 0 || formData.fields.some((field) => !field.fieldKey.trim() || !field.label.trim())) {
+        setSaveError('Biểu mẫu phải có ít nhất một trường và mỗi trường phải có mã cùng nhãn hiển thị.');
+        return;
+      }
+      const keys = formData.fields.map((field) => field.fieldKey.trim().toLowerCase());
+      const positions = formData.fields.map((field) => field.position);
+      if (new Set(keys).size !== keys.length || new Set(positions).size !== positions.length) {
+        setSaveError('Mã trường và thứ tự hiển thị không được trùng nhau.');
+        return;
+      }
+      if (!formData.submitConfig.saveToDatabase || !formData.submitConfig.submitButtonText?.trim() || !formData.submitConfig.successMessage.trim()) {
+        setSaveError('Cần lưu submission, có tên nút gửi và thông báo thành công trước khi xuất bản.');
+        return;
+      }
+      const adminTemplate = emailTemplates.find((item) => item.id === formData.submitConfig.adminEmailTemplate);
+      const customerTemplate = emailTemplates.find((item) => item.id === formData.submitConfig.confirmationEmailTemplate);
+      if (formData.submitConfig.sendAdminEmail && (!formData.submitConfig.adminEmails.length || !adminTemplate || adminTemplate.status !== 'active')) {
+        setSaveError('Email quản trị cần người nhận và một mẫu nội bộ đang sử dụng.');
+        return;
+      }
+      if (formData.submitConfig.sendConfirmationEmail && (!customerTemplate || customerTemplate.status !== 'active')) {
+        setSaveError('Email xác nhận cần một mẫu khách hàng đang sử dụng.');
+        return;
+      }
+    }
+    setSaveError('');
+    onSave(formData, action);
   };
 
   const addField = (fieldType: FieldType) => {
@@ -324,7 +364,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
           <CmsButton
             variant="secondary"
             size="sm"
-            onClick={() => onSave(formData, 'draft')}
+            onClick={() => handleSave('draft')}
             leadingIcon={<Save className="w-4 h-4 text-slate-500" />}
           >
             Lưu bản nháp
@@ -332,13 +372,15 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
           <CmsButton
             variant="primary"
             size="sm"
-            onClick={() => onSave(formData, 'publish')}
+            onClick={() => handleSave('publish')}
             leadingIcon={<Play className="w-4 h-4" />}
           >
             Xuất bản phiên bản mới
           </CmsButton>
         </div>
       </div>
+
+      {saveError && <div role="alert" className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"><AlertCircle className="size-4" />{saveError}</div>}
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 rounded-2xl shadow-2xs">
@@ -855,7 +897,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                       className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs dark:border-slate-700 dark:bg-slate-800"
                     >
                       <option value="">Không gửi bằng mẫu</option>
-                      {mockEmailTemplates.filter((template) => template.workspace === 'vi' && template.audience === 'internal').map((template) => {
+                      {emailTemplates.filter((template) => template.workspace === workspaceLocale && template.audience === 'internal').map((template) => {
                         const eventName = EMAIL_EVENTS.find((item) => item.value === template.event)?.label;
                         return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
                       })}
@@ -897,7 +939,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs dark:border-slate-700 dark:bg-slate-800"
                 >
                   <option value="">Chọn mẫu email</option>
-                  {mockEmailTemplates.filter((template) => template.workspace === 'vi' && template.audience === 'customer').map((template) => {
+                  {emailTemplates.filter((template) => template.workspace === workspaceLocale && template.audience === 'customer').map((template) => {
                     const eventName = EMAIL_EVENTS.find((item) => item.value === template.event)?.label;
                     return <option key={template.id} value={template.id}>{template.name} · {eventName} · {TEMPLATE_STATUSES[template.status].label}</option>;
                   })}

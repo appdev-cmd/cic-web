@@ -16,6 +16,12 @@ export interface CtaModuleData {
   downloadFiles: CtaDownloadFileOption[];
 }
 
+export interface FormModuleData {
+  forms: FormItem[];
+  emailTemplates: EmailTemplate[];
+}
+
 export interface CustomerInteractionDataSource {
   ctaByLocale: Partial<Record<CmsLocale, CtaModuleData>>;
+  formByLocale: Partial<Record<CmsLocale, FormModuleData>>;
 }
