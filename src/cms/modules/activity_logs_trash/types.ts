@@ -94,7 +94,7 @@ export interface TrashedItem {
   dependencyDetails?: string;
   snapshotData: Record<string, any>;
   originalUrl?: string;
-  targetRestoreState: 'draft' | 'inactive' | 'published';
+  targetRestoreState: 'draft' | 'inactive';
 }
 
 export interface ExportJob {

@@ -54,6 +54,7 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | Function SEO CMS | `getDemoFunctionSeoData(locale)` | manager nhận route SEO projection theo workspace; metadata map `cic_config_modules*`, hierarchy/owner chỉ là ViewModel compose tại application layer |
 | Translation Strings CMS | `getDemoLocalizationData()` | UI Dictionary nhận key/value/history qua data function; không còn code workflow translator/reviewer cũ, key kỹ thuật chỉ đọc và value được validate plain text/token |
 | Activity Logs CMS | `demoGovernanceDataSource.audit` | list/detail/export job nhận read model qua props; DTO không nhận raw request headers, export mới bắt đầu ở processing thay vì giả hoàn tất đồng bộ |
+| Trash CMS | `demoGovernanceDataSource.trash` | list/detail/restore/purge nhận snapshot projection qua props; restore chỉ về Draft/Inactive, conflict slug dùng đề xuất backend thay vì suffix hard-code |
 | Services CMS | `ServicesModuleData` | list/form/preview nhận dataset theo workspace qua Editorial data source; workflow chỉ còn Draft/Published |
 | Frontend Menus website | `getNavigationData()` | Header/Footer nhận navigation qua một boundary; giữ nguyên nhãn, thứ tự, dropdown và hành vi điều hướng hiện tại |
 | Frontend Menus CMS | `MenuModuleData` | group/item/validation/version/log nhận theo workspace qua Presentation data source; trạng thái chỉ còn Draft/Published |
@@ -64,7 +65,7 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
-- CMS Dashboard và các module Trash, Contacts.
+- CMS Dashboard và module Contacts.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
 - Website Home (bao gồm event/service highlight riêng), Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
 

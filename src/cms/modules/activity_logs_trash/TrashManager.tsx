@@ -70,7 +70,7 @@ export const TrashManager: React.FC<{ data: TrashedItem[] }> = ({ data }) => {
   const handleBulkRestore = (selectedIds: string[]) => {
     const toRestore = trashedItems.filter((i) => selectedIds.includes(i.id));
     setTrashedItems((prev) => prev.filter((i) => !selectedIds.includes(i.id)));
-    showToast(`Đã khôi phục thành công ${toRestore.length} mục chọn từ Thùng rác!`);
+    showToast(`Đã khôi phục ${toRestore.length} mục về trạng thái Draft/Inactive.`);
   };
 
   const handleBulkDelete = (selectedIds: string[]) => {

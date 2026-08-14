@@ -21,7 +21,7 @@ interface TrashItemDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   item: TrashedItem | null;
-  onRestore: (item: TrashedItem, targetState: 'draft' | 'inactive' | 'published') => void;
+  onRestore: (item: TrashedItem, targetState: 'draft' | 'inactive') => void;
   onPermanentDelete: (item: TrashedItem) => void;
 }
 

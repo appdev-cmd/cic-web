@@ -115,7 +115,7 @@ export const RestoreConflictModal: React.FC<RestoreConflictModalProps> = ({
                 2. Tự động đổi tên URL/Slug để tránh trùng lặp
               </strong>
               <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">
-                Hệ thống tự động thêm hậu tố <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">-restored-2026</code> vào đường dẫn.
+                Hệ thống dùng slug ngắn do backend đề xuất sau khi kiểm tra unique; không ghi đè bản ghi đang tồn tại.
               </p>
             </div>
           </label>
