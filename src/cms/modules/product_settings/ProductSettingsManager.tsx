@@ -482,7 +482,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   </div>
                 )}
 
-                <button type="button" disabled={!searchQuery && statusFilter === 'all' && usageFilter === 'all' && staffProductFilter === 'all'} onClick={() => { setSearchQuery(''); setStatusFilter('all'); setUsageFilter('all'); setStaffProductFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+                <button type="button" disabled={!searchQuery && statusFilter === 'all' && usageFilter === 'all' && staffProductFilter === 'all'} onClick={() => { setSearchQuery(''); setStatusFilter('all'); setUsageFilter('all'); setStaffProductFilter('all'); setCurrentPage(1); }} className="ml-auto flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
 
               </div>
             </div>

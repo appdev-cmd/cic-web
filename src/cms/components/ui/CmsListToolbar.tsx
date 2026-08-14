@@ -45,8 +45,8 @@ export const CmsListToolbar: React.FC<CmsListToolbarProps> = ({
 
       <div className="cms-list-toolbar-actions">
         {onToggleFilters && <CmsButton type="button" variant={filtersOpen || filterCount > 0 ? 'primary' : 'secondary'} size="sm" leadingIcon={<Filter />} onClick={onToggleFilters}>Bộ lọc{filterCount > 0 ? ` (${filterCount})` : ''}</CmsButton>}
-        {onReset && <CmsButton type="button" variant="ghost" size="sm" leadingIcon={<RotateCcw />} onClick={onReset} disabled={resetDisabled}>Đặt lại</CmsButton>}
         {actions}
+        {onReset && <CmsButton type="button" variant="ghost" size="sm" className="ml-auto h-9 w-24 px-0" leadingIcon={<RotateCcw />} onClick={onReset} disabled={resetDisabled}>Đặt lại</CmsButton>}
       </div>
     </div>
 

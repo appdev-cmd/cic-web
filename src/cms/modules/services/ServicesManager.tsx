@@ -385,7 +385,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             <option value="all">Tất cả người phụ trách</option>
             {ownersList.map((owner) => <option key={owner.id} value={owner.id}>{owner.name}</option>)}
           </select>
-          <button type="button" disabled={!searchTerm && filterEditorialStatus === 'all' && filterServiceStatus === 'all' && filterOwnerId === 'all'} onClick={() => { setSearchTerm(''); setFilterEditorialStatus('all'); setFilterServiceStatus('all'); setFilterOwnerId('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+          <button type="button" disabled={!searchTerm && filterEditorialStatus === 'all' && filterServiceStatus === 'all' && filterOwnerId === 'all'} onClick={() => { setSearchTerm(''); setFilterEditorialStatus('all'); setFilterServiceStatus('all'); setFilterOwnerId('all'); setCurrentPage(1); }} className="ml-auto flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
         </div>
 
         {/* Bulk Actions Bar if items selected */}

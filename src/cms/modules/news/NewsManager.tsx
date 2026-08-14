@@ -377,7 +377,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
                   <option value="published">Đã xuất bản (Published)</option>
                 </select>
               </div>
-              <button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && statusFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setStatusFilter('ALL'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+              <div className="flex justify-end md:col-span-2"><button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && statusFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setStatusFilter('ALL'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button></div>
             </div>
 
             {/* BULK ACTIONS BAR */}

@@ -437,7 +437,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               <option value="ended">Đã kết thúc</option>
             </select>
           </div>
-          <div className="flex justify-start md:col-span-1 md:justify-end"><button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button></div>
+          <div className="flex justify-end md:col-span-1"><button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button></div>
         </div>
 
         <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="sự kiện" onClear={() => setSelectedIds([])} actions={[
