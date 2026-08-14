@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building2, 
@@ -46,8 +46,7 @@ import {
   Download
 } from 'lucide-react';
 
-import { partners } from '../data/mockData';
-import { homeAwards } from '../data/homeData';
+import { getHomeAwards, getHomePartners } from '../features/home/homeData';
 import { AwardsSlider } from './AwardsSlider';
 import { BIMIcon } from '@shared/components/Icons';
 import {
@@ -84,6 +83,8 @@ interface AboutViewProps {
 }
 
 export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: AboutViewProps) => {
+  const homeAwards = useMemo(getHomeAwards, []);
+  const partners = useMemo(getHomePartners, []);
   // Interactive active states for redesigned sections
   const [activeCoreIndex, setActiveCoreIndex] = useState(0);
   const [activeFieldIndex, setActiveFieldIndex] = useState(0);

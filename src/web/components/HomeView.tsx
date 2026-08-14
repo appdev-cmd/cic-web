@@ -38,22 +38,7 @@ import { Counter } from '@shared/components/Counter';
 import { BIMIcon } from '@shared/components/Icons';
 import { AwardsSlider } from './AwardsSlider';
 
-// Import mock data
-import { 
-  heroSlides, 
-  projects, 
-  newsItems, 
-  partners, 
-  marqueeTexts 
-} from '../data/mockData';
-
-import {
-  upcomingHomeEvents,
-  pastHomeEvents,
-  homeStats,
-  homeAwards,
-  homeSolutionsList
-} from '../data/homeData';
+import { getHomeData } from '../features/home/homeData';
 
 import { Project } from '@shared/types';
 
@@ -78,6 +63,18 @@ export const HomeView = ({
   setActiveEventId,
   setIsRegisteringEvent
 }: HomeViewProps) => {
+  const {
+    heroSlides,
+    projects,
+    newsItems,
+    partners,
+    marqueeTexts,
+    upcomingHomeEvents,
+    pastHomeEvents,
+    homeStats,
+    homeAwards,
+    homeSolutionsList,
+  } = React.useMemo(getHomeData, []);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
   const [activeProjectTab, setActiveProjectTab] = useState('all');

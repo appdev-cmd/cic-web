@@ -1,7 +1,7 @@
 import { eventsData } from '../../data/eventsData';
 import { getProductsData } from '../products/productsData';
 import { newsData } from '../../data/newsData';
-import { projectsData } from '../../data/projectsData';
+import { getProjectsData } from '../projects/projectsData';
 import type { PublicNewsDataSet } from './types';
 
 /**
@@ -12,6 +12,6 @@ import type { PublicNewsDataSet } from './types';
 export const getNewsData = (): PublicNewsDataSet => ({
   items: newsData,
   relatedProducts: getProductsData().products,
-  relatedProjects: projectsData,
+  relatedProjects: getProjectsData(),
   relatedEvents: eventsData,
 });

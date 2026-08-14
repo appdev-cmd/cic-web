@@ -62,12 +62,16 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | Media picker | `getDemoMediaPickerItems(locale)` | News, Events và Static Pages dùng chung projection ảnh `ready`; component không import fixture Media trực tiếp |
 | CTA CMS | `getDemoCtaModuleData(locale)` | list/form/preview nhận CTA và các relation Form, Email Template, Media theo workspace; style variant được lưu trong ViewModel, action config dùng allowlist |
 | Forms CMS | `getDemoFormModuleData(locale)` | list/builder/preview nhận definition và Email Template relation theo workspace; field key/order và submit config được validate trước Publish |
+| Contacts CMS | `demoContactsDataSource` | manager nhận dataset, nhân viên và người dùng hiện tại qua contract bắt buộc theo workspace; không tự fallback sang danh sách rỗng khi thiếu wiring |
+| Home website | `getHomeData()` | toàn bộ fixture của các section hiện tại nằm sau một data function; thứ tự section, nội dung và layout được giữ nguyên |
+| Projects website | `getProjectsData()` | list/detail/filter/search và News relation dùng chung boundary; component không import raw Project fixture |
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
-- CMS Dashboard và module Contacts.
+- CMS Dashboard.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
-- Website Home (bao gồm event/service highlight riêng), Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
+
+Fixture nằm phía sau các data function của Static Pages, Home và Projects là mock fallback có chủ đích trong giai đoạn React. Đây không còn là coupling của UI; khi PostgreSQL/Next.js sẵn sàng chỉ cần thay implementation của data function, không xóa fixture trước thời điểm đó.
 
 Các module này được xử lý lần lượt theo thứ tự triển khai đã chốt; không refactor hàng loạt.
 

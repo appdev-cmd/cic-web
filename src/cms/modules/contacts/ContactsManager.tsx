@@ -43,14 +43,14 @@ import { ContactPiiAuditModal } from './ContactPiiAuditModal';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
 interface ContactsManagerProps {
-  data?: ContactsModuleData;
+  data: ContactsModuleData;
   staffMembers: StaffMember[];
   currentUserId?: string;
 }
 
 export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMembers, currentUserId }) => {
   // Main Data State
-  const [contacts, setContacts] = useState<ContactRequest[]>(data?.contacts ?? []);
+  const [contacts, setContacts] = useState<ContactRequest[]>(() => [...data.contacts]);
   const [activeTab, setActiveTab] = useState<MainTabType>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 

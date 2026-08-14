@@ -6,7 +6,7 @@ export interface ContactsModuleData {
 }
 
 export interface ContactsDataSource {
-  contactsByLocale: Partial<Record<CmsLocale, ContactsModuleData>>;
+  contactsByLocale: Record<CmsLocale, ContactsModuleData>;
   staffMembers: StaffMember[];
   currentUserId?: string;
 }

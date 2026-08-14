@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -29,7 +29,7 @@ import {
   Cpu,
   MessageSquare
 } from 'lucide-react';
-import { projectsData, DetailedProject } from '../data/projectsData';
+import { getProjectsData, type DetailedProject } from '../features/projects/projectsData';
 
 interface ProjectsViewProps {
   key?: string | number;
@@ -47,6 +47,7 @@ export function ProjectsView({
   onNavigateHome,
   onOpenConsultation
 }: ProjectsViewProps) {
+  const projectsData = useMemo(getProjectsData, []);
   
   const [activeProjectId, setActiveProjectId] = useState<string | null>(initialProjectId);
   const [searchQuery, setSearchQuery] = useState('');

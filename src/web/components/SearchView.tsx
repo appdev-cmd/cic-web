@@ -21,8 +21,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-import { newsItems } from '../data/mockData';
-import { projectsData } from '../data/projectsData';
+import { getNewsData } from '../features/news/newsData';
+import { getProjectsData } from '../features/projects/projectsData';
 import { getServicesData } from '../features/services/servicesData';
 import { getEventsData } from '../features/events/eventsData';
 import { getProductsData } from '../features/products/productsData';
@@ -59,6 +59,8 @@ export function SearchView({
   onNavigateToEvent,
   onNavigateHome
 }: SearchViewProps) {
+  const { items: newsItems } = useMemo(getNewsData, []);
+  const projectsData = useMemo(getProjectsData, []);
   const { events: eventsData } = useMemo(getEventsData, []);
   const { products: productsData } = useMemo(getProductsData, []);
   const { services: servicesData } = useMemo(getServicesData, []);
@@ -156,14 +158,14 @@ export function SearchView({
     newsItems.forEach((item, index) => {
       if (
         item.title.toLowerCase().includes(q) ||
-        item.desc.toLowerCase().includes(q) ||
+        item.shortDesc.toLowerCase().includes(q) ||
         item.category.toLowerCase().includes(q)
       ) {
         results.push({
           id: `news-${index}`,
           type: 'news',
           title: item.title,
-          description: item.desc,
+          description: item.shortDesc,
           img: item.img,
           meta: `Ngày: ${item.date} | Danh mục: ${item.category === 'company' ? 'Tin công ty' : 'Tin chuyên ngành'}`,
           original: item
