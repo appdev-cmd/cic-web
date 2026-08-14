@@ -484,14 +484,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
                 <button type="button" disabled={!searchQuery && statusFilter === 'all' && usageFilter === 'all' && staffProductFilter === 'all'} onClick={() => { setSearchQuery(''); setStatusFilter('all'); setUsageFilter('all'); setStaffProductFilter('all'); setCurrentPage(1); }} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
 
-                {/* Column settings button */}
-                {activeDataType !== 'sales_staff' && <button
-                  onClick={() => setIsColumnModalOpen(true)}
-                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl flex items-center gap-1.5 shrink-0 cursor-pointer"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-orange-600" />
-                  <span>Cấu hình cột</span>
-                </button>}
               </div>
             </div>
 

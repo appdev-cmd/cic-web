@@ -335,14 +335,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
               ]}
             />
 
-            {/* Column Setting Trigger */}
-            <button
-              onClick={() => setIsColumnModalOpen(true)}
-              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Tùy chỉnh cột</span>
-            </button>
           </div>
 
           {/* SEARCH & FILTERS TOOLBAR */}

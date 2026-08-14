@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Filter, RotateCcw, Search, X } from 'lucide-react';
 import { CmsButton } from './CmsButton';
 
 export interface CmsActiveFilter {
@@ -17,7 +17,6 @@ interface CmsListToolbarProps {
   onToggleFilters?: () => void;
   onReset?: () => void;
   resetDisabled?: boolean;
-  onConfigureColumns?: () => void;
   actions?: React.ReactNode;
   filters?: React.ReactNode;
   activeFilters?: CmsActiveFilter[];
@@ -32,7 +31,6 @@ export const CmsListToolbar: React.FC<CmsListToolbarProps> = ({
   onToggleFilters,
   onReset,
   resetDisabled = false,
-  onConfigureColumns,
   actions,
   filters,
   activeFilters = [],
@@ -48,7 +46,6 @@ export const CmsListToolbar: React.FC<CmsListToolbarProps> = ({
       <div className="cms-list-toolbar-actions">
         {onToggleFilters && <CmsButton type="button" variant={filtersOpen || filterCount > 0 ? 'primary' : 'secondary'} size="sm" leadingIcon={<Filter />} onClick={onToggleFilters}>Bộ lọc{filterCount > 0 ? ` (${filterCount})` : ''}</CmsButton>}
         {onReset && <CmsButton type="button" variant="ghost" size="sm" leadingIcon={<RotateCcw />} onClick={onReset} disabled={resetDisabled}>Đặt lại</CmsButton>}
-        {onConfigureColumns && <CmsButton type="button" variant="secondary" size="sm" leadingIcon={<SlidersHorizontal />} onClick={onConfigureColumns}>Cấu hình cột</CmsButton>}
         {actions}
       </div>
     </div>

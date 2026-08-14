@@ -372,30 +372,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         onClose={() => setQuickEditEvent(null)}
       />
 
-      {/* MODAL COLUMN SETTINGS */}
-      <ColumnSettingModal
-        isOpen={isColumnSettingOpen}
-        columns={columnVisibility}
-        density={density}
-        onToggleColumn={(col) =>
-          setColumnVisibility((prev) => ({ ...prev, [col]: !prev[col] }))
-        }
-        onChangeDensity={setDensity}
-        onReset={() =>
-          setColumnVisibility({
-            title: true,
-            time_event: true,
-            place: true,
-            editorial_status: true,
-            progress_status: true,
-            is_hot: true,
-            ordering: true,
-            created_time: false,
-          })
-        }
-        onClose={() => setIsColumnSettingOpen(false)}
-      />
-
       {/* HEADER CARD */}
       <CmsPageHeader
         icon={<CalendarDays />}
@@ -403,12 +379,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         description="Quản lý sự kiện, hội thảo chuyên đề, khóa đào tạo và chương trình trực tuyến."
         meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{events.length} sự kiện</span>}
         actions={<>
-          <CmsIconButton
-            onClick={() => setIsColumnSettingOpen(true)}
-            icon={<SlidersHorizontal />}
-            aria-label="Cấu hình cột"
-            title="Cấu hình cột"
-          />
           <CmsButton
             onClick={handleCreateNew}
             variant="primary"
