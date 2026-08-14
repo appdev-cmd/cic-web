@@ -455,7 +455,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
             </select>
 
             {/* Column Setting Button */}
-            <button type="button" disabled={!searchQuery && selectedCategory === 'all' && selectedBrand === 'all' && editorialFilter === 'all' && catalogFilter === 'all'} onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedBrand('all'); setEditorialFilter('all'); setCatalogFilter('all'); setCurrentPage(1); }} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+            <button type="button" disabled={!searchQuery && selectedCategory === 'all' && selectedBrand === 'all' && editorialFilter === 'all' && catalogFilter === 'all'} onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedBrand('all'); setEditorialFilter('all'); setCatalogFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
           </div>
         </div>
 

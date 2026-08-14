@@ -17,10 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
-  RefreshCw,
   Tag,
   CalendarDays,
-  SlidersHorizontal,
   Sliders,
   ExternalLink,
   Zap,
@@ -39,7 +37,17 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
-import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
+
+interface ColumnVisibility {
+  title: boolean;
+  time_event: boolean;
+  place: boolean;
+  editorial_status: boolean;
+  progress_status: boolean;
+  is_hot: boolean;
+  ordering: boolean;
+  created_time: boolean;
+}
 
 // Helper to format date string to "dd/mm/yyyy HH:mm"
 function formatEventDateTime(dateStr: string): string {
@@ -88,7 +96,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Auxiliary Modals & Drawers States
   const [previewEvent, setPreviewEvent] = useState<EventItem | null>(null);
   const [quickEditEvent, setQuickEditEvent] = useState<EventItem | null>(null);
-  const [isColumnSettingOpen, setIsColumnSettingOpen] = useState(false);
 
   // Table Column Visibility & Density Config
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
@@ -401,16 +408,16 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               placeholder="Tìm kiếm sự kiện theo tiêu đề..."
               value={searchTitle}
               onChange={(e) => { setSearchTitle(e.target.value); setCurrentPage(1); }}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+              className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
             />
           </div>
 
           {/* Dual Status Filter 1: Editorial */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-3">
             <select
               value={editorialFilter}
               onChange={(e) => { setEditorialFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+              className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
             >
               <option value="all">Trạng thái: Tất cả</option>
               <option value="draft">Bản nháp</option>
@@ -419,27 +426,18 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           </div>
 
           {/* Dual Status Filter 2: Event Progress */}
-          <div className="md:col-span-3 flex items-center gap-2">
+          <div className="md:col-span-4">
             <select
               value={eventStatusFilter}
               onChange={(e) => { setEventStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+              className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
             >
               <option value="all">Trạng thái diễn ra: Tất cả</option>
               <option value="upcoming">Sắp diễn ra</option>
               <option value="ended">Đã kết thúc</option>
             </select>
-
-            <button
-              type="button"
-              onClick={() => showToast('Đã làm mới danh sách sự kiện!')}
-              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium cursor-pointer shrink-0"
-              title="Làm mới danh sách"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
           </div>
+          <div className="flex justify-start md:col-span-1 md:justify-end"><button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button></div>
         </div>
 
         <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="sự kiện" onClear={() => setSelectedIds([])} actions={[
