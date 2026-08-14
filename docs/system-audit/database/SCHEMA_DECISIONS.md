@@ -98,6 +98,14 @@ Implementation note: Events hiện chỉ map `time_event` thành thời điểm 
 **CMS impact:** Server Actions handle internal mutations; Route Handlers only when HTTP is needed.  
 **Migration impact:** Backend starts only after migrated PostgreSQL is validated.  
 
+## Decision 13 — Projects use two independent workspace tables
+
+**Reason:** Project is a real new domain with public list/filter/detail, homepage selection, SEO and CMS CRUD, while legacy has no project table; reinterpreting contents/image/business would corrupt existing meanings. The approved minimal design is documented in [09-projects-schema-delta.md](./09-projects-schema-delta.md).
+**Legacy impact:** No legacy table is renamed, dropped or reinterpreted; no project record is invented automatically.
+**Frontend impact:** Homepage and Project pages use one mapped entity; ordinary scope/results/technology prose remains Rich Text.
+**CMS impact:** VI and EN manage independent datasets with the same fields; media and related IDs are validated by the application in the two-table phase.
+**Migration impact:** Additive `cic_projects` and `cic_projects_en`; no cross-workspace FK and no extra relation/taxonomy tables until an actual requirement justifies them.
+
 ## Current approval blockers
 
 - Lần chạy draft hiện có `cic_regions = ERROR`; phải sửa mapping/load `fs_khuvuc` và validate lại.
