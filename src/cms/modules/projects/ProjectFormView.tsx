@@ -58,7 +58,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
           <Field label="Dung lượng"><input className={inputClass} value={form.document_size} onChange={(e) => set('document_size', e.target.value)} /></Field>
           <Field label="URL tài liệu" wide><input className={inputClass} value={form.document_url} onChange={(e) => set('document_url', e.target.value)} /></Field>
         </div></Section>
-        <Section icon={<Link2 />} title="Liên kết"><div className="grid gap-4 md:grid-cols-2"><Field label="Sản phẩm liên quan"><SearchableMultiSelect options={productOptions} selectedIds={form.products_related} onChange={(ids) => set('products_related', ids)} placeholder="Chọn sản phẩm liên quan..." /></Field><Field label="Dịch vụ liên quan"><SearchableMultiSelect options={serviceOptions} selectedIds={form.services_related} onChange={(ids) => set('services_related', ids)} placeholder="Chọn dịch vụ liên quan..." /></Field></div></Section>
+        <Section icon={<Link2 />} title="Nội dung liên quan"><div className="space-y-4"><Field label="Sản phẩm liên quan"><SearchableMultiSelect options={productOptions} selectedIds={form.products_related} onChange={(ids) => set('products_related', ids)} placeholder="Chọn sản phẩm liên quan..." /></Field><Field label="Dịch vụ liên quan"><SearchableMultiSelect options={serviceOptions} selectedIds={form.services_related} onChange={(ids) => set('services_related', ids)} placeholder="Chọn dịch vụ liên quan..." /></Field></div></Section>
       </div>
       <aside className="space-y-6">
         <Section icon={<Search />} title="Phân loại & factsheet"><div className="space-y-4">
