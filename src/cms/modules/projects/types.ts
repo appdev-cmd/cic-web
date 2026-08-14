@@ -34,4 +34,13 @@ export interface CmsProject {
 
 export interface ProjectsModuleData {
   projects: CmsProject[];
+  productOptions: ProjectRelationOption[];
+  serviceOptions: ProjectRelationOption[];
+}
+
+export interface ProjectRelationOption {
+  id: string;
+  label: string;
+  subLabel?: string;
+  image?: string;
 }

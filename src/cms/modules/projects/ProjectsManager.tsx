@@ -53,7 +53,7 @@ export const ProjectsManager: React.FC<Props> = ({ data }) => {
     notify(message);
   };
 
-  if (editing !== undefined) return <ProjectFormView project={editing} onSave={save} onCancel={() => setEditing(undefined)} />;
+  if (editing !== undefined) return <ProjectFormView project={editing} productOptions={data.productOptions} serviceOptions={data.serviceOptions} onSave={save} onCancel={() => setEditing(undefined)} />;
 
   return <div className="relative space-y-6 pb-16">
     {toast && <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl"><CheckCircle2 className="size-4 text-emerald-400" />{toast}</div>}

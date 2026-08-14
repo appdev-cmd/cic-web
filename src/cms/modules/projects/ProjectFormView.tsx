@@ -2,11 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { ArrowLeft, BriefcaseBusiness, FileText, Image, Link2, Save, Search } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
-import type { CmsProject } from './types';
+import type { CmsProject, ProjectRelationOption } from './types';
 
 interface Props {
   project: CmsProject | null;
+  productOptions: ProjectRelationOption[];
+  serviceOptions: ProjectRelationOption[];
   onSave: (project: CmsProject) => void;
   onCancel: () => void;
 }
@@ -14,10 +17,9 @@ interface Props {
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white';
 const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300';
 const splitLines = (value: string) => value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
-const splitIds = (value: string) => value.split(',').map((item) => item.trim()).filter(Boolean);
 const slugify = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-export const ProjectFormView: React.FC<Props> = ({ project, onSave, onCancel }) => {
+export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serviceOptions, onSave, onCancel }) => {
   const initial = useMemo<CmsProject>(() => project ?? {
     id: `project_${Date.now()}`, title: '', alias: '', tagline: '', summary: '', content: '', sector: '', solution: '', customer_name: '', location: '', start_year: null, end_year: null, is_ongoing: false, image: '', gallery: [], video_title: '', video_url: '', video_thumbnail: '', document_title: '', document_url: '', document_size: '', products_related: [], services_related: [], is_featured: false, published: false, ordering: 0, seo_title: '', seo_keyword: '', seo_description: '', created_time: new Date().toISOString(), updated_time: new Date().toISOString(),
   }, [project]);
@@ -56,7 +58,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, onSave, onCancel }) 
           <Field label="Dung lượng"><input className={inputClass} value={form.document_size} onChange={(e) => set('document_size', e.target.value)} /></Field>
           <Field label="URL tài liệu" wide><input className={inputClass} value={form.document_url} onChange={(e) => set('document_url', e.target.value)} /></Field>
         </div></Section>
-        <Section icon={<Link2 />} title="Liên kết"><div className="grid gap-4 md:grid-cols-2"><Field label="ID sản phẩm liên quan"><input className={inputClass} value={form.products_related.join(', ')} onChange={(e) => set('products_related', splitIds(e.target.value))} /></Field><Field label="ID dịch vụ liên quan"><input className={inputClass} value={form.services_related.join(', ')} onChange={(e) => set('services_related', splitIds(e.target.value))} /></Field></div></Section>
+        <Section icon={<Link2 />} title="Liên kết"><div className="grid gap-4 md:grid-cols-2"><Field label="Sản phẩm liên quan"><SearchableMultiSelect options={productOptions} selectedIds={form.products_related} onChange={(ids) => set('products_related', ids)} placeholder="Chọn sản phẩm liên quan..." /></Field><Field label="Dịch vụ liên quan"><SearchableMultiSelect options={serviceOptions} selectedIds={form.services_related} onChange={(ids) => set('services_related', ids)} placeholder="Chọn dịch vụ liên quan..." /></Field></div></Section>
       </div>
       <aside className="space-y-6">
         <Section icon={<Search />} title="Phân loại & factsheet"><div className="space-y-4">

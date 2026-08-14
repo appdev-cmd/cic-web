@@ -1,5 +1,7 @@
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { getProjectsData } from '../../../web/features/projects/projectsData';
+import { getProductsData } from '../../../web/features/products/productsData';
+import { getServicesData } from '../../../web/features/services/servicesData';
 import type { CmsProject, ProjectsModuleData } from './types';
 
 const parsePeriod = (value: string) => {
@@ -48,4 +50,16 @@ const toCmsProject = (project: ReturnType<typeof getProjectsData>[number], order
 
 export const getCmsProjectsData = (locale: CmsLocale): ProjectsModuleData => ({
   projects: locale === 'vi' ? getProjectsData().map((project, index) => toCmsProject(project, index + 1)) : [],
+  productOptions: getProductsData().products.map((product) => ({
+    id: String(product.id),
+    label: product.name,
+    subLabel: [product.brand, product.field].filter(Boolean).join(' · '),
+    image: product.img,
+  })),
+  serviceOptions: getServicesData().services.map((service) => ({
+    id: service.id,
+    label: service.title,
+    subLabel: service.category,
+    image: service.image,
+  })),
 });
