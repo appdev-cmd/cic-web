@@ -77,7 +77,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
       suspended: users.filter((u) => u.status === 'suspended').length,
       deactivated: users.filter((u) => u.status === 'deactivated').length,
       pending: users.filter((u) => u.status === 'pending_invite').length,
-      online: users.filter((u) => u.status_online).length,
+      online: users.filter((u) => u.isOnline).length,
     };
   }, [users]);
 
@@ -97,7 +97,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
       const matchStatus = statusFilter === 'all' || user.status === statusFilter;
 
       // Role Filter
-      const matchRole = roleFilter === 'all' || user.role_id === roleFilter;
+      const matchRole = roleFilter === 'all' || user.primaryRoleId === roleFilter;
 
       // Agency Filter
       const matchAgency = agencyFilter === 'all' || user.agencies.includes(agencyFilter);
@@ -105,8 +105,8 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
       // Online Filter
       const matchOnline =
         onlineFilter === 'all' ||
-        (onlineFilter === 'online' && user.status_online) ||
-        (onlineFilter === 'offline' && !user.status_online);
+        (onlineFilter === 'online' && user.isOnline) ||
+        (onlineFilter === 'offline' && !user.isOnline);
 
       return matchSearch && matchStatus && matchRole && matchAgency && matchOnline;
     });
@@ -141,7 +141,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
     const label = newSt === 'active' ? 'Kích hoạt' : newSt === 'suspended' ? 'Tạm khóa' : 'Ngừng sử dụng';
     if (confirm(`Bạn có chắc muốn ${label} ${selectedIds.length} tài khoản đã chọn?`)) {
       setUsers((prev) =>
-        prev.map((u) => (selectedIds.includes(u.id) ? { ...u, status: newSt, published: newSt === 'active' } : u))
+        prev.map((u) => (selectedIds.includes(u.id) ? { ...u, status: newSt } : u))
       );
       showToast(`Đã ${label} thành công ${selectedIds.length} tài khoản!`);
       setSelectedIds([]);
@@ -169,7 +169,6 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
           return {
             ...u,
             status: targetStatus,
-            published: targetStatus === 'active',
             status_history: newHistory,
           };
         }
@@ -417,7 +416,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
               ) : (
                 paginatedUsers.map((user) => {
                   const isSelected = selectedIds.includes(user.id);
-                  const userRoleObj = data.roles.find((r) => r.id === user.role_id);
+                  const userRoleObj = data.roles.find((r) => r.id === user.primaryRoleId);
                   return (
                     <tr
                       key={user.id}
@@ -468,7 +467,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                       {/* Role Badge */}
                       <td className="p-3">
                         <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${userRoleObj?.badge_color || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
-                          {user.role_name || userRoleObj?.name || 'Content Editor'}
+                          {userRoleObj?.name || 'Chưa gán vai trò'}
                         </span>
                       </td>
 
@@ -496,7 +495,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
 
                       {/* Online Status */}
                       <td className="p-3 text-center">
-                        {user.status_online ? (
+                        {user.isOnline ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             <span>Online</span>
@@ -584,6 +583,8 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         productCategories={data.productCategories}
         newsCategoryOptions={data.newsCategories}
         roles={data.roles}
+        permissionTasks={data.permissionTasks}
+        userPermissions={data.userPermissions}
       />
 
       {/* STATUS CHANGE PROMPT MODAL */}
@@ -685,7 +686,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                   <div>Lần truy cập cuối: <strong className="font-mono">{auditUser.last_visit_time || 'Chưa có'}</strong></div>
                   <div>Lượt ghé thăm: <strong className="font-mono">{auditUser.nums_visit || 0} lần</strong></div>
                   <div>2FA: <strong>{auditUser.two_factor_enabled ? 'Đã bật' : 'Tắt'}</strong></div>
-                  <div>Đổi pass cuối: <strong className="font-mono">{auditUser.password_last_changed || 'N/A'}</strong></div>
+                  <div>Đổi pass cuối: <strong className="font-mono">{auditUser.passwordChangedAt || 'N/A'}</strong></div>
                 </div>
               </div>
 

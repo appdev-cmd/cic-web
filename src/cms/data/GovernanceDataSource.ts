@@ -18,6 +18,8 @@ export interface UsersGovernanceData {
   productCategories: CategoryOption[];
   newsCategories: CategoryOption[];
   roles: RoleOption[];
+  permissionTasks: PermissionTask[];
+  userPermissions: Record<string, UserPermissionState>;
 }
 
 export interface PermissionsGovernanceData {

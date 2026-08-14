@@ -22,7 +22,6 @@ export interface UserStatusHistory {
 export interface CicUser {
   id: string;
   username: string;
-  password?: string;
   email: string;
   fname: string;
   lname: string;
@@ -32,22 +31,20 @@ export interface CicUser {
   address: string;
   summary: string;
   avatar: string;
-  published: boolean; // Map true -> active, false -> suspended/deactivated
   status: UserAccountStatus;
-  role_id: string;
-  role_name: string;
+  primaryRoleId: string; // Projection from the active user-role relation; not a cic_users column.
   ordering: number;
   agencies: string[];
   products_categories: string[];
   news_categories: string[];
   // Security & Audit
   two_factor_enabled?: boolean;
-  password_last_changed?: string;
+  passwordChangedAt?: string;
   failed_login_attempts?: number;
   security_logs?: UserSecurityLog[];
   status_history?: UserStatusHistory[];
   // System managed fields
-  status_online: boolean;
+  isOnline: boolean;
   created_time: string;
   updated_time?: string;
   last_visit_time?: string;
@@ -73,4 +70,3 @@ export interface CategoryOption {
   name: string;
   code?: string;
 }
-

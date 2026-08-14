@@ -48,6 +48,7 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | Services website | `getServicesData()` | list/detail/search không import fixture trực tiếp; `shortDesc` là ViewModel của `summary`, nội dung dài giữ trong Rich Text |
 | Customer Requests CMS | `getDemoCustomerRequestModuleData(locale)` | manager nhận read model hợp nhất qua props; fixture chỉ còn trong demo data source và workspace không fallback chéo |
 | Email Templates CMS | `getDemoEmailTemplateModuleData(locale)` | list/form/preview nhận template và relation Form/CTA theo workspace; không còn bước Chờ duyệt, Draft xuất bản trực tiếp |
+| Users CMS | `demoGovernanceDataSource.users` | list/form nhận profile, status, role/scope options và direct legacy permission qua props; DTO không giữ password hash, `published` hay `role_name` trùng lặp |
 | Services CMS | `ServicesModuleData` | list/form/preview nhận dataset theo workspace qua Editorial data source; workflow chỉ còn Draft/Published |
 | Frontend Menus website | `getNavigationData()` | Header/Footer nhận navigation qua một boundary; giữ nguyên nhãn, thứ tự, dropdown và hành vi điều hướng hiện tại |
 | Frontend Menus CMS | `MenuModuleData` | group/item/validation/version/log nhận theo workspace qua Presentation data source; trạng thái chỉ còn Draft/Published |
@@ -58,7 +59,7 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
-- CMS Dashboard và các module Users, Permissions, Settings, Activity Logs, Trash, Contacts.
+- CMS Dashboard và các module Permissions, Settings, Activity Logs, Trash, Contacts.
 - Function SEO và Translation Strings còn import mock trực tiếp.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
 - Website Home (bao gồm event/service highlight riêng), Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.

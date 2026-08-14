@@ -20,6 +20,8 @@ export const demoGovernanceDataSource: GovernanceDataSource = {
     productCategories: productCategoriesMock,
     newsCategories: newsCategoriesMock,
     roles: rolesMock,
+    permissionTasks: initialPermissionTasksMock,
+    userPermissions: initialUserPermissionsMock,
   },
   permissions: {
     users: permissionUsersMock,

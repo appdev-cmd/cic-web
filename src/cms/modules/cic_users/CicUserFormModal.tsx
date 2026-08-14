@@ -26,8 +26,9 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import { AgencyOption, CategoryOption, CicUser, RoleOption, UserAccountStatus, UserSecurityLog, UserStatusHistory } from './types';
+import { AgencyOption, CategoryOption, CicUser, RoleOption, UserAccountStatus, UserStatusHistory } from './types';
 import { SearchableMultiSelect } from './SearchableMultiSelect';
+import type { PermissionTask, UserPermissionState } from '../permission_management/types';
 
 interface CicUserFormModalProps {
   isOpen: boolean;
@@ -39,6 +40,8 @@ interface CicUserFormModalProps {
   productCategories: CategoryOption[];
   newsCategoryOptions: CategoryOption[];
   roles: RoleOption[];
+  permissionTasks: PermissionTask[];
+  userPermissions: Record<string, UserPermissionState>;
 }
 
 export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
@@ -51,6 +54,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   productCategories,
   newsCategoryOptions,
   roles,
+  permissionTasks,
+  userPermissions,
 }) => {
   const isEditMode = !!userToEdit;
 
@@ -110,8 +115,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       setSummary(userToEdit.summary || '');
 
       setAvatar(userToEdit.avatar || '');
-      setStatus(userToEdit.status || (userToEdit.published ? 'active' : 'suspended'));
-      setRoleId(userToEdit.role_id || 'role_editor');
+      setStatus(userToEdit.status);
+      setRoleId(userToEdit.primaryRoleId || 'role_editor');
       setOrdering(userToEdit.ordering || 0);
       setSelectedAgencies(userToEdit.agencies || ['agency_hn']);
       setProductsCategories(userToEdit.products_categories || []);
@@ -218,9 +223,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       return;
     }
 
-    const selectedRoleObj = roles.find((r) => r.id === roleId);
-    const roleName = selectedRoleObj ? selectedRoleObj.name : 'Content Editor';
-
     const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
     // Prepare status history if status changed
@@ -239,23 +241,9 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       ];
     }
 
-    // Prepare security log
-    const updatedSecurityLogs: UserSecurityLog[] = [
-      {
-        id: `sec_${Date.now()}`,
-        timestamp: nowStr,
-        action: isEditMode ? 'Cập nhật thông tin tài khoản' : 'Khởi tạo tài khoản mới',
-        ip_address: '118.70.124.89',
-        status: 'success',
-        details: isChangingPassword ? 'Thay đổi mật khẩu tài khoản' : undefined,
-      },
-      ...(userToEdit?.security_logs || []),
-    ];
-
     const finalUser: CicUser = {
       id: userToEdit ? userToEdit.id : `usr_${Date.now()}`,
       username: username.trim(),
-      password: isChangingPassword ? password : userToEdit?.password,
       email: email.trim(),
       fname: fname.trim(),
       lname: lname.trim(),
@@ -265,20 +253,18 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       address: address.trim(),
       summary: summary.trim(),
       avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      published: status === 'active',
       status,
-      role_id: roleId,
-      role_name: roleName,
+      primaryRoleId: roleId,
       ordering: Number(ordering) || 0,
       agencies: selectedAgencies,
       products_categories: productsCategories,
       news_categories: newsCategories,
       two_factor_enabled: twoFactorEnabled,
-      password_last_changed: isChangingPassword ? nowStr : userToEdit?.password_last_changed,
+      passwordChangedAt: isChangingPassword ? nowStr : userToEdit?.passwordChangedAt,
       failed_login_attempts: userToEdit?.failed_login_attempts || 0,
-      security_logs: updatedSecurityLogs,
+      security_logs: userToEdit?.security_logs || [],
       status_history: updatedHistory,
-      status_online: userToEdit ? userToEdit.status_online : true,
+      isOnline: userToEdit ? userToEdit.isOnline : false,
       created_time: userToEdit ? userToEdit.created_time : nowStr,
       updated_time: nowStr,
       last_visit_time: userToEdit?.last_visit_time,
@@ -291,6 +277,25 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   if (!isOpen) return null;
 
   const currentRole = roles.find((r) => r.id === roleId);
+  const grantedTaskIds = new Set(userToEdit ? userPermissions[userToEdit.id]?.grantedTaskIds ?? [] : []);
+  const moduleLabels: Record<string, string> = {
+    PRODUCTS: 'Sản phẩm & Giải pháp',
+    NEWS: 'Tin tức & Bài viết',
+    USERS: 'Quản trị Người dùng & Phân quyền',
+    SETTINGS: 'Cấu hình hệ thống',
+    BANNERS: 'Banner & Trình bày website',
+  };
+  const effectiveAccessRows = [...new Set(permissionTasks.map((task) => task.module))].map((module) => {
+    const allowedTasks = permissionTasks.filter((task) => task.module === module && grantedTaskIds.has(task.id));
+    const hasTask = (suffix: string) => allowedTasks.some((task) => task.id.endsWith(suffix));
+    return {
+      module: moduleLabels[module] ?? module,
+      view: hasTask('_list') || hasTask('_view'),
+      create: hasTask('_add'),
+      edit: hasTask('_edit'),
+      delete: hasTask('_del'),
+    };
+  });
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
@@ -865,7 +870,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                     Tóm tắt Quyền hạn Hiệu lực (Effective Access)
                   </div>
                   <p className="text-orange-700 dark:text-orange-400">
-                    Bảng tóm tắt kết hợp giữa Vai trò quản trị (<strong>{currentRole?.name}</strong>) và các phạm vi đơn vị, danh mục phụ trách.
+                    Bảng tóm tắt dùng quyền trực tiếp đã có của tài khoản, kết hợp vai trò hiển thị (<strong>{currentRole?.name}</strong>) và các phạm vi phụ trách.
                   </p>
                 </div>
               </div>
@@ -916,14 +921,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   Ma trận phân quyền chi tiết theo module CMS
                 </div>
                 <div className="p-4 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                  {[
-                    { module: 'Sản phẩm & Giải pháp', view: true, create: true, edit: true, delete: roleId === 'role_superadmin' },
-                    { module: 'Tin tức & Bài viết', view: true, create: true, edit: true, delete: roleId === 'role_superadmin' || roleId === 'role_editor' },
-                    { module: 'Khách hàng & Báo giá', view: true, create: roleId === 'role_sales', edit: true, delete: roleId === 'role_superadmin' },
-                    { module: 'Bản địa hóa (Localization)', view: true, create: roleId === 'role_translator', edit: true, delete: roleId === 'role_superadmin' },
-                    { module: 'Quản trị Người dùng & Phân quyền', view: roleId === 'role_superadmin' || roleId === 'role_admin', create: roleId === 'role_superadmin' || roleId === 'role_admin', edit: roleId === 'role_superadmin' || roleId === 'role_admin', delete: roleId === 'role_superadmin' },
-                  ].map((row, idx) => (
-                    <div key={idx} className="py-2.5 flex items-center justify-between">
+                  {effectiveAccessRows.map((row) => (
+                    <div key={row.module} className="py-2.5 flex items-center justify-between">
                       <span className="font-semibold text-slate-800 dark:text-slate-200">{row.module}</span>
                       <div className="flex items-center gap-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.view ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>Xem</span>
@@ -961,7 +960,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
                   <div className="text-[11px] font-bold uppercase text-slate-400">Đổi mật khẩu lần cuối</div>
                   <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-                    {userToEdit?.password_last_changed || 'Chưa cập nhật'}
+                    {userToEdit?.passwordChangedAt || 'Chưa cập nhật'}
                   </div>
                 </div>
 
