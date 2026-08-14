@@ -45,14 +45,16 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | Products website | `getProductsData()` | catalog/detail/search và các consumer liên quan không import raw product fixture trong component |
 | Products CMS | `ProductsModuleData` | list/form nhận product, taxonomy, relation option và audit data qua demo data source |
 | Product Settings CMS | `ProductTaxonomyModuleData` + `ProductSettingsGlobalData` | taxonomy, người phụ trách, product option và usage impact nhận qua Catalog data source; không giữ routing email/history giả trong contract |
+| Services website | `getServicesData()` | list/detail/search không import fixture trực tiếp; `shortDesc` là ViewModel của `summary`, nội dung dài giữ trong Rich Text |
+| Services CMS | `ServicesModuleData` | list/form/preview nhận dataset theo workspace qua Editorial data source; workflow chỉ còn Draft/Published |
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
-- CMS Dashboard và các module Services, Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
+- CMS Dashboard và các module Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
 - CTA, Forms, Customer Requests và Email Templates còn import fixture trực tiếp ở manager/editor.
 - Function SEO và Translation Strings còn import mock trực tiếp.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.
-- Website Home (bao gồm event highlight riêng), Service, Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
+- Website Home (bao gồm event/service highlight riêng), Project và một số section liên quan còn đọc trực tiếp `src/web/data/**`.
 
 Các module này được xử lý lần lượt theo thứ tự triển khai đã chốt; không refactor hàng loạt.
 

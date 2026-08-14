@@ -3,52 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export interface ServiceDetail {
-  id: string;
-  title: string;
-  tagline?: string;
-  shortDesc: string;
-  category: string;
-  image: string;
-  htmlContent: string;
-  relatedProductIds?: number[];
-  // Backwards compatibility fields for safety
-  whyNeedTitle?: string;
-  whyNeed?: string[];
-  scopeTitle?: string;
-  scope?: {
-    title: string;
-    desc?: string;
-    list?: string[];
-    img?: string;
-  }[];
-  process?: {
-    step: string;
-    title: string;
-    desc: string;
-  }[];
-  benefits?: string[];
-  media?: {
-    type?: 'image' | 'text_block';
-    url?: string;
-    title?: string;
-    content?: string;
-    caption?: string;
-  }[];
-  stateCollaboration?: {
-    title: string;
-    items: {
-      title: string;
-      desc: string;
-      img?: string;
-    }[];
-  };
-  intlCollaboration?: {
-    title: string;
-    desc: string;
-    img?: string;
-  };
-}
+import type { ServiceDetail } from '../features/services/types';
 
 export const servicesData: ServiceDetail[] = [
   {

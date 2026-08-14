@@ -28,7 +28,8 @@ import {
   MessageSquare,
   Filter
 } from 'lucide-react';
-import { servicesData, ServiceDetail } from '../data/servicesData';
+import { getServicesData } from '../features/services/servicesData';
+import type { ServiceDetail } from '../features/services/types';
 import { getProductsData } from '../features/products/productsData';
 import { Product } from '@shared/types';
 
@@ -87,6 +88,7 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
 };
 
 export const ServicesView = ({ initialServiceId = null, onNavigateHome }: ServicesViewProps) => {
+  const { services: servicesData } = useMemo(getServicesData, []);
   const { products: productsData } = useMemo(getProductsData, []);
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
   const [formSubmitted, setFormSubmitted] = useState(false);

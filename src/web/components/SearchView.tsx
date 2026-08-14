@@ -23,7 +23,7 @@ import {
 
 import { newsItems } from '../data/mockData';
 import { projectsData } from '../data/projectsData';
-import { servicesData } from '../data/servicesData';
+import { getServicesData } from '../features/services/servicesData';
 import { getEventsData } from '../features/events/eventsData';
 import { getProductsData } from '../features/products/productsData';
 
@@ -61,6 +61,7 @@ export function SearchView({
 }: SearchViewProps) {
   const { events: eventsData } = useMemo(getEventsData, []);
   const { products: productsData } = useMemo(getProductsData, []);
+  const { services: servicesData } = useMemo(getServicesData, []);
   const [query, setQuery] = useState(initialQuery);
   const [searchInputValue, setSearchInputValue] = useState(initialQuery);
   const [activeTab, setActiveTab] = useState<ResultType>('all');
@@ -112,7 +113,7 @@ export function SearchView({
       if (
         item.title.toLowerCase().includes(q) ||
         item.shortDesc.toLowerCase().includes(q) ||
-        item.tagline.toLowerCase().includes(q) ||
+        (item.tagline || '').toLowerCase().includes(q) ||
         item.category.toLowerCase().includes(q)
       ) {
         results.push({
@@ -122,7 +123,7 @@ export function SearchView({
           description: item.shortDesc,
           img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80', // generic services image
           meta: `Chuyên mục: ${item.category}`,
-          tags: [item.tagline],
+          tags: item.tagline ? [item.tagline] : [],
           original: item
         });
       }

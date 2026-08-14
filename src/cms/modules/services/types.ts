@@ -3,7 +3,7 @@
  * TypeScript Types & Data Schema Specification
  */
 
-export type EditorialStatus = 'draft' | 'pending' | 'approved' | 'published';
+export type EditorialStatus = 'draft' | 'published';
 export type ServiceStatus = 'active' | 'inactive' | 'archived';
 export interface ServiceGroup {
   id: string;
@@ -95,7 +95,7 @@ export interface ServiceActivityLog {
   service_id: string;
   user_name: string;
   user_avatar?: string;
-  action_type: 'create' | 'update' | 'submit' | 'approve' | 'publish' | 'activate' | 'deactivate' | 'archive' | 'restore';
+  action_type: 'create' | 'update' | 'publish' | 'activate' | 'deactivate' | 'archive' | 'restore';
   description: string;
   created_at: string;
 }

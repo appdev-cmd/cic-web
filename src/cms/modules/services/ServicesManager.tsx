@@ -58,8 +58,6 @@ interface ServicesManagerProps {
 
 const editorialStatusLabels: Record<EditorialStatus, string> = {
   draft: 'Bản nháp',
-  pending: 'Chờ xử lý',
-  approved: 'Đã xác nhận',
   published: 'Đã xuất bản',
 };
 
