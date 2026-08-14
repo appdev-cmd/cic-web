@@ -7,7 +7,6 @@ import {
   mockProducts,
 } from '../modules/products/mockData';
 import {
-  mockMasterActivityLogs,
   mockMasterApplications,
   mockMasterBrands,
   mockMasterCategories,
@@ -57,7 +56,6 @@ export const demoCatalogDataSource: CatalogDataSource = {
       { id: 'prod_demo_019', name: 'FIFISH PRO W6 - Rô bốt lặn biển' },
       { id: 'prod_demo_020', name: 'CubiCost - Bóc tách khối lượng trên nền tảng BIM' },
     ],
-    activityLogs: mockMasterActivityLogs,
     usageImpactRecords: mockUsageImpactRecords,
   },
 };

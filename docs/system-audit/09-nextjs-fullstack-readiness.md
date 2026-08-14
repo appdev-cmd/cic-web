@@ -44,10 +44,11 @@ Sau khi sửa, kiểm tra CMS list/create/edit/detail, frontend list/detail nế
 | Events CMS | `getCmsEventsData(locale)` | list/form/relation/media nhận dataset theo workspace qua props |
 | Products website | `getProductsData()` | catalog/detail/search và các consumer liên quan không import raw product fixture trong component |
 | Products CMS | `ProductsModuleData` | list/form nhận product, taxonomy, relation option và audit data qua demo data source |
+| Product Settings CMS | `ProductTaxonomyModuleData` + `ProductSettingsGlobalData` | taxonomy, người phụ trách, product option và usage impact nhận qua Catalog data source; không giữ routing email/history giả trong contract |
 
 ### Còn import mock trực tiếp hoặc qua demo source tổng hợp
 
-- CMS Dashboard và các module Services, Product Settings, Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
+- CMS Dashboard và các module Services, Menu, Media, Users, Permissions, Settings, Activity Logs, Trash, Contacts.
 - CTA, Forms, Customer Requests và Email Templates còn import fixture trực tiếp ở manager/editor.
 - Function SEO và Translation Strings còn import mock trực tiếp.
 - Static Pages vẫn dùng fixture phía sau data function; EN không fallback sang Page VI và chưa được tạo legal page khi chưa có template EN được duyệt.

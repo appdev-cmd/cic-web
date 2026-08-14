@@ -12,7 +12,6 @@ import type {
   MasterApplicationItem,
   MasterProductTypeItem,
   MasterSalesStaffItem,
-  MasterDataActivityLog,
   UsageImpactRecord,
 } from '../modules/product_settings/types';
 
@@ -37,7 +36,6 @@ export interface ProductTaxonomyModuleData {
 export interface ProductSettingsGlobalData {
   salesStaff: MasterSalesStaffItem[];
   productOptions: Pick<ProductItem, 'id' | 'name'>[];
-  activityLogs: MasterDataActivityLog[];
   usageImpactRecords: UsageImpactRecord[];
 }
 

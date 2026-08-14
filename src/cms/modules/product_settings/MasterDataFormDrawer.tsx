@@ -154,7 +154,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   };
 
   // Active form tab
-  const [activeTab, setActiveTab] = useState<'basic' | 'structure' | 'seo' | 'routing'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'seo'>('basic');
 
   // Form State
   const [name, setName] = useState('');

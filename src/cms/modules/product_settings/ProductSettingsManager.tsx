@@ -244,6 +244,24 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
     setSelectedIds([]);
   };
 
+  const setItemStatus = (id: string, status: MasterItemStatus) => {
+    const update = <T extends AnyMasterItem>(items: T[]) => items.map((item) => item.id === id ? { ...item, status } as T : item);
+    setCategories((items) => update(items));
+    setBrands((items) => update(items));
+    setApplications((items) => update(items));
+    setProductTypes((items) => update(items));
+    setSalesStaff((items) => update(items));
+  };
+
+  const removeItem = (id: string) => {
+    const remove = <T extends AnyMasterItem>(items: T[]) => items.filter((item) => item.id !== id);
+    setCategories((items) => remove(items));
+    setBrands((items) => remove(items));
+    setApplications((items) => remove(items));
+    setProductTypes((items) => remove(items));
+    setSalesStaff((items) => remove(items));
+  };
+
   if (isFormDrawerOpen && activeDataType === 'sales_staff') {
     return (
       <MasterDataFormDrawer
@@ -737,12 +755,14 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         item={itemToDelete}
         onConfirmDeactivate={() => {
           if (itemToDelete) {
+            setItemStatus(itemToDelete.id, 'inactive');
             showToast(`Đã ngừng sử dụng mục "${itemToDelete.name}".`);
             setItemToDelete(null);
           }
         }}
         onConfirmPermanentDelete={() => {
           if (itemToDelete) {
+            removeItem(itemToDelete.id);
             showToast(`Đã xóa vĩnh viễn mục "${itemToDelete.name}".`);
             setItemToDelete(null);
           }

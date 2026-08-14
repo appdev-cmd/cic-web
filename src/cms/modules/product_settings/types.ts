@@ -80,21 +80,6 @@ export interface MasterSalesStaffItem extends BaseMasterItem {
   south_sales_product_ids: string[];
 }
 
-// 6. Contact & Email Routing Rule / Quy tắc nhận liên hệ
-export interface MasterRoutingRuleItem extends BaseMasterItem {
-  type: 'routing_rules';
-  priority: number; // 1 = highest
-  scope_category_ids: string[];
-  scope_brand_ids: string[];
-  trigger_keywords: string[];
-  primary_sales_id: string;
-  primary_sales_name?: string;
-  fallback_email: string;
-  notify_cc_emails: string[];
-  working_version?: boolean;
-  last_test_passed?: boolean;
-}
-
 export type AnyMasterItem = 
   | MasterCategoryItem 
   | MasterBrandItem 
@@ -111,29 +96,4 @@ export interface UsageImpactRecord {
   owner_name?: string;
   status: string;
   updated_time: string;
-}
-
-export interface MasterDataActivityLog {
-  id: string;
-  item_type: MasterDataType;
-  item_id: string;
-  item_name: string;
-  user_name: string;
-  user_avatar?: string;
-  action: 'create' | 'update' | 'deactivate' | 'activate' | 'archive' | 'restore' | 'reorder' | 'reparent';
-  details: string;
-  impact_count: number;
-  timestamp: string;
-}
-
-export interface OverviewMetrics {
-  total_categories: number;
-  total_brands: number;
-  total_applications: number;
-  total_product_types: number;
-  total_sales_staff: number;
-  total_routing_rules: number;
-  issue_dependency_count: number;
-  inactive_items_count: number;
-  archived_items_count: number;
 }
