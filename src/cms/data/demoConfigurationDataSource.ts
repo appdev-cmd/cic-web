@@ -29,6 +29,16 @@ function selectScopes(scopeIds: string[]): SystemConfigurationData {
   const excludedPaths = new Set(
     configItemsMock.filter((item) => !visibleItemIds.has(item.id)).map((item) => item.path),
   );
+  const values = Object.fromEntries(
+    Object.entries(initialConfigValuesMock)
+      .filter(([scopeId]) => selected.has(scopeId))
+      .map(([scopeId, scopeValues]) => [
+        scopeId,
+        Object.fromEntries(
+          Object.entries(scopeValues).filter(([settingId]) => visibleItemIds.has(settingId)),
+        ),
+      ]),
+  );
   const drafts = initialDraftsMock
     .filter((item) => selected.has(item.scopeId))
     .map((draft) => {
@@ -48,7 +58,7 @@ function selectScopes(scopeIds: string[]): SystemConfigurationData {
     scopes: configScopesMock.filter((scope) => selected.has(scope.id)),
     groups: configGroupsMock.filter((group) => supportedGroupIds.has(group.id)),
     items: visibleItems,
-    values: Object.fromEntries(Object.entries(initialConfigValuesMock).filter(([scopeId]) => selected.has(scopeId))),
+    values,
     issues: initialIssuesMock.filter((item) => selected.has(item.scopeId) && visibleItemIds.has(item.settingId)),
     drafts,
     versions,
