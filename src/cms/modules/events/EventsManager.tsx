@@ -20,7 +20,6 @@ import {
   RefreshCw,
   Tag,
   CalendarDays,
-  History,
   SlidersHorizontal,
   Sliders,
   ExternalLink,
@@ -40,7 +39,6 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
-import { EventActivityLogDrawer } from './EventActivityLogDrawer';
 import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
 
 // Helper to format date string to "dd/mm/yyyy HH:mm"
@@ -90,7 +88,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Auxiliary Modals & Drawers States
   const [previewEvent, setPreviewEvent] = useState<EventItem | null>(null);
   const [quickEditEvent, setQuickEditEvent] = useState<EventItem | null>(null);
-  const [auditLogEvent, setAuditLogEvent] = useState<EventItem | null>(null);
   const [isColumnSettingOpen, setIsColumnSettingOpen] = useState(false);
 
   // Table Column Visibility & Density Config
@@ -375,13 +372,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         onClose={() => setQuickEditEvent(null)}
       />
 
-      {/* DRAWER ACTIVITY LOG */}
-      <EventActivityLogDrawer
-        isOpen={!!auditLogEvent}
-        event={auditLogEvent}
-        onClose={() => setAuditLogEvent(null)}
-      />
-
       {/* MODAL COLUMN SETTINGS */}
       <ColumnSettingModal
         isOpen={isColumnSettingOpen}
@@ -465,7 +455,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
               onChange={(e) => { setEventStatusFilter(e.target.value); setCurrentPage(1); }}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">TT Diễn ra: Tất cả</option>
+              <option value="all">Trạng thái diễn ra: Tất cả</option>
               <option value="upcoming">Sắp diễn ra</option>
               <option value="ended">Đã kết thúc</option>
             </select>
@@ -482,14 +472,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           </div>
         </div>
 
-        {/* Batch Action Toolbar Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-          <div className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400">
-            <span>Hiển thị: <strong>{filteredEvents.length}</strong> / {events.length} sự kiện</span>
-          </div>
-
-          {/* Batch Action buttons - Only show when items are selected */}
-        </div>
         <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="sự kiện" onClear={() => setSelectedIds([])} actions={[
           { label: 'Xuất bản', onClick: () => handleBatchChangeEditorialStatus('published'), icon: Eye, variant: 'primary' },
           { label: 'Xóa', onClick: handleOpenBatchDelete, icon: Trash2, variant: 'danger' },
@@ -509,7 +491,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                 {columnVisibility.time_event && <th className="py-3 px-4 w-40">Thời gian sự kiện</th>}
                 {columnVisibility.place && <th className="py-3 px-4 min-w-[180px]">Địa điểm</th>}
                 {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">Trạng thái</th>}
-                {columnVisibility.progress_status && <th className="py-3 px-4 w-32 text-center">TT Diễn ra</th>}
+                {columnVisibility.progress_status && <th className="py-3 px-4 w-40 text-center">Trạng thái diễn ra</th>}
                 <th className="py-3 px-4 w-28 text-center">Thao tác</th>
               </tr>
             </thead>
@@ -624,14 +606,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                             title="Sửa nhanh"
                           >
                             <Zap className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setAuditLogEvent(ev)}
-                            className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
-                            title="Nhật ký thay đổi"
-                          >
-                            <History className="w-4 h-4" />
                           </button>
                           <button
                             type="button"

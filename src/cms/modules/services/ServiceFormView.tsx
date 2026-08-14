@@ -59,17 +59,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     setIsDirty(true);
   };
 
-  const handleTogglePlacement = (placeKey: string) => {
-    const current = [...(formData.placement || [])];
-    const index = current.indexOf(placeKey);
-    if (index > -1) {
-      current.splice(index, 1);
-    } else {
-      current.push(placeKey);
-    }
-    handleChange('placement', current);
-  };
-
   const handleSaveDraft = () => {
     const updated: ServiceItem = {
       ...formData,
@@ -446,27 +435,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
 
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Hiển thị tại trang chủ
-              </label>
-              <div className="space-y-2">
-                {[{ key: 'home_featured', label: 'Hiển thị dịch vụ trên trang chủ' }].map((p) => (
-                  <label
-                    key={p.key}
-                    className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={(formData.placement || []).includes(p.key)}
-                      onChange={() => handleTogglePlacement(p.key)}
-                      className="rounded text-orange-600 focus:ring-orange-500"
-                    />
-                    <span>{p.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>

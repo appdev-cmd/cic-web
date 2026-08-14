@@ -431,10 +431,8 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                 <th className="p-3 min-w-[280px] sticky left-10 bg-slate-50 dark:bg-slate-800 z-10">
                   Dịch vụ & Mã
                 </th>
-                <th className="p-3 min-w-[140px]">Người phụ trách</th>
                 <th className="p-3 min-w-[130px]">Trạng thái nội dung</th>
                 <th className="p-3 min-w-[130px]">Trạng thái dịch vụ</th>
-                <th className="p-3 min-w-[150px]">Vị trí hiển thị</th>
                 <th className="p-3 min-w-[130px]">Cập nhật</th>
                 <th className="p-3 w-28 text-right sticky right-0 bg-slate-50 dark:bg-slate-800 z-10">
                   Thao tác
@@ -444,7 +442,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {paginatedServices.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-12 text-slate-400">
+                  <td colSpan={6} className="text-center py-12 text-slate-400">
                     Không tìm thấy dịch vụ phù hợp với điều kiện lọc.
                   </td>
                 </tr>
@@ -495,20 +493,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                         </div>
                       </td>
 
-                      {/* Owner */}
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={item.owner_avatar}
-                            alt={item.owner_name}
-                            className="w-5 h-5 rounded-full object-cover shrink-0"
-                          />
-                          <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
-                            {item.owner_name}
-                          </span>
-                        </div>
-                      </td>
-
                       {/* Editorial Status */}
                       <td className="p-3">
                         <span
@@ -535,20 +519,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                         >
                           {serviceStatusLabels[item.service_status]}
                         </span>
-                      </td>
-
-                      {/* Placement Badges */}
-                      <td className="p-3">
-                        <div className="flex flex-wrap gap-1">
-                          {(item.placement || []).map((p) => (
-                            <span
-                              key={p}
-                              className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                            >
-                              {p === 'home_featured' ? 'Trang chủ' : p === 'services_page' ? 'Catalog' : 'Footer'}
-                            </span>
-                          ))}
-                        </div>
                       </td>
 
                       {/* Updated By */}
