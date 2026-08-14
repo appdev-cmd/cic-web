@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Check, Image as ImageIcon, Search, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
-import { INITIAL_ASSETS } from '../media/mockData';
+import { getDemoMediaPickerItems } from '../../data/demoMediaDataSource';
 
 
 interface PageMediaPickerModalProps {
@@ -26,9 +26,7 @@ const legacyMockImageAliases: Record<string, string> = {
 };
 
 /** Compatibility default for modules not migrated to an injected Media data source yet. */
-export const pageBuilderImages = INITIAL_ASSETS.filter(
-  (asset) => asset.type === 'image' && asset.workflow_status === 'ready',
-);
+export const pageBuilderImages = getDemoMediaPickerItems('vi');
 
 export function findPageBuilderImage(id: string, images: CmsMediaPickerItem[] = pageBuilderImages) {
   const resolvedId = legacyMockImageAliases[id] ?? id;

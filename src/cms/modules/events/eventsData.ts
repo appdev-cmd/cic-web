@@ -1,6 +1,6 @@
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { EventsModuleData } from '../../data/EditorialContentDataSource';
-import { INITIAL_ASSETS } from '../media/mockData';
+import { getDemoMediaPickerItems } from '../../data/demoMediaDataSource';
 import { mockArticles } from '../news/mockData';
 import { mockEventProducts, mockEvents } from './mockData';
 
@@ -12,6 +12,6 @@ export function getCmsEventsData(locale: CmsLocale): EventsModuleData {
     events: mockEvents,
     relatedArticles: mockArticles,
     relatedProducts: mockEventProducts,
-    mediaImages: INITIAL_ASSETS.filter((asset) => asset.type === 'image' && asset.workflow_status === 'ready'),
+    mediaImages: getDemoMediaPickerItems(locale),
   };
 }

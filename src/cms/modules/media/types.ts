@@ -120,7 +120,7 @@ export interface MediaAlbum {
   asset_ids: string[];
   item_count: number;
   display_order: number;
-  workflow_status: 'draft' | 'pending_review' | 'published' | 'archived';
+  workflow_status: 'draft' | 'published' | 'archived';
   owner_name: string;
   created_at: string;
   updated_at: string;

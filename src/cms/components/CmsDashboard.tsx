@@ -115,7 +115,7 @@ const MenuManager = lazy(async () => {
 const MediaManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/media/MediaManager'), import('../data/demoMediaDataSource')]);
   return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-    <module.MediaManager data={dataModule.demoMediaDataSource.mediaByLocale[workspaceLocale]} />
+    <module.MediaManager data={dataModule.getDemoMediaModuleData(workspaceLocale)} />
   ) };
 });
 const ContactsManager = lazy(async () => {

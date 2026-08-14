@@ -1,6 +1,6 @@
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
-import { INITIAL_ASSETS } from '../media/mockData';
+import { getDemoMediaPickerItems } from '../../data/demoMediaDataSource';
 import { pageBuilderEntityOptions, pageBuilderPagesMock } from './pageBuilderData';
 import type { PageBuilderEntityOption, PageBuilderPage } from './pageBuilderTypes';
 
@@ -18,9 +18,7 @@ export function getCmsStaticPagesData(locale: CmsLocale): StaticPagesModuleData 
   return {
     pages: locale === 'vi' ? clone(pageBuilderPagesMock) : [],
     entityOptions: locale === 'vi' ? clone(pageBuilderEntityOptions) : [],
-    mediaImages: clone(
-      INITIAL_ASSETS.filter((asset) => asset.type === 'image' && asset.workflow_status === 'ready'),
-    ),
+    mediaImages: clone(getDemoMediaPickerItems(locale)),
     canCreateLegalPage: locale === 'vi',
   };
 }
