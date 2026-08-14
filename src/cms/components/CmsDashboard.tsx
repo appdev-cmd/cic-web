@@ -60,7 +60,12 @@ const EventsManager = lazy(async () => {
     <module.EventsManager workspaceLocale={workspaceLocale} data={dataModule.getCmsEventsData(workspaceLocale)} />
   ) };
 });
-const EmailTemplatesManager = lazy(() => import('../modules/email_templates/EmailTemplatesManager').then((module) => ({ default: module.EmailTemplatesManager })));
+const EmailTemplatesManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([import('../modules/email_templates/EmailTemplatesManager'), import('../data/demoCustomerInteractionDataSource')]);
+  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+    <module.EmailTemplatesManager workspaceLocale={workspaceLocale} data={dataModule.getDemoEmailTemplateModuleData(workspaceLocale)} />
+  ) };
+});
 const ProductSettingsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([
     import('../modules/product_settings/ProductSettingsManager'),

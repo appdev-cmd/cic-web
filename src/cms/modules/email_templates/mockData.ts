@@ -43,7 +43,6 @@ const makeTemplate = (workspace: EmailWorkspace, event: typeof events[number], a
     content: audience === 'customer' ? customerContent(workspace, event.event) : internalContent(workspace),
     status: 'draft',
     version: 1,
-    usageCount: 0,
     updatedAt: `2026-08-${String(5 - Math.min(index, 4)).padStart(2, '0')} 09:00`,
   };
 };

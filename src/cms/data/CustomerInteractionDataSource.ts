@@ -26,8 +26,15 @@ export interface CustomerRequestModuleData {
   requests: CustomerRequest[];
 }
 
+export interface EmailTemplateModuleData {
+  templates: EmailTemplate[];
+  forms: FormItem[];
+  ctas: CtaItem[];
+}
+
 export interface CustomerInteractionDataSource {
   ctaByLocale: Partial<Record<CmsLocale, CtaModuleData>>;
   formByLocale: Partial<Record<CmsLocale, FormModuleData>>;
   customerRequestByLocale: Partial<Record<CmsLocale, CustomerRequestModuleData>>;
+  emailTemplateByLocale: Partial<Record<CmsLocale, EmailTemplateModuleData>>;
 }

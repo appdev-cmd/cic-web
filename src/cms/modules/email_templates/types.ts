@@ -1,6 +1,6 @@
 export type EmailWorkspace = 'vi' | 'en';
 export type EmailAudience = 'customer' | 'internal';
-export type EmailTemplateStatus = 'draft' | 'review' | 'active' | 'inactive' | 'archived';
+export type EmailTemplateStatus = 'draft' | 'active' | 'inactive' | 'archived';
 export type EmailEvent = 'product_contact' | 'product_download' | 'product_purchase' | 'product_quote' | 'product_hardlock';
 
 export interface EmailTemplate {
@@ -13,7 +13,6 @@ export interface EmailTemplate {
   content: string;
   status: EmailTemplateStatus;
   version: number;
-  usageCount: number;
   updatedAt: string;
 }
 
@@ -27,8 +26,7 @@ export const EMAIL_EVENTS: Array<{ value: EmailEvent; label: string; labelEn: st
 
 export const TEMPLATE_STATUSES: Record<EmailTemplateStatus, { label: string; className: string }> = {
   draft: { label: 'Bản nháp', className: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
-  review: { label: 'Chờ duyệt', className: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' },
-  active: { label: 'Đang sử dụng', className: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' },
+  active: { label: 'Đã xuất bản', className: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' },
   inactive: { label: 'Ngừng sử dụng', className: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300' },
   archived: { label: 'Đã lưu trữ', className: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' },
 };

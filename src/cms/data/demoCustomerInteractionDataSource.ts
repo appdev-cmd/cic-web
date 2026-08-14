@@ -1,5 +1,5 @@
 import type { CmsLocale } from './CmsDataSource';
-import type { CtaModuleData, CustomerInteractionDataSource, CustomerRequestModuleData, FormModuleData } from './CustomerInteractionDataSource';
+import type { CtaModuleData, CustomerInteractionDataSource, CustomerRequestModuleData, EmailTemplateModuleData, FormModuleData } from './CustomerInteractionDataSource';
 import { getDemoMediaModuleData } from './demoMediaDataSource';
 import { MOCK_CTAS } from '../modules/customer_interaction/cta/mockData';
 import { MOCK_FORMS } from '../modules/customer_interaction/forms/mockData';
@@ -25,6 +25,10 @@ export const demoCustomerInteractionDataSource: CustomerInteractionDataSource = 
   customerRequestByLocale: {
     vi: { requests: MOCK_CUSTOMER_REQUESTS },
   },
+  emailTemplateByLocale: {
+    vi: { templates: viCtaData.emailTemplates, forms: MOCK_FORMS, ctas: MOCK_CTAS },
+    en: { templates: mockEmailTemplates.filter((template) => template.workspace === 'en'), forms: [], ctas: [] },
+  },
 };
 
 const emptyCtaData = (): CtaModuleData => ({ ctas: [], forms: [], emailTemplates: [], downloadFiles: [] });
@@ -44,3 +48,9 @@ const emptyCustomerRequestData = (): CustomerRequestModuleData => ({ requests: [
 /** Current React mock boundary for the unified customer-request read model. */
 export const getDemoCustomerRequestModuleData = (locale: CmsLocale): CustomerRequestModuleData =>
   clone(demoCustomerInteractionDataSource.customerRequestByLocale[locale] ?? emptyCustomerRequestData());
+
+const emptyEmailTemplateData = (): EmailTemplateModuleData => ({ templates: [], forms: [], ctas: [] });
+
+/** Current React mock boundary for Email Templates and its Form/CTA usage relations. */
+export const getDemoEmailTemplateModuleData = (locale: CmsLocale): EmailTemplateModuleData =>
+  clone(demoCustomerInteractionDataSource.emailTemplateByLocale[locale] ?? emptyEmailTemplateData());

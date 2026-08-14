@@ -53,7 +53,7 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
     const rawTokens = `${subject} ${content}`.match(/\{\{[^}]+\}\}/g) ?? [];
     const invalid = rawTokens.filter((token) => !tokens.includes(token));
     if (invalid.length) nextErrors.push(`Biến không hợp lệ: ${[...new Set(invalid)].join(', ')}.`);
-    if (status === 'active') nextErrors.push('Không thể kích hoạt trực tiếp trong form. Hãy lưu bản nháp, xem trước và gửi duyệt.');
+    if (status === 'active') nextErrors.push('Không thể xuất bản trực tiếp trong form. Hãy lưu bản nháp, xem trước rồi xuất bản từ danh sách.');
     setErrors(nextErrors);
     if (nextErrors.length) return window.scrollTo({ top: 0, behavior: 'smooth' });
     onSave({ name: name.trim(), event, audience, subject: subject.trim(), content: content.trim(), status, workspace: workspaceLocale });
@@ -64,7 +64,7 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
       <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex items-center gap-3">
           <CmsButton variant="ghost" size="sm" onClick={onCancel} leadingIcon={<ArrowLeft />}>Danh sách</CmsButton>
-          <div><h1 className="text-xl font-bold text-slate-900 dark:text-white">{templateToEdit ? 'Chỉnh sửa mẫu email' : 'Thêm mẫu email'}</h1><p className="text-xs text-slate-500">Workspace {workspaceLocale.toUpperCase()} · Lưu thành bản nháp trước khi duyệt.</p></div>
+          <div><h1 className="text-xl font-bold text-slate-900 dark:text-white">{templateToEdit ? 'Chỉnh sửa mẫu email' : 'Thêm mẫu email'}</h1><p className="text-xs text-slate-500">Workspace {workspaceLocale.toUpperCase()} · Lưu bản nháp và xem trước trước khi xuất bản.</p></div>
         </div>
         <div className="flex flex-wrap gap-2"><CmsButton size="sm" onClick={() => setPreview(!preview)} leadingIcon={<Eye />}>Xem trước</CmsButton><CmsButton type="submit" size="sm" variant="primary" leadingIcon={<Save />}>Lưu bản nháp</CmsButton></div>
       </div>
@@ -75,7 +75,7 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
         <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Tên mẫu <span className="text-red-500">*</span><input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" /></label>
-            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Trạng thái<select value={status} onChange={(e) => setStatus(e.target.value as EmailTemplateStatus)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800"><option value="draft">Bản nháp</option><option value="review">Chờ duyệt</option><option value="inactive">Ngừng sử dụng</option>{templateToEdit?.status === 'archived' && <option value="archived">Đã lưu trữ</option>}</select></label>
+            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Trạng thái<select value={status} onChange={(e) => setStatus(e.target.value as EmailTemplateStatus)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800"><option value="draft">Bản nháp</option><option value="inactive">Ngừng sử dụng</option>{templateToEdit?.status === 'archived' && <option value="archived">Đã lưu trữ</option>}</select></label>
             <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Sự kiện<select value={event} onChange={(e) => setEvent(e.target.value as EmailEvent)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">{EMAIL_EVENTS.map((item) => <option key={item.value} value={item.value}>{workspaceLocale === 'vi' ? item.label : item.labelEn}</option>)}</select></label>
             <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Đối tượng nhận<select value={audience} onChange={(e) => setAudience(e.target.value as EmailAudience)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800"><option value="customer">Khách hàng</option><option value="internal">Nội bộ</option></select></label>
           </div>
