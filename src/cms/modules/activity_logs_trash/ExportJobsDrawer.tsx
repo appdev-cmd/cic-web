@@ -120,7 +120,7 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                     </span>
                   </div>
 
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${job.status === 'completed' ? 'bg-emerald-500/10 text-emerald-600' : job.status === 'failed' || job.status === 'expired' ? 'bg-red-500/10 text-red-600' : 'bg-blue-500/10 text-blue-600'}`}>
                     {job.status.toUpperCase()}
                   </span>
                 </div>
@@ -128,14 +128,13 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                 <div className="text-slate-500 text-[11px] space-y-0.5">
                   <div>Yêu cầu bởi: <strong>{job.requestedBy}</strong> lúc {job.requestedAt}</div>
                   <div>Phạm vi: {job.scopeName} • {job.filterSummary}</div>
-                  <div>Dung lượng: <strong>{job.fileSizeMb} MB</strong> ({job.totalRecords.toLocaleString()} dòng)</div>
-                  <div className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
-                    Hạn tải xuống an toàn: {job.expiresAt}
-                  </div>
+                  {job.status === 'completed' && job.totalRecords !== undefined && <div>Dung lượng: <strong>{job.fileSizeMb} MB</strong> ({job.totalRecords.toLocaleString()} dòng)</div>}
+                  {job.status === 'completed' && job.expiresAt && <div className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">Hạn tải xuống an toàn: {job.expiresAt}</div>}
+                  {(job.status === 'queued' || job.status === 'processing') && <div className="font-semibold text-blue-600">Tệp đang được xử lý. Nút tải sẽ xuất hiện khi hoàn tất.</div>}
                 </div>
 
                 <div className="pt-2 flex justify-end">
-                  <button
+                  {job.status === 'completed' && job.downloadUrl && <button
                     onClick={() => {
                       alert(`Đang tải xuống tệp ${job.id} thành công!`);
                     }}
@@ -143,7 +142,7 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Tải xuống File Excel</span>
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))

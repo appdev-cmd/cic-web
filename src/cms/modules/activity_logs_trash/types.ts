@@ -59,7 +59,6 @@ export interface AuditEvent {
     httpMethod?: string;
     endpoint?: string;
     executionTimeMs?: number;
-    requestHeaders?: Record<string, string>;
   };
 }
 
@@ -105,9 +104,9 @@ export interface ExportJob {
   scopeName: string;
   dateRange: string;
   filterSummary: string;
-  status: 'completed' | 'processing' | 'failed';
-  totalRecords: number;
+  status: 'queued' | 'processing' | 'completed' | 'failed' | 'expired';
+  totalRecords?: number;
   fileSizeMb?: number;
   downloadUrl?: string;
-  expiresAt: string;
+  expiresAt?: string;
 }

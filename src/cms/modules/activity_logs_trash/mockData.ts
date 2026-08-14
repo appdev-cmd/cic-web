@@ -65,10 +65,6 @@ export const initialAuditLogsMock: AuditEvent[] = [
       httpMethod: 'PUT',
       endpoint: '/api/v2/system-config/scopes/site_cic',
       executionTimeMs: 142,
-      requestHeaders: {
-        'x-forwarded-for': '118.70.182.95',
-        'content-type': 'application/json',
-      },
     },
   },
   {

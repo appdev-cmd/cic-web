@@ -46,15 +46,11 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData }> = ({ d
       scopeName: 'Toàn bộ Scope Hệ thống',
       dateRange: range,
       filterSummary,
-      status: 'completed',
-      totalRecords: auditLogs.length,
-      fileSizeMb: 1.8,
-      downloadUrl: '#download_new_export',
-      expiresAt: new Date(Date.now() + 7 * 86400000).toLocaleString(),
+      status: 'processing',
     };
 
     setExportJobs((prev) => [newJob, ...prev]);
-    showToast(`Đã hoàn tất tạo Báo cáo Export thành công!`);
+    showToast('Đã tạo yêu cầu xuất báo cáo. Hệ thống đang xử lý tệp.');
   };
 
   return (
