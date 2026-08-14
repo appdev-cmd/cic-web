@@ -4,14 +4,16 @@ import type { CmsLocale } from '../../data/CmsDataSource';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
-import { functionSeoByLocale } from './mockData';
 import type { FunctionSeoRecord, SeoOwnerStatus } from './types';
 
-interface Props { workspaceLocale: CmsLocale }
+interface Props {
+  workspaceLocale: CmsLocale;
+  data: FunctionSeoRecord[];
+}
 const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-950';
 
-export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale }) => {
-  const [records, setRecords] = useState(() => functionSeoByLocale[workspaceLocale].map((item) => ({ ...item })));
+export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) => {
+  const [records, setRecords] = useState(() => data.map((item) => ({ ...item })));
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<FunctionSeoRecord | null>(null);
   const [expandedIds, setExpandedIds] = useState(() => new Set(records.map((item) => item.id)));

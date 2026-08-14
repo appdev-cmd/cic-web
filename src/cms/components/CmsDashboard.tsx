@@ -30,7 +30,20 @@ const SystemConfiguration = lazy(async () => {
     />
   ) };
 });
-const FunctionSeoManager = lazy(() => import('../modules/function_seo/FunctionSeoManager').then((module) => ({ default: module.FunctionSeoManager })));
+const FunctionSeoManager = lazy(async () => {
+  const [module, dataModule] = await Promise.all([
+    import('../modules/function_seo/FunctionSeoManager'),
+    import('../data/FunctionSeoDataSource'),
+  ]);
+  return {
+    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
+      <module.FunctionSeoManager
+        workspaceLocale={workspaceLocale}
+        data={dataModule.getDemoFunctionSeoData(workspaceLocale)}
+      />
+    ),
+  };
+});
 const ActivityLogsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/ActivityLogsManager'), import('../data/demoGovernanceDataSource')]);
   return { default: () => <module.ActivityLogsManager data={dataModule.demoGovernanceDataSource.audit} /> };
