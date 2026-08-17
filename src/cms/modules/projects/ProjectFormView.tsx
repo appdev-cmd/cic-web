@@ -24,6 +24,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
     id: `project_${Date.now()}`, title: '', alias: '', tagline: '', summary: '', content: '', sector: '', solution: '', technologies: [], customer_name: '', location: '', start_year: null, end_year: null, is_ongoing: false, image: '', gallery: [], video_title: '', video_url: '', video_thumbnail: '', document_title: '', document_url: '', document_size: '', products_related: [], services_related: [], is_featured: false, published: false, ordering: 0, seo_title: '', seo_keyword: '', seo_description: '', created_time: new Date().toISOString(), updated_time: new Date().toISOString(),
   }, [project]);
   const [form, setForm] = useState(initial);
+  const [technologyInput, setTechnologyInput] = useState(initial.technologies.join('\n'));
   const [manualAlias, setManualAlias] = useState(Boolean(project));
   const [error, setError] = useState('');
   const set = <K extends keyof CmsProject>(key: K, value: CmsProject[K]) => setForm((current) => ({ ...current, [key]: value }));
@@ -33,7 +34,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
     if (!form.alias.trim()) return setError('Vui lòng nhập đường dẫn dự án.');
     if (form.start_year && form.end_year && form.end_year < form.start_year) return setError('Năm kết thúc không được nhỏ hơn năm bắt đầu.');
     setError('');
-    onSave({ ...form, title: form.title.trim(), alias: slugify(form.alias), technologies: form.technologies.map((item) => item.trim()).filter(Boolean), end_year: form.is_ongoing ? null : form.end_year, updated_time: new Date().toISOString() });
+    onSave({ ...form, title: form.title.trim(), alias: slugify(form.alias), technologies: splitLines(technologyInput), end_year: form.is_ongoing ? null : form.end_year, updated_time: new Date().toISOString() });
   };
 
   return <div className="space-y-6 pb-16">
@@ -64,7 +65,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
         <Section icon={<Search />} title="Phân loại & factsheet"><div className="space-y-4">
           <Field label="Lĩnh vực"><input className={inputClass} value={form.sector} onChange={(e) => set('sector', e.target.value)} /></Field>
           <Field label="Dịch vụ / Giải pháp chính"><input className={inputClass} value={form.solution} onChange={(e) => set('solution', e.target.value)} /></Field>
-          <Field label="Công nghệ áp dụng"><textarea rows={4} className={inputClass} value={form.technologies.join('\n')} onChange={(e) => set('technologies', e.target.value.split(/\r?\n/))} placeholder="Mỗi dòng một công nghệ" /></Field>
+          <Field label="Công nghệ áp dụng"><textarea rows={4} className={inputClass} value={technologyInput} onChange={(e) => setTechnologyInput(e.target.value)} placeholder="Mỗi dòng một công nghệ" /></Field>
           <Field label="Chủ đầu tư / Khách hàng"><input className={inputClass} value={form.customer_name} onChange={(e) => set('customer_name', e.target.value)} /></Field>
           <Field label="Địa điểm"><input className={inputClass} value={form.location} onChange={(e) => set('location', e.target.value)} /></Field>
           <div className="grid grid-cols-2 gap-3"><Field label="Năm bắt đầu"><input type="number" className={inputClass} value={form.start_year ?? ''} onChange={(e) => set('start_year', e.target.value ? Number(e.target.value) : null)} /></Field><Field label="Năm kết thúc"><input type="number" disabled={form.is_ongoing} className={inputClass} value={form.end_year ?? ''} onChange={(e) => set('end_year', e.target.value ? Number(e.target.value) : null)} /></Field></div>
