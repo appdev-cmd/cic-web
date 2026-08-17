@@ -31,6 +31,7 @@ Không có.
 ### Hãng sản xuất
 
 - Tái sử dụng `name`, `code`, `description`, `image`, `published`, `ordering`, `created_time`, `updated_time`.
+- Form dùng trực tiếp `name` cho “Tiêu đề dữ liệu” và `alias` cho “Tên hiệu”; alias được application tự sinh từ tiêu đề. Không thêm field định danh mới.
 - `logo → image`, `status → published`, `is_featured → show_in_homepage`.
 - Checkbox mới đang diễn đạt chung “Trang chủ & Footer”; application layer dùng `show_in_homepage` theo đúng một policy hiển thị, không thêm hai cờ trùng lặp khi UI chưa quản trị chúng độc lập.
 - Chỉ `country` và `website` là dữ liệu form đang ghi nhưng chưa có nguồn tương đương.
@@ -38,6 +39,7 @@ Không có.
 ### Lĩnh vực ứng dụng
 
 - Dùng `cic_application`/`cic_application_en`; `name`, `code`, `description`, `image`, `color_code`, trạng thái, ordering và timestamps đã có.
+- “Tiêu đề dữ liệu” map vào `name`; “Tên hiệu” map thẳng vào `alias` và được application tự sinh.
 - `icon → image`, `color_badge → color_code`, `status → published`.
 - `sector_group` hiện chỉ là state/default trong mock payload, không có control chỉnh sửa và chưa được frontend đọc độc lập. Không thêm field.
 - Sản phẩm hiện lưu danh sách application ID trong `cic_products.application` để tương thích legacy. Chưa tạo relation table chỉ nhằm làm schema đẹp hơn.
@@ -45,7 +47,7 @@ Không có.
 ### Loại sản phẩm
 
 - Dùng `cic_products_types`/`cic_products_types_en`; `name`, `alias`, `description`, `image`, `published`, `ordering`, `created_time` đã có.
-- `code`/`type_code` có thể map vào `alias` theo contract hiện tại; `icon → image`, `status → published`.
+- “Tiêu đề dữ liệu” map vào `name`; “Tên hiệu” map thẳng vào `alias` và được application tự sinh. `icon → image`, `status → published`.
 - `requires_license_key` và `pricing_model_default` chỉ được gán từ default/mock, chưa có control chỉnh sửa và chưa tham gia logic sản phẩm/frontend. Không thêm field.
 - Chỉ bổ sung `updated_time`; khi triển khai schema sau này cần cơ chế cập nhật timestamp nhất quán với các master table khác.
 

@@ -58,6 +58,15 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { SearchableSelect } from '../../components/SearchableSelect';
 
+const usesSystemAlias = (type: MasterDataType) => ['brands', 'applications', 'product_types'].includes(type);
+const getSystemAlias = (item: AnyMasterItem) => item.alias || item.name
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[đĐ]/g, 'd')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
 interface ProductSettingsManagerProps {
   taxonomy?: ProductTaxonomyModuleData;
   globalData: ProductSettingsGlobalData;
@@ -149,7 +158,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(q);
-        const matchCode = item.code.toLowerCase().includes(q);
+        const matchCode = (usesSystemAlias(item.type) ? getSystemAlias(item) : item.code).toLowerCase().includes(q);
         const matchDesc = (item.description || '').toLowerCase().includes(q);
         if (!matchName && !matchCode && !matchDesc) return false;
       }
@@ -395,7 +404,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
                     {/* Name & Code (Sticky Left) */}
                     <th className="py-3 px-4 min-w-[260px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                      {activeDataType === 'sales_staff' ? 'Tên nhân viên' : 'Tên và mã nhận diện'}
+                      {activeDataType === 'sales_staff' ? 'Tên nhân viên' : usesSystemAlias(activeDataType) ? 'Tiêu đề dữ liệu và tên hiệu' : 'Tên và mã nhận diện'}
                     </th>
 
                     {/* Usage count */}
@@ -466,7 +475,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                               </div>
                               {item.type !== 'sales_staff' && <div className="flex items-center gap-2 text-[10px] text-slate-400">
                                 <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
-                                  {item.code}
+                                  {usesSystemAlias(item.type) ? getSystemAlias(item) : item.code}
                                 </span>
                                 {item.description && (
                                   <>

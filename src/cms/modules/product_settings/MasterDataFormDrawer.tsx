@@ -43,6 +43,14 @@ interface MasterDataFormDrawerProps {
   onClose: () => void;
 }
 
+const createAlias = (value: string) => value
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[đĐ]/g, 'd')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
 function ProductAssignmentField({
   label,
   options,
@@ -184,7 +192,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [colorBadge, setColorBadge] = useState('bg-blue-500/10 text-blue-600 border-blue-500/20');
 
   // Product Type Specifics
-  const [typeCode, setTypeCode] = useState('software_desktop');
   const [requiresLicenseKey, setRequiresLicenseKey] = useState(true);
   const [pricingModel, setPricingModel] = useState<'quote' | 'fixed_price' | 'subscription'>('quote');
 
@@ -192,7 +199,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [phone, setPhone] = useState('');
   const [skype, setSkype] = useState('');
   const [zalo, setZalo] = useState('');
-  const [alias, setAlias] = useState('');
+  const [salesAlias, setSalesAlias] = useState('');
   const [contactProductIds, setContactProductIds] = useState<string[]>([]);
   const [salesProductIds, setSalesProductIds] = useState<string[]>([]);
   const [technicalProductIds, setTechnicalProductIds] = useState<string[]>([]);
@@ -232,7 +239,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         setIcon(app.icon || 'Cpu');
       } else if (item.type === 'product_types') {
         const pt = item as MasterProductTypeItem;
-        setTypeCode(pt.type_code || 'software_desktop');
         setRequiresLicenseKey(pt.requires_license_key ?? true);
         setPricingModel(pt.pricing_model_default || 'quote');
       } else if (item.type === 'sales_staff') {
@@ -240,7 +246,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         setPhone(st.phone || '');
         setSkype(st.skype || '');
         setZalo(st.zalo || '');
-        setAlias(st.alias || '');
+        setSalesAlias(st.alias || '');
         setContactProductIds(st.contact_product_ids || []);
         setSalesProductIds(st.sales_product_ids || []);
         setTechnicalProductIds(st.technical_support_product_ids || []);
@@ -268,13 +274,12 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       setIsFeatured(false);
       setSectorGroup('Kết cấu Dân dụng & Công nghiệp');
       setColorBadge('bg-blue-500/10 text-blue-600 border-blue-500/20');
-      setTypeCode('software_desktop');
       setRequiresLicenseKey(true);
       setPricingModel('quote');
       setPhone('');
       setSkype('');
       setZalo('');
-      setAlias('');
+      setSalesAlias('');
       setContactProductIds([]);
       setSalesProductIds([]);
       setTechnicalProductIds([]);
@@ -302,10 +307,13 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
     e.preventDefault();
     if (!name.trim()) return;
 
+    const generatedAlias = createAlias(name);
     const baseObj = {
       id: item?.id || `item_${Date.now()}`,
       name: name.trim(),
-      code: code.trim() || `CODE-${Date.now()}`,
+      code: (['brands', 'applications', 'product_types'] as MasterDataType[]).includes(targetType)
+        ? item?.code || generatedAlias
+        : code.trim() || item?.code || generatedAlias,
       status: status,
       ordering: Number(ordering) || 1,
       usage_count: item?.usage_count || 0,
@@ -337,6 +345,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       resultObj = {
         ...baseObj,
         type: 'brands',
+        alias: generatedAlias,
         country: country,
         logo: logoUrl,
         website: websiteUrl,
@@ -346,6 +355,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       resultObj = {
         ...baseObj,
         type: 'applications',
+        alias: generatedAlias,
         sector_group: sectorGroup,
         color_badge: colorBadge,
         icon: icon,
@@ -354,7 +364,8 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       resultObj = {
         ...baseObj,
         type: 'product_types',
-        type_code: typeCode,
+        alias: generatedAlias,
+        type_code: item?.type === 'product_types' ? item.type_code : generatedAlias,
         requires_license_key: requiresLicenseKey,
         pricing_model_default: pricingModel,
         icon: icon,
@@ -366,7 +377,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
         phone: phone,
         skype,
         zalo,
-        alias: alias || name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        alias: salesAlias || generatedAlias,
         contact_product_ids: contactProductIds,
         sales_product_ids: salesProductIds,
         technical_support_product_ids: technicalProductIds,
@@ -460,7 +471,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
               <div className={`grid grid-cols-1 gap-3 ${targetType === 'sales_staff' ? '' : 'sm:grid-cols-3'}`}>
                 <div className={targetType === 'sales_staff' ? '' : 'sm:col-span-2'}>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    {targetType === 'sales_staff' ? 'Tên nhân viên' : 'Tên mục'} <span className="text-red-500">*</span>
+                    {targetType === 'sales_staff' ? 'Tên nhân viên' : targetType === 'categories' ? 'Tên mục' : 'Tiêu đề dữ liệu'} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -472,7 +483,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   />
                 </div>
 
-                {targetType !== 'sales_staff' && <div>
+                {targetType === 'categories' && <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
                     Mã nhận diện:
                   </label>
@@ -481,6 +492,18 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white focus:outline-none"
+                  />
+                </div>}
+                {(['brands', 'applications', 'product_types'] as MasterDataType[]).includes(targetType) && <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Tên hiệu <span className="font-normal text-slate-400">(Hệ thống tự động sinh)</span>:
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={createAlias(name)}
+                    placeholder="ten-hieu-tu-dong"
+                    className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                   />
                 </div>}
               </div>
@@ -628,9 +651,9 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <label className="block text-slate-700 dark:text-slate-300 font-bold">Tên hiệu (Alias)</label>
-                        <button type="button" onClick={() => setAlias(name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))} className="text-[10px] font-bold text-orange-600 hover:underline">Tạo tự động</button>
+                        <button type="button" onClick={() => setSalesAlias(createAlias(name))} className="text-[10px] font-bold text-orange-600 hover:underline">Tạo tự động</button>
                       </div>
-                      <input type="text" value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Hệ thống tự động sinh" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none focus:border-orange-500" />
+                      <input type="text" value={salesAlias} onChange={(e) => setSalesAlias(e.target.value)} placeholder="Hệ thống tự động sinh" className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none focus:border-orange-500" />
                     </div>
                   </div>
                   <div className={presentation === 'page' ? 'space-y-5' : 'space-y-3'}>{[

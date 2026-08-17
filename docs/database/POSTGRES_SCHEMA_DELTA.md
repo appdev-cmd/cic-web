@@ -110,6 +110,7 @@ Không có.
 
 ### Mapping / lưu ý
 
+- “Tiêu đề dữ liệu” dùng `name`; “Tên hiệu” dùng trực tiếp `alias` và được application tự sinh. Không thêm field định danh khác.
 - `logo → image`, `status → published`, `is_featured → show_in_homepage`.
 - `country` và `website` là hai dữ liệu form đang chỉnh sửa nhưng PostgreSQL chưa có field tương đương; không nhét website vào Rich Text.
 - Checkbox “Trang chủ & Footer” hiện dùng một policy qua `show_in_homepage`; chưa thêm cờ footer riêng khi CMS không quản trị hai vị trí độc lập.
@@ -126,6 +127,7 @@ Không có.
 
 ### Mapping / lưu ý
 
+- “Tiêu đề dữ liệu” dùng `name`; “Tên hiệu” dùng trực tiếp `alias` và được application tự sinh.
 - `icon → image`, `color_badge → color_code`, `status → published`; các field nội dung, ordering và timestamps đã có.
 - `sector_group` mới chỉ là state/default trong mock payload, chưa có control chỉnh sửa và chưa được frontend đọc độc lập; không thêm field.
 - Danh sách application của sản phẩm tiếp tục dùng `cic_products.application` trong giai đoạn compatibility; chưa tạo relation table chỉ để chuẩn hóa.
@@ -145,7 +147,7 @@ Không có.
 
 ### Mapping / lưu ý
 
-- `code`/`type_code → alias`, `icon → image`, `status → published` theo contract hiện tại.
+- “Tiêu đề dữ liệu” dùng `name`; “Tên hiệu” dùng trực tiếp `alias` và được application tự sinh. `icon → image`, `status → published`.
 - `requires_license_key` và `pricing_model_default` chỉ được gán từ default/mock, chưa có control chỉnh sửa hoặc logic frontend; không thêm field.
 
 ## Người phụ trách kinh doanh

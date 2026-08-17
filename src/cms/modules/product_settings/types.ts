@@ -16,6 +16,7 @@ export interface BaseMasterItem {
   id: string;
   name: string;
   code: string;
+  alias?: string;
   status: MasterItemStatus;
   ordering: number;
   usage_count: number;
