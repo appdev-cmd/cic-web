@@ -67,12 +67,23 @@ EXCLUDED_TABLES = {
 # key: (child_table, dep_table) -> list cac ten cot FK thuc su trong child_table
 FK_COLUMN_OVERRIDES = {
     ("cic_news", "cic_news_categories"): ["category_id"],
+    ("cic_news_en", "cic_news_categories_en"): ["category_id"],
     ("cic_contents", "cic_contents_categories"): ["category_id"],
+    ("cic_contents_en", "cic_contents_categories_en"): ["category_id"],
     ("cic_banners", "cic_banners_categories"): ["category_id"],
+    ("cic_banners_en", "cic_banners_categories_en"): ["category_id"],
     ("cic_slideshow", "cic_slideshow_categories"): ["category_id"],
+    ("cic_slideshow_en", "cic_slideshow_categories_en"): ["category_id"],
     ("cic_menus_items", "cic_menus_groups"): ["group_id"],
+    ("cic_menus_items_en", "cic_menus_groups_en"): ["group_id"],
     ("cic_extends_items", "cic_extends_groups"): ["group_id"],
     ("cic_products_tables", "cic_products_fields_groups"): ["group_id"],
+    ("cic_products_tables_en", "cic_products_fields_groups"): ["group_id"],
+    ("cic_products_en", "cic_cities_en"): ["city_id"],
+    ("cic_products_en", "cic_products_types_en"): ["types_id"],
+    ("cic_products_images_en", "cic_products_en"): ["record_id"],
+    ("cic_image_en", "cic_cities_en"): ["city_id"],
+    ("cic_image_images_en", "cic_image_en"): ["record_id"],
     ("cic_blocks", "cic_config_modules"): ["module_id"],
 }
 
@@ -84,8 +95,11 @@ STUB_TARGETS = {
     ("cic_users_permission_field", "user_id"): "cic_users",
     ("cic_users_permission_fun", "user_id"): "cic_users",
     ("cic_products_images", "record_id"): "cic_products",
+    ("cic_products_images_en", "record_id"): "cic_products_en",
     ("cic_product_contact", "products_id"): "cic_products",
     ("cic_image_images", "record_id"): "cic_image",
+    ("cic_image_images_en", "record_id"): "cic_image_en",
+    ("cic_menus_items_en", "group_id"): "cic_menus_groups_en",
 }
 
 # Cot duoc uu tien dien nhan "Du lieu da bi xoa" de de nhan biet trong UI/admin
@@ -244,6 +258,22 @@ def fix_mislabeled_text(value, source_table):
         return value
 
 
+def quote_pg_text(value):
+    """Quote arbitrary legacy text safely for PostgreSQL.
+
+    Rich Text legacy can contain newlines, quotes and Windows paths ending in
+    backslashes. Dollar quoting avoids interactions between those characters
+    and PostgreSQL string parsing. Pick a tag that is absent from the payload.
+    """
+    value = str(value).replace("\x00", "")
+    suffix = ""
+    while True:
+        tag = f"$etl{suffix}$"
+        if tag not in value:
+            return f"{tag}{value}{tag}"
+        suffix = "1" if suffix == "" else str(int(suffix) + 1)
+
+
 def coerce_value(value, pg_type, col_name=None, table_name=None):
     """Convert Python value to PostgreSQL-compatible format."""
     if value is None:
@@ -329,8 +359,7 @@ def coerce_value(value, pg_type, col_name=None, table_name=None):
                 "Truncated value for %s.%s from %d to 255 chars",
                 table_name, col_name, original_len
             )
-        escaped = value_str.replace("\\", "\\\\").replace("'", "''")
-        return f"'{escaped}'"
+        return quote_pg_text(value_str)
     
     # Handle numeric types that might be too long for varchar columns
     if pg_type == "numeric":
@@ -355,9 +384,7 @@ def escape_sql_value(value):
     if value is None:
         return "NULL"
     if isinstance(value, str):
-        # Escape backslashes first, then single quotes
-        escaped = value.replace("\\", "\\\\").replace("'", "''")
-        return f"'{escaped}'"
+        return quote_pg_text(value)
     return str(value)
 
 

@@ -143,7 +143,7 @@
 
 -- ============================================================
 -- Schema MỚI đề xuất (PostgreSQL) — cic14005_cic_fs
--- Xuất tự động từ tài liệu tham chiếu — 2026-07-30
+-- Xuất tự động từ tài liệu tham chiếu — 2026-08-17
 -- ============================================================
 
 -- Các bảng KHÔNG migrate sang schema mới (11):
@@ -355,7 +355,11 @@ CREATE TABLE "cic_users" (
   "news_categories" varchar(255), -- ← fs_users.news_categories | Tên/mã danh mục tin tức liên kết.
   "full_name" varchar(255), -- ← fs_users.full_name | Họ và tên đầy đủ.
   "image" varchar(255), -- ← fs_users.image | Đường dẫn ảnh chính.
-  "summary" text -- ← fs_users.summary | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
+  "summary" text, -- ← fs_users.summary | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
+  "account_status" varchar(32) NOT NULL DEFAULT 'active', -- ← — (cột mới) | [MỚI] Trạng thái tài khoản: active / suspended / deactivated / pending_invite. `published` không đủ 4 trạng thái. Backfill: published=true→active, còn lại→deactivated; đồng bộ `published` trong giai đoạn compatibility.
+  "two_factor_enabled" boolean NOT NULL DEFAULT false, -- ← — (cột mới) | [MỚI] Cờ bật/tắt 2FA cho tab Bảo mật. Chỉ lưu trạng thái; secret 2FA thuộc lớp xác thực riêng.
+  "password_changed_at" timestamptz NULL, -- ← — (cột mới) | [MỚI] Thời điểm đổi mật khẩu gần nhất. Không map vào `updated_time` vì field đó đổi khi sửa cả hồ sơ/quyền.
+  "failed_login_attempts" integer NOT NULL DEFAULT 0 -- ← — (cột mới) | [MỚI · ĐỀ XUẤT] Số lần đăng nhập lỗi liên tiếp, phục vụ màn hình audit. Chỉ ghi thật khi backend authentication/lockout được triển khai — hiện là mock.
 );
 
 -- Gán quyền (nhóm quyền) cho từng người dùng.
@@ -461,6 +465,128 @@ CREATE TABLE "cic_members" (
   "estore_id" integer -- ← fs_members.estore_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Store reference. Referenced trong 12 file (chỉ đọc session tại libraries/fsmodels.php:175), không tìm thấy nơi set $_SESSION['estore_id']. Runtime verification required — không FK, không index.
 );
 
+-- [BẢNG MỚI] Lịch sử đổi trạng thái tài khoản người dùng.
+DROP TABLE IF EXISTS "cic_user_status_history" CASCADE;
+CREATE TABLE "cic_user_status_history" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "user_id" integer NOT NULL REFERENCES cic_users(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Người dùng bị đổi trạng thái.
+  "previous_status" varchar(32) NULL, -- ← — (bảng mới) | Trạng thái trước khi đổi.
+  "new_status" varchar(32) NOT NULL, -- ← — (bảng mới) | Trạng thái sau khi đổi.
+  "reason" text NULL, -- ← — (bảng mới) | Lý do đổi trạng thái.
+  "changed_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm đổi.
+  "changed_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL -- ← — (bảng mới) | Người thực hiện thay đổi.
+);
+
+-- [BẢNG MỚI · ĐỀ XUẤT] Sự kiện bảo mật (đăng nhập, khoá tài khoản...).
+DROP TABLE IF EXISTS "cic_security_events" CASCADE;
+CREATE TABLE "cic_security_events" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "user_id" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người dùng liên quan (nếu có).
+  "event_type" varchar(64) NOT NULL, -- ← — (bảng mới) | Loại sự kiện bảo mật.
+  "status" varchar(16) NOT NULL, -- ← — (bảng mới) | Kết quả sự kiện.
+  "ip_address" inet NULL, -- ← — (bảng mới) | Địa chỉ IP nguồn.
+  "user_agent" text NULL, -- ← — (bảng mới) | User agent trình duyệt/thiết bị.
+  "details" text NULL, -- ← — (bảng mới) | Chi tiết bổ sung.
+  "created_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm phát sinh.
+);
+
+-- [BẢNG MỚI] Danh mục Role (RBAC) — thay thế mô hình quyền trực tiếp theo user cho CMS mới.
+DROP TABLE IF EXISTS "cic_roles" CASCADE;
+CREATE TABLE "cic_roles" (
+-- (unique theo lower(trim(code)) được thêm bằng CREATE UNIQUE INDEX bên dưới, không thể khai báo inline)
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "code" varchar(100) NOT NULL, -- ← — (bảng mới) | Mã role.
+  "name" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên role.
+  "category" varchar(16) NOT NULL, -- ← — (bảng mới) | Nhóm phân loại role.
+  "risk_level" varchar(16) NOT NULL, -- ← — (bảng mới) | Mức rủi ro của role.
+  "status" varchar(24) NOT NULL, -- ← — (bảng mới) | Trạng thái role.
+  "purpose" text NULL, -- ← — (bảng mới) | Mục đích sử dụng role.
+  "description" text NULL, -- ← — (bảng mới) | Mô tả chi tiết.
+  "owner_name" varchar(255) NULL, -- ← — (bảng mới) | Người sở hữu role.
+  "reviewer_name" varchar(255) NULL, -- ← — (bảng mới) | Người rà soát role.
+  "review_due_at" timestamptz NULL, -- ← — (bảng mới) | Hạn rà soát tiếp theo.
+  "is_protected" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Role hệ thống, không cho xoá.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "updated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL -- ← — (bảng mới) | Người cập nhật.
+);
+
+-- [BẢNG MỚI] Version của Role — Role editor lưu draft/activate, diff và lịch sử version.
+DROP TABLE IF EXISTS "cic_role_versions" CASCADE;
+CREATE TABLE "cic_role_versions" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "role_id" bigint NOT NULL REFERENCES cic_roles(id) ON DELETE CASCADE, -- ← — (bảng mới) | Role sở hữu version.
+  "version_number" numeric(10,1) NOT NULL, -- ← — (bảng mới) | Số hiệu version.
+  "status" varchar(16) NOT NULL, -- ← — (bảng mới) | draft / active / archived.
+  "change_note" text NULL, -- ← — (bảng mới) | Ghi chú thay đổi.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo version.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo version.
+  "activated_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm kích hoạt.
+  "activated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người kích hoạt.
+  CONSTRAINT "uq_cic_role_versions_role_id_version_number" UNIQUE ("role_id", "version_number")
+);
+
+-- [BẢNG MỚI] Ma trận quyền của một version Role, tái sử dụng danh mục task legacy.
+DROP TABLE IF EXISTS "cic_role_version_permissions" CASCADE;
+CREATE TABLE "cic_role_version_permissions" (
+  "role_version_id" bigint NOT NULL REFERENCES cic_role_versions(id) ON DELETE CASCADE, -- ← — (bảng mới) | Version Role.
+  "permission_task_id" integer NOT NULL REFERENCES cic_permission_tasks(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Task quyền (danh mục legacy).
+  "action" varchar(24) NOT NULL, -- ← — (bảng mới) | Hành động cụ thể trong task.
+  "state" varchar(16) NOT NULL -- ← — (bảng mới) | allowed / denied / conditional.
+);
+
+-- [BẢNG MỚI] Phạm vi áp dụng của một version Role (global, site, team, locale, ownership).
+DROP TABLE IF EXISTS "cic_role_version_scopes" CASCADE;
+CREATE TABLE "cic_role_version_scopes" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "role_version_id" bigint NOT NULL REFERENCES cic_role_versions(id) ON DELETE CASCADE, -- ← — (bảng mới) | Version Role.
+  "scope_type" varchar(24) NOT NULL, -- ← — (bảng mới) | global / site / team / locale / ownership.
+  "scope_value" varchar(255) NOT NULL, -- ← — (bảng mới) | Giá trị scope.
+  "description" text NULL -- ← — (bảng mới) | Mô tả bổ sung.
+);
+
+-- [BẢNG MỚI] Gán Role cho User — hỗ trợ thời hạn và hiển thị phạm vi.
+DROP TABLE IF EXISTS "cic_user_roles" CASCADE;
+CREATE TABLE "cic_user_roles" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "user_id" integer NOT NULL REFERENCES cic_users(id) ON DELETE CASCADE, -- ← — (bảng mới) | Người dùng được gán.
+  "role_id" bigint NOT NULL REFERENCES cic_roles(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Role được gán.
+  "assigned_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm gán.
+  "assigned_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người thực hiện gán.
+  "expires_at" timestamptz NULL, -- ← — (bảng mới) | Thời hạn hiệu lực (nếu có).
+  "status" varchar(16) NOT NULL DEFAULT 'active', -- ← — (bảng mới) | Trạng thái gán.
+  "scope_summary" text NULL -- ← — (bảng mới) | Tóm tắt phạm vi hiển thị nhanh.
+);
+
+-- [BẢNG MỚI · ĐỀ XUẤT] Cảnh báo chính sách quyền (conflict, over-privilege...).
+DROP TABLE IF EXISTS "cic_permission_policy_issues" CASCADE;
+CREATE TABLE "cic_permission_policy_issues" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "role_id" bigint NOT NULL REFERENCES cic_roles(id) ON DELETE CASCADE, -- ← — (bảng mới) | Role liên quan.
+  "severity" varchar(16) NOT NULL, -- ← — (bảng mới) | Mức độ nghiêm trọng.
+  "issue_type" varchar(50) NOT NULL, -- ← — (bảng mới) | Loại vấn đề.
+  "title" varchar(255) NOT NULL, -- ← — (bảng mới) | Tiêu đề cảnh báo.
+  "description" text NULL, -- ← — (bảng mới) | Mô tả chi tiết.
+  "recommendation" text NULL, -- ← — (bảng mới) | Khuyến nghị xử lý.
+  "detected_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm phát hiện.
+  "resolved_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm xử lý xong.
+  "resolved_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL -- ← — (bảng mới) | Người xử lý.
+);
+
+-- [BẢNG MỚI · ĐỀ XUẤT] Chiến dịch rà soát quyền định kỳ (access review).
+DROP TABLE IF EXISTS "cic_access_reviews" CASCADE;
+CREATE TABLE "cic_access_reviews" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "role_id" bigint NOT NULL REFERENCES cic_roles(id) ON DELETE CASCADE, -- ← — (bảng mới) | Role được rà soát.
+  "target_user_id" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người dùng mục tiêu (nếu review theo user).
+  "reviewer_user_id" integer NOT NULL REFERENCES cic_users(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Người thực hiện rà soát.
+  "due_at" timestamptz NOT NULL, -- ← — (bảng mới) | Hạn hoàn thành.
+  "status" varchar(20) NOT NULL, -- ← — (bảng mới) | Trạng thái review.
+  "notes" text NULL, -- ← — (bảng mới) | Ghi chú.
+  "completed_at" timestamptz NULL -- ← — (bảng mới) | Thời điểm hoàn thành.
+);
+
 -- Cấu trúc menu khu vực quản trị (admin panel).
 DROP TABLE IF EXISTS "cic_menus_admin" CASCADE;
 CREATE TABLE "cic_menus_admin" (
@@ -557,7 +683,7 @@ CREATE TABLE "cic_menus_items_en" (
   "image" varchar(255), -- ← fs_menus_items.image | Đường dẫn ảnh chính.
   "link" varchar(255), -- ← fs_menus_items.link | Đường dẫn liên kết.
   "target" varchar(255), -- ← fs_menus_items.target | Đối tượng đích (ví dụ target của liên kết: _blank, _self).
-  "group_id" integer REFERENCES cic_menus_groups(id), -- ← fs_menus_items.group_id | ✅ FK CHUẨN: Bảng đích menus_groups tồn tại rõ ràng trong schema này — khai báo REFERENCES menus_groups(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "group_id" integer REFERENCES cic_menus_groups_en(id), -- ← fs_menus_items.group_id | ✅ FK CHUẨN: Bảng đích menus_groups_en tồn tại rõ ràng trong schema này — khai báo REFERENCES menus_groups_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "ordering" integer NOT NULL, -- ← fs_menus_items.ordering | Thứ tự sắp xếp hiển thị.
   "default" boolean, -- ← fs_menus_items.default | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "published" boolean NOT NULL, -- ← fs_menus_items.published | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
@@ -569,7 +695,7 @@ CREATE TABLE "cic_menus_items_en" (
   "is_rewrite" boolean NOT NULL, -- ← fs_menus_items.is_rewrite | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "is_en" boolean, -- ← fs_menus_items.is_en | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "icon" varchar(255), -- ← fs_menus_items.icon | Đường dẫn/tên biểu tượng (icon).
-  "parent_id" integer REFERENCES cic_menus_items(id) ON DELETE SET NULL, -- ← fs_menus_items.parent_id | ✅ FK CHUẨN (tự tham chiếu): Bảng đích menus_items chính là bảng này — khai báo REFERENCES menus_items(id) ON DELETE SET NULL. LƯU Ý: nếu dữ liệu cũ dùng sentinel 0 cho "không có cha/gốc", cần dọn 0→NULL trước khi migrate (giống 5 bảng cây phân cấp đã áp dụng: areas, menus_admin, contents_categories, news_categories, products_categories).
+  "parent_id" integer REFERENCES cic_menus_items_en(id) ON DELETE SET NULL, -- ← fs_menus_items.parent_id | ✅ FK CHUẨN (tự tham chiếu): Bảng đích menus_items chính là bảng này — khai báo REFERENCES menus_items_en(id) ON DELETE SET NULL. LƯU Ý: nếu dữ liệu cũ dùng sentinel 0 cho "không có cha/gốc", cần dọn 0→NULL trước khi migrate (giống 5 bảng cây phân cấp đã áp dụng: areas, menus_admin, contents_categories, news_categories, products_categories).
   "is_type" boolean, -- ← fs_menus_items.is_type | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "is_link" boolean, -- ← fs_menus_items.is_link | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "bk_color" varchar(255), -- ← fs_menus_items.bk_color | Mã màu nền (viết tắt background color).
@@ -640,7 +766,10 @@ CREATE TABLE "cic_config_modules" (
   "fields_seo_h1" varchar(255), -- ← fs_config_modules.fields_seo_h1 + fs_config_modules_en.fields_seo_h1 | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "fields_seo_h2" varchar(255), -- ← fs_config_modules.fields_seo_h2 + fs_config_modules_en.fields_seo_h2 | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "fields_seo_image_alt" varchar(255), -- ← fs_config_modules.fields_seo_image_alt + fs_config_modules_en.fields_seo_image_alt | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "value_seo_title" varchar(255) -- ← fs_config_modules.value_seo_title + fs_config_modules_en.value_seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "value_seo_title" varchar(255), -- ← fs_config_modules.value_seo_title + fs_config_modules_en.value_seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "value_seo_keyword" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Meta keywords cho route/module (VI). Có trong fs_config_modules, được code cũ ghi/đọc nhưng bị bỏ sót khỏi bản PostgreSQL trước đó.
+  "value_seo_description" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Meta description cho route/module (VI). Field legacy dùng thật; bản draft trước chỉ giữ value_seo_title.
+  "seo_indexable" boolean NOT NULL DEFAULT true -- ← — (cột mới) | [MỚI] Cho phép công cụ tìm kiếm lập chỉ mục route/module (VI). `published` là trạng thái cấu hình module, không phải robots index/noindex.
 );
 
 -- Cấu hình các module/widget hiển thị trên site.
@@ -661,7 +790,10 @@ CREATE TABLE "cic_config_modules_en" (
   "fields_seo_h1" varchar(255), -- ← fs_config_modules.fields_seo_h1 + fs_config_modules_en.fields_seo_h1 | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "fields_seo_h2" varchar(255), -- ← fs_config_modules.fields_seo_h2 + fs_config_modules_en.fields_seo_h2 | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "fields_seo_image_alt" varchar(255), -- ← fs_config_modules.fields_seo_image_alt + fs_config_modules_en.fields_seo_image_alt | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "value_seo_title" varchar(255) -- ← fs_config_modules.value_seo_title + fs_config_modules_en.value_seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "value_seo_title" varchar(255), -- ← fs_config_modules.value_seo_title + fs_config_modules_en.value_seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "value_seo_keyword" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Meta keywords cho route/module — workspace EN, khôi phục field tương ứng bị bỏ sót.
+  "value_seo_description" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Meta description cho route/module — workspace EN.
+  "seo_indexable" boolean NOT NULL DEFAULT true -- ← — (cột mới) | [MỚI] Cho phép lập chỉ mục route/module — workspace EN. Không dùng `published` thay cho robots policy.
 );
 
 -- Các khối nội dung (block) có thể chèn vào trang.
@@ -925,7 +1057,7 @@ CREATE TABLE "cic_contents_en" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- ← fs_contents.id / fs_contents_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
   "content" text, -- ← fs_contents.content | Nội dung chi tiết (thường là HTML).
   "tags" varchar(255), -- ← fs_contents.tags | Thẻ gắn với nội dung (dùng để phân loại/tìm kiếm).
-  "category_id" integer, -- ← fs_contents.category_id | ✅ FK CHUẨN: Bảng đích contents_categories tồn tại rõ ràng trong schema này — khai báo REFERENCES contents_categories(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "category_id" integer, -- ← fs_contents.category_id | ✅ FK CHUẨN: Bảng đích contents_categories_en tồn tại rõ ràng trong schema này — khai báo REFERENCES contents_categories_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "category_alias" varchar(255), -- ← fs_contents.category_alias | Alias của danh mục.
   "category_id_wrapper" varchar(255), -- ← fs_contents.category_id_wrapper | Mã danh mục cha bao ngoài (dùng cho breadcrumb/URL lồng nhau).
   "category_alias_wrapper" varchar(255), -- ← fs_contents.category_alias_wrapper | Alias bao ngoài của danh mục cha.
@@ -1022,7 +1154,7 @@ CREATE TABLE "cic_contents_categories_en" (
   "display_sharing" boolean NOT NULL, -- ← fs_contents_categories.display_sharing | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "name_display" varchar(255), -- ← fs_contents_categories.name_display | Tên hiển thị tùy chỉnh (có thể khác tên gốc).
   "is_comment" boolean NOT NULL, -- ← fs_contents_categories.is_comment | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
-  "parent_id" integer REFERENCES cic_contents_categories(id) ON DELETE SET NULL, -- ← fs_contents_categories.parent_id | Tự tham chiếu (self-reference) — sentinel 0 đã được dọn thành NULL trước khi migrate; cho phép NULL và khai báo REFERENCES contents_categories(id) ON DELETE SET NULL để tránh mồ côi cây phân cấp (0 = gốc không còn ý nghĩa FK hợp lệ trong Postgres).
+  "parent_id" integer REFERENCES cic_contents_categories_en(id) ON DELETE SET NULL, -- ← fs_contents_categories.parent_id | Tự tham chiếu (self-reference) — sentinel 0 đã được dọn thành NULL trước khi migrate; cho phép NULL và khai báo REFERENCES contents_categories_en(id) ON DELETE SET NULL để tránh mồ côi cây phân cấp (0 = gốc không còn ý nghĩa FK hợp lệ trong Postgres).
   "estore_id" integer, -- ← fs_contents_categories.estore_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Store reference. Referenced trong 12 file (chỉ đọc session tại libraries/fsmodels.php:175), không tìm thấy nơi set $_SESSION['estore_id']. Runtime verification required — không FK, không index.
   "category_id" integer, -- ← fs_contents_categories.category_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Không có dữ liệu. Ý nghĩa nghiệp vụ chưa xác định — không FK, không index.
   "name" varchar(255), -- ← fs_contents_categories.name + fs_contents_categories_en.name | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
@@ -1103,7 +1235,7 @@ CREATE TABLE "cic_news_en" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- ← fs_news.id / fs_news_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
   "content" text, -- ← fs_news.content | Nội dung chi tiết (thường là HTML).
   "tags" text, -- ← fs_news.tags | Thẻ gắn với nội dung (dùng để phân loại/tìm kiếm).
-  "category_id" integer, -- ← fs_news.category_id | ✅ FK CHUẨN: Bảng đích news_categories tồn tại rõ ràng trong schema này — khai báo REFERENCES news_categories(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "category_id" integer, -- ← fs_news.category_id | ✅ FK CHUẨN: Bảng đích news_categories_en tồn tại rõ ràng trong schema này — khai báo REFERENCES news_categories_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "category_alias" varchar(255), -- ← fs_news.category_alias | Alias của danh mục.
   "category_id_wrapper" varchar(255), -- ← fs_news.category_id_wrapper | Mã danh mục cha bao ngoài (dùng cho breadcrumb/URL lồng nhau).
   "category_alias_wrapper" varchar(255), -- ← fs_news.category_alias_wrapper | Alias bao ngoài của danh mục cha.
@@ -1205,7 +1337,7 @@ DROP TABLE IF EXISTS "cic_news_categories_en" CASCADE;
 CREATE TABLE "cic_news_categories_en" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- ← fs_news_categories.id / fs_news_categories_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
   "alias_wrapper" varchar(255), -- ← fs_news_categories.alias_wrapper | Alias bao ngoài, dùng cho việc bọc đường dẫn (ví dụ danh mục cha).
-  "parent_id" integer REFERENCES cic_news_categories(id) ON DELETE SET NULL, -- ← fs_news_categories.parent_id | Tự tham chiếu (self-reference) — sentinel 0 đã được dọn thành NULL trước khi migrate; cho phép NULL và khai báo REFERENCES news_categories(id) ON DELETE SET NULL để tránh mồ côi cây phân cấp (0 = gốc không còn ý nghĩa FK hợp lệ trong Postgres).
+  "parent_id" integer REFERENCES cic_news_categories_en(id) ON DELETE SET NULL, -- ← fs_news_categories.parent_id | Tự tham chiếu (self-reference) — sentinel 0 đã được dọn thành NULL trước khi migrate; cho phép NULL và khai báo REFERENCES news_categories_en(id) ON DELETE SET NULL để tránh mồ côi cây phân cấp (0 = gốc không còn ý nghĩa FK hợp lệ trong Postgres).
   "list_parents" varchar(255), -- ← fs_news_categories.list_parents | Danh sách mã các cấp cha (phân cấp).
   "level" integer NOT NULL, -- ← fs_news_categories.level | Cấp độ/mức độ phân cấp.
   "published" boolean NOT NULL, -- ← fs_news_categories.published | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
@@ -1535,7 +1667,7 @@ CREATE TABLE "cic_products_en" (
   "is_status" boolean, -- ← fs_products.is_status | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "latitude" numeric(9,6), -- ← fs_products.latitude | Đổi từ varchar sang numeric(9,6) để tính toán/toạ độ chính xác, hỗ trợ query khoảng cách (PostGIS) sau này.
   "longitude" numeric(9,6), -- ← fs_products.longitude | Đổi từ varchar sang numeric(9,6) để tính toán/toạ độ chính xác, hỗ trợ query khoảng cách (PostGIS) sau này.
-  "city_id" integer REFERENCES cic_cities(id), -- ← fs_products.city_id | ✅ FK CHUẨN: Bảng đích cities tồn tại rõ ràng trong schema này — khai báo REFERENCES cities(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "city_id" integer REFERENCES cic_cities_en(id), -- ← fs_products.city_id | ✅ FK CHUẨN: Bảng đích cities_en tồn tại rõ ràng trong schema này — khai báo REFERENCES cities_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "city_name" varchar(255), -- ← fs_products.city_name | Tên tỉnh/thành phố.
   "city_alias" varchar(255), -- ← fs_products.city_alias | Alias của tỉnh/thành phố.
   "colors" varchar(255), -- ← fs_products.colors | Danh sách/thông tin màu sắc.
@@ -1548,7 +1680,7 @@ CREATE TABLE "cic_products_en" (
   "file_driver" varchar(255), -- ← fs_products.file_driver | Tệp driver đính kèm.
   "file_demo" varchar(255), -- ← fs_products.file_demo | Tệp demo/bản dùng thử đính kèm.
   "name_captain" varchar(255), -- ← fs_products.name_captain | Tên người phụ trách/trưởng nhóm.
-  "types_id" integer, -- ← fs_products.types_id | ✅ FK CHUẨN: Ép kiểu từ VARCHAR sang INTEGER — dữ liệu đã kiểm tra không có rác, toàn bộ là số nguyên. Bảng đích products_types tồn tại trong schema này — khai báo REFERENCES products_types(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "types_id" integer, -- ← fs_products.types_id | ✅ FK CHUẨN: Ép kiểu từ VARCHAR sang INTEGER — dữ liệu đã kiểm tra không có rác, toàn bộ là số nguyên. Bảng đích products_types_en tồn tại trong schema này — khai báo REFERENCES products_types_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "products_relates" varchar(255), -- ← fs_products.products_relates | Sản phẩm liên quan (biến thể tên trường).
   "sub_name" varchar(255), -- ← fs_products.sub_name | Tên phụ/tên rút gọn bổ sung.
   "email_contact" varchar(255), -- ← fs_products.email_contact | Email nhận liên hệ.
@@ -1658,7 +1790,7 @@ CREATE TABLE "cic_products_categories_en" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- ← fs_products_categories.id / fs_products_categories_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
   "code" varchar(255), -- ← fs_products_categories.code | Mã định danh dạng chuỗi (mã code) của đối tượng.
   "level" integer, -- ← fs_products_categories.level | Cấp độ/mức độ phân cấp.
-  "parent_id" integer REFERENCES cic_products_categories(id) ON DELETE SET NULL, -- ← fs_products_categories.parent_id | Tự tham chiếu (self-reference) — sentinel 0 đã được dọn thành NULL trước khi migrate; cho phép NULL và khai báo REFERENCES products_categories(id) ON DELETE SET NULL để tránh mồ côi cây phân cấp (0 = gốc không còn ý nghĩa FK hợp lệ trong Postgres).
+  "parent_id" integer REFERENCES cic_products_categories_en(id) ON DELETE SET NULL, -- ← fs_products_categories.parent_id | Tự tham chiếu (self-reference) — sentinel 0 đã được dọn thành NULL trước khi migrate; cho phép NULL và khai báo REFERENCES products_categories_en(id) ON DELETE SET NULL để tránh mồ côi cây phân cấp (0 = gốc không còn ý nghĩa FK hợp lệ trong Postgres).
   "published" boolean, -- ← fs_products_categories.published | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "image" varchar(250), -- ← fs_products_categories.image | Đường dẫn ảnh chính.
   "icon" varchar(250), -- ← fs_products_categories.icon | Đường dẫn/tên biểu tượng (icon).
@@ -1667,7 +1799,7 @@ CREATE TABLE "cic_products_categories_en" (
   "updated_time" timestamptz, -- ← fs_products_categories.updated_time | Đổi datetime → timestamptz; nên có trigger auto-update khi UPDATE row.
   "show_in_homepage" boolean, -- ← fs_products_categories.show_in_homepage | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "show_in_footer" boolean, -- ← fs_products_categories.show_in_footer | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
-  "root_id" integer REFERENCES cic_products_categories(id) ON DELETE SET NULL, -- ← fs_products_categories.root_id | ✅ FK CHUẨN (tự tham chiếu): Bảng đích products_categories chính là bảng này — khai báo REFERENCES products_categories(id) ON DELETE SET NULL. LƯU Ý: nếu dữ liệu cũ dùng sentinel 0 cho "không có cha/gốc", cần dọn 0→NULL trước khi migrate (giống 5 bảng cây phân cấp đã áp dụng: areas, menus_admin, contents_categories, news_categories, products_categories).
+  "root_id" integer REFERENCES cic_products_categories_en(id) ON DELETE SET NULL, -- ← fs_products_categories.root_id | ✅ FK CHUẨN (tự tham chiếu): Bảng đích products_categories chính là bảng này — khai báo REFERENCES products_categories_en(id) ON DELETE SET NULL. LƯU Ý: nếu dữ liệu cũ dùng sentinel 0 cho "không có cha/gốc", cần dọn 0→NULL trước khi migrate (giống 5 bảng cây phân cấp đã áp dụng: areas, menus_admin, contents_categories, news_categories, products_categories).
   "root_alias" varchar(100), -- ← fs_products_categories.root_alias | Alias của mục gốc (cấp cao nhất).
   "list_parents" varchar(255), -- ← fs_products_categories.list_parents | Danh sách mã các cấp cha (phân cấp).
   "alias_wrapper" varchar(255), -- ← fs_products_categories.alias_wrapper | Alias bao ngoài, dùng cho việc bọc đường dẫn (ví dụ danh mục cha).
@@ -1782,7 +1914,7 @@ CREATE TABLE "cic_products_images" (
 DROP TABLE IF EXISTS "cic_products_images_en" CASCADE;
 CREATE TABLE "cic_products_images_en" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- ← fs_products_images.id / fs_products_images_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
-  "record_id" integer REFERENCES cic_products(id), -- ← fs_products_images.record_id | ✅ FK CHUẨN: Bảng đích products tồn tại rõ ràng trong schema này — khai báo REFERENCES products(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "record_id" integer REFERENCES cic_products_en(id), -- ← fs_products_images.record_id | ✅ FK CHUẨN: Bảng đích products_en tồn tại rõ ràng trong schema này — khai báo REFERENCES products_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "session_id" varchar(255), -- ← fs_products_images.session_id | ℹ️ KHÔNG PHẢI KHOÁ NGOẠI THẬT — Đây là chuỗi định danh phiên làm việc tạm thời (session id, thường do PHP session hoặc client tự sinh) dùng để nhóm các bản ghi tạm trước khi có record_id chính thức, KHÔNG trỏ tới một bảng dữ liệu nào. Không có bảng "sessions" trong hệ thống — không FK, không cần index cho mục đích tham chiếu (nếu cần tra cứu nhanh theo session thì đã có sẵn ở nhóm index alias/FK khác nếu áp dụng).
   "image" varchar(255), -- ← fs_products_images.image | Đường dẫn ảnh chính.
   "ordering" integer, -- ← fs_products_images.ordering | Thứ tự sắp xếp hiển thị.
@@ -1885,7 +2017,8 @@ CREATE TABLE "cic_products_types" (
   "tablenames" varchar(225), -- ← fs_products_types.tablenames | Tên các bảng liên kết (có thể nhiều bảng).
   "name" varchar(255), -- ← fs_products_types.name + fs_products_types_en.name | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "alias" varchar(255), -- ← fs_products_types.alias + fs_products_types_en.alias | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "description" text -- ← fs_products_types.description + fs_products_types_en.description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "description" text, -- ← fs_products_types.description + fs_products_types_en.description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "updated_time" timestamptz NULL DEFAULT NULL -- ← — (cột mới) | [MỚI] Thời gian cập nhật gần nhất, dùng cho list hiển thị và ghi khi form lưu. Nullable ở migration đầu; legacy giữ NULL tới lần sửa đầu tiên.
 );
 
 -- Loại/dòng sản phẩm.
@@ -1899,7 +2032,8 @@ CREATE TABLE "cic_products_types_en" (
   "tablenames" varchar(225), -- ← fs_products_types.tablenames | Tên các bảng liên kết (có thể nhiều bảng).
   "name" varchar(255), -- ← fs_products_types.name + fs_products_types_en.name | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "alias" varchar(255), -- ← fs_products_types.alias + fs_products_types_en.alias | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "description" text -- ← fs_products_types.description + fs_products_types_en.description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "description" text, -- ← fs_products_types.description + fs_products_types_en.description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "updated_time" timestamptz NULL DEFAULT NULL -- ← — (cột mới) | [MỚI] Thời gian cập nhật gần nhất — workspace EN. Cần cơ chế cập nhật nhất quán khi triển khai.
 );
 
 -- Yêu cầu liên hệ/tư vấn về một sản phẩm cụ thể từ khách hàng.
@@ -1956,7 +2090,9 @@ CREATE TABLE "cic_manufactories" (
   "seo_title" varchar(255), -- ← fs_manufactories.seo_title + fs_manufactories_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_manufactories.seo_keyword + fs_manufactories_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_description" varchar(255), -- ← fs_manufactories.seo_description + fs_manufactories_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "content" text -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "content" text, -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "country" varchar(255) NULL DEFAULT NULL, -- ← — (cột mới) | [MỚI] Quốc gia sản xuất — form Hãng sản xuất đang có field này nhưng DB chưa có. Nullable, không tự sinh dữ liệu cho bản ghi legacy.
+  "website" varchar(2048) NULL DEFAULT NULL -- ← — (cột mới) | [MỚI] Website chính thức của Hãng. Nullable; URL được validate/render ở tầng ứng dụng.
 );
 
 -- Nhà sản xuất / nhà máy / thương hiệu sản phẩm.
@@ -1983,7 +2119,9 @@ CREATE TABLE "cic_manufactories_en" (
   "seo_title" varchar(255), -- ← fs_manufactories.seo_title + fs_manufactories_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_manufactories.seo_keyword + fs_manufactories_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_description" varchar(255), -- ← fs_manufactories.seo_description + fs_manufactories_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "content" text -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "content" text, -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "country" varchar(255) NULL DEFAULT NULL, -- ← — (cột mới) | [MỚI] Quốc gia sản xuất — workspace EN, giữ đúng contract tương ứng với bảng VI.
+  "website" varchar(2048) NULL DEFAULT NULL -- ← — (cột mới) | [MỚI] Website chính thức của Hãng — workspace EN. Không backfill nội dung không tồn tại.
 );
 
 -- Đơn hàng của khách.
@@ -2119,7 +2257,7 @@ CREATE TABLE "cic_banners" (
 DROP TABLE IF EXISTS "cic_banners_en" CASCADE;
 CREATE TABLE "cic_banners_en" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- ← fs_banners.id / fs_banners_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
-  "category_id" integer, -- ← fs_banners.category_id | ✅ FK CHUẨN: Bảng đích banners_categories tồn tại rõ ràng trong schema này — khai báo REFERENCES banners_categories(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "category_id" integer, -- ← fs_banners.category_id | ✅ FK CHUẨN: Bảng đích banners_categories_en tồn tại rõ ràng trong schema này — khai báo REFERENCES banners_categories_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "type" integer, -- ← fs_banners.type | Loại/phân loại của bản ghi.
   "image" varchar(255), -- ← fs_banners.image | Đường dẫn ảnh chính.
   "icon" varchar(255), -- ← fs_banners.icon | Đường dẫn/tên biểu tượng (icon).
@@ -2239,7 +2377,7 @@ CREATE TABLE "cic_slideshow_en" (
   "edited_time" timestamptz, -- ← fs_slideshow.edited_time | Đổi datetime → timestamptz; nên có trigger auto-update khi UPDATE row.
   "published" boolean, -- ← fs_slideshow.published | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "ordering" integer, -- ← fs_slideshow.ordering | Thứ tự sắp xếp hiển thị.
-  "category_id" integer, -- ← fs_slideshow.category_id | ✅ FK CHUẨN: Bảng đích slideshow_categories tồn tại rõ ràng trong schema này — khai báo REFERENCES slideshow_categories(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "category_id" integer, -- ← fs_slideshow.category_id | ✅ FK CHUẨN: Bảng đích slideshow_categories_en tồn tại rõ ràng trong schema này — khai báo REFERENCES slideshow_categories_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "video" varchar(255), -- ← fs_slideshow.video | Đường dẫn/nội dung video.
   "name" varchar(255), -- ← fs_slideshow.name + fs_slideshow_en.name | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "summary" text -- ← fs_slideshow.summary + fs_slideshow_en.summary | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
@@ -2598,7 +2736,9 @@ CREATE TABLE "cic_services" (
   "keywords" varchar(255), -- ← fs_services.keywords + fs_services_en.keywords | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_title" varchar(255), -- ← fs_services.seo_title + fs_services_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_services.seo_keyword + fs_services_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "seo_description" varchar(255) -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "seo_description" varchar(255), -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "code" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Mã dịch vụ dùng cho list, tìm kiếm, preview, quick edit và thông báo thao tác. Nullable ở migration đầu; cần rule backfill ổn định trước khi siết NOT NULL.
+  "service_status" varchar(20) NULL DEFAULT 'inactive' CHECK ("service_status" IN ('active','inactive','archived')) -- ← — (cột mới) | [MỚI] Vòng đời cung cấp dịch vụ (tabs/filter, kích hoạt/tạm ngừng/lưu trữ). `published` chỉ giữ nghĩa nháp/xuất bản nên không dùng chung cho vòng đời này.
 );
 
 -- Dịch vụ mà công ty cung cấp.
@@ -2640,7 +2780,25 @@ CREATE TABLE "cic_services_en" (
   "keywords" varchar(255), -- ← fs_services.keywords + fs_services_en.keywords | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_title" varchar(255), -- ← fs_services.seo_title + fs_services_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_services.seo_keyword + fs_services_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "seo_description" varchar(255) -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "seo_description" varchar(255), -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "code" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Mã dịch vụ — workspace EN. Không tự sao chép code VI nếu hai workspace không dùng chung identity nghiệp vụ.
+  "service_status" varchar(20) NULL DEFAULT 'inactive' CHECK ("service_status" IN ('active','inactive','archived')) -- ← — (cột mới) | [MỚI] Vòng đời cung cấp dịch vụ — workspace EN. Dùng CHECK thay PostgreSQL enum để migration dễ rollback.
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Dịch vụ (VI) ↔ Sản phẩm (VI), có thứ tự.
+DROP TABLE IF EXISTS "cic_services_products_rel" CASCADE;
+CREATE TABLE "cic_services_products_rel" (
+  "service_id" integer NOT NULL REFERENCES cic_services(id) ON DELETE CASCADE, -- ← — (bảng mới) | Dịch vụ VI sở hữu quan hệ.
+  "product_id" integer NOT NULL REFERENCES cic_products(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Sản phẩm VI liên quan.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự hiển thị sản phẩm trong dịch vụ.
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Dịch vụ (EN) ↔ Sản phẩm (EN), có thứ tự — độc lập workspace EN.
+DROP TABLE IF EXISTS "cic_services_products_rel_en" CASCADE;
+CREATE TABLE "cic_services_products_rel_en" (
+  "service_id" integer NOT NULL REFERENCES cic_services_en(id) ON DELETE CASCADE, -- ← — (bảng mới) | Dịch vụ EN sở hữu quan hệ.
+  "product_id" integer NOT NULL REFERENCES cic_products_en(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Sản phẩm EN liên quan.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự hiển thị sản phẩm trong dịch vụ.
 );
 
 -- Thư viện ảnh (album).
@@ -2795,7 +2953,7 @@ CREATE TABLE "cic_image_en" (
   "is_status" boolean, -- ← fs_image.is_status | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "latitude" numeric(9,6), -- ← fs_image.latitude | Đổi từ varchar sang numeric(9,6) để tính toán/toạ độ chính xác, hỗ trợ query khoảng cách (PostGIS) sau này.
   "longitude" numeric(9,6), -- ← fs_image.longitude | Đổi từ varchar sang numeric(9,6) để tính toán/toạ độ chính xác, hỗ trợ query khoảng cách (PostGIS) sau này.
-  "city_id" integer REFERENCES cic_cities(id), -- ← fs_image.city_id | ✅ FK CHUẨN: Bảng đích cities tồn tại rõ ràng trong schema này — khai báo REFERENCES cities(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "city_id" integer REFERENCES cic_cities_en(id), -- ← fs_image.city_id | ✅ FK CHUẨN: Bảng đích cities_en tồn tại rõ ràng trong schema này — khai báo REFERENCES cities_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "city_name" varchar(255), -- ← fs_image.city_name | Tên tỉnh/thành phố.
   "city_alias" varchar(255), -- ← fs_image.city_alias | Alias của tỉnh/thành phố.
   "district_alias" varchar(255), -- ← fs_image.district_alias | Alias của quận/huyện.
@@ -2976,7 +3134,7 @@ CREATE TABLE "cic_image_images_en" (
   "is_status" boolean, -- ← fs_image_images.is_status | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
   "latitude" numeric(9,6), -- ← fs_image_images.latitude | Đổi từ varchar sang numeric(9,6) để tính toán/toạ độ chính xác, hỗ trợ query khoảng cách (PostGIS) sau này.
   "longitude" numeric(9,6), -- ← fs_image_images.longitude | Đổi từ varchar sang numeric(9,6) để tính toán/toạ độ chính xác, hỗ trợ query khoảng cách (PostGIS) sau này.
-  "city_id" integer REFERENCES cic_cities(id), -- ← fs_image_images.city_id | ✅ FK CHUẨN: Bảng đích cities tồn tại rõ ràng trong schema này — khai báo REFERENCES cities(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "city_id" integer REFERENCES cic_cities_en(id), -- ← fs_image_images.city_id | ✅ FK CHUẨN: Bảng đích cities_en tồn tại rõ ràng trong schema này — khai báo REFERENCES cities_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "city_name" varchar(255), -- ← fs_image_images.city_name | Tên tỉnh/thành phố.
   "city_alias" varchar(255), -- ← fs_image_images.city_alias | Alias của tỉnh/thành phố.
   "district_alias" varchar(255), -- ← fs_image_images.district_alias | Alias của quận/huyện.
@@ -2986,7 +3144,7 @@ CREATE TABLE "cic_image_images_en" (
   "icon" varchar(255), -- ← fs_image_images.icon | Đường dẫn/tên biểu tượng (icon).
   "application" varchar(255), -- ← fs_image_images.application | Tên/mã ứng dụng (component) liên quan.
   "session_id" varchar(255), -- ← fs_image_images.session_id | ℹ️ KHÔNG PHẢI KHOÁ NGOẠI THẬT — Đây là chuỗi định danh phiên làm việc tạm thời (session id, thường do PHP session hoặc client tự sinh) dùng để nhóm các bản ghi tạm trước khi có record_id chính thức, KHÔNG trỏ tới một bảng dữ liệu nào. Không có bảng "sessions" trong hệ thống — không FK, không cần index cho mục đích tham chiếu (nếu cần tra cứu nhanh theo session thì đã có sẵn ở nhóm index alias/FK khác nếu áp dụng).
-  "record_id" integer REFERENCES cic_image(id), -- ← fs_image_images.record_id | ✅ FK CHUẨN: Bảng đích image tồn tại rõ ràng trong schema này — khai báo REFERENCES image(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "record_id" integer REFERENCES cic_image_en(id), -- ← fs_image_images.record_id | ✅ FK CHUẨN: Bảng đích image_en tồn tại rõ ràng trong schema này — khai báo REFERENCES image_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
   "buy_status_id" integer, -- ← fs_image_images.buy_status_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Không có dữ liệu. Không tìm thấy trong PHP source, chỉ tồn tại ở schema dump. Ứng viên xoá (CANDIDATE FOR REMOVAL) sau khi backup và xác nhận runtime — không FK, không index. Cần xem xét thêm nếu sau này có tài liệu xác nhận nghiệp vụ (hiện không referenced trong code, luôn = 0).
   "district_id" integer, -- ← fs_image_images.district_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Không có dữ liệu. Ý nghĩa nghiệp vụ chưa xác định — không FK, không index.
   "name" varchar(255), -- ← fs_image_images.name + fs_image_images_en.name | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
@@ -3024,6 +3182,123 @@ CREATE TABLE "cic_video" (
   "course_id" integer, -- ← fs_video.course_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Course reference. 10 dòng có dữ liệu (demo cũ 2017). Referenced trong 6 file với CMS Course controller/view (cms/modules/course/controllers/course.php). Không có bảng courses trong MySQL cũ nên không FK, không index.
   "course_category_id" integer, -- ← fs_video.course_category_id | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Course category reference. Referenced trong 6 file với CMS Course controller/view. Không FK, không index.
   "course_name" varchar(255) -- ← fs_video.course_name | ⚠️ THIẾU BẢNG THAM CHIẾU — LEGACY: Course name reference (VD: Wave Alpha, SH mode, Winner...). Referenced trong 6 file với CMS Course controller/view. Không FK, không index.
+);
+
+-- [BẢNG MỚI] Thư viện media tập trung (Media Library) — asset gốc dùng chung cho picker và các content module.
+DROP TABLE IF EXISTS "cic_media_assets" CASCADE;
+CREATE TABLE "cic_media_assets" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "filename" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên file gốc.
+  "media_type" varchar(20) NOT NULL CHECK ("media_type" IN ('image','video','document')), -- ← — (bảng mới) | Loại media.
+  "mime_type" varchar(150) NOT NULL, -- ← — (bảng mới) | MIME type.
+  "storage_path" text NOT NULL, -- ← — (bảng mới) | Đường dẫn lưu trữ.
+  "thumbnail_path" text NULL, -- ← — (bảng mới) | Đường dẫn ảnh thumbnail.
+  "file_size_bytes" bigint NOT NULL CHECK ("file_size_bytes" >= 0), -- ← — (bảng mới) | Kích thước file (bytes).
+  "width" integer NULL CHECK ("width" > 0), -- ← — (bảng mới) | Chiều rộng (ảnh/video).
+  "height" integer NULL CHECK ("height" > 0), -- ← — (bảng mới) | Chiều cao (ảnh/video).
+  "duration_seconds" numeric(12,3) NULL CHECK ("duration_seconds" >= 0), -- ← — (bảng mới) | Thời lượng video.
+  "credit_author" varchar(255) NULL, -- ← — (bảng mới) | Tác giả/nguồn ảnh.
+  "license_type" varchar(30) NULL, -- ← — (bảng mới) | Loại giấy phép sử dụng.
+  "license_expiry" date NULL, -- ← — (bảng mới) | Ngày hết hạn giấy phép.
+  "tags" text[] NOT NULL DEFAULT '{}', -- ← — (bảng mới) | Thẻ gắn asset.
+  "workflow_status" varchar(20) NOT NULL DEFAULT 'processing', -- ← — (bảng mới) | Trạng thái xử lý asset.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người upload.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "deleted_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm xoá mềm.
+  "legacy_source_table" varchar(100) NULL, -- ← — (bảng mới) | Bảng nguồn khi import từ legacy.
+  "legacy_source_id" bigint NULL, -- ← — (bảng mới) | ID bản ghi nguồn legacy.
+  "legacy_path" text NULL -- ← — (bảng mới) | Đường dẫn/URL legacy giữ lại.
+);
+
+-- [BẢNG MỚI] Metadata hiển thị của asset theo từng locale (title/alt/caption).
+DROP TABLE IF EXISTS "cic_media_asset_translations" CASCADE;
+CREATE TABLE "cic_media_asset_translations" (
+  "asset_id" bigint NOT NULL REFERENCES cic_media_assets(id) ON DELETE CASCADE, -- ← — (bảng mới) | Asset gốc.
+  "locale" varchar(5) NOT NULL, -- ← — (bảng mới) | Mã locale.
+  "title" varchar(255) NOT NULL, -- ← — (bảng mới) | Tiêu đề hiển thị.
+  "description" text NULL, -- ← — (bảng mới) | Mô tả.
+  "alt_text" text NOT NULL DEFAULT '', -- ← — (bảng mới) | Alt text (SEO/accessibility).
+  "caption" text NULL, -- ← — (bảng mới) | Chú thích ảnh.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "updated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL -- ← — (bảng mới) | Người cập nhật.
+);
+
+-- [BẢNG MỚI] Thư mục tổ chức media theo workspace.
+DROP TABLE IF EXISTS "cic_media_folders" CASCADE;
+CREATE TABLE "cic_media_folders" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL, -- ← — (bảng mới) | Workspace VI/EN.
+  "name" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên thư mục.
+  "alias" varchar(150) NOT NULL, -- ← — (bảng mới) | Alias thư mục.
+  "icon" varchar(100) NULL, -- ← — (bảng mới) | Icon hiển thị.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0), -- ← — (bảng mới) | Thứ tự sắp xếp.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  CONSTRAINT "uq_cic_media_folders_workspace_alias" UNIQUE ("workspace", "alias")
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Thư mục ↔ Asset để tổ chức mà không copy file.
+DROP TABLE IF EXISTS "cic_media_folder_assets" CASCADE;
+CREATE TABLE "cic_media_folder_assets" (
+  "folder_id" bigint NOT NULL REFERENCES cic_media_folders(id) ON DELETE CASCADE, -- ← — (bảng mới) | Thư mục chứa asset.
+  "asset_id" bigint NOT NULL REFERENCES cic_media_assets(id) ON DELETE CASCADE, -- ← — (bảng mới) | Asset được đặt vào thư mục.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự trong thư mục.
+);
+
+-- [BẢNG MỚI] Album ảnh/video, có cover asset.
+DROP TABLE IF EXISTS "cic_media_albums" CASCADE;
+CREATE TABLE "cic_media_albums" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL, -- ← — (bảng mới) | Workspace VI/EN.
+  "title" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên album.
+  "alias" varchar(150) NOT NULL, -- ← — (bảng mới) | Alias album.
+  "description" text NULL, -- ← — (bảng mới) | Mô tả album.
+  "cover_asset_id" bigint NULL REFERENCES cic_media_assets(id) ON DELETE SET NULL, -- ← — (bảng mới) | Asset đại diện (cover).
+  "workflow_status" varchar(20) NOT NULL DEFAULT 'draft' CHECK ("workflow_status" IN ('draft','published','archived')), -- ← — (bảng mới) | Trạng thái album.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0), -- ← — (bảng mới) | Thứ tự sắp xếp.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  CONSTRAINT "uq_cic_media_albums_workspace_alias" UNIQUE ("workspace", "alias")
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Album ↔ Asset, có thứ tự hiển thị.
+DROP TABLE IF EXISTS "cic_media_album_assets" CASCADE;
+CREATE TABLE "cic_media_album_assets" (
+  "album_id" bigint NOT NULL REFERENCES cic_media_albums(id) ON DELETE CASCADE, -- ← — (bảng mới) | Album chứa asset.
+  "asset_id" bigint NOT NULL REFERENCES cic_media_assets(id) ON DELETE CASCADE, -- ← — (bảng mới) | Asset trong album.
+  "position" integer NOT NULL CHECK ("position" > 0) -- ← — (bảng mới) | Vị trí hiển thị.
+);
+
+-- [BẢNG MỚI] Lịch sử phiên bản khi Replace Global Asset — giữ nguyên asset ID, lưu bản cũ có audit.
+DROP TABLE IF EXISTS "cic_media_versions" CASCADE;
+CREATE TABLE "cic_media_versions" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "asset_id" bigint NOT NULL REFERENCES cic_media_assets(id) ON DELETE CASCADE, -- ← — (bảng mới) | Asset gốc.
+  "version_number" integer NOT NULL CHECK ("version_number" >= 1), -- ← — (bảng mới) | Số hiệu version.
+  "filename" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên file của version.
+  "storage_path" text NOT NULL, -- ← — (bảng mới) | Đường dẫn lưu trữ version.
+  "file_size_bytes" bigint NOT NULL CHECK ("file_size_bytes" >= 0), -- ← — (bảng mới) | Kích thước file.
+  "replacement_note" text NULL, -- ← — (bảng mới) | Ghi chú khi thay thế.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người thực hiện thay thế.
+  "created_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm tạo version.
+);
+
+-- [BẢNG MỚI · ĐỀ XUẤT] Biến thể kích thước/định dạng (crop, focal point) của asset.
+DROP TABLE IF EXISTS "cic_media_variants" CASCADE;
+CREATE TABLE "cic_media_variants" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "asset_id" bigint NOT NULL REFERENCES cic_media_assets(id) ON DELETE CASCADE, -- ← — (bảng mới) | Asset gốc.
+  "preset_name" varchar(50) NOT NULL, -- ← — (bảng mới) | Tên preset kích thước.
+  "width" integer NOT NULL CHECK ("width" > 0), -- ← — (bảng mới) | Chiều rộng biến thể.
+  "height" integer NOT NULL CHECK ("height" > 0), -- ← — (bảng mới) | Chiều cao biến thể.
+  "format" varchar(20) NOT NULL, -- ← — (bảng mới) | Định dạng file biến thể.
+  "storage_path" text NOT NULL, -- ← — (bảng mới) | Đường dẫn lưu trữ.
+  "file_size_bytes" bigint NOT NULL CHECK ("file_size_bytes" >= 0), -- ← — (bảng mới) | Kích thước file.
+  "focal_x" numeric(5,2) NULL CHECK ("focal_x" BETWEEN 0 AND 100), -- ← — (bảng mới) | Toạ độ focal point X (%).
+  "focal_y" numeric(5,2) NULL CHECK ("focal_y" BETWEEN 0 AND 100), -- ← — (bảng mới) | Toạ độ focal point Y (%).
+  "processing_status" varchar(20) NOT NULL DEFAULT 'processing' -- ← — (bảng mới) | Trạng thái xử lý biến thể.
 );
 
 -- Danh mục các ứng dụng/module chức năng cài đặt trong hệ thống (component).
@@ -3092,23 +3367,434 @@ CREATE TABLE "cic_year" (
   "ordering" integer -- ← fs_year.ordering | Thứ tự sắp xếp hiển thị.
 );
 
+-- [BẢNG MỚI] Page theo template, giữ pointer Draft/Published hiện hành.
+DROP TABLE IF EXISTS "cic_content_pages" CASCADE;
+CREATE TABLE "cic_content_pages" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL CHECK ("workspace" IN ('vi','en')), -- ← — (bảng mới) | Workspace của Page.
+  "code" varchar(100) NOT NULL, -- ← — (bảng mới) | Mã định danh Page.
+  "name" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên Page.
+  "slug" varchar(512) NOT NULL, -- ← — (bảng mới) | Đường dẫn Page.
+  "page_type" varchar(50) NOT NULL, -- ← — (bảng mới) | Loại Page theo registry.
+  "template_key" varchar(100) NOT NULL, -- ← — (bảng mới) | Template áp dụng.
+  "system_defined" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Page hệ thống, không cho xoá.
+  "draft_revision_id" bigint NULL, -- ← — (bảng mới) | Con trỏ revision Draft hiện hành.
+  "published_revision_id" bigint NULL, -- ← — (bảng mới) | Con trỏ revision Published hiện hành.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "updated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người cập nhật.
+  CONSTRAINT "uq_cic_content_pages_workspace_code" UNIQUE ("workspace", "code"),
+  CONSTRAINT "uq_cic_content_pages_workspace_slug" UNIQUE ("workspace", "slug")
+);
+
+-- [BẢNG MỚI] Revision của Page — lần sửa Draft tiếp theo không ghi đè nội dung đang Published.
+DROP TABLE IF EXISTS "cic_content_page_revisions" CASCADE;
+CREATE TABLE "cic_content_page_revisions" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "page_id" bigint NOT NULL REFERENCES cic_content_pages(id) ON DELETE CASCADE, -- ← — (bảng mới) | Page sở hữu revision.
+  "version_number" integer NOT NULL CHECK ("version_number" >= 1), -- ← — (bảng mới) | Số hiệu revision, UNIQUE (page_id, version_number).
+  "state" varchar(20) NOT NULL CHECK ("state" IN ('draft','published')), -- ← — (bảng mới) | Trạng thái revision.
+  "seo_title" varchar(255) NOT NULL DEFAULT '', -- ← — (bảng mới) | SEO title snapshot.
+  "seo_description" text NOT NULL DEFAULT '', -- ← — (bảng mới) | SEO description snapshot.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo revision.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "published_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm publish.
+  "published_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL -- ← — (bảng mới) | Người publish.
+);
+
+-- [BẢNG MỚI] Section trong một revision, config theo template registry trong code.
+DROP TABLE IF EXISTS "cic_content_page_sections" CASCADE;
+CREATE TABLE "cic_content_page_sections" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "revision_id" bigint NOT NULL REFERENCES cic_content_page_revisions(id) ON DELETE CASCADE, -- ← — (bảng mới) | Revision sở hữu section.
+  "section_key" varchar(150) NOT NULL, -- ← — (bảng mới) | Khoá section theo template.
+  "section_type" varchar(100) NOT NULL, -- ← — (bảng mới) | Loại section/component.
+  "position" integer NOT NULL CHECK ("position" > 0), -- ← — (bảng mới) | Thứ tự section.
+  "config" jsonb NOT NULL DEFAULT '{}'::jsonb, -- ← — (bảng mới) | Cấu hình section (không GIN index nếu không query theo key).
+  CONSTRAINT "uq_cic_content_page_sections_revision_id_section_key" UNIQUE ("revision_id", "section_key"),
+  CONSTRAINT "uq_cic_content_page_sections_revision_id_position" UNIQUE ("revision_id", "position")
+);
+
+-- [BẢNG MỚI] Entity được chọn thủ công trong một section (product/news/service/project/partner/event), có thứ tự.
+DROP TABLE IF EXISTS "cic_content_page_section_references" CASCADE;
+CREATE TABLE "cic_content_page_section_references" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "section_id" bigint NOT NULL REFERENCES cic_content_page_sections(id) ON DELETE CASCADE, -- ← — (bảng mới) | Section sở hữu reference.
+  "entity_type" varchar(30) NOT NULL, -- ← — (bảng mới) | product / news / service / project / partner / event.
+  "entity_id" bigint NOT NULL, -- ← — (bảng mới) | ID entity được chọn (polymorphic, không FK cứng).
+  "position" integer NOT NULL CHECK ("position" > 0) -- ← — (bảng mới) | Thứ tự hiển thị.
+);
+
+-- [BẢNG MỚI] Dự án (VI) — module mới, không có bảng legacy phù hợp để mở rộng.
+DROP TABLE IF EXISTS "cic_projects" CASCADE;
+CREATE TABLE "cic_projects" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "title" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên dự án.
+  "alias" varchar(255) NOT NULL UNIQUE, -- ← — (bảng mới) | Alias dự án.
+  "tagline" text NULL, -- ← — (bảng mới) | Câu giới thiệu ngắn.
+  "summary" text NULL, -- ← — (bảng mới) | Tóm tắt dự án.
+  "content" text NULL, -- ← — (bảng mới) | Nội dung chi tiết (Rich Text).
+  "sector" varchar(150) NULL, -- ← — (bảng mới) | Lĩnh vực dự án.
+  "solution" varchar(255) NULL, -- ← — (bảng mới) | Giải pháp áp dụng.
+  "technologies" text[] NOT NULL DEFAULT '{}', -- ← — (bảng mới) | Công nghệ áp dụng, giữ thứ tự (danh sách tự do, không phải FK).
+  "customer_name" varchar(255) NULL, -- ← — (bảng mới) | Tên khách hàng.
+  "location" varchar(255) NULL, -- ← — (bảng mới) | Địa điểm triển khai.
+  "start_year" smallint NULL, -- ← — (bảng mới) | Năm bắt đầu.
+  "end_year" smallint NULL CHECK ("end_year" >= "start_year"), -- ← — (bảng mới) | Năm kết thúc.
+  "is_ongoing" boolean NOT NULL DEFAULT false CHECK (NOT "is_ongoing" OR "end_year" IS NULL), -- ← — (bảng mới) | Dự án đang triển khai.
+  "image" varchar(500) NULL, -- ← — (bảng mới) | Ảnh đại diện.
+  "gallery" jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof("gallery") = 'array'), -- ← — (bảng mới) | Bộ sưu tập ảnh.
+  "video_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề video.
+  "video_url" text NULL, -- ← — (bảng mới) | Link video.
+  "video_thumbnail" varchar(500) NULL, -- ← — (bảng mới) | Ảnh thumbnail video.
+  "document_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề tài liệu đính kèm.
+  "document_url" text NULL, -- ← — (bảng mới) | Link tài liệu.
+  "document_size" varchar(50) NULL, -- ← — (bảng mới) | Kích thước tài liệu (derived).
+  "is_featured" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Dự án nổi bật.
+  "published" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Trạng thái xuất bản.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0), -- ← — (bảng mới) | Thứ tự hiển thị.
+  "seo_title" varchar(255) NULL, -- ← — (bảng mới) | SEO title.
+  "seo_keyword" varchar(255) NULL, -- ← — (bảng mới) | SEO keywords.
+  "seo_description" varchar(500) NULL, -- ← — (bảng mới) | SEO description.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "updated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người cập nhật.
+  "created_time" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_time" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm cập nhật.
+);
+
+-- [BẢNG MỚI] Dự án (EN) — cùng cấu trúc cic_projects, dataset độc lập, không FK chéo VI/EN.
+DROP TABLE IF EXISTS "cic_projects_en" CASCADE;
+CREATE TABLE "cic_projects_en" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "title" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên dự án.
+  "alias" varchar(255) NOT NULL UNIQUE, -- ← — (bảng mới) | Alias dự án.
+  "tagline" text NULL, -- ← — (bảng mới) | Câu giới thiệu ngắn.
+  "summary" text NULL, -- ← — (bảng mới) | Tóm tắt dự án.
+  "content" text NULL, -- ← — (bảng mới) | Nội dung chi tiết (Rich Text).
+  "sector" varchar(150) NULL, -- ← — (bảng mới) | Lĩnh vực dự án.
+  "solution" varchar(255) NULL, -- ← — (bảng mới) | Giải pháp áp dụng.
+  "technologies" text[] NOT NULL DEFAULT '{}', -- ← — (bảng mới) | Công nghệ áp dụng, giữ thứ tự (danh sách tự do, không phải FK).
+  "customer_name" varchar(255) NULL, -- ← — (bảng mới) | Tên khách hàng.
+  "location" varchar(255) NULL, -- ← — (bảng mới) | Địa điểm triển khai.
+  "start_year" smallint NULL, -- ← — (bảng mới) | Năm bắt đầu.
+  "end_year" smallint NULL CHECK ("end_year" >= "start_year"), -- ← — (bảng mới) | Năm kết thúc.
+  "is_ongoing" boolean NOT NULL DEFAULT false CHECK (NOT "is_ongoing" OR "end_year" IS NULL), -- ← — (bảng mới) | Dự án đang triển khai.
+  "image" varchar(500) NULL, -- ← — (bảng mới) | Ảnh đại diện.
+  "gallery" jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof("gallery") = 'array'), -- ← — (bảng mới) | Bộ sưu tập ảnh.
+  "video_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề video.
+  "video_url" text NULL, -- ← — (bảng mới) | Link video.
+  "video_thumbnail" varchar(500) NULL, -- ← — (bảng mới) | Ảnh thumbnail video.
+  "document_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề tài liệu đính kèm.
+  "document_url" text NULL, -- ← — (bảng mới) | Link tài liệu.
+  "document_size" varchar(50) NULL, -- ← — (bảng mới) | Kích thước tài liệu (derived).
+  "is_featured" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Dự án nổi bật.
+  "published" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Trạng thái xuất bản.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0), -- ← — (bảng mới) | Thứ tự hiển thị.
+  "seo_title" varchar(255) NULL, -- ← — (bảng mới) | SEO title.
+  "seo_keyword" varchar(255) NULL, -- ← — (bảng mới) | SEO keywords.
+  "seo_description" varchar(500) NULL, -- ← — (bảng mới) | SEO description.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "updated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người cập nhật.
+  "created_time" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_time" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm cập nhật.
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Dự án (VI) ↔ Sản phẩm (VI), có thứ tự.
+DROP TABLE IF EXISTS "cic_projects_products_rel" CASCADE;
+CREATE TABLE "cic_projects_products_rel" (
+  "project_id" bigint NOT NULL REFERENCES cic_projects(id) ON DELETE CASCADE, -- ← — (bảng mới) | Dự án VI.
+  "product_id" integer NOT NULL REFERENCES cic_products(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Sản phẩm VI liên quan.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự hiển thị.
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Dự án (EN) ↔ Sản phẩm (EN), tách độc lập theo workspace.
+DROP TABLE IF EXISTS "cic_projects_products_rel_en" CASCADE;
+CREATE TABLE "cic_projects_products_rel_en" (
+  "project_id" bigint NOT NULL REFERENCES cic_projects_en(id) ON DELETE CASCADE, -- ← — (bảng mới) | Dự án EN.
+  "product_id" integer NOT NULL REFERENCES cic_products_en(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Sản phẩm EN liên quan.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự hiển thị.
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Dự án (VI) ↔ Dịch vụ (VI), có thứ tự.
+DROP TABLE IF EXISTS "cic_projects_services_rel" CASCADE;
+CREATE TABLE "cic_projects_services_rel" (
+  "project_id" bigint NOT NULL REFERENCES cic_projects(id) ON DELETE CASCADE, -- ← — (bảng mới) | Dự án VI.
+  "service_id" integer NOT NULL REFERENCES cic_services(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Dịch vụ VI liên quan.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự hiển thị.
+);
+
+-- [BẢNG MỚI] Quan hệ N–N Dự án (EN) ↔ Dịch vụ (EN), tách độc lập theo workspace.
+DROP TABLE IF EXISTS "cic_projects_services_rel_en" CASCADE;
+CREATE TABLE "cic_projects_services_rel_en" (
+  "project_id" bigint NOT NULL REFERENCES cic_projects_en(id) ON DELETE CASCADE, -- ← — (bảng mới) | Dự án EN.
+  "service_id" integer NOT NULL REFERENCES cic_services_en(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Dịch vụ EN liên quan.
+  "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0) -- ← — (bảng mới) | Thứ tự hiển thị.
+);
+
+-- [BẢNG MỚI] CTA (Call-To-Action) reusable — các module khác chỉ lưu CTA reference.
+DROP TABLE IF EXISTS "cic_ctas" CASCADE;
+CREATE TABLE "cic_ctas" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL, -- ← — (bảng mới) | Workspace VI/EN.
+  "code" varchar(100) NOT NULL, -- ← — (bảng mới) | Mã CTA.
+  "admin_name" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên hiển thị trong CMS.
+  "display_text" varchar(100) NOT NULL, -- ← — (bảng mới) | Text hiển thị trên nút.
+  "description" text NULL, -- ← — (bảng mới) | Mô tả CTA.
+  "icon" varchar(100) NULL, -- ← — (bảng mới) | Icon (allowlist Lucide).
+  "style_variant" varchar(30) NOT NULL DEFAULT 'primary', -- ← — (bảng mới) | Biến thể style theo design system.
+  "action_type" varchar(40) NOT NULL, -- ← — (bảng mới) | open_form / download_file / send_email / redirect / scroll / call…
+  "action_config" jsonb NOT NULL DEFAULT '{}'::jsonb, -- ← — (bảng mới) | Payload action (URL, target, anchor, phone, email…).
+  "form_id" bigint NULL, -- ← — (bảng mới) | Bắt buộc khi action_type = open_form.
+  "media_asset_id" bigint NULL REFERENCES cic_media_assets(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Bắt buộc khi action_type = download_file.
+  "email_template_id" bigint NULL, -- ← — (bảng mới) | Bắt buộc khi action_type = send_email.
+  "status" varchar(20) NOT NULL DEFAULT 'draft', -- ← — (bảng mới) | active / inactive / draft / archived.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "deleted_at" timestamptz NULL, -- ← — (bảng mới) | Xoá mềm.
+  CONSTRAINT "uq_cic_ctas_workspace_code" UNIQUE ("workspace", "code")
+);
+
+-- [BẢNG MỚI] Định nghĩa Form — cấu hình gửi email, tạo customer request, version hiện hành.
+DROP TABLE IF EXISTS "cic_forms" CASCADE;
+CREATE TABLE "cic_forms" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL, -- ← — (bảng mới) | Workspace VI/EN.
+  "code" varchar(100) NOT NULL, -- ← — (bảng mới) | Mã Form.
+  "admin_name" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên hiển thị trong CMS.
+  "title" varchar(255) NOT NULL, -- ← — (bảng mới) | Tiêu đề Form.
+  "description" text NULL, -- ← — (bảng mới) | Mô tả Form.
+  "status" varchar(20) NOT NULL DEFAULT 'draft', -- ← — (bảng mới) | active / inactive / draft / archived.
+  "current_version" integer NOT NULL DEFAULT 1 CHECK ("current_version" >= 1), -- ← — (bảng mới) | Version hiện hành.
+  "create_customer_request" boolean NOT NULL DEFAULT true, -- ← — (bảng mới) | Tự tạo customer request khi submit.
+  "send_admin_email" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Gửi email cho admin khi submit.
+  "admin_emails" text[] NOT NULL DEFAULT '{}', -- ← — (bảng mới) | Danh sách email admin nhận.
+  "admin_email_template_id" bigint NULL, -- ← — (bảng mới) | Template email cho admin.
+  "send_confirmation_email" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Gửi email xác nhận cho người gửi.
+  "confirmation_email_template_id" bigint NULL, -- ← — (bảng mới) | Template email xác nhận.
+  "submit_button_text" varchar(100) NOT NULL DEFAULT 'Gửi thông tin', -- ← — (bảng mới) | Text nút submit.
+  "success_message" text NOT NULL, -- ← — (bảng mới) | Thông báo khi gửi thành công.
+  "redirect_url" text NULL, -- ← — (bảng mới) | URL chuyển hướng sau khi gửi.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "deleted_at" timestamptz NULL, -- ← — (bảng mới) | Xoá mềm.
+  CONSTRAINT "uq_cic_forms_workspace_code" UNIQUE ("workspace", "code")
+);
+
+-- [BẢNG MỚI] Field definition của Form (label, type, validation, options).
+DROP TABLE IF EXISTS "cic_form_fields" CASCADE;
+CREATE TABLE "cic_form_fields" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "form_id" bigint NOT NULL REFERENCES cic_forms(id) ON DELETE CASCADE, -- ← — (bảng mới) | Form sở hữu field.
+  "field_key" varchar(100) NOT NULL, -- ← — (bảng mới) | Khoá field.
+  "field_type" varchar(30) NOT NULL, -- ← — (bảng mới) | Loại field theo allowlist.
+  "role_type" varchar(30) NULL, -- ← — (bảng mới) | Vai trò field (VD: email liên hệ chính).
+  "label" varchar(255) NOT NULL, -- ← — (bảng mới) | Nhãn hiển thị.
+  "placeholder" varchar(255) NULL, -- ← — (bảng mới) | Placeholder.
+  "help_text" text NULL, -- ← — (bảng mới) | Text hướng dẫn.
+  "is_required" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Bắt buộc nhập.
+  "is_locked" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Không cho xoá/sửa field hệ thống.
+  "position" integer NOT NULL, -- ← — (bảng mới) | Thứ tự field.
+  "validation_config" jsonb NOT NULL DEFAULT '{}'::jsonb, -- ← — (bảng mới) | Cấu hình validate (allowlist key).
+  "options_config" jsonb NOT NULL DEFAULT '[]'::jsonb, -- ← — (bảng mới) | Options cho select/radio/checkbox.
+  CONSTRAINT "uq_cic_form_fields_form_id_field_key" UNIQUE ("form_id", "field_key"),
+  CONSTRAINT "uq_cic_form_fields_form_id_position" UNIQUE ("form_id", "position")
+);
+
+-- [BẢNG MỚI] Lượt gửi Form.
+DROP TABLE IF EXISTS "cic_form_submissions" CASCADE;
+CREATE TABLE "cic_form_submissions" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "form_id" bigint NOT NULL REFERENCES cic_forms(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Form được gửi.
+  "form_version" integer NOT NULL CHECK ("form_version" >= 1), -- ← — (bảng mới) | Version Form tại thời điểm gửi.
+  "source_type" varchar(50) NULL, -- ← — (bảng mới) | Nguồn gửi (trang, CTA…).
+  "source_id" bigint NULL, -- ← — (bảng mới) | ID nguồn gửi.
+  "source_path" text NULL, -- ← — (bảng mới) | Đường dẫn trang gửi.
+  "submitted_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm gửi.
+);
+
+-- [BẢNG MỚI] Giá trị từng field trong một submission, snapshot field_key theo version submit.
+DROP TABLE IF EXISTS "cic_form_submission_values" CASCADE;
+CREATE TABLE "cic_form_submission_values" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "submission_id" bigint NOT NULL REFERENCES cic_form_submissions(id) ON DELETE CASCADE, -- ← — (bảng mới) | Submission sở hữu giá trị.
+  "field_id" bigint NOT NULL REFERENCES cic_form_fields(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Field tương ứng.
+  "field_key" varchar(100) NOT NULL, -- ← — (bảng mới) | Snapshot key theo version submit.
+  "value_text" text NULL, -- ← — (bảng mới) | Giá trị dạng text.
+  "value_json" jsonb NULL, -- ← — (bảng mới) | Giá trị dạng cấu trúc (multi-select…).
+  "media_asset_id" bigint NULL REFERENCES cic_media_assets(id) ON DELETE RESTRICT -- ← — (bảng mới) | File upload (nếu field kiểu file).
+);
+
+-- [BẢNG MỚI] Trạng thái vận hành hợp nhất cho request từ nhiều nguồn (contact/product_contact/order/form_submission).
+DROP TABLE IF EXISTS "cic_customer_request_states" CASCADE;
+CREATE TABLE "cic_customer_request_states" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL, -- ← — (bảng mới) | Workspace VI/EN.
+  "source_type" varchar(30) NOT NULL CHECK ("source_type" IN ('contact','product_contact','order','form_submission')), -- ← — (bảng mới) | Bảng nguồn.
+  "source_id" bigint NOT NULL, -- ← — (bảng mới) | ID bản ghi nguồn (resolve theo allowlist, không FK đa hình).
+  "status" varchar(30) NOT NULL DEFAULT 'new', -- ← — (bảng mới) | Trạng thái xử lý.
+  "assigned_user_id" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người được phân công.
+  "priority" varchar(20) NOT NULL DEFAULT 'medium' CHECK ("priority" IN ('low','medium','high','urgent')), -- ← — (bảng mới) | Độ ưu tiên.
+  "tags" text[] NOT NULL DEFAULT '{}', -- ← — (bảng mới) | Thẻ gắn request.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo state.
+  "updated_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm cập nhật.
+);
+
+-- [BẢNG MỚI] Ghi chú nội bộ trên một customer request.
+DROP TABLE IF EXISTS "cic_customer_request_notes" CASCADE;
+CREATE TABLE "cic_customer_request_notes" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "request_state_id" bigint NOT NULL REFERENCES cic_customer_request_states(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Request được ghi chú.
+  "content" text NOT NULL, -- ← — (bảng mới) | Nội dung ghi chú (không rỗng sau trim).
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người ghi chú.
+  "created_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm ghi chú.
+);
+
+-- [BẢNG MỚI] Nhật ký thay đổi (append-only) của customer request — nguồn render timeline.
+DROP TABLE IF EXISTS "cic_customer_request_events" CASCADE;
+CREATE TABLE "cic_customer_request_events" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "request_state_id" bigint NOT NULL REFERENCES cic_customer_request_states(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Request liên quan.
+  "event_type" varchar(50) NOT NULL, -- ← — (bảng mới) | note / status / assignment / priority / tags changes.
+  "old_value" jsonb NULL, -- ← — (bảng mới) | Giá trị trước thay đổi.
+  "new_value" jsonb NULL, -- ← — (bảng mới) | Giá trị sau thay đổi.
+  "actor_id" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người thực hiện.
+  "created_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm phát sinh.
+);
+
+-- [BẢNG MỚI] Template email theo event/audience, giữ pointer Draft/Active version.
+DROP TABLE IF EXISTS "cic_email_templates" CASCADE;
+CREATE TABLE "cic_email_templates" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "workspace" varchar(5) NOT NULL, -- ← — (bảng mới) | Workspace VI/EN.
+  "name" varchar(255) NOT NULL, -- ← — (bảng mới) | Tên template.
+  "event_key" varchar(50) NOT NULL, -- ← — (bảng mới) | Event kích hoạt gửi (theo registry).
+  "audience" varchar(20) NOT NULL CHECK ("audience" IN ('customer','internal')), -- ← — (bảng mới) | Đối tượng nhận.
+  "status" varchar(20) NOT NULL DEFAULT 'draft', -- ← — (bảng mới) | draft / active / inactive / archived.
+  "draft_version_id" bigint NULL, -- ← — (bảng mới) | Con trỏ version Draft.
+  "active_version_id" bigint NULL, -- ← — (bảng mới) | Con trỏ version Active.
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người cập nhật.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "activated_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người kích hoạt version Active.
+  "activated_at" timestamptz NULL -- ← — (bảng mới) | Thời điểm kích hoạt.
+);
+
+-- [BẢNG MỚI] Version immutable của template (subject/content) — Save tạo version mới, Publish đổi active_version_id.
+DROP TABLE IF EXISTS "cic_email_template_versions" CASCADE;
+CREATE TABLE "cic_email_template_versions" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "template_id" bigint NOT NULL REFERENCES cic_email_templates(id) ON DELETE CASCADE, -- ← — (bảng mới) | Template sở hữu version.
+  "version_number" integer NOT NULL CHECK ("version_number" >= 1), -- ← — (bảng mới) | Số hiệu version, UNIQUE (template_id, version_number).
+  "subject" text NOT NULL, -- ← — (bảng mới) | Tiêu đề email (không rỗng sau trim).
+  "content" text NOT NULL, -- ← — (bảng mới) | Nội dung email (không rỗng sau trim).
+  "created_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người tạo version.
+  "created_at" timestamptz NOT NULL DEFAULT now() -- ← — (bảng mới) | Thời điểm tạo.
+);
+
+-- [BẢNG MỚI] Audit log quản trị dùng chung toàn hệ thống — actor, action, target, kết quả, request context, diff trước/sau.
+DROP TABLE IF EXISTS "cic_activity_logs" CASCADE;
+CREATE TABLE "cic_activity_logs" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- ← — (bảng mới) | Khoá chính UUID.
+  "occurred_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm phát sinh.
+  "actor_id" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người thực hiện (nếu có).
+  "actor_label" varchar(255) NULL, -- ← — (bảng mới) | Snapshot/fallback cho system/legacy actor.
+  "action_code" varchar(100) NOT NULL, -- ← — (bảng mới) | Mã hành động ổn định từ action registry.
+  "category" varchar(50) NOT NULL, -- ← — (bảng mới) | Nhóm hành động.
+  "severity" varchar(16) NOT NULL CHECK ("severity" IN ('low','medium','high','critical')), -- ← — (bảng mới) | Mức độ nghiêm trọng.
+  "is_sensitive" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Log có dữ liệu nhạy cảm cần redaction.
+  "entity_type" varchar(100) NOT NULL, -- ← — (bảng mới) | Loại entity mục tiêu.
+  "entity_id" varchar(100) NULL, -- ← — (bảng mới) | ID entity mục tiêu (hỗ trợ ID legacy/new khác kiểu).
+  "entity_title" text NULL, -- ← — (bảng mới) | Snapshot tiêu đề để log vẫn đọc được sau khi target đổi/xoá.
+  "module" varchar(100) NULL, -- ← — (bảng mới) | Module nguồn.
+  "workspace" varchar(50) NOT NULL, -- ← — (bảng mới) | Workspace liên quan.
+  "locale" varchar(10) NULL, -- ← — (bảng mới) | Locale liên quan.
+  "result" varchar(16) NOT NULL CHECK ("result" IN ('success','failed','partial','denied')), -- ← — (bảng mới) | Kết quả hành động.
+  "result_message" text NULL, -- ← — (bảng mới) | Thông điệp kết quả.
+  "session_id" varchar(100) NULL, -- ← — (bảng mới) | Phiên làm việc.
+  "correlation_id" varchar(100) NULL, -- ← — (bảng mới) | ID liên kết nhiều log cùng một request.
+  "source_app" varchar(100) NULL, -- ← — (bảng mới) | Ứng dụng nguồn.
+  "environment" varchar(20) NULL, -- ← — (bảng mới) | Môi trường (production/staging…).
+  "ip_address" inet NULL, -- ← — (bảng mới) | Địa chỉ IP.
+  "user_agent" text NULL, -- ← — (bảng mới) | User agent.
+  "http_method" varchar(10) NULL, -- ← — (bảng mới) | HTTP method.
+  "endpoint" text NULL, -- ← — (bảng mới) | Endpoint được gọi.
+  "execution_time_ms" integer NULL CHECK ("execution_time_ms" >= 0), -- ← — (bảng mới) | Thời gian xử lý (ms).
+  "before_data" jsonb NULL, -- ← — (bảng mới) | Dữ liệu trước thay đổi (đã redaction).
+  "after_data" jsonb NULL, -- ← — (bảng mới) | Dữ liệu sau thay đổi (đã redaction).
+  "redacted_fields" text[] NULL -- ← — (bảng mới) | Danh sách field đã bị che.
+);
+
+-- [BẢNG MỚI · ĐỀ XUẤT] Job xuất file audit log theo filter.
+DROP TABLE IF EXISTS "cic_audit_export_jobs" CASCADE;
+CREATE TABLE "cic_audit_export_jobs" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- ← — (bảng mới) | Khoá chính UUID.
+  "requested_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm yêu cầu.
+  "requested_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người yêu cầu.
+  "workspace" varchar(50) NOT NULL, -- ← — (bảng mới) | Workspace.
+  "filter_payload" jsonb NOT NULL, -- ← — (bảng mới) | Bộ lọc export.
+  "status" varchar(16) NOT NULL, -- ← — (bảng mới) | Trạng thái job.
+  "total_records" integer NULL, -- ← — (bảng mới) | Tổng số dòng export.
+  "file_path" text NULL, -- ← — (bảng mới) | Đường dẫn file kết quả.
+  "file_size_bytes" bigint NULL, -- ← — (bảng mới) | Kích thước file.
+  "expires_at" timestamptz NULL, -- ← — (bảng mới) | Hạn tải file.
+  "error_message" text NULL, -- ← — (bảng mới) | Lỗi (nếu có).
+  "completed_at" timestamptz NULL -- ← — (bảng mới) | Thời điểm hoàn tất.
+);
+
+-- [BẢNG MỚI] Thùng rác dùng chung — snapshot, restore, conflict handling, retention, purge, legal hold cho nhiều module.
+DROP TABLE IF EXISTS "cic_trash_items" CASCADE;
+CREATE TABLE "cic_trash_items" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- ← — (bảng mới) | Khoá chính UUID.
+  "workspace" varchar(50) NOT NULL, -- ← — (bảng mới) | Workspace của bản ghi bị xoá.
+  "entity_type" varchar(100) NOT NULL, -- ← — (bảng mới) | Loại entity theo registry được phép xoá.
+  "entity_id" varchar(100) NOT NULL, -- ← — (bảng mới) | ID entity gốc.
+  "module" varchar(100) NOT NULL, -- ← — (bảng mới) | Module nguồn.
+  "title_snapshot" text NOT NULL, -- ← — (bảng mới) | Snapshot tiêu đề.
+  "payload_snapshot" jsonb NOT NULL, -- ← — (bảng mới) | Snapshot dữ liệu (không tự khôi phục mọi FK/media/relation).
+  "original_url" text NULL, -- ← — (bảng mới) | URL gốc (nếu có).
+  "status" varchar(16) NOT NULL DEFAULT 'trashed' CHECK ("status" IN ('trashed','restored','purged')), -- ← — (bảng mới) | Trạng thái vòng đời.
+  "deleted_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người xoá.
+  "deleted_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm xoá.
+  "purge_after" timestamptz NULL, -- ← — (bảng mới) | Hạn tự động purge.
+  "restore_state" varchar(20) NULL, -- ← — (bảng mới) | Trạng thái khi restore (conflict mode…).
+  "restored_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người khôi phục.
+  "restored_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm khôi phục.
+  "purged_by" integer NULL REFERENCES cic_users(id) ON DELETE SET NULL, -- ← — (bảng mới) | Người purge vĩnh viễn.
+  "purged_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm purge.
+  "purge_reason" text NULL, -- ← — (bảng mới) | Lý do purge.
+  "is_legal_hold" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Đang bị giữ lại vì lý do pháp lý (chặn purge).
+  "legal_hold_reason" text NULL -- ← — (bảng mới) | Lý do legal hold.
+);
+
 -- ============================================================
 -- FK hoãn lại (bảng đích được tạo SAU trong file này) — gắn sau
--- khi toàn bộ 104 bảng đã CREATE TABLE xong
+-- khi toàn bộ 146 bảng đã CREATE TABLE xong
 -- ============================================================
 ALTER TABLE "cic_users_permission" ADD CONSTRAINT "fk_cic_users_permission_task_id" FOREIGN KEY ("task_id") REFERENCES "cic_permission_tasks"(id);
 ALTER TABLE "cic_users_permission_field" ADD CONSTRAINT "fk_cic_users_permission_field_task_id" FOREIGN KEY ("task_id") REFERENCES "cic_permission_tasks"(id);
 ALTER TABLE "cic_users_permission_fun" ADD CONSTRAINT "fk_cic_users_permission_fun_task_id" FOREIGN KEY ("task_id") REFERENCES "cic_permission_tasks"(id);
 ALTER TABLE "cic_contents" ADD CONSTRAINT "fk_cic_contents_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_contents_categories"(id);
-ALTER TABLE "cic_contents_en" ADD CONSTRAINT "fk_cic_contents_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_contents_categories"(id);
+ALTER TABLE "cic_contents_en" ADD CONSTRAINT "fk_cic_contents_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_contents_categories_en"(id);
 ALTER TABLE "cic_news" ADD CONSTRAINT "fk_cic_news_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_news_categories"(id);
-ALTER TABLE "cic_news_en" ADD CONSTRAINT "fk_cic_news_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_news_categories"(id);
+ALTER TABLE "cic_news_en" ADD CONSTRAINT "fk_cic_news_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_news_categories_en"(id);
 ALTER TABLE "cic_products" ADD CONSTRAINT "fk_cic_products_types_id" FOREIGN KEY ("types_id") REFERENCES "cic_products_types"(id);
-ALTER TABLE "cic_products_en" ADD CONSTRAINT "fk_cic_products_en_types_id" FOREIGN KEY ("types_id") REFERENCES "cic_products_types"(id);
+ALTER TABLE "cic_products_en" ADD CONSTRAINT "fk_cic_products_en_types_id" FOREIGN KEY ("types_id") REFERENCES "cic_products_types_en"(id);
 ALTER TABLE "cic_banners" ADD CONSTRAINT "fk_cic_banners_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_banners_categories"(id);
-ALTER TABLE "cic_banners_en" ADD CONSTRAINT "fk_cic_banners_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_banners_categories"(id);
+ALTER TABLE "cic_banners_en" ADD CONSTRAINT "fk_cic_banners_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_banners_categories_en"(id);
 ALTER TABLE "cic_slideshow" ADD CONSTRAINT "fk_cic_slideshow_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_slideshow_categories"(id);
-ALTER TABLE "cic_slideshow_en" ADD CONSTRAINT "fk_cic_slideshow_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_slideshow_categories"(id);
+ALTER TABLE "cic_slideshow_en" ADD CONSTRAINT "fk_cic_slideshow_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_slideshow_categories_en"(id);
+ALTER TABLE "cic_content_pages" ADD CONSTRAINT "fk_cic_content_pages_draft_revision_id" FOREIGN KEY ("draft_revision_id") REFERENCES "cic_content_page_revisions"(id);
+ALTER TABLE "cic_content_pages" ADD CONSTRAINT "fk_cic_content_pages_published_revision_id" FOREIGN KEY ("published_revision_id") REFERENCES "cic_content_page_revisions"(id);
+ALTER TABLE "cic_ctas" ADD CONSTRAINT "fk_cic_ctas_form_id" FOREIGN KEY ("form_id") REFERENCES "cic_forms"(id) ON DELETE RESTRICT;
+ALTER TABLE "cic_ctas" ADD CONSTRAINT "fk_cic_ctas_email_template_id" FOREIGN KEY ("email_template_id") REFERENCES "cic_email_templates"(id) ON DELETE RESTRICT;
+ALTER TABLE "cic_forms" ADD CONSTRAINT "fk_cic_forms_admin_email_template_id" FOREIGN KEY ("admin_email_template_id") REFERENCES "cic_email_templates"(id) ON DELETE RESTRICT;
+ALTER TABLE "cic_forms" ADD CONSTRAINT "fk_cic_forms_confirmation_email_template_id" FOREIGN KEY ("confirmation_email_template_id") REFERENCES "cic_email_templates"(id) ON DELETE RESTRICT;
+ALTER TABLE "cic_email_templates" ADD CONSTRAINT "fk_cic_email_templates_draft_version_id" FOREIGN KEY ("draft_version_id") REFERENCES "cic_email_template_versions"(id);
+ALTER TABLE "cic_email_templates" ADD CONSTRAINT "fk_cic_email_templates_active_version_id" FOREIGN KEY ("active_version_id") REFERENCES "cic_email_template_versions"(id);
 
 
 -- ============================================================
@@ -3133,6 +3819,25 @@ CREATE INDEX IF NOT EXISTS "idx_cic_users_permission_field_task_id" ON "cic_user
 CREATE INDEX IF NOT EXISTS "idx_cic_users_permission_fun_user_id" ON "cic_users_permission_fun" ("user_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_users_permission_fun_task_id" ON "cic_users_permission_fun" ("task_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_members_city_id" ON "cic_members" ("city_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_user_status_history_user_id" ON "cic_user_status_history" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_user_status_history_changed_by" ON "cic_user_status_history" ("changed_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_security_events_user_id" ON "cic_security_events" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_roles_created_by" ON "cic_roles" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_roles_updated_by" ON "cic_roles" ("updated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_role_versions_role_id" ON "cic_role_versions" ("role_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_role_versions_created_by" ON "cic_role_versions" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_role_versions_activated_by" ON "cic_role_versions" ("activated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_role_version_permissions_role_version_id" ON "cic_role_version_permissions" ("role_version_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_role_version_permissions_permission_task_id" ON "cic_role_version_permissions" ("permission_task_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_role_version_scopes_role_version_id" ON "cic_role_version_scopes" ("role_version_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_user_roles_user_id" ON "cic_user_roles" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_user_roles_role_id" ON "cic_user_roles" ("role_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_user_roles_assigned_by" ON "cic_user_roles" ("assigned_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_permission_policy_issues_role_id" ON "cic_permission_policy_issues" ("role_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_permission_policy_issues_resolved_by" ON "cic_permission_policy_issues" ("resolved_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_access_reviews_role_id" ON "cic_access_reviews" ("role_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_access_reviews_target_user_id" ON "cic_access_reviews" ("target_user_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_access_reviews_reviewer_user_id" ON "cic_access_reviews" ("reviewer_user_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_menus_admin_parent_id" ON "cic_menus_admin" ("parent_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_menus_items_group_id" ON "cic_menus_items" ("group_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_menus_items_parent_id" ON "cic_menus_items" ("parent_id");
@@ -3224,6 +3929,10 @@ CREATE INDEX IF NOT EXISTS "idx_cic_business_alias" ON "cic_business" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_business_en_alias" ON "cic_business_en" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_services_alias" ON "cic_services" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_services_en_alias" ON "cic_services_en" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_services_products_rel_service_id" ON "cic_services_products_rel" ("service_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_services_products_rel_product_id" ON "cic_services_products_rel" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_services_products_rel_en_service_id" ON "cic_services_products_rel_en" ("service_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_services_products_rel_en_product_id" ON "cic_services_products_rel_en" ("product_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_image_user_id" ON "cic_image" ("user_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_image_city_id" ON "cic_image" ("city_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_image_alias" ON "cic_image" ("alias");
@@ -3241,9 +3950,87 @@ CREATE INDEX IF NOT EXISTS "idx_cic_image_images_en_alias" ON "cic_image_images_
 CREATE INDEX IF NOT EXISTS "idx_cic_video_alias" ON "cic_video" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_video_author_id" ON "cic_video" ("author_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_video_author_last_id" ON "cic_video" ("author_last_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_assets_created_by" ON "cic_media_assets" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_asset_translations_asset_id" ON "cic_media_asset_translations" ("asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_asset_translations_updated_by" ON "cic_media_asset_translations" ("updated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_folders_alias" ON "cic_media_folders" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_folder_assets_folder_id" ON "cic_media_folder_assets" ("folder_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_folder_assets_asset_id" ON "cic_media_folder_assets" ("asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_albums_alias" ON "cic_media_albums" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_albums_cover_asset_id" ON "cic_media_albums" ("cover_asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_albums_created_by" ON "cic_media_albums" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_album_assets_album_id" ON "cic_media_album_assets" ("album_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_album_assets_asset_id" ON "cic_media_album_assets" ("asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_versions_asset_id" ON "cic_media_versions" ("asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_versions_created_by" ON "cic_media_versions" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_media_variants_asset_id" ON "cic_media_variants" ("asset_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_application_alias" ON "cic_application" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_application_en_alias" ON "cic_application_en" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_year_alias" ON "cic_year" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_pages_draft_revision_id" ON "cic_content_pages" ("draft_revision_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_pages_published_revision_id" ON "cic_content_pages" ("published_revision_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_pages_created_by" ON "cic_content_pages" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_pages_updated_by" ON "cic_content_pages" ("updated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_page_revisions_page_id" ON "cic_content_page_revisions" ("page_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_page_revisions_created_by" ON "cic_content_page_revisions" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_page_revisions_published_by" ON "cic_content_page_revisions" ("published_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_page_sections_revision_id" ON "cic_content_page_sections" ("revision_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_page_section_references_section_id" ON "cic_content_page_section_references" ("section_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_content_page_section_references_entity_id" ON "cic_content_page_section_references" ("entity_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_alias" ON "cic_projects" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_sector" ON "cic_projects" ("sector");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_solution" ON "cic_projects" ("solution");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_customer_name" ON "cic_projects" ("customer_name");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_created_by" ON "cic_projects" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_updated_by" ON "cic_projects" ("updated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_updated_time" ON "cic_projects" ("updated_time");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_alias" ON "cic_projects_en" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_sector" ON "cic_projects_en" ("sector");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_solution" ON "cic_projects_en" ("solution");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_customer_name" ON "cic_projects_en" ("customer_name");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_created_by" ON "cic_projects_en" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_updated_by" ON "cic_projects_en" ("updated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_en_updated_time" ON "cic_projects_en" ("updated_time");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_products_rel_project_id" ON "cic_projects_products_rel" ("project_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_products_rel_product_id" ON "cic_projects_products_rel" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_products_rel_en_project_id" ON "cic_projects_products_rel_en" ("project_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_products_rel_en_product_id" ON "cic_projects_products_rel_en" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_services_rel_project_id" ON "cic_projects_services_rel" ("project_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_services_rel_service_id" ON "cic_projects_services_rel" ("service_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_services_rel_en_project_id" ON "cic_projects_services_rel_en" ("project_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_projects_services_rel_en_service_id" ON "cic_projects_services_rel_en" ("service_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_ctas_form_id" ON "cic_ctas" ("form_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_ctas_media_asset_id" ON "cic_ctas" ("media_asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_ctas_email_template_id" ON "cic_ctas" ("email_template_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_ctas_created_by" ON "cic_ctas" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_forms_admin_email_template_id" ON "cic_forms" ("admin_email_template_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_forms_confirmation_email_template_id" ON "cic_forms" ("confirmation_email_template_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_forms_created_by" ON "cic_forms" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_fields_form_id" ON "cic_form_fields" ("form_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submissions_form_id" ON "cic_form_submissions" ("form_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_values_submission_id" ON "cic_form_submission_values" ("submission_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_values_field_id" ON "cic_form_submission_values" ("field_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_values_media_asset_id" ON "cic_form_submission_values" ("media_asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_states_assigned_user_id" ON "cic_customer_request_states" ("assigned_user_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_notes_request_state_id" ON "cic_customer_request_notes" ("request_state_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_notes_created_by" ON "cic_customer_request_notes" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_events_request_state_id" ON "cic_customer_request_events" ("request_state_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_events_actor_id" ON "cic_customer_request_events" ("actor_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_templates_draft_version_id" ON "cic_email_templates" ("draft_version_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_templates_active_version_id" ON "cic_email_templates" ("active_version_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_templates_created_by" ON "cic_email_templates" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_templates_updated_by" ON "cic_email_templates" ("updated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_templates_activated_by" ON "cic_email_templates" ("activated_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_template_versions_template_id" ON "cic_email_template_versions" ("template_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_email_template_versions_created_by" ON "cic_email_template_versions" ("created_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_actor_id" ON "cic_activity_logs" ("actor_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_entity_id" ON "cic_activity_logs" ("entity_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_audit_export_jobs_requested_by" ON "cic_audit_export_jobs" ("requested_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_entity_id" ON "cic_trash_items" ("entity_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_deleted_by" ON "cic_trash_items" ("deleted_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_restored_by" ON "cic_trash_items" ("restored_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_purged_by" ON "cic_trash_items" ("purged_by");
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_roles_code_norm" ON "cic_roles" (lower(trim("code")));
 
 -- ============================================================
 -- TRIGGER auto-update cho cac cot edited_time/updated_time
@@ -3445,3 +4232,10 @@ DROP TRIGGER IF EXISTS trg_cic_image_edited_time ON "cic_image";
 CREATE TRIGGER trg_cic_image_edited_time
   BEFORE UPDATE ON "cic_image"
   FOR EACH ROW EXECUTE FUNCTION set_edited_time();
+
+-- ============================================================
+-- TODO: Partial UNIQUE INDEX (dang cho profiling du lieu that,
+-- xem Schema Delta - chua duoc tao trong file nay):
+--   cic_services.code
+--   cic_services_en.code
+-- ============================================================

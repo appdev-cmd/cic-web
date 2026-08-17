@@ -172,13 +172,12 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [ordering, setOrdering] = useState(1);
 
   // Category Specifics
-  const [slug, setSlug] = useState('');
   const [parentId, setParentId] = useState<string | null>(null);
   const [icon, setIcon] = useState('Building2');
   const [imageUrl, setImageUrl] = useState('');
   const [metaTitle, setMetaTitle] = useState('');
+  const [metaKeyword, setMetaKeyword] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
-  const [canonicalUrl, setCanonicalUrl] = useState('');
   const [siteScope, setSiteScope] = useState<string[]>(['main_website']);
 
   // Brand Specifics
@@ -218,13 +217,12 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
 
       if (item.type === 'categories') {
         const cat = item as MasterCategoryItem;
-        setSlug(cat.slug || '');
         setParentId(cat.parent_id || null);
         setIcon(cat.icon || 'Building2');
         setImageUrl(cat.image || '');
         setMetaTitle(cat.meta_title || '');
+        setMetaKeyword(cat.meta_keyword || '');
         setMetaDescription(cat.meta_description || '');
-        setCanonicalUrl(cat.canonical_url || '');
         setSiteScope(cat.site_scope || ['main_website']);
       } else if (item.type === 'brands') {
         const brd = item as MasterBrandItem;
@@ -260,13 +258,12 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       setDescription('');
       setStatus('active');
       setOrdering(1);
-      setSlug('');
       setParentId(null);
       setIcon('Building2');
       setImageUrl('');
       setMetaTitle('');
+      setMetaKeyword('');
       setMetaDescription('');
-      setCanonicalUrl('');
       setSiteScope(['main_website']);
       setCountry('Việt Nam');
       setLogoUrl('');
@@ -287,20 +284,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       setSouthSalesProductIds([]);
     }
   }, [item, targetType]);
-
-  // Auto Generate Slug Handler
-  const handleAutoSlug = () => {
-    if (!name) return;
-    const generated = name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[đĐ]/g, 'd')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
-    setSlug(generated);
-  };
 
   // Submit Handler
   const handleSubmit = (e: React.FormEvent) => {
@@ -327,18 +310,20 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
 
     if (targetType === 'categories') {
       const parentName = categories.find((c) => c.id === parentId)?.name;
+      const categoryAlias = createAlias(name);
       resultObj = {
         ...baseObj,
         type: 'categories',
-        slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
+        alias: categoryAlias,
+        slug: categoryAlias,
         parent_id: parentId,
         parent_name: parentName,
         level: parentId ? 2 : 1,
         icon: icon,
         image: imageUrl,
         meta_title: metaTitle,
+        meta_keyword: metaKeyword,
         meta_description: metaDescription,
-        canonical_url: canonicalUrl,
         site_scope: siteScope as any,
       } as MasterCategoryItem;
     } else if (targetType === 'brands') {
@@ -559,24 +544,15 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="block text-slate-700 dark:text-slate-300 font-bold">
-                          Đường dẫn Alias (Slug):
-                        </label>
-                        <button
-                          type="button"
-                          onClick={handleAutoSlug}
-                          className="text-[10px] text-orange-600 font-bold hover:underline cursor-pointer"
-                        >
-                          Tạo tự động
-                        </button>
-                      </div>
+                      <label className="mb-1 block font-bold text-slate-700 dark:text-slate-300">
+                        Tên hiệu <span className="font-normal text-slate-400">(Hệ thống tự động sinh)</span>:
+                      </label>
                       <input
                         type="text"
-                        value={slug}
-                        onChange={(e) => setSlug(e.target.value)}
-                        placeholder="phan-mem-ket-cau"
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white focus:outline-none"
+                        readOnly
+                        value={createAlias(name)}
+                        placeholder="ten-hieu-tu-dong"
+                        className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                       />
                     </div>
                   </div>
@@ -687,7 +663,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
             <div className="space-y-4">
               <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Thẻ SEO Meta Title:
+                  SEO title:
                 </label>
                 <input
                   type="text"
@@ -700,7 +676,20 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
 
               <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Thẻ SEO Meta Description:
+                  SEO meta keyword:
+                </label>
+                <input
+                  type="text"
+                  value={metaKeyword}
+                  onChange={(e) => setMetaKeyword(e.target.value)}
+                  placeholder="phần mềm kết cấu, ETABS, SAP2000"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  SEO meta description:
                 </label>
                 <textarea
                   rows={3}
@@ -708,19 +697,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   onChange={(e) => setMetaDescription(e.target.value)}
                   placeholder="Phân phối phần mềm ETABS, SAP2000 chính hãng..."
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Đường dẫn Canonical URL:
-                </label>
-                <input
-                  type="url"
-                  value={canonicalUrl}
-                  onChange={(e) => setCanonicalUrl(e.target.value)}
-                  placeholder="https://cic.com.vn/danh-muc/phan-mem-ket-cau"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:outline-none"
                 />
               </div>
             </div>

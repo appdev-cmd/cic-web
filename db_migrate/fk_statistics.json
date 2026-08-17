@@ -63,6 +63,15 @@
     "coverage": 100.0
   },
   {
+    "table": "cic_menus_items_en",
+    "column": "group_id",
+    "ref_table": "cic_menus_groups_en",
+    "total": 4,
+    "matched": 3,
+    "stub": 1,
+    "coverage": 75.0
+  },
+  {
     "table": "cic_blocks",
     "column": "module_id",
     "ref_table": "cic_config_modules",
@@ -77,6 +86,15 @@
     "ref_table": "cic_contents_categories",
     "total": 3,
     "matched": 3,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_contents_en",
+    "column": "category_id",
+    "ref_table": "cic_contents_categories_en",
+    "total": 2,
+    "matched": 2,
     "stub": 0,
     "coverage": 100.0
   },
@@ -104,6 +122,15 @@
     "ref_table": "cic_users",
     "total": 5,
     "matched": 5,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_news_en",
+    "column": "category_id",
+    "ref_table": "cic_news_categories_en",
+    "total": 9,
+    "matched": 9,
     "stub": 0,
     "coverage": 100.0
   },
@@ -171,9 +198,27 @@
     "coverage": 100.0
   },
   {
+    "table": "cic_banners_en",
+    "column": "category_id",
+    "ref_table": "cic_banners_categories_en",
+    "total": 3,
+    "matched": 3,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
     "table": "cic_slideshow",
     "column": "category_id",
     "ref_table": "cic_slideshow_categories",
+    "total": 1,
+    "matched": 1,
+    "stub": 0,
+    "coverage": 100.0
+  },
+  {
+    "table": "cic_slideshow_en",
+    "column": "category_id",
+    "ref_table": "cic_slideshow_categories_en",
     "total": 1,
     "matched": 1,
     "stub": 0,
@@ -191,7 +236,7 @@
   {
     "table": "cic_products_en",
     "column": "types_id",
-    "ref_table": "cic_products_types",
+    "ref_table": "cic_products_types_en",
     "total": 2,
     "matched": 2,
     "stub": 0,
@@ -209,11 +254,11 @@
   {
     "table": "cic_products_images_en",
     "column": "record_id",
-    "ref_table": "cic_products",
+    "ref_table": "cic_products_en",
     "total": 174,
-    "matched": 172,
-    "stub": 2,
-    "coverage": 98.9
+    "matched": 143,
+    "stub": 31,
+    "coverage": 82.2
   },
   {
     "table": "cic_product_contact",
@@ -254,10 +299,10 @@
   {
     "table": "cic_image_images_en",
     "column": "record_id",
-    "ref_table": "cic_image",
+    "ref_table": "cic_image_en",
     "total": 13,
-    "matched": 13,
-    "stub": 0,
-    "coverage": 100.0
+    "matched": 5,
+    "stub": 8,
+    "coverage": 38.5
   }
 ]

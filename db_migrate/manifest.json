@@ -1677,6 +1677,30 @@
             "col": "summary"
           }
         ]
+      },
+      {
+        "col": "account_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "two_factor_enabled",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "password_changed_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "failed_login_attempts",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -2412,6 +2436,569 @@
     ],
     "depends_on": [
       "cic_cities"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_user_status_history": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "user_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "previous_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "new_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "reason",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "changed_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "changed_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_security_events": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "user_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "event_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ip_address",
+        "pg_type": "inet",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "user_agent",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "details",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_roles": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "category",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "risk_level",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "purpose",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "owner_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "reviewer_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "review_due_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_protected",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_role_versions": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "role_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "version_number",
+        "pg_type": "numeric",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "change_note",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "activated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "activated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_roles",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_role_version_permissions": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "role_version_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "permission_task_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "action",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "state",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_permission_tasks",
+      "cic_role_versions"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_role_version_scopes": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "role_version_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "scope_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "scope_value",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_role_versions"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_user_roles": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "user_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "role_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "assigned_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "assigned_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "expires_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "scope_summary",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_roles",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_permission_policy_issues": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "role_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "severity",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "issue_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "recommendation",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "detected_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "resolved_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "resolved_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_roles",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_access_reviews": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "role_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "target_user_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "reviewer_user_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "due_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "notes",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "completed_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_roles",
+      "cic_users"
     ],
     "self_ref_cols": [],
     "no_pk": false
@@ -3381,10 +3968,11 @@
       }
     ],
     "depends_on": [
-      "cic_menus_groups",
-      "cic_menus_items"
+      "cic_menus_groups_en"
     ],
-    "self_ref_cols": [],
+    "self_ref_cols": [
+      "parent_id"
+    ],
     "no_pk": false
   },
   "cic_config": {
@@ -3871,6 +4459,24 @@
             "col": "value_seo_title"
           }
         ]
+      },
+      {
+        "col": "value_seo_keyword",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "value_seo_description",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_indexable",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -4061,6 +4667,24 @@
             "col": "value_seo_title"
           }
         ]
+      },
+      {
+        "col": "value_seo_keyword",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "value_seo_description",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_indexable",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -6379,7 +7003,7 @@
       }
     ],
     "depends_on": [
-      "cic_contents_categories"
+      "cic_contents_categories_en"
     ],
     "self_ref_cols": [],
     "no_pk": false
@@ -7044,10 +7668,10 @@
         ]
       }
     ],
-    "depends_on": [
-      "cic_contents_categories"
+    "depends_on": [],
+    "self_ref_cols": [
+      "parent_id"
     ],
-    "self_ref_cols": [],
     "no_pk": false
   },
   "cic_news": {
@@ -8310,7 +8934,7 @@
       }
     ],
     "depends_on": [
-      "cic_news_categories",
+      "cic_news_categories_en",
       "cic_users"
     ],
     "self_ref_cols": [],
@@ -9028,10 +9652,10 @@
         ]
       }
     ],
-    "depends_on": [
-      "cic_news_categories"
+    "depends_on": [],
+    "self_ref_cols": [
+      "parent_id"
     ],
-    "self_ref_cols": [],
     "no_pk": false
   },
   "cic_news_keyword": {
@@ -12603,8 +13227,8 @@
       }
     ],
     "depends_on": [
-      "cic_cities",
-      "cic_products_types",
+      "cic_cities_en",
+      "cic_products_types_en",
       "cic_users"
     ],
     "self_ref_cols": [],
@@ -13403,10 +14027,11 @@
         ]
       }
     ],
-    "depends_on": [
-      "cic_products_categories"
+    "depends_on": [],
+    "self_ref_cols": [
+      "parent_id",
+      "root_id"
     ],
-    "self_ref_cols": [],
     "no_pk": false
   },
   "cic_products_categories_rel": {
@@ -14090,7 +14715,7 @@
       }
     ],
     "depends_on": [
-      "cic_products"
+      "cic_products_en"
     ],
     "self_ref_cols": [],
     "no_pk": false
@@ -14812,6 +15437,12 @@
             "col": "description"
           }
         ]
+      },
+      {
+        "col": "updated_time",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -14917,6 +15548,12 @@
             "col": "description"
           }
         ]
+      },
+      {
+        "col": "updated_time",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -15422,6 +16059,18 @@
             "col": "content"
           }
         ]
+      },
+      {
+        "col": "country",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "website",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -15669,6 +16318,18 @@
             "col": "content"
           }
         ]
+      },
+      {
+        "col": "country",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "website",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -17359,7 +18020,7 @@
       }
     ],
     "depends_on": [
-      "cic_banners_categories"
+      "cic_banners_categories_en"
     ],
     "self_ref_cols": [],
     "no_pk": false
@@ -17991,7 +18652,7 @@
       }
     ],
     "depends_on": [
-      "cic_slideshow_categories"
+      "cic_slideshow_categories_en"
     ],
     "self_ref_cols": [],
     "no_pk": false
@@ -21161,6 +21822,18 @@
             "col": "seo_description"
           }
         ]
+      },
+      {
+        "col": "code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "service_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
@@ -21564,11 +22237,85 @@
             "col": "seo_description"
           }
         ]
+      },
+      {
+        "col": "code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "service_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
       }
     ],
     "depends_on": [],
     "self_ref_cols": [],
     "no_pk": false
+  },
+  "cic_services_products_rel": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "service_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_products",
+      "cic_services"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_services_products_rel_en": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "service_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_products_en",
+      "cic_services_en"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
   },
   "cic_image": {
     "is_translation": false,
@@ -23366,7 +24113,7 @@
       }
     ],
     "depends_on": [
-      "cic_cities",
+      "cic_cities_en",
       "cic_users"
     ],
     "self_ref_cols": [],
@@ -25189,8 +25936,8 @@
       }
     ],
     "depends_on": [
-      "cic_cities",
-      "cic_image",
+      "cic_cities_en",
+      "cic_image_en",
       "cic_users"
     ],
     "self_ref_cols": [],
@@ -25360,6 +26107,555 @@
     ],
     "depends_on": [
       "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_media_assets": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "filename",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "media_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "mime_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "storage_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "thumbnail_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "file_size_bytes",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "width",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "height",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "duration_seconds",
+        "pg_type": "numeric",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "credit_author",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "license_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "license_expiry",
+        "pg_type": "date",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "tags",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workflow_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "deleted_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "legacy_source_table",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "legacy_source_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "legacy_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_media_asset_translations": {
+    "is_translation": true,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "locale",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "alt_text",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "caption",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_media_assets",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_media_folders": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "alias",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "icon",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_media_folder_assets": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "folder_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_media_assets",
+      "cic_media_folders"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_media_albums": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "alias",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "cover_asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workflow_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_media_assets",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_media_album_assets": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "album_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "position",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_media_albums",
+      "cic_media_assets"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_media_versions": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "version_number",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "filename",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "storage_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "file_size_bytes",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "replacement_note",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_media_assets",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_media_variants": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "preset_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "width",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "height",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "format",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "storage_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "file_size_bytes",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "focal_x",
+        "pg_type": "numeric",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "focal_y",
+        "pg_type": "numeric",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "processing_status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_media_assets"
     ],
     "self_ref_cols": [],
     "no_pk": false
@@ -25931,6 +27227,1978 @@
       }
     ],
     "depends_on": [],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_content_pages": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "slug",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "page_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "template_key",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "system_defined",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "draft_revision_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "published_revision_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_content_page_revisions",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_content_page_revisions": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "page_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "version_number",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "state",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "published_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "published_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_content_pages",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_content_page_sections": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "revision_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "section_key",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "section_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "position",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "config",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_content_page_revisions"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_content_page_section_references": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "section_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "position",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_content_page_sections"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_projects": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "alias",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "tagline",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "summary",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "content",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "sector",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "solution",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "technologies",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "customer_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "location",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "start_year",
+        "pg_type": "smallint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "end_year",
+        "pg_type": "smallint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_ongoing",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "image",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "gallery",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "video_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "video_url",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "video_thumbnail",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "document_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "document_url",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "document_size",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_featured",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "published",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_keyword",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_description",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_time",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_time",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_projects_en": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "alias",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "tagline",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "summary",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "content",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "sector",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "solution",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "technologies",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "customer_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "location",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "start_year",
+        "pg_type": "smallint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "end_year",
+        "pg_type": "smallint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_ongoing",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "image",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "gallery",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "video_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "video_url",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "video_thumbnail",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "document_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "document_url",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "document_size",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_featured",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "published",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_keyword",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "seo_description",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_time",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_time",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_projects_products_rel": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "project_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_products",
+      "cic_projects"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_projects_products_rel_en": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "project_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_products_en",
+      "cic_projects_en"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_projects_services_rel": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "project_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "service_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_projects",
+      "cic_services"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_projects_services_rel_en": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "project_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "service_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_projects_en",
+      "cic_services_en"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_ctas": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "admin_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "display_text",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "icon",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "style_variant",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "action_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "action_config",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "form_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "media_asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "email_template_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "deleted_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_email_templates",
+      "cic_forms",
+      "cic_media_assets",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_forms": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "admin_name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "description",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "current_version",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "create_customer_request",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "send_admin_email",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "admin_emails",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "admin_email_template_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "send_confirmation_email",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "confirmation_email_template_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "submit_button_text",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "success_message",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "redirect_url",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "deleted_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_email_templates",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_form_fields": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "form_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "field_key",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "field_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "role_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "label",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "placeholder",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "help_text",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_required",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_locked",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "position",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "validation_config",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "options_config",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_forms"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_form_submissions": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "form_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "form_version",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "source_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "source_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "source_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "submitted_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_forms"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_form_submission_values": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "submission_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "field_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "field_key",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "value_text",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "value_json",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "media_asset_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_form_fields",
+      "cic_form_submissions",
+      "cic_media_assets"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_customer_request_states": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "source_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "source_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "assigned_user_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "priority",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "tags",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_customer_request_notes": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "request_state_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "content",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_customer_request_states",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_customer_request_events": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "request_state_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "event_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "old_value",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "new_value",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "actor_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_customer_request_states",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_email_templates": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "name",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "event_key",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "audience",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "draft_version_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "active_version_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "updated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "activated_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "activated_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_email_template_versions",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_email_template_versions": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "template_id",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "version_number",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "subject",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "content",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "created_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_email_templates",
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_activity_logs": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "uuid",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "occurred_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "actor_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "actor_label",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "action_code",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "category",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "severity",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_sensitive",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_id",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_title",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "module",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "locale",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "result",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "result_message",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "session_id",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "correlation_id",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "source_app",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "environment",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ip_address",
+        "pg_type": "inet",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "user_agent",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "http_method",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "endpoint",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "execution_time_ms",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "before_data",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "after_data",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "redacted_fields",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_audit_export_jobs": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "uuid",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "requested_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "requested_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "filter_payload",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "total_records",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "file_path",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "file_size_bytes",
+        "pg_type": "bigint",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "expires_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "error_message",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "completed_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
+    "self_ref_cols": [],
+    "no_pk": false
+  },
+  "cic_trash_items": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "id",
+        "pg_type": "uuid",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "workspace",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_type",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "entity_id",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "module",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "title_snapshot",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "payload_snapshot",
+        "pg_type": "jsonb",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "original_url",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "status",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "deleted_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "deleted_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "purge_after",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "restore_state",
+        "pg_type": "varchar",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "restored_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "restored_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "purged_by",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "purged_at",
+        "pg_type": "timestamptz",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "purge_reason",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "is_legal_hold",
+        "pg_type": "boolean",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "legal_hold_reason",
+        "pg_type": "text",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_users"
+    ],
     "self_ref_cols": [],
     "no_pk": false
   }

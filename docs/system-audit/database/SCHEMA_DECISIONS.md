@@ -98,13 +98,13 @@ Implementation note: `time_event` là thời gian bắt đầu, `end_time` là t
 **CMS impact:** Server Actions handle internal mutations; Route Handlers only when HTTP is needed.  
 **Migration impact:** Backend starts only after migrated PostgreSQL is validated.  
 
-## Decision 13 — Projects use two independent workspace tables
+## Decision 13 — Projects use independent workspace tables and FK relations
 
 **Reason:** Project is a real new domain with public list/filter/detail, homepage selection, SEO and CMS CRUD, while legacy has no project table; reinterpreting contents/image/business would corrupt existing meanings. The approved minimal design is documented in [09-projects-schema-delta.md](./09-projects-schema-delta.md).
 **Legacy impact:** No legacy table is renamed, dropped or reinterpreted; no project record is invented automatically.
 **Frontend impact:** Homepage and Project pages use one mapped entity; ordinary scope/results prose remains Rich Text, còn danh sách “Công nghệ áp dụng” đọc từ `technologies`.
-**CMS impact:** VI and EN manage independent datasets with the same fields; `technologies` là danh sách nhãn độc lập, còn product/service liên quan tiếp tục lưu ID quan hệ và được application validate trong giai đoạn hai bảng.
-**Migration impact:** Additive `cic_projects` and `cic_projects_en`; no cross-workspace FK and no extra relation/taxonomy tables until an actual requirement justifies them.
+**CMS impact:** VI và EN quản lý dataset độc lập cùng contract; `technologies` là danh sách text có thứ tự, còn sản phẩm/dịch vụ liên quan được chọn qua selector và lưu trong junction table có FK.
+**Migration impact:** Additive `cic_projects`, `cic_projects_en` and four workspace-specific junction tables for related Product/Service records. Junction tables enforce FK integrity and relation ordering; there is no cross-workspace FK and no new taxonomy table.
 
 ## Current approval blockers
 

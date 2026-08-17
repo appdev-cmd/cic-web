@@ -36,8 +36,8 @@ export interface MasterCategoryItem extends BaseMasterItem {
   icon?: string;
   image?: string;
   meta_title?: string;
+  meta_keyword?: string;
   meta_description?: string;
-  canonical_url?: string;
   site_scope: ('main_website' | 'portal_bim' | 'store_software')[];
 }
 
