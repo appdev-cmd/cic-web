@@ -339,8 +339,8 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     ],
   },
   {
-    id: 'grp_noi_dung',
-    groupTitle: 'NỘI DUNG',
+    id: 'grp_tin_tuc',
+    groupTitle: 'TIN TỨC',
     items: [
       {
         id: 'menu_news',
@@ -354,29 +354,11 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         iconName: 'FolderTree',
         path: '/cms/news/categories',
       },
-      {
-        id: 'menu_static_pages',
-        title: 'Trang nội dung',
-        iconName: 'FileText',
-        path: '/cms/static-pages',
-      },
-      {
-        id: 'menu_events',
-        title: 'Sự kiện',
-        iconName: 'CalendarEvent',
-        path: '/cms/events',
-      },
-      {
-        id: 'menu_projects',
-        title: 'Dự án',
-        iconName: 'Building2',
-        path: '/cms/projects',
-      },
     ],
   },
   {
-    id: 'grp_danh_muc_kinh_doanh',
-    groupTitle: 'DANH MỤC KINH DOANH',
+    id: 'grp_san_pham',
+    groupTitle: 'SẢN PHẨM',
     items: [
       {
         id: 'menu_products_group',
@@ -414,6 +396,48 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         iconName: 'UserCheck',
         path: '/cms/product-settings/sales-staff',
       },
+    ],
+  },
+  {
+    id: 'grp_trang_noi_dung',
+    groupTitle: 'TRANG NỘI DUNG',
+    items: [
+      {
+        id: 'menu_static_pages',
+        title: 'Trang nội dung',
+        iconName: 'FileText',
+        path: '/cms/static-pages',
+      },
+    ],
+  },
+  {
+    id: 'grp_su_kien',
+    groupTitle: 'SỰ KIỆN',
+    items: [
+      {
+        id: 'menu_events',
+        title: 'Sự kiện',
+        iconName: 'CalendarEvent',
+        path: '/cms/events',
+      },
+    ],
+  },
+  {
+    id: 'grp_du_an',
+    groupTitle: 'DỰ ÁN',
+    items: [
+      {
+        id: 'menu_projects',
+        title: 'Dự án',
+        iconName: 'Building2',
+        path: '/cms/projects',
+      },
+    ],
+  },
+  {
+    id: 'grp_dich_vu',
+    groupTitle: 'DỊCH VỤ',
+    items: [
       {
         id: 'menu_services',
         title: 'Dịch vụ',
@@ -423,8 +447,8 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     ],
   },
   {
-    id: 'grp_trinh_bay_website',
-    groupTitle: 'TRÌNH BÀY WEBSITE',
+    id: 'grp_website',
+    groupTitle: 'WEBSITE',
     items: [
       {
         id: 'menu_navigation',
@@ -432,12 +456,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         iconName: 'Menu',
         path: '/cms/frontend-menus',
       },
-    ],
-  },
-  {
-    id: 'grp_media',
-    groupTitle: 'MEDIA',
-    items: [
       {
         id: 'menu_media_library',
         title: 'Thư viện media',
@@ -468,12 +486,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         iconName: 'MessageSquareText',
         path: '/cms/customer-requests',
       },
-    ],
-  },
-  {
-    id: 'grp_khach_hang',
-    groupTitle: 'KHÁCH HÀNG',
-    items: [
       {
         id: 'menu_email_templates',
         title: 'Mẫu email',
