@@ -347,8 +347,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Tin tức',
         iconName: 'Newspaper',
         path: '/cms/news',
-        badgeCount: 12,
-        badgeVariant: 'info',
       },
       {
         id: 'menu_news_categories',
@@ -469,8 +467,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Yêu cầu khách hàng',
         iconName: 'MessageSquareText',
         path: '/cms/customer-requests',
-        badgeCount: 5,
-        badgeVariant: 'warning',
       },
     ],
   },
