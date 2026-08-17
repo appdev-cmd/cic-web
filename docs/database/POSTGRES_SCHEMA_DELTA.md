@@ -93,9 +93,81 @@ Không có.
 - `site_scope` tồn tại trong state/payload mock nhưng không có control chỉnh sửa và website chưa đọc; chưa đủ cơ sở đưa vào PostgreSQL.
 - Cần sửa `parent_id` và `root_id` của `cic_products_categories_en` đang trỏ bảng VI thành self-reference tới bảng EN sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle. Đây là sửa constraint, không phải ADD field/table.
 
+## Hãng sản xuất
+
+### Bảng hiện có cần mở rộng
+
+| Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
+| ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
+| `cic_manufactories` | `country` | `varchar(255)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất: Quốc gia sản xuất | Nullable, mặc định `NULL`; legacy nhận `NULL`, không tự sinh dữ liệu. |
+| `cic_manufactories` | `website` | `varchar(2048)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất: Website chính thức Hãng | Nullable, mặc định `NULL`; URL được validate/render độc lập. |
+| `cic_manufactories_en` | `country` | `varchar(255)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất workspace EN | Nullable, mặc định `NULL`; giữ contract tương ứng với VI. |
+| `cic_manufactories_en` | `website` | `varchar(2048)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất workspace EN | Nullable, mặc định `NULL`; không backfill nội dung không tồn tại. |
+
+### Bảng mới cần tạo
+
+Không có.
+
+### Mapping / lưu ý
+
+- `logo → image`, `status → published`, `is_featured → show_in_homepage`.
+- `country` và `website` là hai dữ liệu form đang chỉnh sửa nhưng PostgreSQL chưa có field tương đương; không nhét website vào Rich Text.
+- Checkbox “Trang chủ & Footer” hiện dùng một policy qua `show_in_homepage`; chưa thêm cờ footer riêng khi CMS không quản trị hai vị trí độc lập.
+
+## Lĩnh vực ứng dụng
+
+### Bảng hiện có cần mở rộng
+
+Không có field cần thêm; dùng `cic_application`/`cic_application_en`.
+
+### Bảng mới cần tạo
+
+Không có.
+
+### Mapping / lưu ý
+
+- `icon → image`, `color_badge → color_code`, `status → published`; các field nội dung, ordering và timestamps đã có.
+- `sector_group` mới chỉ là state/default trong mock payload, chưa có control chỉnh sửa và chưa được frontend đọc độc lập; không thêm field.
+- Danh sách application của sản phẩm tiếp tục dùng `cic_products.application` trong giai đoạn compatibility; chưa tạo relation table chỉ để chuẩn hóa.
+
+## Loại sản phẩm
+
+### Bảng hiện có cần mở rộng
+
+| Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
+| ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
+| `cic_products_types` | `updated_time` | `timestamptz` | — | — | **BẮT BUỘC** | List hiển thị thời gian cập nhật; form ghi khi lưu | Nullable, mặc định `NULL` trong migration đầu; legacy giữ `NULL` tới lần sửa đầu. |
+| `cic_products_types_en` | `updated_time` | `timestamptz` | — | — | **BẮT BUỘC** | List/form workspace EN | Nullable, mặc định `NULL`; cần cơ chế cập nhật nhất quán khi triển khai schema. |
+
+### Bảng mới cần tạo
+
+Không có.
+
+### Mapping / lưu ý
+
+- `code`/`type_code → alias`, `icon → image`, `status → published` theo contract hiện tại.
+- `requires_license_key` và `pricing_model_default` chỉ được gán từ default/mock, chưa có control chỉnh sửa hoặc logic frontend; không thêm field.
+
+## Người phụ trách kinh doanh
+
+### Bảng hiện có cần mở rộng
+
+Không có field cần thêm; tái sử dụng `cic_business`/`cic_business_en`, tương ứng module nhân viên `fs_business` của CMS cũ.
+
+### Bảng mới cần tạo
+
+Không có.
+
+### Mapping / lưu ý
+
+- `contact_product_ids → lienhe`, `sales_product_ids → lienhe_kd`, `technical_support_product_ids → lienhe_kt`, `north_sales_product_ids → lienhe_kdmb`, `south_sales_product_ids → lienhe_kdmn`.
+- `name`, `code`, `alias`, `phone`, `Skype`, `Zalo`, media, trạng thái, ordering và timestamps đã có. Không dùng `cic_email` làm bảng nhân viên.
+- Giữ danh sách ID trong các field `lienhe*` để tương thích legacy; chưa tạo năm relation table khi chưa có nhu cầu FK/query/reorder độc lập.
+- `usage_count` là derived; `updated_by` thuộc audit/user context. Không thêm vào `cic_business*`.
+
 ## Tổng hợp các đợt audit đã nhập
 
-- Field mới bắt buộc: **0**.
+- Field mới bắt buộc: **6 column trên 4 bảng vật lý**.
 - Bảng mới bắt buộc: **0**.
 - Index mới bắt buộc: **8 unique index alias**, chỉ áp dụng sau data profiling.
 - Constraint hiện có cần sửa/xác minh: **6 FK của workspace EN đang trỏ sang bảng VI**.
