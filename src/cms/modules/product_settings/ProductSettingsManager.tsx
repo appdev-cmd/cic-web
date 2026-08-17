@@ -159,7 +159,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         const q = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(q);
         const matchCode = (usesSystemAlias(item.type) ? getSystemAlias(item) : item.code).toLowerCase().includes(q);
-        const matchDesc = (item.description || '').toLowerCase().includes(q);
+        const matchDesc = item.type === 'categories' && (item.description || '').toLowerCase().includes(q);
         if (!matchName && !matchCode && !matchDesc) return false;
       }
 
@@ -477,7 +477,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                 <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
                                   {usesSystemAlias(item.type) ? getSystemAlias(item) : item.code}
                                 </span>
-                                {item.description && (
+                                {item.type === 'categories' && item.description && (
                                   <>
                                     <span>•</span>
                                     <span className="line-clamp-1 max-w-[200px]">{item.description}</span>

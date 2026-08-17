@@ -666,8 +666,8 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                 </div>
               )}
 
-              {/* Description textarea */}
-              {targetType !== 'sales_staff' && <div>
+              {/* Category description */}
+              {targetType === 'categories' && <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
                   Mô tả vắn tắt / Ghi chú nghiệp vụ:
                 </label>
