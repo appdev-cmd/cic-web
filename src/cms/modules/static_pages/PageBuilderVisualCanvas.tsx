@@ -27,15 +27,17 @@ function LegalPage({ sections }: { sections: PageBuilderSection[] }) {
       </header>
       <article className="mt-8 space-y-8">
         {content.map((section) => <section key={section.id}>
-          <h2 className="text-xl font-black text-slate-900">{String(section.config.title ?? '')}</h2>
-          <div className="mt-3 space-y-3 text-sm leading-7 text-slate-600">
+          {section.config.title && <h2 className="text-xl font-black text-slate-900">{String(section.config.title)}</h2>}
+          {typeof section.config.richTextHtml === 'string' ? (
+            <div className="ck-content mt-3 text-sm leading-7 text-slate-600" dangerouslySetInnerHTML={{ __html: section.config.richTextHtml }} />
+          ) : <div className="mt-3 space-y-3 text-sm leading-7 text-slate-600">
             {Array.isArray(section.config.blocks) ? section.config.blocks.map((block, index) => {
               if (!block || typeof block !== 'object' || Array.isArray(block)) return null;
               const item = block as Record<string, unknown>;
               if (Array.isArray(item.items)) return <ul key={index} className="list-disc space-y-1 pl-5">{item.items.map((value) => <li key={String(value)}>{String(value)}</li>)}</ul>;
               return <p key={index}>{String(item.text ?? '')}</p>;
             }) : <p>{String(section.config.description ?? '')}</p>}
-          </div>
+          </div>}
         </section>)}
       </article>
     </div>

@@ -6,6 +6,7 @@ import { entityTypeLabels, sectionDefinitions } from './pageBuilderRegistry';
 import { PageEntityPickerModal } from './PageEntityPickerModal';
 import { findPageBuilderImage, PageMediaPickerModal } from './PageMediaPickerModal';
 import { PageBuilderVisualCanvas } from './PageBuilderVisualCanvas';
+import { RichTextEditor } from './RichTextEditor';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 
 interface PageBuilderEditorProps {
@@ -25,7 +26,7 @@ const fieldLabels: Record<string, string> = {
   submitLabel: 'Nhãn nút gửi', successTitle: 'Tiêu đề thành công', successMessage: 'Nội dung thành công', lastUpdated: 'Ngày cập nhật',
   readingTime: 'Thời gian đọc', categoryTag: 'Nhãn danh mục', vision: 'Tầm nhìn', mission: 'Sứ mệnh', policyPageId: 'Trang chính sách',
   name: 'Tên', address: 'Địa chỉ', workingHours: 'Giờ làm việc', year: 'Năm', value: 'Giá trị', suffix: 'Hậu tố', label: 'Nhãn',
-  text: 'Nội dung', downloadMediaId: 'Hồ sơ năng lực', mediaId: 'Media', targetId: 'Dữ liệu liên kết', slotKey: 'Vị trí cố định',
+  text: 'Nội dung', richTextHtml: 'Nội dung', downloadMediaId: 'Hồ sơ năng lực', mediaId: 'Media', targetId: 'Dữ liệu liên kết', slotKey: 'Vị trí cố định',
 };
 
 const readOnlyKeys = new Set(['slotKey', 'key', 'targetId', 'categoryKeys']);
@@ -52,6 +53,15 @@ function updateAtPath(config: Record<string, PageBuilderConfigValue>, path: Arra
 const imageKeys = new Set(['imageId', 'backgroundImageId']);
 
 function ConfigField({ fieldKey, value, path, onChange, onPickImage, mediaImages }: { fieldKey: string; value: PageBuilderConfigValue; path: Array<string | number>; onChange: (path: Array<string | number>, value: PageBuilderConfigValue) => void; onPickImage: (path: Array<string | number>, currentId: string) => void; mediaImages: CmsMediaPickerItem[] }) {
+  if (fieldKey === 'richTextHtml') {
+    return (
+      <div className="space-y-1.5 md:col-span-2">
+        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{labelFor(fieldKey)}</span>
+        <RichTextEditor value={String(value ?? '')} onChange={(nextValue) => onChange(path, nextValue)} minHeight="420px" />
+        <span className="block text-[11px] text-slate-400">Dùng heading, đoạn văn, danh sách, bảng, link và ảnh trong cùng một nội dung.</span>
+      </div>
+    );
+  }
   if (Array.isArray(value)) {
     if (value.every((item) => typeof item === 'string')) {
       return (

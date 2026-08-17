@@ -39,6 +39,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
   'contact.form': { label: 'Form liên hệ', description: 'Form nghiệp vụ được tham chiếu bằng ID.' },
   'contact.security': { label: 'Thông báo bảo mật', description: 'Nội dung dẫn tới chính sách bảo mật.' },
   'legal.header': { label: 'Header chính sách', description: 'Thông tin đầu trang pháp lý.' },
+  'legal.content': { label: 'Nội dung', description: 'Toàn bộ nội dung biên tập bằng Rich Text Editor.' },
   'privacy.collection': { label: 'Mục đích thu thập', description: 'Mục 01 của chính sách.' },
   'privacy.usage': { label: 'Phạm vi sử dụng', description: 'Mục 02 của chính sách.' },
   'privacy.retention': { label: 'Thời gian lưu trữ', description: 'Mục 03 của chính sách.' },

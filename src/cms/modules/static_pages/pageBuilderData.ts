@@ -59,25 +59,74 @@ const capacityPage = withSectionPrefix({
   published: { ...sourceAbout.published, sections: sourceAbout.published.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(section.sectionKey)) },
 }, 'capacity');
 
-const privacyPage: PageBuilderPage = { ...sourcePrivacy, templateKey: 'legal_standard', systemDefined: true };
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function legacyLegalSectionsToHtml(sections: PageBuilderPage['draft']['sections']): string {
+  return sections.slice(1).map((section) => {
+    const title = typeof section.config.title === 'string' ? `<h2>${escapeHtml(section.config.title)}</h2>` : '';
+    const blocks = Array.isArray(section.config.blocks)
+      ? section.config.blocks.map((block) => {
+          if (!block || typeof block !== 'object' || Array.isArray(block)) return '';
+          const item = block as Record<string, unknown>;
+          if (Array.isArray(item.items)) return `<ul>${item.items.map((value) => `<li>${escapeHtml(value)}</li>`).join('')}</ul>`;
+          return item.text ? `<p>${escapeHtml(item.text)}</p>` : '';
+        }).join('')
+      : typeof section.config.description === 'string' ? `<p>${escapeHtml(section.config.description)}</p>` : '';
+    const contact = [section.config.phone, section.config.email]
+      .filter((value): value is string => typeof value === 'string' && Boolean(value))
+      .map((value) => `<p>${escapeHtml(value)}</p>`)
+      .join('');
+    return `${title}${blocks}${contact}`;
+  }).join('');
+}
+
+function normalizeLegalPage(page: PageBuilderPage, idPrefix: string): PageBuilderPage {
+  const normalizeVersion = (version: PageBuilderPage['draft']) => {
+    const header = version.sections[0];
+    return {
+      ...version,
+      sections: [
+        { ...header, id: `${idPrefix}_header`, sectionKey: 'legal.header', sectionType: 'legal_header', position: 1 },
+        {
+          id: `${idPrefix}_content`,
+          sectionKey: 'legal.content',
+          sectionType: 'rich_text',
+          position: 2,
+          config: { richTextHtml: legacyLegalSectionsToHtml(version.sections) },
+        },
+      ],
+    };
+  };
+  return { ...page, draft: normalizeVersion(page.draft), published: normalizeVersion(page.published) };
+}
+
+const privacyPage: PageBuilderPage = normalizeLegalPage(
+  { ...sourcePrivacy, templateKey: 'legal_standard', systemDefined: true },
+  'privacy',
+);
 
 export function createLegalPage(input: { id: string; code: string; name: string; slug: string }): PageBuilderPage {
   const now = new Date().toISOString();
   const page = withSectionPrefix({
-    ...sourcePrivacy,
+    ...privacyPage,
     ...input,
     pageType: 'legal',
     templateKey: 'legal_standard',
     systemDefined: false,
-    draft: { ...sourcePrivacy.draft, version: 1, status: 'draft', updatedAt: now },
-    published: { ...sourcePrivacy.published, version: 0, status: 'published', updatedAt: now, publishedAt: undefined },
+    draft: { ...privacyPage.draft, version: 1, status: 'draft', updatedAt: now },
+    published: { ...privacyPage.published, version: 0, status: 'published', updatedAt: now, publishedAt: undefined },
   }, input.code);
   page.draft.seo = { ...page.draft.seo, title: input.name, description: '' };
-  page.draft.sections = page.draft.sections.map((section, index, sections) => {
-    if (index === 0) return { ...section, sectionKey: 'legal.header', config: { ...section.config, categoryTag: 'Trang nội dung', title: input.name, subtitle: `Thông tin về ${input.name.toLowerCase()}.` } };
-    if (index === sections.length - 1) return { ...section, sectionKey: 'legal.assistance' };
-    return { ...section, sectionKey: `legal.content.${index}`, config: { ...section.config, title: `Nội dung ${index}`, blocks: [{ type: 'paragraph', text: 'Nhập nội dung tại đây.' }] } };
-  });
+  page.draft.sections = page.draft.sections.map((section, index) => index === 0
+    ? { ...section, id: `${input.code}_header`, config: { ...section.config, categoryTag: 'Trang nội dung', title: input.name, subtitle: `Thông tin về ${input.name.toLowerCase()}.` } }
+    : { ...section, id: `${input.code}_content`, config: { richTextHtml: '<p>Nhập nội dung tại đây.</p>' } });
   page.published = JSON.parse(JSON.stringify(page.draft)) as PageBuilderPage['published'];
   page.published.version = 0;
   page.published.status = 'published';

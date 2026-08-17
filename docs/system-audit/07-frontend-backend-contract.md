@@ -130,7 +130,8 @@
 | Page identity/URL/template | Page table | Column | `template_key` quyết định component code |
 | Fixed sections/order | Page template registry + section instances | Code + relation | Marketing không add/delete/change type |
 | Text/image/video | section config + Media reference | JSON schema/relation | Không lưu layout/code |
-| Rich article body | section config `content` hoặc legacy contents | Rich Text | Legal/custom article dùng cùng template |
+| Legal/custom page title | section `legal.header` | Page config/MAP | Section tiêu đề cố định theo layout website |
+| Legal/custom page body | `legal.content.richTextHtml` hoặc legacy contents `content` | Rich Text | Một body linh hoạt; không chia mỗi heading/đoạn thành section riêng |
 | Product/news/service/project/partner highlights | ordered section references | Relation table | Chọn thủ công; không auto query |
 | CTA | CTA ID/reference | CTA module | Không duplicate text/url nếu CTA reusable |
 | Form | Form ID/reference | Form module | |

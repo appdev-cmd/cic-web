@@ -25,7 +25,7 @@
 | Page | code/slug/name/status/version | Không có Page Builder | Không có | Không có | Trang theo template | D | Có, bảng mới | Module vẫn tên “Trang nội dung” |
 | Section | section_type/config/order | Không có | Không có | Không có | Instance section cố định | D | Có, bảng mới | Type/layout định nghĩa bằng code; không Add/Delete/change type |
 | Entity selection | productIds/newsIds/... | Một số CSV legacy rời rạc | Không có model chung | Không có | Chọn thủ công có thứ tự | D | Có relation/config có kiểm soát | Không auto selection |
-| Rich article template | content | content | fs_contents.content | cic_contents.content | Chính sách/điều khoản/trang cùng layout | A hoặc Page config | Không thêm column nội dung nhỏ | Một rich text field là đủ |
+| Rich article template | `legal.header` + `legal.content.richTextHtml` | title/content | fs_contents.title/content | cic_contents.title/content | Chính sách/điều khoản/trang cùng layout | A hoặc Page config | Không thêm column nội dung nhỏ | Chỉ hai section cố định: tiêu đề và một Rich Text body; heading/list/bảng/ảnh nằm trong body |
 
 ## Sự kiện
 
