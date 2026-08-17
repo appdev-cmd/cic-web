@@ -34,7 +34,7 @@ Frontend/CMS never consumes raw ORM row. Simple read may use a server-only query
 |---|---|---|---|---|---|
 | News | content/category/media/related/SEO/status | legacy-used fields in audit mapping | ID/timestamps/author audit, counts | category, author, media, related | filters, selection, quality score |
 | Static Pages | page/published or draft revision/sections | allowed config fields per section | revision/version/publish actor | media, CTA, form, ordered entities | canvas viewport/open panel |
-| Events | core content/time/place/topic/link/SEO | legacy form fields | Upcoming/Past; Ongoing if end approved | media/related | countdown/display label |
+| Events | core content/start/end/place/topic/link/SEO | legacy form fields với `end_time` đã cleanup | Upcoming/Ongoing/Ended derive từ thời gian | media/related | countdown/display label |
 | Products | core/detail/classification/media/price/SEO | legacy-used product fields | display price/file metadata | category/type/brand/application/gallery/download/related/CTA | tabs/slider state |
 | Product Settings | master data/business owner | fields matching legacy tables | usage counts | products/categories/users as applicable | select/search state |
 | Services | title/alias/summary/content/image/related/SEO | legacy-used fields | excerpt/breadcrumb | media/product/form/CTA/settings | structured mock blocks removed |
@@ -63,4 +63,3 @@ Server Actions are preferred for internal CMS forms. Route Handlers are reserved
 ## Caching
 
 Public list/detail can use Next.js cache/tag revalidation. Publish/unpublish/menu/settings/SEO changes invalidate affected tags. CMS Draft/Preview, user/permission, request/audit/trash are uncached or request-scoped. Cache strategy is implementation detail, not DB column.
-

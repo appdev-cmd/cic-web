@@ -72,15 +72,15 @@
 **CMS impact:** New role UI can coexist with legacy source explanation.  
 **Migration impact:** Explicit role manifest and 100% effective-permission parity required.
 
-## Decision 10 — Event end time remains REVIEW
+## Decision 10 — Reuse Event `end_time` as the business end time
 
-**Reason:** Current mock has no real values and legacy `end_time` is not event end.  
-**Legacy impact:** Existing column copied unchanged/deprecated.  
-**Frontend impact:** Upcoming/Past derives from start; no reliable Ongoing.  
-**CMS impact:** No end input until requirement approved.  
-**Migration impact:** If approved later, add nullable `event_end_time`; legacy rows NULL.
+**Reason:** Nghiệp vụ đã xác nhận cần phân biệt Upcoming/Ongoing/Ended và PostgreSQL đã có `end_time`; thêm `event_end_time` sẽ trùng dữ liệu.
+**Legacy impact:** Code cũ từng ghi thời điểm sửa vào `end_time`. Phải đối soát với `updated_time`; không được coi giá trị legacy chưa xác minh là thời gian kết thúc sự kiện.
+**Frontend impact:** Trạng thái được derive từ `time_event` và `end_time`, không lưu thủ công.
+**CMS impact:** Form bắt buộc nhập thời gian bắt đầu và kết thúc, với `end_time > time_event`.
+**Migration impact:** Không thêm column. Record legacy có `end_time` mang nghĩa audit được chuyển thành NULL sau khi lưu bằng chứng/đối soát; `updated_time` tiếp tục giữ thời gian sửa.
 
-Implementation note: Events hiện chỉ map `time_event` thành thời điểm bắt đầu và tính Upcoming/Past. `created_time` không phải lịch xuất bản. Mock `agenda`, `speakers`, `targetAudience`, `status` và `isOpenRegistration` không phải bằng chứng thêm column; chúng lần lượt nằm trong Rich Text hoặc được derive. Ý nghĩa dữ liệu thực tế của legacy `end_time` phải được xác minh bằng dữ liệu/CMS cũ trước khi quyết định tái sử dụng hay thêm field mới.
+Implementation note: `time_event` là thời gian bắt đầu, `end_time` là thời gian kết thúc từ hệ thống mới. `created_time` không phải lịch xuất bản. Mock `agenda`, `speakers`, `targetAudience`, `status` và `isOpenRegistration` không phải bằng chứng thêm column; chúng lần lượt nằm trong Rich Text hoặc được derive.
 
 ## Decision 11 — No Level 4 breaking change in initial migration
 
@@ -110,5 +110,5 @@ Implementation note: Events hiện chỉ map `time_event` thành thời điểm 
 
 - Lần chạy draft hiện có `cic_regions = ERROR`; phải sửa mapping/load `fs_khuvuc` và validate lại.
 - `cic_products_categories_rel = SKIPPED_NO_PK`; loader phải hỗ trợ relation synthetic có composite key và đối soát count từ CSV.
-- `event_end_time` chưa có bằng chứng nghiệp vụ đủ mạnh nên không thuộc initial target; hệ thống chỉ phân loại Upcoming/Past từ `time_event`.
+- Migration Event phải có báo cáo đối chiếu `end_time` với `updated_time` trước khi chuẩn hóa; không copy mù timestamp audit thành thời gian kết thúc nghiệp vụ.
 - Các field bảo mật mở rộng và Customer Request notes/events chỉ được đưa vào migration khi implementation tương ứng được duyệt; không tạo column/table “để dành”.

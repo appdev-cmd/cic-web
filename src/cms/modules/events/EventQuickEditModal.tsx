@@ -15,6 +15,7 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({ isOpen
   const [title, setTitle] = useState('');
   const [alias, setAlias] = useState('');
   const [timeEvent, setTimeEvent] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [place, setPlace] = useState('');
   const [editorialStatus, setEditorialStatus] = useState<EditorialStatus>('draft');
   const [isHot, setIsHot] = useState(false);
@@ -26,6 +27,7 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({ isOpen
     setTitle(event.title || '');
     setAlias(event.alias || '');
     setTimeEvent(event.time_event || '');
+    setEndTime(event.end_time || '');
     setPlace(event.place || '');
     setEditorialStatus(event.editorial_status || (event.published ? 'published' : 'draft'));
     setIsHot(event.is_hot ?? false);
@@ -37,9 +39,16 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({ isOpen
 
   const handleSubmit = (submitEvent: React.FormEvent) => {
     submitEvent.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !timeEvent || !endTime) {
+      window.alert('Vui lòng nhập tiêu đề, thời gian bắt đầu và thời gian kết thúc.');
+      return;
+    }
+    if (new Date(endTime).getTime() <= new Date(timeEvent).getTime()) {
+      window.alert('Thời gian kết thúc phải sau thời gian bắt đầu.');
+      return;
+    }
     onSave({
-      title: title.trim(), alias, time_event: timeEvent, place,
+      title: title.trim(), alias, time_event: timeEvent, end_time: endTime, place,
       editorial_status: editorialStatus,
       published: editorialStatus === 'published',
       is_hot: isHot, show_in_home: showInHome,
@@ -56,10 +65,8 @@ export const EventQuickEditModal: React.FC<EventQuickEditModalProps> = ({ isOpen
       <form onSubmit={handleSubmit} className="space-y-4 p-5">
         <label className="block space-y-1.5 text-xs font-bold"><span>Tiêu đề sự kiện *</span><input required value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} /></label>
         <label className="block space-y-1.5 text-xs font-bold"><span>Alias</span><input value={alias} onChange={(e) => setAlias(e.target.value)} className={inputClass} /></label>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-1.5 text-xs font-bold"><span>Thời gian diễn ra</span><input type="datetime-local" value={timeEvent} onChange={(e) => setTimeEvent(e.target.value)} className={inputClass} /></label>
-          <label className="block space-y-1.5 text-xs font-bold"><span>Địa điểm</span><input value={place} onChange={(e) => setPlace(e.target.value)} className={inputClass} /></label>
-        </div>
+        <div className="grid gap-4 sm:grid-cols-2"><label className="block space-y-1.5 text-xs font-bold"><span>Thời gian bắt đầu *</span><input required type="datetime-local" value={timeEvent} onChange={(e) => setTimeEvent(e.target.value)} className={inputClass} /></label><label className="block space-y-1.5 text-xs font-bold"><span>Thời gian kết thúc *</span><input required type="datetime-local" min={timeEvent} value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputClass} /></label></div>
+        <label className="block space-y-1.5 text-xs font-bold"><span>Địa điểm</span><input value={place} onChange={(e) => setPlace(e.target.value)} className={inputClass} /></label>
         <label className="block space-y-1.5 text-xs font-bold"><span>Trạng thái</span><select value={editorialStatus} onChange={(e) => setEditorialStatus(e.target.value as EditorialStatus)} className={inputClass}><option value="draft">Bản nháp</option><option value="published">Đã xuất bản</option></select></label>
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="flex items-center gap-2 text-xs font-semibold"><input type="checkbox" checked={isHot} onChange={(e) => setIsHot(e.target.checked)} />Sự kiện nổi bật</label>

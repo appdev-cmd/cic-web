@@ -19,7 +19,7 @@
 
 | Điểm | Vì sao chưa thêm |
 |---|---|
-| `event_end_time` | Mock có `endDate` nhưng 30/30 record hiện không dùng; legacy `end_time` là updated time. Chỉ bổ sung nếu website thật cần trạng thái “đang diễn ra” ba mốc và nghiệp vụ cung cấp dữ liệu kết thúc. |
+| Event `end_time` legacy | Nghiệp vụ đã chốt cần ba trạng thái. Không thêm field: tái sử dụng `end_time`, nhưng phải đối soát/cleanup giá trị do code cũ ghi như updated time trước khi public sử dụng. |
 | Agenda, speaker, audience, gallery/documents riêng cho Event | Chưa có form/DB legacy; có thể biểu diễn bằng `content`, file/media và related hiện tại. |
 | Category Dịch vụ | CMS/code legacy không chứng minh có danh mục dịch vụ; filter mock không đủ căn cứ. |
 | Các block `whyNeed`, `process`, `benefits`, collaboration | Là cấu trúc mock cũ; rich text đáp ứng nội dung và giữ thiết kế. |
@@ -43,7 +43,7 @@
 3. CSV/text relation (`related`, tags, scope user) có thể chứa ID trùng, rỗng hoặc mất entity; parser phải giữ thứ tự và xuất báo cáo orphan.
 4. VI/EN là dataset độc lập; auto fallback/translate sẽ làm sai dữ liệu.
 5. URL ảnh/file legacy có thể là path tương đối hoặc file thiếu; Media adapter phải giữ raw path và báo missing asset.
-6. `end_time` ở các module không có nghĩa thống nhất. Không rename hàng loạt thành “ngày kết thúc”.
+6. `end_time` ở các module không có nghĩa thống nhất. Chỉ riêng Event được chốt dùng làm thời gian kết thúc sau cleanup; không áp dụng hàng loạt cho module khác.
 7. `created_time` có nơi từng được dùng như ngày đăng. Cần xác định per-module trước khi tạo `published_at` hoặc đổi semantics.
 8. Quyền legacy là quyền trực tiếp theo user; chuyển máy móc thành role có thể làm tăng/giảm quyền. Phải so sánh effective permission từng user.
 9. Gộp contact/order/product contact vào một bảng ngay có nguy cơ mất field đặc thù và ID nguồn. Ưu tiên read model/adapter.
@@ -58,4 +58,4 @@
 
 ## Kết luận trước triển khai
 
-Không cần thay đổi PostgreSQL chỉ để khớp tên mock/UI. Việc đầu tiên của backend nên là định nghĩa DTO/adapter và kiểm thử migration cho các bảng hiện có. Chỉ thiết kế schema mới cho các gap D đã xác nhận; `event_end_time` và các structured content mock phải được quyết định nghiệp vụ riêng trước khi thêm.
+Không cần thay đổi PostgreSQL chỉ để khớp tên mock/UI. Việc đầu tiên của backend nên là định nghĩa DTO/adapter và kiểm thử migration cho các bảng hiện có. Event dùng lại `end_time`, không thêm `event_end_time`; các structured content mock khác vẫn phải được quyết định nghiệp vụ riêng trước khi thêm.

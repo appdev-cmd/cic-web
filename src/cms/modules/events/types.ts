@@ -41,6 +41,7 @@ export interface EventItem {
   tawk_to?: string;
   image: string;
   time_event: string; // Start time, e.g. "2026-08-15T08:30"
+  end_time: string; // Business end time; legacy audit-like values must be cleaned before mapping.
   place: string;
   specific_time: string; // e.g. "08:30 - 17:00 hàng ngày"
   chu_de: string;

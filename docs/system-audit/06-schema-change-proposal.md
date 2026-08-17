@@ -17,8 +17,8 @@
 | News | short description, slug, author, gallery/file, related, SEO | `cic_news*`, category/user/media/file/related fields | DTO rename + joins + rich text | Level 0–1 | Thấp; cần parse CSV/order |
 | News | subtype tuyển dụng/khuyến mại/cổ đông | Category + content/file hiện có | Rich text/category; bỏ field mock chưa chứng minh | Level 0 | Thấp |
 | Static pages | Page/Section Draft/Published | `cic_contents*` không biểu diễn builder | Bảng Page/Section/revision/reference mới; giữ contents legacy | Level 3 | Trung bình; cần seed đúng template |
-| Event | detail core, registration, related, SEO | `cic_event*` | Mapping + derive registration/status hai trạng thái | Level 0–1 | Thấp |
-| Event | ongoing chính xác | Chỉ có `time_event`; `end_time` sai nghĩa | REVIEW `event_end_time` nullable chỉ khi nghiệp vụ xác nhận | Level 2, chưa duyệt | Trung bình; dữ liệu cũ null |
+| Event | detail core, registration, related, SEO | `cic_event*` | Mapping + derive registration/status | Level 0–1 | Thấp |
+| Event | ongoing chính xác | Có `time_event`, `end_time`; code cũ ghi sai nghĩa `end_time` | Tái sử dụng `end_time`, sửa contract/CMS và làm sạch legacy sau đối soát | Level 0–1, không thêm column | Trung bình; phải kiểm tra dữ liệu cũ |
 | Event | agenda/speaker/audience | `content` và file/media | Giữ trong rich text; không thêm schema | Level 0 | Thấp |
 | Product | detail, category/type/brand/app, price, gallery/docs/related | cụm `cic_products*` | Mapping/join/adapter | Level 0–1 | Trung bình do nhiều bảng/CSV legacy |
 | Product settings | master data/sales owner | categories/types/manufactories/application/business/email | Giữ nguồn; adapter select/filter | Level 0–1 | Thấp |
@@ -39,16 +39,9 @@
 | Activity logs | audit actor/action/change | `cic_history` sai nghĩa | `activity_logs` append-only | Level 3 | Trung bình; privacy/storage |
 | Trash | delete/restore entity không có deleted_at | Không có lifecycle chung | `trash_items` + service transaction | Level 3 | Cao; restore conflict/FK |
 
-## 3. Level 2 duy nhất đang REVIEW
+## 3. Event end time đã chốt
 
-`event_end_time` chưa được đưa vào danh sách ADD. Chỉ chuyển thành ADD nếu đồng thời thỏa mãn:
-
-1. Frontend production phải phân biệt Upcoming/Ongoing/Past.
-2. Marketing có quy trình nhập thời gian kết thúc.
-3. Sự kiện nhiều ngày hoặc thời lượng có ý nghĩa nghiệp vụ.
-4. Không dùng `cic_event.end_time` vì field legacy này mang nghĩa cập nhật không ổn định.
-
-Nếu được duyệt: thêm `event_end_time timestamptz NULL`, constraint `event_end_time >= time_event` khi cả hai có giá trị; record legacy để NULL; migration reversible bằng drop column sau khi xác nhận không có dữ liệu mới cần giữ.
+Không thêm `event_end_time`. Dùng `cic_event.end_time` hiện có và đổi application contract về đúng nghĩa thời gian kết thúc. Trước cleanup phải thống kê `end_time IS DISTINCT FROM updated_time`, lấy mẫu ngoại lệ và lưu báo cáo. Không có bằng chứng thời gian kết thúc thật thì record legacy nhận `end_time = NULL`; dữ liệu audit vẫn nằm ở `updated_time`.
 
 ## 4. Không có Level 4
 
@@ -96,9 +89,7 @@ Không rename/drop column legacy, không gộp vật lý bảng request, không 
 
 ### REVIEW
 
-- `event_end_time`.
 - Mức độ Media version/variant/license thực sự cần ở production.
 - Role version/scope/access review vượt mô hình RBAC tối thiểu.
 - Customer request common index/notes/events.
 - Tracking/consent fields nào được phép lưu trong form submissions.
-

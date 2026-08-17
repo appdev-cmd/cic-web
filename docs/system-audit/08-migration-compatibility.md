@@ -77,7 +77,7 @@ Thứ tự thực tế cần theo dependency triển khai, nhưng không domain 
 - Preview đọc đúng Draft mà không Publish.
 - Related entity draft/deleted/missing bị bỏ khỏi public và cảnh báo trong CMS.
 - Product category/brand/type/application và sales owner resolve đúng.
-- Event không dùng `end_time` legacy làm ngày kết thúc.
+- Event không dùng mù giá trị `end_time` legacy: đối soát với `updated_time`, chuẩn hóa timestamp audit về NULL, sau đó CMS mới dùng cột này làm ngày kết thúc.
 - Function SEO route list và entity SEO detail không ghi đè sai cấp intent.
 - Effective permission từng user trước/sau không giảm hoặc tăng âm thầm.
 - Trash restore xử lý FK/slug conflict theo transaction.
@@ -111,4 +111,4 @@ Chỉ viết migration sau khi:
 
 ## 7. Kết luận
 
-PostgreSQL hiện tại không cần redesign. Phần lớn website/CMS mới được đáp ứng bằng Level 0–1. Các Level 3 là domain mới tách biệt; chúng bổ sung khả năng mới mà không phá dữ liệu cũ. Level 2 `event_end_time` vẫn ở REVIEW, và không có Level 4 trong phương án cuối hiện tại.
+PostgreSQL hiện tại không cần redesign. Phần lớn website/CMS mới được đáp ứng bằng Level 0–1. Các Level 3 là domain mới tách biệt; chúng bổ sung khả năng mới mà không phá dữ liệu cũ. Event tái sử dụng `end_time` nên không cần Level 2 `event_end_time`; không có Level 4 trong phương án cuối hiện tại.

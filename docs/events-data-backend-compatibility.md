@@ -100,7 +100,7 @@ Các cột sau có thể còn trong schema/dữ liệu cũ nhưng không còn l�
 | `parent_id` | Không có nghiệp vụ cây Sự kiện |
 | `show_in_homepage` | Form thực tế dùng `show_in_home` |
 | `is_new` | Input legacy đã bị comment; CMS mới không dùng |
-| `end_time` | Code legacy ghi thời điểm cập nhật vào field này, không đáng tin là thời gian kết thúc sự kiện |
+| `end_time` | Code legacy từng ghi thời điểm cập nhật; CMS mới tái sử dụng làm thời gian kết thúc sau khi dữ liệu cũ được đối soát/cleanup |
 | `optimal_seo` | Cờ legacy không còn interaction tương ứng |
 | `keywords`, `name` | Không phải field đang dùng trên form Sự kiện hiện hành |
 | `editor` | Thay bằng user cập nhật và audit log chuẩn |
@@ -120,11 +120,13 @@ Các field trên không tồn tại trong form/database legacy và chưa có req
 
 ## 5. Trạng thái diễn ra
 
-Trạng thái “Sắp diễn ra/Đã diễn ra” là dữ liệu trình bày, được tính từ `time_event` tại thời điểm đọc:
+Trạng thái là dữ liệu derive, được tính từ `time_event` và `end_time` tại thời điểm đọc:
 
 ```text
-time_event > now  -> Sắp diễn ra
-time_event <= now -> Đã diễn ra
+now < time_event                         -> Sắp diễn ra
+time_event <= now AND now < end_time     -> Đang diễn ra
+end_time IS NOT NULL AND now >= end_time -> Đã kết thúc
+end_time IS NULL AND now >= time_event   -> Đã kết thúc (fallback record legacy)
 ```
 
 Không lưu `event_status` vào `cic_event` để tránh trạng thái bị cũ hoặc mâu thuẫn với thời gian.
@@ -140,6 +142,7 @@ Hiện chưa có requirement “Hủy sự kiện”. Nếu sau này cần trạ
 | `tags` | `string[]` | `varchar(255)` | Trim, bỏ rỗng/trùng; serialize ổn định trong giai đoạn tương thích |
 | `image` | Media item/ID | đường dẫn `varchar(255)` | API trả metadata Media; vẫn resolve được ảnh legacy |
 | `time_event` | ISO datetime | `timestamptz` | Parse/trả ISO có timezone Asia/Ho_Chi_Minh phù hợp |
+| `end_time` | ISO datetime/NULL | `timestamptz` | CMS mới ghi thời gian kết thúc; phải lớn hơn `time_event` |
 | Related fields | ID array có thứ tự | CSV ID | Đọc tương thích CSV; ghi qua bảng quan hệ sau khi chuẩn hóa |
 | Người tạo/sửa | User display object | `author_id`, `author_last_id` và snapshot tên | Join `cic_users`; không lưu object vào event |
 | Activity log | Danh sách log | Không thuộc bảng event | Đọc từ hệ thống audit chung |
@@ -263,7 +266,7 @@ Trình tự logic khi triển khai sau này:
 7. So sánh số lượng bản ghi và các Page public quan trọng.
 8. Chỉ chuyển source of truth sang bảng quan hệ sau khi kiểm tra đạt.
 
-Không coi `end_time` legacy là thời gian kết thúc sự kiện và không tạo dữ liệu organizer/speaker từ suy đoán.
+Không coi mù giá trị `end_time` legacy là thời gian kết thúc: phải đối soát với `updated_time` và cleanup trước. Không tạo dữ liệu organizer/speaker từ suy đoán.
 
 ## 13. Acceptance criteria
 
@@ -272,7 +275,7 @@ Không coi `end_time` legacy là thời gian kết thúc sự kiện và không 
 - Field Marketing sử dụng khớp form legacy thực tế.
 - Không có field mock-only trong API/database contract.
 - Database dùng `published` làm nguồn trạng thái duy nhất.
-- Trạng thái diễn ra được tính từ `time_event`, không lưu tay.
+- Trạng thái diễn ra được tính từ `time_event` và `end_time`, không lưu tay.
 - Related IDs giữ đúng thứ tự qua vòng đọc–ghi.
 - Public không đọc Draft hoặc mục trong Thùng rác.
 - Preview CMS đọc Draft theo quyền.

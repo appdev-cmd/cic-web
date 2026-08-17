@@ -50,6 +50,7 @@
 | CTA/Form | seed only explicitly approved reusable records | hard-coded legacy UI remains reference until cutover |
 | Roles | explicit role manifest only | direct permission tables authoritative |
 | Email Template | approved baseline records Draft | `cic_email*` unchanged |
+| Event end time | chỉ giữ giá trị `end_time` đã được xác minh là thời gian kết thúc nghiệp vụ; giá trị trùng/tiệm cận `updated_time` do CMS cũ ghi theo audit được đưa vào báo cáo và target nhận `NULL` | giữ snapshot/raw export để truy vết; không suy diễn nội dung không tồn tại |
 
 ## Null/default rules for old records
 

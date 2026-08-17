@@ -107,7 +107,7 @@
 | Summary/body | `summary`, `content` | Column/Rich Text | |
 | Thumbnail | `image`/Media | Column/relation | |
 | Start/date label | `time_event`, `specific_time` | Column/format | Logic dùng time_event |
-| End time | Chưa có source đúng nghĩa | REVIEW | Không dùng legacy `end_time` |
+| End time | `end_time` | Column/map | Giá trị legacy phải qua cleanup; CMS mới ghi đúng nghĩa |
 | Status | now so với start; ongoing chỉ khi có end thật | Computed | Không lưu manual status |
 | Place/address | `place`, body nếu cần chi tiết | Column/Rich Text | |
 | Registration CTA | `link_dangky` hoặc CTA reference tương lai | Column/CTA | `isOpenRegistration` computed |

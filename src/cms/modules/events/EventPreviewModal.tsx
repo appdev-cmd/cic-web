@@ -43,7 +43,10 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
     }
   };
 
-  const eventHasStarted = new Date(event.time_event).getTime() <= Date.now();
+  const startsAt = new Date(event.time_event).getTime();
+  const endsAt = new Date(event.end_time).getTime();
+  const now = Date.now();
+  const progressLabel = now < startsAt ? 'Sắp diễn ra' : Number.isFinite(endsAt) && now < endsAt ? 'Đang diễn ra' : 'Đã kết thúc';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
@@ -58,7 +61,7 @@ export const EventPreviewModal: React.FC<EventPreviewModalProps> = ({
               <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Xem trước giao diện Sự kiện / Webinar</span>
                 {getEditorialBadge(event.editorial_status || (event.published ? 'published' : 'draft'))}
-                <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-xs rounded-lg">{eventHasStarted ? 'Đã diễn ra' : 'Sắp diễn ra'}</span>
+                <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-xs rounded-lg">{progressLabel}</span>
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                 /su-kien/{event.alias}

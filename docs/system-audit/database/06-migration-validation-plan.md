@@ -26,6 +26,7 @@ For every migrated legacy table: `source count = target count`. No filtering of 
 | Contact/Order | identity, customer contact, message/items/amount/status/time |
 | Config/SEO/Language | key/module/view/task/value/content/locale flags |
 | Media legacy | raw URL/path and owner/source relation |
+| Event time | `time_event` giữ nguyên; `end_time` hợp lệ phải lớn hơn `time_event`; thống kê riêng giá trị legacy trùng/tiệm cận `updated_time` và các bản ghi target nhận `NULL` |
 
 ## Relationship checks
 
@@ -37,6 +38,7 @@ For every migrated legacy table: `source count = target count`. No filtering of 
 - Order-item/product parity.
 - New section references point to correct workspace and preserve `position`.
 - Public relation resolver excludes draft/deleted but CMS reports them; migration does not delete them.
+- Event status được kiểm tra từ thời gian: `now < time_event` = sắp diễn ra; `time_event <= now < end_time` = đang diễn ra; còn lại = đã kết thúc. Bản ghi legacy thiếu `end_time` không được phân loại là đang diễn ra.
 
 ## Duplicate/unique checks
 

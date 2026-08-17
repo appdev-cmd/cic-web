@@ -50,6 +50,13 @@ Known incorrect FK targets stay documented in `postgresql-schema-issues.md`; pro
 - submission indexes `(form_id,created_at)`, `(source_type,source_id)`, status if actual filter uses it.
 - config JSON validated at application boundary; optional DB JSON type checks only when stable.
 
+### Events
+
+- `cic_event.end_time` / `cic_event_en.end_time` được tái sử dụng làm thời gian kết thúc nghiệp vụ; không thêm column mới chỉ để đổi tên theo frontend.
+- Chỉ áp dụng check `end_time IS NULL OR time_event IS NULL OR end_time > time_event` sau khi đã tách và xử lý các giá trị `end_time` legacy từng bị CMS cũ ghi như thời gian cập nhật.
+- Giữ `end_time` nullable trong đợt migrate đầu. Bản ghi chưa xác minh không được tự sinh thời gian kết thúc; CMS mới bắt buộc trường này khi tạo hoặc sửa sự kiện.
+- Chỉ thêm index ghép phục vụ truy vấn trạng thái, ví dụ `(published, time_event, end_time)`, sau khi `EXPLAIN` trên dữ liệu thật chứng minh có lợi.
+
 ### RBAC
 
 - role code unique; assignment unique active `(user_id,role_id,scope)` as model permits.
@@ -80,4 +87,3 @@ Add indexes based on actual list/detail queries:
 - Page Builder page SEO belongs to `cic_content_pages`/published revision according to final revision strategy.
 - CTA/Form/Media do not duplicate page SEO.
 - canonical/robots can be derived unless editors have a confirmed need to override.
-

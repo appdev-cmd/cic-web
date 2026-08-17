@@ -30,7 +30,7 @@ Các cột không liệt kê trong bảng nhóm vẫn **direct-copy cùng tên**
 | `fs_event` | `id,title,alias,summary,content,image` | `cic_event` | same | direct | theo source | none | rich text giữ nguyên |
 | `fs_event` | `time_event`,`specific_time` | `cic_event` | same | parse timestamp/direct label | Yes | NULL | source event time |
 | `fs_event` | `place`,`chu_de`,`link_dangky` | `cic_event` | same | direct | Yes | NULL | location/topic/registration |
-| `fs_event` | `end_time` | `cic_event` | `end_time` | direct legacy timestamp | Yes | NULL | DEPRECATED; không map thành endDate |
+| `fs_event` | `end_time` | `cic_event` | `end_time` | đối soát với `updated_time`; giá trị audit legacy → NULL, chỉ giữ giá trị được xác minh là event end | Yes | NULL | Từ CMS mới là thời gian kết thúc; không tạo `event_end_time` |
 | `fs_event` | related/SEO/flags | `cic_event` | same | raw/direct/boolean | Yes | none | preserve order when parsed |
 | `fs_products` | `id,name,title,alias,summary,content` | `cic_products` | same | direct | theo source | none | không đổi sang mock names |
 | `fs_products` | category/manufactory/type/application IDs | `cic_products`/relation tables | corresponding columns | int + deferred FK | Yes | NULL | giữ snapshot name/alias legacy |

@@ -1,6 +1,6 @@
 # New fields/tables proposal
 
-> Mọi mục ADD dưới đây đã vượt qua kiểm tra map/relation/derive/UI/Rich Text. `event_end_time` vẫn REVIEW, không thuộc schema bắt buộc.
+> Mọi mục ADD dưới đây đã vượt qua kiểm tra map/relation/derive/UI/Rich Text. Event không cần ADD: tái sử dụng `cic_event.end_time` đúng nghĩa nghiệp vụ sau khi làm sạch giá trị legacy.
 
 ## Page Builder
 
@@ -72,7 +72,6 @@ Security fields (`account_status`, `two_factor_enabled`, `failed_login_attempts`
 
 Notes/events tables only if feature is used. Use `(source_type, source_id)` rather than copying base request. Legacy rows receive no note/event. Allowed source types are contact/product_contact/order/form_submission.
 
-## REVIEW: event end time
+## Event end time — MAP/REUSE, không ADD
 
-Candidate `cic_event.event_end_time timestamptz NULL`, no default, check `>= time_event`, index only if status filtering is required. Legacy rows get NULL. Add only after business confirms Ongoing and CMS input. Existing `end_time` cannot be reused.
-
+Dùng `cic_event.end_time timestamptz NULL` hiện có làm thời gian kết thúc. Thêm CHECK `end_time > time_event` khi cả hai có giá trị và chỉ thêm index theo `(published, time_event, end_time)` khi truy vấn trạng thái thực tế cần. Giá trị legacy do code cũ ghi như audit timestamp phải được đối soát với `updated_time`, lưu báo cáo và chuẩn hóa về NULL; không tạo `event_end_time`.

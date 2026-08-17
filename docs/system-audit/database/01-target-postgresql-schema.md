@@ -86,7 +86,7 @@ Không rename/drop. Chỉ sửa metadata schema sau validation:
 
 - Breadcrumb, category count, file size/type/dimensions, author display object.
 - Public status label, reading time, share URL, “mới”, ngày còn lại.
-- Event Upcoming/Past từ `time_event`; Ongoing chỉ khi `event_end_time` được duyệt.
+- Event Upcoming/Ongoing/Ended derive từ `time_event` và `end_time`; không lưu status thủ công.
 - `isOpenRegistration` từ registration link/time policy.
 - SEO fallback/canonical, media display URL, related entity display object.
 
@@ -101,7 +101,7 @@ Không rename/drop. Chỉ sửa metadata schema sau validation:
 
 - Snapshot/category wrapper/alias dư thừa legacy nếu đã có FK, cho đến hết rollback window.
 - CSV relations sau khi relation table mới đã backfill và đối soát.
-- `cic_event.end_time` với nghĩa timestamp cập nhật không ổn định; không dùng làm event end.
+- `cic_event.end_time` được tái sử dụng làm event end; giá trị legacy mang nghĩa timestamp cập nhật phải được cleanup sau đối soát.
 - Category fields của Event/Service không có nghiệp vụ thật.
 - Workflow duyệt nội dung, `optimal_seo`, rating/comments/action flags không còn UI mới.
 - `cic_history` không dùng làm CMS audit; vẫn giữ đúng dữ liệu nghiệp vụ cũ.

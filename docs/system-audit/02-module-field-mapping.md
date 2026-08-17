@@ -38,7 +38,7 @@
 | chu_de | eventType | chu_de | fs_event.chu_de | cic_event.chu_de | Chủ đề | A | Không | Không tạo danh mục sự kiện |
 | link_dangky | isOpenRegistration | link_dangky | fs_event.link_dangky | cic_event.link_dangky | Đăng ký | B | Không | Có link hợp lệ ⇒ có CTA; không lưu boolean trùng nghĩa |
 | status | upcoming/ongoing/past | Không có status chuẩn | Không có | Không có | Trạng thái theo thời gian | B một phần | Chưa | Với một mốc chỉ suy ra sắp/đã; “đang diễn ra” cần end thật mới có nghĩa |
-| endDate | endDate (mock đang rỗng) | `end_time` bị dùng làm updated time | fs_event.end_time | cic_event.end_time | Kết thúc sự kiện | Không được map vào end_time | Chưa kết luận D | Chỉ thêm `event_end_time` sau khi nghiệp vụ xác nhận cần ongoing |
+| endDate | endDate | `end_time` từng bị code cũ ghi như updated time | fs_event.end_time | cic_event.end_time | Kết thúc sự kiện | Có, sau cleanup legacy | Không | CMS mới ghi đúng nghĩa; derive ongoing từ `time_event/end_time` |
 | agenda/speakers/audience/documents/media | các object mock | Không có form | Không có nguồn chắc chắn | Không có | Chi tiết mở rộng | C/D chưa chứng minh | Không | Dùng content rich text/file/media relation trước |
 | SEO/related/published/is_hot/show_in_home | cùng nghĩa UI | có | field legacy | field tương ứng | SEO/liên kết/hiển thị | A | Không | Draft/Published duy nhất |
 
@@ -98,4 +98,3 @@
 | Translation key/value/locale | translation item | languages text/admin/content | fs_languages* | cic_languages* | Từ điển UI | A | Không core | reviewer/workflow mock không áp dụng |
 | Activity log | actor/action/entity/before/after/IP | Không có audit đúng nghĩa | fs_history khác nghiệp vụ | cic_history khác nghiệp vụ | Audit CMS | D | Có bảng mới | Không lưu secret; append-only |
 | Trash item/snapshot/source/deletedBy | trash mock | Không có soft-delete chung | Không có | Không có | Xóa/khôi phục | D | Có bảng mới | Bù cho entity không có `deleted_at`; không thay audit log |
-

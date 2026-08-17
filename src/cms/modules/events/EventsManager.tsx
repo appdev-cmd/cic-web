@@ -68,11 +68,15 @@ function formatEventDateTime(dateStr: string): string {
 
 interface EventsManagerProps { workspaceLocale: CmsLocale; data?: EventsModuleData; }
 
-type EventProgressStatus = 'upcoming' | 'ended';
+type EventProgressStatus = 'upcoming' | 'ongoing' | 'ended';
 
 function getEventProgressStatus(event: EventItem): EventProgressStatus {
   const startsAt = new Date(event.time_event).getTime();
-  return Number.isFinite(startsAt) && startsAt <= Date.now() ? 'ended' : 'upcoming';
+  const endsAt = new Date(event.end_time).getTime();
+  const now = Date.now();
+  if (!Number.isFinite(startsAt) || now < startsAt) return 'upcoming';
+  if (Number.isFinite(endsAt) && now < endsAt) return 'ongoing';
+  return 'ended';
 }
 
 export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, data }) => {
@@ -275,6 +279,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         content: data.content || '',
         image: data.image || '',
         time_event: data.time_event || '',
+        end_time: data.end_time || '',
         place: data.place || '',
         specific_time: data.specific_time || '',
         chu_de: data.chu_de || '',
@@ -313,6 +318,8 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Event progress status badge helper
   const renderEventStatusBadge = (status?: EventProgressStatus) => {
     switch (status) {
+      case 'ongoing':
+        return <span className="px-2 py-0.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold text-[10px] rounded-lg">Đang diễn ra</span>;
       case 'ended':
         return <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded-lg">Kết thúc</span>;
       default:
@@ -434,6 +441,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
             >
               <option value="all">Trạng thái diễn ra: Tất cả</option>
               <option value="upcoming">Sắp diễn ra</option>
+              <option value="ongoing">Đang diễn ra</option>
               <option value="ended">Đã kết thúc</option>
             </select>
           </div>
@@ -522,9 +530,14 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                       {/* Thời gian sự kiện */}
                       {columnVisibility.time_event && (
                         <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold`}>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-start gap-1.5">
                             <CalendarDays className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
-                            <span>{formatEventDateTime(ev.time_event)}</span>
+                            <span>
+                              <span className="block">{formatEventDateTime(ev.time_event)}</span>
+                              <span className="block text-slate-400">
+                                đến {ev.end_time ? formatEventDateTime(ev.end_time) : 'Chưa có thời gian kết thúc'}
+                              </span>
+                            </span>
                           </div>
                         </td>
                       )}

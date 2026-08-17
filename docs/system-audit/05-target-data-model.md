@@ -29,7 +29,7 @@ Website React | CMS React
 | Domain | Nguồn chính | Quyết định |
 |---|---|---|
 | News | `cic_news*`, `cic_news_categories*` | Giữ schema; mapping DTO và relation |
-| Event | `cic_event*` | Giữ schema; không dùng `end_time` làm ngày kết thúc |
+| Event | `cic_event*` | Giữ schema; `time_event` là bắt đầu, tái sử dụng `end_time` làm kết thúc sau cleanup legacy |
 | Product | `cic_products*`, categories, types, manufactories, application, price/images | Giữ schema và ID/relation legacy |
 | Product settings | categories/types/manufactories/application/business/email/types_email | Giữ schema; business/email là người phụ trách, không phải template |
 | Service | `cic_services*` | Giữ content rich text; không tạo category/block columns |
@@ -168,4 +168,3 @@ Source entity type/ID, snapshot tối thiểu, deleted actor/time, restore metad
 ## 5. Quy tắc nội dung Rich Text
 
 Rich text là nguồn cuối cho nội dung biên tập thông thường: body tin tức, nội dung dịch vụ, nội dung sự kiện, mô tả dài sản phẩm và trang legal/article. Ảnh/link/table/list/embed trong bài thuộc rich text đã sanitize. Chỉ tách thành structured field khi cần filter/sort/index/relation/reuse hoặc component frontend cần truy xuất độc lập.
-
