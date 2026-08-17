@@ -117,16 +117,9 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   isMobileOpen,
   onCloseMobile,
 }) => {
-  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>([
-    'grp_tong_quan',
-    'grp_noi_dung',
-    'grp_danh_muc_kinh_doanh',
-    'grp_trinh_bay_website',
-    'grp_tuong_tac_khach_hang',
-    'grp_media',
-    'grp_khach_hang',
-    'grp_quan_tri',
-  ]);
+  const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>(() =>
+    menuGroups.map((group) => group.id)
+  );
 
   // Nested sub-item expand state
   const [expandedSubItemIds, setExpandedSubItemIds] = useState<string[]>([
