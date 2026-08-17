@@ -48,7 +48,7 @@ import {
 } from 'ckeditor5';
 import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
-import { Eye, FileInput, Megaphone, X } from 'lucide-react';
+import { FileInput, Megaphone, X } from 'lucide-react';
 import { getDemoCtaModuleData, getDemoFormModuleData } from '../../data/demoCustomerInteractionDataSource';
 
 interface RichTextEditorProps {
@@ -254,11 +254,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const editorRef = useRef<Editor | null>(null);
   const [selectedCtaId, setSelectedCtaId] = useState('');
   const [selectedFormId, setSelectedFormId] = useState('');
-  const [previewFormId, setPreviewFormId] = useState<string | null>(null);
+  const [referencePicker, setReferencePicker] = useState<CmsReferenceType | null>(null);
 
   const activeCtas = useMemo(() => getDemoCtaModuleData('vi').ctas.filter((item) => item.status === 'active'), []);
   const activeForms = useMemo(() => getDemoFormModuleData('vi').forms.filter((item) => item.status === 'active'), []);
-  const previewForm = activeForms.find((item) => item.id === previewFormId) || null;
+  const previewCta = activeCtas.find((item) => item.id === selectedCtaId) || null;
+  const previewForm = activeForms.find((item) => item.id === selectedFormId) || null;
 
   const config = useMemo(() => ({
     licenseKey: 'GPL',
@@ -325,6 +326,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       description: cta.adminName,
     });
     setSelectedCtaId('');
+    setReferencePicker(null);
   };
 
   const insertForm = (formId = selectedFormId) => {
@@ -337,6 +339,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       description: form.adminName,
     });
     setSelectedFormId('');
+    setReferencePicker(null);
   };
 
   return (
@@ -350,33 +353,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         onAfterDestroy={() => { editorRef.current = null; }}
       />
 
-      <div className="grid gap-2 border-t border-slate-200 bg-slate-50 p-3 lg:grid-cols-2 dark:border-slate-700 dark:bg-slate-800/60">
+      <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <select aria-label="Chọn CTA" value={selectedCtaId} onChange={(event) => setSelectedCtaId(event.target.value)} className="min-w-48 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-600 dark:bg-slate-900">
-            <option value="">Chọn CTA từ module CTA</option>
-            {activeCtas.map((cta) => <option key={cta.id} value={cta.id}>{cta.adminName} · {cta.displayText}</option>)}
-          </select>
-          <button type="button" disabled={!selectedCtaId} onClick={insertCta} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-40"><Megaphone className="h-4 w-4" />Chèn CTA</button>
+          <button type="button" onClick={() => { setSelectedCtaId((current) => current || activeCtas[0]?.id || ''); setReferencePicker('cta'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white"><Megaphone className="h-4 w-4" />Chèn CTA</button>
         </div>
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <select aria-label="Chọn biểu mẫu" value={selectedFormId} onChange={(event) => setSelectedFormId(event.target.value)} className="min-w-48 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-600 dark:bg-slate-900">
-            <option value="">Chọn biểu mẫu từ module Biểu mẫu</option>
-            {activeForms.map((form) => <option key={form.id} value={form.id}>{form.adminName} · {form.title}</option>)}
-          </select>
-          <button type="button" disabled={!selectedFormId} onClick={() => setPreviewFormId(selectedFormId)} className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"><Eye className="h-4 w-4" />Xem</button>
-          <button type="button" disabled={!selectedFormId} onClick={() => insertForm()} className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white disabled:opacity-40 dark:bg-slate-600"><FileInput className="h-4 w-4" />Chèn Form</button>
+          <button type="button" onClick={() => { setSelectedFormId((current) => current || activeForms[0]?.id || ''); setReferencePicker('form'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white dark:bg-slate-600"><FileInput className="h-4 w-4" />Chèn Form</button>
         </div>
       </div>
 
-      {previewForm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="form-preview-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setPreviewFormId(null); }}>
+      {referencePicker && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="reference-preview-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setReferencePicker(null); }}>
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
-            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"><div><p className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Xem trước · {previewForm.code}</p><h3 id="form-preview-title" className="mt-1 text-lg font-bold dark:text-white">{previewForm.title}</h3><p className="mt-1 text-xs text-slate-500">{previewForm.description}</p></div><button type="button" aria-label="Đóng xem form" onClick={() => setPreviewFormId(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X className="h-5 w-5" /></button></div>
-            <div className="space-y-4 p-5">
-              {[...previewForm.fields].filter((field) => field.fieldType !== 'hidden').sort((a, b) => a.position - b.position).map((field) => <div key={field.id}><label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</label>{field.fieldType === 'textarea' ? <textarea disabled rows={3} placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800" /> : field.fieldType === 'select' ? <select disabled className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800"><option>{field.placeholder || 'Chọn một giá trị'}</option></select> : <input disabled type={field.fieldType === 'email' ? 'email' : field.fieldType === 'phone' ? 'tel' : field.fieldType === 'file_upload' ? 'file' : 'text'} placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800" />}{field.helpText && <p className="mt-1 text-[10px] text-slate-500">{field.helpText}</p>}</div>)}
-              <button type="button" disabled className="w-full rounded-xl bg-orange-600 px-4 py-3 text-xs font-bold text-white">{previewForm.submitConfig.submitButtonText || 'Gửi thông tin'}</button>
+            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"><div><p className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Chọn và xem trước</p><h3 id="reference-preview-title" className="mt-1 text-lg font-bold dark:text-white">{referencePicker === 'cta' ? 'CTA' : 'Biểu mẫu'}</h3></div><button type="button" aria-label="Đóng" onClick={() => setReferencePicker(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X className="h-5 w-5" /></button></div>
+            <div className="space-y-5 p-5">
+              {referencePicker === 'cta' ? <select aria-label="Chọn CTA để xem trước" value={selectedCtaId} onChange={(event) => setSelectedCtaId(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"><option value="">Chọn CTA từ module CTA</option>{activeCtas.map((cta) => <option key={cta.id} value={cta.id}>{cta.adminName} · {cta.displayText}</option>)}</select> : <select aria-label="Chọn biểu mẫu để xem trước" value={selectedFormId} onChange={(event) => setSelectedFormId(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"><option value="">Chọn biểu mẫu từ module Biểu mẫu</option>{activeForms.map((form) => <option key={form.id} value={form.id}>{form.adminName} · {form.title}</option>)}</select>}
+              {referencePicker === 'cta' && previewCta && <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-800"><p className="mb-4 text-xs font-bold text-slate-500">{previewCta.adminName}</p><button type="button" className={`inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold ${previewCta.styleVariant === 'outline' ? 'border border-orange-600 text-orange-600' : previewCta.styleVariant === 'secondary' ? 'bg-slate-800 text-white' : previewCta.styleVariant === 'gradient' ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white' : 'bg-orange-600 text-white'}`}><Megaphone className="h-4 w-4" />{previewCta.displayText}</button><p className="mt-4 text-xs text-slate-500">{previewCta.description}</p></div>}
+              {referencePicker === 'form' && previewForm && <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800"><div><h4 className="font-bold dark:text-white">{previewForm.title}</h4><p className="mt-1 text-xs text-slate-500">{previewForm.description}</p></div>{[...previewForm.fields].filter((field) => field.fieldType !== 'hidden').sort((a, b) => a.position - b.position).map((field) => <div key={field.id}><label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</label>{field.fieldType === 'textarea' ? <textarea disabled rows={3} placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" /> : <input disabled type="text" placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" />}</div>)}<button type="button" disabled className="w-full rounded-xl bg-orange-600 px-4 py-3 text-xs font-bold text-white">{previewForm.submitConfig.submitButtonText || 'Gửi thông tin'}</button></div>}
+              {((referencePicker === 'cta' && !previewCta) || (referencePicker === 'form' && !previewForm)) && <p className="rounded-xl bg-slate-100 p-6 text-center text-sm text-slate-500 dark:bg-slate-800">Chưa có mục khả dụng để xem trước.</p>}
             </div>
-            <div className="flex justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-700"><button type="button" onClick={() => setPreviewFormId(null)} className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold dark:border-slate-600">Đóng</button><button type="button" onClick={() => { insertForm(previewForm.id); setPreviewFormId(null); }} className="rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white">Chèn biểu mẫu này</button></div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-700"><button type="button" onClick={() => setReferencePicker(null)} className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold dark:border-slate-600">Đóng</button><button type="button" disabled={referencePicker === 'cta' ? !previewCta : !previewForm} onClick={() => referencePicker === 'cta' ? insertCta() : insertForm()} className="rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{referencePicker === 'cta' ? 'Chèn CTA này' : 'Chèn biểu mẫu này'}</button></div>
           </div>
         </div>
       )}

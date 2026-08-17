@@ -132,6 +132,7 @@
 | Text/image/video | section config + Media reference | JSON schema/relation | Không lưu layout/code |
 | Legal/custom page title | section `legal.header` | Page config/MAP | Section tiêu đề cố định theo layout website |
 | Legal/custom page body | `legal.content.richTextHtml` hoặc legacy contents `content` | Rich Text | Một body linh hoạt; không chia mỗi heading/đoạn thành section riêng |
+| CTA/Form trong legal body | reference widget chứa ID | CTA/Form relation | Rich Text chỉ giữ vị trí nhúng; CMS dùng hai nút mở modal chọn và xem trước entity, không sao chép cấu hình CTA/Form vào HTML |
 | Product/news/service/project/partner highlights | ordered section references | Relation table | Chọn thủ công; không auto query |
 | CTA | CTA ID/reference | CTA module | Không duplicate text/url nếu CTA reusable |
 | Form | Form ID/reference | Form module | |
