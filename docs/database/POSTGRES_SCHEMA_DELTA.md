@@ -47,9 +47,55 @@ Không có.
 - Số bài trong danh mục được tính bằng `COUNT(cic_news.id)` theo `category_id`; không lưu column `count`.
 - Cần sửa FK hiện có `cic_news_categories_en.parent_id` từ `cic_news_categories(id)` thành self-reference `cic_news_categories_en(id)` sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle. Đây là sửa constraint sai workspace, không phải ADD field/table.
 
-## Tổng hợp đợt audit
+## Sản phẩm
+
+### Bảng hiện có cần mở rộng
+
+Không có field nghiệp vụ mới cần thêm. `cic_products`, `cic_products_en` và các bảng relation/media/file hiện tại đã đáp ứng save/read contract của CMS/website mới.
+
+| Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
+| ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
+| `cic_products` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | CMS tạo/kiểm tra alias; website tra cứu sản phẩm VI | Chỉ tạo sau khi profiling NULL/rỗng/trùng, khoảng trắng và khác biệt hoa/thường. Có thể dùng partial unique index trong giai đoạn chuyển tiếp. |
+| `cic_products_en` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | CMS tạo/kiểm tra alias; website tra cứu sản phẩm EN | Profiling độc lập dataset EN; không ép `alias NOT NULL` trong migration đầu nếu legacy chưa đạt. |
+
+### Bảng mới cần tạo
+
+Không có.
+
+### Mapping / lưu ý
+
+- `title → name`, `sku → code`, `short_description → summary`, `content_html → description`, `video_url → video`, `meta_* → seo_*`, `brand_id → manufactory`, `product_type → types_id`/`types`.
+- Danh mục N-N dùng `cic_products_categories_rel*`; không tạo relation khác và không loại bỏ `category_id` CSV trong giai đoạn compatibility.
+- Gallery dùng `cic_products_images*`. Các file/link tải xuống đã có trong Product; loại và kích thước file là dữ liệu derived.
+- `highlights`, `tech_specs`, document metadata/version/access, `availability_signal`, `site_placement` và các field completeness/version/activity chỉ có trong mock/type hoặc chưa nằm trong save form; không thêm vào DB.
+- Hãng, ứng dụng, loại sản phẩm và người phụ trách sử dụng entity/relation legacy hiện có; DTO trả object hiển thị, không lưu lặp tên theo ViewModel.
+- Cần xác minh/sửa hai FK EN hiện có: `cic_products_en.types_id` đang trỏ bảng loại VI và `cic_products_images_en.record_id` đang trỏ Product VI. Đây là sửa constraint, không phải ADD field/table.
+
+## Danh mục sản phẩm
+
+### Bảng hiện có cần mở rộng
+
+Không có field nghiệp vụ mới cần thêm. `cic_products_categories` và `cic_products_categories_en` đã có cây phân cấp, alias, mô tả, media, trạng thái, ordering, SEO và timestamps.
+
+| Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
+| ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
+| `cic_products_categories` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu danh mục VI | Chỉ tạo sau khi xử lý NULL/rỗng/trùng và ngoại lệ legacy. |
+| `cic_products_categories_en` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu danh mục EN | Profiling độc lập dataset EN trước khi áp dụng. |
+
+### Bảng mới cần tạo
+
+Không có.
+
+### Mapping / lưu ý
+
+- `slug → alias`, `status → published`, `meta_title → seo_title`, `meta_description → seo_description`; `canonical_url` map vào `link` hiện có hoặc derive từ alias.
+- `usage_count`/`count` được tính từ relation; có thể dùng `total_products` legacy như cache sau khi xác minh. Không tạo count column mới.
+- `site_scope` tồn tại trong state/payload mock nhưng không có control chỉnh sửa và website chưa đọc; chưa đủ cơ sở đưa vào PostgreSQL.
+- Cần sửa `parent_id` và `root_id` của `cic_products_categories_en` đang trỏ bảng VI thành self-reference tới bảng EN sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle. Đây là sửa constraint, không phải ADD field/table.
+
+## Tổng hợp các đợt audit đã nhập
 
 - Field mới bắt buộc: **0**.
 - Bảng mới bắt buộc: **0**.
-- Index mới bắt buộc: **4 unique index alias**, chỉ áp dụng sau data profiling.
-- Constraint hiện có cần sửa: **2 FK của workspace EN đang trỏ sang bảng VI**.
+- Index mới bắt buộc: **8 unique index alias**, chỉ áp dụng sau data profiling.
+- Constraint hiện có cần sửa/xác minh: **6 FK của workspace EN đang trỏ sang bảng VI**.
