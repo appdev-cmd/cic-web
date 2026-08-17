@@ -89,14 +89,20 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         <button
           onClick={onOpenCommandPalette}
           className="w-full flex items-center justify-between px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-lg text-xs text-slate-400 transition-all cursor-pointer group"
+          title="Mở Tìm kiếm toàn hệ thống (Ctrl + K hoặc /)"
         >
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">
-            <Search className="w-4 h-4 text-slate-400" />
-            <span>Tìm sản phẩm, tin tức, banner, người dùng...</span>
+            <Search className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <span>Tìm kiếm trong CMS (sản phẩm, tin tức, leads, SEO...)...</span>
           </div>
-          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded shadow-xs">
-            Ctrl K
-          </kbd>
+          <div className="flex items-center gap-1">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded shadow-xs">
+              Ctrl K
+            </kbd>
+            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded shadow-xs">
+              /
+            </kbd>
+          </div>
         </button>
       </div>
 

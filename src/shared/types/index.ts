@@ -95,9 +95,9 @@ export interface EventItem {
   isFeatured?: boolean; // Highlight for Hero Event
   status: 'upcoming' | 'ongoing' | 'past'; // upcoming = Sắp diễn ra, ongoing = Đang diễn ra, past = Đã diễn ra
   isOpenRegistration: boolean; // Đang mở đăng ký
-  targetAudience: string[];
-  agenda: EventAgendaItem[];
-  speakers: EventSpeaker[];
+  targetAudience?: string[];
+  agenda?: EventAgendaItem[];
+  speakers?: EventSpeaker[];
   media: {
     gallery: string[];
     videoUrl?: string;

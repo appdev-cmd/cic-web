@@ -23,6 +23,90 @@ export const mockEventProducts: RelatedProductItem[] = [
 
 export const mockEvents: EventItem[] = [
   {
+    id: 'ev_smartport_2026',
+    title: 'Hội thảo: “Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam thập kỷ tới”',
+    alias: 'dot-pha-ung-dung-ai-trong-van-hanh-cang-bien-viet-nam',
+    summary: 'CIC phối hợp cùng ERIC C&C – Hàn Quốc tổ chức hội thảo trực tuyến chia sẻ xu hướng Smart Port, Digital Twin, AI và TOS trong vận hành cảng biển.',
+    content: `<p style="text-align: center;"><img alt="Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam" src="/upload_images/images/2026/STC/D%E1%BB%99t_pha_%E1%BB%A9ng_d%E1%BB%A5ng_AI_trong_v%E1%BA%ADn_hanh_c%E1%BA%A3ng_bi%E1%BB%83n_(1).png" style="width: 700px; height: 394px;" /></p>
+
+<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Nhằm chia sẻ những xu hướng và giải pháp tiên tiến trong phát triển cảng thông minh, <strong>Công ty Cổ phần Công nghệ và Tư vấn CIC</strong> phối hợp cùng <strong>ERIC C&amp;C – Hàn Quốc</strong> tổ chức hội thảo trực tuyến với chủ đề:&nbsp;<strong>“Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam thập kỷ tới”</strong></span></span></p>
+
+<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Hội thảo là cơ hội để các cơ quan quản lý, chủ đầu tư và doanh nghiệp khai thác cảng cập nhật kinh nghiệm triển khai <strong>Smart Port</strong> trên thế giới; đồng thời tìm hiểu khả năng ứng dụng <strong>Digital Twin, AI và Terminal Operating System – TOS</strong> trong giám sát, mô phỏng và tối ưu hoạt động khai thác cảng biển.</span></span></p>
+
+<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Tại chương trình, <strong>Giám đốc kỹ thuật – Geon Lee&nbsp;</strong>và&nbsp;<strong>Chuyên gia kỹ thuật&nbsp;–&nbsp;</strong><strong>TS.&nbsp;Jun-Hee Cho</strong> của <strong>ERIC C&amp;C</strong> sẽ trực tiếp chia sẻ kinh nghiệm thực tiễn, các bài toán ứng dụng công nghệ và lộ trình triển khai phù hợp với điều kiện vận hành của các cảng biển tại Việt Nam.</span></span></p>
+
+<h2><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Về ERIC C&amp;C – Hàn Quốc</span></span></strong></h2>
+
+<p style="text-align: center;"><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><img alt="eric-c-c-smart-port" src="/upload_images/images/2026/STC/smartport_main_image-min.png" style="width: 700px; height: 350px;" /></span></span></strong></p>
+
+<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>ERIC C&amp;C </strong>là doanh nghiệp công nghệ Hàn Quốc cung cấp các giải pháp Smart Port, hướng tới nâng cao hiệu suất khai thác, an toàn vận hành và năng suất tại các cảng biển.</span></span></p>
+
+<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Các giải pháp của hãng tích hợp TOS, hệ thống điều khiển thiết bị, IoT, AI, dữ liệu lớn, giám sát thời gian thực và điều khiển từ xa, có khả năng tùy chỉnh theo nhiều mô hình cảng khác nhau. ERIC C&amp;C đã tham gia triển khai giải pháp tại một số cảng và terminal tiêu biểu như Cảng container tự động Qinzhou, Dongwon Global Terminal và BNCT – Cảng mới Busan.</span></span></p>
+
+<p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thông qua các giải pháp này, ERIC C&amp;C tập trung vào bốn giá trị chính: <strong>nâng cao hiệu quả khai thác, tăng cường an toàn, hỗ trợ vận hành thông minh</strong> và <strong>mở rộng linh hoạt theo hạ tầng của từng cảng.</strong></span></span></p>
+
+<h2 style="text-align: center;"><img alt="Giải pháp Smart Port ERIC C&C" src="/upload_images/images/2026/STC/Solution__(2).jpg" style="width: 700px; height: 394px;" /></h2>
+
+<h2 style="text-align: justify;"><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Thông tin sự kiện</span></span></strong></h2>
+
+<ul>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Thời gian:</strong> 08h30–10h00, Thứ Tư, ngày 19/08/2026</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Hình thức:</strong> Trực tuyến qua Zoom</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Chi phí tham dự:</strong> Miễn phí</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Link đăng ký:</strong>&nbsp;<a href="https://docs.google.com/forms/d/e/1FAIpQLSct1dkcn4KjwwxiEnTdc267C1ubcmkvbD75OqiLMT4xDGGH4g/viewform" target="_blank" rel="noopener noreferrer"><strong>Tại đây</strong></a></span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Diễn giả:</strong></span></span>
+	<ul>
+		<li><em><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Giám đốc kỹ thuật – Geon Lee, ERIC C&amp;C</span></span></em></li>
+		<li><em><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Chuyên gia kỹ thuật – TS.&nbsp;Jun-Hee Cho,&nbsp;ERIC C&amp;C</span></span></em></li>
+	</ul>
+	</li>
+</ul>
+
+<h2 style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong>Nội dung chương trình</strong></span></span></h2>
+
+<ul>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Cập nhật xu hướng chuyển đổi số và phát triển Smart Port trên thế giới;</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Ứng dụng Digital Twin kết hợp TOS trong xây dựng bản sao số, giám sát và mô phỏng vận hành cảng;</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Ứng dụng AI trong tối ưu bãi container, cầu bến, thiết bị xếp dỡ và luồng phương tiện;</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Giải pháp giám sát an toàn, cảnh báo va chạm và khu vực nguy hiểm;</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Khả năng tích hợp với TOS, STS, RTG/RMG, GPS/GNSS, IoT, CCTV, API, MQTT và hệ thống dữ liệu hiện có;</span></span></li>
+	<li style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Lộ trình từ khảo sát, tư vấn, thử nghiệm PoC/Pilot đến triển khai trên quy mô toàn cảng.</span></span></li>
+</ul>
+
+<p style="text-align: justify;"><em><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">CIC trân trọng kính mời Quý Khách hàng, Quý Đối tác đăng ký tham dự để trao đổi trực tiếp với chuyên gia và tìm hiểu các giải pháp công nghệ phù hợp với nhu cầu thực tế của đơn vị.</span></span></em></p>
+
+<p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Mọi thắc mắc về thông tin hội thảo vui lòng liên hệ Ban tổ chức:</span></span></strong></p>
+
+<p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Công ty Cổ phần Công nghệ và Tư vấn CIC</span></span></strong></p>
+
+<p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Trụ sở chính:</span></span></strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"> Tầng 4, VG Building, Số 235 Nguyễn Trãi, Hà Nội</span></span></p>
+
+<p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Tel: &nbsp;</span></span></strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"><strong><em>036 575 6854</em></strong> (Ms. Huyen)</span></span></p>
+
+<p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Email: <a href="mailto:huyentran@cic.com.vn">huyentran@cic.com.vn</a></span></span></strong></p>`,
+    image: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=800&auto=format&fit=crop&q=80',
+    time_event: '2026-08-19T08:30',
+    end_time: '2026-08-19T10:00',
+    place: 'Trực tuyến qua Zoom - CIC Tech & ERIC C&C',
+    specific_time: '08:30 - 10:00, Thứ Tư, ngày 19/08/2026',
+    chu_de: 'AI & Smart Port Operations Vietnam 2026-2036',
+    link_dangky: 'https://docs.google.com/forms/d/e/1FAIpQLSct1dkcn4KjwwxiEnTdc267C1ubcmkvbD75OqiLMT4xDGGH4g/viewform',
+    editorial_status: 'published',
+    event_related: ['ev_1001'],
+    news_related: ['news_1001'],
+    products_related: ['prod_sap2000'],
+    is_hot: true,
+    show_in_home: true,
+    published: true,
+    ordering: 1,
+    seo_title: 'Hội thảo Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam - CIC & ERIC C&C',
+    seo_keyword: 'Smart Port, AI Port, ERIC CC, Digital Twin, TOS, Cang bien thong minh, CIC Tech',
+    seo_description: 'Hội thảo trực tuyến do CIC và ERIC C&C Hàn Quốc tổ chức về giải pháp Smart Port, AI, Digital Twin và TOS trong vận hành cảng biển Việt Nam.',
+    created_by: 'Nguyễn Văn Minh (Editor)',
+    created_time: '2026-08-01 08:30:00',
+    updated_time: '2026-08-01 08:30:00',
+  },
+  {
     id: 'ev_1001',
     title: 'Hội thảo Chuyển đổi số & Ứng dụng Giải pháp Mô hình hóa BIM trong Xây dựng Đô thị 2026',
     alias: 'hoi-thao-chuyen-doi-so-va-ung-dung-mo-hinh-bim-2026',

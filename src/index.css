@@ -844,3 +844,85 @@ input[type="button"],
   background: #0f172a;
   color: #e2e8f0;
 }
+
+/* Rich Content HTML Renderer for Events & Articles */
+.event-rich-content,
+.article-rich-content {
+  color: #334155;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.event-rich-content p,
+.article-rich-content p {
+  margin-bottom: 1rem;
+}
+
+.event-rich-content img,
+.article-rich-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.25rem auto;
+  display: block;
+}
+
+.event-rich-content h2,
+.article-rich-content h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.event-rich-content h3,
+.article-rich-content h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.event-rich-content ul,
+.article-rich-content ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.event-rich-content ol,
+.article-rich-content ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.event-rich-content li,
+.article-rich-content li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.event-rich-content a,
+.article-rich-content a {
+  color: #ea580c;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.event-rich-content a:hover,
+.article-rich-content a:hover {
+  color: #c2410c;
+}
+
+.event-rich-content strong,
+.article-rich-content strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+

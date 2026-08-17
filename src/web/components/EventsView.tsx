@@ -45,6 +45,23 @@ interface EventsViewProps {
   onNavigateToProduct?: (productId: string) => void;
 }
 
+const cleanEventHtml = (html: string) => {
+  if (!html) return '';
+  return html
+    .replace(
+      /src="(?:https:\/\/www\.cic\.com\.vn)?\/upload_images\/images\/2026\/STC\/D%E1%BB%99t_pha_%E1%BB%A9ng_d%E1%BB%A5ng_AI_trong_v%E1%BA%ADn_hanh_c%E1%BA%A3ng_bi%E1%BB%83n_\(1\)\.png"/g,
+      'src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=1200" alt="Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam"'
+    )
+    .replace(
+      /src="(?:https:\/\/www\.cic\.com\.vn)?\/upload_images\/images\/2026\/STC\/smartport_main_image-min\.png"/g,
+      'src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200" alt="ERIC C&C Smart Port Solutions"'
+    )
+    .replace(
+      /src="(?:https:\/\/www\.cic\.com\.vn)?\/upload_images\/images\/2026\/STC\/Solution__\(2\)\.jpg"/g,
+      'src="https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&q=80&w=1200" alt="Giải pháp công nghệ cảng thông minh"'
+    );
+};
+
 export const EventsView: React.FC<EventsViewProps> = ({ 
   initialEventId,
   initialIsRegistering,
@@ -728,90 +745,24 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       </div>
                     </div>
 
-                    {/* LONG FORM DESCRIPTION */}
+                    {/* LONG FORM DESCRIPTION / RICH ARTICLE CONTENT */}
                     <div className="p-6 sm:p-8 space-y-4">
-                      <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
-                        Giới thiệu chương trình
-                      </h2>
-                      <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line">
-                        {selectedEvent.longDesc}
-                      </div>
+                      {/<[a-z][\s\S]*>/i.test(selectedEvent.longDesc) ? (
+                        <div
+                          className="event-rich-content text-slate-800 leading-relaxed font-normal"
+                          dangerouslySetInnerHTML={{ __html: cleanEventHtml(selectedEvent.longDesc) }}
+                        />
+                      ) : (
+                        <>
+                          <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
+                            Giới thiệu chương trình
+                          </h2>
+                          <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line">
+                            {selectedEvent.longDesc}
+                          </div>
+                        </>
+                      )}
                     </div>
-
-                    {/* AUDIENCE / TARGET GROUP */}
-                    {selectedEvent.targetAudience && selectedEvent.targetAudience.length > 0 && (
-                      <div className="p-6 sm:p-8 space-y-4">
-                        <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
-                          Đối tượng tham dự phù hợp
-                        </h2>
-                        <ul className="space-y-2">
-                          {selectedEvent.targetAudience.map((aud, i) => (
-                            <li key={i} className="flex items-start gap-2.5 text-sm font-medium text-slate-700">
-                              <span className="w-1.5 h-1.5 rounded-full bg-orange-600 mt-2 shrink-0" />
-                              <span className="leading-relaxed">{aud}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* AGENDA TIMELINE */}
-                    {selectedEvent.agenda && selectedEvent.agenda.length > 0 && (
-                      <div className="p-6 sm:p-8 space-y-4">
-                        <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
-                          Agenda chi tiết chương trình
-                        </h2>
-                        
-                        <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-8 py-2">
-                          {selectedEvent.agenda.map((item, i) => (
-                            <div key={i} className="relative group">
-                              
-                              {/* Timeline point */}
-                              <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-white border-2 border-orange-600 rounded-full group-hover:bg-orange-600 transition-all"></div>
-                              
-                              <div className="space-y-1">
-                                <div className="flex flex-col md:flex-row md:items-center gap-2">
-                                  <span className="px-2.5 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider shrink-0 w-fit rounded-[6px]">
-                                    {item.time}
-                                  </span>
-                                  {item.speaker && (
-                                    <span className="text-xs font-bold text-orange-600">
-                                      • Diễn giả: {item.speaker}
-                                    </span>
-                                  )}
-                                </div>
-                                <h4 className="text-sm font-bold text-slate-950">{item.title}</h4>
-                                {item.description && (
-                                  <p className="text-slate-500 text-xs font-medium leading-relaxed max-w-2xl">{item.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* SPEAKERS / PRESENTERS */}
-                    {selectedEvent.speakers && selectedEvent.speakers.length > 0 && (
-                      <div className="p-6 sm:p-8 space-y-4 border-t border-slate-100">
-                        <h3 className="text-base font-bold text-slate-900 uppercase tracking-tight">
-                          Ban diễn giả & Chuyên gia
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {selectedEvent.speakers.map((speaker, i) => (
-                            <div key={i} className="text-sm">
-                              <p className="font-bold text-slate-900">{speaker.name}</p>
-                              <p className="text-xs text-orange-600 font-semibold">{speaker.role} – {speaker.company}</p>
-                              {speaker.bio && (
-                                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                                  {speaker.bio}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                   </div>
                 </div>

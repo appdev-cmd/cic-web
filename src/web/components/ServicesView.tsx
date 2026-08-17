@@ -164,6 +164,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     return productsData.slice(0, 4);
   }, [activeService]);
 
+  const relatedServices = useMemo(() => {
+    if (!activeService) return [];
+    const sameCategory = servicesData.filter(s => s.id !== activeService.id && s.category === activeService.category);
+    const otherServices = servicesData.filter(s => s.id !== activeService.id && s.category !== activeService.category);
+    return [...sameCategory, ...otherServices].slice(0, 3);
+  }, [activeService, servicesData]);
+
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullname || !formData.phone) {
@@ -752,6 +759,74 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 </div>
 
               </div>
+
+              {/* Related Services Section (Dịch vụ liên quan) */}
+              {relatedServices.length > 0 && (
+                <div className="pt-14 border-t border-slate-200 mt-14 space-y-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-900">
+                        Dịch Vụ Liên Quan
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        Các gói giải pháp và tư vấn chuyển đổi số kỹ thuật nổi bật khác của CIC
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-orange-600 shrink-0">
+                      Giải pháp đồng bộ
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                    {relatedServices.map((relService) => {
+                      const cleanRelTitle = relService.title
+                        .replace("Dịch Vụ ", "")
+                        .replace("Toàn Diện của CIC – Bứt Phá Chuyển Đổi Số Ngành Xây Dựng", "");
+
+                      return (
+                        <div
+                          key={relService.id}
+                          onClick={() => handleServiceSelect(relService.id)}
+                          className="bg-white border border-slate-200/90 hover:border-orange-500 p-5 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 rounded-[14px] group flex flex-col justify-between cursor-pointer relative overflow-hidden"
+                        >
+                          <div>
+                            {/* Uniform Image Banner */}
+                            <div className="h-44 w-full overflow-hidden rounded-[10px] relative mb-4 shrink-0 bg-slate-100">
+                              <img 
+                                src={relService.image} 
+                                alt={relService.title} 
+                                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
+                                referrerPolicy="no-referrer"
+                              />
+                              {relService.category && (
+                                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-slate-950/80 text-white text-[10px] font-bold uppercase tracking-wider rounded-[4px] backdrop-blur-xs">
+                                  {relService.category}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Title & Excerpt */}
+                            <div className="space-y-2 mb-4">
+                              <h4 className="text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                                {cleanRelTitle}
+                              </h4>
+                              <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
+                                {getServiceExcerpt(relService)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Card Footer Action Button */}
+                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-orange-600 group-hover:text-orange-700 transition-colors">
+                            <span>Xem Chi Tiết Dịch Vụ</span>
+                            <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

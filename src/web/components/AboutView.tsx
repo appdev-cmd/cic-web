@@ -115,7 +115,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
   const ActiveFieldIcon = businessFields[activeFieldIndex].icon;
 
   return (
-    <div className="pt-24 bg-transparent min-h-screen">
+    <div className="pt-24 bg-transparent min-h-screen relative">
+      {/* 1 Fixed Background Watermark - Follows along viewport on scroll & visible clearly */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[480px] md:w-[600px] lg:w-[700px] aspect-square opacity-[0.075] pointer-events-none select-none z-0">
+        <img 
+          src="/logo CIC-12.png" 
+          alt="CIC Logo Watermark" 
+          className="w-full h-full object-contain filter grayscale contrast-125" 
+        />
+      </div>
+
       {/* Visual Top Hero Banner */}
       <section className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -208,7 +217,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
               className="w-full space-y-6 lg:space-y-8"
              >
                 {/* 0. Giới Thiệu & Video */}
-                <section className="pb-4 lg:pb-6 bg-white relative overflow-hidden z-10 border-b border-slate-100">
+                <section className="pb-4 lg:pb-6 bg-transparent relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="w-full relative z-10">
                     <SectionHeader 
                       title="Tổng quan doanh nghiệp" 
@@ -241,12 +250,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* 3. Tiến Trình Phát Triển (Timeline) */}
-                <section className="py-6 md:py-8 bg-white relative overflow-hidden border-b border-slate-100 z-10">
-                  {/* Submerged Background Watermark - Centered */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[550px] h-[400px] md:h-[550px] opacity-[0.035] pointer-events-none select-none z-0">
-                    <img src="/logo CIC-12.png" alt="" className="w-full h-full object-contain filter grayscale" />
-                  </div>
-
+                <section className="py-6 md:py-8 bg-transparent relative overflow-hidden border-b border-slate-100 z-10">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-[8px] mb-2">
@@ -359,7 +363,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* Lĩnh vực kinh doanh */}
-                <section id="solutions" className="py-16 bg-white text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
+                <section id="solutions" className="py-16 bg-transparent text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
                       title="SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP" 
@@ -394,7 +398,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* Awards Section */}
-                <section className="py-16 bg-slate-50 relative overflow-hidden z-10 border-b border-slate-200">
+                <section className="py-16 bg-slate-50/60 relative overflow-hidden z-10 border-b border-slate-200">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
                       title="Thành tựu & Giải thưởng" 
@@ -412,7 +416,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* Partners Section */}
-                <section className="py-10 bg-white border-b border-slate-100 overflow-hidden relative z-10">
+                <section className="py-10 bg-transparent border-b border-slate-100 overflow-hidden relative z-10">
                   <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
                     <SectionHeader 
                       title="Đối tác chiến lược" 
@@ -482,13 +486,15 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="space-y-12"
+            className="space-y-12 relative overflow-hidden z-10"
           >
             {/* Structural Banner */}
-            <SectionHeader title="Cơ cấu tổ chức" />
+            <div className="relative z-10">
+              <SectionHeader title="Cơ cấu tổ chức" />
+            </div>
 
             {/* Sơ đồ cơ cấu tổ chức chuẩn xác theo sơ đồ gốc CIC - Tự động co giãn full chiều ngang không kéo scrollbar trên PC */}
-            <div className="w-full overflow-x-auto lg:overflow-x-visible py-2">
+            <div className="w-full overflow-x-auto lg:overflow-x-visible py-2 relative z-10">
               <div className="w-full max-w-7xl mx-auto">
                 <svg 
                   viewBox="0 0 1600 560" 
@@ -718,10 +724,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4 }}
-            className="w-full space-y-16"
+            className="w-full space-y-16 relative overflow-hidden z-10"
           >
             {/* Top Capacity & Scale Overview */}
-            <div className="w-full bg-white">
+            <div className="w-full bg-transparent">
               <div className="max-w-7xl mx-auto relative z-10">
                 <div className="flex flex-col items-center text-center pt-2">
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight">

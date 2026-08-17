@@ -1,5 +1,6 @@
 export type CmsModuleKey =
   | 'dashboard'
+  | 'search'
   | 'users'
   | 'permissions'
   | 'settings'
@@ -32,6 +33,7 @@ interface CmsRouteDefinition {
 
 export const CMS_ROUTES: CmsRouteDefinition[] = [
   { module: 'dashboard', canonicalPath: '/cms/dashboard', aliases: ['/cms'] },
+  { module: 'search', canonicalPath: '/cms/search', aliases: ['/cms/global-search'], nestedPrefixes: ['/cms/search/'] },
   {
     module: 'users',
     canonicalPath: '/cms/users',

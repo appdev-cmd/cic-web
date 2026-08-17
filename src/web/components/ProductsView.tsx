@@ -19,7 +19,9 @@ import {
   Box,
   Layers,
   FileText,
-  Tag
+  Tag,
+  PhoneCall,
+  ShoppingCart
 } from 'lucide-react';
 import { Product } from '@shared/types';
 import { getProductsData } from '../features/products/productsData';
@@ -734,6 +736,10 @@ export function ProductsView(_props?: ProductsViewProps) {
           product={selectedProduct}
           products={productsData}
           onBack={() => setSelectedProduct(null)}
+          onSelectProduct={(p) => {
+            setSelectedProduct(p);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           onContact={triggerContact}
           onDownload={triggerDownload}
           onBuy={triggerBuy}
@@ -1256,12 +1262,12 @@ export function ProductsView(_props?: ProductsViewProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: idx * 0.04 }}
                     onClick={() => { setSelectedProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="bg-white border border-slate-200/90 hover:border-orange-500 p-5 sm:p-6 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 rounded-[12px] group flex flex-col justify-between cursor-pointer relative overflow-hidden min-h-[285px] sm:min-h-[305px]"
+                    className="bg-white border border-slate-200/90 hover:border-orange-500 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 rounded-[12px] group flex flex-col justify-between cursor-pointer relative overflow-hidden min-h-[285px] sm:min-h-[300px]"
                   >
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {/* Image on Left (Logo size), Title on Right */}
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
                           <img 
                             src={product.img || product.icon} 
                             alt={product.name}
@@ -1270,29 +1276,71 @@ export function ProductsView(_props?: ProductsViewProps) {
                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
                           />
                         </div>
-                        <h3 className="text-xs sm:text-sm font-bold text-[#333] leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
+                        <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
                           {product.name}
                         </h3>
                       </div>
 
                       {/* Price Section */}
-                      <div className="flex items-center gap-2 pt-1">
-                        <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Giá bán:</span>
-                        <span className="text-base font-black text-orange-600 tracking-tight">
+                      <div className="flex items-baseline gap-2 pt-0.5">
+                        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">Giá bán:</span>
+                        <span className="text-sm sm:text-base font-extrabold text-orange-600 tracking-tight">
                           {product.price === 'Liên hệ' ? 'Liên hệ' : product.price}
                         </span>
                       </div>
 
-                      {/* Short Description */}
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-3 pt-3 border-t border-slate-100">
-                        {product.description}
-                      </p>
+                      {/* Short Description (Normal) & Action Buttons (On Hover) */}
+                      <div className="pt-2.5 border-t border-slate-100 min-h-[66px] flex flex-col justify-center">
+                        {/* Default state: Short description */}
+                        <p className="text-xs sm:text-[13px] text-slate-600 font-normal leading-relaxed line-clamp-3 group-hover:hidden transition-all duration-200">
+                          {product.description}
+                        </p>
+
+                        {/* Hover state: 3 action buttons on the same row without icons (Liên hệ, Download, Đăng ký mua) */}
+                        <div className="hidden group-hover:grid grid-cols-3 gap-1 transition-all duration-200 animate-in fade-in-50">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerContact(product);
+                            }}
+                            className="py-2 px-0.5 sm:px-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold tracking-tight rounded-[6px] transition-all flex items-center justify-center text-center shadow-xs active:scale-95 cursor-pointer whitespace-nowrap"
+                            title="Liên hệ tư vấn"
+                          >
+                            Liên hệ
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerDownload(product);
+                            }}
+                            className="py-2 px-0.5 sm:px-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold tracking-tight rounded-[6px] border border-slate-200 transition-all flex items-center justify-center text-center shadow-xs active:scale-95 cursor-pointer whitespace-nowrap"
+                            title="Tải bộ cài & tài liệu"
+                          >
+                            Download
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerBuy(product);
+                            }}
+                            className="py-2 px-0.5 sm:px-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold tracking-tight rounded-[6px] transition-all flex items-center justify-center text-center shadow-sm shadow-orange-600/20 active:scale-95 cursor-pointer whitespace-nowrap"
+                            title="Đăng ký mua bản quyền / sản phẩm"
+                          >
+                            Đăng ký mua
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Product Details Action at Bottom */}
-                    <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
+                    <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs sm:text-[13px] font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
                       <span className="font-bold tracking-tight">Chi tiết sản phẩm</span>
-                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </motion.div>
                 ))}

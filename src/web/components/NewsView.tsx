@@ -177,7 +177,7 @@ export function NewsView({
   };
 
   const breakingNewsList = React.useMemo(() => {
-    return newsData.slice(0, 6);
+    return newsData.filter(item => item.category !== 'shareholder').slice(0, 6);
   }, [newsData]);
 
   const renderNewsTicker = () => (
@@ -467,8 +467,12 @@ export function NewsView({
 
   // --- FILTER LOGIC ---
   const filteredNews = newsData.filter((item) => {
-    // 1. Category check
-    if (activeCategory !== 'all' && item.category !== activeCategory) {
+    // 1. Category check - 'all' tab excludes 'shareholder' (Quan hệ cổ đông)
+    if (activeCategory === 'all') {
+      if (item.category === 'shareholder') {
+        return false;
+      }
+    } else if (item.category !== activeCategory) {
       return false;
     }
 
@@ -607,7 +611,7 @@ export function NewsView({
   const latestNews = React.useMemo(() => {
     if (!selectedItem) return [];
     return [...newsData]
-      .filter(item => item.id !== selectedItem.id)
+      .filter(item => item.id !== selectedItem.id && (selectedItem.category === 'shareholder' ? true : item.category !== 'shareholder'))
       .slice(0, 5);
   }, [selectedItem]);
 
@@ -617,7 +621,7 @@ export function NewsView({
     const sameCategory = newsData.filter(item => item.id !== selectedItem.id && item.category === selectedItem.category);
     if (sameCategory.length >= 4) return sameCategory.slice(0, 4);
 
-    const otherCategory = newsData.filter(item => item.id !== selectedItem.id && item.category !== selectedItem.category);
+    const otherCategory = newsData.filter(item => item.id !== selectedItem.id && item.category !== selectedItem.category && (selectedItem.category === 'shareholder' ? true : item.category !== 'shareholder'));
     return [...sameCategory, ...otherCategory].slice(0, 4);
   }, [selectedItem]);
 

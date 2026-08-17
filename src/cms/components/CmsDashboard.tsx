@@ -191,6 +191,11 @@ const CustomerRequestManager = lazy(async () => {
   ) };
 });
 
+const CmsGlobalSearchPage = lazy(async () => {
+  const module = await import('../modules/search/CmsGlobalSearchPage');
+  return { default: module.CmsGlobalSearchPage };
+});
+
 interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
 }
@@ -227,6 +232,29 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Global Keyboard Shortcuts (Ctrl+K / Cmd+K and '/' key)
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInputActive =
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'SELECT' ||
+        target?.isContentEditable;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      } else if (e.key === '/' && !isInputActive && !isCommandPaletteOpen) {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalShortcuts);
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts);
+  }, [isCommandPaletteOpen]);
 
   const navigateToCmsPath = (path: string, title: string) => {
     window.history.pushState({}, '', path);
@@ -320,7 +348,16 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
               </div>
             )}
           >
-          {activeModule === 'users' ? (
+          {activeModule === 'search' ? (
+            <CmsGlobalSearchPage
+              key={`${workspaceLocale}:${activePath}`}
+              workspaceLocale={workspaceLocale}
+              userRole={demoCmsDataSource.currentUser.role}
+              onNavigate={(path, title) => {
+                navigateToCmsPath(path, title);
+              }}
+            />
+          ) : activeModule === 'users' ? (
             <CicUsersManager />
           ) : activeModule === 'permissions' ? (
             <PermissionManagement />
@@ -399,10 +436,16 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
       <CmsCommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
+        userRole={demoCmsDataSource.currentUser.role}
+        workspaceLocale={workspaceLocale}
         onSelectAction={(path, label) => {
           navigateToCmsPath(path, label);
           setToastMessage(`Đã chuyển sang: ${label}`);
           setTimeout(() => setToastMessage(null), 3000);
+        }}
+        onViewAllResults={(query, module) => {
+          const targetUrl = `/cms/search?q=${encodeURIComponent(query)}${module && module !== 'all' ? `&module=${module}` : ''}`;
+          navigateToCmsPath(targetUrl, `Tìm kiếm: "${query}"`);
         }}
       />
 

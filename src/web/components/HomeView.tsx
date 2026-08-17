@@ -125,7 +125,12 @@ export const HomeView = ({
     return matchesTab && matchesSearch;
   });
 
-  const filteredNews = newsItems.filter(n => activeNewsCategory === 'all' || n.category === activeNewsCategory);
+  const filteredNews = newsItems.filter(n => {
+    if (activeNewsCategory === 'all') {
+      return n.category !== 'investor';
+    }
+    return n.category === activeNewsCategory;
+  });
 
   const handleContactSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -275,7 +280,7 @@ export const HomeView = ({
                   Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3.5 sm:gap-4">
                 <button 
                   onClick={() => {
                     setCurrentView('about');
@@ -283,12 +288,12 @@ export const HomeView = ({
                     setAboutSubTab('overview');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-lg border-2 border-orange-600 btn-modern-interaction flex items-center gap-2"
+                  className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-[8px] font-black uppercase tracking-wider text-xs sm:text-sm transition-all active:scale-95 shadow-lg shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center gap-2.5 cursor-pointer"
                 >
-                  Khám phá hành trình CIC <ArrowRight size={16} />
+                  Khám phá hành trình CIC <ArrowRight size={18} />
                 </button>
-                <button className="px-5 py-2 bg-white text-slate-900 rounded-[8px] font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 btn-modern-interaction flex items-center gap-2">
-                  Tải Hồ sơ năng lực <Download size={16} />
+                <button className="px-6 py-3 bg-white text-slate-900 rounded-[8px] font-black uppercase tracking-wider text-xs sm:text-sm transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2.5 cursor-pointer">
+                  Tải Hồ sơ năng lực <Download size={18} />
                 </button>
               </div>
             </motion.div>
@@ -844,9 +849,9 @@ export const HomeView = ({
                     setActiveLink('Sự kiện');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-5 py-2 bg-orange-600 text-white rounded-none font-black uppercase tracking-wide hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all shadow-xl active:scale-95 btn-modern-interaction text-sm"
+                  className="px-6 py-3 bg-orange-600 hover:bg-white text-white hover:text-orange-600 rounded-[8px] font-black uppercase tracking-wide border-2 border-orange-600 transition-all shadow-xl active:scale-95 btn-modern-interaction text-xs sm:text-sm cursor-pointer inline-flex items-center gap-2"
                 >
-                  Đăng ký tham dự ngay
+                  Đăng ký tham dự ngay <ArrowRight size={16} />
                 </button>
               </div>
             </motion.div>
