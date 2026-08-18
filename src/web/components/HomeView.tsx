@@ -385,9 +385,11 @@ export const HomeView = ({
             </p>
           </div>
           <div className="flex justify-center -mt-2 mb-8">
-            <div className="w-full max-w-[280px] relative">
+            <div className="w-full max-w-[280px] relative flex items-center">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search size={18} className="text-slate-400" />
+              </div>
               <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 shadow-sm transition-all rounded-[8px] text-sm font-medium" />
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
@@ -452,8 +454,8 @@ export const HomeView = ({
             {[
               { title: 'Phần mềm kỹ thuật bản quyền', desc: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng, năng lượng do CIC phát triển & phân phối.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
               { title: 'Thiết bị công nghệ', desc: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR, GPR phục vụ ngành kỹ thuật.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
-              { title: 'Netzero và phát triển bền vững', desc: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và lộ trình Net Zero.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'tu-van-chuyen-doi-so' },
-              { title: 'Tư vấn & Đào tạo', desc: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'dao-tao-chuyen-giao' },
+              { title: 'Netzero và phát triển bền vững', desc: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và lộ trình Net Zero.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'tu-van-kiem-ke-khi-nha-kinh' },
+              { title: 'Tư vấn & Đào tạo', desc: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: null },
             ].map((item, i) => (
               <motion.div 
                 key={i}
@@ -469,7 +471,7 @@ export const HomeView = ({
                   } else if (item.view === 'services') {
                     setCurrentView('services');
                     setActiveLink('Dịch vụ');
-                    if (item.serviceId && setActiveServiceId) setActiveServiceId(item.serviceId);
+                    if (setActiveServiceId) setActiveServiceId(item.serviceId || null);
                   }
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
@@ -538,8 +540,10 @@ export const HomeView = ({
                 </button>
               ))}
             </div>
-            <div className="relative w-full md:w-auto min-w-[280px]">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="relative flex items-center w-full md:w-auto min-w-[280px]">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                <Search className="text-slate-400" size={18} />
+              </div>
               <input
                 type="text"
                 placeholder="Tìm kiếm dự án..."

@@ -196,8 +196,10 @@ export function ProjectsView({
               {/* Secondary Filter Controls Bar (Search + Solution + Customer) */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-100/60 p-4 rounded-[10px]">
                 {/* Search Bar */}
-                <div className="md:col-span-5 relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <div className="md:col-span-5 relative flex items-center">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <Search className="text-slate-400" size={15} />
+                  </div>
                   <input
                     type="text"
                     value={searchQuery}

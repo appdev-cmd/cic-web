@@ -37,11 +37,28 @@ export const CmsListToolbar: React.FC<CmsListToolbarProps> = ({
 }) => (
   <section className="cms-list-toolbar" aria-label="Tìm kiếm và lọc danh sách">
     <div className="cms-list-toolbar-row">
-      <label className="cms-list-search">
-        <Search aria-hidden="true" />
+      <div className="cms-list-search relative flex items-center w-full max-w-lg">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-orange-500">
+          <Search className="w-4 h-4" aria-hidden="true" />
+        </div>
         <span className="sr-only">Tìm kiếm</span>
-        <input value={searchValue} onChange={(event) => onSearchChange(event.target.value)} placeholder={searchPlaceholder} />
-      </label>
+        <input 
+          value={searchValue} 
+          onChange={(event) => onSearchChange(event.target.value)} 
+          placeholder={searchPlaceholder} 
+          className="w-full pl-10 pr-8 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all font-medium min-h-[2.5rem]"
+        />
+        {searchValue && (
+          <button
+            type="button"
+            onClick={() => onSearchChange('')}
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            title="Xóa tìm kiếm"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
 
       <div className="cms-list-toolbar-actions">
         {onToggleFilters && <CmsButton type="button" variant={filtersOpen || filterCount > 0 ? 'primary' : 'secondary'} size="sm" leadingIcon={<Filter />} onClick={onToggleFilters}>Bộ lọc{filterCount > 0 ? ` (${filterCount})` : ''}</CmsButton>}

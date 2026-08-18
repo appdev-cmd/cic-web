@@ -433,8 +433,10 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
           <div className="lg:col-span-9 space-y-4">
             {/* Filter Toolbar & Saved Views Pills */}
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-850 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-              <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              <div className="relative flex items-center flex-1 max-w-md">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Search className="w-4 h-4 text-slate-400" />
+                </div>
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo tên file, alt text, tag hoặc tác giả..."

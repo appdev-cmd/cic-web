@@ -262,8 +262,10 @@ export function SearchView({
             </div>
 
             <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2.5 max-w-3xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <div className="relative flex items-center flex-1">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                  <Search className="text-slate-400" size={18} />
+                </div>
                 <input
                   type="text"
                   value={searchInputValue}

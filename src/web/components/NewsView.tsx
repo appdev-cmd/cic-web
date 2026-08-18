@@ -1469,8 +1469,10 @@ export function NewsView({
               {/* SECONDARY FILTER ENGINE BAR */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-transparent p-0">
                 {/* Search Input */}
-                <div className="md:col-span-6 relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <div className="md:col-span-6 relative flex items-center">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <Search className="text-slate-400" size={15} />
+                  </div>
                   <input
                     type="text"
                     value={searchQuery}

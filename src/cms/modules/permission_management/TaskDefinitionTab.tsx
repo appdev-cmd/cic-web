@@ -99,8 +99,10 @@ export const TaskDefinitionTab: React.FC<TaskDefinitionTabProps> = ({
       {/* Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          <div className="relative flex items-center flex-1 max-w-md">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               type="text"
               placeholder="Tìm kiếm Task definition, Mô tả, Module..."

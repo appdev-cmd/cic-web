@@ -160,8 +160,10 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
       {/* Top Sidebar Header & Search */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         {!isCollapsed ? (
-          <div className="flex-1 mr-2 relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
+          <div className="flex-1 mr-2 relative flex items-center">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
+              <Search className="w-3.5 h-3.5 text-slate-400" />
+            </div>
             <input
               type="text"
               placeholder="Lọc menu..."

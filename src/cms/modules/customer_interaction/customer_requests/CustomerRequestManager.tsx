@@ -459,8 +459,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             {/* Top Row: Search & Export & Reset */}
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
               {/* Keyword Search Input */}
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+              <div className="relative flex items-center flex-1">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Search className="w-4 h-4 text-slate-400" />
+                </div>
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo tên, email, sđt, công ty, nội dung, mã yêu cầu..."
@@ -472,7 +474,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
                   <button
                     type="button"
                     onClick={() => setFilter({ ...filter, searchQuery: '' })}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>

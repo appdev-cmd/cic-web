@@ -196,7 +196,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     <div className="min-h-screen bg-slate-50/60 pt-28 pb-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         <AnimatePresence mode="wait">
-          {!activeServiceId ? (
+          {!activeService ? (
             /* ============================================================== */
             /* 1. CATALOG PAGE (TRANG DANH MỤC DỊCH VỤ & GIẢI PHÁP)           */
             /* ============================================================== */
@@ -283,8 +283,10 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                   <div className="space-y-5">
                     {/* Search Input Bar & Counter */}
                     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-                      <div className="relative w-full sm:max-w-md">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <div className="relative flex items-center w-full sm:max-w-md">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                          <Search className="text-slate-400" size={16} />
+                        </div>
                         <input
                           type="text"
                           value={searchQuery}
@@ -295,7 +297,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                         {searchQuery && (
                           <button 
                             onClick={() => setSearchQuery('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                           >
                             <X size={14} />
                           </button>

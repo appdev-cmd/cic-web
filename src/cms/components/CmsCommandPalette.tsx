@@ -274,7 +274,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
             placeholder="Tìm kiếm sản phẩm, bài viết, khách hàng, cấu hình, dữ liệu..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none font-normal"
+            className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 border-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 font-normal"
           />
           {query && (
             <button

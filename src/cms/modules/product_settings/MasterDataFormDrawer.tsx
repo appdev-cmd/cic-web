@@ -120,8 +120,10 @@ function ProductAssignmentField({
           )}
         </div>
       )}
-      <div className="relative mb-3">
-        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+      <div className="relative mb-3 flex items-center">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
+          <Search className="h-3.5 w-3.5 text-slate-400" />
+        </div>
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm sản phẩm..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
       </div>
       <div className="max-h-48 space-y-1 overflow-y-auto pr-1">

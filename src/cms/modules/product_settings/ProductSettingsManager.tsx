@@ -321,8 +321,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
               {/* Search */}
-              <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+              <div className="relative flex items-center flex-1 max-w-md">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Search className="w-4 h-4 text-slate-400" />
+                </div>
                 <input
                   type="text"
                   value={searchQuery}
@@ -417,9 +419,9 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                       <th className="py-3 px-4 min-w-[110px]">Thứ tự (Order)</th>
                     )}
 
-                    {/* Scope / Country / Email */}
-                    {columnVisibility.scope_or_country && (
-                      <th className="py-3 px-4 min-w-[200px]">{activeDataType === 'sales_staff' ? 'Số điện thoại / Skype / Zalo' : 'Phạm vi / Thông tin liên hệ'}</th>
+                    {/* Scope / Contact Info - Only for sales staff */}
+                    {columnVisibility.scope_or_country && activeDataType === 'sales_staff' && (
+                      <th className="py-3 px-4 min-w-[200px]">Số điện thoại / Skype / Zalo</th>
                     )}
 
                     {/* Status */}
@@ -467,23 +469,14 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                 className="font-bold text-slate-900 dark:text-white hover:text-orange-600 cursor-pointer flex items-center gap-2"
                               >
                                 <span>{item.name}</span>
-                                {item.type === 'categories' && (item as MasterCategoryItem).parent_name && (
-                                  <span className="text-[10px] text-slate-400 font-normal">
-                                    (Con của: {(item as MasterCategoryItem).parent_name})
-                                  </span>
-                                )}
                               </div>
-                              {item.type !== 'sales_staff' && <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                                <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
-                                  {usesSystemAlias(item.type) ? getSystemAlias(item) : item.code}
-                                </span>
-                                {item.type === 'categories' && item.description && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="line-clamp-1 max-w-[200px]">{item.description}</span>
-                                  </>
-                                )}
-                              </div>}
+                              {item.type !== 'sales_staff' && (
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                                  <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
+                                    {usesSystemAlias(item.type) ? getSystemAlias(item) : item.code}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </td>
 
@@ -511,24 +504,13 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                             </td>
                           )}
 
-                          {/* Scope / Country / Email */}
-                          {columnVisibility.scope_or_country && (
+                          {/* Contact Info - Only for sales staff */}
+                          {columnVisibility.scope_or_country && activeDataType === 'sales_staff' && (
                             <td className="py-3 px-4 font-medium text-slate-700 dark:text-slate-300">
-                              {item.type === 'brands' && (
-                                <span className="flex items-center gap-1">
-                                  <Globe className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>{(item as MasterBrandItem).country}</span>
-                                </span>
-                              )}
-                              {item.type === 'sales_staff' && (
-                                <div className="space-y-1 text-[11px]">
-                                  <span className="flex items-center gap-1 font-mono text-orange-600"><Phone className="w-3.5 h-3.5" />{(item as MasterSalesStaffItem).phone || '—'}</span>
-                                  <span className="block text-slate-500">Skype: {(item as MasterSalesStaffItem).skype || '—'} · Zalo: {(item as MasterSalesStaffItem).zalo || '—'}</span>
-                                </div>
-                              )}
-                              {['categories', 'applications', 'product_types'].includes(item.type) && (
-                                <span className="text-slate-400 italic">Mặc định Toàn quốc</span>
-                              )}
+                              <div className="space-y-1 text-[11px]">
+                                <span className="flex items-center gap-1 font-mono text-orange-600"><Phone className="w-3.5 h-3.5" />{(item as MasterSalesStaffItem).phone || '—'}</span>
+                                <span className="block text-slate-500">Skype: {(item as MasterSalesStaffItem).skype || '—'} · Zalo: {(item as MasterSalesStaffItem).zalo || '—'}</span>
+                              </div>
                             </td>
                           )}
 
@@ -621,6 +603,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
         isOpen={isColumnModalOpen}
         columns={columnVisibility}
         density={density}
+        activeDataType={activeDataType}
         onToggleColumn={(colKey) =>
           setColumnVisibility((prev) => ({ ...prev, [colKey]: !prev[colKey] }))
         }

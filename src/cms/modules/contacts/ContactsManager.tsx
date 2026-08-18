@@ -506,8 +506,10 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           
           {/* Search Input with Shortcut indicator */}
-          <div className="relative w-full sm:w-96">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="relative flex items-center w-full sm:w-96">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               id="contacts_search_input"
               type="text"
@@ -516,9 +518,11 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
               placeholder="Tìm mã REQ, tên người gửi, email, công ty, nội dung (Phím '/')..."
               className="w-full text-xs pl-10 pr-12 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 outline-none"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400 border border-slate-300 dark:border-slate-700 px-1.5 py-0.5 rounded">
-              /
-            </span>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span className="text-[10px] font-mono text-slate-400 border border-slate-300 dark:border-slate-700 px-1.5 py-0.5 rounded">
+                /
+              </span>
+            </div>
           </div>
 
           {/* Quick Filters & Saved Views */}

@@ -217,8 +217,10 @@ export const MenuManager: React.FC<MenuManagerProps> = ({ workspaceLocale, data 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             {/* Search */}
-            <div className="relative flex-1 sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <div className="relative flex items-center flex-1 sm:w-64">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search className="w-4 h-4 text-slate-400" />
+              </div>
               <input
                 type="text"
                 value={searchKeyword}

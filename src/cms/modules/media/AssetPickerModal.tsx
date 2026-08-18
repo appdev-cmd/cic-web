@@ -82,8 +82,10 @@ export const AssetPickerModal: React.FC<AssetPickerModalProps> = ({
 
         {/* Search Toolbar */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <div className="relative max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+          <div className="relative flex items-center max-w-md">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               type="text"
               placeholder="Tìm kiếm file media..."

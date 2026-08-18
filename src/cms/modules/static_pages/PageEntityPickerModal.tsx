@@ -79,8 +79,10 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
 
         <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
           <div className="min-h-0 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r dark:border-slate-800">
-            <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div className="relative mb-3 flex items-center">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Tìm ${entityTypeLabels[entityType].toLowerCase()}...`} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
             </div>
             <div className="max-h-[48vh] space-y-2 overflow-y-auto pr-1">

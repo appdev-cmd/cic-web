@@ -96,8 +96,10 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           {/* Keyword Search */}
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          <div className="relative flex items-center w-full sm:w-72">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               type="text"
               placeholder="Tìm theo Tên người dùng, Email, Role..."

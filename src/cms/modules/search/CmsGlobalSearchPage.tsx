@@ -193,21 +193,23 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
         </div>
 
         {/* Search Bar Input */}
-        <div className="relative group">
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center pointer-events-none transition-colors group-focus-within:bg-orange-500 group-focus-within:text-white">
-            <Search className="w-4 h-4" />
+        <div className="relative flex items-center group">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+            <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center transition-colors group-focus-within:bg-orange-500 group-focus-within:text-white">
+              <Search className="w-4 h-4" />
+            </div>
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Nhập tên sản phẩm, mã SKU, tiêu đề bài viết, email/SĐT khách hàng, đối tác..."
-            className="w-full pl-13 pr-11 py-3 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-200 font-normal shadow-2xs focus:shadow-md focus:shadow-orange-500/5"
+            className="w-full pl-14 pr-11 py-3 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800/90 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-200 font-normal shadow-2xs focus:shadow-md focus:shadow-orange-500/5"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
               title="Xóa tìm kiếm"
             >
               <X className="w-4 h-4" />

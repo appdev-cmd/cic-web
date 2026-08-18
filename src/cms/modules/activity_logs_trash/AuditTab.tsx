@@ -98,8 +98,10 @@ export const AuditTab: React.FC<AuditTabProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3">
         {/* SEARCH & CONTROLS ROW */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-xs">
-          <div className="md:col-span-5 relative">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+          <div className="md:col-span-5 relative flex items-center">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               type="text"
               value={searchKeyword}

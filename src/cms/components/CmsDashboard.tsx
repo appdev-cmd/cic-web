@@ -15,10 +15,17 @@ import type { CmsLocale } from '../data/CmsDataSource';
 import type { MasterDataType } from '../modules/product_settings/types';
 
 const getProductSettingsDataType = (path: string): MasterDataType => {
-  if (path.endsWith('/brands') || path === '/cms/manufacturers' || path === '/cms/products/brands') return 'brands';
-  if (path.endsWith('/applications') || path === '/cms/applications') return 'applications';
-  if (path.endsWith('/product-types') || path === '/cms/product-types') return 'product_types';
-  if (path.endsWith('/sales-staff') || path === '/cms/sales-staff') return 'sales_staff';
+  const cleanPath = path.split('?')[0];
+  const queryStr = path.includes('?') ? path.split('?')[1] : '';
+  const searchParams = new URLSearchParams(queryStr);
+  const tab = searchParams.get('tab');
+  if (tab === 'brands' || tab === 'applications' || tab === 'product_types' || tab === 'sales_staff' || tab === 'categories') {
+    return tab as MasterDataType;
+  }
+  if (cleanPath.endsWith('/brands') || cleanPath === '/cms/manufacturers' || cleanPath === '/cms/products/brands') return 'brands';
+  if (cleanPath.endsWith('/applications') || cleanPath === '/cms/applications') return 'applications';
+  if (cleanPath.endsWith('/product-types') || cleanPath === '/cms/product-types') return 'product_types';
+  if (cleanPath.endsWith('/sales-staff') || cleanPath === '/cms/sales-staff') return 'sales_staff';
   return 'categories';
 };
 

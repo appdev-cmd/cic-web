@@ -155,8 +155,8 @@ export const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
                   <span className="font-bold text-slate-800 dark:text-slate-200">{product.product_type}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Phụ trách kỹ thuật:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{product.owner_name}</span>
+                  <span className="text-slate-400 block text-[11px]">Mã sản phẩm / SKU:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{product.code || product.sku || 'Chưa đặt mã'}</span>
                 </div>
               </div>
 

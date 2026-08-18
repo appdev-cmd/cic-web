@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag } from 'lucide-react';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { findPageBuilderImage, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
+import { ProductFileInput } from './ProductFileInput';
 import type { ProductBrand, ProductCategory, ProductItem, ProductOwnerOption } from './types';
 import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 
@@ -87,7 +88,131 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ product, cat
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Tổng quan</div><RichTextEditor value={description} onChange={setDescription} minHeight="320px" /></section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Chi tiết tính năng</div><RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" /></section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Video</div><RichTextEditor value={video} onChange={setVideo} minHeight="260px" /></section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Link2 className="h-5 w-5 text-orange-600" />Tệp sản phẩm</div><div className="space-y-5"><div className="grid gap-3 md:grid-cols-3"><div><label className={labelClass}>Tên file báo giá</label><input className={inputClass} value={fileCatalogue} onChange={(e) => setFileCatalogue(e.target.value)} /></div><div><label className={labelClass}>File báo giá</label><input className={inputClass} value={filePrice} onChange={(e) => setFilePrice(e.target.value)} placeholder="Chọn file" /></div><div><label className={labelClass}>Link báo giá</label><input className={inputClass} value={linkCatalogue} onChange={(e) => setLinkCatalogue(e.target.value)} /></div></div><div className="grid gap-3 md:grid-cols-3"><div><label className={labelClass}>Tên file khóa cứng</label><input className={inputClass} value={fileDriverName} onChange={(e) => setFileDriverName(e.target.value)} /></div><div><label className={labelClass}>File khóa cứng</label><input className={inputClass} value={fileDriver} onChange={(e) => setFileDriver(e.target.value)} placeholder="Chọn file" /></div><div><label className={labelClass}>Link khóa cứng</label><input className={inputClass} value={linkDriver} onChange={(e) => setLinkDriver(e.target.value)} /></div></div>{downloads.map((item, index) => <div key={index} className="grid gap-3 rounded-xl border border-slate-200 p-3 md:grid-cols-3 dark:border-slate-700"><div><label className={labelClass}>Ghi chú file {index + 1}</label><input className={inputClass} value={item.name} onChange={(e) => updateDownload(index, 'name', e.target.value)} /></div><div><label className={labelClass}>File {index + 1}</label><input className={inputClass} value={item.file} onChange={(e) => updateDownload(index, 'file', e.target.value)} /></div><div><label className={labelClass}>Link file {index + 1}</label><input className={inputClass} value={item.link} onChange={(e) => updateDownload(index, 'link', e.target.value)} /></div></div>)}</div></section>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
+          <Link2 className="h-5 w-5 text-orange-600" />
+          Tệp sản phẩm & Tài liệu đính kèm
+        </div>
+        <div className="space-y-6">
+          {/* File báo giá (Catalog / Price) */}
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-orange-600 uppercase tracking-wider">
+              <FileDown className="w-4 h-4" />
+              File báo giá & Catalogue
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div>
+                <label className={labelClass}>Tên file báo giá / tiêu đề</label>
+                <input 
+                  className={inputClass} 
+                  value={fileCatalogue} 
+                  onChange={(e) => setFileCatalogue(e.target.value)} 
+                  placeholder="VD: Báo giá AutoCAD 2026..." 
+                />
+              </div>
+              <div>
+                <ProductFileInput
+                  label="Chọn tệp báo giá"
+                  value={filePrice}
+                  onChange={setFilePrice}
+                  onAutoFillName={(autoName) => {
+                    if (!fileCatalogue) setFileCatalogue(autoName);
+                  }}
+                  placeholder="Chọn file báo giá từ máy..."
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Link báo giá (URL trực tuyến)</label>
+                <input 
+                  className={inputClass} 
+                  value={linkCatalogue} 
+                  onChange={(e) => setLinkCatalogue(e.target.value)} 
+                  placeholder="https://..." 
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* File khóa cứng (Driver / Dongle) */}
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4" />
+              File Driver & Khóa cứng (Dongle)
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div>
+                <label className={labelClass}>Tên file khóa cứng / driver</label>
+                <input 
+                  className={inputClass} 
+                  value={fileDriverName} 
+                  onChange={(e) => setFileDriverName(e.target.value)} 
+                  placeholder="VD: Driver Sentinel HASP..." 
+                />
+              </div>
+              <div>
+                <ProductFileInput
+                  label="Chọn tệp Driver / Khóa cứng"
+                  value={fileDriver}
+                  onChange={setFileDriver}
+                  onAutoFillName={(autoName) => {
+                    if (!fileDriverName) setFileDriverName(autoName);
+                  }}
+                  placeholder="Chọn file driver từ máy..."
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Link khóa cứng (URL trực tuyến)</label>
+                <input 
+                  className={inputClass} 
+                  value={linkDriver} 
+                  onChange={(e) => setLinkDriver(e.target.value)} 
+                  placeholder="https://..." 
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Các tệp tải về 1 - 6 */}
+          <div className="space-y-3">
+            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Danh sách tệp tải về bổ sung (Tối đa 6 tệp)
+            </div>
+            {downloads.map((item, index) => (
+              <div key={index} className="grid gap-3 rounded-xl border border-slate-200 p-3.5 md:grid-cols-3 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xs">
+                <div>
+                  <label className={labelClass}>Ghi chú / Tên tệp {index + 1}</label>
+                  <input 
+                    className={inputClass} 
+                    value={item.name} 
+                    onChange={(e) => updateDownload(index, 'name', e.target.value)} 
+                    placeholder={`Tên tài liệu / phần mềm ${index + 1}...`}
+                  />
+                </div>
+                <div>
+                  <ProductFileInput
+                    label={`Chọn tệp đính kèm ${index + 1}`}
+                    value={item.file}
+                    onChange={(val) => updateDownload(index, 'file', val)}
+                    onAutoFillName={(autoName) => {
+                      if (!item.name) updateDownload(index, 'name', autoName);
+                    }}
+                    placeholder={`Chọn tệp ${index + 1} từ máy...`}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Link tải trực tuyến {index + 1}</label>
+                  <input 
+                    className={inputClass} 
+                    value={item.link} 
+                    onChange={(e) => updateDownload(index, 'link', e.target.value)} 
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main><aside className="space-y-5">
       <ContentQualityPanel checks={[{ label: 'Có tên sản phẩm', passed: Boolean(name.trim()) }, { label: 'Có ít nhất một lĩnh vực', passed: categoryIds.length > 0 }, { label: 'Có hãng sản xuất', passed: Boolean(manufactory) }, { label: 'Có tóm tắt', passed: Boolean(summary.trim()) }, { label: 'Có nội dung tổng quan', passed: description.replace(/<[^>]+>/g, '').trim().length > 30 }, { label: 'Có ảnh sản phẩm', passed: Boolean(image) }, { label: 'Có cấu hình SEO', passed: Boolean(seoTitle.trim() && seoDescription.trim()) }]} />
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><ImageIcon className="h-5 w-5 text-orange-600" />Media</div><div className="space-y-4"><div><label className={labelClass}>Ảnh sản phẩm</label>{image && findPageBuilderImage(image) && <img src={findPageBuilderImage(image)?.thumbnail_url ?? findPageBuilderImage(image)?.url} alt="" className="mb-2 aspect-video w-full rounded-xl object-cover" />}<button type="button" onClick={() => setMediaTarget('image')} className="w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn ảnh sản phẩm</button></div><div><label className={labelClass}>Icon</label>{icon && findPageBuilderImage(icon) && <img src={findPageBuilderImage(icon)?.thumbnail_url ?? findPageBuilderImage(icon)?.url} alt="" className="mb-2 h-20 w-20 rounded-xl object-cover" />}<button type="button" onClick={() => setMediaTarget('icon')} className="w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn icon</button></div><div><label className={labelClass}>Tags</label><textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} /></div></div></section>
@@ -97,3 +222,4 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ product, cat
     {mediaTarget && <PageMediaPickerModal currentId={mediaTarget === 'image' ? image : icon} onClose={() => setMediaTarget(null)} onConfirm={(mediaId) => mediaTarget === 'image' ? setImage(mediaId) : setIcon(mediaId)} />}
   </div>;
 };
+

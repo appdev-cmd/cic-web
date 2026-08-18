@@ -96,7 +96,13 @@ export const EmailTemplatesManager: React.FC<Props> = ({ workspaceLocale, data }
 
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
       <div className="grid gap-3 md:grid-cols-12">
-        <label className="relative md:col-span-5"><Search className="absolute left-3 top-2.5 size-4 text-slate-400"/><span className="sr-only">Tìm mẫu email</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm theo tên hoặc tiêu đề..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800"/></label>
+        <div className="relative flex items-center md:col-span-5">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <Search className="size-4 text-slate-400" />
+          </div>
+          <span className="sr-only">Tìm mẫu email</span>
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm theo tên hoặc tiêu đề..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
+        </div>
         <select aria-label="Lọc sự kiện" value={event} onChange={(e) => setEvent(e.target.value as typeof event)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 md:col-span-3"><option value="all">Tất cả sự kiện</option>{EMAIL_EVENTS.map((item) => <option value={item.value} key={item.value}>{workspaceLocale === 'vi' ? item.label : item.labelEn}</option>)}</select>
         <select aria-label="Lọc đối tượng" value={audience} onChange={(e) => setAudience(e.target.value as typeof audience)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 md:col-span-2"><option value="all">Mọi đối tượng</option><option value="customer">Khách hàng</option><option value="internal">Nội bộ</option></select>
         <select aria-label="Lọc trạng thái" value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 md:col-span-2"><option value="all">Mọi trạng thái</option>{Object.entries(TEMPLATE_STATUSES).map(([value, item]) => <option key={value} value={value}>{item.label}</option>)}</select>

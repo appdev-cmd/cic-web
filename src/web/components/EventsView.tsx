@@ -1088,8 +1088,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
               <div className="pt-6 border-t border-slate-200 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between gap-4">
                 
                 {/* Search Field */}
-                <div className="relative w-full lg:max-w-md">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <div className="relative flex items-center w-full lg:max-w-md">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <Search className="text-slate-400" size={16} />
+                  </div>
                   <input
                     type="text"
                     placeholder="Tìm kiếm sự kiện, địa điểm, chủ đề..."

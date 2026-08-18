@@ -342,11 +342,13 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Search box */}
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+          <div className="relative flex items-center flex-1 min-w-[240px]">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               type="text"
-              placeholder="Tìm kiếm dịch vụ theo tên, mã (DV-BIM-01) hoặc người phụ trách..."
+              placeholder="Tìm kiếm dịch vụ theo tên, mã hoặc người phụ trách..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"

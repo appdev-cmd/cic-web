@@ -99,7 +99,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
     sku: true,
     category: true,
     brand: true,
-    owner: true,
     editorial_status: true,
     catalog_status: true,
     updated_time: true,
@@ -394,8 +393,10 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Search Input */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+          <div className="relative flex items-center flex-1 max-w-md">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
             <input
               type="text"
               value={searchQuery}
@@ -404,7 +405,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                 setCurrentPage(1);
               }}
               placeholder="Tìm theo Tên sản phẩm, SKU, Hãng..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
             />
           </div>
 
@@ -500,9 +501,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                 {/* Brand */}
                 {columnVisibility.brand && <th className="py-3 px-4 min-w-[150px]">Hãng sản xuất</th>}
 
-                {/* Owner */}
-                {columnVisibility.owner && <th className="py-3 px-4 min-w-[150px]">Người phụ trách</th>}
-
                 {/* Completeness */}
                 {columnVisibility.completeness && <th className="py-3 px-4 min-w-[120px]">Chất lượng (%)</th>}
 
@@ -583,20 +581,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                       {columnVisibility.brand && (
                         <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
                           {p.brand_name}
-                        </td>
-                      )}
-
-                      {/* Owner */}
-                      {columnVisibility.owner && (
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            {p.owner_avatar ? (
-                              <img src={p.owner_avatar} alt="" className="w-5 h-5 rounded-full" />
-                            ) : (
-                              <User className="w-4 h-4 text-slate-400" />
-                            )}
-                            <span className="font-bold text-slate-800 dark:text-slate-200">{p.owner_name}</span>
-                          </div>
                         </td>
                       )}
 
@@ -741,7 +725,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
             sku: true,
             category: true,
             brand: true,
-            owner: true,
             editorial_status: true,
             catalog_status: true,
             updated_time: true,

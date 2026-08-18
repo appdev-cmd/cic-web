@@ -824,19 +824,21 @@ export function ProductsView(_props?: ProductsViewProps) {
             {/* Compact Search Input */}
             <div className="mb-5">
               <label className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-1.5">Từ khóa</label>
-              <div className="relative">
+              <div className="relative flex items-center">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
+                  <Search size={15} className="text-slate-400" />
+                </div>
                 <input 
                   type="text" 
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                   placeholder="Nhập tên sản phẩm..."
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 text-sm font-medium text-slate-800 transition-all placeholder:text-slate-400 rounded-[8px]"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 pr-8 text-sm font-medium text-slate-800 transition-all placeholder:text-slate-400 rounded-[8px]"
                 />
-                <Search size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 {search && (
                   <button 
                     onClick={() => setSearch('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     <X size={14} />
                   </button>

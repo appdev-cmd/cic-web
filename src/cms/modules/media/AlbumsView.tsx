@@ -84,8 +84,10 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
     <div className="space-y-6">
       {/* Search & Actions Header */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+        <div className="relative flex items-center flex-1 max-w-md">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <Search className="w-4 h-4 text-slate-400" />
+          </div>
           <input
             type="text"
             placeholder="Tìm kiếm 14 Album khảo sát theo tên, alias..."

@@ -217,8 +217,10 @@ export const PermissionMatrixTab: React.FC<PermissionMatrixTabProps> = ({
         </div>
 
         {/* User Search Input */}
-        <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+        <div className="relative flex items-center">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
+            <Search className="w-3.5 h-3.5 text-slate-400" />
+          </div>
           <input
             type="text"
             placeholder="Tìm theo tên, username, vai trò..."
@@ -412,8 +414,10 @@ export const PermissionMatrixTab: React.FC<PermissionMatrixTabProps> = ({
           </div>
 
           {/* Search Permission Input */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+          <div className="relative flex items-center">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-3.5 h-3.5 text-slate-400" />
+            </div>
             <input
               type="text"
               placeholder="Lọc tên Task, Function hoặc Field..."

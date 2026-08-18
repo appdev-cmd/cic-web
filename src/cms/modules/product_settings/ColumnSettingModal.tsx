@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, SlidersHorizontal, Check, RotateCcw } from 'lucide-react';
+import { MasterDataType } from './types';
 
 export interface ProductSettingsColumnVisibility {
   code: boolean;
@@ -15,6 +16,7 @@ interface ColumnSettingModalProps {
   isOpen: boolean;
   columns: ProductSettingsColumnVisibility;
   density: 'normal' | 'compact';
+  activeDataType?: MasterDataType;
   onToggleColumn: (key: keyof ProductSettingsColumnVisibility) => void;
   onChangeDensity: (density: 'normal' | 'compact') => void;
   onReset: () => void;
@@ -25,6 +27,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   isOpen,
   columns,
   density,
+  activeDataType,
   onToggleColumn,
   onChangeDensity,
   onReset,
@@ -38,7 +41,9 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'usage_count', label: 'Số sản phẩm đang dùng' },
     { key: 'status', label: 'Trạng thái sử dụng' },
     { key: 'ordering', label: 'Thứ tự hiển thị (Priority/Order)' },
-    { key: 'scope_or_country', label: 'Phạm vi / Quốc gia / Email' },
+    ...(activeDataType === 'sales_staff'
+      ? [{ key: 'scope_or_country' as const, label: 'Thông tin liên hệ (SĐT, Skype, Zalo)' }]
+      : []),
     { key: 'updated_time', label: 'Thời gian cập nhật gần nhất' },
   ];
 
