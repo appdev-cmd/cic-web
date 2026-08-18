@@ -63,7 +63,10 @@ const cleanCmsHtml = (htmlString: string): string => {
     .replace(/line-height\s*:\s*[^;"]+;?/gi, '')
     .replace(/background-color\s*:\s*[^;"]+;?/gi, '')
     .replace(/background\s*:\s*[^;"]+;?/gi, '')
-    .replace(/color\s*:\s*[^;"]+;?/gi, '');
+    .replace(/color\s*:\s*[^;"]+;?/gi, '')
+    // 4. Normalize image paths & ensure referrerpolicy
+    .replace(/src="\/upload_images\//g, 'src="https://www.cic.com.vn/upload_images/')
+    .replace(/<img\b(?![^>]*\breferrerpolicy=)/gi, '<img referrerpolicy="no-referrer"');
 
   return cleaned;
 };
@@ -763,18 +766,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               {/* Related Services Section (Dịch vụ liên quan) */}
               {relatedServices.length > 0 && (
                 <div className="pt-14 border-t border-slate-200 mt-14 space-y-8">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-900">
-                        Dịch Vụ Liên Quan
-                      </h3>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        Các gói giải pháp và tư vấn chuyển đổi số kỹ thuật nổi bật khác của CIC
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-orange-600 shrink-0">
-                      Giải pháp đồng bộ
-                    </span>
+                  <div>
+                    <h3 className="text-xl font-extrabold uppercase tracking-tight text-slate-900">
+                      Dịch Vụ Liên Quan
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      Các gói giải pháp và tư vấn chuyển đổi số kỹ thuật nổi bật khác của CIC
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
@@ -798,11 +796,6 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                                 referrerPolicy="no-referrer"
                               />
-                              {relService.category && (
-                                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-slate-950/80 text-white text-[10px] font-bold uppercase tracking-wider rounded-[4px] backdrop-blur-xs">
-                                  {relService.category}
-                                </span>
-                              )}
                             </div>
 
                             {/* Title & Excerpt */}

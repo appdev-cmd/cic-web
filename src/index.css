@@ -10,6 +10,8 @@
 html {
   scroll-behavior: smooth;
   font-family: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 body {
@@ -17,6 +19,31 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Global Crisp Text Selection (Bôi đen văn bản) */
+::selection {
+  background-color: #ea580c !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+::-moz-selection {
+  background-color: #ea580c !important;
+  color: #ffffff !important;
+}
+
+/* Ensure rich HTML content from CMS/Events/News/Products is fully selectable */
+.event-rich-content,
+.article-rich-content,
+.ck-content,
+.event-rich-content *,
+.article-rich-content *,
+.ck-content * {
+  -webkit-user-select: text !important;
+  user-select: text !important;
 }
 
 /* CMS interaction baseline: consistent icon alignment, focus visibility and readable wrapping. */
@@ -289,23 +316,49 @@ body {
   width: 1rem;
   height: 1rem;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: #f97316;
+  transition: color 150ms ease;
 }
 
 .cms-shell .cms-list-search input {
   width: 100%;
   min-height: 2.5rem;
-  padding: 0.5rem 0.875rem 0.5rem 2.5rem;
+  padding: 0.5rem 0.875rem 0.5rem 2.625rem;
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
   background: #f8fafc;
-  font-size: 0.75rem;
+  color: #0f172a;
+  font-size: 0.8125rem;
+  transition: all 150ms ease;
+}
+
+.cms-shell .cms-list-search input:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.cms-shell .cms-list-search input:focus {
+  background: #ffffff;
+  border-color: #f97316;
+  outline: 2px solid rgba(249, 115, 22, 0.2);
+  outline-offset: 1px;
 }
 
 .dark .cms-shell .cms-list-search input {
   border-color: #334155;
   background: #1e293b;
   color: #f8fafc;
+}
+
+.dark .cms-shell .cms-list-search input:hover {
+  background: #0f172a;
+  border-color: #475569;
+}
+
+.dark .cms-shell .cms-list-search input:focus {
+  background: #0f172a;
+  border-color: #f97316;
+  outline: 2px solid rgba(249, 115, 22, 0.25);
 }
 
 .cms-shell .cms-list-toolbar-actions,

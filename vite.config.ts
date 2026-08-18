@@ -18,6 +18,11 @@ export default defineConfig(({mode}) => {
         '@cms': path.resolve(__dirname, './src/cms'),
       },
     },
+    build: {
+      outDir: 'dist',
+      sourcemap: false,
+      chunkSizeWarningLimit: 3000,
+    },
     server: {
       host: '0.0.0.0',
       port: 3000,

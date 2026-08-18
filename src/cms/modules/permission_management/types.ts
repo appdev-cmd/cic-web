@@ -42,7 +42,7 @@ export interface CmsUserPermissionTarget {
 // --- MODULE 15: VAI TRÒ & QUYỀN SPECIFICATION TYPES ---
 
 export type RoleRiskLevel = 'standard' | 'elevated' | 'privileged';
-export type RoleStatus = 'active' | 'draft' | 'archived' | 'needs_review';
+export type RoleStatus = 'active' | 'draft' | 'archived';
 export type RoleCategory = 'system' | 'custom';
 
 export type MatrixAction =
@@ -50,8 +50,6 @@ export type MatrixAction =
   | 'create'
   | 'edit'
   | 'delete'
-  | 'review'
-  | 'approve'
   | 'publish'
   | 'export'
   | 'configure';

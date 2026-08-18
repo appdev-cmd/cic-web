@@ -139,39 +139,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         }
       />
 
-      {/* 2. DASHBOARD TOOLBAR */}
-      <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Left Toolbar Controls */}
-        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-          {/* Time Range Selector */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl text-xs font-semibold">
-            {[
-              { id: '7', label: '7 Ngày' },
-              { id: '30', label: '30 Ngày' },
-              { id: 'month', label: 'Tháng này' },
-              { id: 'year', label: 'Năm nay' },
-            ].map((r) => (
-              <button
-                key={r.id}
-                onClick={() => setTimeRange(r.id as any)}
-                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-xs whitespace-nowrap ${
-                  timeRange === r.id
-                    ? 'bg-orange-600 text-white font-bold shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
-            <Globe className="h-3.5 w-3.5" />
-          </div>
-        </div>
-
-      </div>
-
       {/* DYNAMIC SECTIONS RENDERED BASED ON PREFERENCE ORDER AND VISIBILITY */}
       {!data ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">

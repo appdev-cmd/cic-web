@@ -280,7 +280,7 @@ export const HomeView = ({
                   Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3.5 sm:gap-4">
+              <div className="flex flex-wrap gap-3">
                 <button 
                   onClick={() => {
                     setCurrentView('about');
@@ -288,12 +288,12 @@ export const HomeView = ({
                     setAboutSubTab('overview');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-[8px] font-black uppercase tracking-wider text-xs sm:text-sm transition-all active:scale-95 shadow-lg shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center gap-2.5 cursor-pointer"
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-md shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center gap-2 cursor-pointer"
                 >
-                  Khám phá hành trình CIC <ArrowRight size={18} />
+                  Khám phá hành trình CIC <ArrowRight size={15} />
                 </button>
-                <button className="px-6 py-3 bg-white text-slate-900 rounded-[8px] font-black uppercase tracking-wider text-xs sm:text-sm transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2.5 cursor-pointer">
-                  Tải Hồ sơ năng lực <Download size={18} />
+                <button className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-slate-900 rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-xs border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2 cursor-pointer">
+                  Tải Hồ sơ năng lực <Download size={15} />
                 </button>
               </div>
             </motion.div>

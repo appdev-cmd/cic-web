@@ -60,11 +60,9 @@ const MODULE_LIST = [
 const MATRIX_ACTIONS: { code: MatrixAction; label: string; isPrivileged?: boolean }[] = [
   { code: 'view', label: 'Xem (View)' },
   { code: 'create', label: 'Tạo (Create)' },
-  { code: 'edit', label: 'Sửa (Edit)' },
+  { code: 'edit', label: 'Sửa / Lưu nháp (Edit)' },
   { code: 'delete', label: 'Xóa (Delete)', isPrivileged: true },
-  { code: 'review', label: 'Rà soát (Review)' },
-  { code: 'approve', label: 'Duyệt (Approve)', isPrivileged: true },
-  { code: 'publish', label: 'Xuất bản (Publish)' },
+  { code: 'publish', label: 'Xuất bản (Publish)', isPrivileged: true },
   { code: 'export', label: 'Xuất dữ liệu (Export)' },
   { code: 'configure', label: 'Cấu hình (Configure)', isPrivileged: true },
 ];
@@ -163,11 +161,11 @@ export const RoleEditorModal: React.FC<RoleEditorModalProps> = ({
 
   // Check Separation of Duties (SoD) risk automatically
   const sodConflictFound = useMemo(() => {
-    // Conflict rule: Cannot have both PRODUCTS Edit and PRODUCTS Approve in the same role
-    const prodEdit = matrix.PRODUCTS?.edit === 'allowed' || matrix.PRODUCTS?.edit === 'conditional';
-    const prodApprove = matrix.PRODUCTS?.approve === 'allowed' || matrix.PRODUCTS?.approve === 'conditional';
-    return prodEdit && prodApprove;
-  }, [matrix]);
+    // Conflict rule: Non-privileged roles should not combine full system configuration with user deletion
+    const rolesConfig = matrix.ROLES?.configure === 'allowed';
+    const usersDelete = matrix.USERS?.delete === 'allowed';
+    return riskLevel !== 'privileged' && rolesConfig && usersDelete;
+  }, [matrix, riskLevel]);
 
   // Diff calculation comparing Current Matrix vs Active Version Matrix
   const matrixDiffs = useMemo(() => {

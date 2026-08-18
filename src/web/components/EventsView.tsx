@@ -48,18 +48,10 @@ interface EventsViewProps {
 const cleanEventHtml = (html: string) => {
   if (!html) return '';
   return html
-    .replace(
-      /src="(?:https:\/\/www\.cic\.com\.vn)?\/upload_images\/images\/2026\/STC\/D%E1%BB%99t_pha_%E1%BB%A9ng_d%E1%BB%A5ng_AI_trong_v%E1%BA%ADn_hanh_c%E1%BA%A3ng_bi%E1%BB%83n_\(1\)\.png"/g,
-      'src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=1200" alt="Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam"'
-    )
-    .replace(
-      /src="(?:https:\/\/www\.cic\.com\.vn)?\/upload_images\/images\/2026\/STC\/smartport_main_image-min\.png"/g,
-      'src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200" alt="ERIC C&C Smart Port Solutions"'
-    )
-    .replace(
-      /src="(?:https:\/\/www\.cic\.com\.vn)?\/upload_images\/images\/2026\/STC\/Solution__\(2\)\.jpg"/g,
-      'src="https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&q=80&w=1200" alt="Giải pháp công nghệ cảng thông minh"'
-    );
+    // Prefix any relative /upload_images URLs to https://www.cic.com.vn/upload_images
+    .replace(/src="\/upload_images\//g, 'src="https://www.cic.com.vn/upload_images/')
+    // Ensure referrerpolicy="no-referrer" on all img tags
+    .replace(/<img\b(?![^>]*\breferrerpolicy=)/gi, '<img referrerpolicy="no-referrer"');
 };
 
 export const EventsView: React.FC<EventsViewProps> = ({ 
@@ -746,18 +738,18 @@ export const EventsView: React.FC<EventsViewProps> = ({
                     </div>
 
                     {/* LONG FORM DESCRIPTION / RICH ARTICLE CONTENT */}
-                    <div className="p-6 sm:p-8 space-y-4">
+                    <div className="p-6 sm:p-8 space-y-4 select-text">
                       {/<[a-z][\s\S]*>/i.test(selectedEvent.longDesc) ? (
                         <div
-                          className="event-rich-content text-slate-800 leading-relaxed font-normal"
+                          className="event-rich-content text-slate-800 leading-relaxed font-normal select-text"
                           dangerouslySetInnerHTML={{ __html: cleanEventHtml(selectedEvent.longDesc) }}
                         />
                       ) : (
                         <>
-                          <h2 className="text-xl font-black uppercase tracking-tight text-slate-950">
+                          <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 select-text">
                             Giới thiệu chương trình
                           </h2>
-                          <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line">
+                          <div className="text-slate-600 text-sm leading-relaxed font-medium space-y-4 whitespace-pre-line select-text">
                             {selectedEvent.longDesc}
                           </div>
                         </>
@@ -1177,6 +1169,8 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             whileHover={{ y: -4 }}
                             transition={{ duration: 0.25 }}
                             onClick={() => {
+                              const sel = window.getSelection();
+                              if (sel && sel.toString().trim().length > 0) return;
                               setSelectedEvent(event);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}

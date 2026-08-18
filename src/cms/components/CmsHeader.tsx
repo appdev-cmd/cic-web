@@ -12,9 +12,9 @@ import {
   Globe,
   Menu,
   X,
-  FileText,
+  Newspaper,
   Package,
-  Image as ImageIcon,
+  Sparkles,
   Calendar,
   ExternalLink,
 } from 'lucide-react';
@@ -29,7 +29,7 @@ interface CmsHeaderProps {
   workspaceLocale: CmsLocale;
   onToggleWorkspaceLocale: () => void;
   onOpenCommandPalette: () => void;
-  onQuickAction: (type: 'product' | 'news' | 'banner' | 'event') => void;
+  onQuickAction: (type: 'product' | 'news' | 'service' | 'event') => void;
   onToggleMobileSidebar: () => void;
   onSwitchToWebsite?: () => void;
 }
@@ -85,22 +85,26 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
       </div>
 
       {/* Middle: Global Search Input with Ctrl+K */}
-      <div className="hidden md:flex items-center flex-1 max-w-md mx-6">
+      <div className="hidden sm:flex items-center flex-1 max-w-[220px] md:max-w-xs lg:max-w-lg mx-2 sm:mx-4 lg:mx-6">
         <button
           onClick={onOpenCommandPalette}
-          className="w-full flex items-center justify-between px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-lg text-xs text-slate-400 transition-all cursor-pointer group"
+          className="w-full flex items-center justify-between pl-2.5 sm:pl-3 pr-2 py-1.5 sm:py-2 bg-slate-50/90 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/90 hover:border-orange-400/80 dark:border-slate-700/80 dark:hover:border-orange-500/60 rounded-xl text-xs text-slate-400 transition-all duration-200 cursor-pointer group shadow-xs hover:shadow-md hover:shadow-orange-500/5"
           title="Mở Tìm kiếm toàn hệ thống (Ctrl + K hoặc /)"
         >
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">
-            <Search className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-            <span>Tìm kiếm trong CMS (sản phẩm, tin tức, leads, SEO...)...</span>
+          <div className="flex items-center gap-2 sm:gap-2.5 text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors min-w-0">
+            <div className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors duration-200 shrink-0">
+              <Search className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-normal text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 truncate text-left">
+              <span className="lg:hidden">Tìm kiếm CMS...</span>
+              <span className="hidden lg:inline">
+                Tìm kiếm toàn bộ CMS <span className="text-slate-400 dark:text-slate-500 font-light text-[11px]">(sản phẩm, tin tức, leads...)</span>
+              </span>
+            </span>
           </div>
-          <div className="flex items-center gap-1">
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded shadow-xs">
-              Ctrl K
-            </kbd>
-            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded shadow-xs">
-              /
+          <div className="hidden md:flex items-center gap-1.5 shrink-0 pl-2">
+            <kbd className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-2xs group-hover:border-orange-300 dark:group-hover:border-orange-700/50 transition-colors">
+              <span className="text-[11px] font-sans">⌘</span>K
             </kbd>
           </div>
         </button>
@@ -108,13 +112,13 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
 
       {/* Right Controls: Quick Action, Notifs, Lang, Theme, User */}
       <div className="flex min-w-0 items-center gap-1 sm:gap-2 lg:gap-3">
-        {/* Mobile Search trigger */}
+        {/* Mobile Search trigger (< sm) */}
         <button
           onClick={onOpenCommandPalette}
-          className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-          title="Tìm kiếm"
+          className="sm:hidden flex items-center justify-center w-8.5 h-8.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 bg-slate-100/80 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
+          title="Tìm kiếm toàn hệ thống"
         >
-          <Search className="w-5 h-5" />
+          <Search className="w-4 h-4" />
         </button>
 
         {/* Quick + New Dropdown */}
@@ -145,7 +149,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                   onQuickAction('product');
                   setIsQuickActionOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
                 <Package className="w-4 h-4 text-orange-500" />
                 <span>Sản phẩm mới</span>
@@ -155,27 +159,27 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                   onQuickAction('news');
                   setIsQuickActionOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
-                <FileText className="w-4 h-4 text-orange-500" />
-                <span>Bài viết mới</span>
+                <Newspaper className="w-4 h-4 text-blue-500" />
+                <span>Tin tức mới</span>
               </button>
               <button
                 onClick={() => {
-                  onQuickAction('banner');
+                  onQuickAction('service');
                   setIsQuickActionOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
-                <ImageIcon className="w-4 h-4 text-emerald-500" />
-                <span>Banner mới</span>
+                <Sparkles className="w-4 h-4 text-emerald-500" />
+                <span>Dịch vụ mới</span>
               </button>
               <button
                 onClick={() => {
                   onQuickAction('event');
                   setIsQuickActionOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
                 <Calendar className="w-4 h-4 text-amber-500" />
                 <span>Sự kiện mới</span>

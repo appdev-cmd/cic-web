@@ -291,8 +291,18 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
         onToggleWorkspaceLocale={() => setWorkspaceLocale(workspaceLocale === 'vi' ? 'en' : 'vi')}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onQuickAction={(type) => {
-          setToastMessage(`Đã mở giao diện tạo mới ${type.toUpperCase()}`);
-          setTimeout(() => setToastMessage(null), 3000);
+          const actionConfig: Record<'product' | 'news' | 'service' | 'event', { path: string; title: string; label: string }> = {
+            product: { path: '/cms/products', title: 'Quản lý Sản phẩm', label: 'Sản phẩm' },
+            news: { path: '/cms/news', title: 'Quản lý Tin tức', label: 'Tin tức' },
+            service: { path: '/cms/services', title: 'Quản lý Dịch vụ', label: 'Dịch vụ' },
+            event: { path: '/cms/events', title: 'Quản trị Sự kiện & Hội thảo', label: 'Sự kiện' },
+          };
+          const target = actionConfig[type];
+          if (target) {
+            navigateToCmsPath(target.path, target.title);
+            setToastMessage(`Đã chuyển tới phân hệ tạo mới ${target.label}`);
+            setTimeout(() => setToastMessage(null), 3000);
+          }
         }}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
         onSwitchToWebsite={onSwitchToWebsite}

@@ -161,9 +161,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
     sales_staff: 'người phụ trách',
   };
 
-  // Active form tab
-  const [activeTab, setActiveTab] = useState<'basic' | 'seo'>('basic');
-
   // Form State
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
@@ -171,24 +168,13 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [ordering, setOrdering] = useState(1);
 
-  // Category Specifics
+  // Category Specifics (internal defaults)
   const [parentId, setParentId] = useState<string | null>(null);
-  const [icon, setIcon] = useState('Building2');
-  const [imageUrl, setImageUrl] = useState('');
-  const [metaTitle, setMetaTitle] = useState('');
-  const [metaKeyword, setMetaKeyword] = useState('');
-  const [metaDescription, setMetaDescription] = useState('');
-  const [siteScope, setSiteScope] = useState<string[]>(['main_website']);
-
-  // Brand Specifics
-  const [country, setCountry] = useState('Mỹ (USA)');
-  const [logoUrl, setLogoUrl] = useState('');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [isFeatured, setIsFeatured] = useState(false);
 
   // Application Specifics
   const [sectorGroup, setSectorGroup] = useState('Kết cấu Dân dụng & Công nghiệp');
   const [colorBadge, setColorBadge] = useState('bg-blue-500/10 text-blue-600 border-blue-500/20');
+  const [icon, setIcon] = useState('Cpu');
 
   // Product Type Specifics
   const [requiresLicenseKey, setRequiresLicenseKey] = useState(true);
@@ -205,7 +191,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   const [northSalesProductIds, setNorthSalesProductIds] = useState<string[]>([]);
   const [southSalesProductIds, setSouthSalesProductIds] = useState<string[]>([]);
 
-
   // Populate state on edit
   useEffect(() => {
     if (item) {
@@ -218,18 +203,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       if (item.type === 'categories') {
         const cat = item as MasterCategoryItem;
         setParentId(cat.parent_id || null);
-        setIcon(cat.icon || 'Building2');
-        setImageUrl(cat.image || '');
-        setMetaTitle(cat.meta_title || '');
-        setMetaKeyword(cat.meta_keyword || '');
-        setMetaDescription(cat.meta_description || '');
-        setSiteScope(cat.site_scope || ['main_website']);
-      } else if (item.type === 'brands') {
-        const brd = item as MasterBrandItem;
-        setCountry(brd.country || 'Việt Nam');
-        setLogoUrl(brd.logo || '');
-        setWebsiteUrl(brd.website || '');
-        setIsFeatured(brd.is_featured || false);
       } else if (item.type === 'applications') {
         const app = item as MasterApplicationItem;
         setSectorGroup(app.sector_group || 'Kết cấu Dân dụng & Công nghiệp');
@@ -259,16 +232,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
       setStatus('active');
       setOrdering(1);
       setParentId(null);
-      setIcon('Building2');
-      setImageUrl('');
-      setMetaTitle('');
-      setMetaKeyword('');
-      setMetaDescription('');
-      setSiteScope(['main_website']);
-      setCountry('Việt Nam');
-      setLogoUrl('');
-      setWebsiteUrl('');
-      setIsFeatured(false);
       setSectorGroup('Kết cấu Dân dụng & Công nghiệp');
       setColorBadge('bg-blue-500/10 text-blue-600 border-blue-500/20');
       setRequiresLicenseKey(true);
@@ -294,9 +257,7 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
     const baseObj = {
       id: item?.id || `item_${Date.now()}`,
       name: name.trim(),
-      code: (['brands', 'applications', 'product_types'] as MasterDataType[]).includes(targetType)
-        ? item?.code || generatedAlias
-        : code.trim() || item?.code || generatedAlias,
+      code: generatedAlias,
       status: status,
       ordering: Number(ordering) || 1,
       usage_count: item?.usage_count || 0,
@@ -309,32 +270,31 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
     let resultObj: AnyMasterItem;
 
     if (targetType === 'categories') {
-      const parentName = categories.find((c) => c.id === parentId)?.name;
       const categoryAlias = createAlias(name);
       resultObj = {
         ...baseObj,
         type: 'categories',
         alias: categoryAlias,
         slug: categoryAlias,
-        parent_id: parentId,
-        parent_name: parentName,
-        level: parentId ? 2 : 1,
-        icon: icon,
-        image: imageUrl,
-        meta_title: metaTitle,
-        meta_keyword: metaKeyword,
-        meta_description: metaDescription,
-        site_scope: siteScope as any,
+        parent_id: null,
+        parent_name: undefined,
+        level: 1,
+        icon: 'Package',
+        image: '',
+        meta_title: '',
+        meta_keyword: '',
+        meta_description: '',
+        site_scope: ['main_website'],
       } as MasterCategoryItem;
     } else if (targetType === 'brands') {
       resultObj = {
         ...baseObj,
         type: 'brands',
         alias: generatedAlias,
-        country: country,
-        logo: logoUrl,
-        website: websiteUrl,
-        is_featured: isFeatured,
+        country: '',
+        logo: '',
+        website: '',
+        is_featured: false,
       } as MasterBrandItem;
     } else if (targetType === 'applications') {
       resultObj = {
@@ -375,6 +335,8 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
   };
 
   if (!isOpen) return null;
+
+  const isSimpleForm = targetType === 'categories' || targetType === 'brands';
 
   return (
     <div className={presentation === 'page' ? 'min-h-[calc(100vh-7rem)] animate-in fade-in duration-200' : 'fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200'}>
@@ -417,71 +379,30 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
           </div>
         </div>
 
-        {/* Section Navigation Tabs */}
-        <div className={`${presentation === 'page' && targetType === 'sales_staff' ? 'hidden' : 'flex'} items-center gap-2 px-5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs`}>
-          <button
-            type="button"
-            onClick={() => setActiveTab('basic')}
-            className={`py-3 px-3 font-bold border-b-2 -mb-px cursor-pointer transition-all ${
-              activeTab === 'basic'
-                ? 'border-orange-600 text-orange-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            Thông tin cơ bản
-          </button>
-
-          {targetType === 'categories' && (
-            <button
-              type="button"
-              onClick={() => setActiveTab('seo')}
-              className={`py-3 px-3 font-bold border-b-2 -mb-px cursor-pointer transition-all ${
-                activeTab === 'seo'
-                  ? 'border-orange-600 text-orange-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
-            >
-              Tìm kiếm và hiển thị công khai
-            </button>
-          )}
-
-        </div>
-
         {/* Drawer Form Body */}
         <form id="masterDataForm" onSubmit={handleSubmit} className={`flex-1 space-y-5 text-xs ${presentation === 'page' ? 'mx-auto w-full max-w-6xl p-5 sm:p-6' : 'overflow-y-auto p-6'}`}>
           
-          {/* TAB 1: BASIC INFO */}
-          {activeTab === 'basic' && (
+          {/* SIMPLIFIED FORM FOR CATEGORIES & BRANDS */}
+          {isSimpleForm ? (
             <div className="space-y-4">
-              <div className={`grid grid-cols-1 gap-3 ${targetType === 'sales_staff' ? '' : 'sm:grid-cols-3'}`}>
-                <div className={targetType === 'sales_staff' ? '' : 'sm:col-span-2'}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    {targetType === 'sales_staff' ? 'Tên nhân viên' : targetType === 'categories' ? 'Tên mục' : 'Tiêu đề dữ liệu'} <span className="text-red-500">*</span>
+                    Tiêu đề dữ liệu <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={targetType === 'sales_staff' ? 'Nhập tên nhân viên' : 'Ví dụ: Phần mềm thiết kế kết cấu'}
+                    placeholder={targetType === 'categories' ? 'Ví dụ: Phần mềm thiết kế kết cấu' : 'Ví dụ: CSI America'}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:border-orange-500 text-slate-900 dark:text-white"
                   />
                 </div>
 
-                {targetType === 'categories' && <div>
+                <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    Mã nhận diện:
-                  </label>
-                  <input
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white focus:outline-none"
-                  />
-                </div>}
-                {(['brands', 'applications', 'product_types'] as MasterDataType[]).includes(targetType) && <div>
-                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    Tên hiệu <span className="font-normal text-slate-400">(Hệ thống tự động sinh)</span>:
+                    Tên hiệu <span className="font-normal text-slate-400">(Tự động sinh)</span>:
                   </label>
                   <input
                     type="text"
@@ -490,7 +411,69 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                     placeholder="ten-hieu-tu-dong"
                     className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                   />
-                </div>}
+                </div>
+              </div>
+
+              {/* Status & Priority Order */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Trạng thái hoạt động:
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold cursor-pointer focus:outline-none"
+                  >
+                    <option value="active">Đang sử dụng</option>
+                    <option value="inactive">Ngừng sử dụng</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Thứ tự ưu tiên:
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={ordering}
+                    onChange={(e) => setOrdering(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* OTHER TYPES: APPLICATIONS, PRODUCT_TYPES, SALES_STAFF */
+            <div className="space-y-4">
+              <div className={`grid grid-cols-1 gap-3 ${targetType === 'sales_staff' ? '' : 'sm:grid-cols-3'}`}>
+                <div className={targetType === 'sales_staff' ? '' : 'sm:col-span-2'}>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    {targetType === 'sales_staff' ? 'Tên nhân viên' : 'Tiêu đề dữ liệu'} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={targetType === 'sales_staff' ? 'Nhập tên nhân viên' : 'Ví dụ: Thiết kế cầu đường'}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none focus:border-orange-500 text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Tên hiệu <span className="font-normal text-slate-400">(Tự động sinh)</span>:
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={createAlias(name)}
+                    placeholder="ten-hieu-tu-dong"
+                    className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  />
+                </div>
               </div>
 
               {/* Status & Priority Order */}
@@ -522,89 +505,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   />
                 </div>
               </div>
-
-              {/* Category specific fields */}
-              {targetType === 'categories' && (
-                <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Danh mục cha (Parent Category):
-                      </label>
-                      <select
-                        value={parentId || ''}
-                        onChange={(e) => setParentId(e.target.value || null)}
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium cursor-pointer focus:outline-none"
-                      >
-                        <option value="">(Cấp cao nhất - Root Category)</option>
-                        {categories.filter((c) => c.id !== item?.id).map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block font-bold text-slate-700 dark:text-slate-300">
-                        Tên hiệu <span className="font-normal text-slate-400">(Hệ thống tự động sinh)</span>:
-                      </label>
-                      <input
-                        type="text"
-                        readOnly
-                        value={createAlias(name)}
-                        placeholder="ten-hieu-tu-dong"
-                        className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 font-mono text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                      />
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-              {/* Brand specific fields */}
-              {targetType === 'brands' && (
-                <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Quốc gia sản xuất:
-                      </label>
-                      <input
-                        type="text"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        placeholder="Mỹ (USA), Nhật Bản, Việt Nam..."
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                        Website chính thức Hãng:
-                      </label>
-                      <input
-                        type="url"
-                        value={websiteUrl}
-                        onChange={(e) => setWebsiteUrl(e.target.value)}
-                        placeholder="https://www.csiamerica.com"
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      id="isFeatured"
-                      checked={isFeatured}
-                      onChange={(e) => setIsFeatured(e.target.checked)}
-                      className="w-4 h-4 text-orange-600 rounded cursor-pointer"
-                    />
-                    <label htmlFor="isFeatured" className="font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
-                      Nổi bật trên Trang chủ & Footer Website
-                    </label>
-                  </div>
-                </div>
-              )}
 
               {/* Sales Staff Specific Fields */}
               {targetType === 'sales_staff' && (
@@ -641,64 +541,6 @@ export const MasterDataFormDrawer: React.FC<MasterDataFormDrawerProps> = ({
                   ].map(([label, selected, setter]) => <ProductAssignmentField key={label as string} label={label as string} options={productOptions} selectedIds={selected as string[]} onChange={setter as React.Dispatch<React.SetStateAction<string[]>>} />)}</div>
                 </div>
               )}
-
-              {/* Category description */}
-              {targetType === 'categories' && <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Mô tả vắn tắt / Ghi chú nghiệp vụ:
-                </label>
-                <textarea
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Mô tả phạm vi áp dụng..."
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none text-slate-900 dark:text-white"
-                />
-              </div>}
-            </div>
-          )}
-
-          {/* TAB 2: SEO & PUBLIC DISPLAY (For Categories) */}
-          {activeTab === 'seo' && targetType === 'categories' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  SEO title:
-                </label>
-                <input
-                  type="text"
-                  value={metaTitle}
-                  onChange={(e) => setMetaTitle(e.target.value)}
-                  placeholder="Phần mềm Thiết kế Kết cấu | Công ty CIC"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  SEO meta keyword:
-                </label>
-                <input
-                  type="text"
-                  value={metaKeyword}
-                  onChange={(e) => setMetaKeyword(e.target.value)}
-                  placeholder="phần mềm kết cấu, ETABS, SAP2000"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  SEO meta description:
-                </label>
-                <textarea
-                  rows={3}
-                  value={metaDescription}
-                  onChange={(e) => setMetaDescription(e.target.value)}
-                  placeholder="Phân phối phần mềm ETABS, SAP2000 chính hãng..."
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium focus:outline-none"
-                />
-              </div>
             </div>
           )}
 

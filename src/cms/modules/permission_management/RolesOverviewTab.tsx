@@ -45,7 +45,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
 }) => {
   // Filters State
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | RoleCategory | 'archived' | 'needs_review'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | RoleCategory | 'archived'>('all');
   const [riskFilter, setRiskFilter] = useState<'all' | RoleRiskLevel>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | RoleStatus>('all');
 
@@ -66,10 +66,9 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
 
       // Category filter
       let matchCat = true;
-      if (categoryFilter === 'system') matchCat = r.category === 'system';
-      else if (categoryFilter === 'custom') matchCat = r.category === 'custom';
+      if (categoryFilter === 'system') matchCat = r.category === 'system' && r.status !== 'archived';
+      else if (categoryFilter === 'custom') matchCat = r.category === 'custom' && r.status !== 'archived';
       else if (categoryFilter === 'archived') matchCat = r.status === 'archived';
-      else if (categoryFilter === 'needs_review') matchCat = r.status === 'needs_review' || (r.reviewDueDays !== undefined && r.reviewDueDays < 0);
 
       // Risk Filter
       const matchRisk = riskFilter === 'all' || r.riskLevel === riskFilter;
@@ -124,14 +123,6 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
         </span>
       );
     }
-    if (r.status === 'needs_review' || (r.reviewDueDays !== undefined && r.reviewDueDays < 0)) {
-      return (
-        <span className="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 rounded text-[10px] font-bold border border-amber-300 dark:border-amber-800 flex items-center gap-1">
-          <Clock className="w-3 h-3 text-amber-600" />
-          <span>Needs Review</span>
-        </span>
-      );
-    }
     if (r.draftVersion) {
       return (
         <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 rounded text-[10px] font-bold border border-blue-300 dark:border-blue-800">
@@ -171,7 +162,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                 categoryFilter === 'all' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Tất cả ({roles.length})
+              Tất cả ({roles.filter((r) => r.status !== 'archived').length})
             </button>
             <button
               onClick={() => setCategoryFilter('system')}
@@ -179,7 +170,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                 categoryFilter === 'system' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Hệ thống ({roles.filter((r) => r.category === 'system').length})
+              Hệ thống ({roles.filter((r) => r.category === 'system' && r.status !== 'archived').length})
             </button>
             <button
               onClick={() => setCategoryFilter('custom')}
@@ -187,15 +178,15 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                 categoryFilter === 'custom' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Tùy chỉnh ({roles.filter((r) => r.category === 'custom').length})
+              Tùy chỉnh ({roles.filter((r) => r.category === 'custom' && r.status !== 'archived').length})
             </button>
             <button
-              onClick={() => setCategoryFilter('needs_review')}
+              onClick={() => setCategoryFilter('archived')}
               className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                categoryFilter === 'needs_review' ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
+                categoryFilter === 'archived' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Cần Review
+              Lưu trữ ({roles.filter((r) => r.status === 'archived').length})
             </button>
           </div>
 

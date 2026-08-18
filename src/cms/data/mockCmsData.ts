@@ -339,8 +339,8 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     ],
   },
   {
-    id: 'grp_tin_tuc',
-    groupTitle: 'TIN TỨC',
+    id: 'grp_noi_dung',
+    groupTitle: 'NỘI DUNG',
     items: [
       {
         id: 'menu_news',
@@ -353,6 +353,30 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Danh mục tin tức',
         iconName: 'FolderTree',
         path: '/cms/news/categories',
+      },
+      {
+        id: 'menu_static_pages',
+        title: 'Trang nội dung',
+        iconName: 'FileText',
+        path: '/cms/static-pages',
+      },
+      {
+        id: 'menu_events',
+        title: 'Sự kiện',
+        iconName: 'CalendarEvent',
+        path: '/cms/events',
+      },
+      {
+        id: 'menu_projects',
+        title: 'Dự án',
+        iconName: 'Building2',
+        path: '/cms/projects',
+      },
+      {
+        id: 'menu_services',
+        title: 'Dịch vụ',
+        iconName: 'Layers',
+        path: '/cms/services',
       },
     ],
   },
@@ -395,54 +419,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         title: 'Người phụ trách kinh doanh',
         iconName: 'UserCheck',
         path: '/cms/product-settings/sales-staff',
-      },
-    ],
-  },
-  {
-    id: 'grp_trang_noi_dung',
-    groupTitle: 'TRANG NỘI DUNG',
-    items: [
-      {
-        id: 'menu_static_pages',
-        title: 'Trang nội dung',
-        iconName: 'FileText',
-        path: '/cms/static-pages',
-      },
-    ],
-  },
-  {
-    id: 'grp_su_kien',
-    groupTitle: 'SỰ KIỆN',
-    items: [
-      {
-        id: 'menu_events',
-        title: 'Sự kiện',
-        iconName: 'CalendarEvent',
-        path: '/cms/events',
-      },
-    ],
-  },
-  {
-    id: 'grp_du_an',
-    groupTitle: 'DỰ ÁN',
-    items: [
-      {
-        id: 'menu_projects',
-        title: 'Dự án',
-        iconName: 'Building2',
-        path: '/cms/projects',
-      },
-    ],
-  },
-  {
-    id: 'grp_dich_vu',
-    groupTitle: 'DỊCH VỤ',
-    items: [
-      {
-        id: 'menu_services',
-        title: 'Dịch vụ',
-        iconName: 'Layers',
-        path: '/cms/services',
       },
     ],
   },
@@ -495,8 +471,8 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
     ],
   },
   {
-    id: 'grp_quan_tri',
-    groupTitle: 'QUẢN TRỊ',
+    id: 'grp_quan_tri_he_thong',
+    groupTitle: 'QUẢN TRỊ HỆ THỐNG',
     items: [
       {
         id: 'menu_users',

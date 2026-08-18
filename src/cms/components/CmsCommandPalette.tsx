@@ -264,20 +264,22 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
       {/* Modal Dialog */}
       <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]">
         {/* Search Input Bar */}
-        <div className="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 bg-white dark:bg-slate-900 sticky top-0 z-10">
-          <Search className="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0" />
+        <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-3 bg-slate-50/50 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
+          <div className="w-9 h-9 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 border border-orange-500/20">
+            <Search className="w-4.5 h-4.5" />
+          </div>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Tìm kiếm trong CMS (sản phẩm, bài viết, khách hàng, cấu hình SEO, hãng...)"
+            placeholder="Tìm kiếm sản phẩm, bài viết, khách hàng, cấu hình, dữ liệu..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none font-medium"
+            className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none font-normal"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Xóa từ khóa"
             >
               <X className="w-4 h-4" />
@@ -285,7 +287,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
           )}
           <button
             onClick={onClose}
-            className="px-1.5 py-1 text-[11px] font-mono font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
+            className="px-2 py-1 text-[11px] font-mono font-medium rounded-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all shadow-2xs cursor-pointer"
             title="Đóng (Esc)"
           >
             ESC

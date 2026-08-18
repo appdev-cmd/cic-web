@@ -75,7 +75,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
       tel: '024 3976 1381',
       fax: '',
       email: 'info@cic.com.vn',
-      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30 | Thứ Bảy: 08:00 - 12:00',
+      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.9658249645934!2d105.8058773!3d21.0016278!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac9804b49cf5%3A0x6bcfd35c59f0f975!2sVG%20Building!5e0!3m2!1svi!2s!4v1721445021235!5m2!1svi!2s',
       searchQuery: 'VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội, Việt Nam'
     },
@@ -85,7 +85,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
       tel: '088 645 2020 - 028 628 99022 - 028 628 99033',
       fax: '',
       email: 'cichcm@cic.com.vn',
-      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30 | Thứ Bảy: Nghỉ',
+      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.231264223456!2d106.695247!3d10.793619!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528b76df47c17%3A0xa6607e4c63f11467!2zMzYgTmd1eeG7hW4gSHV5IEzGsOG7b25nLCBQaMaw4budbmcgMTQsIELDjG5oIFRo4bqhbmgsIEjhu5MgQ2jDrSBNaW5oLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1721445124012!5m2!1svi!2s',
       searchQuery: '36 Nguyễn Huy Lượng, Bình Thạnh, TP. Hồ Chí Minh, Việt Nam'
     }
@@ -200,9 +200,9 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                     <button
                       key={tab.key}
                       onClick={() => setActiveBranch(tab.key as any)}
-                      className={`px-3.5 py-1.5 text-xs font-black uppercase tracking-wider transition-all rounded-[8px] ${
+                      className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer ${
                         activeBranch === tab.key
-                          ? 'bg-white text-slate-950 shadow-sm border border-slate-200/50'
+                          ? 'bg-white text-slate-950 shadow-xs border border-slate-200/50'
                           : 'text-slate-500 hover:text-slate-900'
                       }`}
                     >
@@ -220,42 +220,42 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-6"
+                  className="space-y-5"
                 >
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-black text-slate-950 flex items-center gap-2.5">
-                      <Building className="text-orange-600 shrink-0" size={20} />
+                  <div className="space-y-3.5">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                      <Building className="text-orange-600 shrink-0" size={19} />
                       {branches[activeBranch].name}
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold text-slate-600">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       
                       <div className="space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Địa chỉ văn phòng</span>
-                        <p className="text-slate-800 leading-relaxed font-bold">{branches[activeBranch].address}</p>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Địa chỉ văn phòng</span>
+                        <p className="text-slate-800 leading-relaxed text-xs sm:text-[13px] font-medium">{branches[activeBranch].address}</p>
                       </div>
 
                       <div className="space-y-1.5 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Liên hệ nhanh</span>
-                        <div className="space-y-1 text-slate-800">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Liên hệ nhanh</span>
+                        <div className="space-y-1 text-slate-800 text-xs sm:text-[13px] font-medium">
                           <p className="flex items-center gap-2">
                             <Phone className="text-orange-600 shrink-0" size={14} /> 
-                            <span>SĐT: {branches[activeBranch].tel}</span>
+                            <span>SĐT: <strong className="font-semibold text-slate-900">{branches[activeBranch].tel}</strong></span>
                           </p>
                           <p className="flex items-center gap-2">
                             <Mail className="text-orange-600 shrink-0" size={14} /> 
-                            <span>Email: {branches[activeBranch].email}</span>
+                            <span>Email: <strong className="font-semibold text-slate-900">{branches[activeBranch].email}</strong></span>
                           </p>
                           {branches[activeBranch].fax && (
-                            <p className="text-slate-500 font-medium">Fax: {branches[activeBranch].fax}</p>
+                            <p className="text-slate-500 font-medium pl-5.5 text-[11px] sm:text-xs">Fax: {branches[activeBranch].fax}</p>
                           )}
                         </div>
                       </div>
 
                       <div className="md:col-span-2 space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-sans">Thời gian làm việc</span>
-                        <p className="text-slate-800 flex items-center gap-2">
-                          <Clock className="text-orange-600" size={14} /> {branches[activeBranch].workingHours}
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Thời gian làm việc</span>
+                        <p className="text-slate-800 text-xs sm:text-[13px] font-medium flex items-center gap-2">
+                          <Clock className="text-orange-600 shrink-0" size={14} /> {branches[activeBranch].workingHours}
                         </p>
                       </div>
 
@@ -263,21 +263,21 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   </div>
 
                   {/* MAP CONTAINER */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-black">
-                      <span className="uppercase tracking-wider text-slate-400 font-sans">Bản đồ vệ tinh Google Maps</span>
+                  <div className="space-y-2.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Bản đồ Google Maps</span>
                       <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branches[activeBranch].searchQuery)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-orange-600 hover:text-orange-700 hover:underline transition-all"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700 hover:underline transition-all"
                       >
-                        Mở bằng ứng dụng Google Maps <ExternalLink size={12} />
+                        Mở bằng ứng dụng Google Maps <ExternalLink size={13} />
                       </a>
                     </div>
                     
                     {/* Google Maps Embed iframe */}
-                    <div className="h-80 bg-slate-200 shadow-inner relative overflow-hidden rounded-[10px]">
+                    <div className="h-80 bg-slate-200 shadow-inner relative overflow-hidden rounded-[10px] border border-slate-200">
                       <iframe
                         title={branches[activeBranch].name}
                         src={branches[activeBranch].mapUrl}
@@ -357,7 +357,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   
                   {/* Họ tên */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       Họ tên <span className="text-orange-600">*</span>
                     </label>
                     <input
@@ -365,13 +365,13 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       placeholder="Nhập họ và tên"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
-                        formErrors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
+                      className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
+                        formErrors.fullName ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                       }`}
                     />
                     {formErrors.fullName && (
-                      <span className="text-[10px] text-red-500 font-bold flex items-center gap-1">
-                        <AlertCircle size={12} /> {formErrors.fullName}
+                      <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                        <AlertCircle size={13} /> {formErrors.fullName}
                       </span>
                     )}
                   </div>
@@ -379,7 +379,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   {/* Địa chỉ email & Số điện thoại */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                         Địa chỉ email <span className="text-orange-600">*</span>
                       </label>
                       <input
@@ -387,19 +387,19 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         placeholder="Nhập email liên hệ"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
-                          formErrors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
+                        className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
+                          formErrors.email ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                         }`}
                       />
                       {formErrors.email && (
-                        <span className="text-[10px] text-red-500 font-bold flex items-center gap-1">
-                          <AlertCircle size={12} /> {formErrors.email}
+                        <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                          <AlertCircle size={13} /> {formErrors.email}
                         </span>
                       )}
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                         Số điện thoại <span className="text-orange-600">*</span>
                       </label>
                       <input
@@ -407,13 +407,13 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         placeholder="Nhập số điện thoại"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
-                          formErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
+                        className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
+                          formErrors.phone ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                         }`}
                       />
                       {formErrors.phone && (
-                        <span className="text-[10px] text-red-500 font-bold flex items-center gap-1">
-                          <AlertCircle size={12} /> {formErrors.phone}
+                        <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                          <AlertCircle size={13} /> {formErrors.phone}
                         </span>
                       )}
                     </div>
@@ -421,7 +421,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
 
                   {/* Tiêu đề */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       Tiêu đề <span className="text-orange-600">*</span>
                     </label>
                     <input
@@ -429,20 +429,20 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       placeholder="Nhập tiêu đề yêu cầu tư vấn..."
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className={`w-full p-2.5 bg-slate-50 border text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
-                        formErrors.subject ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
+                      className={`w-full px-3.5 py-2.5 bg-slate-50 border text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:bg-white rounded-[8px] transition-all ${
+                        formErrors.subject ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                       }`}
                     />
                     {formErrors.subject && (
-                      <span className="text-[10px] text-red-500 font-bold flex items-center gap-1">
-                        <AlertCircle size={12} /> {formErrors.subject}
+                      <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                        <AlertCircle size={13} /> {formErrors.subject}
                       </span>
                     )}
                   </div>
 
                   {/* Nội dung */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       Nội dung
                     </label>
                     <textarea
@@ -450,13 +450,13 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       placeholder="Mô tả nhu cầu của bạn..."
                       value={formData.note}
                       onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-orange-600 focus:border-orange-600 resize-none rounded-[8px]"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-600/20 focus:border-orange-600 focus:bg-white resize-none rounded-[8px] transition-all"
                     ></textarea>
                   </div>
 
                   {/* Nhập mã bảo mật */}
                   <div className="bg-slate-50 border border-slate-200 p-4 space-y-2.5 rounded-[8px]">
-                    <label className="text-[11px] font-black uppercase tracking-wider text-slate-700 block">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                       Nhập mã bảo mật <span className="text-orange-600">*</span>
                     </label>
                     <div className="flex items-center gap-3">
@@ -468,14 +468,14 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         placeholder="Nhập kết quả..."
                         value={formData.captchaAnswer}
                         onChange={(e) => setFormData({ ...formData, captchaAnswer: e.target.value })}
-                        className={`w-full p-2.5 bg-white border text-xs font-black text-slate-800 focus:outline-none focus:ring-1 rounded-[8px] ${
-                          formErrors.captchaAnswer ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-orange-600 focus:border-orange-600'
+                        className={`w-full px-3.5 py-2.5 bg-white border text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 rounded-[8px] transition-all ${
+                          formErrors.captchaAnswer ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
                         }`}
                       />
                     </div>
                     {formErrors.captchaAnswer && (
-                      <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 block">
-                        <AlertCircle size={12} /> {formErrors.captchaAnswer}
+                      <span className="text-xs text-red-500 font-semibold flex items-center gap-1 block">
+                        <AlertCircle size={13} /> {formErrors.captchaAnswer}
                       </span>
                     )}
                   </div>
@@ -484,10 +484,10 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs font-black uppercase tracking-widest text-center transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-600/15 disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed rounded-[8px]"
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-600/15 disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed rounded-[8px] cursor-pointer"
                   >
                     {isSubmitting ? 'Đang gửi thông tin...' : 'Gửi yêu cầu ngay'} 
-                    <Send size={14} className="shrink-0" />
+                    <Send size={15} className="shrink-0" />
                   </button>
 
                 </form>
@@ -496,12 +496,12 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
             </div>
 
             {/* SECURITY/CONFIDENCE CARD */}
-            <div className="bg-slate-900 text-slate-300 p-6 border border-white/10 space-y-4 rounded-[10px]">
-              <div className="flex items-center gap-2 text-white">
-                <ShieldCheck className="text-orange-500" size={20} />
-                <h4 className="text-xs font-black uppercase tracking-wider">Chính sách bảo mật & Tiêu chuẩn ISO</h4>
+            <div className="bg-slate-900 text-slate-300 p-6 border border-white/10 space-y-3 rounded-[10px]">
+              <div className="flex items-center gap-2.5 text-white">
+                <ShieldCheck className="text-orange-500 shrink-0" size={22} />
+                <h4 className="text-sm font-bold uppercase tracking-wider">Chính sách bảo mật & Tiêu chuẩn ISO</h4>
               </div>
-              <p className="text-[10px] font-medium leading-relaxed text-slate-400">
+              <p className="text-xs sm:text-[13px] font-normal leading-relaxed text-slate-300">
                 CIC cam kết bảo mật 100% dữ liệu của khách hàng theo tiêu chuẩn ISO/IEC 27001 và Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân. Mọi luồng thông tin gửi qua cổng liên hệ đều được mã hóa SSL/TLS 256-bit an toàn tuyệt đối.
               </p>
             </div>
