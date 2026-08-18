@@ -117,7 +117,10 @@ Vào ngày 15 tháng 7 năm 2026, tại trụ sở **Công ty Cổ phần Công 
       embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
       thumbnail: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'
     },
-    relatedEventIds: ['bim-digital-twins-2026'],
+    relatedProductIds: [2, 6],
+    relatedProjectIds: ['cao-toc-bac-nam-twin', 'nha-ga-t3-tan-son-nhat-cde'],
+    relatedEventIds: ['bim-digital-twins-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['kien-thuc-digital-twin-ha-tang', 'thong-tu-moi-chuan-dinh-dang-cde-2026'],
     seoTitle: 'Hợp tác chiến lược CIC & Bentley Systems về an toàn thông tin hạ tầng số',
     seoDesc: 'CIC Tech phối hợp cùng Bentley Systems chuẩn hóa quy trình an ninh dữ liệu và bản sao số bảo mật cao cấp cho các doanh nghiệp hạ tầng tại Việt Nam.',
     seoKeywords: ['CIC Tech', 'Bentley Systems', 'An toàn thông tin', 'BIM', 'Digital Twins']
@@ -151,6 +154,10 @@ Kính chúc Quý Khách hàng, Quý Đối tác cùng toàn thể gia đình cá
     attachments: [
       { title: 'Công văn thông báo lịch nghỉ lễ chính thức có dấu đỏ.pdf', size: '1.2 MB', url: '#' }
     ],
+    relatedProductIds: [1, 6],
+    relatedProjectIds: ['landmark-81-bim', 'cau-my-thuan-2-quan-trac'],
+    relatedEventIds: ['enjicad-training-2026', 'ai-smartport-vietnam-2026'],
+    relatedArticleIds: ['cic-bentley-systems-cybersecurity-2026', 'hanh-trinh-team-building-phu-quoc-2026'],
     seoTitle: 'Thông báo lịch nghỉ lễ Quốc Khánh 2/9 năm 2026 - CIC Tech',
     seoDesc: 'Lịch nghỉ lễ Quốc Khánh 2/9 năm 2026 chi tiết của Công ty Cổ phần Công nghệ và Tư vấn CIC kèm thông tin liên hệ hỗ trợ khẩn cấp.',
     seoKeywords: ['Lịch nghỉ lễ', 'Quốc khánh 2/9', 'CIC thông báo']
@@ -180,7 +187,11 @@ Chuyến đi đã khép lại nhưng dư âm và ngọn lửa tinh thần gắn 
       'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1531747118685-ca8fa6e08806?auto=format&fit=crop&q=80'
-    ]
+    ],
+    relatedProductIds: [1, 3],
+    relatedProjectIds: ['dien-gio-mui-dinh', 'nha-may-thep-hoa-phat-bim'],
+    relatedEventIds: ['bim-digital-twins-2026', 'enjicad-training-2026'],
+    relatedArticleIds: ['cic-chuc-mung-35-nam-thanh-lap-2026', 'vinh-danh-top-10-doanh-nghiep-cntt-2026']
   },
 
   // --- TIN TỨC CHUYÊN NGÀNH ---
@@ -209,9 +220,10 @@ Mô hình 3D truyền thống chỉ hiển thị cấu trúc hình học tĩnh c
 
 #### 3. Công nghệ triển khai phổ biến hiện nay
 Hiện nay, CIC Tech đang đồng hành cùng các đơn vị giao thông ứng dụng nền tảng **Bentley iTwin** và **GIS Esri** để xây dựng các bản sao số chuẩn xác, mang lại giá trị quản trị to lớn vượt ngoài mong đợi của các chủ đầu tư.`,
-    relatedProductIds: [1, 2],
-    relatedProjectIds: ['landmark-81-bim'],
-    relatedEventIds: ['bim-digital-twins-2026'],
+    relatedProductIds: [2, 5],
+    relatedProjectIds: ['cao-toc-bac-nam-twin', 'cau-my-thuan-2-quan-trac'],
+    relatedEventIds: ['bim-digital-twins-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['giai-phap-gis-3d-quan-ly-do-thi-thong-minh', 'cic-bentley-systems-cybersecurity-2026'],
     seoTitle: 'Bản sao số Digital Twin trong quản lý hạ tầng giao thông thông minh',
     seoDesc: 'Tìm hiểu chi tiết về công nghệ Bản sao số (Digital Twins), sự khác biệt với BIM tĩnh và ứng dụng thực tế trong quản lý bảo trì đường bộ hiện đại.',
     seoKeywords: ['Digital Twin', 'Bản sao số', 'iTwin Bentley', 'Quản lý đường cao tốc', 'IoT']
@@ -242,7 +254,10 @@ Là giải pháp phần mềm CAD bản quyền Việt Nam hàng đầu, **enjiC
     attachments: [
       { title: 'Brochure giới thiệu tính năng chi tiết enjiCAD 2026.pdf', size: '3.5 MB', url: '#' }
     ],
-    relatedProductIds: [1]
+    relatedProductIds: [1, 3],
+    relatedProjectIds: ['landmark-81-bim', 'nha-may-thep-hoa-phat-bim'],
+    relatedEventIds: ['enjicad-training-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['huong-dan-toi-uu-hoa-ban-ve-cad-lon', 'chuong-trinh-uu-dai-enjicad-he-2026']
   },
   {
     id: 'chinh-sach-lo-trinh-ap-dung-bim-viet-nam',
@@ -269,9 +284,10 @@ Với hơn 10 năm kinh nghiệm tư vấn BIM chuyên sâu và là đơn vị �
     attachments: [
       { title: 'Tài liệu hướng dẫn triển khai BEP chuẩn Bộ Xây dựng.pdf', size: '4.8 MB', url: '#' }
     ],
-    relatedProductIds: [1],
-    relatedProjectIds: ['landmark-81-bim'],
-    relatedEventIds: ['bim-digital-twins-2026']
+    relatedProductIds: [1, 6],
+    relatedProjectIds: ['landmark-81-bim', 'nha-ga-t3-tan-son-nhat-cde'],
+    relatedEventIds: ['bim-digital-twins-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['thong-tu-moi-chuan-dinh-dang-cde-2026', 'kien-thuc-digital-twin-ha-tang']
   },
 
   // --- TIN TUYỂN DỤNG ---
@@ -292,6 +308,10 @@ Với hơn 10 năm kinh nghiệm tư vấn BIM chuyên sâu và là đơn vị �
     author: 'Phòng Hành chính Nhân sự',
     views: 1240,
     tags: ['Tuyển dụng Kỹ sư', 'BIM MEP', 'Revit', 'Việc làm Hà Nội'],
+    relatedProductIds: [1, 6],
+    relatedProjectIds: ['nha-ga-t3-tan-son-nhat-cde', 'landmark-81-bim'],
+    relatedEventIds: ['bim-digital-twins-2026', 'enjicad-training-2026'],
+    relatedArticleIds: ['tuyen-dung-chuyen-vien-kinh-doanh-phan-mem', 'chinh-sach-lo-trinh-ap-dung-bim-viet-nam'],
     contentMarkdown: `### TUYỂN DỤNG KỸ SƯ TƯ VẤN BIM MEP
 
 Do nhu cầu mở rộng quy mô các dự án tư vấn BIM cấp đặc biệt và hợp tác Digital Twins quốc tế, **CIC Tech** trân trọng kính mời các ứng viên xuất sắc ứng tuyển vào vị trí **Kỹ sư Tư vấn BIM MEP**:
@@ -334,6 +354,10 @@ Do nhu cầu mở rộng quy mô các dự án tư vấn BIM cấp đặc biệt
     author: 'Phòng Tuyển dụng CIC',
     views: 980,
     tags: ['Tuyển dụng sales', 'Phần mềm bản quyền', 'Việc làm HCM'],
+    relatedProductIds: [1, 3],
+    relatedProjectIds: ['landmark-81-bim', 'cao-toc-bac-nam-twin'],
+    relatedEventIds: ['enjicad-training-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['tuyen-dung-ky-su-bim-mep-2026', 'chuong-trinh-uu-dai-enjicad-he-2026'],
     contentMarkdown: `### CHUYÊN VIÊN KINH DOANH PHẦN MỀM BẢN QUYỀN (B2B SALES)
 
 Bạn đam mê công nghệ và mong muốn nâng tầm kỹ năng bán hàng trong phân khúc khách hàng doanh nghiệp xây dựng, cơ khí lớn? Hãy gia nhập đội ngũ kinh doanh đầy nhiệt huyết của **CIC Tech** tại TP. Hồ Chí Minh!
@@ -364,7 +388,10 @@ Bạn đam mê công nghệ và mong muốn nâng tầm kỹ năng bán hàng tr
     appliedTargets: ['enjiCAD Professional 2D/3D', 'Hỗ trợ nâng cấp phần cứng'],
     status: 'Đang diễn ra',
     author: 'Phòng Phát triển Thị trường',
-    relatedProductIds: [1],
+    relatedProductIds: [1, 3],
+    relatedProjectIds: ['landmark-81-bim', 'nha-may-thep-hoa-phat-bim'],
+    relatedEventIds: ['enjicad-training-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['huong-dan-toi-uu-hoa-ban-ve-cad-lon', 'chinh-sach-lo-trinh-ap-dung-bim-viet-nam'],
     views: 1650,
     tags: ['Khuyến mại', 'enjiCAD Pro', 'Bản quyền vĩnh viễn', 'Ưu đãi hè 2026'],
     contentMarkdown: `### CHƯƠNG TRÌNH KHUYẾN MẠI LỚN NHẤT 2026: MUA 3 TẶNG 1 ENJICAD
@@ -402,6 +429,10 @@ Số lượng gói ưu đãi có hạn để đảm bảo chất lượng dịch
     author: 'Hội đồng Quản trị CIC',
     views: 1120,
     tags: ['Quan hệ cổ đông', 'Đại hội cổ đông 2026', 'Cổ tức 15%'],
+    relatedProductIds: [1, 6],
+    relatedProjectIds: ['landmark-81-bim', 'cao-toc-bac-nam-twin'],
+    relatedEventIds: ['bim-digital-twins-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['bao-cao-tai-chinh-hop-nhat-quas-1-2026', 'thong-bao-phat-hanh-co-phieu-esop-2026'],
     contentMarkdown: `### NGHỊ QUYẾT ĐẠI HỘI ĐỒNG CỔ ĐÔNG THƯỜNG NIÊN NĂM 2026
 #### CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ TƯ VẤN CIC
 
@@ -442,6 +473,10 @@ Hội đồng Quản trị kính gửi đến Quý cổ đông toàn bộ biên 
     author: 'Ban Kiểm soát & Tài chính CIC',
     views: 750,
     tags: ['Báo cáo tài chính', 'Quý 1 2026', 'Tăng trưởng doanh thu'],
+    relatedProductIds: [1, 5],
+    relatedProjectIds: ['cao-toc-bac-nam-twin', 'cau-my-thuan-2-quan-trac'],
+    relatedEventIds: ['bim-digital-twins-2026', 'enjicad-training-2026'],
+    relatedArticleIds: ['nghi-quyet-dhcd-thuong-nien-2026', 'thong-bao-phat-hanh-co-phieu-esop-2026'],
     contentMarkdown: `### BÁO CÁO TÀI CHÍNH HỢP NHẤT QUÝ I NĂM 2026
 
 Công ty Cổ phần Công nghệ và Tư vấn CIC chính thức công bố Báo cáo tài chính hợp nhất Quý I năm 2026 đã được lập tuân thủ theo các chuẩn mực kế toán Việt Nam (VAS).
@@ -467,6 +502,10 @@ Quý cổ đông và các nhà đầu tư có thể xem báo cáo chi tiết bao
     author: 'Ban Tổng Giám đốc CIC',
     views: 620,
     tags: ['ESOP 2026', 'Phát hành cổ phiếu', 'Gắn kết người lao động'],
+    relatedProductIds: [1, 2],
+    relatedProjectIds: ['landmark-81-bim', 'nha-ga-t3-tan-son-nhat-cde'],
+    relatedEventIds: ['ai-infrastructure-design-2026', 'bim-digital-twins-2026'],
+    relatedArticleIds: ['nghi-quyet-dhcd-thuong-nien-2026', 'bao-cao-tai-chinh-hop-nhat-quas-1-2026'],
     contentMarkdown: `### THÔNG BÁO PHÁT HÀNH CỔ PHIẾU ESOP NĂM 2026
 
 Hội đồng quản trị Công ty Cổ phần Công nghệ và Tư vấn CIC xin thông báo phương án phát hành cổ phiếu cho người lao động có đóng góp đặc biệt trong năm tài chính vừa qua:
@@ -489,6 +528,10 @@ Hội đồng quản trị Công ty Cổ phần Công nghệ và Tư vấn CIC x
     author: 'Ban Truyền thông CIC',
     views: 2100,
     tags: ['35 Năm CIC', 'Kỷ niệm thành lập', 'Lịch sử CIC'],
+    relatedProductIds: [1, 2, 6],
+    relatedProjectIds: ['landmark-81-bim', 'cao-toc-bac-nam-twin'],
+    relatedEventIds: ['bim-digital-twins-2026', 'ai-smartport-vietnam-2026'],
+    relatedArticleIds: ['vinh-danh-top-10-doanh-nghiep-cntt-2026', 'cic-khai-truong-van-phong-da-nang-2026'],
     contentMarkdown: `### 35 NĂM HÀNH TRÌNH KIẾN TẠO VÀ PHÁT TRIỂN
 
 Ngày 18/05/2026, Công ty Cổ phần Công nghệ và Tư vấn CIC đã trọng thể tổ chức **Lễ Kỷ niệm 35 năm thành lập (1991 - 2026)**. Sự kiện có sự tham dự của đại diện lãnh đạo Bộ Xây dựng, các hội nghề nghiệp, đối tác chiến lược quốc tế cùng toàn thể cán bộ nhân viên CIC qua các thời kỳ.

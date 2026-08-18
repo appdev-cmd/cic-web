@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   GitCommit,
   History,
+  X,
 } from 'lucide-react';
 import {
   ServiceItem,
@@ -40,6 +41,7 @@ import type { ServicesModuleData } from '../../data/EditorialContentDataSource';
 import { ServiceFormView } from './ServiceFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
@@ -176,6 +178,21 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
     }
   };
 
+  const isFilterActive = Boolean(
+    searchTerm ||
+    filterEditorialStatus !== 'all' ||
+    filterServiceStatus !== 'all' ||
+    filterOwnerId !== 'all'
+  );
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setFilterEditorialStatus('all');
+    setFilterServiceStatus('all');
+    setFilterOwnerId('all');
+    setCurrentPage(1);
+  };
+
   // Action Handlers
   const handleCreateNew = () => {
     const newService: ServiceItem = {
@@ -304,122 +321,173 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         </CmsButton>}
       />
 
-      {/* View Tabs */}
-      <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1 scrollbar-none">
-        {[
+      {/* 2. TABS */}
+      <CmsTabs
+        ariaLabel="Trạng thái dịch vụ"
+        value={activeTab}
+        onChange={(tab) => {
+          setActiveTab(tab as any);
+          setCurrentPage(1);
+        }}
+        items={[
           { id: 'all', label: 'Tất cả dịch vụ', count: services.filter((s) => !s.is_deleted).length },
           { id: 'active', label: 'Đang hoạt động', count: services.filter((s) => !s.is_deleted && s.service_status === 'active').length },
-          { id: 'low_quality', label: 'Chất lượng nội dung thấp', count: services.filter((s) => !s.is_deleted && s.quality_score < 70).length },
+          { id: 'low_quality', label: 'Chất lượng thấp', count: services.filter((s) => !s.is_deleted && s.quality_score < 70).length },
           { id: 'trash', label: 'Thùng rác', count: services.filter((s) => s.is_deleted).length },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id as any);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 text-xs font-semibold rounded-t-xl transition-all whitespace-nowrap flex items-center gap-1.5 border-b-2 ${
-              activeTab === tab.id
-                ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/20'
-                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeTab === tab.id
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              {tab.count}
-            </span>
-          </button>
-        ))}
-      </div>
+        ]}
+      />
 
-      {/* Toolbar & Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Search box */}
-          <div className="relative flex items-center flex-1 min-w-[240px]">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="w-4 h-4 text-slate-400" />
+      {/* 3. TOOLBAR & FILTERS */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Ô Tìm kiếm (Search Box) */}
+          <div className="relative flex items-center w-full sm:w-56 lg:w-64 shrink-0">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <Search className="w-4 h-4" />
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm dịch vụ theo tên, mã hoặc người phụ trách..."
+              placeholder="Tìm theo Tên, Mã, Người phụ trách..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9.5 pl-9 pr-8 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setCurrentPage(1);
+                }}
+                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title="Xóa tìm kiếm"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Editorial Status Filter */}
-          <select
-            value={filterEditorialStatus}
-            onChange={(e) => setFilterEditorialStatus(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-          >
-            <option value="all">Tất cả trạng thái nội dung</option>
-            <option value="draft">Bản nháp</option>
-            <option value="published">Đã xuất bản</option>
-          </select>
+          <div className="min-w-[140px] flex-1 max-w-[200px]">
+            <select
+              value={filterEditorialStatus}
+              onChange={(e) => {
+                setFilterEditorialStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Trạng thái nội dung"
+            >
+              <option value="all">Tất cả trạng thái nội dung</option>
+              <option value="draft">Bản nháp</option>
+              <option value="published">Đã xuất bản</option>
+            </select>
+          </div>
 
           {/* Service Status Filter */}
-          <select
-            value={filterServiceStatus}
-            onChange={(e) => setFilterServiceStatus(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-          >
-            <option value="all">Tất cả trạng thái dịch vụ</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Tạm ngừng</option>
-            <option value="archived">Đã lưu trữ</option>
-          </select>
+          <div className="min-w-[140px] flex-1 max-w-[200px]">
+            <select
+              value={filterServiceStatus}
+              onChange={(e) => {
+                setFilterServiceStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Trạng thái dịch vụ"
+            >
+              <option value="all">Tất cả trạng thái dịch vụ</option>
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Tạm ngừng</option>
+              <option value="archived">Đã lưu trữ</option>
+            </select>
+          </div>
 
           {/* Owner Filter */}
-          <select
-            value={filterOwnerId}
-            onChange={(e) => setFilterOwnerId(e.target.value)}
-            className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
-          >
-            <option value="all">Tất cả người phụ trách</option>
-            {ownersList.map((owner) => <option key={owner.id} value={owner.id}>{owner.name}</option>)}
-          </select>
-          <button type="button" disabled={!searchTerm && filterEditorialStatus === 'all' && filterServiceStatus === 'all' && filterOwnerId === 'all'} onClick={() => { setSearchTerm(''); setFilterEditorialStatus('all'); setFilterServiceStatus('all'); setFilterOwnerId('all'); setCurrentPage(1); }} className="ml-auto flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
-        </div>
+          <div className="min-w-[140px] flex-1 max-w-[200px]">
+            <select
+              value={filterOwnerId}
+              onChange={(e) => {
+                setFilterOwnerId(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Người phụ trách"
+            >
+              <option value="all">Tất cả người phụ trách</option>
+              {ownersList.map((owner) => (
+                <option key={owner.id} value={owner.id}>
+                  {owner.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Bulk Actions Bar if items selected */}
-        <CmsBulkActionBar
-          selectedCount={selectedIds.length}
-          itemLabel="dịch vụ"
-          onClear={() => setSelectedIds([])}
-          actions={[
-            { label: 'Kích hoạt', icon: Power, variant: 'primary', onClick: () => {
-                  setServices((prev) =>
-                    prev.map((s) => (selectedIds.includes(s.id) ? { ...s, service_status: 'active' } : s))
-                  );
-                  showToast(`Đã kích hoạt ${selectedIds.length} dịch vụ!`);
-                  setSelectedIds([]);
-                } },
-            { label: 'Lưu trữ', icon: Archive, onClick: () => {
-                  setServices((prev) =>
-                    prev.map((s) => (selectedIds.includes(s.id) ? { ...s, service_status: 'archived' } : s))
-                  );
-                  showToast(`Đã lưu trữ ${selectedIds.length} dịch vụ!`);
-                  setSelectedIds([]);
-                } },
-            { label: 'Xóa', icon: Trash2, variant: 'danger', onClick: () => {
-                  setServices((prev) =>
-                    prev.map((s) => (selectedIds.includes(s.id) ? { ...s, is_deleted: true } : s))
-                  );
-                  showToast(`Đã di chuyển ${selectedIds.length} dịch vụ vào Thùng rác!`);
-                  setSelectedIds([]);
-                } },
-          ]}
-        />
+          {/* Cụm nút thao tác bên phải: Đặt lại */}
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            <button
+              type="button"
+              disabled={!isFilterActive}
+              onClick={handleResetFilters}
+              className={`flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                isFilterActive
+                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 hover:bg-orange-100 dark:hover:bg-orange-900/80 shadow-xs'
+                  : 'text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 disabled:cursor-not-allowed disabled:opacity-50'
+              }`}
+              title="Đặt lại tất cả bộ lọc và tìm kiếm"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Đặt lại</span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Bulk Actions Bar if items selected */}
+      <CmsBulkActionBar
+        selectedCount={selectedIds.length}
+        itemLabel="dịch vụ"
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Xuất bản',
+            icon: FileCheck,
+            variant: 'primary',
+            onClick: () => {
+              setServices((prev) =>
+                prev.map((s) => (selectedIds.includes(s.id) ? { ...s, editorial_status: 'published' } : s))
+              );
+              showToast(`Đã xuất bản ${selectedIds.length} dịch vụ!`);
+              setSelectedIds([]);
+            },
+          },
+          {
+            label: 'Chuyển bản nháp',
+            icon: RotateCcw,
+            onClick: () => {
+              setServices((prev) =>
+                prev.map((s) => (selectedIds.includes(s.id) ? { ...s, editorial_status: 'draft' } : s))
+              );
+              showToast(`Đã chuyển ${selectedIds.length} dịch vụ về Bản nháp!`);
+              setSelectedIds([]);
+            },
+          },
+          {
+            label: 'Xóa',
+            icon: Trash2,
+            variant: 'danger',
+            onClick: () => {
+              setServices((prev) =>
+                prev.map((s) => (selectedIds.includes(s.id) ? { ...s, is_deleted: true } : s))
+              );
+              showToast(`Đã di chuyển ${selectedIds.length} dịch vụ vào Thùng rác!`);
+              setSelectedIds([]);
+            },
+          },
+        ]}
+      />
 
       {/* Main Full-Width Data Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">

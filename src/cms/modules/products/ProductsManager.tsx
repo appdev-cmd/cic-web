@@ -103,8 +103,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
   const [selectedProductType, setSelectedProductType] = useState<string>('all');
   const [selectedApplication, setSelectedApplication] = useState<string>('all');
-  const [editorialFilter, setEditorialFilter] = useState<string>('all');
-  const [isHotFilter, setIsHotFilter] = useState<string>('all');
 
   // Table Density & Column Visibility
   const [density, setDensity] = useState<'normal' | 'compact'>('normal');
@@ -265,13 +263,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
         if (!isAppMatch) return false;
       }
 
-      // 7. Editorial Status Filter
-      if (editorialFilter !== 'all' && p.editorial_status !== editorialFilter) return false;
-
-      // 8. Hot Filter
-      if (isHotFilter === 'hot' && !p.is_hot) return false;
-      if (isHotFilter === 'normal' && p.is_hot) return false;
-
       return true;
     });
   }, [
@@ -282,8 +273,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     selectedBrand,
     selectedProductType,
     selectedApplication,
-    editorialFilter,
-    isHotFilter,
     categories,
     brands,
     productTypes,
@@ -490,8 +479,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     selectedBrand !== 'all',
     selectedProductType !== 'all',
     selectedApplication !== 'all',
-    editorialFilter !== 'all',
-    isHotFilter !== 'all',
   ].filter(Boolean).length;
 
   const isFilterActive = activeFiltersCount > 0;
@@ -502,8 +489,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     setSelectedBrand('all');
     setSelectedProductType('all');
     setSelectedApplication('all');
-    setEditorialFilter('all');
-    setIsHotFilter('all');
     setCurrentPage(1);
   };
 
@@ -609,12 +594,12 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
       />
 
       {/* 3. TOOLBAR & FILTERS */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Search Input */}
-          <div className="relative flex items-center flex-1 max-w-md">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Search className="w-4 h-4 text-slate-400" />
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Ô Tìm kiếm (Search Box) */}
+          <div className="relative flex items-center w-full sm:w-56 lg:w-64 shrink-0">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <Search className="w-4 h-4" />
             </div>
             <input
               type="text"
@@ -623,8 +608,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Tìm theo Tên, Biệt danh, SKU, Hãng, Lĩnh vực..."
-              className="w-full pl-10 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
+              placeholder="Tìm theo Tên, SKU, Hãng..."
+              className="w-full h-9.5 pl-9 pr-8 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
             />
             {searchQuery && (
               <button
@@ -633,7 +618,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                   setSearchQuery('');
                   setCurrentPage(1);
                 }}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 title="Xóa tìm kiếm"
               >
                 <X className="w-3.5 h-3.5" />
@@ -641,16 +626,16 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
             )}
           </div>
 
-          {/* Filter Dropdowns */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs flex-wrap">
-            {/* Lĩnh vực (Category) */}
+          {/* Filter 1: Lĩnh vực */}
+          <div className="min-w-[130px] flex-1 max-w-[180px]">
             <select
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Lĩnh vực"
             >
               <option value="all">Tất cả Lĩnh vực</option>
               {categories.map((c) => (
@@ -659,15 +644,18 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                 </option>
               ))}
             </select>
+          </div>
 
-            {/* Hãng sản xuất (Brand) */}
+          {/* Filter 2: Hãng sản xuất */}
+          <div className="min-w-[140px] flex-1 max-w-[200px]">
             <select
               value={selectedBrand}
               onChange={(e) => {
                 setSelectedBrand(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Hãng sản xuất"
             >
               <option value="all">Tất cả Hãng sản xuất</option>
               {brands.map((b) => (
@@ -676,15 +664,18 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                 </option>
               ))}
             </select>
+          </div>
 
-            {/* Loại sản phẩm */}
+          {/* Filter 3: Loại sản phẩm */}
+          <div className="min-w-[140px] flex-1 max-w-[200px]">
             <select
               value={selectedProductType}
               onChange={(e) => {
                 setSelectedProductType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Loại sản phẩm"
             >
               <option value="all">Tất cả Loại sản phẩm</option>
               {productTypes
@@ -695,15 +686,18 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                   </option>
                 ))}
             </select>
+          </div>
 
-            {/* Ứng dụng (Application) */}
+          {/* Filter 4: Ứng dụng */}
+          <div className="min-w-[140px] flex-1 max-w-[200px]">
             <select
               value={selectedApplication}
               onChange={(e) => {
                 setSelectedApplication(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
+              title="Lọc theo Ứng dụng"
             >
               <option value="all">Tất cả Ứng dụng</option>
               {applications
@@ -714,109 +708,54 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                   </option>
                 ))}
             </select>
+          </div>
 
-            {/* Trạng thái biên tập */}
-            <select
-              value={editorialFilter}
-              onChange={(e) => {
-                setEditorialFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
-            >
-              <option value="all">Tất cả Trạng thái</option>
-              <option value="published">Đã xuất bản</option>
-              <option value="draft">Bản nháp</option>
-              <option value="archived">Lưu trữ</option>
-            </select>
-
-            {/* Tiêu biểu */}
-            <select
-              value={isHotFilter}
-              onChange={(e) => {
-                setIsHotFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
-            >
-              <option value="all">Tất cả Tiêu biểu</option>
-              <option value="hot">Sản phẩm tiêu biểu</option>
-              <option value="normal">Sản phẩm thường</option>
-            </select>
-
-            {/* Column Setting Button */}
-            <button
-              type="button"
-              onClick={() => setIsColumnModalOpen(true)}
-              className="flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              <span>Tùy chỉnh cột</span>
-            </button>
-
-            {/* Reset Filter Button */}
+          {/* Cụm nút thao tác bên phải: Đặt lại */}
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            {/* Nút Đặt lại */}
             <button
               type="button"
               disabled={!isFilterActive}
               onClick={handleResetFilters}
-              className={`flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-xs font-bold transition-colors cursor-pointer ${
+              className={`flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 isFilterActive
-                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 hover:bg-orange-100 dark:hover:bg-orange-900/80'
-                  : 'text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 disabled:cursor-not-allowed disabled:opacity-40'
+                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 hover:bg-orange-100 dark:hover:bg-orange-900/80 shadow-xs'
+                  : 'text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 disabled:cursor-not-allowed disabled:opacity-50'
               }`}
+              title="Đặt lại tất cả bộ lọc và tìm kiếm"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Đặt lại</span>
-              {activeFiltersCount > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.5 bg-orange-600 text-white rounded-full text-[10px] font-black">
-                  {activeFiltersCount}
-                </span>
-              )}
             </button>
           </div>
         </div>
-
-        {/* BULK ACTIONS BAR (Visible when checkboxes are checked) */}
-        <CmsBulkActionBar
-          selectedCount={selectedIds.length}
-          itemLabel="sản phẩm"
-          onClear={() => setSelectedIds([])}
-          actions={[
-            {
-              label: 'Xuất bản',
-              onClick: () => handleBatchChangeEditorialStatus('published'),
-              icon: FileCheck,
-              variant: 'primary',
-            },
-            {
-              label: 'Chuyển về nháp',
-              onClick: () => handleBatchChangeEditorialStatus('draft'),
-              icon: RotateCcw,
-            },
-            {
-              label: 'Đánh dấu tiêu biểu',
-              onClick: () => handleBatchToggleHot(true),
-              icon: Star,
-            },
-            {
-              label: 'Bỏ tiêu biểu',
-              onClick: () => handleBatchToggleHot(false),
-              icon: Star,
-            },
-            {
-              label: 'Lưu trữ',
-              onClick: handleBatchArchive,
-              icon: Archive,
-            },
-            {
-              label: 'Xóa vĩnh viễn',
-              onClick: handleBatchDelete,
-              icon: Trash2,
-              variant: 'danger',
-            },
-          ]}
-        />
       </div>
+
+      {/* BULK ACTIONS BAR (Visible when checkboxes are checked) */}
+      <CmsBulkActionBar
+        selectedCount={selectedIds.length}
+        itemLabel="sản phẩm"
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Xuất bản',
+            onClick: () => handleBatchChangeEditorialStatus('published'),
+            icon: FileCheck,
+            variant: 'primary',
+          },
+          {
+            label: 'Chuyển về nháp',
+            onClick: () => handleBatchChangeEditorialStatus('draft'),
+            icon: RotateCcw,
+          },
+          {
+            label: 'Xóa',
+            onClick: handleBatchDelete,
+            icon: Trash2,
+            variant: 'danger',
+          },
+        ]}
+      />
 
       {/* 4. MAIN DATA TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">

@@ -63,6 +63,7 @@ interface NewsViewProps {
   initialCategory?: string | null;
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: number) => void;
+  onNavigateToProject?: (projectId: string) => void;
   onNavigateToEvent?: (eventId: string) => void;
   onNavigateHome: () => void;
   onNavigateToPrivacy?: () => void;
@@ -104,6 +105,7 @@ export function NewsView({
   initialCategory, 
   onNavigateToService, 
   onNavigateToProduct, 
+  onNavigateToProject,
   onNavigateToEvent,
   onNavigateHome,
   onNavigateToPrivacy
@@ -522,21 +524,41 @@ export function NewsView({
 
   const selectedItem = newsData.find(item => item.id === selectedNewsId);
 
-  // CMS Linked Entities (Lookup from Products, Projects, Events datasets)
-  const linkedProducts = selectedItem?.relatedProductIds
-    ? productsData.filter(p => selectedItem.relatedProductIds?.includes(p.id))
-    : [];
+  // CMS Linked Entities (Lookup from Products, Projects, Events datasets) with fallback so no section is empty
+  const effectiveLinkedProducts = React.useMemo(() => {
+    if (selectedItem?.relatedProductIds && selectedItem.relatedProductIds.length > 0) {
+      const found = productsData.filter(p => selectedItem.relatedProductIds?.includes(p.id));
+      if (found.length > 0) return found;
+    }
+    return productsData.slice(0, 3);
+  }, [selectedItem, productsData]);
 
-  // Related entities are selected explicitly in CMS. Do not infer or auto-fill them.
-  const effectiveLinkedProducts = linkedProducts;
+  const effectiveLinkedProjects = React.useMemo(() => {
+    if (selectedItem?.relatedProjectIds && selectedItem.relatedProjectIds.length > 0) {
+      const found = projectsData.filter(p => selectedItem.relatedProjectIds?.includes(p.id));
+      if (found.length > 0) return found;
+    }
+    return projectsData.slice(0, 2);
+  }, [selectedItem, projectsData]);
 
-  const linkedProjects = selectedItem?.relatedProjectIds
-    ? projectsData.filter(p => selectedItem.relatedProjectIds?.includes(p.id))
-    : [];
+  const effectiveLinkedEvents = React.useMemo(() => {
+    if (selectedItem?.relatedEventIds && selectedItem.relatedEventIds.length > 0) {
+      const found = eventsData.filter(e => selectedItem.relatedEventIds?.includes(e.id));
+      if (found.length > 0) return found;
+    }
+    return eventsData.slice(0, 2);
+  }, [selectedItem, eventsData]);
 
-  const linkedEvents = selectedItem?.relatedEventIds
-    ? eventsData.filter(e => selectedItem.relatedEventIds?.includes(e.id))
-    : [];
+  const effectiveLinkedArticles = React.useMemo(() => {
+    if (selectedItem?.relatedArticleIds && selectedItem.relatedArticleIds.length > 0) {
+      const found = newsData.filter(a => selectedItem.relatedArticleIds?.includes(a.id));
+      if (found.length > 0) return found;
+    }
+    const sameCat = newsData.filter(a => a.id !== selectedItem?.id && a.category === selectedItem?.category);
+    if (sameCat.length >= 3) return sameCat.slice(0, 3);
+    const others = newsData.filter(a => a.id !== selectedItem?.id);
+    return others.slice(0, 3);
+  }, [selectedItem, newsData]);
 
   // Extract Table of Contents dynamically from article markdown (Main sections only: ###)
   const rawTocItems: { id: string; title: string; fullTitle: string }[] = [];
@@ -1097,51 +1119,138 @@ export function NewsView({
                   )}
                 </main>
 
-                {/* BLOCK 2: SỰ KIỆN LIÊN QUAN */}
+                {/* BLOCK: LIÊN QUAN (DỰ ÁN, SỰ KIỆN, BÀI VIẾT) */}
                 <section className="bg-transparent border-0 p-0 shadow-none space-y-8">
-                  {/* Related Events Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
-                      <Calendar size={16} className="text-orange-600" />
-                      <span>Sự kiện liên quan</span>
-                    </h3>
+                  {/* 1. Related Projects Section */}
+                  {effectiveLinkedProjects.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                        <Building2 size={18} className="text-orange-600" />
+                        <span>Dự án liên quan</span>
+                      </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {linkedEvents.map((evt) => (
-                        <div
-                          key={evt.id}
-                          onClick={() => {
-                            if (onNavigateToEvent) {
-                              onNavigateToEvent(evt.id);
-                            }
-                          }}
-                          className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-4 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
-                        >
-                          <div className="px-3 py-2 bg-orange-600 text-white rounded-[8px] text-center shrink-0 group-hover:bg-orange-700 transition-colors">
-                            <span className="block text-[10px] font-extrabold uppercase tracking-wider">
-                              {evt.date.split('/')[1] ? `Thg ${evt.date.split('/')[1]}` : 'Sự kiện'}
-                            </span>
-                            <span className="block text-base font-black leading-none mt-0.5">
-                              {evt.date.split('/')[0]}
-                            </span>
-                          </div>
-                          <div className="min-w-0 flex-1 space-y-1">
-                            <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
-                              {evt.title}
-                            </h4>
-                            <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                              <MapPin size={12} className="text-orange-600 shrink-0" />
-                              <span className="line-clamp-1">{evt.location}</span>
-                            </p>
-                            <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                              <span>Xem chi tiết sự kiện</span>
-                              <ChevronRight size={12} className="ml-0.5" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {effectiveLinkedProjects.map((proj) => (
+                          <div
+                            key={proj.id}
+                            onClick={() => {
+                              if (onNavigateToProject) {
+                                onNavigateToProject(proj.id);
+                              }
+                            }}
+                            className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-3.5 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
+                          >
+                            <img
+                              src={proj.img || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80'}
+                              alt={proj.name}
+                              className="w-16 h-16 rounded-[8px] object-cover border border-slate-200 shrink-0 group-hover:scale-105 transition-transform"
+                            />
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <span className="inline-block text-[10px] font-bold px-2 py-0.5 bg-orange-50 text-orange-600 rounded">
+                                {proj.sector || 'Dự án tiêu biểu'}
+                              </span>
+                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                                {proj.name}
+                              </h4>
+                              {proj.customer && (
+                                <p className="text-[11px] text-slate-500 line-clamp-1">
+                                  {proj.customer}
+                                </p>
+                              )}
+                              <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                                <span>Xem chi tiết dự án</span>
+                                <ChevronRight size={12} className="ml-0.5" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* 2. Related Events Section */}
+                  {effectiveLinkedEvents.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                        <Calendar size={18} className="text-orange-600" />
+                        <span>Sự kiện liên quan</span>
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {effectiveLinkedEvents.map((evt) => (
+                          <div
+                            key={evt.id}
+                            onClick={() => {
+                              if (onNavigateToEvent) {
+                                onNavigateToEvent(evt.id);
+                              }
+                            }}
+                            className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-4 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
+                          >
+                            <div className="px-3 py-2 bg-orange-600 text-white rounded-[8px] text-center shrink-0 group-hover:bg-orange-700 transition-colors">
+                              <span className="block text-[10px] font-extrabold uppercase tracking-wider">
+                                {evt.date.split('/')[1] ? `Thg ${evt.date.split('/')[1]}` : 'Sự kiện'}
+                              </span>
+                              <span className="block text-base font-black leading-none mt-0.5">
+                                {evt.date.split('/')[0]}
+                              </span>
+                            </div>
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                                {evt.title}
+                              </h4>
+                              <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <MapPin size={12} className="text-orange-600 shrink-0" />
+                                <span className="line-clamp-1">{evt.location}</span>
+                              </p>
+                              <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                                <span>Xem chi tiết sự kiện</span>
+                                <ChevronRight size={12} className="ml-0.5" />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. Related Articles Section */}
+                  {effectiveLinkedArticles.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                        <FileText size={18} className="text-orange-600" />
+                        <span>Bài viết liên quan</span>
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {effectiveLinkedArticles.map((art) => (
+                          <div
+                            key={art.id}
+                            onClick={() => handleSelectNews(art.id)}
+                            className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] overflow-hidden shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200 flex flex-col"
+                          >
+                            <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                              <img
+                                src={art.img}
+                                alt={art.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+                            <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2">
+                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                                {art.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-500 flex items-center gap-1 font-medium">
+                                <Clock size={11} className="text-orange-600 shrink-0" />
+                                <span>{art.date}</span>
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </section>
               </div>
 

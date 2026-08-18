@@ -2,6 +2,19 @@ import type { EventItem, Product } from '../../../shared/types';
 
 export interface NewsRelatedProject {
   id: string;
+  name: string;
+  tagline?: string;
+  shortDesc?: string;
+  sector?: string;
+  solution?: string;
+  customer?: string;
+  location?: string;
+  time?: string;
+  img?: string;
+  featured?: boolean;
+  scope?: string[];
+  appliedSolutions?: string[];
+  results?: string[];
 }
 
 export type PublicNewsCategory = 'company' | 'specialty' | 'recruitment' | 'promotion' | 'shareholder';

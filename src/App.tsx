@@ -347,6 +347,13 @@ export default function App() {
               setEventsResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            onNavigateToProject={(projectId) => {
+              setCurrentView('projects');
+              setActiveLink('Dự án');
+              setActiveProjectId(projectId);
+              setProjectsResetKey(prev => prev + 1);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             onNavigateToService={(serviceId) => {
               setCurrentView('services');
               setActiveLink('Dịch vụ');
