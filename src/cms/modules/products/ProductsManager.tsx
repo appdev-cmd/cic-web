@@ -3,34 +3,23 @@ import {
   Package,
   Plus,
   Search,
-  Filter,
   SlidersHorizontal,
-  RefreshCw,
-  Download,
   Trash2,
-  CheckSquare,
-  Square,
   CheckCircle2,
-  XCircle,
-  Clock,
-  AlertTriangle,
   Zap,
   Eye,
   History,
   Copy,
-  User,
   Star,
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  Layers,
-  Sparkles,
-  ArrowUpDown,
   Tag,
   ShieldCheck,
   Archive,
   FileCheck,
   RotateCcw,
+  Layers,
+  Edit,
+  ExternalLink,
+  X,
 } from 'lucide-react';
 import {
   ProductItem,
@@ -38,12 +27,12 @@ import {
   ProductBrand,
   ProductActivityLog,
   EditorialStatus,
-  CatalogStatus,
 } from './types';
+import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ProductsModuleData } from '../../data/CatalogDataSource';
 import { ProductsFormView } from './ProductsFormView';
-import { ColumnSettingModal, ColumnVisibility } from './ColumnSettingModal';
+import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ProductPreviewModal } from './ProductPreviewModal';
 import { ProductQuickEditModal } from './ProductQuickEditModal';
@@ -56,29 +45,52 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
-type SystemViewTab = 'all' | 'low_quality' | 'active' | 'archived';
+type SystemViewTab = 'all' | 'published' | 'draft' | 'is_hot' | 'archived';
 
 interface ProductsManagerProps {
   workspaceLocale: CmsLocale;
   data?: ProductsModuleData;
 }
 
-export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocale, data }) => {
+const removeVietnameseTones = (str: string = ''): string => {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase()
+    .trim();
+};
+
+export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
   // Main Products List State
-  const [products, setProducts] = useState<ProductItem[]>(() => (data?.products ?? []).map((item) => ({
-    ...item,
-    editorial_status: item.editorial_status === 'published' || item.editorial_status === 'archived' ? item.editorial_status : 'draft',
-  })));
+  const [products, setProducts] = useState<ProductItem[]>(() =>
+    (data?.products ?? []).map((item) => ({
+      ...item,
+      name: item.name || item.title || '',
+      code: item.code || item.sku || '',
+      price_old: item.price_old || item.price || '',
+      types: item.types || item.product_type || '',
+      manufactory: item.manufactory || item.brand_id || '',
+      category_ids: item.category_ids && item.category_ids.length > 0
+        ? item.category_ids
+        : item.category_id
+        ? [item.category_id]
+        : [],
+      application: item.application || item.application_areas || [],
+      editorial_status:
+        item.editorial_status === 'published' || item.editorial_status === 'archived'
+          ? item.editorial_status
+          : 'draft',
+    }))
+  );
   const [categories] = useState<ProductCategory[]>(data?.categories ?? []);
   const [brands] = useState<ProductBrand[]>(data?.brands ?? []);
-  const [applications] = useState(data?.applications ?? []);
-  const [productTypes] = useState(data?.productTypes ?? []);
+  const [applications] = useState<MasterApplicationItem[]>(data?.applications ?? []);
+  const [productTypes] = useState<MasterProductTypeItem[]>(data?.productTypes ?? []);
   const [owners] = useState(data?.owners ?? []);
   const [activityLogs] = useState<ProductActivityLog[]>(data?.activityLogs ?? []);
 
-  // Current User context (mock current logged in user)
-
-  // Navigation State: 'list' | 'create' | 'edit'
+  // Navigation State: 'list' | 'form'
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
   const [selectedProductForForm, setSelectedProductForForm] = useState<ProductItem | null>(null);
 
@@ -89,21 +101,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
+  const [selectedProductType, setSelectedProductType] = useState<string>('all');
+  const [selectedApplication, setSelectedApplication] = useState<string>('all');
   const [editorialFilter, setEditorialFilter] = useState<string>('all');
-  const [catalogFilter, setCatalogFilter] = useState<string>('all');
+  const [isHotFilter, setIsHotFilter] = useState<string>('all');
 
   // Table Density & Column Visibility
   const [density, setDensity] = useState<'normal' | 'compact'>('normal');
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
-    title: true,
-    sku: true,
-    category: true,
-    brand: true,
-    editorial_status: true,
-    catalog_status: true,
-    updated_time: true,
-    completeness: true,
-  });
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(defaultColumnVisibility);
 
   // Selected Checkboxes
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -128,44 +133,168 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
+  // Helper lookups
+  const getCategoryNames = (p: ProductItem): string[] => {
+    const ids = p.category_ids && p.category_ids.length > 0 ? p.category_ids : p.category_id ? [p.category_id] : [];
+    const matched = categories.filter((c) => ids.includes(c.id) || ids.includes(c.name));
+    if (matched.length > 0) return matched.map((c) => c.name);
+    if (ids.length > 0) return ids;
+    return ['Chưa phân loại'];
+  };
+
+  const getBrandName = (p: ProductItem): string => {
+    const brandId = p.manufactory || p.brand_id;
+    const found = brands.find((b) => b.id === brandId || b.name === brandId || b.name === p.brand_name);
+    return found ? found.name : p.brand_name || brandId || '—';
+  };
+
+  const getProductTypeName = (p: ProductItem): string => {
+    const typeId = p.types || p.product_type;
+    const found = productTypes.find((t) => t.id === typeId || t.name === typeId);
+    return found ? found.name : typeId || '—';
+  };
+
   // Filter Logic
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      // System View Tab
-      if (activeTab === 'low_quality' && p.completeness_score >= 75) return false;
-      if (activeTab === 'active' && p.catalog_status !== 'active') return false;
-      if (activeTab === 'archived' && p.editorial_status !== 'archived' && p.catalog_status !== 'archived') return false;
+      // 1. System View Tab
+      if (activeTab === 'published' && p.editorial_status !== 'published') return false;
+      if (activeTab === 'draft' && p.editorial_status !== 'draft') return false;
+      if (activeTab === 'is_hot' && !p.is_hot) return false;
+      if (activeTab === 'archived' && p.editorial_status !== 'archived') return false;
 
       // Exclude archived from 'all' tab unless explicitly chosen
-      if (activeTab === 'all' && (p.editorial_status === 'archived' || p.catalog_status === 'archived')) return false;
+      if (activeTab === 'all' && p.editorial_status === 'archived') return false;
 
-      // Search Query
+      // 2. Search Query (supports accented and unaccented search across all fields)
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchTitle = p.title.toLowerCase().includes(q);
-        const matchSku = p.sku.toLowerCase().includes(q);
-        const matchBrand = p.brand_name.toLowerCase().includes(q);
-        const matchDesc = p.short_description.toLowerCase().includes(q);
-        if (!matchTitle && !matchSku && !matchBrand && !matchDesc) return false;
+        const rawQ = searchQuery.toLowerCase().trim();
+        const normQ = removeVietnameseTones(searchQuery);
+
+        const catNames = getCategoryNames(p).join(' ');
+        const brandName = getBrandName(p);
+        const typeName = getProductTypeName(p);
+        const appNames = (p.application || p.application_areas || []).join(' ');
+        const tagNames = (p.tags || []).join(' ');
+
+        const searchableParts = [
+          p.name,
+          p.title,
+          p.code,
+          p.sku,
+          p.alias,
+          p.summary,
+          p.short_description,
+          p.description,
+          p.price,
+          p.price_old,
+          brandName,
+          typeName,
+          catNames,
+          appNames,
+          tagNames,
+        ];
+
+        const rawText = searchableParts.filter(Boolean).join(' ').toLowerCase();
+        const normText = removeVietnameseTones(rawText);
+
+        if (!rawText.includes(rawQ) && !normText.includes(normQ)) {
+          return false;
+        }
       }
 
-      // Dropdown Filters
-      if (selectedCategory !== 'all' && p.category_id !== selectedCategory) return false;
-      if (selectedBrand !== 'all' && p.brand_id !== selectedBrand) return false;
+      // 3. Category Filter
+      if (selectedCategory !== 'all') {
+        const pCatIds = [
+          ...(p.category_ids || []),
+          p.category_id,
+        ].filter(Boolean) as string[];
+
+        const targetCat = categories.find((c) => c.id === selectedCategory);
+        const targetCatNameNorm = targetCat ? removeVietnameseTones(targetCat.name) : '';
+
+        const hasCatMatch = pCatIds.some((catIdOrName) => {
+          if (catIdOrName === selectedCategory) return true;
+          if (targetCatNameNorm && removeVietnameseTones(catIdOrName).includes(targetCatNameNorm)) return true;
+          return false;
+        });
+
+        if (!hasCatMatch) return false;
+      }
+
+      // 4. Brand Filter
+      if (selectedBrand !== 'all') {
+        const targetBrand = brands.find((b) => b.id === selectedBrand);
+        const targetBrandNameNorm = targetBrand ? removeVietnameseTones(targetBrand.name) : '';
+
+        const pBrandId = p.manufactory || p.brand_id || '';
+        const pBrandNameNorm = removeVietnameseTones(p.brand_name || getBrandName(p));
+
+        const isBrandMatch =
+          pBrandId === selectedBrand ||
+          (targetBrandNameNorm && (pBrandNameNorm.includes(targetBrandNameNorm) || targetBrandNameNorm.includes(pBrandNameNorm)));
+
+        if (!isBrandMatch) return false;
+      }
+
+      // 5. Product Type Filter
+      if (selectedProductType !== 'all') {
+        const targetType = productTypes.find((t) => t.id === selectedProductType);
+        const targetTypeNameNorm = targetType ? removeVietnameseTones(targetType.name) : '';
+        const pTypeVal = p.types || p.product_type || '';
+        const pTypeValNorm = removeVietnameseTones(pTypeVal);
+
+        const isTypeMatch =
+          pTypeVal === selectedProductType ||
+          (targetType && pTypeVal === targetType.name) ||
+          (targetTypeNameNorm && pTypeValNorm && (pTypeValNorm.includes(targetTypeNameNorm) || targetTypeNameNorm.includes(pTypeValNorm)));
+
+        if (!isTypeMatch) return false;
+      }
+
+      // 6. Application Filter
+      if (selectedApplication !== 'all') {
+        const targetApp = applications.find((a) => a.id === selectedApplication);
+        const targetAppNameNorm = targetApp ? removeVietnameseTones(targetApp.name) : '';
+        const pAppsNorm = (p.application || p.application_areas || []).map((a) => removeVietnameseTones(a));
+
+        const isAppMatch =
+          (p.application || p.application_areas || []).includes(selectedApplication) ||
+          (targetAppNameNorm && pAppsNorm.some((a) => a.includes(targetAppNameNorm) || targetAppNameNorm.includes(a)));
+
+        if (!isAppMatch) return false;
+      }
+
+      // 7. Editorial Status Filter
       if (editorialFilter !== 'all' && p.editorial_status !== editorialFilter) return false;
-      if (catalogFilter !== 'all' && p.catalog_status !== catalogFilter) return false;
+
+      // 8. Hot Filter
+      if (isHotFilter === 'hot' && !p.is_hot) return false;
+      if (isHotFilter === 'normal' && p.is_hot) return false;
 
       return true;
     });
-  }, [products, activeTab, searchQuery, selectedCategory, selectedBrand, editorialFilter, catalogFilter]);
+  }, [
+    products,
+    activeTab,
+    searchQuery,
+    selectedCategory,
+    selectedBrand,
+    selectedProductType,
+    selectedApplication,
+    editorialFilter,
+    isHotFilter,
+    categories,
+    brands,
+    productTypes,
+    applications,
+  ]);
 
   // Paginated Products
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     return filteredProducts.slice(startIndex, startIndex + pageSize);
   }, [filteredProducts, currentPage, pageSize]);
-
-  const totalPages = Math.ceil(filteredProducts.length / pageSize) || 1;
 
   // Selection Checkbox Handlers
   const handleSelectAllOnPage = () => {
@@ -185,27 +314,25 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   // Bulk Actions
   const handleBatchChangeEditorialStatus = (status: EditorialStatus) => {
     setProducts((prev) =>
-      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, editorial_status: status } : p))
+      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, editorial_status: status, published: status === 'published' } : p))
     );
-    showToast(`Đã chuyển trạng thái biên tập sang "${status.toUpperCase()}" cho ${selectedIds.length} sản phẩm!`);
+    showToast(`Đã chuyển trạng thái sang "${status === 'published' ? 'Đã xuất bản' : status === 'draft' ? 'Bản nháp' : 'Lưu trữ'}" cho ${selectedIds.length} sản phẩm!`);
     setSelectedIds([]);
   };
 
-  const handleBatchChangeCatalogStatus = (status: CatalogStatus) => {
+  const handleBatchToggleHot = (isHot: boolean) => {
     setProducts((prev) =>
-      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, catalog_status: status } : p))
+      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, is_hot: isHot } : p))
     );
-    showToast(`Đã chuyển trạng thái kinh doanh sang "${status.toUpperCase()}" cho ${selectedIds.length} sản phẩm!`);
+    showToast(`Đã ${isHot ? 'đánh dấu tiêu biểu' : 'bỏ đánh dấu tiêu biểu'} cho ${selectedIds.length} sản phẩm!`);
     setSelectedIds([]);
   };
 
   const handleBatchArchive = () => {
     setProducts((prev) =>
-      prev.map((p) =>
-        selectedIds.includes(p.id) ? { ...p, editorial_status: 'archived', catalog_status: 'archived' } : p
-      )
+      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, editorial_status: 'archived', published: false } : p))
     );
-    showToast(`Đã lưu trữ ${selectedIds.length} sản phẩm!`);
+    showToast(`Đã chuyển ${selectedIds.length} sản phẩm vào lưu trữ!`);
     setSelectedIds([]);
   };
 
@@ -222,69 +349,112 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   ) => {
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const editorialStatus: EditorialStatus = actionType === 'publish' ? 'published' : 'draft';
+    const prodName = productData.name || productData.title || 'Sản phẩm mới';
+
     if (selectedProductForForm) {
       // Update
       setProducts((prev) =>
-        prev.map((p) => (p.id === selectedProductForForm.id ? {
-          ...p,
-          ...productData,
-          title: productData.name || productData.title || p.title,
-          short_description: productData.summary ?? productData.short_description ?? p.short_description,
-          content_html: productData.description ?? productData.content_html ?? p.content_html,
-          editorial_status: editorialStatus,
-          published: editorialStatus === 'published',
-          published_time: editorialStatus === 'published' ? p.published_time || now : undefined,
-          updated_time: now,
-        } : p))
+        prev.map((p) =>
+          p.id === selectedProductForForm.id
+            ? {
+                ...p,
+                ...productData,
+                name: prodName,
+                title: prodName,
+                code: productData.code || productData.sku || p.code || p.sku,
+                sku: productData.code || productData.sku || p.sku,
+                price_old: productData.price_old || productData.price || p.price_old || p.price,
+                price: productData.price_old || productData.price || p.price,
+                types: productData.types || productData.product_type || p.types || p.product_type,
+                product_type: productData.types || productData.product_type || p.product_type,
+                manufactory: productData.manufactory || productData.brand_id || p.manufactory || p.brand_id,
+                brand_id: productData.manufactory || productData.brand_id || p.brand_id,
+                category_ids: productData.category_ids || p.category_ids,
+                application: productData.application || productData.application_areas || p.application,
+                summary: productData.summary ?? productData.short_description ?? p.summary,
+                short_description: productData.summary ?? productData.short_description ?? p.short_description,
+                description: productData.description ?? productData.content_html ?? p.description,
+                content_html: productData.description ?? productData.content_html ?? p.content_html,
+                editorial_status: editorialStatus,
+                published: editorialStatus === 'published',
+                published_time: editorialStatus === 'published' ? p.published_time || now : undefined,
+                updated_time: now,
+              }
+            : p
+        )
       );
-      showToast(`Đã cập nhật sản phẩm "${productData.name || productData.title || selectedProductForForm.title}"!`);
+      showToast(`Đã cập nhật sản phẩm "${prodName}"!`);
     } else {
       // Create new
-      const title = productData.name || productData.title || '';
       const newProd: ProductItem = {
         id: `prod_${Date.now()}`,
+        name: prodName,
+        title: prodName,
+        code: productData.code || productData.sku || `SP-${Date.now()}`,
         sku: productData.code || productData.sku || `SP-${Date.now()}`,
-        title,
         alias: productData.alias || '',
-        short_description: productData.summary || productData.short_description || '',
-        product_type: productData.types || productData.product_type || '',
-        category_id: productData.category_ids?.[0] || productData.category_id || '',
+        other_languages1: productData.other_languages1 || '',
+        manufactory: productData.manufactory || productData.brand_id || '',
         brand_id: productData.manufactory || productData.brand_id || '',
-        brand_name: brands.find((brand) => brand.id === (productData.manufactory || productData.brand_id))?.name || '',
+        brand_name: brands.find((b) => b.id === (productData.manufactory || productData.brand_id))?.name || '',
+        types: productData.types || productData.product_type || '',
+        product_type: productData.types || productData.product_type || '',
+        category_ids: productData.category_ids || (productData.category_id ? [productData.category_id] : []),
+        category_id: productData.category_ids?.[0] || productData.category_id || '',
+        application: productData.application || productData.application_areas || [],
         application_areas: productData.application || productData.application_areas || [],
+        products_relates: productData.products_relates || [],
+        summary: productData.summary || productData.short_description || '',
+        short_description: productData.summary || productData.short_description || '',
+        description: productData.description || productData.content_html || '',
+        content_html: productData.description || productData.content_html || '',
+        feature_details: productData.feature_details || '',
+        video: productData.video || productData.video_url || '',
+        tawk_to: productData.tawk_to || '',
+        tags: productData.tags || [],
+        price_old: productData.price_old || productData.price || '',
         price: productData.price_old || productData.price || '',
         currency: productData.currency || 'VND',
         unit: productData.unit || '',
         origin: productData.origin || '',
         warranty: productData.warranty || '',
         availability_signal: productData.availability_signal || 'contact',
-        content_html: productData.description || productData.content_html || '',
-        highlights: productData.highlights || [],
-        tech_specs: productData.tech_specs || [],
         image: productData.image || '',
+        icon: productData.icon || '',
         gallery: productData.gallery || [],
         documents: productData.documents || [],
+        is_hot: productData.is_hot || false,
+        teamview: productData.teamview || false,
+        ordering: productData.ordering || 1,
+        landing_page: productData.landing_page || '',
+        seo_title: productData.seo_title || productData.meta_title || '',
         meta_title: productData.seo_title || productData.meta_title || '',
-        meta_description: productData.seo_description || productData.meta_description || '',
+        seo_keyword: productData.seo_keyword || productData.meta_keywords || '',
         meta_keywords: productData.seo_keyword || productData.meta_keywords || '',
+        seo_description: productData.seo_description || productData.meta_description || '',
+        meta_description: productData.seo_description || productData.meta_description || '',
         canonical_url: productData.canonical_url || '',
+        file_catalogue: productData.file_catalogue || '',
+        file_price: productData.file_price || '',
+        link_catalogue: productData.link_catalogue || '',
+        file_driver_name: productData.file_driver_name || '',
+        file_driver: productData.file_driver || '',
+        link_driver: productData.link_driver || '',
         owner_id: productData.owner_id || '',
         owner_name: productData.owner_name || '',
         inquiry_routing: productData.inquiry_routing || '',
         editorial_status: editorialStatus,
-        catalog_status: productData.catalog_status || 'inactive',
+        catalog_status: 'active',
         published: editorialStatus === 'published',
-        is_hot: productData.is_hot || false,
-        ordering: productData.ordering || 1,
-        site_placement: productData.site_placement || ['catalog_grid'],
-        completeness_score: productData.completeness_score || 0,
+        site_placement: ['catalog_grid'],
+        completeness_score: 85,
         created_time: now,
         updated_time: now,
         published_time: editorialStatus === 'published' ? now : undefined,
         ...productData,
       };
       setProducts((prev) => [newProd, ...prev]);
-      showToast(`Đã tạo mới sản phẩm "${title}"!`);
+      showToast(`Đã tạo mới sản phẩm "${prodName}"!`);
     }
     setViewMode('list');
     setSelectedProductForForm(null);
@@ -294,24 +464,47 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
   const handleConfirmDuplicate = (config: DuplicateConfig) => {
     if (!productToDuplicate) return;
 
+    const sourceName = productToDuplicate.name || productToDuplicate.title;
     const newProd: ProductItem = {
       ...productToDuplicate,
       id: `prod_${Date.now()}`,
-      sku: `${productToDuplicate.sku}${config.newSkuSuffix}`,
-      title: `${productToDuplicate.title} (Copy)`,
+      name: `${sourceName} (Bản sao)`,
+      title: `${sourceName} (Bản sao)`,
+      code: `${productToDuplicate.code || productToDuplicate.sku}${config.newSkuSuffix}`,
+      sku: `${productToDuplicate.sku || productToDuplicate.code}${config.newSkuSuffix}`,
       alias: `${productToDuplicate.alias}-copy`,
       editorial_status: 'draft',
-      catalog_status: 'inactive',
       published: false,
-      working_version_id: undefined,
-      has_working_draft: false,
       created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
       updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
 
     setProducts((prev) => [newProd, ...prev]);
-    showToast(`Đã nhân bản sản phẩm mới thành công! Mã SKU: ${newProd.sku}`);
+    showToast(`Đã nhân bản sản phẩm mới thành công!`);
     setProductToDuplicate(null);
+  };
+
+  const activeFiltersCount = [
+    searchQuery.trim() !== '',
+    selectedCategory !== 'all',
+    selectedBrand !== 'all',
+    selectedProductType !== 'all',
+    selectedApplication !== 'all',
+    editorialFilter !== 'all',
+    isHotFilter !== 'all',
+  ].filter(Boolean).length;
+
+  const isFilterActive = activeFiltersCount > 0;
+
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setSelectedBrand('all');
+    setSelectedProductType('all');
+    setSelectedApplication('all');
+    setEditorialFilter('all');
+    setIsHotFilter('all');
+    setCurrentPage(1);
   };
 
   // If in Form View
@@ -348,7 +541,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-4">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -357,9 +550,13 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
       <CmsPageHeader
         icon={<Package />}
         title="Sản phẩm"
-        description="Quản lý thông tin, phân loại, giá bán, trạng thái xuất bản và chất lượng dữ liệu sản phẩm."
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{products.filter((product) => product.editorial_status !== 'archived').length} sản phẩm</span>}
-        actions={(
+        description="Quản lý danh mục sản phẩm, cấu hình giá, phân loại theo hãng, lĩnh vực, ứng dụng và trạng thái xuất bản."
+        meta={
+          <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
+            {products.filter((product) => product.editorial_status !== 'archived').length} sản phẩm
+          </span>
+        }
+        actions={
           <CmsButton
             onClick={() => {
               setSelectedProductForForm(null);
@@ -371,21 +568,43 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
           >
             Thêm sản phẩm
           </CmsButton>
-        )}
+        }
       />
 
+      {/* 2. TABS */}
       <CmsTabs
-        ariaLabel="Nhóm sản phẩm"
+        ariaLabel="Trạng thái sản phẩm"
         value={activeTab}
         onChange={(tab) => {
-          setActiveTab(tab);
+          setActiveTab(tab as SystemViewTab);
           setCurrentPage(1);
         }}
         items={[
-          { id: 'all', label: 'Tất cả sản phẩm', count: products.filter((p) => p.editorial_status !== 'archived').length },
-          { id: 'low_quality', label: 'Chất lượng dưới 75%', count: products.filter((p) => p.completeness_score < 75).length },
-          { id: 'active', label: 'Đang kinh doanh', count: products.filter((p) => p.catalog_status === 'active').length },
-          { id: 'archived', label: 'Lưu trữ và thùng rác', count: products.filter((p) => p.editorial_status === 'archived' || p.catalog_status === 'archived').length },
+          {
+            id: 'all',
+            label: 'Tất cả sản phẩm',
+            count: products.filter((p) => p.editorial_status !== 'archived').length,
+          },
+          {
+            id: 'published',
+            label: 'Đã xuất bản',
+            count: products.filter((p) => p.editorial_status === 'published').length,
+          },
+          {
+            id: 'draft',
+            label: 'Bản nháp',
+            count: products.filter((p) => p.editorial_status === 'draft').length,
+          },
+          {
+            id: 'is_hot',
+            label: 'Sản phẩm tiêu biểu',
+            count: products.filter((p) => p.is_hot && p.editorial_status !== 'archived').length,
+          },
+          {
+            id: 'archived',
+            label: 'Lưu trữ & Thùng rác',
+            count: products.filter((p) => p.editorial_status === 'archived').length,
+          },
         ]}
       />
 
@@ -404,14 +623,27 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Tìm theo Tên sản phẩm, SKU, Hãng..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
+              placeholder="Tìm theo Tên, Biệt danh, SKU, Hãng, Lĩnh vực..."
+              className="w-full pl-10 pr-9 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setCurrentPage(1);
+                }}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title="Xóa tìm kiếm"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Filter Dropdowns */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-            {/* Category */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs flex-wrap">
+            {/* Lĩnh vực (Category) */}
             <select
               value={selectedCategory}
               onChange={(e) => {
@@ -420,13 +652,15 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
               }}
               className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
-              <option value="all">Tất cả Danh mục</option>
+              <option value="all">Tất cả Lĩnh vực</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
               ))}
             </select>
 
-            {/* Brand */}
+            {/* Hãng sản xuất (Brand) */}
             <select
               value={selectedBrand}
               onChange={(e) => {
@@ -437,11 +671,51 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
             >
               <option value="all">Tất cả Hãng sản xuất</option>
               {brands.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
               ))}
             </select>
 
-            {/* Editorial Status */}
+            {/* Loại sản phẩm */}
+            <select
+              value={selectedProductType}
+              onChange={(e) => {
+                setSelectedProductType(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+            >
+              <option value="all">Tất cả Loại sản phẩm</option>
+              {productTypes
+                .filter((t) => t.status === 'active')
+                .map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+            </select>
+
+            {/* Ứng dụng (Application) */}
+            <select
+              value={selectedApplication}
+              onChange={(e) => {
+                setSelectedApplication(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+            >
+              <option value="all">Tất cả Ứng dụng</option>
+              {applications
+                .filter((a) => a.status === 'active')
+                .map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+            </select>
+
+            {/* Trạng thái biên tập */}
             <select
               value={editorialFilter}
               onChange={(e) => {
@@ -450,13 +724,55 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
               }}
               className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
-              <option value="all">Tất cả Biên tập</option>
+              <option value="all">Tất cả Trạng thái</option>
+              <option value="published">Đã xuất bản</option>
               <option value="draft">Bản nháp</option>
-              <option value="published">Đã xuất bản (Published)</option>
+              <option value="archived">Lưu trữ</option>
+            </select>
+
+            {/* Tiêu biểu */}
+            <select
+              value={isHotFilter}
+              onChange={(e) => {
+                setIsHotFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+            >
+              <option value="all">Tất cả Tiêu biểu</option>
+              <option value="hot">Sản phẩm tiêu biểu</option>
+              <option value="normal">Sản phẩm thường</option>
             </select>
 
             {/* Column Setting Button */}
-            <button type="button" disabled={!searchQuery && selectedCategory === 'all' && selectedBrand === 'all' && editorialFilter === 'all' && catalogFilter === 'all'} onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedBrand('all'); setEditorialFilter('all'); setCatalogFilter('all'); setCurrentPage(1); }} className="ml-auto flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+            <button
+              type="button"
+              onClick={() => setIsColumnModalOpen(true)}
+              className="flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              <span>Tùy chỉnh cột</span>
+            </button>
+
+            {/* Reset Filter Button */}
+            <button
+              type="button"
+              disabled={!isFilterActive}
+              onClick={handleResetFilters}
+              className={`flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-xs font-bold transition-colors cursor-pointer ${
+                isFilterActive
+                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 hover:bg-orange-100 dark:hover:bg-orange-900/80'
+                  : 'text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 disabled:cursor-not-allowed disabled:opacity-40'
+              }`}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Đặt lại</span>
+              {activeFiltersCount > 0 && (
+                <span className="ml-0.5 px-1.5 py-0.5 bg-orange-600 text-white rounded-full text-[10px] font-black">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -466,10 +782,38 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
           itemLabel="sản phẩm"
           onClear={() => setSelectedIds([])}
           actions={[
-            { label: 'Xuất bản', onClick: () => handleBatchChangeEditorialStatus('published'), icon: FileCheck, variant: 'primary' },
-            { label: 'Đưa vào kinh doanh', onClick: () => handleBatchChangeCatalogStatus('active'), icon: Package },
-            { label: 'Lưu trữ', onClick: handleBatchArchive, icon: Archive },
-            { label: 'Xóa', onClick: handleBatchDelete, icon: Trash2, variant: 'danger' },
+            {
+              label: 'Xuất bản',
+              onClick: () => handleBatchChangeEditorialStatus('published'),
+              icon: FileCheck,
+              variant: 'primary',
+            },
+            {
+              label: 'Chuyển về nháp',
+              onClick: () => handleBatchChangeEditorialStatus('draft'),
+              icon: RotateCcw,
+            },
+            {
+              label: 'Đánh dấu tiêu biểu',
+              onClick: () => handleBatchToggleHot(true),
+              icon: Star,
+            },
+            {
+              label: 'Bỏ tiêu biểu',
+              onClick: () => handleBatchToggleHot(false),
+              icon: Star,
+            },
+            {
+              label: 'Lưu trữ',
+              onClick: handleBatchArchive,
+              icon: Archive,
+            },
+            {
+              label: 'Xóa vĩnh viễn',
+              onClick: handleBatchDelete,
+              icon: Trash2,
+              variant: 'danger',
+            },
           ]}
         />
       </div>
@@ -477,41 +821,66 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
       {/* 4. MAIN DATA TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="cms-data-table text-left">
+          <table className="cms-data-table text-left w-full">
             <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
               <tr>
                 {/* Checkbox Sticky Left */}
                 <th className="py-3 px-3 w-10 sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
                   <CmsSelectionCheckbox
-                    checked={paginatedProducts.length > 0 && paginatedProducts.every((product) => selectedIds.includes(product.id))}
-                    indeterminate={selectedIds.some((id) => paginatedProducts.some((product) => product.id === id)) && !paginatedProducts.every((product) => selectedIds.includes(product.id))}
+                    checked={
+                      paginatedProducts.length > 0 &&
+                      paginatedProducts.every((product) => selectedIds.includes(product.id))
+                    }
+                    indeterminate={
+                      selectedIds.some((id) => paginatedProducts.some((product) => product.id === id)) &&
+                      !paginatedProducts.every((product) => selectedIds.includes(product.id))
+                    }
                     onChange={handleSelectAllOnPage}
                     label="Chọn tất cả sản phẩm trên trang"
                   />
                 </th>
 
-                {/* Title & Identity (Sticky Left) */}
-                <th className="py-3 px-4 min-w-[280px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                  Sản phẩm & Mã SKU
-                </th>
+                {/* Tên sản phẩm & Nhận diện (Sticky Left) */}
+                {columnVisibility.product && (
+                  <th className="py-3 px-4 min-w-[280px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
+                    Sản phẩm
+                  </th>
+                )}
 
-                {/* Category */}
-                {columnVisibility.category && <th className="py-3 px-4 min-w-[160px]">Danh mục</th>}
+                {/* Biệt danh / Mã */}
+                {columnVisibility.code && <th className="py-3 px-4 min-w-[130px]">Biệt danh</th>}
 
-                {/* Brand */}
+                {/* Lĩnh vực */}
+                {columnVisibility.category && <th className="py-3 px-4 min-w-[160px]">Lĩnh vực</th>}
+
+                {/* Hãng sản xuất */}
                 {columnVisibility.brand && <th className="py-3 px-4 min-w-[150px]">Hãng sản xuất</th>}
 
-                {/* Completeness */}
-                {columnVisibility.completeness && <th className="py-3 px-4 min-w-[120px]">Chất lượng (%)</th>}
+                {/* Loại sản phẩm */}
+                {columnVisibility.product_type && <th className="py-3 px-4 min-w-[140px]">Loại sản phẩm</th>}
 
-                {/* Editorial Status */}
-                {columnVisibility.editorial_status && <th className="py-3 px-4 min-w-[140px]">Biên tập</th>}
+                {/* Ứng dụng */}
+                {columnVisibility.application && <th className="py-3 px-4 min-w-[160px]">Ứng dụng</th>}
 
-                {/* Catalog Status */}
-                {columnVisibility.catalog_status && <th className="py-3 px-4 min-w-[140px]">Kinh doanh</th>}
+                {/* Giá */}
+                {columnVisibility.price && <th className="py-3 px-4 min-w-[120px]">Giá</th>}
 
-                {/* Updated Time */}
-                {columnVisibility.updated_time && <th className="py-3 px-4 min-w-[140px]">Cập nhật</th>}
+                {/* Thứ tự */}
+                {columnVisibility.ordering && <th className="py-3 px-3 min-w-[80px] text-center">Thứ tự</th>}
+
+                {/* Sản phẩm tiêu biểu */}
+                {columnVisibility.is_hot && <th className="py-3 px-3 min-w-[100px] text-center">Tiêu biểu</th>}
+
+                {/* Link TeamViewer */}
+                {columnVisibility.teamview && <th className="py-3 px-3 min-w-[110px] text-center">TeamViewer</th>}
+
+                {/* Trạng thái */}
+                {columnVisibility.editorial_status && (
+                  <th className="py-3 px-4 min-w-[120px] text-center">Trạng thái</th>
+                )}
+
+                {/* Thời gian cập nhật */}
+                {columnVisibility.updated_time && <th className="py-3 px-4 min-w-[130px]">Cập nhật</th>}
 
                 {/* Actions (Sticky Right) */}
                 <th className="py-3 px-4 w-28 text-center sticky right-0 z-20 bg-slate-50 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-800">
@@ -524,7 +893,13 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
               {paginatedProducts.length > 0 ? (
                 paginatedProducts.map((p) => {
                   const isSelected = selectedIds.includes(p.id);
-                  const catName = categories.find((c) => c.id === p.category_id)?.name || 'Chưa phân loại';
+                  const prodName = p.name || p.title || 'Chưa đặt tên';
+                  const prodCode = p.code || p.sku || '—';
+                  const prodPrice = p.price_old || p.price || 'Báo giá';
+                  const catNames = getCategoryNames(p);
+                  const brandName = getBrandName(p);
+                  const typeName = getProductTypeName(p);
+                  const apps = p.application || p.application_areas || [];
 
                   return (
                     <tr
@@ -535,109 +910,171 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                     >
                       {/* Checkbox Sticky Left */}
                       <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
-                        <CmsSelectionCheckbox checked={isSelected} onChange={() => handleToggleSelect(p.id)} label={`Chọn sản phẩm ${p.title}`} />
+                        <CmsSelectionCheckbox
+                          checked={isSelected}
+                          onChange={() => handleToggleSelect(p.id)}
+                          label={`Chọn sản phẩm ${prodName}`}
+                        />
                       </td>
 
-                      {/* Product Identity */}
-                      <td className="py-3 px-4 sticky left-10 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={p.image}
-                            alt=""
-                            className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0"
-                          />
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-slate-900 dark:text-white hover:text-orange-600 cursor-pointer line-clamp-1" onClick={() => { setSelectedProductForForm(p); setViewMode('form'); }}>
-                                {p.title}
-                              </span>
+                      {/* Product Identity (Tên & Ảnh & Hot) */}
+                      {columnVisibility.product && (
+                        <td className="py-3 px-4 sticky left-10 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-3">
+                            {p.image ? (
+                              <img
+                                src={p.image}
+                                alt=""
+                                className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 bg-slate-100 dark:bg-slate-800"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 flex items-center justify-center shrink-0">
+                                <Package className="w-5 h-5" />
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedProductForForm(p);
+                                  setViewMode('form');
+                                }}
+                                className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer text-left line-clamp-1"
+                              >
+                                {prodName}
+                              </button>
                               {p.is_hot && (
-                                <span className="px-1.5 py-0.2 bg-amber-500/10 text-amber-600 text-[9px] font-black rounded border border-amber-500/20">
+                                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black rounded border border-amber-500/20 shrink-0">
                                   HOT
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                              <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
-                                SKU: {p.sku}
-                              </span>
-                              <span>•</span>
-                              <span className="text-orange-600 font-bold">{p.price}</span>
-                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
+                      )}
 
-                      {/* Category */}
+                      {/* Biệt danh / Mã */}
+                      {columnVisibility.code && (
+                        <td className="py-3 px-4 font-mono font-bold text-xs text-slate-700 dark:text-slate-300">
+                          {prodCode}
+                        </td>
+                      )}
+
+                      {/* Lĩnh vực */}
                       {columnVisibility.category && (
                         <td className="py-3 px-4">
-                          <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] rounded-lg">
-                            {catName}
-                          </span>
-                        </td>
-                      )}
-
-                      {/* Brand */}
-                      {columnVisibility.brand && (
-                        <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
-                          {p.brand_name}
-                        </td>
-                      )}
-
-                      {/* Completeness */}
-                      {columnVisibility.completeness && (
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-12 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full ${
-                                  p.completeness_score >= 80 ? 'bg-emerald-500' : 'bg-amber-500'
-                                }`}
-                                style={{ width: `${p.completeness_score}%` }}
-                              />
-                            </div>
-                            <span className="font-bold font-mono text-[11px] text-slate-700 dark:text-slate-300">
-                              {p.completeness_score}%
-                            </span>
+                          <div className="flex flex-wrap gap-1">
+                            {catNames.map((cat, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px] rounded-lg"
+                              >
+                                {cat}
+                              </span>
+                            ))}
                           </div>
                         </td>
                       )}
 
-                      {/* Editorial Status */}
-                      {columnVisibility.editorial_status && (
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-2.5 py-1 text-[10px] font-bold rounded-full border uppercase tracking-wider ${
-                              p.editorial_status === 'published'
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : p.editorial_status === 'draft'
-                                ? 'bg-slate-500/10 text-slate-600 border-slate-500/20'
-                                : 'bg-red-500/10 text-red-600 border-red-500/20'
-                            }`}
-                          >
-                            {p.editorial_status}
-                          </span>
+                      {/* Hãng sản xuất */}
+                      {columnVisibility.brand && (
+                        <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200 text-xs">
+                          {brandName}
                         </td>
                       )}
 
-                      {/* Catalog Status */}
-                      {columnVisibility.catalog_status && (
+                      {/* Loại sản phẩm */}
+                      {columnVisibility.product_type && (
+                        <td className="py-3 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          {typeName}
+                        </td>
+                      )}
+
+                      {/* Ứng dụng */}
+                      {columnVisibility.application && (
                         <td className="py-3 px-4">
+                          {apps.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {apps.map((app, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-[10px] font-medium rounded"
+                                >
+                                  {app}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs">—</span>
+                          )}
+                        </td>
+                      )}
+
+                      {/* Giá */}
+                      {columnVisibility.price && (
+                        <td className="py-3 px-4 font-bold text-xs text-orange-600 dark:text-orange-400">
+                          {prodPrice}
+                        </td>
+                      )}
+
+                      {/* Thứ tự */}
+                      {columnVisibility.ordering && (
+                        <td className="py-3 px-3 text-center font-mono font-bold text-xs text-slate-600 dark:text-slate-300">
+                          {p.ordering ?? 1}
+                        </td>
+                      )}
+
+                      {/* Tiêu biểu */}
+                      {columnVisibility.is_hot && (
+                        <td className="py-3 px-3 text-center">
+                          {p.is_hot ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                              <Star className="w-3 h-3 fill-amber-500" />
+                              Tiêu biểu
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">—</span>
+                          )}
+                        </td>
+                      )}
+
+                      {/* Link TeamViewer */}
+                      {columnVisibility.teamview && (
+                        <td className="py-3 px-3 text-center">
+                          {p.teamview ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Có
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-xs">—</span>
+                          )}
+                        </td>
+                      )}
+
+                      {/* Trạng thái */}
+                      {columnVisibility.editorial_status && (
+                        <td className="py-3 px-4 text-center">
                           <span
-                            className={`px-2.5 py-1 text-[10px] font-bold rounded-full border uppercase tracking-wider ${
-                              p.catalog_status === 'active'
-                                ? 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                                : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                            className={`px-2.5 py-1 text-[10px] font-bold rounded-full border tracking-wider ${
+                              p.editorial_status === 'published'
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                : p.editorial_status === 'draft'
+                                ? 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20'
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
                             }`}
                           >
-                            {p.catalog_status}
+                            {p.editorial_status === 'published'
+                              ? 'Đã xuất bản'
+                              : p.editorial_status === 'draft'
+                              ? 'Bản nháp'
+                              : 'Lưu trữ'}
                           </span>
                         </td>
                       )}
 
                       {/* Updated Time */}
                       {columnVisibility.updated_time && (
-                        <td className="py-3 px-4 font-mono text-[10px] text-slate-500">
+                        <td className="py-3 px-4 font-mono text-[10px] text-slate-500 dark:text-slate-400">
                           {p.updated_time}
                         </td>
                       )}
@@ -651,7 +1088,19 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                             icon={<Zap />}
                             size="sm"
                             aria-label="Sửa nhanh sản phẩm"
-                            title="Sửa nhanh thuộc tính"
+                            title="Sửa nhanh theo biểu mẫu"
+                          />
+
+                          {/* Edit Full */}
+                          <CmsIconButton
+                            onClick={() => {
+                              setSelectedProductForForm(p);
+                              setViewMode('form');
+                            }}
+                            icon={<Edit />}
+                            size="sm"
+                            aria-label="Chỉnh sửa chi tiết"
+                            title="Chỉnh sửa toàn bộ biểu mẫu"
                           />
 
                           {/* Preview */}
@@ -697,7 +1146,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
                 })
               ) : (
                 <tr>
-                  <td colSpan={12} className="py-12 text-center text-slate-400 text-xs italic">
+                  <td colSpan={14} className="py-12 text-center text-slate-400 text-xs italic">
                     Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
                   </td>
                 </tr>
@@ -707,7 +1156,17 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
         </div>
 
         {/* 5. PAGINATION FOOTER */}
-        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredProducts.length} itemLabel="sản phẩm" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
+        <CmsPagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalCount={filteredProducts.length}
+          itemLabel="sản phẩm"
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* AUXILIARY MODALS & DRAWERS */}
@@ -719,18 +1178,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
           setColumnVisibility((prev) => ({ ...prev, [colKey]: !prev[colKey] }))
         }
         onChangeDensity={setDensity}
-        onReset={() =>
-          setColumnVisibility({
-            title: true,
-            sku: true,
-            category: true,
-            brand: true,
-            editorial_status: true,
-            catalog_status: true,
-            updated_time: true,
-            completeness: true,
-          })
-        }
+        onReset={() => setColumnVisibility(defaultColumnVisibility)}
         onClose={() => setIsColumnModalOpen(false)}
       />
 
@@ -742,18 +1190,18 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
             setProducts((prev) =>
               prev.map((p) =>
                 p.id === productToDelete.id
-                  ? { ...p, editorial_status: 'archived', catalog_status: 'archived' }
+                  ? { ...p, editorial_status: 'archived', published: false }
                   : p
               )
             );
-            showToast(`Đã chuyển sản phẩm "${productToDelete.title}" sang trạng thái Lưu trữ.`);
+            showToast(`Đã chuyển sản phẩm "${productToDelete.name || productToDelete.title}" sang trạng thái Lưu trữ.`);
             setProductToDelete(null);
           }
         }}
         onConfirmPermanentDelete={() => {
           if (productToDelete) {
             setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
-            showToast(`Đã xóa vĩnh viễn sản phẩm "${productToDelete.title}".`);
+            showToast(`Đã xóa vĩnh viễn sản phẩm "${productToDelete.name || productToDelete.title}".`);
             setProductToDelete(null);
           }
         }}
@@ -772,12 +1220,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ workspaceLocal
         product={productToQuickEdit}
         categories={categories}
         brands={brands}
+        applications={applications}
+        productTypes={productTypes}
         onSave={(updatedFields) => {
           if (productToQuickEdit) {
             setProducts((prev) =>
               prev.map((p) => (p.id === productToQuickEdit.id ? { ...p, ...updatedFields } : p))
             );
-            showToast(`Đã cập nhật nhanh sản phẩm "${productToQuickEdit.title}".`);
+            showToast(`Đã cập nhật nhanh sản phẩm "${updatedFields.name || updatedFields.title || productToQuickEdit.title}".`);
             setProductToQuickEdit(null);
           }
         }}

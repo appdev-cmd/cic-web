@@ -392,20 +392,27 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="cms-data-table text-left">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                <th className="p-3 w-10 text-center">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+              <tr>
+                {/* Checkbox Sticky Left */}
+                <th className="py-3 px-3 w-10 sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800 text-center">
                   <CmsSelectionCheckbox checked={filteredUsers.length > 0 && selectedIds.length === filteredUsers.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredUsers.length} onChange={handleSelectAll} label="Chọn tất cả tài khoản" />
                 </th>
-                <th className="p-3 w-12 text-center">Avatar</th>
-                <th className="p-3">Tài khoản (Username)</th>
-                <th className="p-3">Họ và tên</th>
-                <th className="p-3">Vai trò (Role)</th>
-                <th className="p-3">Chi nhánh / Scope</th>
-                <th className="p-3 text-center">Trạng thái</th>
-                <th className="p-3 text-center">Trực tuyến</th>
-                <th className="p-3">Lần truy cập cuối</th>
-                <th className="p-3 text-right pr-5">Thao tác</th>
+                {/* Username Sticky Left */}
+                <th className="py-3 px-4 min-w-[200px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
+                  Tài khoản (Username)
+                </th>
+                <th className="py-3 px-3 w-14 text-center">Avatar</th>
+                <th className="py-3 px-4 min-w-[170px]">Họ và tên</th>
+                <th className="py-3 px-4 min-w-[150px]">Vai trò (Role)</th>
+                <th className="py-3 px-4 min-w-[160px]">Chi nhánh / Scope</th>
+                <th className="py-3 px-4 min-w-[120px] text-center">Trạng thái</th>
+                <th className="py-3 px-4 min-w-[100px] text-center">Trực tuyến</th>
+                <th className="py-3 px-4 min-w-[150px]">Lần truy cập cuối</th>
+                {/* Actions Sticky Right */}
+                <th className="py-3 px-4 w-36 text-center sticky right-0 z-20 bg-slate-50 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-800">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
@@ -422,32 +429,17 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                   return (
                     <tr
                       key={user.id}
-                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
+                      className={`group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
                         isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
                       }`}
                     >
-                      {/* Checkbox */}
-                      <td className="p-3 text-center">
+                      {/* Checkbox Sticky Left */}
+                      <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800/80 border-r border-slate-100 dark:border-slate-800 text-center">
                         <CmsSelectionCheckbox checked={isSelected} onChange={() => handleSelectOne(user.id)} label={`Chọn tài khoản ${user.username}`} />
                       </td>
 
-                      {/* Avatar */}
-                      <td className="p-3 text-center">
-                        {user.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user.username}
-                            className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 mx-auto"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center mx-auto">
-                            {user.username[0].toUpperCase()}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Username & Email */}
-                      <td className="p-3">
+                      {/* Username Sticky Left */}
+                      <td className="py-3 px-4 sticky left-10 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800/80 border-r border-slate-100 dark:border-slate-800">
                         <div className="font-mono font-bold text-slate-900 dark:text-white">
                           {user.username}
                         </div>
@@ -456,8 +448,23 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                         </div>
                       </td>
 
+                      {/* Avatar */}
+                      <td className="py-3 px-3 text-center">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.username}
+                            className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 mx-auto"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center mx-auto">
+                            {user.username[0]?.toUpperCase() || 'U'}
+                          </div>
+                        )}
+                      </td>
+
                       {/* Full Name & Phone */}
-                      <td className="p-3">
+                      <td className="py-3 px-4">
                         <div className="font-semibold text-slate-800 dark:text-slate-200">
                           {user.full_name || `${user.lname} ${user.fname}`.trim()}
                         </div>
@@ -467,14 +474,14 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                       </td>
 
                       {/* Role Badge */}
-                      <td className="p-3">
+                      <td className="py-3 px-4">
                         <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${userRoleObj?.badge_color || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                           {userRoleObj?.name || 'Chưa gán vai trò'}
                         </span>
                       </td>
 
                       {/* Agency & Category Scope count */}
-                      <td className="p-3">
+                      <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {user.agencies.map((aid) => {
                             const ag = data.agencies.find((a) => a.id === aid);
@@ -491,12 +498,12 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                       </td>
 
                       {/* Status */}
-                      <td className="p-3 text-center">
+                      <td className="py-3 px-4 text-center">
                         {renderStatusBadge(user.status)}
                       </td>
 
                       {/* Online Status */}
-                      <td className="p-3 text-center">
+                      <td className="py-3 px-4 text-center">
                         {user.isOnline ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -508,14 +515,14 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                       </td>
 
                       {/* Last visit */}
-                      <td className="p-3 text-slate-500 dark:text-slate-400 text-[11px] font-mono whitespace-nowrap">
+                      <td className="py-3 px-4 text-slate-500 dark:text-slate-400 text-[11px] font-mono whitespace-nowrap">
                         <div>{user.last_visit_time || 'Chưa truy cập'}</div>
                         <div className="text-[10px] text-slate-400">{user.nums_visit || 0} lượt ghé thăm</div>
                       </td>
 
-                      {/* Actions */}
-                      <td className="p-3 text-right pr-5 whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
+                      {/* Actions (Sticky Right) */}
+                      <td className="py-3 px-4 sticky right-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800/80 border-l border-slate-100 dark:border-slate-800 text-center">
+                        <div className="flex items-center justify-center gap-1">
                           {/* Edit button */}
                           <CmsIconButton
                             onClick={() => {

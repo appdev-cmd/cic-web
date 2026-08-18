@@ -7,7 +7,7 @@ import {
   Moon,
   ChevronDown,
   User,
-  Settings,
+  KeyRound,
   LogOut,
   Globe,
   Menu,
@@ -32,6 +32,9 @@ interface CmsHeaderProps {
   onQuickAction: (type: 'product' | 'news' | 'service' | 'event') => void;
   onToggleMobileSidebar: () => void;
   onSwitchToWebsite?: () => void;
+  onOpenMyAccount?: () => void;
+  onOpenChangePassword?: () => void;
+  onLogout?: () => void;
 }
 
 export const CmsHeader: React.FC<CmsHeaderProps> = ({
@@ -45,6 +48,9 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   onQuickAction,
   onToggleMobileSidebar,
   onSwitchToWebsite,
+  onOpenMyAccount,
+  onOpenChangePassword,
+  onLogout,
 }) => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -55,6 +61,21 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'superadmin':
+        return 'Quản trị viên cấp cao';
+      case 'admin':
+        return 'Quản trị viên';
+      case 'editor':
+        return 'Biên tập viên';
+      case 'viewer':
+        return 'Người xem';
+      default:
+        return 'Quản trị viên';
+    }
   };
 
   return (
@@ -277,84 +298,146 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         {/* Theme Toggle Light/Dark */}
         <button
           onClick={onToggleTheme}
-          className="hidden sm:inline-flex p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          title={isDarkMode ? 'Chuyển Chế độ Sáng' : 'Chuyển Chế độ Tối'}
+          className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          title={isDarkMode ? 'Chuyển sang Chế độ Sáng' : 'Chuyển sang Chế độ Tối'}
+          aria-label="Đổi chế độ sáng tối"
         >
           {isDarkMode ? (
-            <Sun className="w-4 h-4 text-amber-400" />
+            <Sun className="w-5 h-5 text-amber-400 animate-in spin-in-180 duration-200" />
           ) : (
-            <Moon className="w-4 h-4 text-slate-600" />
+            <Moon className="w-5 h-5 text-slate-600 hover:text-slate-900 duration-200" />
           )}
         </button>
 
         {/* User Menu Avatar */}
-        <div className="relative hidden sm:block">
+        <div className="relative">
           <button
             onClick={() => {
               setIsUserMenuOpen(!isUserMenuOpen);
               setIsQuickActionOpen(false);
               setIsNotifOpen(false);
             }}
-            className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+            aria-label="Menu tài khoản"
           >
-            <img
-              src={user.user_avatar}
-              alt={user.full_name}
-              className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700"
-            />
-            <span className="hidden xl:inline text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
-              {user.full_name}
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden xl:inline" />
+            <div className="relative">
+              <img
+                src={user.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                alt={user.full_name}
+                className="w-7.5 h-7.5 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+              />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
+            </div>
+            <div className="hidden xl:flex flex-col text-left">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[120px] truncate leading-tight">
+                {user.full_name}
+              </span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">
+                {getRoleDisplayName(user.role)}
+              </span>
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
           </button>
 
           {isUserMenuOpen && (
             <div
-              className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-2 z-50 text-xs"
+              className="absolute right-0 mt-2 w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/90 rounded-2xl shadow-2xl py-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150"
               onMouseLeave={() => setIsUserMenuOpen(false)}
             >
-              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700/80">
-                <p className="font-bold text-slate-900 dark:text-white truncate">
-                  {user.full_name}
-                </p>
-                <p className="text-slate-400 dark:text-slate-500 text-[11px] truncate">
-                  @{user.username} • {user.role}
-                </p>
+              {/* Header Info Block */}
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-start gap-3 bg-slate-50/50 dark:bg-slate-800/30 rounded-t-2xl">
+                <div className="relative shrink-0 mt-0.5">
+                  <img
+                    src={user.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                    alt={user.full_name}
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+                  />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-slate-900 dark:text-white text-sm truncate leading-snug">
+                    {user.full_name}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs truncate leading-snug">
+                    {user.email}
+                  </p>
+                  <div className="mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300 border border-orange-200 dark:border-orange-900/60">
+                      {getRoleDisplayName(user.role)}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="py-1">
+              {/* Account Actions Section */}
+              <div className="py-1.5 px-1.5 space-y-0.5">
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    if (onOpenMyAccount) onOpenMyAccount();
+                  }}
+                  className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl flex items-center gap-2.5 cursor-pointer font-medium transition-colors"
+                >
+                  <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  <span>Tài khoản của tôi</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    if (onOpenChangePassword) onOpenChangePassword();
+                  }}
+                  className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl flex items-center gap-2.5 cursor-pointer font-medium transition-colors"
+                >
+                  <KeyRound className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  <span>Đổi mật khẩu</span>
+                </button>
+                <button
+                  onClick={() => {
+                    onToggleTheme();
+                  }}
+                  className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl flex items-center justify-between cursor-pointer font-medium transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    {isDarkMode ? (
+                      <Sun className="w-4 h-4 text-amber-400" />
+                    ) : (
+                      <Moon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                    )}
+                    <span>{isDarkMode ? 'Giao diện sáng' : 'Giao diện tối'}</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+                    {isDarkMode ? 'Đang bật tối' : 'Đang bật sáng'}
+                  </span>
+                </button>
+              </div>
+
+              {/* View Website Section */}
+              <div className="py-1.5 px-1.5 border-t border-slate-100 dark:border-slate-800">
                 {onSwitchToWebsite && (
                   <button
                     onClick={() => {
-                      onSwitchToWebsite();
                       setIsUserMenuOpen(false);
+                      onSwitchToWebsite();
                     }}
-                    className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer font-medium text-orange-600 dark:text-orange-400"
+                    className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-600 dark:hover:text-orange-400 rounded-xl flex items-center justify-between cursor-pointer font-medium transition-colors group"
                   >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Xem Website Frontend</span>
+                    <div className="flex items-center gap-2.5">
+                      <ExternalLink className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors" />
+                      <span>Xem website</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 group-hover:text-orange-500">Mở</span>
                   </button>
                 )}
-                <button
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
-                >
-                  <User className="w-4 h-4 text-slate-400" />
-                  <span>Trang cá nhân Admin</span>
-                </button>
-                <button
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer"
-                >
-                  <Settings className="w-4 h-4 text-slate-400" />
-                  <span>Cấu hình tài khoản</span>
-                </button>
               </div>
 
-              <div className="pt-1 border-t border-slate-100 dark:border-slate-700/80">
+              {/* Logout Section */}
+              <div className="pt-1.5 pb-1 px-1.5 border-t border-slate-100 dark:border-slate-800">
                 <button
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="w-full px-3 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 cursor-pointer font-medium"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    if (onLogout) onLogout();
+                  }}
+                  className="w-full px-3 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl flex items-center gap-2.5 cursor-pointer font-medium transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Đăng xuất</span>

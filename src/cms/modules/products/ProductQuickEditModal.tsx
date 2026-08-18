@@ -1,292 +1,420 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, Save, X, RotateCcw, AlertCircle } from 'lucide-react';
-import { ProductItem, ProductCategory, ProductBrand, EditorialStatus, CatalogStatus, AvailabilitySignal } from './types';
+import { Zap, Save, X, RotateCcw, Sparkles } from 'lucide-react';
+import { ProductItem, ProductCategory, ProductBrand, EditorialStatus } from './types';
+import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
+import { SearchableSelect, SearchableMultiSelect } from '../../components/SearchableSelect';
 
 interface ProductQuickEditModalProps {
   isOpen: boolean;
   product: ProductItem | null;
   categories: ProductCategory[];
   brands: ProductBrand[];
+  applications: MasterApplicationItem[];
+  productTypes: MasterProductTypeItem[];
   onSave: (updatedFields: Partial<ProductItem>) => void;
   onClose: () => void;
 }
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+const inputClass =
+  'w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white';
+const labelClass = 'mb-1 block text-xs font-bold text-slate-700 dark:text-slate-300';
 
 export const ProductQuickEditModal: React.FC<ProductQuickEditModalProps> = ({
   isOpen,
   product,
   categories,
   brands,
+  applications: applicationOptions,
+  productTypes,
   onSave,
   onClose,
 }) => {
   if (!isOpen || !product) return null;
 
-  const [title, setTitle] = useState(product.title);
-  const [sku, setSku] = useState(product.sku);
-  const [categoryId, setCategoryId] = useState(product.category_id);
-  const [brandId, setBrandId] = useState(product.brand_id);
-  const [price, setPrice] = useState(product.price);
-  const [availabilitySignal, setAvailabilitySignal] = useState<AvailabilitySignal>(product.availability_signal || 'in_stock');
-  const [editorialStatus, setEditorialStatus] = useState<EditorialStatus>(product.editorial_status);
-  const [catalogStatus, setCatalogStatus] = useState<CatalogStatus>(product.catalog_status);
+  const [name, setName] = useState(product.name || product.title || '');
+  const [alias, setAlias] = useState(product.alias || '');
+  const [manualAlias, setManualAlias] = useState(false);
+  const [code, setCode] = useState(product.code || product.sku || '');
+  const [otherLanguages1, setOtherLanguages1] = useState(product.other_languages1 || '');
+  const [manufactory, setManufactory] = useState(product.manufactory || product.brand_id || '');
+  const [types, setTypes] = useState(product.types || product.product_type || '');
+  const [categoryIds, setCategoryIds] = useState<string[]>(
+    product.category_ids || (product.category_id ? [product.category_id] : [])
+  );
+  const [applications, setApplications] = useState<string[]>(
+    product.application || product.application_areas || []
+  );
+  const [priceOld, setPriceOld] = useState(product.price_old || product.price || '');
+  const [isHot, setIsHot] = useState(product.is_hot ?? false);
+  const [teamview, setTeamview] = useState(product.teamview ?? false);
   const [ordering, setOrdering] = useState(product.ordering || 1);
-  const [isHot, setIsHot] = useState(product.is_hot || false);
+  const [landingPage, setLandingPage] = useState(product.landing_page || '');
+  const [summary, setSummary] = useState(product.summary || product.short_description || '');
+  const [editorialStatus, setEditorialStatus] = useState<EditorialStatus>(
+    product.editorial_status === 'published' ? 'published' : 'draft'
+  );
 
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    setTitle(product.title);
-    setSku(product.sku);
-    setCategoryId(product.category_id);
-    setBrandId(product.brand_id);
-    setPrice(product.price);
-    setAvailabilitySignal(product.availability_signal || 'in_stock');
-    setEditorialStatus(product.editorial_status);
-    setCatalogStatus(product.catalog_status);
+    setName(product.name || product.title || '');
+    setAlias(product.alias || '');
+    setManualAlias(false);
+    setCode(product.code || product.sku || '');
+    setOtherLanguages1(product.other_languages1 || '');
+    setManufactory(product.manufactory || product.brand_id || '');
+    setTypes(product.types || product.product_type || '');
+    setCategoryIds(product.category_ids || (product.category_id ? [product.category_id] : []));
+    setApplications(product.application || product.application_areas || []);
+    setPriceOld(product.price_old || product.price || '');
+    setIsHot(product.is_hot ?? false);
+    setTeamview(product.teamview ?? false);
     setOrdering(product.ordering || 1);
-    setIsHot(product.is_hot || false);
+    setLandingPage(product.landing_page || '');
+    setSummary(product.summary || product.short_description || '');
+    setEditorialStatus(product.editorial_status === 'published' ? 'published' : 'draft');
     setIsDirty(false);
   }, [product]);
+
+  useEffect(() => {
+    if (!manualAlias && name) {
+      setAlias(slugify(name));
+    }
+  }, [name, manualAlias]);
 
   const handleFieldChange = () => {
     setIsDirty(true);
   };
 
   const handleReset = () => {
-    setTitle(product.title);
-    setSku(product.sku);
-    setCategoryId(product.category_id);
-    setBrandId(product.brand_id);
-    setPrice(product.price);
-    setAvailabilitySignal(product.availability_signal || 'in_stock');
-    setEditorialStatus(product.editorial_status);
-    setCatalogStatus(product.catalog_status);
+    setName(product.name || product.title || '');
+    setAlias(product.alias || '');
+    setManualAlias(false);
+    setCode(product.code || product.sku || '');
+    setOtherLanguages1(product.other_languages1 || '');
+    setManufactory(product.manufactory || product.brand_id || '');
+    setTypes(product.types || product.product_type || '');
+    setCategoryIds(product.category_ids || (product.category_id ? [product.category_id] : []));
+    setApplications(product.application || product.application_areas || []);
+    setPriceOld(product.price_old || product.price || '');
+    setIsHot(product.is_hot ?? false);
+    setTeamview(product.teamview ?? false);
     setOrdering(product.ordering || 1);
-    setIsHot(product.is_hot || false);
+    setLandingPage(product.landing_page || '');
+    setSummary(product.summary || product.short_description || '');
+    setEditorialStatus(product.editorial_status === 'published' ? 'published' : 'draft');
     setIsDirty(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedBrand = brands.find((b) => b.id === brandId);
+    if (!name.trim() || categoryIds.length === 0) {
+      alert('Vui lòng nhập tên sản phẩm và chọn ít nhất một lĩnh vực.');
+      return;
+    }
+
+    const selectedBrand = brands.find((b) => b.id === manufactory);
+
     onSave({
-      title,
-      sku,
-      category_id: categoryId,
-      brand_id: brandId,
+      name,
+      title: name,
+      alias: alias || slugify(name),
+      code,
+      sku: code || product.sku,
+      other_languages1: otherLanguages1,
+      manufactory,
+      brand_id: manufactory,
       brand_name: selectedBrand ? selectedBrand.name : product.brand_name,
-      price,
-      availability_signal: availabilitySignal,
-      editorial_status: editorialStatus,
-      catalog_status: catalogStatus,
-      published: editorialStatus === 'published',
-      ordering: Number(ordering),
+      types,
+      product_type: types,
+      category_ids: categoryIds,
+      category_id: categoryIds[0] || '',
+      application: applications,
+      application_areas: applications,
+      price_old: priceOld,
+      price: priceOld,
+      ordering: Number(ordering) || 1,
+      landing_page: landingPage,
       is_hot: isHot,
+      teamview,
+      editorial_status: editorialStatus,
+      published: editorialStatus === 'published',
+      summary,
+      short_description: summary,
+      updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/80">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-amber-500/10 text-amber-600 rounded-xl">
+            <div className="p-2 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
               <Zap className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                  Sửa nhanh thuộc tính Sản phẩm
+                  Sửa nhanh sản phẩm
                 </h3>
                 {isDirty && (
-                  <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 font-bold text-[10px] rounded-full border border-amber-500/20">
-                    Đã thay đổi chưa lưu
+                  <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[10px] rounded-full border border-amber-500/20">
+                    Đã thay đổi
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 truncate max-w-xs">{product.title}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-md">
+                Cập nhật nhanh các trường thông tin theo biểu mẫu sản phẩm CMS
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
+            aria-label="Đóng"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 text-xs">
-          {/* Title */}
+          {/* Tên sản phẩm */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Tên sản phẩm *
-            </label>
+            <label className={labelClass}>Tên sản phẩm *</label>
             <input
               type="text"
-              value={title}
+              value={name}
               onChange={(e) => {
-                setTitle(e.target.value);
+                setName(e.target.value);
                 handleFieldChange();
               }}
               required
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+              placeholder="Nhập tên sản phẩm..."
+              className={inputClass}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {/* SKU */}
+          {/* Alias & Biệt danh */}
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Mã SKU *
-              </label>
+              <label className={labelClass}>Alias</label>
               <input
                 type="text"
-                value={sku}
+                value={alias}
                 onChange={(e) => {
-                  setSku(e.target.value);
+                  setManualAlias(true);
+                  setAlias(e.target.value);
                   handleFieldChange();
                 }}
-                required
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono"
+                placeholder="alias-san-pham"
+                className={inputClass}
               />
             </div>
-
-            {/* Price */}
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Giá niêm yết / License
-              </label>
+              <label className={labelClass}>Biệt danh (Mã sản phẩm)</label>
               <input
                 type="text"
-                value={price}
+                value={code}
                 onChange={(e) => {
-                  setPrice(e.target.value);
+                  setCode(e.target.value);
                   handleFieldChange();
                 }}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+                placeholder="VD: SP-ETABS-2026..."
+                className={`${inputClass} font-mono`}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {/* Category */}
+          {/* Hãng sản xuất & Loại sản phẩm */}
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Danh mục
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) => {
-                  setCategoryId(e.target.value);
+              <label className={labelClass}>Hãng sản xuất</label>
+              <SearchableSelect
+                options={brands.map((b) => ({ id: b.id, label: b.name }))}
+                selectedId={manufactory}
+                onChange={(val) => {
+                  setManufactory(val);
                   handleFieldChange();
                 }}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+                placeholder="Chọn hãng sản xuất..."
+              />
             </div>
-
-            {/* Brand */}
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Hãng sản xuất
-              </label>
-              <select
-                value={brandId}
-                onChange={(e) => {
-                  setBrandId(e.target.value);
+              <label className={labelClass}>Loại sản phẩm</label>
+              <SearchableSelect
+                options={productTypes
+                  .filter((item) => item.status === 'active')
+                  .map((item) => ({ id: item.id, label: item.name }))}
+                selectedId={types}
+                onChange={(val) => {
+                  setTypes(val);
                   handleFieldChange();
                 }}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
-              >
-                {brands.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
+                placeholder="Chọn loại sản phẩm..."
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {/* Editorial Status */}
+          {/* Lĩnh vực (Category) */}
+          <div>
+            <label className={labelClass}>Lĩnh vực *</label>
+            <SearchableMultiSelect
+              options={categories.map((c) => ({ id: c.id, label: c.name }))}
+              selectedIds={categoryIds}
+              onChange={(vals) => {
+                setCategoryIds(vals);
+                handleFieldChange();
+              }}
+              placeholder="Chọn lĩnh vực chuyên ngành..."
+            />
+          </div>
+
+          {/* Ứng dụng */}
+          <div>
+            <label className={labelClass}>Ứng dụng</label>
+            <SearchableMultiSelect
+              options={applicationOptions
+                .filter((item) => item.status === 'active')
+                .map((item) => ({ id: item.id, label: item.name }))}
+              selectedIds={applications}
+              onChange={(vals) => {
+                setApplications(vals);
+                handleFieldChange();
+              }}
+              placeholder="Chọn lĩnh vực ứng dụng..."
+            />
+          </div>
+
+          {/* Giá & Landing page & URL ngôn ngữ khác */}
+          <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Trạng thái Biên tập
-              </label>
+              <label className={labelClass}>Giá</label>
+              <input
+                type="text"
+                value={priceOld}
+                onChange={(e) => {
+                  setPriceOld(e.target.value);
+                  handleFieldChange();
+                }}
+                placeholder="VD: Báo giá / 15.000.000 VNĐ..."
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Thứ tự</label>
+              <input
+                type="number"
+                min={1}
+                value={ordering}
+                onChange={(e) => {
+                  setOrdering(Number(e.target.value));
+                  handleFieldChange();
+                }}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Trạng thái</label>
               <select
                 value={editorialStatus}
                 onChange={(e) => {
                   setEditorialStatus(e.target.value as EditorialStatus);
                   handleFieldChange();
                 }}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer font-bold"
+                className={`${inputClass} cursor-pointer font-bold`}
               >
                 <option value="draft">Bản nháp</option>
-                <option value="published">Xuất bản (Published)</option>
-              </select>
-            </div>
-
-            {/* Catalog Status */}
-            <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Trạng thái Kinh doanh
-              </label>
-              <select
-                value={catalogStatus}
-                onChange={(e) => {
-                  setCatalogStatus(e.target.value as CatalogStatus);
-                  handleFieldChange();
-                }}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer font-bold"
-              >
-                <option value="active">Đang kinh doanh</option>
-                <option value="inactive">Ngừng kinh doanh</option>
-                <option value="archived">Lưu trữ</option>
+                <option value="published">Đã xuất bản</option>
               </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 items-center pt-2">
-            {/* Ordering */}
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Thứ tự sắp xếp (Ordering)
-              </label>
+              <label className={labelClass}>Landing page</label>
               <input
-                type="number"
-                value={ordering}
+                type="text"
+                value={landingPage}
                 onChange={(e) => {
-                  setOrdering(Number(e.target.value));
+                  setLandingPage(e.target.value);
                   handleFieldChange();
                 }}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+                placeholder="https://..."
+                className={inputClass}
               />
             </div>
-
-            {/* Is Hot Toggle */}
-            <div className="pt-5">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isHot}
-                  onChange={(e) => {
-                    setIsHot(e.target.checked);
-                    handleFieldChange();
-                  }}
-                  className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
-                />
-                <span className="font-bold text-slate-800 dark:text-slate-200">
-                  Nổi bật / Hot Product
-                </span>
-              </label>
+            <div>
+              <label className={labelClass}>URL ngôn ngữ khác</label>
+              <input
+                type="text"
+                value={otherLanguages1}
+                onChange={(e) => {
+                  setOtherLanguages1(e.target.value);
+                  handleFieldChange();
+                }}
+                placeholder="https://..."
+                className={inputClass}
+              />
             </div>
+          </div>
+
+          {/* Tóm tắt */}
+          <div>
+            <label className={labelClass}>Tóm tắt</label>
+            <textarea
+              rows={2}
+              value={summary}
+              onChange={(e) => {
+                setSummary(e.target.value);
+                handleFieldChange();
+              }}
+              placeholder="Tóm tắt ngắn gọn về sản phẩm..."
+              className={inputClass}
+            />
+          </div>
+
+          {/* Checkboxes: Sản phẩm tiêu biểu & Link TeamViewer */}
+          <div className="flex flex-wrap items-center gap-6 pt-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 p-3 border border-slate-200/80 dark:border-slate-800">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <input
+                type="checkbox"
+                checked={isHot}
+                onChange={(e) => {
+                  setIsHot(e.target.checked);
+                  handleFieldChange();
+                }}
+                className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
+              />
+              <span>Sản phẩm tiêu biểu</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <input
+                type="checkbox"
+                checked={teamview}
+                onChange={(e) => {
+                  setTeamview(e.target.checked);
+                  handleFieldChange();
+                }}
+                className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
+              />
+              <span>Link TeamViewer</span>
+            </label>
           </div>
 
           {/* Footer Actions */}
@@ -295,26 +423,26 @@ export const ProductQuickEditModal: React.FC<ProductQuickEditModalProps> = ({
               type="button"
               onClick={handleReset}
               disabled={!isDirty}
-              className="px-3 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 disabled:opacity-40 cursor-pointer"
+              className="px-3 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold text-xs flex items-center gap-1.5 disabled:opacity-40 cursor-pointer transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Khôi phục ban đầu</span>
+              <span>Khôi phục</span>
             </button>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer transition-colors"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-1.5 cursor-pointer transition-colors"
               >
                 <Save className="w-4 h-4" />
-                <span>Cập nhật ngay</span>
+                <span>Lưu thay đổi</span>
               </button>
             </div>
           </div>

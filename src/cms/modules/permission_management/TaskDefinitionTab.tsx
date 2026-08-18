@@ -138,15 +138,21 @@ export const TaskDefinitionTab: React.FC<TaskDefinitionTabProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="cms-data-table text-left">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                <th className="p-3 w-28">Module</th>
-                <th className="p-3 w-24">View</th>
-                <th className="p-3">Task Name</th>
-                <th className="p-3">Description</th>
-                <th className="p-3 text-center w-24">Published</th>
-                <th className="p-3 text-center w-20">Ordering</th>
-                <th className="p-3 text-right pr-4">Thao tác</th>
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+              <tr>
+                {/* Module (Sticky Left) */}
+                <th className="py-3 px-4 min-w-[140px] sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
+                  Module
+                </th>
+                <th className="py-3 px-4 min-w-[120px]">View</th>
+                <th className="py-3 px-4 min-w-[200px]">Task Name</th>
+                <th className="py-3 px-4 min-w-[250px]">Description</th>
+                <th className="py-3 px-4 min-w-[100px] text-center">Published</th>
+                <th className="py-3 px-4 min-w-[90px] text-center">Ordering</th>
+                {/* Actions (Sticky Right) */}
+                <th className="py-3 px-4 w-28 text-center sticky right-0 z-20 bg-slate-50 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-800">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
@@ -158,22 +164,26 @@ export const TaskDefinitionTab: React.FC<TaskDefinitionTabProps> = ({
                 </tr>
               ) : (
                 filteredTasks.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                    <td className="p-3">
+                  <tr
+                    key={t.id}
+                    className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
+                  >
+                    {/* Module (Sticky Left) */}
+                    <td className="py-3 px-4 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 border-r border-slate-100 dark:border-slate-800">
                       <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[10px] font-mono font-bold">
                         {t.module}
                       </span>
                     </td>
-                    <td className="p-3 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                    <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400">
                       {t.view}
                     </td>
-                    <td className="p-3 font-semibold text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
                       {t.task}
                     </td>
-                    <td className="p-3 text-slate-500 dark:text-slate-400">
+                    <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
                       {t.description || '—'}
                     </td>
-                    <td className="p-3 text-center">
+                    <td className="py-3 px-4 text-center">
                       <span
                         className={`inline-block w-2.5 h-2.5 rounded-full ${
                           t.published ? 'bg-emerald-500' : 'bg-slate-300'
@@ -181,20 +191,23 @@ export const TaskDefinitionTab: React.FC<TaskDefinitionTabProps> = ({
                         title={t.published ? 'Kích hoạt' : 'Ẩn'}
                       />
                     </td>
-                    <td className="p-3 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-4 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
                       {t.ordering}
                     </td>
-                    <td className="p-3 text-right pr-4 whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1">
+                    {/* Actions (Sticky Right) */}
+                    <td className="py-3 px-4 sticky right-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 border-l border-slate-100 dark:border-slate-800 text-center">
+                      <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => handleOpenModal(t)}
                           className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/50 rounded-lg transition-colors cursor-pointer"
+                          title="Sửa"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDeleteTask(t.id)}
                           className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
+                          title="Xóa"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

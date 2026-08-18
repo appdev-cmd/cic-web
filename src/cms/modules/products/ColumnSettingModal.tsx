@@ -2,15 +2,34 @@ import React from 'react';
 import { SlidersHorizontal, Check, RotateCcw, X, Layers } from 'lucide-react';
 
 export interface ColumnVisibility {
-  title: boolean;
-  sku: boolean;
+  product: boolean;
+  code: boolean;
   category: boolean;
   brand: boolean;
+  product_type: boolean;
+  application: boolean;
+  price: boolean;
+  ordering: boolean;
+  is_hot: boolean;
+  teamview: boolean;
   editorial_status: boolean;
-  catalog_status: boolean;
   updated_time: boolean;
-  completeness: boolean;
 }
+
+export const defaultColumnVisibility: ColumnVisibility = {
+  product: true,
+  code: true,
+  category: true,
+  brand: true,
+  product_type: true,
+  application: true,
+  price: true,
+  ordering: true,
+  is_hot: true,
+  teamview: false,
+  editorial_status: true,
+  updated_time: true,
+};
 
 interface ColumnSettingModalProps {
   isOpen: boolean;
@@ -34,14 +53,18 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   if (!isOpen) return null;
 
   const columnLabels: Array<{ key: keyof ColumnVisibility; label: string; desc: string }> = [
-    { key: 'title', label: 'Tên & Nhận diện sản phẩm', desc: 'Thumbnail, tiêu đề và chất lượng' },
-    { key: 'sku', label: 'Mã SKU / Mã nhận diện', desc: 'Mã SKU duy nhất của sản phẩm' },
-    { key: 'category', label: 'Danh mục & Loại sản phẩm', desc: 'Phân loại catalog' },
-    { key: 'brand', label: 'Hãng sản xuất', desc: 'Thương hiệu / Đối tác' },
-    { key: 'editorial_status', label: 'Trạng thái nội dung', desc: 'Bản nháp hoặc đã xuất bản' },
-    { key: 'catalog_status', label: 'Trạng thái kinh doanh', desc: 'Đang kinh doanh, ngừng kinh doanh hoặc lưu trữ' },
-    { key: 'completeness', label: 'Điểm hoàn thiện (%)', desc: 'Completeness checklist score' },
-    { key: 'updated_time', label: 'Thời gian cập nhật', desc: 'Người sửa & thời điểm gần nhất' },
+    { key: 'product', label: 'Tên & Ảnh sản phẩm', desc: 'Ảnh đại diện, tên sản phẩm và nhãn nổi bật' },
+    { key: 'code', label: 'Biệt danh / Mã', desc: 'Mã định danh biệt danh của sản phẩm' },
+    { key: 'category', label: 'Lĩnh vực', desc: 'Danh mục lĩnh vực chuyên ngành' },
+    { key: 'brand', label: 'Hãng sản xuất', desc: 'Thương hiệu / Đối tác công nghệ' },
+    { key: 'product_type', label: 'Loại sản phẩm', desc: 'Phần mềm, Thiết bị, Bản quyền...' },
+    { key: 'application', label: 'Ứng dụng', desc: 'Các lĩnh vực ứng dụng của sản phẩm' },
+    { key: 'price', label: 'Giá', desc: 'Giá sản phẩm hoặc báo giá license' },
+    { key: 'ordering', label: 'Thứ tự', desc: 'Thứ tự hiển thị ưu tiên' },
+    { key: 'is_hot', label: 'Sản phẩm tiêu biểu', desc: 'Đánh dấu nổi bật trang chủ' },
+    { key: 'teamview', label: 'Link TeamViewer', desc: 'Hỗ trợ kết nối từ xa' },
+    { key: 'editorial_status', label: 'Trạng thái', desc: 'Đã xuất bản, Bản nháp, Lưu trữ' },
+    { key: 'updated_time', label: 'Thời gian cập nhật', desc: 'Thời điểm chỉnh sửa gần nhất' },
   ];
 
   return (
@@ -62,7 +85,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -83,7 +106,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                 className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
                   density === 'normal'
                     ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 shadow-2xs'
-                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <span>Tiêu chuẩn</span>
@@ -95,7 +118,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                 className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
                   density === 'compact'
                     ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 shadow-2xs'
-                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <span>Thu gọn</span>
@@ -115,7 +138,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               <button
                 type="button"
                 onClick={onReset}
-                className="text-[11px] text-orange-600 dark:text-orange-400 font-bold hover:underline flex items-center gap-1"
+                className="text-[11px] text-orange-600 dark:text-orange-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Đặt lại mặc định</span>
@@ -125,13 +148,15 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
               {columnLabels.map((col) => {
                 const isChecked = columns[col.key];
-                const isTitleCol = col.key === 'title';
+                const isTitleCol = col.key === 'product';
                 return (
                   <div
                     key={col.key}
                     onClick={() => !isTitleCol && onToggleColumn(col.key)}
                     className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                      isTitleCol ? 'bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 opacity-80 cursor-not-allowed' : 'hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 cursor-pointer'
+                      isTitleCol
+                        ? 'bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 opacity-80 cursor-not-allowed'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 cursor-pointer'
                     }`}
                   >
                     <div>
@@ -158,7 +183,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
         <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-800 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-md transition-colors"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-md transition-colors cursor-pointer"
           >
             Đóng & Áp dụng
           </button>

@@ -1,36 +1,26 @@
 import React, { useState } from 'react';
 import {
   Shield,
-  Sliders,
   CheckCircle2,
-  Users,
-  AlertTriangle,
-  Clock,
   Layers,
+  Sparkles,
 } from 'lucide-react';
 import type { PermissionsGovernanceData } from '../../data/GovernanceDataSource';
 import {
   PermissionTask,
-  UserPermissionState,
   CmsRole,
   RoleAssignment,
-  PolicyIssue,
-  AccessReview,
 } from './types';
-import { PermissionMatrixTab } from './PermissionMatrixTab';
 import { TaskDefinitionTab } from './TaskDefinitionTab';
 import { RolesOverviewTab } from './RolesOverviewTab';
 import { RoleEditorModal } from './RoleEditorModal';
-import { AssignmentsTab } from './AssignmentsTab';
-import { PolicyIssuesTab } from './PolicyIssuesTab';
-import { AccessReviewsTab } from './AccessReviewsTab';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
 export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }> = ({ data }) => {
-  // Tabs State: 'roles' (Module 15 Main) | 'assignments' | 'issues' | 'reviews' | 'matrix' | 'tasks'
-  const [activeTab, setActiveTab] = useState<'roles' | 'assignments' | 'issues' | 'reviews' | 'matrix' | 'tasks'>('roles');
+  // Tabs State: Only 2 tabs: 'roles' | 'tasks'
+  const [activeTab, setActiveTab] = useState<'roles' | 'tasks'>('roles');
 
   // Core Data States
   const [users] = useState(data.users);
@@ -38,20 +28,13 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
   const [functions] = useState(data.functions);
   const [fields] = useState(data.fields);
 
-  // Module 15 States
+  // Roles & Assignments States
   const [roles, setRoles] = useState<CmsRole[]>(data.roles);
   const [assignments, setAssignments] = useState<RoleAssignment[]>(data.assignments);
-  const [issues, setIssues] = useState<PolicyIssue[]>(data.issues);
-  const [reviews, setReviews] = useState<AccessReview[]>(data.reviews);
 
   // Modal State for Creating/Editing Role
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [roleToEdit, setRoleToEdit] = useState<CmsRole | null>(null);
-
-  // Legacy Matrix User Permissions Map State
-  const [userPermissionsMap, setUserPermissionsMap] = useState<
-    Record<string, UserPermissionState>
-  >(data.userPermissions);
 
   // Toast notification state
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -165,28 +148,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
     showToast('Đã thu hồi gán quyền tài khoản!');
   };
 
-  // Policy Issue Handlers
-  const handleResolveIssue = (issueId: string) => {
-    setIssues((prev) => prev.filter((i) => i.id !== issueId));
-    showToast('Đã ghi nhận xử lý xong cảnh báo Security/SoD!');
-  };
-
-  // Access Review Handlers
-  const handleConfirmReview = (reviewId: string) => {
-    setReviews((prev) =>
-      prev.map((r) => (r.id === reviewId ? { ...r, status: 'confirmed', notes: 'Đã hoàn tất rà soát trực tiếp' } : r))
-    );
-    showToast('Đã phê duyệt xác nhận quyền hạn cho nhân sự!');
-  };
-
-  const handleRevokeReview = (reviewId: string) => {
-    setReviews((prev) =>
-      prev.map((r) => (r.id === reviewId ? { ...r, status: 'revoked', notes: 'Thu hồi do thay đổi vị trí công tác' } : r))
-    );
-    showToast('Đã ghi nhận thu hồi quyền hạn nhân sự!');
-  };
-
-  // Legacy Task/User Handlers
+  // Task Handlers
   const handleSaveTask = (savedTask: PermissionTask) => {
     setTasks((prev) => {
       const exists = prev.some((t) => t.id === savedTask.id);
@@ -206,15 +168,6 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
     }
   };
 
-  const handleSaveUserPermissions = (userId: string, newPerms: UserPermissionState) => {
-    setUserPermissionsMap((prev) => ({
-      ...prev,
-      [userId]: newPerms,
-    }));
-    const userObj = users.find((u) => u.id === userId);
-    showToast(`Đã lưu cấu hình phân quyền cho tài khoản "${userObj?.fullName || userId}"!`);
-  };
-
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Toast Notification */}
@@ -228,7 +181,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
       <CmsPageHeader
         icon={<Shield />}
         title="Vai trò và quyền"
-        description="Quản lý vai trò, phạm vi truy cập, cảnh báo xung đột quyền và các đợt rà soát."
+        description="Quản lý vai trò người dùng, phạm vi truy cập và danh mục phân hệ chức năng hệ thống."
         meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{roles.filter((role) => role.status !== 'archived').length} vai trò</span>}
         actions={(
           <CmsButton onClick={handleOpenCreateRole} variant="primary" size="sm" leadingIcon={<Shield />}>
@@ -260,18 +213,18 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
           </div>
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Xung đột quyền</div>
-            <div className="text-xl font-extrabold text-red-600 dark:text-red-400 font-mono flex items-center gap-1">
-              <span>{issues.length}</span>
-              {issues.length > 0 && <AlertTriangle className="w-4 h-4 text-red-500" />}
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Danh mục chức năng</div>
+            <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400 font-mono flex items-center gap-1">
+              <span>{tasks.length}</span>
+              <span className="text-xs text-slate-400 font-normal ml-1">phân hệ</span>
             </div>
           </div>
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Chờ rà soát</div>
-            <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400 font-mono">
-              {reviews.filter((r) => r.status === 'pending').length}
-              <span className="text-xs text-slate-400 font-normal ml-1">lượt</span>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Hành động & Trường</div>
+            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+              {functions.length + fields.length}
+              <span className="text-xs text-slate-400 font-normal ml-1">chi tiết</span>
             </div>
           </div>
         </div>
@@ -283,12 +236,8 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
             value={activeTab}
             onChange={(tab) => setActiveTab(tab as any)}
             items={[
-              { id: 'roles', label: 'Danh sách vai trò', icon: Shield },
-              { id: 'assignments', label: 'Gán vai trò', count: assignments.length, icon: Users },
-              { id: 'issues', label: 'Xung đột quyền', count: issues.length, icon: AlertTriangle },
-              { id: 'reviews', label: 'Đợt rà soát', count: reviews.filter((r) => r.status === 'pending').length, icon: Clock },
-              { id: 'matrix', label: 'Ma trận quyền', icon: Sliders },
-              { id: 'tasks', label: 'Danh mục chức năng', icon: Layers },
+              { id: 'roles', label: 'Danh sách vai trò', count: roles.filter((r) => r.status !== 'archived').length, icon: Shield },
+              { id: 'tasks', label: 'Danh mục chức năng', count: tasks.length, icon: Layers },
             ]}
           />
         </div>
@@ -298,55 +247,14 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
       {activeTab === 'roles' && (
         <RolesOverviewTab
           roles={roles}
+          assignments={assignments}
+          users={users}
+          onAddAssignment={handleAddAssignment}
+          onRevokeAssignment={handleRevokeAssignment}
           onOpenCreate={handleOpenCreateRole}
           onOpenEdit={handleOpenEditRole}
           onCloneRole={handleCloneRole}
           onArchiveRole={handleArchiveRole}
-          onSelectRoleForReview={(r) => {
-            setActiveTab('reviews');
-            showToast(`Vui lòng thực hiện rà soát cho vai trò "${r.name}"`);
-          }}
-        />
-      )}
-
-      {activeTab === 'assignments' && (
-        <AssignmentsTab
-          users={users}
-          assignments={assignments}
-          roles={roles}
-          onAddAssignment={handleAddAssignment}
-          onRevokeAssignment={handleRevokeAssignment}
-        />
-      )}
-
-      {activeTab === 'issues' && (
-        <PolicyIssuesTab
-          issues={issues}
-          roles={roles}
-          onOpenEditRole={(r) => {
-            setRoleToEdit(r);
-            setIsEditorOpen(true);
-          }}
-          onResolveIssue={handleResolveIssue}
-        />
-      )}
-
-      {activeTab === 'reviews' && (
-        <AccessReviewsTab
-          reviews={reviews}
-          onConfirmReview={handleConfirmReview}
-          onRevokeReview={handleRevokeReview}
-        />
-      )}
-
-      {activeTab === 'matrix' && (
-        <PermissionMatrixTab
-          users={users}
-          tasks={tasks}
-          functions={functions}
-          fields={fields}
-          userPermissionsMap={userPermissionsMap}
-          onSaveUserPermissions={handleSaveUserPermissions}
         />
       )}
 

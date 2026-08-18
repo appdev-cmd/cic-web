@@ -3,7 +3,6 @@ import {
   Settings,
   Globe,
   Sliders,
-  Table as TableIcon,
   ShieldAlert,
   History,
   Shield,
@@ -32,7 +31,6 @@ import type { SystemConfigurationData } from '../../data/ConfigurationDataSource
 
 import { OverviewTab } from './OverviewTab';
 import { SettingsEditorTab } from './SettingsEditorTab';
-import { SettingsTableView } from './SettingsTableView';
 import { ValidationIssuesTab } from './ValidationIssuesTab';
 import { VersionHistoryTab } from './VersionHistoryTab';
 import { ActivityAuditTab } from './ActivityAuditTab';
@@ -64,7 +62,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     };
   }, [websiteData, globalData]);
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'editor' | 'table' | 'issues' | 'versions' | 'audit'
+    'overview' | 'editor' | 'issues' | 'versions' | 'audit'
   >('editor');
 
   const [scopes, setScopes] = useState<ConfigScope[]>(mergedData.scopes);
@@ -348,7 +346,6 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
         items={[
           { id: 'overview', label: 'Tổng quan', icon: Globe },
           { id: 'editor', label: 'Chỉnh sửa', icon: Sliders },
-          { id: 'table', label: 'Bảng cấu hình', icon: TableIcon },
           { id: 'issues', label: 'Cảnh báo', count: issues.length, icon: ShieldAlert },
           { id: 'versions', label: 'Phiên bản', icon: History },
           { id: 'audit', label: 'Nhật ký', icon: Shield },
@@ -400,16 +397,6 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           }}
           onSaveDraft={handleSaveDraft}
           onPublish={handlePublish}
-        />
-      )}
-
-      {activeTab === 'table' && (
-        <SettingsTableView
-          scopes={scopes}
-          groups={groups}
-          items={items}
-          valuesRecordMap={valuesRecordMap}
-          onLocateInEditor={handleLocateInEditor}
         />
       )}
 

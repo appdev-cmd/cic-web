@@ -83,52 +83,52 @@ export interface ProductItem {
   availability_signal: AvailabilitySignal;
 
   // Content
-  content_html: string;
-  highlights: string[]; // Đặc điểm nổi bật
+  content_html?: string;
+  highlights?: string[]; // Đặc điểm nổi bật
   
   // Tech Specs
-  tech_specs: TechSpecParam[];
+  tech_specs?: TechSpecParam[];
 
   // Media
   image: string; // Thumbnail chính
-  gallery: string[];
+  gallery?: string[];
   video_url?: string;
   og_image?: string;
 
   // Documents
-  documents: ProductDocument[];
+  documents?: ProductDocument[];
 
   // SEO & Social
-  meta_title: string;
-  meta_description: string;
-  meta_keywords: string;
-  canonical_url: string;
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  canonical_url?: string;
 
   // Contact & Owner
-  owner_id: string;
-  owner_name: string;
+  owner_id?: string;
+  owner_name?: string;
   owner_avatar?: string;
-  inquiry_routing: string; // Bộ phận tiếp nhận liên hệ
+  inquiry_routing?: string; // Bộ phận tiếp nhận liên hệ
 
   // Dual Statuses
   editorial_status: EditorialStatus;
-  catalog_status: CatalogStatus;
-  published: boolean; // Computed or alias for published editorial
+  catalog_status?: CatalogStatus;
+  published?: boolean; // Computed or alias for published editorial
   
   // Placement & Ordering
-  is_hot: boolean;
-  ordering: number;
-  site_placement: string[]; // e.g. ['home_featured', 'catalog_grid', 'footer_links']
+  is_hot?: boolean;
+  ordering?: number;
+  site_placement?: string[]; // e.g. ['home_featured', 'catalog_grid', 'footer_links']
   scheduled_publish_time?: string;
 
   // Quality & Versions
-  completeness_score: number; // 0 - 100%
+  completeness_score?: number; // 0 - 100%
   missing_fields?: string[];
   working_version_id?: string;
   has_working_draft?: boolean;
 
   // Timestamps & Audit
-  created_time: string;
+  created_time?: string;
   updated_time: string;
   published_time?: string;
 }

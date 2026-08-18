@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
@@ -253,9 +253,26 @@ const editorPlugins: PluginConstructor<Editor>[] = [
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, minHeight = '280px' }) => {
   const editorRef = useRef<Editor | null>(null);
+  const lastDataRef = useRef<string>(value || '');
+  const [editorData, setEditorData] = useState<string>(value || '');
   const [selectedCtaId, setSelectedCtaId] = useState('');
   const [selectedFormId, setSelectedFormId] = useState('');
   const [referencePicker, setReferencePicker] = useState<CmsReferenceType | null>(null);
+
+  // Synchronize when the external value changes and differs from the last emitted editor data
+  useEffect(() => {
+    if (value !== lastDataRef.current) {
+      lastDataRef.current = value || '';
+      setEditorData(value || '');
+      if (editorRef.current && editorRef.current.getData() !== (value || '')) {
+        try {
+          editorRef.current.setData(value || '');
+        } catch (err) {
+          console.warn('CKEditor external setData warning:', err);
+        }
+      }
+    }
+  }, [value]);
 
   const activeCtas = useMemo(() => getDemoCtaModuleData('vi').ctas.filter((item) => item.status === 'active'), []);
   const activeForms = useMemo(() => getDemoFormModuleData('vi').forms.filter((item) => item.status === 'active'), []);
@@ -309,12 +326,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const insertReference = (attributes: CmsReferenceAttributes) => {
     const editor = editorRef.current;
     if (!editor) return;
-    editor.model.change((writer) => {
-      const reference = writer.createElement('cmsReference', attributes);
-      editor.model.insertObject(reference, null, null, { setSelection: 'after' });
-    });
-    onChange(editor.getData());
-    editor.editing.view.focus();
+    try {
+      editor.model.change((writer) => {
+        const reference = writer.createElement('cmsReference', attributes);
+        editor.model.insertObject(reference, null, null, { setSelection: 'after' });
+      });
+      const nextData = editor.getData();
+      lastDataRef.current = nextData;
+      onChange(nextData);
+      editor.editing.view.focus();
+    } catch (err) {
+      console.warn('Error inserting reference widget:', err);
+    }
   };
 
   const insertCta = () => {
@@ -348,10 +371,25 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       <CKEditor
         editor={ClassicEditor}
         config={config}
-        data={value}
-        onReady={(editor) => { editorRef.current = editor; }}
-        onChange={(_, editor) => onChange(editor.getData())}
-        onAfterDestroy={() => { editorRef.current = null; }}
+        data={editorData}
+        onReady={(editor) => {
+          editorRef.current = editor;
+        }}
+        onChange={(_, editor) => {
+          try {
+            const data = editor.getData();
+            lastDataRef.current = data;
+            onChange(data);
+          } catch (err) {
+            console.warn('CKEditor getData warning:', err);
+          }
+        }}
+        onError={(error, details) => {
+          console.warn('CKEditor runtime error captured:', error, details);
+        }}
+        onAfterDestroy={() => {
+          editorRef.current = null;
+        }}
       />
 
       <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">

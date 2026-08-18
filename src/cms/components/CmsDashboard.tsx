@@ -7,8 +7,10 @@ import { CmsBreadcrumb } from './CmsBreadcrumb';
 import { CmsFooter } from './CmsFooter';
 import { CmsCommandPalette } from './CmsCommandPalette';
 import { CmsRightDrawer, DrawerItem } from './CmsRightDrawer';
+import { MyAccountModal } from './MyAccountModal';
+import { ChangePasswordModal } from './ChangePasswordModal';
 
-import { ContactMessage, ProductRegistration, PendingContent } from '../types';
+import { ContactMessage, ProductRegistration, PendingContent, CmsUser } from '../types';
 import { resolveCmsModule } from '../routing';
 import { demoCmsDataSource } from '../data/demoCmsDataSource';
 import type { CmsLocale } from '../data/CmsDataSource';
@@ -208,8 +210,35 @@ interface CmsDashboardProps {
 }
 
 export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite }) => {
-  // Theme & Layout States
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  // Theme & Layout States (Persisted & Synced)
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    try {
+      const savedTheme = localStorage.getItem('cms_theme');
+      if (savedTheme !== null) {
+        return savedTheme === 'dark';
+      }
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+    try {
+      localStorage.setItem('cms_theme', isDarkMode ? 'dark' : 'light');
+    } catch {
+      // ignore
+    }
+  }, [isDarkMode]);
+
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -224,6 +253,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [drawerItem, setDrawerItem] = useState<DrawerItem | null>(null);
 
   // Filter & Data States
+  const [currentUser, setCurrentUser] = useState<CmsUser>(demoCmsDataSource.currentUser);
+  const [isMyAccountOpen, setIsMyAccountOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [trafficRange, setTrafficRange] = useState<'7' | '30'>('7');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -290,7 +322,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
     <div className={`cms-shell min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* 1. HEADER */}
       <CmsHeader
-        user={demoCmsDataSource.currentUser}
+        user={currentUser}
         initialNotifications={demoCmsDataSource.notifications}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
@@ -313,6 +345,14 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
         }}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
         onSwitchToWebsite={onSwitchToWebsite}
+        onOpenMyAccount={() => setIsMyAccountOpen(true)}
+        onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+        onLogout={() => {
+          setToastMessage('Đã đăng xuất thành công khỏi hệ thống quản trị!');
+          setTimeout(() => {
+            if (onSwitchToWebsite) onSwitchToWebsite();
+          }, 800);
+        }}
       />
 
       {/* 2. SIDEBAR */}
@@ -471,6 +511,28 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
         item={drawerItem}
         onClose={() => setDrawerItem(null)}
         onUpdateStatus={handleUpdateStatus}
+      />
+
+      {/* MY ACCOUNT MODAL */}
+      <MyAccountModal
+        isOpen={isMyAccountOpen}
+        onClose={() => setIsMyAccountOpen(false)}
+        user={currentUser}
+        onSave={(updatedUser) => {
+          setCurrentUser(updatedUser);
+          setToastMessage('Đã cập nhật thông tin tài khoản cá nhân thành công!');
+          setTimeout(() => setToastMessage(null), 3500);
+        }}
+      />
+
+      {/* CHANGE PASSWORD MODAL */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        onSuccess={() => {
+          setToastMessage('Đổi mật khẩu thành công! Mật khẩu mới đã được cập nhật an toàn.');
+          setTimeout(() => setToastMessage(null), 4000);
+        }}
       />
     </div>
   );
