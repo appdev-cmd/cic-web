@@ -372,6 +372,7 @@ export default function App() {
               setActiveLink('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            onOpenConsultation={() => setIsConsultationOpen(true)}
           />
         ) : currentView === 'events' ? (
           <EventsView 
@@ -395,6 +396,7 @@ export default function App() {
               setProductsResetKey(prev => prev + 1);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            onOpenConsultation={() => setIsConsultationOpen(true)}
           />
         ) : currentView === 'contact' ? (
           <ContactView 

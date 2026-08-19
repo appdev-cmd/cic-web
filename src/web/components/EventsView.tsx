@@ -43,6 +43,7 @@ interface EventsViewProps {
   onNavigateHome?: () => void;
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: string) => void;
+  onOpenConsultation?: () => void;
 }
 
 const cleanEventHtml = (html: string) => {
@@ -58,6 +59,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
   initialEventId,
   initialIsRegistering,
   onNavigateToProduct,
+  onOpenConsultation,
 }) => {
   const { events: eventsData, relatedProducts: productsData } = React.useMemo(getEventsData, []);
   // Navigation & details state
@@ -988,93 +990,81 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   TẦNG 1: HERO EVENT (SỰ KIỆN GẦN NHẤT / NỔI BẬT)
                  ========================================================= */}
               {heroEvent && statusFilter === 'all' && !searchTerm && (
-                <section className="bg-transparent border-0 p-0 shadow-none transition-all duration-300 overflow-hidden group cursor-pointer">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <section className="bg-white border border-slate-200/80 rounded-[12px] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mb-8 group">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
                     
-                    {/* Left: Image Hero Banner */}
-                    <div className="lg:col-span-6 relative bg-slate-950 h-64 sm:h-80 lg:h-[340px] overflow-hidden rounded-[14px]">
+                    {/* Left: Image Hero Banner (65-70% width) */}
+                    <div 
+                      onClick={() => {
+                        setSelectedEvent(heroEvent);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="lg:col-span-8 relative bg-slate-100 min-h-[260px] sm:min-h-[320px] lg:min-h-[360px] overflow-hidden cursor-pointer flex items-center justify-center"
+                    >
                       <img 
                         src={heroEvent.img} 
                         alt={heroEvent.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04] opacity-90"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent lg:hidden" />
-                      
-                      {/* Badge Overlay */}
-                      <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-2">
-                        <span className="bg-[#FC5115] text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1.5 rounded-[6px]">
-                          <Sparkles size={12} /> Sự kiện sắp tới nổi bật
-                        </span>
-                        {heroEvent.eventType && (
-                          <span className="bg-slate-900/90 text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider border border-slate-700 shadow-md rounded-[6px]">
-                            {heroEvent.eventType}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Remaining Days Counter */}
-                      <div className="absolute bottom-3.5 left-3.5 bg-slate-950/85 backdrop-blur-md text-white border border-slate-800 px-3.5 py-1.5 text-xs font-bold font-mono shadow-lg flex items-center gap-2 rounded-[6px]">
-                        <Clock size={14} className="text-orange-500" />
-                        <span>Còn {getDaysRemaining(heroEvent.startDate)} ngày nữa</span>
-                      </div>
                     </div>
 
-                    {/* Right: Content Details */}
-                    <div className="lg:col-span-6 py-1 flex flex-col justify-between space-y-4 h-full">
-                      <div className="space-y-3.5">
-                        <div className="flex flex-wrap items-center gap-2.5 text-xs font-bold text-[#6B7280]">
-                          <span className="flex items-center gap-1 text-[#FC5115]">
-                            <Calendar size={14} /> {heroEvent.date}
-                          </span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1">
-                            <Clock size={14} /> {heroEvent.startDate.split('T')[1].slice(0, 5)} - 11:30
+                    {/* Right: Content Details & Action (30-35% width) */}
+                    <div className="lg:col-span-4 p-6 sm:p-7 lg:p-8 bg-slate-50/70 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col justify-between space-y-5">
+                      <div className="space-y-4">
+                        {/* Status Badge */}
+                        <div>
+                          <span className="inline-block px-3 py-1 bg-[#dc2626] text-white text-[11px] font-black uppercase tracking-wider rounded-[4px] shadow-2xs">
+                            SẮP DIỄN RA
                           </span>
                         </div>
 
+                        {/* Event Title */}
                         <h2 
                           onClick={() => {
                             setSelectedEvent(heroEvent);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="text-xl sm:text-2xl font-bold text-[#444] leading-snug uppercase group-hover:text-[#FC5115] cursor-pointer transition-colors"
+                          className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight hover:text-orange-600 cursor-pointer transition-colors"
                         >
                           {heroEvent.title}
                         </h2>
 
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-700 bg-slate-50/80 p-2.5 border-l-2 border-[#FC5115] rounded-r-[6px]">
-                          <MapPin size={15} className="text-[#FC5115] shrink-0" />
-                          <span className="truncate">{heroEvent.location}</span>
+                        {/* Date & Time */}
+                        <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-700">
+                          <Calendar size={18} className="text-slate-700 shrink-0" />
+                          <span>{heroEvent.date}</span>
                         </div>
 
-                        <p className="text-[#6B7280] text-xs sm:text-sm line-clamp-3 leading-relaxed font-medium">
-                          {heroEvent.shortDesc}
-                        </p>
+                        {/* Location */}
+                        <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-700">
+                          <MapPin size={18} className="text-slate-700 shrink-0" />
+                          <span>{heroEvent.location}</span>
+                        </div>
                       </div>
 
-                      {/* CTA Buttons */}
-                      <div className="pt-3.5 border-t border-slate-200/60 flex flex-wrap sm:flex-nowrap gap-3 items-center">
-                        {heroEvent.isOpenRegistration && (
+                      {/* CTA Button */}
+                      <div className="pt-2">
+                        {heroEvent.isOpenRegistration ? (
                           <button
                             onClick={() => {
                               setRegisterEvent(heroEvent);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
-                            className="w-full sm:w-auto bg-white hover:bg-orange-50/80 text-[#FC5115] hover:text-orange-700 border border-orange-500/60 hover:border-orange-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all shadow-2xs flex items-center justify-center gap-2 rounded-[8px] cursor-pointer"
+                            className="w-full py-3.5 px-6 bg-orange-600 hover:bg-orange-500 text-white font-black text-sm uppercase tracking-wider rounded-full shadow-md shadow-orange-600/25 hover:shadow-lg hover:shadow-orange-600/35 transition-all text-center flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                           >
-                            Đăng ký tham dự <ArrowRight size={14} className="text-[#FC5115]" />
+                            ĐĂNG KÝ NGAY
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedEvent(heroEvent);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="w-full py-3.5 px-6 bg-slate-800 hover:bg-slate-900 text-white font-black text-sm uppercase tracking-wider rounded-full shadow-sm transition-all text-center flex items-center justify-center cursor-pointer"
+                          >
+                            XEM CHI TIẾT
                           </button>
                         )}
-
-                        <button
-                          onClick={() => {
-                            setSelectedEvent(heroEvent);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-200 hover:border-slate-300 px-5 py-2.5 text-xs font-bold uppercase tracking-widest transition-all text-center rounded-[8px] cursor-pointer shadow-2xs"
-                        >
-                          Xem chi tiết
-                        </button>
                       </div>
                     </div>
 
@@ -1313,46 +1303,29 @@ export const EventsView: React.FC<EventsViewProps> = ({
               )}
 
               {/* =========================================================
-                  TẦNG 4: FOOTER EMAIL NOTIFICATION CALLOUT
+                  TẦNG 4: FOOTER CONSULTATION CALLOUT
                  ========================================================= */}
               <section className="bg-white text-slate-900 p-8 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden rounded-2xl">
                 <div className="max-w-3xl mx-auto text-center space-y-6 relative z-10">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <h2 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight text-slate-950">
-                      Bạn chưa thấy sự kiện phù hợp?
+                      Bạn quan tâm đến các sự kiện và giải pháp của CIC?
                     </h2>
-                    <p className="text-slate-600 text-xs sm:text-sm font-medium max-w-xl mx-auto leading-relaxed">
-                      Đăng ký email để nhận thông báo trực tiếp khi CIC tổ chức các hội thảo, khóa đào tạo và ra mắt giải pháp công nghệ mới.
+                    <p className="text-slate-600 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
+                      Để lại thông tin để đội ngũ CIC tư vấn, hỗ trợ và cung cấp thêm thông tin phù hợp với nhu cầu của bạn.
                     </p>
                   </div>
 
-                  {!subscriptionSuccess ? (
-                    <form onSubmit={handleSubscribeSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-                      <input
-                        type="email"
-                        required
-                        placeholder="Nhập email liên hệ"
-                        value={subscriberEmail}
-                        onChange={(e) => setSubscriberEmail(e.target.value)}
-                        className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 text-xs px-4 py-3 rounded-xl placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white transition-all"
-                      />
-
-                      <button
-                        type="submit"
-                        className="bg-orange-600 hover:bg-orange-700 active:scale-95 text-white px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all shrink-0 shadow-sm rounded-xl cursor-pointer"
-                      >
-                        Đăng ký nhận tin
-                      </button>
-                    </form>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-orange-50 border border-orange-200 p-4 text-orange-950 text-xs font-bold text-center max-w-lg mx-auto rounded-xl"
+                  <div className="flex justify-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenConsultation?.()}
+                      className="bg-orange-600 hover:bg-orange-500 active:scale-95 text-white px-6 py-2.5 sm:py-3 text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 rounded-[8px] cursor-pointer"
                     >
-                      Cảm ơn bạn! Đã ghi nhận email đăng ký nhận thông báo sự kiện CIC.
-                    </motion.div>
-                  )}
+                      <span>Đăng ký tư vấn</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </section>
 

@@ -124,9 +124,6 @@ export const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({
                   <span className="text-slate-400 flex items-center gap-1 text-[11px]">
                     <Calendar className="w-3.5 h-3.5" /> {article.start_time || article.created_time}
                   </span>
-                  <span className="text-slate-400 flex items-center gap-1 text-[11px]">
-                    <User className="w-3.5 h-3.5" /> {article.author?.name || 'CIC Admin'}
-                  </span>
                 </div>
 
                 <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">

@@ -115,16 +115,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [requests]);
 
-  const pageOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    requests.forEach((r) => {
-      if (r.sourceConfig?.pageId && r.sourceConfig?.pageTitle) {
-        map.set(r.sourceConfig.pageId, r.sourceConfig.pageTitle);
-      }
-    });
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [requests]);
-
   const assigneeOptions = useMemo(() => {
     const map = new Map<string, string>();
     MOCK_STAFF_MEMBERS.forEach((m) => {
@@ -144,7 +134,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     filter.status ||
     filter.formId ||
     filter.ctaId ||
-    filter.pageId ||
     filter.assignedUserId ||
     filter.dateFrom ||
     filter.dateTo
@@ -156,7 +145,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
       status: undefined,
       formId: undefined,
       ctaId: undefined,
-      pageId: undefined,
       assignedUserId: undefined,
       tab: activeTab,
       dateFrom: undefined,
@@ -213,9 +201,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
 
     // CTA filter
     if (filter.ctaId && request.sourceConfig.ctaId !== filter.ctaId) return false;
-
-    // Page filter
-    if (filter.pageId && request.sourceConfig.pageId !== filter.pageId) return false;
 
     // Assignee filter
     if (filter.assignedUserId) {
@@ -649,7 +634,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             </div>
 
             {/* Bottom Row: Specific Dropdown Filters */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1 border-t border-slate-100 dark:border-slate-800 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 pt-1 border-t border-slate-100 dark:border-slate-800 text-xs">
               {/* Form Filter */}
               <div>
                 <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
@@ -683,25 +668,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
                   {ctaOptions.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Page Filter */}
-              <div>
-                <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
-                  Trang
-                </label>
-                <select
-                  value={filter.pageId || ''}
-                  onChange={(e) => setFilter({ ...filter, pageId: e.target.value || undefined })}
-                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
-                >
-                  <option value="">Tất cả Trang</option>
-                  {pageOptions.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
                     </option>
                   ))}
                 </select>

@@ -67,6 +67,7 @@ interface NewsViewProps {
   onNavigateToEvent?: (eventId: string) => void;
   onNavigateHome: () => void;
   onNavigateToPrivacy?: () => void;
+  onOpenConsultation?: () => void;
 }
 
 const renderFormattedText = (text: string) => {
@@ -108,7 +109,8 @@ export function NewsView({
   onNavigateToProject,
   onNavigateToEvent,
   onNavigateHome,
-  onNavigateToPrivacy
+  onNavigateToPrivacy,
+  onOpenConsultation
 }: NewsViewProps) {
   const {
     items: newsData,
@@ -738,16 +740,6 @@ export function NewsView({
                     <Calendar className="w-3.5 h-3.5 text-orange-600" />
                     {selectedItem.date}
                   </span>
-                  <span className="text-slate-500 font-medium flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-orange-600" />
-                    ~{Math.max(1, Math.ceil(selectedItem.contentMarkdown.split(' ').length / 180))} phút đọc
-                  </span>
-                  {selectedItem.author && (
-                    <span className="text-slate-500 font-medium flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-orange-600" />
-                      {selectedItem.author}
-                    </span>
-                  )}
                   {selectedItem.views && (
                     <span className="text-slate-500 font-medium flex items-center gap-1">
                       <Eye className="w-3.5 h-3.5 text-orange-600" />
@@ -1863,7 +1855,7 @@ export function NewsView({
               </div>
             )}
 
-            {/* TECH NEWSLETTER SUBSCRIPTION FORM */}
+            {/* TECH CONSULTATION CTA SECTION */}
             <motion.section 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1872,73 +1864,25 @@ export function NewsView({
               className="mt-12 sm:mt-16 bg-white text-slate-900 p-8 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden rounded-2xl"
             >
               <div className="max-w-3xl mx-auto text-center space-y-6 relative z-10">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <h2 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight text-slate-950">
-                    Đăng ký nhận bản tin công nghệ
+                    Cần tư vấn giải pháp?
                   </h2>
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium max-w-xl mx-auto leading-relaxed">
-                    Nhận những phân tích chuyên sâu và tin tức công nghệ mới nhất hàng tuần trực tiếp trong hộp thư của bạn.
+                  <p className="text-slate-600 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
+                    Đội ngũ chuyên gia CIC luôn sẵn sàng đồng hành, tư vấn và cung cấp các giải pháp phần mềm, chuyển đổi số phù hợp nhất cho bạn.
                   </p>
                 </div>
 
-                {!newsletterSubmitted ? (
-                  <form onSubmit={handleNewsletterSubmit} className="space-y-3 max-w-lg mx-auto">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <input
-                        type="email"
-                        required
-                        value={newsletterEmail}
-                        onChange={(e) => setNewsletterEmail(e.target.value)}
-                        placeholder="Nhập email liên hệ"
-                        className="flex-1 bg-slate-50 border border-slate-300 text-slate-900 text-xs px-4 py-3 rounded-xl placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white transition-all"
-                      />
-
-                      <button
-                        type="submit"
-                        disabled={isNewsletterSubmitting}
-                        className="bg-orange-600 hover:bg-orange-700 active:scale-95 text-white px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all shrink-0 shadow-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
-                      >
-                        {isNewsletterSubmitting ? (
-                          <>
-                            <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>Đang xử lý...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Đăng ký ngay</span>
-                            <Send className="w-3.5 h-3.5" />
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <p className="text-[11px] text-slate-500 leading-normal">
-                      Bằng cách đăng ký, bạn đồng ý với{' '}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onNavigateToPrivacy) {
-                            onNavigateToPrivacy();
-                          } else {
-                            onNavigateHome();
-                          }
-                        }}
-                        className="text-orange-600 hover:underline cursor-pointer font-bold text-[11px]"
-                      >
-                        Chính sách bảo mật
-                      </button>{' '}
-                      của CIC Technology.
-                    </p>
-                  </form>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-orange-50 border border-orange-200 p-4 text-orange-950 text-xs font-bold text-center max-w-lg mx-auto rounded-xl"
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => onOpenConsultation?.()}
+                    className="bg-orange-600 hover:bg-orange-500 active:scale-95 text-white px-6 py-2.5 sm:py-3 text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 rounded-[8px] cursor-pointer"
                   >
-                    Cảm ơn bạn đã đăng ký! Chúng tôi đã ghi nhận email của bạn.
-                  </motion.div>
-                )}
+                    <span>Liên hệ tư vấn</span>
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
               </div>
             </motion.section>
 

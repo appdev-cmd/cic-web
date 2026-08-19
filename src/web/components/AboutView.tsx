@@ -203,7 +203,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 pt-16" 
             aria-hidden="true"
           >
-            <div className="w-[320px] sm:w-[460px] md:w-[580px] lg:w-[680px] max-w-[88vw] aspect-square opacity-[0.08]">
+            <div className="w-[240px] sm:w-[340px] md:w-[420px] lg:w-[480px] max-w-[70vw] aspect-square opacity-[0.04]">
               <img 
                 src="/logo CIC-12.png" 
                 alt="" 
@@ -218,7 +218,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             aria-hidden="true"
           >
             <div className="sticky top-1/2 -translate-y-1/2 flex items-center justify-center w-full min-h-[400px]">
-              <div className="w-[320px] sm:w-[460px] md:w-[580px] lg:w-[680px] max-w-[88vw] aspect-square opacity-[0.085] transition-opacity duration-300">
+              <div className="w-[240px] sm:w-[340px] md:w-[420px] lg:w-[480px] max-w-[70vw] aspect-square opacity-[0.045] transition-opacity duration-300">
                 <img 
                   src="/logo CIC-12.png" 
                   alt="" 
@@ -260,9 +260,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                           Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng, quyết đoán, và năng động cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm. Chúng tôi luôn gắn bó với sứ mệnh: “Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ công nghệ thông tin hiện đại, có tính ứng dụng cao để hỗ trợ các kỹ sư, doanh nghiệp, cơ quan nghiên cứu, các nhà quản lý trong công tác nghiên cứu, sản xuất, điều hành tại Việt Nam và các nước trong khu vực; đồng thời không ngừng phát triển nhằm góp phần vào sự hội nhập và phát triển chung của đất nước, đem lại thu nhập cao ổn định cho cán bộ công nhân viên cũng như hài hoà với lợi ích của cổ đông.”
                         </p>
                       </div>
-                      <div className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-slate-900">
+                      <div className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black">
                         <iframe 
-                          className="w-full h-full rounded-[10px]"
+                          className="w-full h-full scale-[1.03] origin-center"
                           src="https://www.youtube.com/embed/hdLFK_09-tU?start=448" 
                           title="YouTube video player" 
                           frameBorder="0" 
@@ -328,7 +328,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                       {/* Left: Illustration */}
                       <div className="relative aspect-[4/5] rounded-[10px] overflow-hidden shadow-sm group hidden lg:block">
-                        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 rounded-[10px]" />
+                        <img src="/35nam_cic_1.JPG" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
                       </div>
 
@@ -825,10 +825,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                   </div>
                   
                   <a 
-                    href="mailto:info@cic.com.vn?subject=Yeu%20cau%20ho%20so%20nang%20luc%20CIC" 
+                    href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf" 
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-sm hover:bg-orange-700 transition-colors inline-flex items-center gap-3 rounded-[8px] shadow-lg shadow-orange-600/30 cursor-pointer"
                   >
-                    <Download size={20} /> Tải hồ sơ năng lực (Profile)
+                    <ArrowUpRight size={20} /> Hồ sơ năng lực (Profile)
                   </a>
                 </div>
               </div>

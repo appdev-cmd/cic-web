@@ -6,9 +6,9 @@ export const eventsData: EventItem[] = [
   // =========================================================================
   {
     id: 'ai-smartport-vietnam-2026',
-    title: 'Hội thảo: “Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam thập kỷ tới”',
+    title: 'Hội thảo: Đột Phá Ứng Dụng AI Trong Vận Hành Cảng Biển Việt Nam Thập Kỷ Tới',
     shortDesc: 'Công ty Cổ phần Công nghệ và Tư vấn CIC phối hợp cùng ERIC C&C – Hàn Quốc tổ chức hội thảo trực tuyến chia sẻ xu hướng Smart Port, Digital Twin, AI và TOS trong vận hành cảng biển.',
-    longDesc: `<p style="text-align: center;"><img alt="Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam" src="https://www.cic.com.vn/upload_images/images/2026/STC/D%E1%BB%99t_pha_%E1%BB%A9ng_d%E1%BB%A5ng_AI_trong_v%E1%BA%ADn_hanh_c%E1%BA%A3ng_bi%E1%BB%83n_(1).png" style="width: 750px; max-width: 100%; height: auto; border-radius: 8px;" /></p>
+    longDesc: `<p style="text-align: center;"><img alt="Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam" src="https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png" style="width: 750px; max-width: 100%; height: auto; border-radius: 8px;" /></p>
 
 <p style="text-align: justify;"><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Trong bối cảnh dòng chảy thương mại quốc tế không ngừng gia tăng và áp lực tự động hóa chuỗi cung ứng logistics toàn cầu ngày càng gay gắt, việc nâng cao năng suất bến cảng, rút ngắn thời gian giải phóng tàu và giảm thiểu rủi ro vận hành đã trở thành mục tiêu chiến lược của ngành hàng hải Việt Nam. Nhằm chia sẻ những xu hướng và giải pháp công nghệ tiên phong trong phát triển cảng thông minh (Smart Port), <strong>Công ty Cổ phần Công nghệ và Tư vấn CIC</strong> phối hợp cùng đối tác chiến lược <strong>ERIC C&amp;C – Hàn Quốc</strong> trân trọng tổ chức hội thảo trực tuyến chuyên đề: <strong>“Đột phá ứng dụng AI trong vận hành cảng biển Việt Nam thập kỷ tới”</strong>.</span></span></p>
 
@@ -121,11 +121,11 @@ export const eventsData: EventItem[] = [
 <p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Email tiếp nhận thông tin:</span></span></strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"> <a href="mailto:huyentran@cic.com.vn">huyentran@cic.com.vn</a> | <a href="mailto:info@cic.com.vn">info@cic.com.vn</a></span></span></p>
 
 <p><strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;">Website:</span></span></strong><span style="font-size:18px;"><span style="font-family:Times New Roman,Times,serif;"> <a href="https://www.cic.com.vn" target="_blank" rel="noopener noreferrer">https://www.cic.com.vn</a></span></span></p>`,
-    img: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80',
-    date: '19/08/2026',
+    img: 'https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png',
+    date: '19/08/2026 08:30',
     startDate: '2026-08-19T08:30:00',
-    location: 'Trực tuyến qua Zoom',
-    address: 'Nền tảng Zoom Meeting Trực tuyến - CIC Tech & ERIC C&C',
+    location: 'Online',
+    address: 'Hội thảo Trực tuyến qua Zoom',
     eventType: 'Hội thảo Trực tuyến',
     status: 'upcoming',
     isOpenRegistration: true,

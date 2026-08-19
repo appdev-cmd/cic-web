@@ -82,6 +82,7 @@ export const HomeView = ({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectSearchQuery, setProjectSearchQuery] = useState('');
   const [hoveredProjectIndex, setHoveredProjectIndex] = useState<number | null>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
   // Contact form states
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -292,9 +293,14 @@ export const HomeView = ({
                 >
                   Khám phá hành trình CIC <ArrowRight size={15} />
                 </button>
-                <button className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-slate-900 rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-xs border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2 cursor-pointer">
-                  Tải Hồ sơ năng lực <Download size={15} />
-                </button>
+                <a 
+                  href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-slate-900 rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-xs border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2 cursor-pointer"
+                >
+                  Hồ sơ năng lực <ArrowUpRight size={15} />
+                </a>
               </div>
             </motion.div>
             
@@ -303,22 +309,44 @@ export const HomeView = ({
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="group relative rounded-[16px] sm:rounded-[20px] overflow-hidden shadow-2xl border border-slate-200/90 aspect-video cursor-pointer"
-              onClick={() => window.open('https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s', '_blank')}
+              className="relative rounded-[16px] sm:rounded-[20px] overflow-hidden shadow-2xl border border-slate-200/90 aspect-video bg-slate-900"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&q=80" 
-                alt="Office" 
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-[16px] sm:rounded-[20px]"
-              />
-              <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-all flex items-center justify-center">
-                <div className="relative">
-                  <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-[8px] flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
-                    <Play size={22} fill="white" className="ml-0.5" />
+              {!isVideoPlaying ? (
+                <div 
+                  className="group relative w-full h-full cursor-pointer"
+                  onClick={() => setIsVideoPlaying(true)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Phát video giới thiệu CIC"
+                >
+                  <img 
+                    src="https://img.youtube.com/vi/hdLFK_09-tU/maxresdefault.jpg" 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://img.youtube.com/vi/hdLFK_09-tU/hqdefault.jpg';
+                    }}
+                    alt="Video giới thiệu CIC" 
+                    className="w-full h-full object-cover scale-[1.18] group-hover:scale-[1.25] transition-transform duration-700 ease-out origin-center"
+                  />
+                  <div className="absolute inset-0 bg-transparent group-hover:bg-slate-950/15 transition-all flex items-center justify-center">
+                    <div className="relative">
+                      <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-[8px] flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
+                        <Play size={22} fill="white" className="ml-0.5" />
+                      </div>
+                      <div className="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-orange-600 rounded-[8px] animate-ping opacity-20"></div>
+                    </div>
                   </div>
-                  <div className="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-orange-600 rounded-[8px] animate-ping opacity-20"></div>
                 </div>
-              </div>
+              ) : (
+                <iframe 
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/hdLFK_09-tU?start=448&autoplay=1" 
+                  title="YouTube video player" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  allowFullScreen
+                ></iframe>
+              )}
             </motion.div>
           </div>
         </div>
@@ -826,27 +854,27 @@ export const HomeView = ({
               viewport={{ once: true }}
               className="lg:col-span-7 bg-slate-900/40 rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group"
             >
-              <div className="h-[360px] md:h-[400px] overflow-hidden relative">
-                <img src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" alt="Special Event" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 rounded-[10px]" />
-                <div className="absolute top-6 left-6 px-4 py-1.5 bg-orange-600 text-white rounded-[8px] text-xs font-black uppercase tracking-widest shadow-xl">Hot Event</div>
+              <div className="h-[280px] sm:h-[340px] md:h-[380px] overflow-hidden relative bg-slate-950 flex items-center justify-center">
+                <img src="https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png" alt="Hội thảo AI Cảng biển" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                <div className="absolute top-4 left-4 px-3 py-1 bg-red-600 text-white rounded-[4px] text-xs font-black uppercase tracking-wider shadow-xl">Sắp diễn ra</div>
                 {/* Logo Overlay */}
-                <div className="absolute top-6 right-6 z-10 transition-all duration-300 group-hover:scale-105">
+                <div className="absolute top-4 right-4 z-10 transition-all duration-300 group-hover:scale-105">
                   <img src="/logo.png" alt="CIC Logo" className="h-6 md:h-8 w-auto object-contain drop-shadow-xl" />
                 </div>
               </div>
               <div className="p-6 md:p-8">
-                <h3 className="text-2xl md:text-3xl font-black text-white mb-3 group-hover:text-orange-600 transition-colors">[Sự kiện tháng 4] Bentley Innovation Day 2026 tại TP. Hồ Chí Minh</h3>
-                <p className="text-slate-400 mb-5 leading-relaxed text-base">
-                  Định hình tương lai số cho hạ tầng Việt Nam. Khám phá các công nghệ quản lý tài sản, BIM và Digital Twins tiên tiến nhất từ Bentley Systems.
+                <h3 className="text-xl md:text-2xl font-black text-white mb-3 group-hover:text-orange-600 transition-colors">Hội thảo: Đột Phá Ứng Dụng AI Trong Vận Hành Cảng Biển Việt Nam Thập Kỷ Tới</h3>
+                <p className="text-slate-400 mb-5 leading-relaxed text-sm md:text-base">
+                  Khám phá xu hướng Smart Port, Digital Twin kết hợp Terminal Operating System (TOS) và các giải pháp AI tối ưu hóa hoạt động khai thác cảng biển.
                 </p>
                 <div className="flex flex-wrap gap-6 text-slate-300 mb-6">
-                  <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><Calendar size={18} className="text-orange-600" /> Tháng 04/2026</div>
-                  <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><MapPin size={18} className="text-orange-600" /> TP. Hồ Chí Minh</div>
+                  <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><Calendar size={18} className="text-orange-600" /> 19/08/2026 08:30</div>
+                  <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><MapPin size={18} className="text-orange-600" /> Online (Zoom)</div>
                 </div>
                 <button 
                   onClick={() => {
                     if (setActiveEventId && setIsRegisteringEvent) {
-                      setActiveEventId('bim-digital-twins-2026');
+                      setActiveEventId('ai-smartport-vietnam-2026');
                       setIsRegisteringEvent(true);
                     }
                     setCurrentView('events');
