@@ -417,9 +417,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
                       return (
                         <tr
                           key={art.id}
-                          className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
-                            isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                          }`}
+                          className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                         >
                           {/* Checkbox */}
                           <td className={`p-3 text-center ${getRowPadding()}`}>

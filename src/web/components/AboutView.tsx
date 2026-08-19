@@ -116,15 +116,6 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
 
   return (
     <div className="pt-24 bg-transparent min-h-screen relative">
-      {/* 1 Fixed Background Watermark - Follows along viewport on scroll & visible clearly */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[480px] md:w-[600px] lg:w-[700px] aspect-square opacity-[0.075] pointer-events-none select-none z-0">
-        <img 
-          src="/logo CIC-12.png" 
-          alt="CIC Logo Watermark" 
-          className="w-full h-full object-contain filter grayscale contrast-125" 
-        />
-      </div>
-
       {/* Visual Top Hero Banner */}
       <section className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -203,8 +194,43 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
         </div>
       </div>
 
-      {/* Main Dynamic View Content */}
-      <div className="max-w-7xl mx-auto px-6 pt-4 md:pt-6 pb-12 lg:pb-16">
+      {/* Main Dynamic View Content Container */}
+      <div className="relative min-h-[600px]">
+        {/* Contained Brand Watermark */}
+        {activeTab === 'structure' ? (
+          /* Static Watermark for Structure Page - Fully fixed & centered behind the organization diagram */
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 pt-16" 
+            aria-hidden="true"
+          >
+            <div className="w-[320px] sm:w-[460px] md:w-[580px] lg:w-[680px] max-w-[88vw] aspect-square opacity-[0.08]">
+              <img 
+                src="/logo CIC-12.png" 
+                alt="" 
+                className="w-full h-full object-contain filter grayscale contrast-125" 
+              />
+            </div>
+          </div>
+        ) : (
+          /* Scrolling Watermark for Overview & Experience - Locks in the vertical center of the screen while scrolling */
+          <div 
+            className="absolute inset-0 pointer-events-none select-none z-0" 
+            aria-hidden="true"
+          >
+            <div className="sticky top-1/2 -translate-y-1/2 flex items-center justify-center w-full min-h-[400px]">
+              <div className="w-[320px] sm:w-[460px] md:w-[580px] lg:w-[680px] max-w-[88vw] aspect-square opacity-[0.085] transition-opacity duration-300">
+                <img 
+                  src="/logo CIC-12.png" 
+                  alt="" 
+                  className="w-full h-full object-contain filter grayscale contrast-125" 
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Dynamic View Content */}
+        <div className="max-w-7xl mx-auto px-6 pt-4 md:pt-6 pb-12 lg:pb-16 relative z-10">
         
         {/* ==================== 1. TỔNG QUAN DOANH NGHIỆP ==================== */}
         {activeTab === 'overview' && (
@@ -809,6 +835,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
             </div>
           </motion.div>
         )}
+        </div>
       </div>
     </div>
   );

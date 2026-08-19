@@ -16,16 +16,22 @@ import {
   FileText,
   MousePointer2,
   Globe,
+  UserCheck,
+  MessageSquare,
 } from 'lucide-react';
 import { CustomerRequest, RequestListTabType, RequestFilterState } from './types';
 import type { CustomerRequestModuleData } from '../../../data/CustomerInteractionDataSource';
 import { RequestList } from './components/RequestList';
 import { RequestDetailPage } from './components/RequestDetailPage';
+import { RequestReassignModal } from './components/RequestReassignModal';
+import { RequestQuickNotesModal } from './components/RequestQuickNotesModal';
 import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsTabs } from '../../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
+import { StaffMember } from '../../contacts/types';
+import { MOCK_STAFF_MEMBERS } from '../../contacts/mockData';
 
 interface CustomerRequestManagerProps {
   data: CustomerRequestModuleData;
@@ -41,6 +47,23 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   });
   const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
   const [selectedRequest, setSelectedRequest] = useState<CustomerRequest | null>(null);
+
+  // Modals state
+  const [reassignModalData, setReassignModalData] = useState<{
+    isOpen: boolean;
+    requests: CustomerRequest[];
+  }>({
+    isOpen: false,
+    requests: [],
+  });
+
+  const [notesModalData, setNotesModalData] = useState<{
+    isOpen: boolean;
+    request: CustomerRequest | null;
+  }>({
+    isOpen: false,
+    request: null,
+  });
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -104,6 +127,9 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
 
   const assigneeOptions = useMemo(() => {
     const map = new Map<string, string>();
+    MOCK_STAFF_MEMBERS.forEach((m) => {
+      map.set(m.id, m.name);
+    });
     requests.forEach((r) => {
       if (r.assignedUserId && r.assignedUserName) {
         map.set(r.assignedUserId, r.assignedUserName);
@@ -322,35 +348,123 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   const handleAddNote = (requestId: string, noteContent: string) => {
-    setRequests(
-      requests.map((r) =>
-        r.id === requestId
-          ? {
-              ...r,
-              internalNotes: [
-                ...r.internalNotes,
-                {
-                  id: `note_${Date.now()}`,
-                  content: noteContent,
-                  createdBy: 'Current User',
-                  createdByName: 'Current User',
-                  createdAt: new Date().toISOString(),
-                },
-              ],
-              logs: [
-                ...r.logs,
-                {
-                  id: `log_${Date.now()}`,
-                  actionType: 'note_added',
-                  createdBy: 'Current User',
-                  createdByName: 'Current User',
-                  createdAt: new Date().toISOString(),
-                },
-              ],
-            }
-          : r
-      )
+    const now = new Date().toISOString();
+    const newNote = {
+      id: `note_${Date.now()}`,
+      content: noteContent.trim(),
+      createdBy: 'current_user',
+      createdByName: 'Quản trị viên',
+      createdAt: now,
+    };
+    const newLog = {
+      id: `log_${Date.now()}`,
+      actionType: 'note_added',
+      createdBy: 'current_user',
+      createdByName: 'Quản trị viên',
+      createdAt: now,
+    };
+
+    setRequests((prev) =>
+      prev.map((r) => {
+        if (r.id === requestId) {
+          const updated = {
+            ...r,
+            internalNotes: [...(r.internalNotes || []), newNote],
+            logs: [...(r.logs || []), newLog],
+            updatedAt: now,
+          };
+          if (selectedRequest?.id === requestId) {
+            setSelectedRequest(updated);
+          }
+          if (notesModalData.isOpen && notesModalData.request?.id === requestId) {
+            setNotesModalData({ isOpen: true, request: updated });
+          }
+          return updated;
+        }
+        return r;
+      })
     );
+  };
+
+  const handleConfirmReassign = (requestIds: string[], targetStaff: StaffMember, reason: string) => {
+    const now = new Date().toISOString();
+    setRequests((prev) =>
+      prev.map((r) => {
+        if (requestIds.includes(r.id)) {
+          const oldName = r.assignedUserName || 'Chưa phân công';
+          const newNotes = reason.trim()
+            ? [
+                ...(r.internalNotes || []),
+                {
+                  id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+                  content: `[Chuyển giao người phụ trách] Từ "${oldName}" sang "${targetStaff.name}". Lý do: ${reason.trim()}`,
+                  createdBy: 'current_user',
+                  createdByName: 'Quản trị viên',
+                  createdAt: now,
+                },
+              ]
+            : r.internalNotes || [];
+
+          const updated: CustomerRequest = {
+            ...r,
+            assignedUserId: targetStaff.id,
+            assignedUserName: targetStaff.name,
+            internalNotes: newNotes,
+            updatedAt: now,
+            logs: [
+              ...(r.logs || []),
+              {
+                id: `log_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+                actionType: 'reassigned',
+                oldValue: oldName,
+                newValue: targetStaff.name,
+                createdBy: 'current_user',
+                createdByName: 'Quản trị viên',
+                createdAt: now,
+              },
+            ],
+          };
+
+          if (selectedRequest?.id === r.id) {
+            setSelectedRequest(updated);
+          }
+          return updated;
+        }
+        return r;
+      })
+    );
+    setSelectedRequestIds([]);
+  };
+
+  const handleOpenReassignSingle = (request: CustomerRequest) => {
+    setReassignModalData({
+      isOpen: true,
+      requests: [request],
+    });
+  };
+
+  const handleOpenReassignBulk = () => {
+    const targetRequests = requests.filter((r) => selectedRequestIds.includes(r.id));
+    if (targetRequests.length > 0) {
+      setReassignModalData({
+        isOpen: true,
+        requests: targetRequests,
+      });
+    }
+  };
+
+  const handleOpenNotesModal = (request: CustomerRequest) => {
+    setNotesModalData({
+      isOpen: true,
+      request,
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Bạn có chắc chắn muốn xóa ${selectedRequestIds.length} yêu cầu đã chọn?`)) {
+      setRequests((prev) => prev.filter((r) => !selectedRequestIds.includes(r.id)));
+      setSelectedRequestIds([]);
+    }
   };
 
   const handleTabChange = (tab: RequestListTabType) => {
@@ -383,7 +497,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   const handleAssignUser = (id: string, userId: string) => {
-    console.log('Assign user:', id, userId);
+    const staff = MOCK_STAFF_MEMBERS.find((s) => s.id === userId);
+    if (staff) {
+      handleConfirmReassign([id], staff, 'Phân công trực tiếp');
+    }
   };
 
   const handleBackToList = () => {
@@ -638,21 +755,22 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             onClear={() => setSelectedRequestIds([])}
             actions={[
               {
-                label: 'Phân công',
-                onClick: () => console.log('Assign'),
+                label: 'Gán người phụ trách',
+                onClick: handleOpenReassignBulk,
               },
               {
                 label: 'Đổi trạng thái',
-                onClick: () => console.log('Change status'),
-              },
-              {
-                label: 'Thêm tag',
-                onClick: () => console.log('Add tag'),
+                onClick: () => {
+                  selectedRequestIds.forEach((id) => {
+                    const req = requests.find((r) => r.id === id);
+                    if (req) handleQuickStatusToggle(id, req.status);
+                  });
+                },
               },
               {
                 label: 'Xóa',
                 variant: 'danger',
-                onClick: () => console.log('Delete'),
+                onClick: handleBulkDelete,
               },
             ]}
           />
@@ -668,6 +786,8 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             onDuplicateRequest={handleDuplicateRequest}
             onDeleteRequest={handleDeleteRequest}
             onQuickStatusToggle={handleQuickStatusToggle}
+            onReassignRequest={handleOpenReassignSingle}
+            onOpenNotesModal={handleOpenNotesModal}
           />
         </>
       ) : (
@@ -678,11 +798,28 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             request={selectedRequest}
             onBack={handleBackToList}
             onAssignUser={handleAssignUser}
+            onReassignRequest={handleOpenReassignSingle}
             onUpdateStatus={handleChangeStatus}
             onAddNote={handleAddNote}
           />
         )
       )}
+
+      {/* Modal: Gán / Chuyển giao người phụ trách */}
+      <RequestReassignModal
+        isOpen={reassignModalData.isOpen}
+        requests={reassignModalData.requests}
+        onClose={() => setReassignModalData({ isOpen: false, requests: [] })}
+        onConfirmReassign={handleConfirmReassign}
+      />
+
+      {/* Modal: Ghi chú nội bộ nhanh */}
+      <RequestQuickNotesModal
+        isOpen={notesModalData.isOpen}
+        request={notesModalData.request}
+        onClose={() => setNotesModalData({ isOpen: false, request: null })}
+        onAddNote={handleAddNote}
+      />
     </div>
   );
 };

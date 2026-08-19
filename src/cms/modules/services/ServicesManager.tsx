@@ -522,9 +522,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                   return (
                     <tr
                       key={item.id}
-                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                        isSelected ? 'bg-orange-50/30 dark:bg-orange-950/20' : ''
-                      }`}
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                     >
                       {/* Checkbox */}
                       <td className="p-3 text-center sticky left-0 bg-white dark:bg-slate-900 z-10">

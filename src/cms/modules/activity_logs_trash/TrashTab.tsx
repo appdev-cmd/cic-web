@@ -181,9 +181,7 @@ export const TrashTab: React.FC<TrashTabProps> = ({
                   return (
                     <tr
                       key={item.id}
-                      className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors ${
-                        isSelected ? 'bg-orange-500/5' : ''
-                      }`}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                     >
                       <td className="py-3.5 px-4 text-center">
                         <CmsSelectionCheckbox

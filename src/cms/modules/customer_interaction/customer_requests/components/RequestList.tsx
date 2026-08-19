@@ -12,6 +12,11 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  UserCheck,
+  UserPlus,
+  MessageSquare,
+  Plus,
+  StickyNote,
 } from 'lucide-react';
 import { CustomerRequest, RequestListTabType } from '../types';
 import { REQUEST_STATUS_LABELS } from '../../shared/constants/statusTypes';
@@ -28,6 +33,8 @@ interface RequestListProps {
   onDuplicateRequest: (request: CustomerRequest) => void;
   onDeleteRequest: (id: string) => void;
   onQuickStatusToggle: (id: string, currentStatus: string) => void;
+  onReassignRequest?: (request: CustomerRequest) => void;
+  onOpenNotesModal?: (request: CustomerRequest) => void;
 }
 
 export const RequestList: React.FC<RequestListProps> = ({
@@ -40,6 +47,8 @@ export const RequestList: React.FC<RequestListProps> = ({
   onDuplicateRequest,
   onDeleteRequest,
   onQuickStatusToggle,
+  onReassignRequest,
+  onOpenNotesModal,
 }) => {
   const isAllSelected = requests.length > 0 && selectedRequestIds.length === requests.length;
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,11 +103,6 @@ export const RequestList: React.FC<RequestListProps> = ({
     return phoneField?.valueText || '';
   };
 
-  const getCustomerCompany = (request: CustomerRequest): string => {
-    const companyField = request.submissionValues.find((v) => v.fieldKey === 'company' || v.fieldType === 'text');
-    return companyField?.valueText || '';
-  };
-
   const formatRelativeTime = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -128,14 +132,15 @@ export const RequestList: React.FC<RequestListProps> = ({
                   className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                 />
               </th>
-              <th className="p-3 min-w-[180px]">Khách hàng</th>
-              <th className="p-3 min-w-[120px]">Điện thoại</th>
-              <th className="p-3 min-w-[140px]">Biểu mẫu</th>
-              <th className="p-3 min-w-[130px]">CTA</th>
-              <th className="p-3 min-w-[150px]">Trang</th>
-              <th className="p-3 min-w-[120px]">Ngày gửi</th>
-              <th className="p-3 min-w-[120px]">Trạng thái</th>
-              <th className="p-3 w-28 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">Thao tác</th>
+              <th className="p-3 min-w-[170px]">Khách hàng</th>
+              <th className="p-3 min-w-[110px]">Điện thoại</th>
+              <th className="p-3 min-w-[130px]">Biểu mẫu & CTA</th>
+              <th className="p-3 min-w-[130px]">Trang gửi</th>
+              <th className="p-3 min-w-[110px]">Ngày gửi</th>
+              <th className="p-3 min-w-[160px]">Người phụ trách</th>
+              <th className="p-3 min-w-[160px]">Ghi chú</th>
+              <th className="p-3 min-w-[110px]">Trạng thái</th>
+              <th className="p-3 w-32 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">Thao tác</th>
             </tr>
           </thead>
 
@@ -146,13 +151,13 @@ export const RequestList: React.FC<RequestListProps> = ({
               const phone = getCustomerPhone(request);
               const email = getCustomerEmail(request);
               const name = getCustomerName(request);
+              const notesCount = request.internalNotes?.length || 0;
+              const latestNote = notesCount > 0 ? request.internalNotes[notesCount - 1] : null;
 
               return (
                 <tr
                   key={request.id}
-                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                    isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                  }`}
+                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                 >
                   {/* Checkbox */}
                   <td className="p-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
@@ -169,12 +174,12 @@ export const RequestList: React.FC<RequestListProps> = ({
                     <button
                       type="button"
                       onClick={() => onViewRequest(request)}
-                      className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 text-left line-clamp-1 transition-colors"
+                      className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 text-left line-clamp-1 transition-colors cursor-pointer"
                     >
                       {name}
                     </button>
                     {email && (
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[160px]">
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[150px]">
                         {email}
                       </div>
                     )}
@@ -195,27 +200,21 @@ export const RequestList: React.FC<RequestListProps> = ({
                     )}
                   </td>
 
-                  {/* Biểu mẫu */}
+                  {/* Biểu mẫu & CTA */}
                   <td className="p-3">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">
+                    <div className="font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">
                       {request.sourceConfig.formName || '—'}
-                    </span>
-                  </td>
-
-                  {/* CTA */}
-                  <td className="p-3">
-                    {request.sourceConfig.ctaName ? (
-                      <span className="inline-block bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-[11px] font-medium truncate max-w-[120px]">
+                    </div>
+                    {request.sourceConfig.ctaName && (
+                      <span className="inline-block bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded text-[10px] font-medium truncate max-w-[130px] mt-0.5">
                         {request.sourceConfig.ctaName}
                       </span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
                     )}
                   </td>
 
                   {/* Trang */}
                   <td className="p-3">
-                    <div className="line-clamp-1 font-medium text-slate-700 dark:text-slate-300" title={request.sourceConfig.pageUrl}>
+                    <div className="line-clamp-1 font-medium text-slate-700 dark:text-slate-300 max-w-[140px]" title={request.sourceConfig.pageUrl}>
                       {request.sourceConfig.pageTitle || request.sourceConfig.pageUrl || '—'}
                     </div>
                   </td>
@@ -227,12 +226,87 @@ export const RequestList: React.FC<RequestListProps> = ({
                     </div>
                   </td>
 
+                  {/* Người phụ trách (Assignee Column) */}
+                  <td className="p-3">
+                    {request.assignedUserName ? (
+                      <div className="flex items-center gap-2 group">
+                        <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-center text-[10px] shrink-0 border border-orange-200 dark:border-orange-900">
+                          {request.assignedUserName.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => onReassignRequest?.(request)}
+                            className="font-bold text-slate-800 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 truncate block text-left transition-colors cursor-pointer text-xs"
+                            title="Bấm để đổi người phụ trách"
+                          >
+                            {request.assignedUserName}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onReassignRequest?.(request)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 rounded transition-all cursor-pointer"
+                          title="Đổi người phụ trách"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onReassignRequest?.(request)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-orange-500 hover:text-orange-600 dark:hover:text-orange-400 text-[11px] font-medium transition-colors cursor-pointer bg-slate-50/50 dark:bg-slate-800/40"
+                        title="Bấm để gán nhân sự phụ trách"
+                      >
+                        <UserPlus className="w-3 h-3" />
+                        <span>Chưa phân công</span>
+                      </button>
+                    )}
+                  </td>
+
+                  {/* Ghi chú (Notes Column) */}
+                  <td className="p-3">
+                    {notesCount > 0 && latestNote ? (
+                      <div className="space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => onOpenNotesModal?.(request)}
+                          className="flex items-center gap-1.5 text-left group cursor-pointer"
+                          title={`Xem toàn bộ ${notesCount} ghi chú`}
+                        >
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[10px] font-bold shrink-0 border border-blue-200/60 dark:border-blue-900/60">
+                            <MessageSquare className="w-2.5 h-2.5" />
+                            {notesCount}
+                          </span>
+                          <span className="text-[11px] text-slate-600 dark:text-slate-300 truncate max-w-[110px] group-hover:text-orange-600 dark:group-hover:text-orange-400">
+                            {latestNote.content}
+                          </span>
+                        </button>
+                        <div className="text-[9px] text-slate-400 truncate">
+                          bởi {latestNote.createdByName}
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onOpenNotesModal?.(request)}
+                        className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors cursor-pointer"
+                        title="Thêm ghi chú xử lý"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Thêm ghi chú</span>
+                      </button>
+                    )}
+                  </td>
+
                   {/* Trạng thái */}
                   <td className="p-3">
                     <button
                       type="button"
                       onClick={() => onQuickStatusToggle(request.id, request.status)}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all ${getStatusColor(request.status)}`}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${getStatusColor(request.status)}`}
+                      title="Bấm để đổi nhanh trạng thái tiếp theo"
                     >
                       <StatusIcon className="w-3 h-3" />
                       <span>{REQUEST_STATUS_LABELS[request.status]}</span>
@@ -248,6 +322,20 @@ export const RequestList: React.FC<RequestListProps> = ({
                         size="sm"
                         aria-label="Xem chi tiết"
                         title="Xem chi tiết"
+                      />
+                      <CmsIconButton
+                        onClick={() => onReassignRequest?.(request)}
+                        icon={<UserCheck />}
+                        size="sm"
+                        aria-label="Gán người phụ trách"
+                        title="Gán người phụ trách"
+                      />
+                      <CmsIconButton
+                        onClick={() => onOpenNotesModal?.(request)}
+                        icon={<MessageSquare />}
+                        size="sm"
+                        aria-label="Ghi chú nội bộ"
+                        title="Ghi chú nội bộ"
                       />
                       <CmsIconButton
                         onClick={() => onDuplicateRequest(request)}
@@ -280,7 +368,19 @@ export const RequestList: React.FC<RequestListProps> = ({
           <p className="text-xs mt-1">Chưa có yêu cầu từ khách hàng</p>
         </div>
       )}
-      {requests.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={requests.length} itemLabel="yêu cầu" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
+      {requests.length > 0 && (
+        <CmsPagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalCount={requests.length}
+          itemLabel="yêu cầu"
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
+      )}
     </div>
   );
 };

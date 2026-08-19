@@ -481,11 +481,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                   return (
                     <tr
                       key={ev.id}
-                      className={`group transition-colors ${
-                        isSelected
-                          ? 'bg-orange-50/40 dark:bg-orange-950/20'
-                          : 'hover:bg-slate-50/60 dark:hover:bg-slate-800/40'
-                      }`}
+                      className="group transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
                     >
                       {/* Checkbox */}
                       <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>

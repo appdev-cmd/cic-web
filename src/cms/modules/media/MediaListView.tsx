@@ -93,9 +93,7 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
               return (
                 <tr
                   key={asset.id}
-                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
-                    isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                  }`}
+                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                 >
                   {/* Selection */}
                   <td className="p-3 text-center sticky left-0 bg-white dark:bg-slate-900 z-10">

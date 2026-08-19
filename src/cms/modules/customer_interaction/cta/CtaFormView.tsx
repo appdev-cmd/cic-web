@@ -59,6 +59,73 @@ const ICON_OPTIONS = [
   { value: 'MousePointer2', label: 'Con trỏ (MousePointer2)', icon: MousePointer2 },
 ];
 
+export const REAL_WEBSITE_PAGES = [
+  { value: '/', label: 'Trang chủ (/)' },
+  { value: '/gioi-thieu', label: 'Giới thiệu — Tổng quan (/gioi-thieu)' },
+  { value: '/gioi-thieu/co-cau-to-chuc', label: 'Giới thiệu — Cơ cấu tổ chức (/gioi-thieu/co-cau-to-chuc)' },
+  { value: '/gioi-thieu/nang-luc-kinh-nghiem', label: 'Giới thiệu — Năng lực & Kinh nghiệm (/gioi-thieu/nang-luc-kinh-nghiem)' },
+  { value: '/san-pham', label: 'Sản phẩm công nghệ (/san-pham)' },
+  { value: '/dich-vu', label: 'Dịch vụ chuyên sâu (/dich-vu)' },
+  { value: '/du-an', label: 'Dự án tiêu biểu (/du-an)' },
+  { value: '/tin-tuc', label: 'Tin tức & Góc nhìn (/tin-tuc)' },
+  { value: '/su-kien', label: 'Sự kiện & Hội thảo (/su-kien)' },
+  { value: '/lien-he', label: 'Liên hệ tư vấn (/lien-he)' },
+  { value: '/chinh-sach-bao-mat', label: 'Chính sách bảo mật (/chinh-sach-bao-mat)' },
+  { value: '/dieu-khoan-su-dung', label: 'Điều khoản sử dụng (/dieu-khoan-su-dung)' },
+];
+
+export const REAL_WEBSITE_SECTIONS = [
+  {
+    group: 'Trang chủ (Home)',
+    sections: [
+      { value: '#home-hero', label: '#home-hero — Hero Banner chính' },
+      { value: '#home-intro', label: '#home-intro — Giới thiệu & Video doanh nghiệp' },
+      { value: '#home-stats', label: '#home-stats — Thống kê năng lực 35+ năm' },
+      { value: '#home-awards', label: '#home-awards — Thành tựu & Giải thưởng' },
+      { value: '#home-ecosystem', label: '#home-ecosystem — Hệ sinh thái Sản phẩm & Dịch vụ' },
+      { value: '#home-projects', label: '#home-projects — Dự án tiêu biểu' },
+      { value: '#home-events', label: '#home-events — Sự kiện nổi bật' },
+      { value: '#home-news', label: '#home-news — Tin tức & Góc nhìn' },
+      { value: '#home-partners', label: '#home-partners — Đối tác chiến lược' },
+      { value: '#contact-form', label: '#contact-form — Form gửi yêu cầu tư vấn' },
+    ],
+  },
+  {
+    group: 'Trang Giới thiệu (About)',
+    sections: [
+      { value: '#about-overview', label: '#about-overview — Tổng quan doanh nghiệp' },
+      { value: '#about-timeline', label: '#about-timeline — Lịch sử & Tiến trình phát triển' },
+      { value: '#about-strategy', label: '#about-strategy — Tầm nhìn - Sứ mệnh - Giá trị cốt lõi' },
+      { value: '#about-offerings', label: '#about-offerings — Lĩnh vực kinh doanh & Dịch vụ' },
+      { value: '#about-structure', label: '#about-structure — Sơ đồ Cơ cấu tổ chức' },
+      { value: '#about-capacity', label: '#about-capacity — Năng lực doanh nghiệp' },
+      { value: '#about-experience', label: '#about-experience — Kinh nghiệm theo chuyên ngành' },
+      { value: '#about-partners', label: '#about-partners — Đối tác phần mềm & thiết bị' },
+    ],
+  },
+  {
+    group: 'Trang Dịch vụ (Services)',
+    sections: [
+      { value: '#services-list', label: '#services-list — Danh sách dịch vụ trọng tâm' },
+      { value: '#service-detail', label: '#service-detail — Khối chi tiết dịch vụ' },
+    ],
+  },
+  {
+    group: 'Trang Sản phẩm (Products)',
+    sections: [
+      { value: '#products-grid', label: '#products-grid — Danh mục sản phẩm công nghệ' },
+      { value: '#product-categories', label: '#product-categories — Bộ lọc phân loại sản phẩm' },
+    ],
+  },
+  {
+    group: 'Trang Liên hệ (Contact)',
+    sections: [
+      { value: '#contact-branches', label: '#contact-branches — Chi nhánh Hà Nội & TP.HCM' },
+      { value: '#contact-map', label: '#contact-map — Bản đồ Google Maps' },
+    ],
+  },
+];
+
 export const CtaFormView: React.FC<CtaFormViewProps> = ({
   cta,
   workspaceLocale,
@@ -501,25 +568,45 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                 </div>
               )}
 
-              {(formData.actionConfig.type === 'redirect_internal' ||
-                formData.actionConfig.type === 'redirect_external') && (
+              {formData.actionConfig.type === 'redirect_internal' && (
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                      Đường dẫn URL đích <span className="text-red-500">*</span>
+                      Chọn trang nội bộ đích <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={formData.actionConfig.url || ''}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          actionConfig: { ...formData.actionConfig, url: e.target.value },
-                        })
-                      }
-                      placeholder={formData.actionConfig.type === 'redirect_internal' ? '/giai-phap-erp' : 'https://cic.com.vn/dich-vu'}
-                      className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium"
-                    />
+                    <div className="space-y-2">
+                      <select
+                        value={REAL_WEBSITE_PAGES.some((p) => p.value === formData.actionConfig.url) ? formData.actionConfig.url : (formData.actionConfig.url ? '__custom__' : '')}
+                        onChange={(e) => {
+                          if (e.target.value !== '__custom__') {
+                            setFormData({
+                              ...formData,
+                              actionConfig: { ...formData.actionConfig, url: e.target.value },
+                            });
+                          }
+                        }}
+                        className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium cursor-pointer"
+                      >
+                        <option value="">-- Chọn trang nội bộ từ danh sách --</option>
+                        {REAL_WEBSITE_PAGES.map((page) => (
+                          <option key={page.value} value={page.value}>{page.label}</option>
+                        ))}
+                        <option value="__custom__">-- Tự nhập đường dẫn tùy chỉnh --</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        value={formData.actionConfig.url || ''}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            actionConfig: { ...formData.actionConfig, url: e.target.value },
+                          })
+                        }
+                        placeholder="Ví dụ: /gioi-thieu/nang-luc-kinh-nghiem hoặc /dich-vu"
+                        className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono text-xs"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-6">
@@ -557,23 +644,112 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                 </div>
               )}
 
+              {formData.actionConfig.type === 'redirect_external' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                      Đường dẫn URL bên ngoài <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.actionConfig.url || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          actionConfig: { ...formData.actionConfig, url: e.target.value },
+                        })
+                      }
+                      placeholder="https://cic.com.vn hoặc liên kết ngoài"
+                      className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-300">
+                      <input
+                        type="radio"
+                        name="openInNewTabExt"
+                        checked={formData.actionConfig.openInNewTab === true || formData.actionConfig.openInNewTab === undefined}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            actionConfig: { ...formData.actionConfig, openInNewTab: true },
+                          })
+                        }
+                        className="text-orange-600 focus:ring-orange-500"
+                      />
+                      Mở trong tab mới (_blank - Khuyên dùng cho link ngoài)
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-300">
+                      <input
+                        type="radio"
+                        name="openInNewTabExt"
+                        checked={formData.actionConfig.openInNewTab === false}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            actionConfig: { ...formData.actionConfig, openInNewTab: false },
+                          })
+                        }
+                        className="text-orange-600 focus:ring-orange-500"
+                      />
+                      Mở cùng tab hiện tại (_self)
+                    </label>
+                  </div>
+                </div>
+              )}
+
               {formData.actionConfig.type === 'scroll_to_section' && (
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                    Mã Element SectionID cần cuộn mượt tới <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.actionConfig.sectionId || ''}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        actionConfig: { ...formData.actionConfig, sectionId: e.target.value },
-                      })
-                    }
-                    placeholder="#section-contact-form"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                      Chọn Section trên trang cần cuộn mượt tới <span className="text-red-500">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      <select
+                        value={
+                          REAL_WEBSITE_SECTIONS.some((group) => group.sections.some((s) => s.value === formData.actionConfig.sectionId))
+                            ? formData.actionConfig.sectionId
+                            : (formData.actionConfig.sectionId ? '__custom__' : '')
+                        }
+                        onChange={(e) => {
+                          if (e.target.value !== '__custom__') {
+                            setFormData({
+                              ...formData,
+                              actionConfig: { ...formData.actionConfig, sectionId: e.target.value },
+                            });
+                          }
+                        }}
+                        className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium cursor-pointer"
+                      >
+                        <option value="">-- Chọn Section thực tế từ danh sách website --</option>
+                        {REAL_WEBSITE_SECTIONS.map((group) => (
+                          <optgroup key={group.group} label={group.group}>
+                            {group.sections.map((sec) => (
+                              <option key={sec.value} value={sec.value}>{sec.label}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                        <option value="__custom__">-- Tự nhập mã Section tùy chỉnh (#id) --</option>
+                      </select>
+
+                      <input
+                        type="text"
+                        value={formData.actionConfig.sectionId || ''}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            actionConfig: { ...formData.actionConfig, sectionId: e.target.value },
+                          })
+                        }
+                        placeholder="#contact-form hoặc #home-stats"
+                        className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/60 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Khi click vào nút, trình duyệt sẽ tự động cuộn mượt (smooth scroll) đến vị trí section đã chọn.
+                  </p>
                 </div>
               )}
 

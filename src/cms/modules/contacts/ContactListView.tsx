@@ -148,12 +148,10 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
                   return (
                     <tr
                       key={contact.id}
-                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group ${
-                        isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                      } ${contact.is_unread ? 'font-medium' : ''}`}
+                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group ${contact.is_unread ? 'font-medium' : ''}`}
                     >
                       {/* Sticky Selection */}
-                      <td className={`sticky left-0 z-10 ${rowPadding} ${isSelected ? 'bg-orange-50/90 dark:bg-slate-900' : 'bg-white dark:bg-slate-900'}`}>
+                      <td className={`sticky left-0 z-10 ${rowPadding} bg-white dark:bg-slate-900`}>
                         <CmsSelectionCheckbox
                           checked={isSelected}
                           onChange={() => onToggleSelectOne(contact.id)}
@@ -162,7 +160,7 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
                       </td>
 
                       {/* Sticky Request ID & Sender */}
-                      <td className={`sticky left-10 z-10 ${rowPadding} ${isSelected ? 'bg-orange-50/90 dark:bg-slate-900' : 'bg-white dark:bg-slate-900'}`}>
+                      <td className={`sticky left-10 z-10 ${rowPadding} bg-white dark:bg-slate-900`}>
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
                             <button

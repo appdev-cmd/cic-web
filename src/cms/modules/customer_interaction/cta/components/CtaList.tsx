@@ -106,9 +106,7 @@ export const CtaList: React.FC<CtaListProps> = ({
               return (
                 <tr
                   key={cta.id}
-                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                    isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                  }`}
+                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                 >
                   {/* Checkbox */}
                   <td className="p-3 sticky left-0 bg-white dark:bg-slate-900 z-10">

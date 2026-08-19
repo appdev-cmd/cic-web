@@ -357,179 +357,210 @@ export const Header = ({
         </AnimatePresence>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            className="fixed inset-0 z-[100] bg-slate-950 p-6 flex flex-col gap-8"
-          >
-            <div className="flex justify-between items-center">
-              <div className="text-2xl font-black text-white">CIC</div>
-              <button 
-                className="p-2 text-white" 
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <X size={32} />
-              </button>
-            </div>
-            <nav className="flex flex-col gap-4 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
-              {navLinks.map((link) => {
-                const hasDropdown = !!link.dropdown;
-                const isExpanded = expandedMobileMenu === link.name;
-                const isActive = (currentView === 'products' && link.name === 'Sản phẩm') || 
-                                 (currentView === 'about' && link.name === 'Giới thiệu') || 
-                                 (currentView === 'services' && link.name === 'Dịch vụ') || 
-                                 (currentView === 'projects' && link.name === 'Dự án') || 
-                                 (currentView === 'news' && link.name === 'Tin tức') || 
-                                 (currentView === 'events' && link.name === 'Sự kiện') || 
-                                 (currentView === 'contact' && link.name === 'Liên hệ') ||
-                                 (currentView === 'home' && activeLink === link.name);
-                return (
-                  <div key={link.name} className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <a 
-                        href={link.href}
-                        className={`text-2xl font-black transition-colors ${
-                          isActive ? 'text-orange-600' : 'text-white hover:text-orange-600'
-                        }`}
-                        onClick={(e) => {
-                          setMobileMenuOpen(false);
-                           if (link.name === 'Sản phẩm') {
-                             e.preventDefault();
-                             setCurrentView('products');
-                             setActiveLink('Sản phẩm');
-                             if (onResetProducts) onResetProducts();
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else if (link.name === 'Giới thiệu') {
-                             e.preventDefault();
-                             setCurrentView('about');
-                             setAboutSubTab('overview');
-                             setActiveLink('Giới thiệu');
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else if (link.name === 'Dịch vụ') {
-                             e.preventDefault();
-                             setCurrentView('services');
-                             setActiveLink('Dịch vụ');
-                             if (onSelectService) onSelectService(null);
-                             if (onResetServices) onResetServices();
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else if (link.name === 'Dự án') {
-                             e.preventDefault();
-                             setCurrentView('projects');
-                             setActiveLink('Dự án');
-                             if (onSelectProject) onSelectProject(null);
-                             if (onResetProjects) onResetProjects();
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else if (link.name === 'Tin tức') {
-                             e.preventDefault();
-                             setCurrentView('news');
-                             setActiveLink('Tin tức');
-                             if (onSelectNewsCategory) onSelectNewsCategory('all');
-                             if (onResetNews) onResetNews();
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else if (link.name === 'Sự kiện') {
-                             e.preventDefault();
-                             setCurrentView('events');
-                             setActiveLink('Sự kiện');
-                             if (onResetEvents) onResetEvents();
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else if (link.name === 'Liên hệ') {
-                             e.preventDefault();
-                             setCurrentView('contact');
-                             setActiveLink('Liên hệ');
-                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                           } else {
-                             setCurrentView('home');
-                             setActiveLink(link.name);
-                           }
-                         }}
-                      >
-                        {link.name}
-                      </a>
-                      {hasDropdown && (
-                        <button 
+          <div className="fixed inset-0 z-[100] flex justify-end">
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Slide-out Sidebar Panel */}
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="relative w-[85vw] max-w-[320px] sm:max-w-[360px] h-full bg-slate-900 border-l border-slate-800 p-5 sm:p-6 flex flex-col justify-between shadow-2xl z-10 overflow-hidden"
+            >
+              {/* Drawer Top Header */}
+              <div className="flex justify-between items-center pb-4 border-b border-slate-800 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <img 
+                    src="/logo.png" 
+                    alt="CIC Logo" 
+                    className="h-8 w-auto object-contain filter brightness-110" 
+                  />
+                  <span className="text-sm font-black tracking-wider text-white uppercase">CIC Technology</span>
+                </div>
+                <button 
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Đóng menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Drawer Navigation Links */}
+              <nav className="flex flex-col gap-1 overflow-y-auto my-4 pr-1 py-1 custom-scrollbar flex-1">
+                {navLinks.map((link) => {
+                  const hasDropdown = !!link.dropdown;
+                  const isExpanded = expandedMobileMenu === link.name;
+                  const isActive = (currentView === 'products' && link.name === 'Sản phẩm') || 
+                                   (currentView === 'about' && link.name === 'Giới thiệu') || 
+                                   (currentView === 'services' && link.name === 'Dịch vụ') || 
+                                   (currentView === 'projects' && link.name === 'Dự án') || 
+                                   (currentView === 'news' && link.name === 'Tin tức') || 
+                                   (currentView === 'events' && link.name === 'Sự kiện') || 
+                                   (currentView === 'contact' && link.name === 'Liên hệ') ||
+                                   (currentView === 'home' && activeLink === link.name);
+                  return (
+                    <div key={link.name} className="flex flex-col">
+                      <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors ${
+                        isActive ? 'bg-orange-500/10 text-orange-500 font-bold' : 'hover:bg-slate-800/60 text-slate-200 hover:text-white'
+                      }`}>
+                        <a 
+                          href={link.href}
+                          className="text-base font-semibold transition-colors flex-1"
                           onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedMobileMenu(isExpanded ? null : link.name);
+                            setMobileMenuOpen(false);
+                            if (link.name === 'Sản phẩm') {
+                              e.preventDefault();
+                              setCurrentView('products');
+                              setActiveLink('Sản phẩm');
+                              if (onResetProducts) onResetProducts();
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else if (link.name === 'Giới thiệu') {
+                              e.preventDefault();
+                              setCurrentView('about');
+                              setAboutSubTab('overview');
+                              setActiveLink('Giới thiệu');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else if (link.name === 'Dịch vụ') {
+                              e.preventDefault();
+                              setCurrentView('services');
+                              setActiveLink('Dịch vụ');
+                              if (onSelectService) onSelectService(null);
+                              if (onResetServices) onResetServices();
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else if (link.name === 'Dự án') {
+                              e.preventDefault();
+                              setCurrentView('projects');
+                              setActiveLink('Dự án');
+                              if (onSelectProject) onSelectProject(null);
+                              if (onResetProjects) onResetProjects();
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else if (link.name === 'Tin tức') {
+                              e.preventDefault();
+                              setCurrentView('news');
+                              setActiveLink('Tin tức');
+                              if (onSelectNewsCategory) onSelectNewsCategory('all');
+                              if (onResetNews) onResetNews();
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else if (link.name === 'Sự kiện') {
+                              e.preventDefault();
+                              setCurrentView('events');
+                              setActiveLink('Sự kiện');
+                              if (onResetEvents) onResetEvents();
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else if (link.name === 'Liên hệ') {
+                              e.preventDefault();
+                              setCurrentView('contact');
+                              setActiveLink('Liên hệ');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else {
+                              setCurrentView('home');
+                              setActiveLink(link.name);
+                            }
                           }}
-                          className="p-2 text-white hover:text-orange-600 focus:outline-none"
                         >
-                          <ChevronDown 
-                            size={24} 
-                            className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
-                          />
-                        </button>
+                          {link.name}
+                        </a>
+                        {hasDropdown && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedMobileMenu(isExpanded ? null : link.name);
+                            }}
+                            className="p-1 text-slate-400 hover:text-orange-500 focus:outline-none"
+                            aria-label={`Mở danh mục ${link.name}`}
+                          >
+                            <ChevronDown 
+                              size={18} 
+                              className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180 text-orange-500' : ''}`} 
+                            />
+                          </button>
+                        )}
+                      </div>
+                      {hasDropdown && isExpanded && (
+                        <div className="flex flex-col gap-0.5 pl-3 my-1 border-l-2 border-orange-500/40 ml-3 bg-slate-950/30 rounded-r-lg py-1">
+                          {link.dropdown?.map((subItem) => (
+                            <a
+                              key={subItem.name}
+                              href={subItem.href}
+                              className="text-sm font-normal text-slate-300 hover:text-orange-400 transition-colors py-1.5 px-2 rounded hover:bg-white/5"
+                              onClick={(e) => {
+                                setMobileMenuOpen(false);
+                                if (link.name === 'Giới thiệu') {
+                                  e.preventDefault();
+                                  setCurrentView('about');
+                                  setActiveLink('Giới thiệu');
+                                  if (subItem.name === 'Cơ cấu tổ chức') {
+                                    setAboutSubTab('structure');
+                                  } else if (subItem.name === 'Năng lực và Kinh nghiệm') {
+                                    setAboutSubTab('experience');
+                                  } else {
+                                    setAboutSubTab('overview');
+                                  }
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else if (link.name === 'Dịch vụ') {
+                                  e.preventDefault();
+                                  setCurrentView('services');
+                                  setActiveLink('Dịch vụ');
+                                  if (onSelectService) onSelectService(subItem.href);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else if (link.name === 'Tin tức') {
+                                  e.preventDefault();
+                                  setCurrentView('news');
+                                  setActiveLink('Tin tức');
+                                  if (onSelectNewsCategory) {
+                                    if (subItem.name === 'Tin công ty') onSelectNewsCategory('company');
+                                    else if (subItem.name === 'Tin chuyên ngành') onSelectNewsCategory('specialty');
+                                    else if (subItem.name === 'Tin tuyển dụng') onSelectNewsCategory('recruitment');
+                                    else if (subItem.name === 'Tin khuyến mại') onSelectNewsCategory('promotion');
+                                    else if (subItem.name === 'Quan hệ cổ đông') onSelectNewsCategory('shareholder');
+                                  }
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else {
+                                  setCurrentView('home');
+                                  setActiveLink(link.name);
+                                }
+                              }}
+                            >
+                              {subItem.name}
+                            </a>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    {hasDropdown && isExpanded && (
-                      <div className="flex flex-col gap-2 pl-4 border-l border-white/20 mt-1">
-                        {link.dropdown?.map((subItem) => (
-                          <a
-                            key={subItem.name}
-                            href={subItem.href}
-                            className="text-base font-normal text-slate-200 hover:text-orange-500 transition-colors py-1.5"
-                             onClick={(e) => {
-                              setMobileMenuOpen(false);
-                              if (link.name === 'Giới thiệu') {
-                                e.preventDefault();
-                                setCurrentView('about');
-                                setActiveLink('Giới thiệu');
-                                if (subItem.name === 'Cơ cấu tổ chức') {
-                                  setAboutSubTab('structure');
-                                } else if (subItem.name === 'Năng lực và Kinh nghiệm') {
-                                  setAboutSubTab('experience');
-                                } else {
-                                  setAboutSubTab('overview');
-                                }
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              } else if (link.name === 'Dịch vụ') {
-                                e.preventDefault();
-                                setCurrentView('services');
-                                setActiveLink('Dịch vụ');
-                                if (onSelectService) onSelectService(subItem.href);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              } else if (link.name === 'Tin tức') {
-                                e.preventDefault();
-                                setCurrentView('news');
-                                setActiveLink('Tin tức');
-                                if (onSelectNewsCategory) {
-                                  if (subItem.name === 'Tin công ty') onSelectNewsCategory('company');
-                                  else if (subItem.name === 'Tin chuyên ngành') onSelectNewsCategory('specialty');
-                                  else if (subItem.name === 'Tin tuyển dụng') onSelectNewsCategory('recruitment');
-                                  else if (subItem.name === 'Tin khuyến mại') onSelectNewsCategory('promotion');
-                                  else if (subItem.name === 'Quan hệ cổ đông') onSelectNewsCategory('shareholder');
-                                }
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              } else {
-                                setCurrentView('home');
-                                setActiveLink(link.name);
-                              }
-                            }}
-                          >
-                            {subItem.name}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </nav>
-            <div className="mt-auto pt-6 border-t border-white/10">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenConsultation?.();
-                }}
-                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-black text-center uppercase tracking-wider text-sm transition-all border-2 border-orange-600 active:scale-[0.98] rounded-[8px]"
-              >
-                Tư vấn ngay
-              </button>
-            </div>
-          </motion.div>
+                  );
+                })}
+              </nav>
+
+              {/* Drawer Bottom Actions */}
+              <div className="pt-4 border-t border-slate-800 shrink-0 flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenConsultation?.();
+                  }}
+                  className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold text-center uppercase tracking-wider text-xs transition-all active:scale-[0.98] rounded-[8px] shadow-lg shadow-orange-600/20"
+                >
+                  Tư vấn ngay
+                </button>
+                <div className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-2">
+                  <span>Hotline: <strong className="text-slate-200">024 3976 1381</strong></span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>

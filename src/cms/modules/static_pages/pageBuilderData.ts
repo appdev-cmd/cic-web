@@ -21,9 +21,11 @@ function withSectionPrefix(page: PageBuilderPage, idPrefix: string): PageBuilder
 
 const sourceHome = clonePage(sourcePages.find((page) => page.code === 'home')!);
 const sourceAbout = clonePage(sourcePages.find((page) => page.code === 'about')!);
+const sourceContact = clonePage(sourcePages.find((page) => page.code === 'contact')!);
 const sourcePrivacy = clonePage(sourcePages.find((page) => page.code === 'privacy_policy')!);
 
 const homePage: PageBuilderPage = { ...sourceHome, templateKey: 'home', systemDefined: true };
+const contactPage: PageBuilderPage = { ...sourceContact, templateKey: 'contact', systemDefined: true };
 const aboutSectionKeys = new Set(['about.hero', 'about.overview', 'about.timeline', 'about.strategy', 'about.offerings', 'about.awards', 'about.partners', 'about.contact_cta']);
 const aboutPage: PageBuilderPage = {
   ...sourceAbout,
@@ -136,7 +138,7 @@ export function createLegalPage(input: { id: string; code: string; name: string;
 const termsPage = createLegalPage({ id: 'page_terms_vi', code: 'terms_of_use', name: 'Điều khoản sử dụng', slug: '/dieu-khoan-su-dung' });
 termsPage.systemDefined = true;
 
-export const pageBuilderPagesMock: PageBuilderPage[] = [homePage, aboutPage, organizationPage, capacityPage, privacyPage, termsPage];
+export const pageBuilderPagesMock: PageBuilderPage[] = [homePage, aboutPage, organizationPage, capacityPage, contactPage, privacyPage, termsPage];
 
 export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
   { id: 'product_ai_platform', label: 'Nền tảng AI CIC', description: 'Sản phẩm · AI và dữ liệu', entityType: 'product' },

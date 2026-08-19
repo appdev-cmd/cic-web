@@ -48,8 +48,8 @@ export interface PageBuilderPage {
   code: string;
   slug: string;
   name: string;
-  pageType: 'home' | 'about' | 'organization' | 'capacity_experience' | 'legal';
-  templateKey: 'home' | 'about' | 'organization' | 'capacity_experience' | 'legal_standard';
+  pageType: 'home' | 'about' | 'organization' | 'capacity_experience' | 'contact' | 'legal';
+  templateKey: 'home' | 'about' | 'organization' | 'capacity_experience' | 'contact' | 'legal_standard';
   systemDefined: boolean;
   draft: PageBuilderVersion;
   published: PageBuilderVersion;

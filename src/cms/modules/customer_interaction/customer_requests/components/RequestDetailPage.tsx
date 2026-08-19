@@ -35,7 +35,8 @@ interface RequestDetailPageProps {
   requestId: string;
   request: CustomerRequest | null;
   onBack: () => void;
-  onAssignUser: (requestId: string, userId: string) => void;
+  onAssignUser?: (requestId: string, userId: string) => void;
+  onReassignRequest?: (request: CustomerRequest) => void;
   onUpdateStatus: (requestId: string, newStatus: string) => void;
   onAddNote: (requestId: string, noteContent: string) => void;
 }
@@ -45,6 +46,7 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
   request,
   onBack,
   onAssignUser,
+  onReassignRequest,
   onUpdateStatus,
   onAddNote,
 }) => {
@@ -302,10 +304,11 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => onAssignUser(request.id, 'user_001')}
-              className="ml-2 px-2.5 py-1 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-all"
+              onClick={() => onReassignRequest?.(request)}
+              className="ml-2 px-2.5 py-1 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1"
             >
-              Gán tôi
+              <UserCheck className="w-3 h-3" />
+              <span>{request.assignedUserName ? 'Đổi người phụ trách' : 'Gán người phụ trách'}</span>
             </button>
           </div>
         </div>

@@ -844,8 +844,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                     <tr
                       key={p.id}
                       className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                        isSelected ? 'bg-orange-500/5 dark:bg-orange-950/20' : ''
-                      } ${density === 'compact' ? 'py-1' : ''}`}
+                        density === 'compact' ? 'py-1' : ''
+                      }`}
                     >
                       {/* Checkbox Sticky Left */}
                       <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">

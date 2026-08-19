@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AboutView } from '../../../web/components/AboutView';
+import { ContactView } from '../../../web/components/ContactView';
 import { HomeView } from '../../../web/components/HomeView';
 import type { PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 
@@ -51,12 +52,13 @@ function WebsitePage({ page }: { page: PageBuilderPage }) {
   if (page.pageType === 'about') return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} />;
   if (page.pageType === 'organization') return <AboutView activeTab="structure" setActiveTab={noop} onNavigateToContact={noop} />;
   if (page.pageType === 'capacity_experience') return <AboutView activeTab="experience" setActiveTab={noop} onNavigateToContact={noop} />;
+  if (page.pageType === 'contact') return <ContactView />;
   if (page.pageType === 'legal') return <LegalPage sections={page.draft.sections} />;
   return <LegalPage sections={page.draft.sections} />;
 }
 
 function editableNodes(root: HTMLElement, page: PageBuilderPage): HTMLElement[] {
-  if (page.pageType === 'home' || page.pageType === 'about' || page.pageType === 'organization' || page.pageType === 'capacity_experience') return Array.from(root.querySelectorAll<HTMLElement>('section'));
+  if (page.pageType === 'home' || page.pageType === 'about' || page.pageType === 'organization' || page.pageType === 'capacity_experience' || page.pageType === 'contact') return Array.from(root.querySelectorAll<HTMLElement>('section'));
   if (page.pageType === 'legal') {
     const header = root.querySelector<HTMLElement>('header');
     const articleSections = Array.from(root.querySelectorAll<HTMLElement>('article section'));

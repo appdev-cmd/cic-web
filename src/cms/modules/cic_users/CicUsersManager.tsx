@@ -429,9 +429,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                   return (
                     <tr
                       key={user.id}
-                      className={`group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                        isSelected ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''
-                      }`}
+                      className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                     >
                       {/* Checkbox Sticky Left */}
                       <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800/80 border-r border-slate-100 dark:border-slate-800 text-center">
