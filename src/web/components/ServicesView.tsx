@@ -104,14 +104,13 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
   });
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4; // 4 equal size white blocks per page as requested
 
-  // Reset page when category or search changes
+  // Reset page when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery]);
 
   const activeService = servicesData.find(s => s.id === activeServiceId);
 
@@ -132,18 +131,15 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
     }
   }, [activeService, productsData]);
 
-  const categoryList = useMemo(() => {
-    const rawCats = Array.from(new Set(servicesData.map(s => s.category)));
-    return ['Tất cả', ...rawCats];
-  }, []);
-
   const filteredServices = servicesData.filter(service => {
-    const matchesCategory = selectedCategory === 'Tất cả' || service.category === selectedCategory;
-    const matchesSearch = 
-      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.shortDesc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (service.tagline || '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      service.title.toLowerCase().includes(query) ||
+      service.shortDesc.toLowerCase().includes(query) ||
+      (service.tagline || '').toLowerCase().includes(query) ||
+      (service.category || '').toLowerCase().includes(query)
+    );
   });
 
   const totalItems = filteredServices.length;
@@ -279,72 +275,49 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                 {/* COLUMN LEFT: SERVICES LIST (CÁC BLOCK TRẮNG ĐỒNG NHẤT SIZE) */}
                 <div className="lg:col-span-8 space-y-8">
                   
-                  {/* Search Bar & Category Filter Pills (Format chuẩn đồng nhất với Tin tức & Sự kiện) */}
-                  <div className="space-y-5">
-                    {/* Search Input Bar & Counter */}
-                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-                      <div className="relative flex items-center w-full sm:max-w-md">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                          <Search className="text-slate-400" size={16} />
-                        </div>
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                          className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-orange-500 pl-10 pr-9 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-xl shadow-xs"
-                        />
-                        {searchQuery && (
-                          <button 
-                            onClick={() => setSearchQuery('')}
-                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                          >
-                            <X size={14} />
-                          </button>
-                        )}
+                  {/* Search Bar & Counter */}
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                    <div className="relative flex items-center w-full sm:max-w-md">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                        <Search className="text-slate-400" size={16} />
                       </div>
-
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
-                        <SlidersHorizontal size={14} className="text-orange-600" />
-                        <span>Hiển thị {filteredServices.length} trên {servicesData.length} dịch vụ</span>
-                      </div>
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Tìm kiếm dịch vụ, giải pháp..."
+                        className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-orange-500 pl-10 pr-9 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-xl shadow-xs"
+                      />
+                      {searchQuery && (
+                        <button 
+                          onClick={() => setSearchQuery('')}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Category Filter Pills (Không bị bọc bởi block trắng) */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                      {categoryList.map((cat) => {
-                        const isActive = selectedCategory === cat;
-                        return (
-                          <button
-                            key={cat}
-                            type="button"
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                              isActive
-                                ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
-                                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                            }`}
-                          >
-                            {cat}
-                          </button>
-                        );
-                      })}
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
+                      <SlidersHorizontal size={14} className="text-orange-600" />
+                      <span>Hiển thị {filteredServices.length} trên {servicesData.length} dịch vụ</span>
                     </div>
                   </div>
 
                   {/* GRID 4 BLOCK TRẮNG ĐỒNG NHẤT SIZE */}
                   {paginatedServices.length === 0 ? (
                     <div className="text-center py-16 bg-white border border-slate-200/90 rounded-[14px] p-8 space-y-4">
-                      <p className="text-slate-400 font-bold text-sm">Không tìm thấy dịch vụ nào phù hợp với bộ lọc.</p>
-                      <button
-                        onClick={() => {
-                          setSearchQuery('');
-                          setSelectedCategory('Tất cả');
-                        }}
-                        className="px-5 py-2 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
-                      >
-                        Xóa tìm kiếm & Bộ lọc
-                      </button>
+                      <p className="text-slate-400 font-bold text-sm">
+                        {searchQuery ? `Không tìm thấy dịch vụ nào phù hợp với từ khóa "${searchQuery}".` : 'Không tìm thấy dịch vụ nào.'}
+                      </p>
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="px-5 py-2 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider hover:bg-orange-600 transition-all rounded-[8px] cursor-pointer"
+                        >
+                          Xóa tìm kiếm
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">

@@ -7,6 +7,7 @@ import {
   Search, 
   ArrowRight, 
   ChevronRight, 
+  ChevronDown,
   Download, 
   User, 
   ChevronLeft, 
@@ -1073,71 +1074,101 @@ export const EventsView: React.FC<EventsViewProps> = ({
               )}
 
               {/* =========================================================
-                  TẦNG 2: TÌM KIẾM + BỘ LỌC TĨNH PHẲNG
+                  SLEEK FILTER & CATEGORY TABS (ĐỒNG NHẤT VỚI TIN TỨC & DỰ ÁN)
                  ========================================================= */}
-              <div className="pt-6 border-t border-slate-200 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between gap-4">
+              <div className="space-y-4 pt-6 border-t border-slate-200">
                 
-                {/* Search Field */}
-                <div className="relative flex items-center w-full lg:max-w-md">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                    <Search className="text-slate-400" size={16} />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm sự kiện, địa điểm, chủ đề..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FC5115] focus:border-[#FC5115] rounded-[10px] shadow-2xs"
-                  />
+                {/* Category Pill Tabs */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                  {eventCategories.map((cat) => {
+                    const isSelected = categoryFilter === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          setCategoryFilter(cat);
+                          setCurrentPage(1);
+                        }}
+                        className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer flex items-center gap-2 ${
+                          isSelected
+                            ? 'bg-[#FC5115] text-white shadow-md'
+                            : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
+                        }`}
+                      >
+                        <span>{cat}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Filter Select Dropdowns & Sort Dropdown */}
-                <div className="flex flex-wrap items-center gap-3 justify-between lg:justify-end w-full lg:w-auto">
-                  
-                  {/* Category Select Dropdown */}
-                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-700 rounded-[10px] shadow-2xs">
-                    <span className="text-slate-400 font-medium hidden sm:inline">Danh mục:</span>
-                    <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
-                    >
-                      {eventCategories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
+                {/* Secondary Filter Controls Bar (Search + Status + Sort + Reset) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-slate-100/60 p-3 sm:p-4 rounded-[10px]">
+                  {/* Search Bar */}
+                  <div className="md:col-span-5 relative flex items-center">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                      <Search className="text-slate-400" size={15} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm sự kiện, địa điểm, chủ đề..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
+                    />
                   </div>
 
-                  {/* Status Select Dropdown */}
-                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-700 rounded-[10px] shadow-2xs">
-                    <span className="text-slate-400 font-medium hidden sm:inline">Trạng thái:</span>
+                  {/* Status Dropdown */}
+                  <div className="md:col-span-3">
                     <select
                       value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value as any)}
-                      className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value as any);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                     >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="upcoming">Sắp diễn ra</option>
-                      <option value="ongoing">Đang diễn ra</option>
-                      <option value="past">Đã kết thúc</option>
+                      <option value="all" className="font-normal">Trạng thái: Tất cả</option>
+                      <option value="upcoming" className="font-normal">Sắp diễn ra</option>
+                      <option value="ongoing" className="font-normal">Đang diễn ra</option>
+                      <option value="past" className="font-normal">Đã kết thúc</option>
                     </select>
                   </div>
 
-                  {/* Sort Select */}
-                  <div className="flex items-center gap-1.5 bg-white border border-slate-200/90 px-3 py-2 text-xs font-bold text-slate-700 rounded-[10px] shadow-2xs">
-                    <span className="text-slate-400 font-medium hidden sm:inline">Sắp xếp:</span>
+                  {/* Sort Dropdown */}
+                  <div className="md:col-span-3">
                     <select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
+                      onChange={(e) => {
+                        setSortBy(e.target.value as any);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                     >
-                      <option value="newest">Mới nhất</option>
-                      <option value="oldest">Cũ nhất</option>
+                      <option value="newest" className="font-normal">Sắp xếp: Mới nhất</option>
+                      <option value="oldest" className="font-normal">Sắp xếp: Cũ nhất</option>
                     </select>
                   </div>
 
+                  {/* Reset Filters */}
+                  <div className="md:col-span-1 flex justify-end">
+                    {(searchTerm || categoryFilter !== 'Tất cả' || statusFilter !== 'all' || sortBy !== 'newest') && (
+                      <button
+                        onClick={() => {
+                          setSearchTerm('');
+                          setCategoryFilter('Tất cả');
+                          setStatusFilter('all');
+                          setSortBy('newest');
+                          setCurrentPage(1);
+                        }}
+                        className="w-full text-center px-2 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap rounded-[8px] cursor-pointer"
+                      >
+                        Xóa lọc
+                      </button>
+                    )}
+                  </div>
                 </div>
 
               </div>
