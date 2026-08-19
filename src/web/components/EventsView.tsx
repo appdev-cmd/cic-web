@@ -881,7 +881,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               <h4 className="text-xs font-semibold text-[#333] group-hover:text-orange-600 transition-colors leading-snug line-clamp-2">
                                 {item.title}
                               </h4>
-                              <p className="text-[11px] text-[#6B7280] line-clamp-2 leading-relaxed">
+                              <p className="text-sm text-[#6B7280] line-clamp-2 leading-relaxed">
                                 {item.shortDesc}
                               </p>
                               <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
@@ -931,7 +931,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               </div>
                             )}
 
-                            <p className="text-[11px] text-slate-500 font-normal leading-relaxed line-clamp-2 border-t border-slate-100 pt-2">
+                            <p className="text-xs text-slate-500 font-normal leading-relaxed line-clamp-2 border-t border-slate-100 pt-2">
                               {prod.desc || (prod as any).description}
                             </p>
                           </div>
@@ -1223,7 +1223,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                                   {event.title}
                                 </h3>
 
-                                <p className="text-xs text-[#6B7280] line-clamp-2 leading-relaxed pt-0.5">
+                                <p className="text-sm text-[#6B7280] line-clamp-2 leading-relaxed pt-0.5">
                                   {event.shortDesc}
                                 </p>
 

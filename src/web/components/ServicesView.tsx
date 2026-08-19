@@ -378,7 +378,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                                 <h3 className="text-base sm:text-lg font-semibold text-[#333] group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
                                   {cleanTitle}
                                 </h3>
-                                <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
+                                <p className="text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
                                   {getServiceExcerpt(service)}
                                 </p>
                               </div>
@@ -805,7 +805,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                               <h4 className="text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
                                 {cleanRelTitle}
                               </h4>
-                              <p className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-3">
+                              <p className="text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
                                 {getServiceExcerpt(relService)}
                               </p>
                             </div>
@@ -845,7 +845,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
             <div className="space-y-2">
               <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">{selectedProductModal.brand}</span>
               <h3 className="text-lg font-bold text-slate-950">{selectedProductModal.name}</h3>
-              <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{selectedProductModal.description}</p>
+              <p className="text-[13px] text-slate-600 leading-relaxed line-clamp-3">{selectedProductModal.description}</p>
             </div>
 
             <div className="pt-2 flex gap-2">

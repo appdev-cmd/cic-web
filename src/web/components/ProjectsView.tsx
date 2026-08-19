@@ -344,7 +344,7 @@ export function ProjectsView({
                           </h3>
 
                           {/* 1-Line Description */}
-                          <p className="text-xs lg:text-sm text-slate-200 line-clamp-2 font-medium leading-relaxed max-w-3xl">
+                          <p className="text-sm text-slate-200 line-clamp-2 font-medium leading-relaxed max-w-3xl">
                             {project.shortDesc}
                           </p>
 

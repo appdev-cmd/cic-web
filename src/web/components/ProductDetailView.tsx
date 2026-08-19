@@ -645,7 +645,7 @@ export function ProductDetailView({
                   {/* Short Description (Normal) & Action Buttons (On Hover) */}
                   <div className="pt-2.5 border-t border-slate-100 min-h-[66px] flex flex-col justify-center">
                     {/* Default state: Short description */}
-                    <p className="text-xs sm:text-[13px] text-slate-600 font-normal leading-relaxed line-clamp-3 group-hover:hidden transition-all duration-200">
+                    <p className="text-sm text-slate-600 font-normal leading-relaxed line-clamp-3 group-hover:hidden transition-all duration-200">
                       {rel.description}
                     </p>
 

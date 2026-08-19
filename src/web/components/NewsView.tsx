@@ -1466,7 +1466,7 @@ export function NewsView({
                       {filteredNews[0].title}
                     </h2>
 
-                    <p className="text-xs lg:text-sm text-slate-300 line-clamp-2 leading-relaxed font-medium max-w-3xl">
+                    <p className="text-sm lg:text-base text-slate-300 line-clamp-3 leading-relaxed font-medium max-w-3xl">
                       {filteredNews[0].shortDesc}
                     </p>
 
@@ -1511,7 +1511,7 @@ export function NewsView({
                         <h4 className="text-sm lg:text-base font-bold text-slate-900 transition-colors line-clamp-2 leading-snug">
                           {sideItem.title}
                         </h4>
-                        <p className="text-xs text-slate-500 line-clamp-2 font-medium leading-relaxed hidden sm:block">
+                        <p className="text-[13px] text-slate-500 line-clamp-3 font-medium leading-relaxed">
                           {sideItem.shortDesc}
                         </p>
                       </div>
@@ -1801,7 +1801,7 @@ export function NewsView({
                         </h3>
 
                         {/* Excerpt - Max 3 lines */}
-                        <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed font-normal flex-1">
+                        <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed font-normal flex-1">
                           {news.shortDesc}
                         </p>
 

@@ -401,7 +401,7 @@ export function SearchView({
                             <h3 className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
                               {item.title}
                             </h3>
-                            <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">
+                            <p className="text-sm text-slate-500 font-medium line-clamp-2 leading-relaxed">
                               {item.description}
                             </p>
                           </div>
