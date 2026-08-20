@@ -322,7 +322,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
                       <button
                         key={idx}
                         onClick={() => handleSelectRecentSearch(s.query)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800/80 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 border border-slate-200/80 dark:border-slate-700/80 transition-colors cursor-pointer group"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800/80 hover:bg-orange-500 dark:hover:bg-orange-600 text-slate-900 dark:text-slate-200 hover:text-white dark:hover:text-white border border-slate-200/80 dark:border-slate-700/80 transition-colors cursor-pointer group"
                       >
                         <Search className="w-3 h-3 text-slate-400 group-hover:text-orange-500" />
                         <span>{s.query}</span>
@@ -573,7 +573,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
                   <div className="pt-3 pb-1 px-1">
                     <button
                       onClick={() => handleViewAll('all')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
+                      className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-600 dark:hover:bg-orange-600 text-slate-900 dark:text-slate-200 hover:text-white dark:hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
                     >
                       <Search className="w-4 h-4" />
                       <span>Xem tất cả {searchResults.totalResults} kết quả trong trang tìm kiếm nâng cao</span>

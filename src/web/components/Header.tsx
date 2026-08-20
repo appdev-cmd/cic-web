@@ -82,6 +82,23 @@ export const Header = ({
     };
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (mobileMenuOpen) {
+          setMobileMenuOpen(false);
+        }
+        if (isSearchOpen) {
+          setIsSearchOpen(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [mobileMenuOpen, isSearchOpen]);
+
   const isSolidView = currentView === 'products' || currentView === 'about' || currentView === 'services' || currentView === 'projects' || currentView === 'news' || currentView === 'events' || currentView === 'contact' || currentView === 'privacy' || currentView === 'terms' || currentView === 'search';
   // Header should be styled as white/dark-text if we are in solid page views OR if we scrolled down on homepage
   const isHeaderWhite = isScrolled || isSolidView;
@@ -276,16 +293,16 @@ export const Header = ({
               </button>
             </div>
 
-            <button 
+            <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`p-2 rounded-[8px] transition-colors ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
+              className={`p-2 rounded-[8px] transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
               title="Tìm kiếm"
             >
               <Search size={20} />
             </button>
             <button 
               onClick={onOpenConsultation}
-              className="hidden sm:block px-5 py-2 bg-orange-600 text-white rounded-[8px] text-sm font-black transition-all active:scale-95 border-2 border-orange-600 btn-modern-interaction"
+              className="hidden sm:block px-5 py-2.5 bg-orange-600 text-white rounded-lg text-sm font-black transition-all active:scale-95 border-2 border-orange-600 btn-modern-interaction"
             >
               Tư vấn ngay
             </button>
@@ -328,7 +345,8 @@ export const Header = ({
                     }
                   }}
                   placeholder="Nhập từ khóa tìm kiếm sản phẩm, dịch vụ, dự án, tin tức..."
-                  className={`w-full border px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:border-orange-600 rounded-[8px] font-bold transition-colors ${
+                  aria-label="Tìm kiếm"
+                  className={`w-full border px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] font-bold transition-colors ${
                     !isHeaderWhite
                       ? 'bg-slate-900 border-slate-700 text-white'
                       : 'bg-slate-50 border-slate-200 text-slate-800'
@@ -417,9 +435,9 @@ export const Header = ({
                       <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors ${
                         isActive ? 'bg-orange-500/10 text-orange-500 font-bold' : 'hover:bg-slate-800/60 text-slate-200 hover:text-white'
                       }`}>
-                        <a 
+                        <a
                           href={link.href}
-                          className="text-base font-semibold transition-colors flex-1"
+                          className="text-base font-semibold transition-colors flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded"
                           onClick={(e) => {
                             setMobileMenuOpen(false);
                             if (link.name === 'Sản phẩm') {
@@ -475,12 +493,12 @@ export const Header = ({
                           {link.name}
                         </a>
                         {hasDropdown && (
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setExpandedMobileMenu(isExpanded ? null : link.name);
                             }}
-                            className="p-1 text-slate-400 hover:text-orange-500 focus:outline-none"
+                            className="p-1 text-slate-400 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded"
                             aria-label={`Mở danh mục ${link.name}`}
                           >
                             <ChevronDown 
@@ -496,7 +514,7 @@ export const Header = ({
                             <a
                               key={subItem.name}
                               href={subItem.href}
-                              className="text-sm font-normal text-slate-300 hover:text-orange-400 transition-colors py-1.5 px-2 rounded hover:bg-white/5"
+                              className="text-sm font-normal text-slate-300 hover:text-orange-400 transition-colors py-1.5 px-2 rounded hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-orange-500"
                               onClick={(e) => {
                                 setMobileMenuOpen(false);
                                 if (link.name === 'Giới thiệu') {
@@ -553,7 +571,7 @@ export const Header = ({
                     setMobileMenuOpen(false);
                     onOpenConsultation?.();
                   }}
-                  className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold text-center uppercase tracking-wider text-xs transition-all active:scale-[0.98] rounded-[8px] shadow-lg shadow-orange-600/20"
+                  className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold text-center uppercase tracking-wider text-xs transition-all active:scale-[0.98] rounded-[8px] shadow-lg shadow-orange-600/20 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
                 >
                   Tư vấn ngay
                 </button>

@@ -1001,7 +1001,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                       <img 
                         src={heroEvent.img} 
                         alt={heroEvent.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     </div>
 

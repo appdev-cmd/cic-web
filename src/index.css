@@ -7,6 +7,11 @@
   --font-sans: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   --font-display: "Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   --font-mono: "Roboto", "Be Vietnam Pro", monospace;
+  --spacing-13: 3.25rem;
+  --spacing-14: 3.5rem;
+  --spacing-18: 4.5rem;
+  --spacing-26: 6.5rem;
+  --spacing-30: 7.5rem;
 }
 
 html {

@@ -260,7 +260,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
                       <img 
                         src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80" 
                         alt="Dịch vụ chuyển đổi số và công nghệ kỹ thuật CIC" 
-                        className="w-full h-64 sm:h-80 lg:h-[340px] object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-64 sm:h-80 lg:h-[340px] object-cover transition-transform duration-500 group-hover:scale-105"
                         referrerPolicy="no-referrer"
                       />
                     </div>
@@ -574,7 +574,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome }: Servic
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/90 pb-5">
                 <button
                   onClick={() => setActiveServiceId(null)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-800 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-800 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer shadow-xs"
                 >
                   <ArrowLeft size={14} /> Trở về danh mục dịch vụ
                 </button>

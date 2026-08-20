@@ -178,7 +178,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
         </div>
 
         {/* TWO COLUMN CONTENT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* COLUMN 1: OFFICE LISTS, DEPARTMENTS & INTERACTIVE MAP (7 Cols) */}
           <div className="lg:col-span-7 space-y-10">

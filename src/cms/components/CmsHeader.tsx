@@ -136,7 +136,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         {/* Mobile Search trigger (< sm) */}
         <button
           onClick={onOpenCommandPalette}
-          className="sm:hidden flex items-center justify-center w-8.5 h-8.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 bg-slate-100/80 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
+          className="sm:hidden flex items-center justify-center w-8.5 h-8.5 rounded-lg text-slate-900 dark:text-slate-200 hover:text-white dark:hover:text-white bg-slate-100/80 dark:bg-slate-800 hover:bg-orange-500 dark:hover:bg-orange-600 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
           title="Tìm kiếm toàn hệ thống"
         >
           <Search className="w-4 h-4" />
@@ -419,7 +419,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                       setIsUserMenuOpen(false);
                       onSwitchToWebsite();
                     }}
-                    className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-600 dark:hover:text-orange-400 rounded-xl flex items-center justify-between cursor-pointer font-medium transition-colors group"
+                    className="w-full px-3 py-2 text-left text-slate-900 dark:text-slate-200 hover:bg-orange-500 dark:hover:bg-orange-600 hover:text-white dark:hover:text-white rounded-xl flex items-center justify-between cursor-pointer font-medium transition-colors group"
                   >
                     <div className="flex items-center gap-2.5">
                       <ExternalLink className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors" />

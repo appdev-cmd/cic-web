@@ -155,7 +155,7 @@ export const HomeView = ({
   return (
     <>
       {/* Hero Section */}
-      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10 border-b border-orange-500/60 shadow-[0_4px_25px_rgba(252,81,21,0.15)]">
+      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10 border-b border-orange-500/60 shadow-lg">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.img 
@@ -172,7 +172,7 @@ export const HomeView = ({
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 via-60% to-transparent"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-16 items-center relative z-10 w-full mb-4">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10 w-full mb-4">
           <motion.div
             key={currentSlide}
             initial={{ opacity: 0, x: -30 }}
@@ -180,7 +180,7 @@ export const HomeView = ({
             transition={{ duration: 0.8 }}
             className="lg:col-span-8 xl:col-span-9"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-[8px] mb-5 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg mb-5 backdrop-blur-md">
               <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
                 Leading Innovation since 1990
@@ -196,14 +196,14 @@ export const HomeView = ({
               {heroSlides[currentSlide].sub}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={() => {
                   setCurrentView('products');
                   setActiveLink('Sản phẩm');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_50px_rgba(234,88,12,0.3)] border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3 cursor-pointer"
+                className="px-5 py-2.5 bg-orange-600 text-white rounded-lg font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3 cursor-pointer"
               >
                 Khám phá giải pháp <ArrowRight size={20} />
               </button>
@@ -214,7 +214,7 @@ export const HomeView = ({
                   setAboutSubTab('overview');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2 bg-white/5 text-white rounded-[8px] font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction cursor-pointer"
+                className="px-5 py-2.5 bg-white/5 text-white rounded-lg font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction cursor-pointer"
               >
                 <Users size={20} /> Về chúng tôi
               </button>
@@ -236,7 +236,7 @@ export const HomeView = ({
         {/* Headline Ticker */}
         <div className="absolute bottom-0 left-0 right-0 bg-slate-950/80 border-t border-white/10 backdrop-blur-md z-30 hidden md:block">
           <div className="max-w-7xl mx-auto px-6 h-12 flex items-center gap-4 relative overflow-hidden">
-            <div className="flex bg-orange-600 text-white px-3 py-1 rounded-[8px] text-[10px] font-black uppercase tracking-widest shrink-0 gap-2 items-center z-10 shadow-xs">
+            <div className="flex bg-orange-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shrink-0 gap-2 items-center z-10 shadow-xs">
               <div className="relative flex items-center justify-center shrink-0">
                 <Bell size={13} className="animate-[bounce_1.2s_infinite] text-white shrink-0" />
                 <span className="absolute -top-1 -right-1 flex h-2 w-2">
@@ -262,7 +262,7 @@ export const HomeView = ({
       {/* Intro Section (Hơn 35 năm đồng hành) */}
       <section id="about" className="py-20 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <motion.div 
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -289,7 +289,7 @@ export const HomeView = ({
                     setAboutSubTab('overview');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-4 py-2 sm:px-5 sm:py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-md shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-sm shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center gap-2 cursor-pointer"
                 >
                   Khám phá hành trình CIC <ArrowRight size={15} />
                 </button>
@@ -297,7 +297,7 @@ export const HomeView = ({
                   href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-slate-900 rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-xs border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2 cursor-pointer"
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-slate-900 rounded-lg font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2 cursor-pointer"
                 >
                   Hồ sơ năng lực <ArrowUpRight size={15} />
                 </a>
@@ -309,12 +309,13 @@ export const HomeView = ({
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative rounded-[16px] sm:rounded-[20px] overflow-hidden shadow-2xl border border-slate-200/90 aspect-video bg-slate-900"
+              className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-xl border border-slate-200/90 aspect-video bg-slate-900"
             >
               {!isVideoPlaying ? (
                 <div 
                   className="group relative w-full h-full cursor-pointer"
                   onClick={() => setIsVideoPlaying(true)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsVideoPlaying(true); } }}
                   role="button"
                   tabIndex={0}
                   aria-label="Phát video giới thiệu CIC"
@@ -325,11 +326,11 @@ export const HomeView = ({
                       (e.target as HTMLImageElement).src = 'https://img.youtube.com/vi/hdLFK_09-tU/hqdefault.jpg';
                     }}
                     alt="Video giới thiệu CIC" 
-                    className="w-full h-full object-cover scale-[1.18] group-hover:scale-[1.25] transition-transform duration-700 ease-out origin-center"
+                    className="w-full h-full object-cover scale-[1.18] group-hover:scale-[1.25] transition-transform duration-500 ease-out origin-center"
                   />
                   <div className="absolute inset-0 bg-transparent group-hover:bg-slate-950/15 transition-all flex items-center justify-center">
                     <div className="relative">
-                      <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-[8px] flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
+                      <div className="relative w-14 h-14 md:w-16 md:h-16 bg-orange-600 text-white rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
                         <Play size={22} fill="white" className="ml-0.5" />
                       </div>
                       <div className="absolute inset-0 w-14 h-14 md:w-16 md:h-16 bg-orange-600 rounded-[8px] animate-ping opacity-20"></div>
@@ -417,23 +418,23 @@ export const HomeView = ({
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search size={18} className="text-slate-400" />
               </div>
-              <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 shadow-sm transition-all rounded-[8px] text-sm font-medium" />
+              <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm transition-all rounded-lg text-sm font-medium" />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
             {/* AI & Smart Tech - Large Feature */}
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              whileHover={{ y: -8, scale: 1.01 }}
+              whileHover={{ y: -4, scale: 1.005 }}
               onClick={() => {
                 setCurrentView('products');
                 setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-8 group relative p-6 md:p-8 rounded-[10px] bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-xl"
+              className="lg:col-span-8 group relative p-6 md:p-8 rounded-xl bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-lg"
             >
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-all duration-500 transform group-hover:rotate-12 text-slate-900">
                 <BIMIcon />
@@ -459,16 +460,16 @@ export const HomeView = ({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              whileHover={{ y: -8 }}
+              whileHover={{ y: -4 }}
               onClick={() => {
                 setCurrentView('services');
                 setActiveLink('Dịch vụ');
                 if (setActiveServiceId) setActiveServiceId('tu-van-bim');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-4 group p-6 md:p-8 rounded-[10px] bg-slate-50 shadow-sm border border-slate-100 transition-all relative overflow-hidden hover:shadow-xl cursor-pointer"
+              className="lg:col-span-4 group p-6 md:p-8 rounded-xl bg-slate-50 shadow-sm border border-slate-100 transition-all relative overflow-hidden hover:shadow-lg cursor-pointer"
             >
-              <div className="w-16 h-16 bg-slate-50 rounded-[10px] flex items-center justify-center mb-8 border border-slate-100 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 text-slate-400 transition-all">
+              <div className="w-16 h-16 bg-slate-50 rounded-[10px] flex items-center justify-center mb-8 border border-slate-100 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 text-slate-600 transition-all">
                 <BIMIcon />
               </div>
               <h3 className="text-xl font-black mb-4 group-hover:text-orange-600 transition-colors">BIM & Digital Twins</h3>
@@ -491,7 +492,7 @@ export const HomeView = ({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: 0.1 * i }}
-                whileHover={{ y: -8 }}
+                whileHover={{ y: -4 }}
                 onClick={() => {
                   if (item.view === 'products') {
                     setCurrentView('products');
@@ -503,7 +504,7 @@ export const HomeView = ({
                   }
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className={`${item.cols} p-6 rounded-[10px] bg-slate-50 border border-slate-100 shadow-sm transition-all group hover:shadow-xl hover:border-slate-200 cursor-pointer`}
+                className={`${item.cols} p-6 rounded-xl bg-slate-50 border border-slate-100 shadow-sm transition-all group hover:shadow-lg hover:border-slate-200 cursor-pointer`}
               >
                 <div className="h-1 w-12 bg-slate-200 mb-6 group-hover:w-full group-hover:bg-orange-600 transition-all duration-500 rounded-full"></div>
                 <h3 className="text-xl font-black mb-3 group-hover:text-orange-600 transition-colors text-slate-900">{item.title}</h3>
@@ -520,9 +521,9 @@ export const HomeView = ({
                 setActiveLink('Sản phẩm');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="lg:col-span-12 p-8 rounded-[10px] bg-orange-600 text-white flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer shadow-lg"
+              className="lg:col-span-12 p-8 rounded-xl bg-orange-600 text-white flex flex-col md:flex-row items-center justify-between gap-4 group cursor-pointer shadow-lg"
             >
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-slate-50/20 rounded-[10px] flex items-center justify-center">
                   <Globe size={32} />
                 </div>
@@ -561,7 +562,7 @@ export const HomeView = ({
                     setHoveredProjectIndex(null);
                   }}
                   className={`px-8 py-2.5 rounded-[8px] font-black text-xs uppercase tracking-widest transition-all ${
-                    activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-xl' : 'bg-white text-slate-500 hover:bg-slate-100 border border-slate-200'
+                    activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
                   {tab.label}
@@ -580,7 +581,7 @@ export const HomeView = ({
                   setProjectSearchQuery(e.target.value);
                   setHoveredProjectIndex(null);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-[8px] font-medium text-sm text-slate-900 focus:outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
@@ -588,7 +589,7 @@ export const HomeView = ({
           {/* 3 Cards 16:9 Expanding Accordion Container */}
           <div 
             onMouseLeave={() => setHoveredProjectIndex(null)}
-            className="flex flex-col md:flex-row items-start justify-start gap-5 lg:gap-6 w-full"
+            className="flex flex-col md:flex-row items-start justify-start gap-4 lg:gap-4 w-full"
           >
             {filteredProjects.length > 0 ? (
               (() => {
@@ -623,23 +624,42 @@ export const HomeView = ({
                     }
                   }
 
+                  const targetId =
+                    proj.id === 1 ? 'landmark-81-bim' :
+                    proj.id === 2 ? 'cao-toc-bac-nam-twin' :
+                    proj.id === 3 ? 'dien-gio-mui-dinh' :
+                    proj.id === 4 ? 'ham-duong-bo-deo-ca-pro' :
+                    String(proj.id);
+
+                  const handleProjectClick = () => {
+                    setActiveProjectId(targetId);
+                    setCurrentView('projects');
+                    setActiveLink('Dự án');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  };
+
                   return (
                     <div
                       key={proj.id}
                       onMouseEnter={() => setHoveredProjectIndex(i)}
                       onFocus={() => setHoveredProjectIndex(i)}
                       onClick={() => {
-                        const targetId = 
-                          proj.id === 1 ? 'landmark-81-bim' :
-                          proj.id === 2 ? 'cao-toc-bac-nam-twin' :
-                          proj.id === 3 ? 'dien-gio-mui-dinh' :
-                          proj.id === 4 ? 'ham-duong-bo-deo-ca-pro' :
-                          String(proj.id);
-
-                        setActiveProjectId(targetId);
-                        setCurrentView('projects');
-                        setActiveLink('Dự án');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // Toggle expansion on click for touch devices
+                        if (hoveredProjectIndex === i) {
+                          handleProjectClick();
+                        } else {
+                          setHoveredProjectIndex(i);
+                        }
+                      }}
+                      onKeyDown={(e) => { 
+                        if (e.key === 'Enter' || e.key === ' ') { 
+                          e.preventDefault(); 
+                          if (hoveredProjectIndex === i) {
+                            handleProjectClick();
+                          } else {
+                            setHoveredProjectIndex(i);
+                          }
+                        } 
                       }}
                       tabIndex={0}
                       role="button"
@@ -654,15 +674,15 @@ export const HomeView = ({
                       }`}
                     >
                       {/* 16:9 Aspect Ratio Image Box */}
-                      <div className={`relative w-full aspect-video md:aspect-[16/9] overflow-hidden rounded-[10px] border transition-all duration-300 bg-slate-950 ${
+                      <div className={`relative w-full aspect-video md:aspect-[16/9] overflow-hidden rounded-xl border transition-all duration-300 bg-slate-950 ${
                         isHovered 
-                          ? 'shadow-2xl border-orange-500/60 ring-2 ring-orange-500/20 -translate-y-1' 
-                          : 'shadow-md border-slate-200 group-hover:border-slate-300'
+                          ? 'shadow-xl border-orange-500/60 ring-2 ring-orange-500/20 -translate-y-1' 
+                          : 'shadow-sm border-slate-200 group-hover:border-slate-300'
                       }`}>
                         <img 
                           src={proj.img} 
                           alt={proj.name} 
-                          className={`w-full h-full object-cover transition-all duration-300 rounded-[10px] ${
+                          className={`w-full h-full object-cover transition-all duration-300 rounded-lg ${
                             isHovered ? 'scale-105 brightness-100' : 'scale-100 brightness-95 group-hover:scale-105'
                           }`}
                           referrerPolicy="no-referrer"
@@ -670,7 +690,7 @@ export const HomeView = ({
 
                         {/* Top Right Number Badge */}
                         <div className="absolute top-3.5 right-3.5 z-20">
-                          <span className={`inline-flex items-center justify-center min-w-[36px] h-8 px-2.5 rounded-[8px] font-black text-xs tracking-wider shadow-md transition-all duration-300 ${
+                          <span className={`inline-flex items-center justify-center min-w-[36px] h-8 px-2.5 rounded-lg font-black text-xs tracking-wider shadow-sm transition-all duration-300 ${
                             isHovered 
                               ? 'bg-orange-600 text-white border border-orange-400/50 scale-105' 
                               : 'bg-slate-950/60 text-white/90 backdrop-blur-md border border-white/20'
@@ -766,7 +786,7 @@ export const HomeView = ({
                 setActiveLink('Dự án');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-md inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-1.5"
             >
               Xem tất cả dự án <ChevronRight className="inline-block group-hover:translate-x-1.5 transition-transform" />
             </button>
@@ -776,16 +796,31 @@ export const HomeView = ({
         {/* Project Detail Backdrop (Page Transition Simulation) */}
         <AnimatePresence>
           {selectedProject && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[200] bg-white p-6 md:p-20 overflow-y-auto"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setSelectedProject(null);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setSelectedProject(null);
+                }
+              }}
+              tabIndex={-1}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="project-detail-title"
             >
               <div className="max-w-7xl mx-auto">
-                <button 
+                <button
                   onClick={() => setSelectedProject(null)}
-                  className="mb-12 flex items-center gap-3 text-slate-500 font-black uppercase tracking-widest hover:text-orange-600 transition-colors"
+                  className="mb-12 flex items-center gap-3 text-slate-500 font-black uppercase tracking-widest hover:text-orange-600 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-lg px-2 py-1"
+                  id="project-detail-close"
                 >
                   <ChevronLeft size={24} /> Quay lại danh sách
                 </button>
@@ -799,7 +834,7 @@ export const HomeView = ({
                     transition={{ delay: 0.3 }}
                   >
                     <div className="text-orange-600 text-sm font-black uppercase tracking-widest mb-4">{selectedProject.location}</div>
-                    <h2 className="text-5xl md:text-6xl font-black text-slate-950 mb-8 leading-tight">{selectedProject.name}</h2>
+                    <h2 id="project-detail-title" className="text-5xl md:text-6xl font-black text-slate-950 mb-8 leading-tight">{selectedProject.name}</h2>
                     <div className="space-y-8 text-lg text-slate-600 leading-relaxed">
                        <p>Mô tả chi tiết dự án: Dự án triển khai hạ tầng số với quy mô lớn, ứng dụng các giải pháp tiên tiến nhất từ đối tác Bentley Systems và giải pháp AI do CIC phát triển.</p>
                        <div className="flex gap-4">
@@ -839,7 +874,7 @@ export const HomeView = ({
                 key={tab.id}
                 onClick={() => setActiveEventTab(tab.id)}
                 className={`px-6 py-2 rounded-[8px] font-bold text-sm transition-all ${
-                  activeEventTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-800 border border-slate-800'
+                  activeEventTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-900/50 text-slate-300 hover:bg-slate-800 border border-slate-800'
                 }`}
               >
                 {tab.label}
@@ -855,7 +890,7 @@ export const HomeView = ({
               className="lg:col-span-7 bg-slate-900/40 rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/5 group"
             >
               <div className="h-[280px] sm:h-[340px] md:h-[380px] overflow-hidden relative bg-slate-950 flex items-center justify-center">
-                <img src="https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png" alt="Hội thảo AI Cảng biển" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                <img src="https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png" alt="Hội thảo AI Cảng biển" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute top-4 left-4 px-3 py-1 bg-red-600 text-white rounded-[4px] text-xs font-black uppercase tracking-wider shadow-xl">Sắp diễn ra</div>
                 {/* Logo Overlay */}
                 <div className="absolute top-4 right-4 z-10 transition-all duration-300 group-hover:scale-105">
@@ -867,7 +902,7 @@ export const HomeView = ({
                 <p className="text-slate-400 mb-5 leading-relaxed text-sm md:text-base">
                   Khám phá xu hướng Smart Port, Digital Twin kết hợp Terminal Operating System (TOS) và các giải pháp AI tối ưu hóa hoạt động khai thác cảng biển.
                 </p>
-                <div className="flex flex-wrap gap-6 text-slate-300 mb-6">
+                <div className="flex flex-wrap gap-4 text-slate-300 mb-6">
                   <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><Calendar size={18} className="text-orange-600" /> 19/08/2026 08:30</div>
                   <div className="flex items-center gap-2.5 font-bold text-sm md:text-base"><MapPin size={18} className="text-orange-600" /> Online (Zoom)</div>
                 </div>
@@ -909,7 +944,7 @@ export const HomeView = ({
                   className="flex gap-4 p-4 md:p-4.5 rounded-[10px] border border-transparent hover:border-white/10 transition-all cursor-pointer group relative shadow-orange-600/10 hover:shadow-xl text-left bg-slate-900/20"
                 >
                   <div className="w-24 h-24 md:w-28 md:h-28 rounded-[10px] overflow-hidden shadow-inner flex-shrink-0 relative">
-                    <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700 rounded-[10px]" />
+                    <img src={ev.img} alt="Event" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500 rounded-[10px]" />
                     {/* Watermark */}
                     <div className="absolute bottom-2 right-2 opacity-10 group-hover:opacity-40 transition-all w-7">
                        <img src="/logo.png" alt="" className="w-full invert" />
@@ -965,7 +1000,7 @@ export const HomeView = ({
                 className={`flex-shrink-0 px-5 py-2.5 rounded-[8px] uppercase font-medium text-xs tracking-wider border transition-all ${
                   activeNewsCategory === cat.id 
                     ? 'bg-orange-600 text-white border-orange-600 shadow-sm' 
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-orange-600 hover:text-orange-600 hover:bg-orange-50/50'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-orange-600 hover:text-orange-600 hover:bg-orange-50/50'
                 }`}
               >
                 {cat.label}
@@ -973,11 +1008,11 @@ export const HomeView = ({
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredNews.length > 0 ? filteredNews.map((news, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
-                whileHover={{ y: -10 }}
+                whileHover={{ y: -4 }}
                 onClick={() => {
                   setCurrentView('news');
                   setActiveLink('Tin tức');
@@ -987,7 +1022,7 @@ export const HomeView = ({
                 className="group bg-slate-50 rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col relative cursor-pointer"
               >
                 <div className="h-56 overflow-hidden relative rounded-[10px]">
-                  <img src={news.img} alt={news.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 rounded-[10px]" />
+                  <img src={news.img} alt={news.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-[10px]" />
                   
                   {/* Watermark */}
                   <div className="absolute top-4 right-4 opacity-5 group-hover:opacity-20 transition-all w-10">
@@ -1035,7 +1070,7 @@ export const HomeView = ({
           <motion.div 
             animate={{ x: ["0%", "-50%"] }}
             transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
-            className="flex gap-6 whitespace-nowrap"
+            className="flex gap-4 whitespace-nowrap"
           >
             {[...partners, ...partners].map((partner, i) => (
               <motion.div 
@@ -1134,7 +1169,7 @@ export const HomeView = ({
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-bold" 
                       placeholder="Nhập họ và tên" 
                     />
                   </div>
@@ -1145,7 +1180,7 @@ export const HomeView = ({
                       required
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold" 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-bold" 
                       placeholder="Nhập số điện thoại" 
                     />
                   </div>
@@ -1155,7 +1190,7 @@ export const HomeView = ({
                   <select 
                     value={interestService}
                     onChange={(e) => setInterestService(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold cursor-pointer"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-bold cursor-pointer"
                   >
                     <option>Phần mềm kỹ thuật bản quyền</option>
                     <option>Thiết bị & IoT</option>
@@ -1169,11 +1204,11 @@ export const HomeView = ({
                     rows={4} 
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-600 transition-all font-bold resize-none" 
+                    className="w-full bg-slate-50 border border-slate-100 rounded-lg px-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-bold resize-none" 
                     placeholder="Mô tả nhu cầu của bạn..."
                   />
                 </div>
-                <button type="submit" className="w-full py-2.5 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">
+                <button type="submit" className="w-full py-4 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">
                   Gửi thông tin ngay
                 </button>
               </form>

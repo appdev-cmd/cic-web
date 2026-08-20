@@ -843,7 +843,7 @@ export function NewsView({
                     <img 
                       src={selectedItem.img} 
                       alt={selectedItem.title} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-[10px]"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-[10px]"
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
@@ -1074,7 +1074,7 @@ export function NewsView({
                                 value={consultName}
                                 onChange={(e) => setConsultName(e.target.value)}
                                 placeholder="Nhập họ và tên"
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
                               />
                             </div>
 
@@ -1086,7 +1086,7 @@ export function NewsView({
                                 value={consultEmail}
                                 onChange={(e) => setConsultEmail(e.target.value)}
                                 placeholder="Nhập email liên hệ"
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-colors rounded-[8px]"
                               />
                             </div>
                           </div>
@@ -1422,7 +1422,7 @@ export function NewsView({
                   <img 
                     src={filteredNews[0].img} 
                     alt={filteredNews[0].title} 
-                    className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-[1.05] transition-all duration-700 ease-out"
+                    className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-[1.05] transition-all duration-500 ease-out"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
@@ -1507,7 +1507,7 @@ export function NewsView({
                     <button
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id as any)}
-                      className={`group shrink-0 px-4 py-2.5 text-xs sm:text-[13px] transition-all rounded-[8px] flex items-center gap-2 border ${
+                      className={`group shrink-0 px-3 py-1.5 text-xs sm:text-[13px] transition-all rounded-[8px] flex items-center gap-2 border ${
                         isSelected 
                           ? 'bg-[#FC5115] text-white border-[#FC5115] shadow-md shadow-orange-500/20 font-bold' 
                           : 'bg-white text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/40 hover:text-orange-600 font-semibold shadow-xs'
@@ -1754,7 +1754,7 @@ export function NewsView({
                               e.stopPropagation();
                               handleDownloadAttachment(news.title);
                             }}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-[#FC5115] text-white text-xs font-bold transition-all rounded-[6px] shadow-2xs group-hover:bg-[#FC5115] shrink-0"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-[#FC5115] text-white text-xs font-bold transition-all rounded-[6px] shadow-2xs group-hover:bg-[#FC5115] shrink-0"
                           >
                             <Download size={14} />
                             <span>Tải về</span>
@@ -1963,7 +1963,7 @@ export function NewsView({
                     />
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer shrink-0"
+                      className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer shrink-0"
                     >
                       Đăng ký
                     </button>
@@ -2012,7 +2012,7 @@ export function NewsView({
               <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
                 <button
                   onClick={() => setShowBellModal(false)}
-                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer"
+                  className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer"
                 >
                   Đóng
                 </button>

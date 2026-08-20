@@ -751,7 +751,7 @@ export function ProductsView(_props?: ProductsViewProps) {
   }
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pt-36 pb-24 relative overflow-hidden">
+    <div className="bg-slate-50/50 min-h-screen pt-24 pb-20 relative overflow-hidden">
       {/* Visual background accents to match main landing page */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-10 w-[600px] h-[600px] bg-orange-600/5 blur-[120px] rounded-none"></div>
@@ -787,7 +787,7 @@ export function ProductsView(_props?: ProductsViewProps) {
           <div className="lg:hidden flex gap-2 w-full mb-2">
             <button
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 rounded-[8px]"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 rounded-[8px]"
             >
               <SlidersHorizontal size={14} className="text-orange-600" />
               {isMobileFilterOpen ? 'Đóng bộ lọc' : 'Bộ lọc tìm kiếm'}

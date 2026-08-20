@@ -271,7 +271,7 @@ export function SearchView({
                   value={searchInputValue}
                   onChange={(e) => setSearchInputValue(e.target.value)}
                   placeholder="Nhập tên sản phẩm, dịch vụ tư vấn, dự án công trình, tin tức chuyên ngành..."
-                  className="w-full bg-slate-50/80 border border-slate-200 pl-11 pr-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-600 focus:bg-white transition-all font-semibold rounded-[10px]"
+                  className="w-full bg-slate-50/80 border border-slate-200 pl-11 pr-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all font-semibold rounded-[10px]"
                 />
               </div>
               <button

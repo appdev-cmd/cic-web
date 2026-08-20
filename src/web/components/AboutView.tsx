@@ -328,7 +328,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                       {/* Left: Illustration */}
                       <div className="relative aspect-[4/5] rounded-[10px] overflow-hidden shadow-sm group hidden lg:block">
-                        <img src="/35nam_cic_1.JPG" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 rounded-[10px]" />
+                        <img src="/35nam_cic_1.JPG" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
                       </div>
 
@@ -458,19 +458,19 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     {/* Modern Photo Album (Bento Grid) */}
                     <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[250px] mb-12">
                       <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     </div>

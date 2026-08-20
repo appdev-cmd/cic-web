@@ -205,7 +205,7 @@ export function ProjectsView({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm tên dự án, chủ đầu tư, địa điểm..."
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
+                    className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
                   />
                 </div>
 
@@ -214,7 +214,7 @@ export function ProjectsView({
                   <select
                     value={selectedSolution}
                     onChange={(e) => setSelectedSolution(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
+                    className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                   >
                     <option value="Tất cả" className="font-normal">Giải pháp: Tất cả</option>
                     {solutions.filter(s => s !== 'Tất cả').map(sol => (
@@ -228,7 +228,7 @@ export function ProjectsView({
                   <select
                     value={selectedCustomer}
                     onChange={(e) => setSelectedCustomer(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
+                    className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 px-3 py-2 text-xs font-normal text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
                   >
                     <option value="Tất cả" className="font-normal">Chủ đầu tư: Tất cả</option>
                     {customers.filter(c => c !== 'Tất cả').map(cust => (
@@ -309,7 +309,7 @@ export function ProjectsView({
                       <img
                         src={project.img}
                         alt={project.name}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
+                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.08]"
                         referrerPolicy="no-referrer"
                       />
 

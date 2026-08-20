@@ -106,7 +106,7 @@ function CollapsibleContent({
           <button
             type="button"
             onClick={toggleExpand}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-orange-50 hover:text-orange-600 text-slate-800 text-xs font-bold rounded-full border border-slate-200 hover:border-orange-300 transition-all shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-orange-50 hover:text-orange-600 text-slate-800 text-xs font-bold rounded-lg border border-slate-200 hover:border-orange-300 transition-all shadow-sm cursor-pointer"
           >
             {isExpanded ? (
               <>
@@ -182,7 +182,7 @@ export function ProductDetailView({
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 mb-8 shadow-sm cursor-pointer rounded-[8px]"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 mb-8 shadow-sm cursor-pointer rounded-lg"
         >
           <ChevronLeft size={16} />
           Quay lại danh sách
@@ -194,10 +194,10 @@ export function ProductDetailView({
           {/* Left Column: Interactive Image Slider */}
           <div className="lg:col-span-6 space-y-4">
             {/* Feature Image */}
-            <div className="bg-white p-2 border border-slate-200 shadow-sm relative overflow-hidden group aspect-[4/3] rounded-[10px]">
+            <div className="bg-white p-2 border border-slate-200 shadow-xs relative overflow-hidden group aspect-[4/3] rounded-xl">
               
               {/* Slideshow image container */}
-              <div className="w-full h-full bg-slate-50 relative overflow-hidden rounded-[8px] flex items-center justify-center p-3">
+              <div className="w-full h-full bg-slate-50 relative overflow-hidden rounded-lg flex items-center justify-center p-3">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={currentSlide}
@@ -217,19 +217,19 @@ export function ProductDetailView({
                   <>
                     <button
                       onClick={handlePrevSlide}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-lg"
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button
                       onClick={handleNextSlide}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-[8px]"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-lg"
                     >
                       <ChevronRight size={20} />
                     </button>
 
                     {/* Indicator Overlay */}
-                    <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-[8px]">
+                    <div className="absolute bottom-4 left-4 bg-slate-950/85 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg">
                       Slide {currentSlide + 1} / {slideImages.length}
                     </div>
                   </>
@@ -258,7 +258,7 @@ export function ProductDetailView({
             
             {/* Badges and Field */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="px-3 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-[8px]">
+              <span className="px-3 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-lg">
                 {product.field}
               </span>
               <span className="text-orange-600 text-xs font-bold uppercase tracking-wider">
@@ -275,7 +275,7 @@ export function ProductDetailView({
             <div className="w-16 h-1.5 bg-orange-600 rounded-[8px]"></div>
 
             {/* Price */}
-            <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px] rounded-[10px]">
+            <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px] rounded-xl shadow-sm">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 {isEquipment ? 'Giá bán' : 'Giá bán bản quyền'}
               </span>
@@ -312,7 +312,7 @@ export function ProductDetailView({
             <div className={`grid grid-cols-1 ${isEquipment ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-4 pt-4`}>
               <button
                 onClick={() => onContact(product)}
-                className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-lg shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold uppercase tracking-wider text-xs transition-all shadow-md shadow-orange-600/15 flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-lg"
               >
                 <MessageSquare size={16} />
                 Yêu cầu tư vấn
@@ -321,7 +321,7 @@ export function ProductDetailView({
               {!isEquipment && (
                 <button
                   onClick={() => onDownload(product)}
-                  className="w-full py-4 bg-slate-900 hover:bg-orange-600 text-white font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                  className="w-full py-2.5 bg-slate-900 hover:bg-orange-600 text-white font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-lg"
                 >
                   <Download size={16} />
                   Tải phần mềm
@@ -330,7 +330,7 @@ export function ProductDetailView({
 
               <button
                 onClick={() => onBuy(product)}
-                className="w-full py-4 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-[8px]"
+                className="w-full py-2.5 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-lg"
               >
                 Đăng ký mua
               </button>

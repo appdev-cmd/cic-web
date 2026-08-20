@@ -74,9 +74,9 @@ export const Footer = ({
                 <input 
                   type="email" 
                   placeholder="Nhập email liên hệ" 
-                  className="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-sm focus:outline-none focus:border-orange-600 rounded-[8px] transition-all"
+                  className="flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
                 />
-                <button className="px-4 py-2 bg-orange-600 text-white text-xs font-black uppercase rounded-[8px] hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>
+                <button className="px-5 py-2.5 bg-orange-600 text-white text-xs font-black uppercase rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>
               </form>
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
