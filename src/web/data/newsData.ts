@@ -5,7 +5,7 @@
 
 export interface BaseNewsItem {
   id: string;
-  category: 'company' | 'specialty' | 'recruitment' | 'promotion' | 'shareholder';
+  category: 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder';
   title: string;
   date: string;
   shortDesc: string;
@@ -48,7 +48,15 @@ export interface SpecialtyNewsItem extends BaseNewsItem {
   subType: 'Kiến thức' | 'Cập nhật công nghệ' | 'Chính sách' | 'Giải pháp';
 }
 
-// 3. Recruitment News Extra Details
+// 3. International Cooperation News Extra Details
+export interface InternationalNewsItem extends BaseNewsItem {
+  category: 'international';
+  subType?: 'Đối tác chiến lược' | 'Chuyển giao công nghệ' | 'Hội nghị quốc tế' | 'Dự án quốc tế' | string;
+  partnerCountry?: string;
+  partnerName?: string;
+}
+
+// 4. Recruitment News Extra Details
 export interface RecruitmentNewsItem extends BaseNewsItem {
   category: 'recruitment';
   position: string; // Vị trí tuyển dụng
@@ -60,7 +68,7 @@ export interface RecruitmentNewsItem extends BaseNewsItem {
   status: 'Đang tuyển' | 'Đã hết hạn'; // Trạng thái tuyển dụng
 }
 
-// 4. Promotion News Extra Details
+// 5. Promotion News Extra Details
 export interface PromotionNewsItem extends BaseNewsItem {
   category: 'promotion';
   programName: string; // Chương trình khuyến mại
@@ -69,7 +77,7 @@ export interface PromotionNewsItem extends BaseNewsItem {
   status: 'Đang diễn ra' | 'Đã kết thúc'; // Trạng thái chương trình
 }
 
-// 5. Shareholder News Extra Details
+// 6. Shareholder News Extra Details
 export interface ShareholderNewsItem extends BaseNewsItem {
   category: 'shareholder';
   docType: 'Thông báo cổ đông' | 'Báo cáo thường niên' | 'Điều lệ công ty' | 'Báo cáo tài chính' | 'Nghị quyết' | 'Báo cáo' | 'Thông báo' | string; // Submenu tài liệu cổ đông
@@ -81,6 +89,7 @@ export interface ShareholderNewsItem extends BaseNewsItem {
 export type DetailedNewsItem = 
   | CompanyNewsItem
   | SpecialtyNewsItem
+  | InternationalNewsItem
   | RecruitmentNewsItem
   | PromotionNewsItem
   | ShareholderNewsItem;
@@ -288,6 +297,97 @@ Với hơn 10 năm kinh nghiệm tư vấn BIM chuyên sâu và là đơn vị �
     relatedProjectIds: ['landmark-81-bim', 'nha-ga-t3-tan-son-nhat-cde'],
     relatedEventIds: ['bim-digital-twins-2026', 'ai-infrastructure-design-2026'],
     relatedArticleIds: ['thong-tu-moi-chuan-dinh-dang-cde-2026', 'kien-thuc-digital-twin-ha-tang']
+  },
+
+  // --- TIN HỢP TÁC QUỐC TẾ ---
+  {
+    id: 'cic-idea-statica-ky-ket-hop-tac-2026',
+    category: 'international',
+    subType: 'Đối tác chiến lược',
+    partnerCountry: 'Cộng hòa Séc',
+    partnerName: 'IDEA StatiCa s.r.o.',
+    title: 'CIC Tech và IDEA StatiCa (Cộng hòa Séc) ký kết hợp tác mở rộng giải pháp tính toán kết cấu thép tại Việt Nam',
+    date: '20/07/2026',
+    shortDesc: 'Thỏa thuận hợp tác chiến lược giữa CIC Tech và hãng phần mềm kết cấu IDEA StatiCa mở ra cơ hội tiếp cận công nghệ tính toán liên kết thép phi tuyến tiên tiến cho cộng đồng kỹ sư xây dựng Việt Nam.',
+    img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
+    author: 'Ban Đối ngoại & Hợp tác Quốc tế CIC',
+    views: 2980,
+    tags: ['IDEA StatiCa', 'Hợp tác quốc tế', 'Kết cấu thép', 'Chuyển giao công nghệ'],
+    contentMarkdown: `### LỄ KÝ KẾT THỎA THUẬN HỢP TÁC CHIẾN LƯỢC CIC TECH & IDEA STATICA
+
+Ngày 20/07/2026, tại Trụ sở CIC Tech (Hà Nội), lễ ký kết thỏa thuận hợp tác chiến lược giữa **Công ty Cổ phần Công nghệ và Tư vấn CIC** và **IDEA StatiCa s.r.o. (Cộng hòa Séc)** đã diễn ra trang trọng với sự tham dự của đại diện Đại sứ quán Cộng hòa Séc cùng đông đảo chuyên gia đầu ngành kết cấu công trình.
+
+#### 1. Trọng tâm của thỏa thuận hợp tác
+Theo thỏa thuận được ký kết:
+* **Phân phối và bản địa hóa giải pháp**: CIC tiếp tục là đối tác phân phối ủy quyền độc quyền các dòng giải pháp tính toán liên kết thép (Steel Connections), bê tông dự ứng lực và cấu kiện phức tạp của IDEA StatiCa tại thị trường Việt Nam.
+* **Tích hợp tiêu chuẩn TCVN**: Hai bên phối hợp nghiên cứu tích hợp hoàn chỉnh các bộ tham số tính toán của tiêu chuẩn Việt Nam (TCVN 5575:2012 / TCVN sửa đổi) trực tiếp vào cơ sở dữ liệu vật liệu của phần mềm IDEA StatiCa.
+* **Chương trình đào tạo và cấp chứng chỉ quốc tế**: Hàng quý, CIC và các chuyên gia từ Cộng hòa Séc sẽ tổ chức các khóa sát hạch và cấp chứng chỉ **Certified IDEA StatiCa Professional** cho kỹ sư kết cấu tại Việt Nam.
+
+#### 2. Phát biểu của lãnh đạo hai bên
+* **Ông Juraj Páleník - Giám đốc Phát triển Quốc tế IDEA StatiCa**: *"CIC Tech là một trong những đối tác uy tín và giàu năng lực kỹ thuật nhất tại khu vực Đông Nam Á. Chúng tôi tin tưởng sự hợp tác chặt chẽ này sẽ giúp các công trình phức tạp như sân bay, nhà xưởng khẩu độ lớn và cầu thép tại Việt Nam được tối ưu hóa độ an toàn và tiết kiệm vật liệu vượt bậc."*
+* **Đại diện Ban Lãnh đạo CIC Tech**: *"Việc đưa công nghệ phân tích phần tử hữu hạn dựa trên thành phần (CBFEM) của IDEA StatiCa về Việt Nam là bước đi then chốt trong định hướng nâng cao năng lực cạnh tranh quốc tế cho các nhà thầu và viện thiết kế trong nước."*`,
+    attachments: [
+      { title: 'Thông cáo báo chí thỏa thuận hợp tác CIC - IDEA StatiCa 2026.pdf', size: '2.1 MB', url: '#' }
+    ],
+    relatedProductIds: [2, 5],
+    relatedProjectIds: ['nha-may-thep-hoa-phat-bim', 'landmark-81-bim'],
+    relatedEventIds: ['bim-digital-twins-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['kien-thuc-digital-twin-ha-tang', 'cic-bentley-systems-cybersecurity-2026'],
+    seoTitle: 'CIC Tech ký kết hợp tác chiến lược cùng IDEA StatiCa - Nâng tầm giải pháp kết cấu thép',
+    seoDesc: 'Lễ ký kết thỏa thuận hợp tác toàn diện giữa CIC Tech và tập đoàn phần mềm IDEA StatiCa s.r.o. (Cộng hòa Séc) về chuyển giao công nghệ phân tích liên kết thép tiên tiến.',
+    seoKeywords: ['IDEA StatiCa', 'Hợp tác quốc tế', 'CIC Tech', 'Kết cấu thép', 'CBFEM']
+  },
+  {
+    id: 'cic-tham-du-autodesk-university-usa-2026',
+    category: 'international',
+    subType: 'Hội nghị quốc tế',
+    partnerCountry: 'Hoa Kỳ',
+    partnerName: 'Autodesk Inc.',
+    title: 'Đoàn đại biểu CIC tham dự Hội nghị thượng đỉnh Công nghệ Toàn cầu Autodesk University tại Hoa Kỳ',
+    date: '10/06/2026',
+    shortDesc: 'Đoàn công tác CIC Tech do Tổng Giám đốc dẫn đầu đã tham gia chuỗi hội thảo chuyên đề về Trí tuệ nhân tạo tạo sinh trong kiến trúc và kết nối mạng lưới đối tác CDE toàn cầu tại San Diego, California.',
+    img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80',
+    author: 'Đoàn công tác Quốc tế CIC',
+    views: 2650,
+    tags: ['Autodesk University', 'Hội nghị quốc tế', 'Generative AI', 'BIM'],
+    contentMarkdown: `### CIC TECH TẠI HỘI NGHỊ TOÀN CẦU AUTODESK UNIVERSITY 2026
+
+Từ ngày 05/06 đến 09/06/2026, đoàn đại biểu cấp cao của **CIC Tech** đã có mặt tại San Diego Convention Center (Hoa Kỳ) để tham dự **Autodesk University 2026 (AU 2026)** - sự kiện công nghệ thiết kế và xây dựng thường niên lớn nhất hành tinh với hơn 12.000 chuyên gia đến từ hơn 90 quốc gia.
+
+#### Những nội dung trọng tâm tại hội nghị:
+1. **Generative Design & AI trong Quy hoạch Đô thị**: Autodesk công bố các mô hình nền tảng AI chuyên dụng cho phép tự động tối ưu hóa hướng nắng, gió, tải trọng kết cấu và lượng khí thải carbon ngay từ giai đoạn phác thảo ý tưởng kiến trúc sơ bộ.
+2. **Mở rộng hệ sinh thái Autodesk Construction Cloud (ACC)**: Thúc đẩy tích hợp sâu giữa CDE với bản đồ số ArcGIS (Esri) và cảm biến IoT công trường thời gian thực.
+3. **Các phiên làm việc song phương**: Đoàn CIC đã có các cuộc họp cấp cao với Ban Giám đốc phụ trách khu vực Châu Á - Thái Bình Dương của Autodesk nhằm thúc đẩy các gói hỗ trợ đặc quyền về đào tạo cấp chứng chỉ chính hãng cho các trường đại học khối kỹ thuật tại Việt Nam.`,
+    relatedProductIds: [1, 6],
+    relatedProjectIds: ['nha-ga-t3-tan-son-nhat-cde', 'cao-toc-bac-nam-twin'],
+    relatedEventIds: ['ai-infrastructure-design-2026', 'bim-digital-twins-2026'],
+    relatedArticleIds: ['chinh-sach-lo-trinh-ap-dung-bim-viet-nam', 'kien-thuc-digital-twin-ha-tang']
+  },
+  {
+    id: 'cic-ptv-group-chuyen-giao-cong-nghe-giao-thong-thong-minh',
+    category: 'international',
+    subType: 'Chuyển giao công nghệ',
+    partnerCountry: 'Đức',
+    partnerName: 'PTV Group (Germany)',
+    title: 'CIC hợp tác chiến lược cùng PTV Group (Đức) chuyển giao công nghệ mô phỏng giao thông vi mô và giải pháp Net Zero',
+    date: '28/05/2026',
+    shortDesc: 'Chương trình hợp tác chuyển giao phần mềm mô phỏng giao thông PTV Vissim & PTV Visum hỗ trợ tối ưu hóa quy hoạch hạ tầng giao thông đô thị và giảm phát thải khí nhà kính tại các thành phố lớn.',
+    img: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&q=80',
+    author: 'Trung tâm Giải pháp Đô thị & Giao thông CIC',
+    views: 2150,
+    tags: ['PTV Group', 'Mô phỏng giao thông', 'Vissim', 'Net Zero', 'Đức'],
+    contentMarkdown: `### HỢP TÁC CHIẾN LƯỢC CIC & PTV GROUP (ĐỨC) VỀ GIAO THÔNG THÔNG MINH
+
+Nhằm phục vụ chiến lược quốc gia về chuyển đổi xanh và xây dựng hệ thống giao thông thông minh (ITS), **CIC Tech** đã chính thức hoàn tất thỏa thuận chuyển giao công nghệ toàn diện với **PTV Group (Cộng hòa Liên bang Đức)** - tập đoàn số 1 thế giới về phần mềm mô phỏng và tối ưu hóa luồng giao thông.
+
+#### Phạm vi chuyển giao công nghệ:
+* **PTV Vissim 2026**: Giải pháp mô phỏng vi mô luồng xe hỗn hợp đặc trưng của Việt Nam (kết hợp xe máy, ô tô, xe buýt nhanh BRT và người đi bộ).
+* **PTV Visum**: Phần mềm hoạch định chiến lược mạng lưới giao thông vùng và phân tích tác động môi trường.
+* **Hệ thống tư vấn tích hợp**: Đội ngũ chuyên gia kỹ sư giao thông của CIC được đào tạo trực tiếp bởi các chuyên gia PTV tại Karlsruhe (Đức), sẵn sàng hỗ trợ các Sở Giao thông Vận tải và các chủ đầu tư BOT lập mô hình đánh giá lưu lượng chuẩn xác.`,
+    relatedProductIds: [2, 5],
+    relatedProjectIds: ['cao-toc-bac-nam-twin', 'cau-my-thuan-2-quan-trac'],
+    relatedEventIds: ['ai-smartport-vietnam-2026', 'ai-infrastructure-design-2026'],
+    relatedArticleIds: ['kien-thuc-digital-twin-ha-tang', 'cic-bentley-systems-cybersecurity-2026']
   },
 
   // --- TIN TUYỂN DỤNG ---

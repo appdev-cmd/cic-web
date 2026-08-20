@@ -229,6 +229,7 @@ export const Header = ({
                                 if (onSelectNewsCategory) {
                                   if (subItem.name === 'Tin công ty') onSelectNewsCategory('company');
                                   else if (subItem.name === 'Tin chuyên ngành') onSelectNewsCategory('specialty');
+                                  else if (subItem.name === 'Hợp tác quốc tế' || subItem.name === 'Hợp tác Quốc tế' || subItem.name === 'Tin hợp tác quốc tế' || subItem.name === 'Tin hợp tác Quốc tế') onSelectNewsCategory('international');
                                   else if (subItem.name === 'Tin tuyển dụng') onSelectNewsCategory('recruitment');
                                   else if (subItem.name === 'Tin khuyến mại') onSelectNewsCategory('promotion');
                                   else if (subItem.name === 'Quan hệ cổ đông') onSelectNewsCategory('shareholder');
@@ -523,6 +524,7 @@ export const Header = ({
                                   if (onSelectNewsCategory) {
                                     if (subItem.name === 'Tin công ty') onSelectNewsCategory('company');
                                     else if (subItem.name === 'Tin chuyên ngành') onSelectNewsCategory('specialty');
+                                    else if (subItem.name === 'Hợp tác quốc tế' || subItem.name === 'Hợp tác Quốc tế' || subItem.name === 'Tin hợp tác quốc tế' || subItem.name === 'Tin hợp tác Quốc tế') onSelectNewsCategory('international');
                                     else if (subItem.name === 'Tin tuyển dụng') onSelectNewsCategory('recruitment');
                                     else if (subItem.name === 'Tin khuyến mại') onSelectNewsCategory('promotion');
                                     else if (subItem.name === 'Quan hệ cổ đông') onSelectNewsCategory('shareholder');

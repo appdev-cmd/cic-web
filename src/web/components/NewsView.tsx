@@ -34,6 +34,7 @@ import {
   DollarSign,
   Award,
   Globe,
+  Handshake,
   CornerDownRight,
   Check,
   Copy,
@@ -120,7 +121,7 @@ export function NewsView({
   } = React.useMemo(getNewsData, []);
   
   // Navigation states
-  const [activeCategory, setActiveCategory] = useState<'all' | 'company' | 'specialty' | 'recruitment' | 'promotion' | 'shareholder'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder'>('all');
   const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
 
   // Search & Filter states
@@ -129,6 +130,7 @@ export function NewsView({
   // Category-specific sub-filters
   const [companySubType, setCompanySubType] = useState<string>('Tất cả');
   const [specialtySubType, setSpecialtySubType] = useState<'Tất cả' | 'Kiến thức' | 'Cập nhật công nghệ' | 'Chính sách' | 'Giải pháp'>('Tất cả');
+  const [internationalSubType, setInternationalSubType] = useState<string>('Tất cả');
   
   const [recruitmentDept, setRecruitmentDept] = useState<string>('Tất cả');
   const [recruitmentLoc, setRecruitmentLoc] = useState<string>('Tất cả');
@@ -412,7 +414,7 @@ export function NewsView({
   useEffect(() => {
     if (initialCategory) {
       const cat = initialCategory.toLowerCase();
-      if (['company', 'specialty', 'recruitment', 'promotion', 'shareholder'].includes(cat)) {
+      if (['company', 'specialty', 'international', 'recruitment', 'promotion', 'shareholder'].includes(cat)) {
         setActiveCategory(cat as any);
       } else {
         setActiveCategory('all');
@@ -425,7 +427,7 @@ export function NewsView({
   // Reset pagination when category, search or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, searchQuery, companySubType, specialtySubType, recruitmentDept, recruitmentLoc, recruitmentStatus, promotionStatus, shareholderYear, shareholderDocType]);
+  }, [activeCategory, searchQuery, companySubType, specialtySubType, internationalSubType, recruitmentDept, recruitmentLoc, recruitmentStatus, promotionStatus, shareholderYear, shareholderDocType]);
 
   const handleSelectNews = (id: string) => {
     setSelectedNewsId(id);
@@ -495,6 +497,11 @@ export function NewsView({
     if (item.category === 'specialty') {
       const sItem = item as SpecialtyNewsItem;
       if (specialtySubType !== 'Tất cả' && sItem.subType !== specialtySubType) return false;
+    }
+
+    if (item.category === 'international') {
+      const iItem = item as any;
+      if (internationalSubType !== 'Tất cả' && iItem.subType !== internationalSubType) return false;
     }
 
     if (item.category === 'recruitment') {
@@ -590,9 +597,9 @@ export function NewsView({
     });
   }
 
-  // TOC Visibility Rule: Show for specialty articles or company articles with headings.
+  // TOC Visibility Rule: Show for specialty/international articles or company articles with headings.
   // Hide strictly for recruitment, promotion, and shareholder articles.
-  const showTOC = selectedItem?.category === 'specialty' || (selectedItem?.category === 'company' && rawTocItems.length > 0);
+  const showTOC = selectedItem?.category === 'specialty' || selectedItem?.category === 'international' || (selectedItem?.category === 'company' && rawTocItems.length > 0);
   const tocItems = showTOC ? rawTocItems : [];
 
   const scrollToSection = (id: string) => {
@@ -618,6 +625,9 @@ export function NewsView({
     }
     if (news.category === 'specialty') {
       return 'Tin chuyên ngành';
+    }
+    if (news.category === 'international') {
+      return 'Hợp tác quốc tế';
     }
     if (news.category === 'recruitment') {
       return 'Tuyển dụng';
@@ -662,6 +672,7 @@ export function NewsView({
     { id: 'all', label: 'Tất cả tin tức', icon: BookOpen },
     { id: 'company', label: 'Tin tức công ty', icon: Building2 },
     { id: 'specialty', label: 'Tin chuyên ngành', icon: Globe },
+    { id: 'international', label: 'Hợp tác quốc tế', icon: Handshake },
     { id: 'recruitment', label: 'Tin tuyển dụng', icon: Briefcase },
     { id: 'promotion', label: 'Tin khuyến mại', icon: Percent },
     { id: 'shareholder', label: 'Quan hệ cổ đông', icon: TrendingUp },
@@ -1111,139 +1122,103 @@ export function NewsView({
                   )}
                 </main>
 
-                {/* BLOCK: LIÊN QUAN (DỰ ÁN, SỰ KIỆN, BÀI VIẾT) */}
-                <section className="bg-transparent border-0 p-0 shadow-none space-y-8">
-                  {/* 1. Related Projects Section */}
-                  {effectiveLinkedProjects.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
-                        <Building2 size={18} className="text-orange-600" />
-                        <span>Dự án liên quan</span>
-                      </h3>
+                {/* BLOCK: LIÊN QUAN (DỰ ÁN, SỰ KIỆN) NẾU CÓ */}
+                {(effectiveLinkedProjects.length > 0 || effectiveLinkedEvents.length > 0) && (
+                  <section className="bg-transparent border-0 p-0 shadow-none space-y-8">
+                    {/* 1. Related Projects Section */}
+                    {effectiveLinkedProjects.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                          <Building2 size={18} className="text-orange-600" />
+                          <span>Dự án liên quan</span>
+                        </h3>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {effectiveLinkedProjects.map((proj) => (
-                          <div
-                            key={proj.id}
-                            onClick={() => {
-                              if (onNavigateToProject) {
-                                onNavigateToProject(proj.id);
-                              }
-                            }}
-                            className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-3.5 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
-                          >
-                            <img
-                              src={proj.img || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80'}
-                              alt={proj.name}
-                              className="w-16 h-16 rounded-[8px] object-cover border border-slate-200 shrink-0 group-hover:scale-105 transition-transform"
-                            />
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <span className="inline-block text-[10px] font-bold px-2 py-0.5 bg-orange-50 text-orange-600 rounded">
-                                {proj.sector || 'Dự án tiêu biểu'}
-                              </span>
-                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
-                                {proj.name}
-                              </h4>
-                              {proj.customer && (
-                                <p className="text-[11px] text-slate-500 line-clamp-1">
-                                  {proj.customer}
-                                </p>
-                              )}
-                              <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                                <span>Xem chi tiết dự án</span>
-                                <ChevronRight size={12} className="ml-0.5" />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 2. Related Events Section */}
-                  {effectiveLinkedEvents.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
-                        <Calendar size={18} className="text-orange-600" />
-                        <span>Sự kiện liên quan</span>
-                      </h3>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {effectiveLinkedEvents.map((evt) => (
-                          <div
-                            key={evt.id}
-                            onClick={() => {
-                              if (onNavigateToEvent) {
-                                onNavigateToEvent(evt.id);
-                              }
-                            }}
-                            className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-4 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
-                          >
-                            <div className="px-3 py-2 bg-orange-600 text-white rounded-[8px] text-center shrink-0 group-hover:bg-orange-700 transition-colors">
-                              <span className="block text-[10px] font-extrabold uppercase tracking-wider">
-                                {evt.date.split('/')[1] ? `Thg ${evt.date.split('/')[1]}` : 'Sự kiện'}
-                              </span>
-                              <span className="block text-base font-black leading-none mt-0.5">
-                                {evt.date.split('/')[0]}
-                              </span>
-                            </div>
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
-                                {evt.title}
-                              </h4>
-                              <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                                <MapPin size={12} className="text-orange-600 shrink-0" />
-                                <span className="line-clamp-1">{evt.location}</span>
-                              </p>
-                              <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
-                                <span>Xem chi tiết sự kiện</span>
-                                <ChevronRight size={12} className="ml-0.5" />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 3. Related Articles Section */}
-                  {effectiveLinkedArticles.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
-                        <FileText size={18} className="text-orange-600" />
-                        <span>Bài viết liên quan</span>
-                      </h3>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {effectiveLinkedArticles.map((art) => (
-                          <div
-                            key={art.id}
-                            onClick={() => handleSelectNews(art.id)}
-                            className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] overflow-hidden shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200 flex flex-col"
-                          >
-                            <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {effectiveLinkedProjects.map((proj) => (
+                            <div
+                              key={proj.id}
+                              onClick={() => {
+                                if (onNavigateToProject) {
+                                  onNavigateToProject(proj.id);
+                                }
+                              }}
+                              className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-3.5 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
+                            >
                               <img
-                                src={art.img}
-                                alt={art.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                referrerPolicy="no-referrer"
+                                src={proj.img || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80'}
+                                alt={proj.name}
+                                className="w-16 h-16 rounded-[8px] object-cover border border-slate-200 shrink-0 group-hover:scale-105 transition-transform"
                               />
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <span className="inline-block text-[10px] font-bold px-2 py-0.5 bg-orange-50 text-orange-600 rounded">
+                                  {proj.sector || 'Dự án tiêu biểu'}
+                                </span>
+                                <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                                  {proj.name}
+                                </h4>
+                                {proj.customer && (
+                                  <p className="text-[11px] text-slate-500 line-clamp-1">
+                                    {proj.customer}
+                                  </p>
+                                )}
+                                <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                                  <span>Xem chi tiết dự án</span>
+                                  <ChevronRight size={12} className="ml-0.5" />
+                                </div>
+                              </div>
                             </div>
-                            <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2">
-                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
-                                {art.title}
-                              </h4>
-                              <p className="text-[10px] text-slate-500 flex items-center gap-1 font-medium">
-                                <Clock size={11} className="text-orange-600 shrink-0" />
-                                <span>{art.date}</span>
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </section>
+                    )}
+
+                    {/* 2. Related Events Section */}
+                    {effectiveLinkedEvents.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                          <Calendar size={18} className="text-orange-600" />
+                          <span>Sự kiện liên quan</span>
+                        </h3>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {effectiveLinkedEvents.map((evt) => (
+                            <div
+                              key={evt.id}
+                              onClick={() => {
+                                if (onNavigateToEvent) {
+                                  onNavigateToEvent(evt.id);
+                                }
+                              }}
+                              className="bg-white border border-slate-200 hover:border-orange-500 rounded-[10px] p-4 flex items-start gap-3.5 shadow-2xs transition-all hover:shadow-md cursor-pointer group hover:-translate-y-0.5 duration-200"
+                            >
+                              <div className="px-3 py-2 bg-orange-600 text-white rounded-[8px] text-center shrink-0 group-hover:bg-orange-700 transition-colors">
+                                <span className="block text-[10px] font-extrabold uppercase tracking-wider">
+                                  {evt.date.split('/')[1] ? `Thg ${evt.date.split('/')[1]}` : 'Sự kiện'}
+                                </span>
+                                <span className="block text-base font-black leading-none mt-0.5">
+                                  {evt.date.split('/')[0]}
+                                </span>
+                              </div>
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <h4 className="text-xs font-bold text-slate-950 group-hover:text-orange-600 transition-colors line-clamp-2 leading-snug">
+                                  {evt.title}
+                                </h4>
+                                <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                  <MapPin size={12} className="text-orange-600 shrink-0" />
+                                  <span className="line-clamp-1">{evt.location}</span>
+                                </p>
+                                <div className="pt-1 flex items-center text-[10px] font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+                                  <span>Xem chi tiết sự kiện</span>
+                                  <ChevronRight size={12} className="ml-0.5" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </section>
+                )}
               </div>
 
               {/* RIGHT SIDEBAR (col-span-4): Category-Aware Dynamic Sidebar */}
@@ -1532,13 +1507,20 @@ export function NewsView({
                     <button
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id as any)}
-                      className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] flex items-center gap-2 ${
+                      className={`group shrink-0 px-4 py-2.5 text-xs sm:text-[13px] transition-all rounded-[8px] flex items-center gap-2 border ${
                         isSelected 
-                          ? 'bg-[#FC5115] text-white shadow-md' 
-                          : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-950'
+                          ? 'bg-[#FC5115] text-white border-[#FC5115] shadow-md shadow-orange-500/20 font-bold' 
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-orange-400 hover:bg-orange-50/40 hover:text-orange-600 font-semibold shadow-xs'
                       }`}
                     >
-                      <CatIcon size={14} />
+                      <CatIcon 
+                        size={15} 
+                        className={`transition-colors shrink-0 ${
+                          isSelected 
+                            ? 'text-white' 
+                            : 'text-orange-500 group-hover:text-orange-600'
+                        }`} 
+                      />
                       <span>{cat.label}</span>
                     </button>
                   );
@@ -1612,6 +1594,20 @@ export function NewsView({
                   </div>
                 )}
 
+                {activeCategory === 'international' && (
+                  <div className="md:col-span-4">
+                    <select
+                      value={internationalSubType}
+                      onChange={(e: any) => setInternationalSubType(e.target.value)}
+                      className="w-full bg-white border border-slate-200 focus:border-[#FC5115] px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all rounded-[8px] cursor-pointer"
+                    >
+                      {['Tất cả', 'Đối tác chiến lược', 'Chuyển giao công nghệ', 'Hội nghị quốc tế', 'Dự án quốc tế'].map(st => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 {activeCategory === 'recruitment' && (
                   <>
                     <div className="md:col-span-2">
@@ -1666,6 +1662,7 @@ export function NewsView({
                       setSearchQuery('');
                       setCompanySubType('Tất cả');
                       setSpecialtySubType('Tất cả');
+                      setInternationalSubType('Tất cả');
                       setRecruitmentDept('Tất cả');
                       setRecruitmentLoc('Tất cả');
                       setRecruitmentStatus('Tất cả');
@@ -1690,6 +1687,7 @@ export function NewsView({
                     setSearchQuery('');
                     setCompanySubType('Tất cả');
                     setSpecialtySubType('Tất cả');
+                    setInternationalSubType('Tất cả');
                     setRecruitmentDept('Tất cả');
                     setRecruitmentLoc('Tất cả');
                     setRecruitmentStatus('Tất cả');

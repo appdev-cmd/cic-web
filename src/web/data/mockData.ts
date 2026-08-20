@@ -96,6 +96,13 @@ export const newsItems: NewsItem[] = [
     img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80'
   },
   {
+    category: 'international',
+    title: 'CIC ký kết thỏa thuận hợp tác chuyển giao công nghệ cùng Tập đoàn Bentley Systems',
+    date: '18/08/2026',
+    desc: 'Thỏa thuận hợp tác mở rộng chuyển giao công nghệ bản sao số Digital Twins và hệ thống iTwin tiên tiến cho các dự án hạ tầng trọng điểm.',
+    img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'
+  },
+  {
     category: 'specialty',
     title: 'Ra mắt giải pháp AI trong quản lý năng lượng và Net Zero',
     date: '05/05/2024',
@@ -175,6 +182,7 @@ export const navLinks: NavLink[] = [
     dropdown: [
       { name: 'Tin công ty', href: '#news' },
       { name: 'Tin chuyên ngành', href: '#news' },
+      { name: 'Hợp tác quốc tế', href: '#news' },
       { name: 'Tin tuyển dụng', href: '#news' },
       { name: 'Tin khuyến mại', href: '#news' },
       { name: 'Quan hệ cổ đông', href: '#news' }

@@ -17,7 +17,7 @@ export interface NewsRelatedProject {
   results?: string[];
 }
 
-export type PublicNewsCategory = 'company' | 'specialty' | 'recruitment' | 'promotion' | 'shareholder';
+export type PublicNewsCategory = 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder';
 
 export interface PublicNewsItem {
   id: string;

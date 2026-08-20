@@ -954,6 +954,7 @@ export const HomeView = ({
               { id: 'all', label: 'Tất cả' },
               { id: 'company', label: 'Tin Công ty' },
               { id: 'specialty', label: 'Tin Chuyên ngành' },
+              { id: 'international', label: 'Hợp tác Quốc tế' },
               { id: 'promo', label: 'Tin Khuyến mại' },
               { id: 'career', label: 'Tuyển dụng' },
               { id: 'investor', label: 'Quan hệ Cổ đông' }
@@ -994,7 +995,7 @@ export const HomeView = ({
                   </div>
 
                   <div className="absolute top-4 left-4 px-3 py-1 bg-orange-600 text-white rounded-[8px] text-[10px] font-black uppercase tracking-widest shadow-lg">
-                    {news.category === 'company' ? 'Tin Công ty' : news.category === 'promo' ? 'Khuyến mại' : news.category === 'career' ? 'Tuyển dụng' : news.category === 'investor' ? 'Cổ đông' : 'Tech News'}
+                    {news.category === 'company' ? 'Tin Công ty' : news.category === 'international' ? 'Hợp tác Quốc tế' : news.category === 'specialty' ? 'Tin Chuyên ngành' : news.category === 'promo' ? 'Khuyến mại' : news.category === 'career' ? 'Tuyển dụng' : news.category === 'investor' ? 'Cổ đông' : 'Tech News'}
                   </div>
                 </div>
                 <div className="p-8 flex-1 flex flex-col">

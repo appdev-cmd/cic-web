@@ -75,9 +75,9 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
       tel: '024 3976 1381',
       fax: '',
       email: 'info@cic.com.vn',
-      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.9658249645934!2d105.8058773!3d21.0016278!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac9804b49cf5%3A0x6bcfd35c59f0f975!2sVG%20Building!5e0!3m2!1svi!2s!4v1721445021235!5m2!1svi!2s',
-      searchQuery: 'VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội, Việt Nam'
+      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:00',
+      mapUrl: 'https://maps.google.com/maps?q=T%C3%B2a+nh%C3%A0+VG+Building%2C+235+Nguy%E1%BB%85n+Tr%C3%A3i%2C+Thanh+Xu%C3%A2n%2C+H%C3%A0+N%E1%BB%99i&t=&z=16&ie=UTF8&iwloc=&output=embed',
+      searchQuery: 'Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội, Việt Nam'
     },
     hcm: {
       name: 'Chi nhánh TP. Hồ Chí Minh',
@@ -85,9 +85,9 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
       tel: '088 645 2020 - 028 628 99022 - 028 628 99033',
       fax: '',
       email: 'cichcm@cic.com.vn',
-      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30',
-      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.231264223456!2d106.695247!3d10.793619!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317528b76df47c17%3A0xa6607e4c63f11467!2zMzYgTmd1eeG7hW4gSHV5IEzGsOG7b25nLCBQaMaw4budbmcgMTQsIELDjG5oIFRo4bqhbmgsIEjhu5MgQ2jDrSBNaW5oLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1721445124012!5m2!1svi!2s',
-      searchQuery: '36 Nguyễn Huy Lượng, Bình Thạnh, TP. Hồ Chí Minh, Việt Nam'
+      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:00',
+      mapUrl: 'https://maps.google.com/maps?q=36+Nguy%E1%BB%85n+Huy+L%C6%B0%E1%BB%A3ng%2C+Ph%C6%B0%E1%BB%9Dng+14%2C+B%C3%ACnh+Th%E1%BA%A1nh%2C+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh&t=&z=16&ie=UTF8&iwloc=&output=embed',
+      searchQuery: '36 Nguyễn Huy Lượng, Phường 14, Bình Thạnh, TP. Hồ Chí Minh, Việt Nam'
     }
   };
 
@@ -247,7 +247,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                             <span>Email: <strong className="font-semibold text-slate-900">{branches[activeBranch].email}</strong></span>
                           </p>
                           {branches[activeBranch].fax && (
-                            <p className="text-slate-500 font-medium pl-5.5 text-[11px] sm:text-xs">Fax: {branches[activeBranch].fax}</p>
+                            <p className="text-slate-600 font-medium pl-5.5 text-[11px] sm:text-xs">Fax: {branches[activeBranch].fax}</p>
                           )}
                         </div>
                       </div>
@@ -287,7 +287,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         allowFullScreen={true}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        className="w-full h-full grayscale hover:grayscale-0 transition-all duration-500 rounded-[10px]"
+                        className="w-full h-full rounded-[10px]"
                       ></iframe>
                     </div>
                   </div>
