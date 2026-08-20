@@ -108,13 +108,6 @@ export const newsItems: NewsItem[] = [
     date: '05/05/2024',
     desc: 'Giúp doanh nghiệp kiểm kê phát thải tự động và tối ưu hóa lộ trình giảm Carbon theo tiêu chuẩn quốc tế.',
     img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop'
-  },
-  {
-    category: 'company',
-    title: 'Sự kiện Bentley Innovation Day quy quy tụ hơn 500 chuyên gia',
-    date: '28/04/2024',
-    desc: 'Chia sẻ kinh nghiệm triển khai BIM và Digital Twins từ các tập đoàn lớn toàn cầu.',
-    img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'
   }
 ];
 

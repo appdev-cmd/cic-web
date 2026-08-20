@@ -10,28 +10,29 @@ import {
   Play, 
   Phone, 
   Mail, 
-  ChevronRight,
-  ChevronLeft,
-  ArrowUpRight,
-  Download,
-  ShieldCheck,
-  Cpu,
-  Layers,
-  Users,
-  Bell,
-  Search,
-  X,
-  Calendar,
-  MapPin,
-  Globe,
-  Award,
-  Menu,
-  User,
-  Building,
-  Briefcase,
-  Send,
-  CheckCircle,
-  Check
+  ChevronRight, 
+  ChevronLeft, 
+  ArrowUpRight, 
+  Download, 
+  ShieldCheck, 
+  Cpu, 
+  Layers, 
+  Users, 
+  Bell, 
+  Search, 
+  X, 
+  Calendar, 
+  MapPin, 
+  Globe, 
+  Award, 
+  Menu, 
+  User, 
+  Building, 
+  Briefcase, 
+  Send, 
+  CheckCircle, 
+  Check,
+  FileText
 } from 'lucide-react';
 
 import { Counter } from '@shared/components/Counter';
@@ -1045,10 +1046,29 @@ export const HomeView = ({
                 </div>
               </motion.div>
             )) : (
-              <div className="col-span-full py-12 text-center text-slate-400 font-bold uppercase tracking-widest">
-                Đang cập nhật bài viết...
+              <div className="col-span-full py-16 px-6 text-center bg-white rounded-[10px] border border-dashed border-slate-200 shadow-sm flex flex-col items-center justify-center">
+                <FileText className="w-10 h-10 text-slate-300 mb-3" />
+                <p className="text-slate-500 font-bold text-sm tracking-wide">Đang cập nhật bài viết...</p>
+                <p className="text-xs text-slate-400 mt-1">Nội dung chuyên mục này sẽ sớm được phát hành.</p>
               </div>
             )}
+          </div>
+
+          {/* View All News Button */}
+          <div className="text-center mt-10">
+            <button 
+              onClick={() => {
+                setCurrentView('news');
+                setActiveLink('Tin tức');
+                if (setPreSelectedNewsCategory) {
+                  setPreSelectedNewsCategory(activeNewsCategory !== 'all' ? activeNewsCategory : 'all');
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-2 cursor-pointer"
+            >
+              Xem tất cả tin tức <ChevronRight size={16} className="inline-block group-hover:translate-x-1.5 transition-transform" />
+            </button>
           </div>
         </div>
       </section>
