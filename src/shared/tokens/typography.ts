@@ -6,16 +6,16 @@
  */
 
 export const fontFamilies = {
-  sans: '"Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif',
-  display: '"Roboto", "Be Vietnam Pro", system-ui, -apple-system, sans-serif',
-  mono: '"Roboto", "Be Vietnam Pro", monospace',
+  sans: '"Be Vietnam Pro", "Roboto", system-ui, -apple-system, sans-serif',
+  display: '"Be Vietnam Pro", "Roboto", system-ui, -apple-system, sans-serif',
+  mono: 'ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Monaco, Consolas, monospace',
 } as const;
 
 export const fontSizes = {
   micro: {
-    fontSize: '10px',
+    fontSize: '11px',
     lineHeight: '1.4',
-    letterSpacing: '0.3em',
+    letterSpacing: '0.12em',
     textTransform: 'uppercase',
   },
   xs: {
@@ -55,13 +55,18 @@ export const fontSizes = {
   },
   '4xl': {
     fontSize: '36px',
-    lineHeight: '1.2',
-    letterSpacing: '-0.025em',
+    lineHeight: '1.18',
+    letterSpacing: '-0.02em',
   },
   '5xl': {
     fontSize: '48px',
-    lineHeight: '1.1',
-    letterSpacing: '-0.025em',
+    lineHeight: '1.12',
+    letterSpacing: '-0.03em',
+  },
+  '6xl': {
+    fontSize: '72px',
+    lineHeight: '1.08',
+    letterSpacing: '-0.03em',
   },
 } as const;
 
@@ -76,13 +81,13 @@ export const fontWeights = {
 } as const;
 
 export const letterSpacings = {
-  tighter: '-0.05em',
-  tight: '-0.025em',
+  tighter: '-0.03em',
+  tight: '-0.02em',
   normal: '0em',
-  wide: '0.05em',
-  wider: '0.1em',
-  widest: '0.2em',
-  ultra: '0.3em',
+  wide: '0.04em',
+  wider: '0.08em',
+  widest: '0.12em',
+  ultra: '0.16em',
 } as const;
 
 export const lineHeights = {

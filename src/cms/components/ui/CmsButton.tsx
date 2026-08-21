@@ -18,7 +18,7 @@ const variantClasses: Record<CmsButtonVariant, string> = {
 };
 
 const sizeClasses: Record<CmsButtonSize, string> = {
-  sm: 'min-h-8 px-3 text-xs rounded-lg gap-1.5',
+  sm: 'min-h-8 px-3 text-[13px] rounded-lg gap-1.5',
   md: 'min-h-10 px-4 text-sm rounded-xl gap-2',
 };
 

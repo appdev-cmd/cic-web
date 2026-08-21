@@ -28,7 +28,7 @@ export function CmsTabs<T extends string>({ items, value, onChange, ariaLabel }:
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`-mb-px inline-flex min-h-9 shrink-0 items-center gap-2 rounded-t-lg border-b-2 px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+            className={`-mb-px inline-flex min-h-9 shrink-0 items-center gap-2 rounded-t-lg border-b-2 px-3 text-[13px] font-semibold leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
               active
                 ? 'border-orange-600 bg-orange-50/60 text-orange-700 dark:bg-orange-950/20 dark:text-orange-300'
                 : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
@@ -37,7 +37,7 @@ export function CmsTabs<T extends string>({ items, value, onChange, ariaLabel }:
             {Icon && <Icon className="size-4" aria-hidden="true" />}
             <span>{item.label}</span>
             {typeof item.count === 'number' && (
-              <span className={`min-w-5 rounded-full px-1.5 py-0.5 text-center font-mono text-[10px] ${active ? 'bg-orange-600 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
+              <span className={`min-w-5 rounded-full px-1.5 py-0.5 text-center font-mono text-xs leading-4 ${active ? 'bg-orange-600 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
                 {item.count}
               </span>
             )}

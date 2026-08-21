@@ -17,6 +17,7 @@ import {
   Globe 
 } from 'lucide-react';
 import { ZaloIcon } from '@shared/components/Icons';
+import { typeNav, typeButton, typeH4, typeCaption } from '@shared/components/Typography';
 import { getNavigationData } from '../features/navigation/navigationData';
 
 interface HeaderProps {
@@ -197,7 +198,7 @@ export const Header = ({
                         setActiveLink(link.name);
                       }
                     }}
-                    className={`text-sm font-bold transition-all flex items-center gap-1 uppercase tracking-wide ${
+                    className={`${typeNav} transition-all flex items-center gap-1 uppercase ${
                       isActive 
                         ? 'text-orange-600' 
                         : isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white/90 hover:text-white'

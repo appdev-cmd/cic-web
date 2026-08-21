@@ -169,7 +169,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
               placeholder="Lọc menu..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="w-full pl-8 pr-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
+              className="w-full pl-8 pr-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-[13px] leading-5 rounded-md border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
         ) : (
@@ -217,7 +217,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
               {!isCollapsed ? (
                 <button
                   onClick={() => toggleGroup(group.id)}
-                  className="w-full px-2 py-1 text-left text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
+                  className="w-full px-2 py-1 text-left text-xs font-bold leading-4 text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center justify-between hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
                 >
                   <span className="truncate">{group.groupTitle}</span>
                   <ChevronDown
@@ -245,7 +245,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                     return (
                       <div key={item.id} className="relative group">
                         <div
-                          className={`w-full px-2.5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-2.5 ${
+                          className={`w-full px-2.5 py-2 rounded-lg text-[13px] font-medium leading-5 transition-all flex items-center gap-2.5 ${
                             isActive
                               ? 'bg-orange-600 text-white shadow-xs font-semibold'
                               : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'

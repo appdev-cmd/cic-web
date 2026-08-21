@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 
 import { Counter } from '@shared/components/Counter';
+import { SectionHeader, typeBadge, typeBodyLead, typeButton, typeHero, typeH2, typeProse, typeStat, typeMeta } from '@shared/components/Typography';
 import { BIMIcon } from '@shared/components/Icons';
 import { AwardsSlider } from './AwardsSlider';
 
@@ -105,18 +106,6 @@ export const HomeView = ({
     return () => clearInterval(timer);
   }, []);
 
-  const SectionHeader = ({ title, sub, dark }: { title: string; sub: string; dark?: boolean }) => (
-    <div className="text-center mb-6">
-      <h2 className={`text-4xl font-black uppercase tracking-tighter mb-2 ${dark ? 'text-white' : 'text-slate-950'}`}>
-        {title}
-      </h2>
-      <div className="w-16 h-1 bg-orange-600 mx-auto mt-2 mb-4"></div>
-      <p className={`font-bold uppercase tracking-widest text-[10px] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-        {sub}
-      </p>
-    </div>
-  );
-
   const filteredProjects = projects.filter(p => {
     const matchesTab = activeProjectTab === 'all' || p.type === activeProjectTab;
     const searchLower = projectSearchQuery.toLowerCase();
@@ -183,17 +172,17 @@ export const HomeView = ({
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg mb-5 backdrop-blur-md">
               <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
+              <span className={`${typeBadge} text-white`}>
                 Leading Innovation since 1990
               </span>
             </div>
             
             <h1 
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-[4.5rem] xl:text-7xl font-black text-white leading-[1.1] mb-4 tracking-tighter"
+              className={`${typeHero} text-white mb-4`}
               dangerouslySetInnerHTML={{ __html: heroSlides[currentSlide].title }}
             />
             
-            <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-8 max-w-xl leading-relaxed font-medium">
+            <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>
               {heroSlides[currentSlide].sub}
             </p>
 
@@ -204,7 +193,7 @@ export const HomeView = ({
                   setActiveLink('Sản phẩm');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2.5 bg-orange-600 text-white rounded-lg font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3 cursor-pointer"
+                className={`px-5 py-2.5 bg-orange-600 text-white rounded-lg ${typeButton} transition-all active:scale-95 shadow-lg shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center justify-center gap-3 cursor-pointer`}
               >
                 Khám phá giải pháp <ArrowRight size={20} />
               </button>
@@ -215,7 +204,7 @@ export const HomeView = ({
                   setAboutSubTab('overview');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2.5 bg-white/5 text-white rounded-lg font-black text-sm uppercase tracking-widest transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction cursor-pointer"
+                className={`px-5 py-2.5 bg-white/5 text-white rounded-lg ${typeButton} transition-all hover:bg-white/10 border-2 border-white/10 flex items-center justify-center gap-3 btn-modern-interaction cursor-pointer`}
               >
                 <Users size={20} /> Về chúng tôi
               </button>
@@ -270,11 +259,10 @@ export const HomeView = ({
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
-              <p className="text-orange-600 font-black uppercase tracking-[0.3em] text-[10px] mb-4">Về chúng tôi</p>
-              <h2 className="text-3xl md:text-4xl lg:text-[2.8rem] xl:text-[3.2rem] font-black text-[#0b1b36] mb-8 leading-[1.2] tracking-tighter w-full max-w-none break-words">
+              <h2 className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
                 Hơn 35 năm <span className="text-orange-600">đồng hành</span><br className="hidden md:block" /> cùng kỹ thuật Việt Nam
               </h2>
-              <div className="space-y-4 text-slate-600 leading-relaxed text-base mb-10 font-medium text-justify">
+              <div className={`${typeProse} space-y-4 text-slate-600 mb-10 text-justify`}>
                 <p>
                   CIC (tiền thân là Trung tâm Tin học - Bộ Xây dựng, thành lập năm 1990) là đơn vị hàng đầu cung cấp phần mềm, thiết bị và giải pháp số cho ngành xây dựng.
                 </p>
@@ -367,10 +355,10 @@ export const HomeView = ({
                 transition={{ delay: i * 0.1, duration: 0.8 }}
                 className="text-center group"
               >
-                <div className="text-5xl md:text-6xl font-black text-slate-800 mb-4 tracking-tighter flex items-center justify-center h-16 group-hover:scale-110 group-hover:text-orange-500 transition-all duration-500">
+                <div className={`${typeStat} text-slate-800 mb-4 flex items-center justify-center h-16 group-hover:scale-110 group-hover:text-orange-500 transition-all duration-500`}>
                   <Counter value={stat.val!} suffix={stat.suffix!} />
                 </div>
-                <div className="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">{stat.label}</div>
+                <div className={`${typeMeta} text-slate-500`}>{stat.label}</div>
               </motion.div>
             ))}
           </div>

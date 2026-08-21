@@ -86,7 +86,17 @@ export const generateCssVariables = (): string => {
 
       /* Typography */
       --token-font-sans: ${fontFamilies.sans};
+      --token-font-display: ${fontFamilies.display};
       --token-font-mono: ${fontFamilies.mono};
+      --token-type-body-size: 1rem;
+      --token-type-body-leading: 1.65;
+      --token-type-prose-measure: 68ch;
+      --token-type-tracking-tighter: ${letterSpacings.tighter};
+      --token-type-tracking-tight: ${letterSpacings.tight};
+      --token-type-h1-size: ${fontSizes['4xl'].fontSize};
+      --token-type-h2-size: ${fontSizes['3xl'].fontSize};
+      --token-type-h3-size: ${fontSizes['2xl'].fontSize};
+      --token-type-hero-size: clamp(1.875rem, calc(2.5vw + 1.25rem), ${fontSizes['6xl'].fontSize});
     }
   `.trim();
 };

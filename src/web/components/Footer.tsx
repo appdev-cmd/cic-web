@@ -14,6 +14,7 @@ import {
   Globe 
 } from 'lucide-react';
 import { ZaloIcon } from '@shared/components/Icons';
+import { typeH4, typeButton, typeCaption, typeLabel, typeMeta } from '@shared/components/Typography';
 import { getNavigationData, type FooterNavigationItem, type PublicNavigationView } from '../features/navigation/navigationData';
 
 interface FooterProps {
@@ -65,18 +66,18 @@ export const Footer = ({
                 className="h-26 sm:h-30 w-auto mb-4 rounded-[10px]"
               />
             </div>
-            <p className="text-white font-black text-lg mb-4 leading-tight whitespace-nowrap">
+            <p className={`${typeH4} text-white mb-4 leading-tight whitespace-nowrap`}>
               Công ty cổ phần Công nghệ và Tư vấn CIC
             </p>
             <div className="mb-8">
-              <h4 className="text-white/60 text-xs font-bold mb-4 tracking-tight">Đăng ký để nhận bản tin công nghệ mới nhất từ CIC</h4>
+              <h4 className={`${typeCaption} text-white/60 mb-4`}>Đăng ký để nhận bản tin công nghệ mới nhất từ CIC</h4>
               <form className="relative flex gap-2" onSubmit={(e) => e.preventDefault()}>
                 <input 
                   type="email" 
                   placeholder="Nhập email liên hệ" 
                   className="flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
                 />
-                <button className="px-5 py-2.5 bg-orange-600 text-white text-xs font-black uppercase rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction">Đăng ký</button>
+                <button className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction`}>Đăng ký</button>
               </form>
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
@@ -100,8 +101,8 @@ export const Footer = ({
 
           {/* Navigation Menu */}
           <div className="lg:col-span-2">
-            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Điều hướng</h3>
-            <ul className="space-y-4 text-sm font-bold">
+            <h3 className={`${typeLabel} text-white mb-8`}>Điều hướng</h3>
+            <ul className="space-y-4 text-sm font-semibold">
               {footerPrimaryLinks.map((item) => (
                 <li key={item.label}>
                   <a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all flex items-center gap-2 underline-offset-4 hover:underline">{item.label}</a>
@@ -111,16 +112,16 @@ export const Footer = ({
           </div>
 
           <div className="lg:col-span-3">
-            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-8">Giải pháp & Dịch vụ</h3>
+            <h3 className={`${typeLabel} text-white mb-8`}>Giải pháp & Dịch vụ</h3>
             <div className="grid grid-cols-1 gap-6">
               <div>
-                <h4 className="text-white/60 text-xs font-black uppercase mb-4 tracking-tighter">Giải pháp</h4>
+                <h4 className={`${typeMeta} text-white/60 mb-4`}>Giải pháp</h4>
                 <ul className="space-y-3 text-xs font-bold">
                   {footerSolutionLinks.map((item) => <li key={item.label}><a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all">{item.label}</a></li>)}
                 </ul>
               </div>
               <div>
-                <h4 className="text-white/60 text-xs font-black uppercase mb-4 tracking-tighter">Dịch vụ</h4>
+                <h4 className={`${typeMeta} text-white/60 mb-4`}>Dịch vụ</h4>
                 <ul className="space-y-3 text-xs font-bold">
                   {footerServiceLinks.map((item) => <li key={item.label}><a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all">{item.label}</a></li>)}
                 </ul>
@@ -131,10 +132,10 @@ export const Footer = ({
           {/* Contact Details */}
           <div className="lg:col-span-3 space-y-10">
             <div>
-              <h3 className="text-white font-black uppercase tracking-widest text-sm mb-6 flex items-center gap-2">
+              <h3 className={`${typeLabel} text-white mb-6 flex items-center gap-2`}>
                 <MapPin size={18} className="text-orange-600" /> Trụ sở chính
               </h3>
-              <div className="space-y-4 text-sm">
+              <div className={`${typeCaption} space-y-4 text-slate-400`}>
                 <p className="leading-relaxed">Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam</p>
                 <div className="flex flex-col gap-2">
                   <a href="tel:02439761381" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
@@ -151,10 +152,10 @@ export const Footer = ({
             </div>
 
             <div>
-              <h3 className="text-white font-black uppercase tracking-widest text-sm mb-6 flex items-center gap-2">
+              <h3 className={`${typeLabel} text-white mb-6 flex items-center gap-2`}>
                 <MapPin size={18} className="text-orange-600" /> Chi nhánh Tp HCM
               </h3>
-              <div className="space-y-4 text-sm">
+              <div className={`${typeCaption} space-y-4 text-slate-400`}>
                 <p className="leading-relaxed">Số 36 Nguyễn Huy Lượng, P. Bình Thạnh, TP. Hồ Chí Minh</p>
                 <div className="flex flex-col gap-2">
                   <a href="tel:0886452020" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
@@ -169,7 +170,7 @@ export const Footer = ({
           </div>
         </div>
 
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs uppercase tracking-widest font-black">
+        <div className={`pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 ${typeMeta}`}>
           <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
           <div className="flex items-center gap-6 sm:gap-10">
             <a 

@@ -62,19 +62,7 @@ import {
   hardwarePartners
 } from '../data/aboutData';
 
-const SectionHeader = ({ title, sub, dark }: { title: string; sub?: string; dark?: boolean }) => (
-  <div className="text-center mb-6">
-    <h2 className={`text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 ${dark ? 'text-white' : 'text-slate-950'}`}>
-      {title}
-    </h2>
-    <div className="w-16 h-1 bg-orange-600 mx-auto mt-2 mb-4"></div>
-    {sub && (
-      <p className={`font-bold uppercase tracking-widest text-[10px] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-        {sub}
-      </p>
-    )}
-  </div>
-);
+import { SectionHeader } from '@shared/components/Typography';
 
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';

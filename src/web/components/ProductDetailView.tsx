@@ -41,6 +41,16 @@ interface ProductDetailViewProps {
   onSelectProduct?: (product: Product) => void;
 }
 
+const cleanProductHtml = (htmlString: string): string => {
+  if (!htmlString) return '';
+
+  return htmlString
+    .replace(/font-family\s*:\s*[^;\"]+;?/gi, '')
+    .replace(/font-size\s*:\s*[^;\"]+;?/gi, '')
+    .replace(/line-height\s*:\s*[^;\"]+;?/gi, '')
+    .replace(/(<font\b[^>]*?)\s+face=(['\"])[^'\"]*\2/gi, '$1');
+};
+
 function CollapsibleContent({ 
   children, 
   maxHeight = 450 
@@ -379,7 +389,7 @@ export function ProductDetailView({
                     {product.overviewHtml ? (
                       <div 
                         className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
-                        dangerouslySetInnerHTML={{ __html: product.overviewHtml }} 
+                        dangerouslySetInnerHTML={{ __html: cleanProductHtml(product.overviewHtml) }}
                       />
                     ) : product.description ? (
                       <p className="text-slate-700 text-justify text-base leading-relaxed">
@@ -405,7 +415,7 @@ export function ProductDetailView({
                     {product.featuresHtml ? (
                       <div 
                         className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mb-3 [&_h2]:mt-6 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-slate-800 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_li]:mb-1 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-3"
-                        dangerouslySetInnerHTML={{ __html: product.featuresHtml }} 
+                        dangerouslySetInnerHTML={{ __html: cleanProductHtml(product.featuresHtml) }}
                       />
                     ) : (
                       <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[8px]">
