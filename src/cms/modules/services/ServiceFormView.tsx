@@ -17,21 +17,12 @@ import {
 import {
   ServiceItem,
   EditorialStatus,
-  ServiceActivityLog,
-  ServiceVersion,
-  ServiceUsedByReference,
-  ServiceRelatedContact,
 } from './types';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { findPageBuilderImage, pageBuilderImages, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 
 interface ServiceFormViewProps {
   service: ServiceItem;
-  owners: { id: string; name: string; email: string }[];
-  activityLogs: ServiceActivityLog[];
-  versions: ServiceVersion[];
-  usedByReferences: ServiceUsedByReference[];
-  relatedContacts: ServiceRelatedContact[];
   onBack: () => void;
   onSave: (updated: ServiceItem) => void;
   onOpenPreview: (item: ServiceItem) => void;
@@ -71,17 +62,15 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     showToast('Đã lưu bản nháp dịch vụ thành công!');
   };
 
-  const handlePublishAndActivate = () => {
+  const handlePublish = () => {
     const updated: ServiceItem = {
       ...formData,
       editorial_status: 'published',
-      service_status: 'active',
-      publish_at: formData.publish_at || new Date().toISOString().replace('T', ' ').substring(0, 19),
       updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
     onSave(updated);
     setIsDirty(false);
-    showToast('Đã xuất bản (Publish) và kích hoạt (Activate) dịch vụ trên Website!');
+    showToast('Đã xuất bản dịch vụ trên website!');
   };
 
   const showToast = (msg: string) => {
@@ -123,7 +112,6 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
           </button>
           <div className="min-w-0">
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="font-mono text-xs font-bold text-slate-500">{formData.code}</span>
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                   formData.editorial_status === 'published'
@@ -131,16 +119,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                     : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                 }`}
               >
-                Editorial: {formData.editorial_status}
-              </span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  formData.service_status === 'active'
-                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
-                    : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-                }`}
-              >
-                Service: {formData.service_status}
+                {formData.editorial_status === 'published' ? 'Đã xuất bản' : 'Bản nháp'}
               </span>
             </div>
             <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate max-w-lg mt-0.5">
@@ -170,7 +149,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
           </button>
 
           <button
-            onClick={handlePublishAndActivate}
+            onClick={handlePublish}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-orange-700 sm:flex-none"
           >
             <CheckCircle2 className="w-3.5 h-3.5" /> Xuất bản
@@ -406,15 +385,15 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Trạng thái Biên tập (Editorial Status)
+                  Trạng thái xuất bản
                 </label>
                 <select
                   value={formData.editorial_status}
                   onChange={(e) => handleChange('editorial_status', e.target.value as EditorialStatus)}
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 font-bold"
                 >
-                  <option value="draft">Draft (Nháp)</option>
-                  <option value="published">Published (Đã xuất bản)</option>
+                  <option value="draft">Bản nháp</option>
+                  <option value="published">Đã xuất bản</option>
                 </select>
               </div>
 
@@ -423,7 +402,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Thứ tự ưu tiên hiển thị (Display Order)
+                  Thứ tự hiển thị
                 </label>
                 <input
                   type="number"

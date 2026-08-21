@@ -12,7 +12,6 @@ import {
   Check,
   RotateCcw,
   RefreshCw,
-  Sparkles,
   Calendar,
   Layers,
   ArrowUpDown,
@@ -37,7 +36,6 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ArticlePreviewModal } from './components/ArticlePreviewModal';
-import { QuickEditModal } from './components/QuickEditModal';
 import { ColumnSettingModal, ColumnVisibility, TableDensity } from './components/ColumnSettingModal';
 import { VersionHistoryDrawer } from './components/VersionHistoryDrawer';
 import { ActivityLogDrawer } from './components/ActivityLogDrawer';
@@ -76,7 +74,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
 
   // Modals & Drawers
   const [previewArticle, setPreviewArticle] = useState<NewsArticle | null>(null);
-  const [quickEditArticle, setQuickEditArticle] = useState<NewsArticle | null>(null);
   const [versionDrawerArticle, setVersionDrawerArticle] = useState<NewsArticle | null>(null);
   const [activityDrawerArticle, setActivityDrawerArticle] = useState<NewsArticle | null>(null);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
@@ -317,7 +314,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
               }}
               items={[
                 { id: 'all', label: 'Tất cả bài viết', count: articles.filter((a) => !a.in_trash).length },
-                { id: 'trash', label: 'Lưu trữ & thùng rác', count: articles.filter((a) => a.in_trash).length },
+                { id: 'trash', label: 'Thùng rác', count: articles.filter((a) => a.in_trash).length },
               ]}
             />
 
@@ -523,14 +520,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
                               />
 
                               <CmsIconButton
-                                onClick={() => setQuickEditArticle(art)}
-                                icon={<Sparkles />}
-                                size="sm"
-                                aria-label="Sửa nhanh tin tức"
-                                title="Sửa nhanh"
-                              />
-
-                              <CmsIconButton
                                 onClick={() => handleOpenEditForm(art)}
                                 icon={<Edit />}
                                 size="sm"
@@ -576,17 +565,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
         isOpen={Boolean(previewArticle)}
         article={previewArticle}
         onClose={() => setPreviewArticle(null)}
-      />
-
-      <QuickEditModal
-        isOpen={Boolean(quickEditArticle)}
-        article={quickEditArticle}
-        categories={categories}
-        onClose={() => setQuickEditArticle(null)}
-        onSave={(updated) => {
-          setArticles((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
-          showToast(`Đã cập nhật nhanh bài viết "${updated.title}"!`);
-        }}
       />
 
       <ColumnSettingModal

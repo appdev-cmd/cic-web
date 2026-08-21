@@ -203,10 +203,6 @@ Không có.
 
 | Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
 | ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
-| `cic_services` | `code` | `varchar(255)` | — | Partial unique index trên code chuẩn hóa | **BẮT BUỘC** | List, tìm kiếm, preview, quick edit và thông báo thao tác | Nullable trong migration đầu; cần rule backfill ổn định trước khi siết `NOT NULL`. |
-| `cic_services_en` | `code` | `varchar(255)` | — | Partial unique index trên code chuẩn hóa | **BẮT BUỘC** | Contract workspace EN | Không tự sao chép code VI nếu hai workspace không dùng chung identity nghiệp vụ. |
-| `cic_services` | `service_status` | `varchar(20)` | — | CHECK thuộc `active`, `inactive`, `archived`; index khi filter cần | **BẮT BUỘC** | Tabs/filter và hành động kích hoạt, tạm ngừng, lưu trữ | `published` giữ nghĩa nháp/xuất bản nên không thể đồng thời lưu vòng đời cung cấp dịch vụ. Nullable/default `inactive` theo migration rule được duyệt. |
-| `cic_services_en` | `service_status` | `varchar(20)` | — | CHECK/index tương ứng bảng VI | **BẮT BUỘC** | Contract workspace EN | Dùng CHECK thay PostgreSQL enum để migration dễ rollback. |
 | `cic_services` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu dịch vụ VI | Index hiện tại không unique; profiling trước khi áp dụng. |
 | `cic_services_en` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu dịch vụ EN | Profiling dataset EN độc lập. |
 
@@ -243,7 +239,7 @@ Không có.
 
 - `slug → alias`, `description/htmlContent → content`, `thumbnail_url → image`, `summary/tagline → summary`, `display_order → ordering`, `meta_* → seo_*`, `editorial_status → published`.
 - `benefits_process`, `supplementary_content`, scope, quy trình và lợi ích trong fixture website tiếp tục compose vào Rich Text `content`; không tạo column theo từng section.
-- `banner_url`, `video_url`, `media_alt`, `og_image`, `group_id`, owner, placement, CTA và `publish_at` chưa có write contract nhất quán trong form chính; chưa thêm vào PostgreSQL.
+- CMS đã bỏ `code`, `service_status`, `group_id`, owner, placement, CTA, `publish_at` và các field fixture không có nguồn DB. `editorial_status` map trực tiếp vào `published`; không thêm column trạng thái khác.
 - Version, activity log, used-by, trash và yêu cầu khách hàng thuộc shared module/relation, không thêm vào `cic_services*`.
 - `migration_report.json` còn báo `cic_services: ERROR`; xử lý tại migration/validation, không mở rộng schema để che lỗi migrate.
 

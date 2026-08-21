@@ -6,8 +6,8 @@
  */
 
 export const fontFamilies = {
-  sans: '"Be Vietnam Pro", "Roboto", system-ui, -apple-system, sans-serif',
-  display: '"Be Vietnam Pro", "Roboto", system-ui, -apple-system, sans-serif',
+  sans: '"Roboto", system-ui, -apple-system, sans-serif',
+  display: '"Roboto", system-ui, -apple-system, sans-serif',
   mono: 'ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Monaco, Consolas, monospace',
 } as const;
 

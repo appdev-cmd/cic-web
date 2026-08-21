@@ -3,7 +3,7 @@
  * Strict specification compliance for dual status, taxonomy, commercial, 11 form sections, quality checklist & audit history.
  */
 
-export type EditorialStatus = 'draft' | 'published' | 'archived';
+export type EditorialStatus = 'draft' | 'published';
 
 export type CatalogStatus = 'active' | 'inactive' | 'archived';
 

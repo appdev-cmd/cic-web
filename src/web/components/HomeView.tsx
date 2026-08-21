@@ -998,7 +998,7 @@ export const HomeView = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredNews.length > 0 ? filteredNews.map((news, i) => (
+            {filteredNews.length > 0 ? filteredNews.slice(0, 3).map((news, i) => (
               <motion.div
                 key={i}
                 whileHover={{ y: -4 }}
@@ -1042,9 +1042,8 @@ export const HomeView = ({
             )}
           </div>
 
-          {/* View All News Button */}
-          <div className="text-center mt-10">
-            <button 
+          <div className="text-center mt-5 md:mt-6">
+            <button
               onClick={() => {
                 setCurrentView('news');
                 setActiveLink('Tin tức');
@@ -1053,7 +1052,7 @@ export const HomeView = ({
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
             >
               Xem tất cả tin tức <ChevronRight size={16} className="inline-block group-hover:translate-x-1.5 transition-transform" />
             </button>

@@ -1,11 +1,10 @@
 import React from 'react';
-import { AlertTriangle, Trash2, Archive, X } from 'lucide-react';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 import { ProductItem } from './types';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   product: ProductItem | null;
-  onConfirmArchive: () => void;
   onConfirmPermanentDelete: () => void;
   onClose: () => void;
 }
@@ -13,7 +12,6 @@ interface DeleteConfirmModalProps {
 export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   isOpen,
   product,
-  onConfirmArchive,
   onConfirmPermanentDelete,
   onClose,
 }) => {
@@ -28,7 +26,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </div>
           <div className="space-y-1">
             <h3 className="font-bold text-slate-900 dark:text-white text-base">
-              Xác nhận Lưu trữ hoặc Xóa sản phẩm
+              Xác nhận xóa sản phẩm
             </h3>
             <p className="text-xs text-slate-500">
               Bạn đang thao tác trên sản phẩm: <span className="font-bold text-slate-900 dark:text-slate-100">"{product.title}"</span> (SKU: {product.sku}).
@@ -47,24 +45,15 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </p>
         </div>
 
-        {/* Actions Choice */}
+        {/* Actions */}
         <div className="space-y-2 pt-2">
-          <button
-            type="button"
-            onClick={onConfirmArchive}
-            className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all"
-          >
-            <Archive className="w-4 h-4" />
-            <span>Chuyển vào lưu trữ — nên chọn</span>
-          </button>
-
           <button
             type="button"
             onClick={onConfirmPermanentDelete}
             className="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-red-600/20 transition-all"
           >
             <Trash2 className="w-4 h-4" />
-            <span>Xóa vĩnh viễn khỏi hệ thống (Không thể hoàn tác)</span>
+            <span>Xóa sản phẩm (Không thể hoàn tác)</span>
           </button>
 
           <button

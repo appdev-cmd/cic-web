@@ -2,18 +2,16 @@ import React, { useEffect, useState, useMemo } from 'react';
 import {
   FolderTree,
   Layers,
-  Zap,
+  Edit3,
   Plus,
   Search,
   Filter,
-  SlidersHorizontal,
   RefreshCw,
   Trash2,
   CheckSquare,
   Square,
   CheckCircle2,
   XCircle,
-  Eye,
   History,
   Copy,
   ChevronLeft,
@@ -47,8 +45,6 @@ import {
 } from './types';
 import type { ProductSettingsGlobalData, ProductTaxonomyModuleData } from '../../data/CatalogDataSource';
 
-import { UsageImpactDrawer } from './UsageImpactDrawer';
-import { ColumnSettingModal, ProductSettingsColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { MasterDataFormDrawer } from './MasterDataFormDrawer';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
@@ -101,7 +97,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   // Search & Filters State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [usageFilter, setUsageFilter] = useState<'all' | 'used' | 'unused'>('all');
   const [staffProductFilter, setStaffProductFilter] = useState('all');
   const [viewFormat, setViewFormat] = useState<'list' | 'tree'>('list');
 
@@ -109,23 +104,9 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Modals & Drawers State
-  const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [impactDrawerItem, setImpactDrawerItem] = useState<AnyMasterItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<AnyMasterItem | null>(null);
   const [formDrawerItem, setFormDrawerItem] = useState<AnyMasterItem | null>(null);
   const [isFormDrawerOpen, setIsFormDrawerOpen] = useState(false);
-
-  // Table Density & Column Visibility
-  const [density, setDensity] = useState<'normal' | 'compact'>('normal');
-  const [columnVisibility, setColumnVisibility] = useState<ProductSettingsColumnVisibility>({
-    code: true,
-    type_badge: true,
-    usage_count: true,
-    status: true,
-    ordering: true,
-    scope_or_country: true,
-    updated_time: true,
-  });
 
   // Toast Notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -166,10 +147,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       // Status
       if (statusFilter !== 'all' && item.status !== statusFilter) return false;
 
-      // Usage
-      if (usageFilter === 'used' && item.usage_count === 0) return false;
-      if (usageFilter === 'unused' && item.usage_count > 0) return false;
-
       if (activeDataType === 'sales_staff' && staffProductFilter !== 'all') {
         const staffItem = item as MasterSalesStaffItem;
         const assignedProductIds = [
@@ -184,7 +161,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
       return true;
     });
-  }, [currentActiveList, searchQuery, statusFilter, usageFilter, activeDataType, staffProductFilter]);
+  }, [currentActiveList, searchQuery, statusFilter, activeDataType, staffProductFilter]);
 
   // Paginated Output
   const paginatedList = useMemo(() => {
@@ -353,20 +330,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   <option value="inactive">Ngừng sử dụng</option>
                 </select>
 
-                {/* Usage filter */}
-                {activeDataType !== 'sales_staff' && <select
-                  value={usageFilter}
-                  onChange={(e) => {
-                    setUsageFilter(e.target.value as any);
-                    setCurrentPage(1);
-                  }}
-                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
-                >
-                  <option value="all">Tất cả Mức sử dụng</option>
-                  <option value="used">Đang được dùng (&gt;0)</option>
-                  <option value="unused">Chưa sử dụng (=0)</option>
-                </select>}
-
                 {activeDataType === 'sales_staff' && (
                   <div className="w-64 shrink-0">
                     <SearchableSelect
@@ -382,7 +345,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                   </div>
                 )}
 
-                <button type="button" disabled={!searchQuery && statusFilter === 'all' && usageFilter === 'all' && staffProductFilter === 'all'} onClick={() => { setSearchQuery(''); setStatusFilter('all'); setUsageFilter('all'); setStaffProductFilter('all'); setCurrentPage(1); }} className="ml-auto flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
+                <button type="button" disabled={!searchQuery && statusFilter === 'all' && staffProductFilter === 'all'} onClick={() => { setSearchQuery(''); setStatusFilter('all'); setStaffProductFilter('all'); setCurrentPage(1); }} className="ml-auto flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button>
 
               </div>
             </div>
@@ -409,28 +372,19 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                       {activeDataType === 'sales_staff' ? 'Tên nhân viên' : usesSystemAlias(activeDataType) ? 'Tiêu đề dữ liệu và tên hiệu' : 'Tên và mã nhận diện'}
                     </th>
 
-                    {/* Usage count */}
-                    {columnVisibility.usage_count && activeDataType !== 'sales_staff' && (
-                      <th className="py-3 px-4 min-w-[140px]">Số SP / Đơn hàng dùng</th>
-                    )}
-
                     {/* Ordering */}
-                    {columnVisibility.ordering && (
-                      <th className="py-3 px-4 min-w-[110px]">Thứ tự (Order)</th>
-                    )}
+                    <th className="py-3 px-4 min-w-[110px]">Thứ tự</th>
 
                     {/* Scope / Contact Info - Only for sales staff */}
-                    {columnVisibility.scope_or_country && activeDataType === 'sales_staff' && (
+                    {activeDataType === 'sales_staff' && (
                       <th className="py-3 px-4 min-w-[200px]">Số điện thoại / Skype / Zalo</th>
                     )}
 
                     {/* Status */}
-                    {columnVisibility.status && (
-                      <th className="py-3 px-4 min-w-[130px]">Trạng thái</th>
-                    )}
+                    <th className="py-3 px-4 min-w-[130px]">Trạng thái</th>
 
                     {/* Updated Time */}
-                    {columnVisibility.updated_time && (
+                    {activeDataType === 'sales_staff' && (
                       <th className="py-3 px-4 min-w-[140px]">{activeDataType === 'sales_staff' ? 'Ngày tạo / ID' : 'Cập nhật'}</th>
                     )}
 
@@ -449,9 +403,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                       return (
                         <tr
                           key={item.id}
-                          className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
-                            density === 'compact' ? 'py-1' : ''
-                          }`}
+                          className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                         >
                           {/* Checkbox */}
                           <td className="py-3 px-3 sticky left-0 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
@@ -480,32 +432,11 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                             </div>
                           </td>
 
-                          {/* Usage Count badge */}
-                          {columnVisibility.usage_count && item.type !== 'sales_staff' && (
-                            <td className="py-3 px-4">
-                              <button
-                                onClick={() => setImpactDrawerItem(item)}
-                                className={`px-2.5 py-1 font-bold text-[11px] rounded-lg border flex items-center gap-1.5 cursor-pointer transition-all ${
-                                  item.usage_count > 0
-                                    ? 'bg-orange-500/10 text-orange-600 border-orange-500/20 hover:bg-orange-500/20'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
-                                }`}
-                              >
-                                <span>{item.usage_count} đối tượng</span>
-                                <Eye className="w-3 h-3" />
-                              </button>
-                            </td>
-                          )}
-
                           {/* Ordering */}
-                          {columnVisibility.ordering && (
-                            <td className="py-3 px-4 font-mono font-bold text-slate-700 dark:text-slate-300">
-                              #{item.ordering}
-                            </td>
-                          )}
+                          <td className="py-3 px-4 font-mono font-bold text-slate-700 dark:text-slate-300">#{item.ordering}</td>
 
                           {/* Contact Info - Only for sales staff */}
-                          {columnVisibility.scope_or_country && activeDataType === 'sales_staff' && (
+                          {activeDataType === 'sales_staff' && (
                             <td className="py-3 px-4 font-medium text-slate-700 dark:text-slate-300">
                               <div className="space-y-1 text-[11px]">
                                 <span className="flex items-center gap-1 font-mono text-orange-600"><Phone className="w-3.5 h-3.5" />{(item as MasterSalesStaffItem).phone || '—'}</span>
@@ -515,8 +446,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                           )}
 
                           {/* Status */}
-                          {columnVisibility.status && (
-                            <td className="py-3 px-4">
+                          <td className="py-3 px-4">
                               <span
                                 className={`px-2.5 py-1 text-[10px] font-bold rounded-full border uppercase tracking-wider ${
                                   item.status === 'active'
@@ -528,11 +458,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                               >
                                 {item.status}
                               </span>
-                            </td>
-                          )}
+                          </td>
 
                           {/* Updated Time */}
-                          {columnVisibility.updated_time && (
+                          {activeDataType === 'sales_staff' && (
                             <td className="py-3 px-4 font-mono text-[10px] text-slate-500">
                               {item.type === 'sales_staff' ? <><div>{item.created_time}</div><div className="mt-1 font-bold text-slate-700 dark:text-slate-300">ID: {item.id}</div></> : item.updated_time}
                             </td>
@@ -546,18 +475,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                   setFormDrawerItem(item);
                                   setIsFormDrawerOpen(true);
                                 }}
-                                icon={<Zap />}
+                                icon={<Edit3 />}
                                 size="sm"
                                 aria-label="Chỉnh sửa thiết lập"
                                 title="Chỉnh sửa"
-                              />
-
-                              <CmsIconButton
-                                onClick={() => setImpactDrawerItem(item)}
-                                icon={<Eye />}
-                                size="sm"
-                                aria-label="Xem nơi đang sử dụng"
-                                title="Xem nơi đang sử dụng"
                               />
 
                               <CmsIconButton
@@ -565,8 +486,8 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
                                 icon={<Trash2 />}
                                 size="sm"
                                 variant="danger"
-                                aria-label="Ngừng sử dụng hoặc lưu trữ"
-                                title="Ngừng dùng / Lưu trữ"
+                                aria-label="Xóa hoặc ngừng sử dụng"
+                                title="Xóa / Ngừng sử dụng"
                               />
                             </div>
                           </td>
@@ -591,37 +512,6 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
       </div>
 
       {/* AUXILIARY DRAWERS & MODALS */}
-      <UsageImpactDrawer
-        isOpen={!!impactDrawerItem}
-        item={impactDrawerItem}
-        records={globalData.usageImpactRecords}
-        onClose={() => setImpactDrawerItem(null)}
-      />
-
-
-      <ColumnSettingModal
-        isOpen={isColumnModalOpen}
-        columns={columnVisibility}
-        density={density}
-        activeDataType={activeDataType}
-        onToggleColumn={(colKey) =>
-          setColumnVisibility((prev) => ({ ...prev, [colKey]: !prev[colKey] }))
-        }
-        onChangeDensity={setDensity}
-        onReset={() =>
-          setColumnVisibility({
-            code: true,
-            type_badge: true,
-            usage_count: true,
-            status: true,
-            ordering: true,
-            scope_or_country: true,
-            updated_time: true,
-          })
-        }
-        onClose={() => setIsColumnModalOpen(false)}
-      />
-
       <DeleteConfirmModal
         isOpen={!!itemToDelete}
         item={itemToDelete}

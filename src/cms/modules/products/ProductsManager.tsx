@@ -6,14 +6,12 @@ import {
   SlidersHorizontal,
   Trash2,
   CheckCircle2,
-  Zap,
   Eye,
   History,
   Copy,
   Star,
   Tag,
   ShieldCheck,
-  Archive,
   FileCheck,
   RotateCcw,
   Layers,
@@ -35,7 +33,6 @@ import { ProductsFormView } from './ProductsFormView';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ProductPreviewModal } from './ProductPreviewModal';
-import { ProductQuickEditModal } from './ProductQuickEditModal';
 import { ProductActivityDrawer } from './ProductActivityDrawer';
 import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
@@ -45,7 +42,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
-type SystemViewTab = 'all' | 'published' | 'draft' | 'is_hot' | 'archived';
+type SystemViewTab = 'all' | 'published' | 'draft' | 'is_hot';
 
 interface ProductsManagerProps {
   workspaceLocale: CmsLocale;
@@ -77,10 +74,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
         ? [item.category_id]
         : [],
       application: item.application || item.application_areas || [],
-      editorial_status:
-        item.editorial_status === 'published' || item.editorial_status === 'archived'
-          ? item.editorial_status
-          : 'draft',
+      editorial_status: item.editorial_status === 'published' ? 'published' : 'draft',
     }))
   );
   const [categories] = useState<ProductCategory[]>(data?.categories ?? []);
@@ -115,7 +109,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<ProductItem | null>(null);
   const [productToPreview, setProductToPreview] = useState<ProductItem | null>(null);
-  const [productToQuickEdit, setProductToQuickEdit] = useState<ProductItem | null>(null);
   const [productForActivity, setProductForActivity] = useState<ProductItem | null>(null);
   const [productToDuplicate, setProductToDuplicate] = useState<ProductItem | null>(null);
 
@@ -159,10 +152,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
       if (activeTab === 'published' && p.editorial_status !== 'published') return false;
       if (activeTab === 'draft' && p.editorial_status !== 'draft') return false;
       if (activeTab === 'is_hot' && !p.is_hot) return false;
-      if (activeTab === 'archived' && p.editorial_status !== 'archived') return false;
-
-      // Exclude archived from 'all' tab unless explicitly chosen
-      if (activeTab === 'all' && p.editorial_status === 'archived') return false;
 
       // 2. Search Query (supports accented and unaccented search across all fields)
       if (searchQuery.trim()) {
@@ -305,7 +294,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     setProducts((prev) =>
       prev.map((p) => (selectedIds.includes(p.id) ? { ...p, editorial_status: status, published: status === 'published' } : p))
     );
-    showToast(`Đã chuyển trạng thái sang "${status === 'published' ? 'Đã xuất bản' : status === 'draft' ? 'Bản nháp' : 'Lưu trữ'}" cho ${selectedIds.length} sản phẩm!`);
+    showToast(`Đã chuyển trạng thái sang "${status === 'published' ? 'Đã xuất bản' : 'Bản nháp'}" cho ${selectedIds.length} sản phẩm!`);
     setSelectedIds([]);
   };
 
@@ -314,14 +303,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
       prev.map((p) => (selectedIds.includes(p.id) ? { ...p, is_hot: isHot } : p))
     );
     showToast(`Đã ${isHot ? 'đánh dấu tiêu biểu' : 'bỏ đánh dấu tiêu biểu'} cho ${selectedIds.length} sản phẩm!`);
-    setSelectedIds([]);
-  };
-
-  const handleBatchArchive = () => {
-    setProducts((prev) =>
-      prev.map((p) => (selectedIds.includes(p.id) ? { ...p, editorial_status: 'archived', published: false } : p))
-    );
-    showToast(`Đã chuyển ${selectedIds.length} sản phẩm vào lưu trữ!`);
     setSelectedIds([]);
   };
 
@@ -538,7 +519,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
         description="Quản lý danh mục sản phẩm, cấu hình giá, phân loại theo hãng, lĩnh vực, ứng dụng và trạng thái xuất bản."
         meta={
           <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-            {products.filter((product) => product.editorial_status !== 'archived').length} sản phẩm
+            {products.length} sản phẩm
           </span>
         }
         actions={
@@ -568,7 +549,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
           {
             id: 'all',
             label: 'Tất cả sản phẩm',
-            count: products.filter((p) => p.editorial_status !== 'archived').length,
+            count: products.length,
           },
           {
             id: 'published',
@@ -583,12 +564,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
           {
             id: 'is_hot',
             label: 'Sản phẩm tiêu biểu',
-            count: products.filter((p) => p.is_hot && p.editorial_status !== 'archived').length,
-          },
-          {
-            id: 'archived',
-            label: 'Lưu trữ & Thùng rác',
-            count: products.filter((p) => p.editorial_status === 'archived').length,
+            count: products.filter((p) => p.is_hot).length,
           },
         ]}
       />
@@ -1002,11 +978,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                                 : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
                             }`}
                           >
-                            {p.editorial_status === 'published'
-                              ? 'Đã xuất bản'
-                              : p.editorial_status === 'draft'
-                              ? 'Bản nháp'
-                              : 'Lưu trữ'}
+                            {p.editorial_status === 'published' ? 'Đã xuất bản' : 'Bản nháp'}
                           </span>
                         </td>
                       )}
@@ -1021,15 +993,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                       {/* Sticky Right Actions */}
                       <td className="py-3 px-4 sticky right-0 z-10 bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800 text-center">
                         <div className="flex items-center justify-center gap-1">
-                          {/* Quick Edit */}
-                          <CmsIconButton
-                            onClick={() => setProductToQuickEdit(p)}
-                            icon={<Zap />}
-                            size="sm"
-                            aria-label="Sửa nhanh sản phẩm"
-                            title="Sửa nhanh theo biểu mẫu"
-                          />
-
                           {/* Edit Full */}
                           <CmsIconButton
                             onClick={() => {
@@ -1069,14 +1032,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                             title="Nhân bản sản phẩm"
                           />
 
-                          {/* Archive/Delete */}
+                          {/* Delete */}
                           <CmsIconButton
                             onClick={() => setProductToDelete(p)}
                             icon={<Trash2 />}
                             size="sm"
                             variant="danger"
-                            aria-label="Lưu trữ hoặc xóa sản phẩm"
-                            title="Lưu trữ hoặc xóa"
+                            aria-label="Xóa sản phẩm"
+                            title="Xóa"
                           />
                         </div>
                       </td>
@@ -1124,19 +1087,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
       <DeleteConfirmModal
         isOpen={!!productToDelete}
         product={productToDelete}
-        onConfirmArchive={() => {
-          if (productToDelete) {
-            setProducts((prev) =>
-              prev.map((p) =>
-                p.id === productToDelete.id
-                  ? { ...p, editorial_status: 'archived', published: false }
-                  : p
-              )
-            );
-            showToast(`Đã chuyển sản phẩm "${productToDelete.name || productToDelete.title}" sang trạng thái Lưu trữ.`);
-            setProductToDelete(null);
-          }
-        }}
         onConfirmPermanentDelete={() => {
           if (productToDelete) {
             setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
@@ -1152,25 +1102,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
         product={productToPreview}
         categories={categories}
         onClose={() => setProductToPreview(null)}
-      />
-
-      <ProductQuickEditModal
-        isOpen={!!productToQuickEdit}
-        product={productToQuickEdit}
-        categories={categories}
-        brands={brands}
-        applications={applications}
-        productTypes={productTypes}
-        onSave={(updatedFields) => {
-          if (productToQuickEdit) {
-            setProducts((prev) =>
-              prev.map((p) => (p.id === productToQuickEdit.id ? { ...p, ...updatedFields } : p))
-            );
-            showToast(`Đã cập nhật nhanh sản phẩm "${updatedFields.name || updatedFields.title || productToQuickEdit.title}".`);
-            setProductToQuickEdit(null);
-          }
-        }}
-        onClose={() => setProductToQuickEdit(null)}
       />
 
       <ProductActivityDrawer

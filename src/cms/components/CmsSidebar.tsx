@@ -217,7 +217,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
               {!isCollapsed ? (
                 <button
                   onClick={() => toggleGroup(group.id)}
-                  className="w-full px-2 py-1 text-left text-xs font-bold leading-4 text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center justify-between hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
+                  className="w-full px-2 py-1 text-left text-[11px] font-semibold leading-4 text-slate-400 dark:text-slate-500 uppercase tracking-wide flex items-center justify-between hover:text-slate-500 dark:hover:text-slate-400 transition-colors group cursor-pointer"
                 >
                   <span className="truncate">{group.groupTitle}</span>
                   <ChevronDown

@@ -57,7 +57,7 @@ export const UsedByDrawer: React.FC<UsedByDrawerProps> = ({
           <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
-              Lưu ý: Lưu trữ (Archive) hoặc Ngừng hoạt động (Deactivate) dịch vụ này sẽ ảnh hưởng trực tiếp đến các vị trí liên kết bên dưới.
+              Lưu ý: Bỏ xuất bản hoặc xóa dịch vụ này sẽ ảnh hưởng trực tiếp đến các vị trí liên kết bên dưới.
             </span>
           </div>
 

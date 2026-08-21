@@ -4,7 +4,6 @@ import type { CmsMediaPickerItem } from './MediaPickerDataSource';
 import type { EventItem, RelatedProductItem as EventRelatedProductItem } from '../modules/events/types';
 import type {
   ServiceActivityLog,
-  ServiceGroup,
   ServiceItem,
   ServiceRelatedContact,
   ServiceUsedByReference,
@@ -20,8 +19,6 @@ export interface NewsModuleData {
 
 export interface ServicesModuleData {
   services: ServiceItem[];
-  groups: ServiceGroup[];
-  owners: { id: string; name: string; email: string }[];
   activityLogs: ServiceActivityLog[];
   versions: ServiceVersion[];
   usedByReferences: ServiceUsedByReference[];

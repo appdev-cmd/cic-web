@@ -2736,9 +2736,7 @@ CREATE TABLE "cic_services" (
   "keywords" varchar(255), -- ← fs_services.keywords + fs_services_en.keywords | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_title" varchar(255), -- ← fs_services.seo_title + fs_services_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_services.seo_keyword + fs_services_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "seo_description" varchar(255), -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "code" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Mã dịch vụ dùng cho list, tìm kiếm, preview, quick edit và thông báo thao tác. Nullable ở migration đầu; cần rule backfill ổn định trước khi siết NOT NULL.
-  "service_status" varchar(20) NULL DEFAULT 'inactive' CHECK ("service_status" IN ('active','inactive','archived')) -- ← — (cột mới) | [MỚI] Vòng đời cung cấp dịch vụ (tabs/filter, kích hoạt/tạm ngừng/lưu trữ). `published` chỉ giữ nghĩa nháp/xuất bản nên không dùng chung cho vòng đời này.
+  "seo_description" varchar(255) -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
 );
 
 -- Dịch vụ mà công ty cung cấp.
@@ -2780,9 +2778,7 @@ CREATE TABLE "cic_services_en" (
   "keywords" varchar(255), -- ← fs_services.keywords + fs_services_en.keywords | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_title" varchar(255), -- ← fs_services.seo_title + fs_services_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_services.seo_keyword + fs_services_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "seo_description" varchar(255), -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "code" varchar(255) NULL, -- ← — (cột mới) | [MỚI] Mã dịch vụ — workspace EN. Không tự sao chép code VI nếu hai workspace không dùng chung identity nghiệp vụ.
-  "service_status" varchar(20) NULL DEFAULT 'inactive' CHECK ("service_status" IN ('active','inactive','archived')) -- ← — (cột mới) | [MỚI] Vòng đời cung cấp dịch vụ — workspace EN. Dùng CHECK thay PostgreSQL enum để migration dễ rollback.
+  "seo_description" varchar(255) -- ← fs_services.seo_description + fs_services_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
 );
 
 -- [BẢNG MỚI] Quan hệ N–N Dịch vụ (VI) ↔ Sản phẩm (VI), có thứ tự.
@@ -4235,7 +4231,5 @@ CREATE TRIGGER trg_cic_image_edited_time
 
 -- ============================================================
 -- TODO: Partial UNIQUE INDEX (dang cho profiling du lieu that,
--- xem Schema Delta - chua duoc tao trong file nay):
---   cic_services.code
---   cic_services_en.code
+-- xem Schema Delta - chua duoc tao trong file nay).
 -- ============================================================

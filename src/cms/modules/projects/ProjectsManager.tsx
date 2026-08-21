@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Archive, BriefcaseBusiness, CheckCircle2, Edit3, Plus, RotateCcw, Search, Star, Trash2, X } from 'lucide-react';
+import { BriefcaseBusiness, CheckCircle2, Edit3, Eye, Plus, RotateCcw, Search, Star, Trash2, X } from 'lucide-react';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { ProjectFormView } from './ProjectFormView';
+import { ProjectPreviewModal } from './ProjectPreviewModal';
 import type { CmsProject, ProjectsModuleData } from './types';
 
 interface Props { data: ProjectsModuleData; }
@@ -14,6 +15,7 @@ type StatusFilter = 'all' | 'published' | 'draft';
 export const ProjectsManager: React.FC<Props> = ({ data }) => {
   const [projects, setProjects] = useState(data.projects);
   const [editing, setEditing] = useState<CmsProject | null | undefined>(undefined);
+  const [previewProject, setPreviewProject] = useState<CmsProject | null>(null);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sector, setSector] = useState('all');
@@ -54,7 +56,7 @@ export const ProjectsManager: React.FC<Props> = ({ data }) => {
     notify(message);
   };
 
-  if (editing !== undefined) return <ProjectFormView project={editing} productOptions={data.productOptions} serviceOptions={data.serviceOptions} onSave={save} onCancel={() => setEditing(undefined)} />;
+  if (editing !== undefined) return <><ProjectFormView project={editing} productOptions={data.productOptions} serviceOptions={data.serviceOptions} onSave={save} onPreview={setPreviewProject} onCancel={() => setEditing(undefined)} /><ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} /></>;
 
   return <div className="relative space-y-6 pb-16">
     {toast && <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl"><CheckCircle2 className="size-4 text-emerald-400" />{toast}</div>}
@@ -116,10 +118,11 @@ export const ProjectsManager: React.FC<Props> = ({ data }) => {
 
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
       <div className="overflow-x-auto"><table className="cms-data-table min-w-[1050px] text-left"><thead><tr><th className="w-12 px-3 py-3"><CmsSelectionCheckbox checked={allPageSelected} indeterminate={!allPageSelected && pageIds.some((id) => selectedIds.includes(id))} onChange={() => setSelectedIds((current) => allPageSelected ? current.filter((id) => !pageIds.includes(id)) : Array.from(new Set([...current, ...pageIds])))} label="Chọn tất cả dự án trên trang" /></th><th className="min-w-[320px] px-4 py-3">Dự án</th><th className="min-w-[180px] px-4 py-3">Lĩnh vực / Giải pháp</th><th className="min-w-[180px] px-4 py-3">Khách hàng</th><th className="min-w-[130px] px-4 py-3">Thời gian</th><th className="min-w-[130px] px-4 py-3">Trạng thái</th><th className="w-24 px-4 py-3 text-center">Thao tác</th></tr></thead>
-        <tbody>{pageItems.map((project) => <tr key={project.id}><td className="px-3 py-3"><CmsSelectionCheckbox checked={selectedIds.includes(project.id)} onChange={() => setSelectedIds((current) => current.includes(project.id) ? current.filter((id) => id !== project.id) : [...current, project.id])} label={`Chọn ${project.title}`} /></td><td className="px-4 py-3"><div className="flex items-center gap-3">{project.image ? <img src={project.image} alt="" className="h-12 w-20 rounded-lg object-cover" /> : <div className="h-12 w-20 rounded-lg bg-slate-100 dark:bg-slate-800" />}<div className="min-w-0"><button onClick={() => setEditing(project)} className="line-clamp-2 text-left text-sm font-bold text-slate-900 hover:text-orange-600 dark:text-white">{project.title}</button><p className="mt-1 truncate font-mono text-[10px] text-slate-400">/{project.alias}</p></div></div></td><td className="px-4 py-3 text-xs"><p className="font-bold text-slate-800 dark:text-slate-200">{project.sector || '—'}</p><p className="mt-1 text-slate-500">{project.solution || '—'}</p></td><td className="px-4 py-3 text-xs"><p className="font-semibold text-slate-800 dark:text-slate-200">{project.customer_name || '—'}</p><p className="mt-1 text-slate-500">{project.location || '—'}</p></td><td className="px-4 py-3 text-xs font-medium text-slate-600 dark:text-slate-300">{formatPeriod(project)}</td><td className="px-4 py-3"><div className="flex flex-col items-start gap-1">{project.is_featured && <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700"><Star className="size-3" />Nổi bật</span>}<span className={`rounded-full px-2 py-1 text-[10px] font-bold ${project.published ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{project.published ? 'Đã xuất bản' : 'Bản nháp'}</span></div></td><td className="px-4 py-3"><div className="flex justify-center gap-1"><CmsIconButton aria-label={`Sửa ${project.title}`} icon={<Edit3 />} onClick={() => setEditing(project)} /><CmsIconButton aria-label={`Xóa ${project.title}`} icon={<Trash2 />} variant="danger" onClick={() => { if (window.confirm(`Xóa dự án “${project.title}”?`)) { setProjects((current) => current.filter((item) => item.id !== project.id)); notify('Đã xóa dự án khỏi mock hiện tại.'); } }} /></div></td></tr>)}</tbody></table></div>
+        <tbody>{pageItems.map((project) => <tr key={project.id}><td className="px-3 py-3"><CmsSelectionCheckbox checked={selectedIds.includes(project.id)} onChange={() => setSelectedIds((current) => current.includes(project.id) ? current.filter((id) => id !== project.id) : [...current, project.id])} label={`Chọn ${project.title}`} /></td><td className="px-4 py-3"><div className="flex items-center gap-3">{project.image ? <img src={project.image} alt="" className="h-12 w-20 rounded-lg object-cover" /> : <div className="h-12 w-20 rounded-lg bg-slate-100 dark:bg-slate-800" />}<div className="min-w-0"><button onClick={() => setEditing(project)} className="line-clamp-2 text-left text-sm font-bold text-slate-900 hover:text-orange-600 dark:text-white">{project.title}</button><p className="mt-1 truncate font-mono text-[10px] text-slate-400">/{project.alias}</p></div></div></td><td className="px-4 py-3 text-xs"><p className="font-bold text-slate-800 dark:text-slate-200">{project.sector || '—'}</p><p className="mt-1 text-slate-500">{project.solution || '—'}</p></td><td className="px-4 py-3 text-xs"><p className="font-semibold text-slate-800 dark:text-slate-200">{project.customer_name || '—'}</p><p className="mt-1 text-slate-500">{project.location || '—'}</p></td><td className="px-4 py-3 text-xs font-medium text-slate-600 dark:text-slate-300">{formatPeriod(project)}</td><td className="px-4 py-3"><div className="flex flex-col items-start gap-1">{project.is_featured && <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700"><Star className="size-3" />Nổi bật</span>}<span className={`rounded-full px-2 py-1 text-[10px] font-bold ${project.published ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{project.published ? 'Đã xuất bản' : 'Bản nháp'}</span></div></td><td className="px-4 py-3"><div className="flex justify-center gap-1"><CmsIconButton aria-label={`Xem trước ${project.title}`} icon={<Eye />} onClick={() => setPreviewProject(project)} /><CmsIconButton aria-label={`Sửa ${project.title}`} icon={<Edit3 />} onClick={() => setEditing(project)} /><CmsIconButton aria-label={`Xóa ${project.title}`} icon={<Trash2 />} variant="danger" onClick={() => { if (window.confirm(`Xóa dự án “${project.title}”?`)) { setProjects((current) => current.filter((item) => item.id !== project.id)); notify('Đã xóa dự án khỏi mock hiện tại.'); } }} /></div></td></tr>)}</tbody></table></div>
       {pageItems.length === 0 && <div className="py-14 text-center text-sm text-slate-500">Không tìm thấy dự án phù hợp.</div>}
       <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filtered.length} itemLabel="dự án" pageSizeOptions={[10, 20, 50]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
     </section>
+    <ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} />
   </div>;
 };
 

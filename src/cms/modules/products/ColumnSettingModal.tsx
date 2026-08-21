@@ -63,7 +63,7 @@ export const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     { key: 'ordering', label: 'Thứ tự', desc: 'Thứ tự hiển thị ưu tiên' },
     { key: 'is_hot', label: 'Sản phẩm tiêu biểu', desc: 'Đánh dấu nổi bật trang chủ' },
     { key: 'teamview', label: 'Link TeamViewer', desc: 'Hỗ trợ kết nối từ xa' },
-    { key: 'editorial_status', label: 'Trạng thái', desc: 'Đã xuất bản, Bản nháp, Lưu trữ' },
+    { key: 'editorial_status', label: 'Trạng thái', desc: 'Đã xuất bản, Bản nháp' },
     { key: 'updated_time', label: 'Thời gian cập nhật', desc: 'Thời điểm chỉnh sửa gần nhất' },
   ];
 

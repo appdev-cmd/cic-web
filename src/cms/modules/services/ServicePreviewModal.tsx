@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Monitor, Tablet, Smartphone, ExternalLink, Globe, BadgeCheck, PhoneCall } from 'lucide-react';
+import { X, Monitor, Tablet, Smartphone, Globe } from 'lucide-react';
 import { ServiceItem } from './types';
 
 interface ServicePreviewModalProps {
@@ -107,18 +107,15 @@ export const ServicePreviewModal: React.FC<ServicePreviewModalProps> = ({
           {/* Header Banner */}
           <div className="relative h-64 w-full bg-slate-900 overflow-hidden">
             <img
-              src={service.banner_url || service.thumbnail_url}
-              alt={service.media_alt}
+              src={service.thumbnail_url}
+              alt={service.title}
               className="w-full h-full object-cover opacity-60"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent flex items-end p-8">
               <div className="space-y-2 text-white max-w-2xl">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white">
-                    Dịch vụ CIC
-                  </span>
-                  <span className="text-xs text-slate-300">Mã: {service.code}</span>
-                </div>
+                <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white">
+                  Dịch vụ CIC
+                </span>
                 <h1 className="text-xl md:text-2xl font-bold leading-tight">
                   {service.title}
                 </h1>
@@ -141,30 +138,6 @@ export const ServicePreviewModal: React.FC<ServicePreviewModalProps> = ({
               <div dangerouslySetInnerHTML={{ __html: service.description }} />
             </div>
 
-            {/* Benefits & Process */}
-            {service.benefits_process && (
-              <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <BadgeCheck className="w-4 h-4 text-emerald-600" /> Lợi ích & Quy trình triển khai
-                </h3>
-                <p className="text-xs text-slate-700 leading-relaxed">
-                  {service.benefits_process}
-                </p>
-              </div>
-            )}
-
-            {/* CTA Box */}
-            <div className="p-6 bg-slate-900 text-white rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h4 className="font-bold text-sm">Bạn cần hỗ trợ thêm thông tin?</h4>
-                <p className="text-xs text-slate-400">
-                  Người phụ trách: {service.owner_name} ({service.owner_email})
-                </p>
-              </div>
-              <button className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shrink-0">
-                <PhoneCall className="w-4 h-4" /> {service.cta_label || 'Đăng ký Tư vấn'}
-              </button>
-            </div>
           </div>
         </div>
       </div>

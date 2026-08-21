@@ -21,7 +21,6 @@ import {
   CalendarDays,
   Sliders,
   ExternalLink,
-  Zap,
   CheckCircle,
   RotateCcw,
 } from 'lucide-react';
@@ -31,7 +30,6 @@ import type { EventsModuleData } from '../../data/EditorialContentDataSource';
 import { EventsFormView } from './EventsFormView';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { EventPreviewModal } from './EventPreviewModal';
-import { EventQuickEditModal } from './EventQuickEditModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
@@ -99,7 +97,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
 
   // Auxiliary Modals & Drawers States
   const [previewEvent, setPreviewEvent] = useState<EventItem | null>(null);
-  const [quickEditEvent, setQuickEditEvent] = useState<EventItem | null>(null);
 
   // Table Column Visibility & Density Config
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
@@ -231,27 +228,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     setIsFormOpen(true);
   };
 
-  // Quick Edit Save Handler
-  const handleSaveQuickEdit = (updatedFields: Partial<EventItem>) => {
-    if (!quickEditEvent) return;
-    setEvents((prev) =>
-      prev.map((item) =>
-        item.id === quickEditEvent.id
-          ? {
-              ...item,
-              ...updatedFields,
-              ...(typeof updatedFields.published === 'boolean'
-                ? { editorial_status: updatedFields.published ? 'published' as const : 'draft' as const }
-                : {}),
-              updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-            }
-          : item
-      )
-    );
-    showToast(`Đã cập nhật nhanh sự kiện "${quickEditEvent.title}"!`);
-    setQuickEditEvent(null);
-  };
-
   // Save Form Handler
   const handleSaveEvent = (data: Partial<EventItem>) => {
     if (eventToEdit) {
@@ -376,14 +352,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         isOpen={!!previewEvent}
         event={previewEvent}
         onClose={() => setPreviewEvent(null)}
-      />
-
-      {/* MODAL QUICK EDIT */}
-      <EventQuickEditModal
-        isOpen={!!quickEditEvent}
-        event={quickEditEvent}
-        onSave={handleSaveQuickEdit}
-        onClose={() => setQuickEditEvent(null)}
       />
 
       {/* HEADER CARD */}
@@ -567,7 +535,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                         </td>
                       )}
 
-                      {/* Action buttons (Preview, QuickEdit, History, FullEdit, Delete) */}
+                      {/* Action buttons */}
                       <td className={`${isCompact ? 'py-2' : 'py-3.5'} px-4 text-center`}>
                         <div className="flex items-center justify-center gap-1">
                           <button
@@ -577,14 +545,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
                             title="Xem trước giao diện sự kiện"
                           >
                             <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setQuickEditEvent(ev)}
-                            className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer"
-                            title="Sửa nhanh"
-                          >
-                            <Zap className="w-4 h-4" />
                           </button>
                           <button
                             type="button"

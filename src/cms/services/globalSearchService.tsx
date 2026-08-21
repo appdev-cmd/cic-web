@@ -744,25 +744,20 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
       records.push({
         id: `srv_${srv.id}`,
         title: srv.title,
-        subtitle: `Mã: ${srv.code || srv.id} · Phạm vi: ${srv.scope || 'Toàn quốc'} · Nhóm: ${srv.group_name || 'Dịch vụ'}`,
+        subtitle: srv.summary || srv.slug,
         module: 'services',
         moduleLabel: 'Dịch vụ',
-        category: srv.group_name || 'Dịch vụ Kỹ thuật',
-        statusText: 'Đang hoạt động',
-        statusColor: 'emerald',
+        category: 'Dịch vụ',
+        statusText: srv.editorial_status === 'published' ? 'Đã xuất bản' : 'Bản nháp',
+        statusColor: srv.editorial_status === 'published' ? 'emerald' : 'slate',
         path: `/cms/services`,
         actionType: 'edit',
         icon: Sparkles,
-        metadata: {
-          code: srv.code || srv.id,
-        },
+        metadata: { slug: srv.slug },
         keywords: [
           srv.title,
-          srv.code || '',
           srv.summary || '',
-          srv.group_name || '',
-          srv.scope || '',
-          srv.business_relation || '',
+          srv.slug,
         ],
       });
     });

@@ -37,10 +37,6 @@ Không có.
 
 | Table | Field thêm | Type | FK | Index / constraint | Mức độ | CMS mới sử dụng | Ghi chú |
 | ----- | ---------- | ---- | -- | ------------------ | ------ | --------------- | ------- |
-| `cic_services` | `code` | `varchar(255)` | — | Partial unique index trên code chuẩn hóa | **BẮT BUỘC** | List, tìm kiếm, preview, quick edit và thông báo thao tác đều dùng mã dịch vụ | Nullable trong migration đầu để giữ dữ liệu legacy; cần quy tắc backfill ổn định trước khi siết `NOT NULL`. |
-| `cic_services_en` | `code` | `varchar(255)` | — | Partial unique index trên code chuẩn hóa | **BẮT BUỘC** | Workspace EN dùng cùng data contract | Không tự sao chép code VI nếu hai workspace không dùng chung identity nghiệp vụ. |
-| `cic_services` | `service_status` | `varchar(20)` | — | CHECK thuộc `active`, `inactive`, `archived`; index đơn khi filter thực tế cần | **BẮT BUỘC** | Tabs/filter và hành động kích hoạt, tạm ngừng, lưu trữ trong `ServicesManager` | `published` giữ nghĩa nháp/xuất bản; không thể đồng thời lưu vòng đời cung cấp dịch vụ. Default đề xuất `inactive`, legacy backfill theo rule được duyệt. |
-| `cic_services_en` | `service_status` | `varchar(20)` | — | CHECK/index tương ứng bảng VI | **BẮT BUỘC** | Contract workspace EN | Không dùng PostgreSQL enum để tránh migration enum khó rollback; dùng CHECK constraint. |
 | `cic_services` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | CMS kiểm tra alias; website tra cứu dịch vụ VI | Index alias hiện tại không unique; profiling dữ liệu trước khi áp dụng. |
 | `cic_services_en` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | CMS kiểm tra alias; website tra cứu dịch vụ EN | Profiling dataset EN độc lập. |
 
@@ -80,7 +76,7 @@ Không có.
 - `benefits_process`, `supplementary_content`, `scope`, quy trình và lợi ích trong fixture website phải compose vào Rich Text `content`; không tạo column theo từng section mockup.
 - `banner_url`, `video_url`, `media_alt` và `og_image` chưa có control ghi dữ liệu trong form hiện tại. Ảnh chính dùng `image`; chưa thêm các field media chỉ vì type/mock còn khai báo.
 - `group_id`/`group_name` chưa được form hiện tại quản trị. Dữ liệu legacy `category_id` không có bảng danh mục dịch vụ hợp lệ và mọi record khảo sát cùng một giá trị; chưa tạo bảng nhóm dịch vụ.
-- `owner_id`, `placement`, `publish_at`, CTA fields và request routing hiện còn ở mock/quick-edit không nhất quán với form chính và các quyết định UI gần đây. Chưa đủ cơ sở thêm column; cần làm sạch contract CMS trước.
+- Contract CMS đã bỏ `code`, `service_status`, owner, placement, CTA, publish scheduling và các field fixture không có nguồn DB. Trạng thái `editorial_status` map trực tiếp vào `published`.
 - Version, activity log, used-by, trash và yêu cầu khách hàng thuộc shared modules/relation, không thêm vào `cic_services*`.
 - `migration_report.json` hiện báo `cic_services: ERROR`; xử lý trong migration/validation, không mở rộng schema để che lỗi migrate.
 

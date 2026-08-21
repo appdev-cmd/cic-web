@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowLeft, BriefcaseBusiness, FileText, Image, Link2, Save, Search } from 'lucide-react';
+import { ArrowLeft, BriefcaseBusiness, Eye, FileText, Image, Link2, Save, Search } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { SearchableMultiSelect } from '../../components/SearchableSelect';
@@ -11,6 +11,7 @@ interface Props {
   productOptions: ProjectRelationOption[];
   serviceOptions: ProjectRelationOption[];
   onSave: (project: CmsProject) => void;
+  onPreview: (project: CmsProject) => void;
   onCancel: () => void;
 }
 
@@ -19,7 +20,7 @@ const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slat
 const splitLines = (value: string) => value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
 const slugify = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serviceOptions, onSave, onCancel }) => {
+export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serviceOptions, onSave, onPreview, onCancel }) => {
   const initial = useMemo<CmsProject>(() => project ?? {
     id: `project_${Date.now()}`, title: '', alias: '', tagline: '', summary: '', content: '', sector: '', solution: '', technologies: [], customer_name: '', location: '', start_year: null, end_year: null, is_ongoing: false, image: '', gallery: [], video_title: '', video_url: '', video_thumbnail: '', document_title: '', document_url: '', document_size: '', products_related: [], services_related: [], is_featured: false, published: false, ordering: 0, seo_title: '', seo_keyword: '', seo_description: '', created_time: new Date().toISOString(), updated_time: new Date().toISOString(),
   }, [project]);
@@ -38,7 +39,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
   };
 
   return <div className="space-y-6 pb-16">
-    <CmsPageHeader icon={<BriefcaseBusiness />} title={project ? 'Chỉnh sửa dự án' : 'Thêm dự án'} description="Nội dung bài viết dùng Rich Text; các trường filter được quản lý độc lập." actions={<><CmsButton size="sm" variant="secondary" leadingIcon={<ArrowLeft />} onClick={onCancel}>Quay lại</CmsButton><CmsButton size="sm" variant="primary" leadingIcon={<Save />} onClick={submit}>Lưu dự án</CmsButton></>} />
+    <CmsPageHeader icon={<BriefcaseBusiness />} title={project ? 'Chỉnh sửa dự án' : 'Thêm dự án'} description="Nội dung bài viết dùng Rich Text; các trường filter được quản lý độc lập." actions={<><CmsButton size="sm" variant="secondary" leadingIcon={<ArrowLeft />} onClick={onCancel}>Quay lại</CmsButton><CmsButton size="sm" variant="secondary" leadingIcon={<Eye />} onClick={() => onPreview({ ...form, technologies: splitLines(technologyInput) })}>Xem trước</CmsButton><CmsButton size="sm" variant="primary" leadingIcon={<Save />} onClick={submit}>Lưu dự án</CmsButton></>} />
     {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
     <div className="grid gap-6 xl:grid-cols-3">
       <div className="space-y-6 xl:col-span-2">

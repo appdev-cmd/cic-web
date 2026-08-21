@@ -7,7 +7,6 @@ import {
   mockServicesData,
   mockServiceUsedByReferences,
   mockServiceVersions,
-  serviceGroupsMock,
 } from '../modules/services/mockData';
 
 export const demoEditorialContentDataSource: EditorialContentDataSource = {
@@ -21,12 +20,6 @@ export const demoEditorialContentDataSource: EditorialContentDataSource = {
   servicesByLocale: {
     vi: {
       services: mockServicesData,
-      groups: serviceGroupsMock,
-      owners: [
-        { id: 'usr_002', name: 'Trần Văn Mạnh', email: 'manh.tv@cic.com.vn' },
-        { id: 'usr_003', name: 'Nguyễn Thị Bích', email: 'bich.nt@cic.com.vn' },
-        { id: 'usr_004', name: 'Lê Quang Huy', email: 'huy.lq@cic.com.vn' },
-      ],
       activityLogs: mockServiceActivityLogs,
       versions: mockServiceVersions,
       usedByReferences: mockServiceUsedByReferences,

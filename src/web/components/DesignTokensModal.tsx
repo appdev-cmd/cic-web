@@ -336,7 +336,7 @@ export const DesignTokensModal: React.FC<DesignTokensModalProps> = ({ isOpen, on
             <div className="space-y-8">
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-4">
-                  Font Family & Scale (Roboto & Be Vietnam Pro)
+                  Font Family & Scale (Roboto)
                 </h3>
                 <div className="space-y-4">
                   {(Object.entries(designTokens.typography.fontSizes) as [string, { fontSize: string; lineHeight: string }][]).map(([name, conf]) => (
