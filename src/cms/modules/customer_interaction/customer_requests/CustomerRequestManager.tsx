@@ -26,6 +26,7 @@ import { RequestDetailPage } from './components/RequestDetailPage';
 import { RequestReassignModal } from './components/RequestReassignModal';
 import { RequestQuickNotesModal } from './components/RequestQuickNotesModal';
 import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../shared/constants/statusTypes';
+import type { PriorityLevel } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsTabs } from '../../../components/ui/CmsTabs';
@@ -471,16 +472,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     );
   };
 
-  const handleDuplicateRequest = (request: CustomerRequest) => {
-    const newRequest: CustomerRequest = {
-      ...request,
-      id: `req_${Date.now()}`,
-      status: 'new',
-      createdAt: new Date().toISOString(),
-    };
-    setRequests((prev) => [newRequest, ...prev]);
-  };
-
   const handleAssignUser = (id: string, userId: string) => {
     const staff = MOCK_STAFF_MEMBERS.find((s) => s.id === userId);
     if (staff) {
@@ -522,6 +513,37 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             }
           : r
       )
+    );
+  };
+
+  const handleUpdatePriority = (id: string, newPriority: PriorityLevel) => {
+    const now = new Date().toISOString();
+
+    setRequests((prev) =>
+      prev.map((request) => {
+        if (request.id !== id || request.priority === newPriority) return request;
+
+        const updated: CustomerRequest = {
+          ...request,
+          priority: newPriority,
+          updatedAt: now,
+          logs: [
+            ...(request.logs || []),
+            {
+              id: `log_${Date.now()}`,
+              actionType: 'priority_changed',
+              oldValue: request.priority,
+              newValue: newPriority,
+              createdBy: 'current_user',
+              createdByName: 'Quản trị viên',
+              createdAt: now,
+            },
+          ],
+        };
+
+        setSelectedRequest((current) => (current?.id === id ? updated : current));
+        return updated;
+      })
     );
   };
 
@@ -749,7 +771,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             onToggleSelectAll={handleToggleSelectAll}
             onToggleSelectRequest={handleToggleSelectRequest}
             onViewRequest={handleViewDetail}
-            onDuplicateRequest={handleDuplicateRequest}
             onDeleteRequest={handleDeleteRequest}
             onQuickStatusToggle={handleQuickStatusToggle}
             onReassignRequest={handleOpenReassignSingle}
@@ -766,6 +787,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             onAssignUser={handleAssignUser}
             onReassignRequest={handleOpenReassignSingle}
             onUpdateStatus={handleChangeStatus}
+            onUpdatePriority={handleUpdatePriority}
             onAddNote={handleAddNote}
           />
         )

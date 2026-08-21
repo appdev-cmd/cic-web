@@ -8,7 +8,7 @@
 | --- | --- |
 | Phạm vi | Hệ thống CMS/Admin quản trị Website CIC |
 | Đối tượng sử dụng | Ban lãnh đạo, cán bộ quản lý và các bộ phận vận hành CMS |
-| Quy mô chức năng | 28 chức năng thuộc 10 nhóm nghiệp vụ |
+| Quy mô chức năng | 27 chức năng thuộc 10 nhóm nghiệp vụ |
 | Cơ sở đối chiếu | Danh sách chức năng chuẩn và các màn quản trị hiện có |
 | Trạng thái tài liệu | Phiên bản hoàn chỉnh sau rà soát |
 
@@ -20,37 +20,19 @@ CMS là trung tâm quản trị giúp công ty chủ động vận hành Website
 
 ### Phạm vi quản lý trong một trang
 
-| Nhóm nghiệp vụ | Số chức năng | Nội dung quản lý trọng tâm | Kết quả chính |
+| Nhóm nghiệp vụ | Số chức năng | Các module/chức năng thuộc nhóm | Kết quả chính |
 | --- | ---: | --- | --- |
-| Tổng quan | 1 | Chỉ số vận hành và công việc cần chú ý | Nắm tình hình nhanh, ưu tiên đúng việc |
-| Quản lý nội dung | 5 | Tin tức, danh mục, trang nội dung, sự kiện, dự án | Nội dung Website được cập nhật có kiểm soát |
-| Sản phẩm/Dịch vụ | 7 | Sản phẩm, dữ liệu phân loại, đầu mối kinh doanh, dịch vụ | Thông tin kinh doanh thống nhất và dễ tra cứu |
-| Trình bày Website | 1 | Cấu trúc menu và điều hướng | Người xem tiếp cận nội dung thuận tiện |
-| Media | 1 | Ảnh, video, tài liệu và album | Tài nguyên truyền thông được quản lý tập trung |
-| Tương tác khách hàng | 5 | CTA, biểu mẫu, yêu cầu, email và liên hệ sản phẩm | Nhu cầu khách hàng được tiếp nhận và theo dõi |
-| Người dùng & phân quyền | 2 | Tài khoản, vai trò và phạm vi làm việc | Đúng người, đúng quyền, đúng trách nhiệm |
-| Cấu hình hệ thống | 4 | Thiết lập, ngôn ngữ, nhật ký và thùng rác | Vận hành ổn định, có khả năng kiểm soát và phục hồi |
-| SEO | 1 | Thông tin hiển thị trên công cụ tìm kiếm | Tăng tính nhất quán và khả năng tiếp cận |
-| Tiện ích CMS | 1 | Tìm kiếm trên toàn hệ thống | Rút ngắn thời gian tra cứu và điều hướng |
-| **Tổng cộng** | **28** | **10 nhóm nghiệp vụ** | **Quản trị Website tập trung, minh bạch và chủ động** |
-
-### Ba luồng vận hành cốt lõi
-
-```mermaid
-flowchart LR
-    A[Soạn nội dung hoặc sản phẩm] --> B[Bổ sung media và thông tin tìm kiếm]
-    B --> C[Xem trước và kiểm tra]
-    C --> D[Công bố lên Website]
-
-    E[CTA] --> F[Biểu mẫu]
-    F --> G[Yêu cầu khách hàng]
-    G --> H[Phân công và xử lý]
-    H --> I[Phản hồi bằng mẫu email]
-
-    J[Người dùng] --> K[Vai trò và quyền]
-    K --> L[Thực hiện công việc được giao]
-    L --> M[Nhật ký hoạt động]
-```
+| Tổng quan | 1 | Tổng quan | Nắm tình hình nhanh, ưu tiên đúng việc |
+| Quản lý nội dung | 5 | Tin tức; Danh mục tin tức; Trang nội dung; Sự kiện; Dự án | Nội dung Website được cập nhật có kiểm soát |
+| Sản phẩm/Dịch vụ | 7 | Sản phẩm; Danh mục sản phẩm; Hãng sản xuất; Lĩnh vực ứng dụng; Loại sản phẩm; Người phụ trách kinh doanh; Dịch vụ | Thông tin kinh doanh thống nhất và dễ tra cứu |
+| Trình bày Website | 1 | Menu | Người xem tiếp cận nội dung thuận tiện |
+| Media | 1 | Thư viện media | Tài nguyên truyền thông được quản lý tập trung |
+| Tương tác khách hàng | 4 | CTA; Biểu mẫu; Yêu cầu khách hàng; Mẫu email | Nhu cầu khách hàng được tiếp nhận và theo dõi |
+| Người dùng & phân quyền | 2 | Người dùng; Vai trò & quyền | Đúng người, đúng quyền, đúng trách nhiệm |
+| Cấu hình hệ thống | 4 | Cấu hình hệ thống; Ngôn ngữ giao diện; Nhật ký hoạt động; Thùng rác | Vận hành ổn định, có khả năng kiểm soát và phục hồi |
+| SEO | 1 | Cấu hình SEO chức năng | Tăng tính nhất quán và khả năng tiếp cận |
+| Tiện ích CMS | 1 | Tìm kiếm toàn cục | Rút ngắn thời gian tra cứu và điều hướng |
+| **Tổng cộng** | **27** | **10 nhóm nghiệp vụ** | **Quản trị Website tập trung, minh bạch và chủ động** |
 
 ## 2. CMS là gì?
 
@@ -110,7 +92,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý toàn bộ bài viết truyền thông, tin doanh nghiệp và tin chuyên ngành đăng trên Website.
 
-![Màn hình quản lý Tin tức](https://lh3.googleusercontent.com/d/1iEwpEY26KhqnwLNvTESx9-lT066gcLd6=w1600)
+![Màn hình quản lý Tin tức](https://lh3.googleusercontent.com/d/1uN0v7HDn2Yeof10fNJUtmBFB5iBCtJph=w1600)
 
 *Hình 2. Danh sách Tin tức và các công cụ theo dõi, tìm kiếm, quản lý trạng thái.*
 
@@ -539,33 +521,6 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Giá trị:** Giúp phản hồi nhanh, đúng thông tin và đồng nhất hình ảnh giao tiếp của công ty.
 
-#### Liên hệ & đăng ký sản phẩm
-
-**Mục đích:** Tổng hợp các liên hệ chung, yêu cầu báo giá và đăng ký liên quan tới sản phẩm để bộ phận vận hành tiếp nhận.
-
-![Màn hình Liên hệ và đăng ký sản phẩm](https://lh3.googleusercontent.com/d/1d49WUuuc73ad-rrmtkFajRY0SThd9pNv=w1600)
-
-*Hình 20. Màn hình tiếp nhận Liên hệ và đăng ký sản phẩm.*
-
-**Chức năng chính:**
-
-- Phân loại yêu cầu theo nguồn và nội dung quan tâm.
-- Lọc các yêu cầu chưa phân công, quá hạn hoặc đã giải quyết.
-- Phân công đầu mối xử lý và cập nhật trạng thái.
-- Đặt mức ưu tiên, thêm ghi chú nội bộ và theo dõi lịch sử xử lý.
-- Nhận diện yêu cầu rác hoặc trùng lặp, đồng thời bảo vệ việc xem thông tin cá nhân nhạy cảm.
-- Thực hiện phân công hoặc đổi trạng thái cho nhiều yêu cầu cùng lúc.
-
-**Ví dụ thực tế:** Khách chọn “Đăng ký mua” ngay trên thẻ một sản phẩm ở trang danh sách. Khi yêu cầu xuất hiện trong CMS, cán bộ xử lý có thể thấy nguồn là đăng ký sản phẩm và sản phẩm khách đang xem, sau đó phân công cho đúng người phụ trách kinh doanh.
-
-**Mối liên hệ với Yêu cầu khách hàng:** Đây là màn tiếp nhận chuyên biệt cho dữ liệu liên hệ và đăng ký sản phẩm hiện có. “Yêu cầu khách hàng” là góc nhìn quản lý hợp nhất nhiều nguồn; hai màn có phạm vi gần nhau nhưng phục vụ hai cách theo dõi khác nhau.
-
-**Cách sử dụng:** Vào Liên hệ & đăng ký sản phẩm → chọn yêu cầu → kiểm tra nguồn và sản phẩm quan tâm → phân công → cập nhật kết quả xử lý.
-
-**Giá trị:** Giúp các liên hệ phát sinh từ Website được tiếp nhận có hệ thống và chuyển đúng bộ phận.
-
----
-
 ### 3.7. Người dùng & phân quyền
 
 > Bảo đảm mỗi nhân sự chỉ tiếp cận và thực hiện đúng công việc thuộc trách nhiệm được giao.
@@ -576,7 +531,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình quản lý Người dùng](https://lh3.googleusercontent.com/d/1LyjiAxAQt76G9VBlDX0fYmHfwtpicPr6=w1600)
 
-*Hình 21. Danh sách Người dùng và trạng thái tài khoản CMS.*
+*Hình 20. Danh sách Người dùng và trạng thái tài khoản CMS.*
 
 **Chức năng chính:**
 
@@ -599,7 +554,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình quản lý Vai trò và quyền](https://lh3.googleusercontent.com/d/1UMTjMO7yo6qf3lqGrO9-4-KEwbeDB_O9=w1600)
 
-*Hình 22. Màn hình quản lý Vai trò, quyền hạn và phạm vi áp dụng.*
+*Hình 21. Màn hình quản lý Vai trò, quyền hạn và phạm vi áp dụng.*
 
 **Chức năng chính:**
 
@@ -628,7 +583,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình Cấu hình hệ thống](https://lh3.googleusercontent.com/d/1TalTvfipa60htKFVWJ4au1KWfqeoebMd=w1600)
 
-*Hình 23. Khu vực Cấu hình hệ thống theo các nhóm thiết lập vận hành.*
+*Hình 22. Khu vực Cấu hình hệ thống theo các nhóm thiết lập vận hành.*
 
 **Chức năng chính:**
 
@@ -649,7 +604,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình quản lý Ngôn ngữ giao diện](https://lh3.googleusercontent.com/d/1y5UPwazZ5kDUm-f44GYw22YTpcA6Um2s=w1600)
 
-*Hình 24. Màn hình quản lý câu chữ giao diện theo phạm vi và ngôn ngữ.*
+*Hình 23. Màn hình quản lý câu chữ giao diện theo phạm vi và ngôn ngữ.*
 
 **Chức năng chính:**
 
@@ -670,7 +625,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình Nhật ký hoạt động](https://lh3.googleusercontent.com/d/1GJ0Q8g6WONaY1oz-hUz-1rhE0TcOht95=w1600)
 
-*Hình 25. Nhật ký hoạt động phục vụ theo dõi và truy vết thao tác quản trị.*
+*Hình 24. Nhật ký hoạt động phục vụ theo dõi và truy vết thao tác quản trị.*
 
 **Chức năng chính:**
 
@@ -691,7 +646,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình Thùng rác](https://lh3.googleusercontent.com/d/1XvPGCwiNGQanuLF9yGkbyOtCgSF3l4SS=w1600)
 
-*Hình 26. Màn hình Thùng rác với các lựa chọn phục hồi hoặc xử lý nội dung đã xóa.*
+*Hình 25. Màn hình Thùng rác với các lựa chọn phục hồi hoặc xử lý nội dung đã xóa.*
 
 **Chức năng chính:**
 
@@ -718,7 +673,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình Cấu hình SEO chức năng](https://lh3.googleusercontent.com/d/19LdTv7HMw_4Zw8V1F_qrPwo1BPKBS0n_=w1600)
 
-*Hình 27. Màn hình Cấu hình SEO theo từng nhóm trang chức năng.*
+*Hình 26. Màn hình Cấu hình SEO theo từng nhóm trang chức năng.*
 
 **Chức năng chính:**
 
@@ -746,7 +701,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 ![Màn hình Tìm kiếm toàn cục](https://lh3.googleusercontent.com/d/1bZCyH6-Opcz2r0eNeWzP5UpLzCBPcncS=w1600)
 
-*Hình 28. Màn hình Tìm kiếm toàn cục trên nhiều nhóm dữ liệu CMS.*
+*Hình 27. Màn hình Tìm kiếm toàn cục trên nhiều nhóm dữ liệu CMS.*
 
 **Chức năng chính:**
 
@@ -781,31 +736,13 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 | Chỉ tiêu kiểm tra | Kết quả |
 | --- | ---: |
-| Tổng số chức năng CMS trong Inventory | **28** |
-| Tổng số chức năng đã được mô tả | **28** |
-| Số màn hình minh họa từ CMS hiện tại | **28** |
-| Số chức năng có ví dụ nghiệp vụ thực tế | **28** |
+| Tổng số route/module được ghi nhận trong Inventory | **28** |
+| Số chức năng chính thức thuộc phạm vi tài liệu | **27** |
+| Số chức năng đã được mô tả | **27** |
+| Số màn hình minh họa từ CMS hiện tại | **27** |
+| Số chức năng có ví dụ nghiệp vụ thực tế | **27** |
+| Số module cũ/ngoài phạm vi chức năng chính thức | **1** |
 | Số chức năng thiếu | **0** |
 | Số chức năng còn cần bổ sung/chỉnh sửa sau khi review | **0** |
 
-### Phạm vi cần lưu ý khi trình bày
-
-- **CTA:** đã có các luồng quản lý chính như tạo, sửa, xem trước, nhân bản, thay đổi trạng thái và xem nơi sử dụng; một số thao tác đồng thời trên nhiều CTA chưa hoàn thiện nên không được giới thiệu như khả năng chính.
-- **Biểu mẫu:** đã có các luồng tạo, sửa, xem trước, nhân bản, cấu hình gửi và xem lượt gửi; một số thao tác đồng thời trên nhiều biểu mẫu và dữ liệu lượt gửi thực tế vẫn cần hoàn thiện.
-- **Liên hệ & đăng ký sản phẩm:** màn quản lý vẫn tồn tại và có đầy đủ luồng phân loại, phân công, cập nhật trạng thái, ghi chú, xử lý rác/trùng; tuy nhiên chức năng này hiện không xuất hiện trong menu bên trái và có phạm vi gần với Yêu cầu khách hàng.
-- **Vai trò & quyền:** tài liệu chỉ mô tả các khả năng đang được mở cho người dùng gồm vai trò, ma trận quyền, phạm vi, gán/thu hồi vai trò và danh mục chức năng; không đưa các màn thử nghiệm chưa tham gia luồng sử dụng hiện tại vào nội dung giới thiệu.
-
-### Checklist hoàn thành
-
-- [x] Đã kiểm tra toàn bộ chức năng CMS.
-- [x] Không bỏ sót chức năng trong Inventory.
-- [x] Đã kiểm tra chức năng chính của từng phân hệ.
-- [x] Đã mô tả mục đích.
-- [x] Đã mô tả khả năng chính.
-- [x] Đã bổ sung ví dụ nghiệp vụ thực tế cho từng chức năng.
-- [x] Đã mô tả cách sử dụng cơ bản.
-- [x] Đã mô tả giá trị/kết quả.
-- [x] Nội dung phù hợp với người không chuyên kỹ thuật.
-- [x] Không đi sâu vào nội dung hoặc kiến trúc kỹ thuật.
-
-Kết quả đối chiếu cuối: tài liệu đã bao phủ đủ 28 chức năng trong `CMS_FUNCTION_INVENTORY.md`, giữ đúng phạm vi CMS/Admin và không bổ sung chức năng ngoài danh sách kiểm kê.
+Kết quả đối chiếu cuối: tài liệu mô tả đủ **27 chức năng chính thức** của CMS/Admin. Route **Liên hệ & đăng ký sản phẩm** vẫn được Inventory ghi nhận để theo dõi kỹ thuật nhưng không được tính hoặc giới thiệu như một chức năng độc lập.

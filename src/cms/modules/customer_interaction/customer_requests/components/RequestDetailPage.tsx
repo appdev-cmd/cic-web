@@ -29,7 +29,8 @@ import {
 } from 'lucide-react';
 import { CustomerRequest } from '../types';
 import { REQUEST_STATUS_LABELS, REQUEST_STATUS_COLORS, REQUEST_STATUSES } from '../../shared/constants/statusTypes';
-import { PRIORITY_LABELS, PRIORITY_COLORS } from '../../shared/constants/statusTypes';
+import { PRIORITY_LEVELS, PRIORITY_LABELS, PRIORITY_COLORS } from '../../shared/constants/statusTypes';
+import type { PriorityLevel } from '../../shared/constants/statusTypes';
 
 interface RequestDetailPageProps {
   requestId: string;
@@ -38,6 +39,7 @@ interface RequestDetailPageProps {
   onAssignUser?: (requestId: string, userId: string) => void;
   onReassignRequest?: (request: CustomerRequest) => void;
   onUpdateStatus: (requestId: string, newStatus: string) => void;
+  onUpdatePriority: (requestId: string, newPriority: PriorityLevel) => void;
   onAddNote: (requestId: string, noteContent: string) => void;
 }
 
@@ -48,6 +50,7 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
   onAssignUser,
   onReassignRequest,
   onUpdateStatus,
+  onUpdatePriority,
   onAddNote,
 }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'source' | 'logs'>('info');
@@ -215,6 +218,23 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
               {REQUEST_STATUSES.map((st) => (
                 <option key={st.value} value={st.value}>
                   Trạng thái: {st.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-2.5 text-slate-400 pointer-events-none" />
+          </div>
+
+          {/* Quick Priority Select */}
+          <div className="relative">
+            <select
+              aria-label="Cập nhật mức ưu tiên"
+              value={request.priority}
+              onChange={(e) => onUpdatePriority(request.id, e.target.value as PriorityLevel)}
+              className="appearance-none pl-3 pr-8 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 cursor-pointer transition-colors"
+            >
+              {PRIORITY_LEVELS.map((priority) => (
+                <option key={priority.value} value={priority.value}>
+                  Ưu tiên: {priority.label}
                 </option>
               ))}
             </select>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Eye,
   Edit3,
-  Copy,
   Trash2,
   FileText,
   List,
@@ -30,7 +29,6 @@ interface RequestListProps {
   onToggleSelectAll: () => void;
   onToggleSelectRequest: (id: string) => void;
   onViewRequest: (request: CustomerRequest) => void;
-  onDuplicateRequest: (request: CustomerRequest) => void;
   onDeleteRequest: (id: string) => void;
   onQuickStatusToggle: (id: string, currentStatus: string) => void;
   onReassignRequest?: (request: CustomerRequest) => void;
@@ -44,7 +42,6 @@ export const RequestList: React.FC<RequestListProps> = ({
   onToggleSelectAll,
   onToggleSelectRequest,
   onViewRequest,
-  onDuplicateRequest,
   onDeleteRequest,
   onQuickStatusToggle,
   onReassignRequest,
@@ -336,13 +333,6 @@ export const RequestList: React.FC<RequestListProps> = ({
                         size="sm"
                         aria-label="Ghi chú nội bộ"
                         title="Ghi chú nội bộ"
-                      />
-                      <CmsIconButton
-                        onClick={() => onDuplicateRequest(request)}
-                        icon={<Copy />}
-                        size="sm"
-                        aria-label="Nhân bản"
-                        title="Nhân bản"
                       />
                       <CmsIconButton
                         onClick={() => onDeleteRequest(request.id)}
