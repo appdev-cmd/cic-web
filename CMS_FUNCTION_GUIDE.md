@@ -70,7 +70,7 @@ CMS là hệ thống quản trị tập trung giúp công ty cập nhật nội 
 
 Mỗi chức năng dưới đây được trình bày theo năm nội dung: **dùng để làm gì, quản lý được gì, tình huống thực tế, cách sử dụng cơ bản và kết quả mang lại**.
 
-> **Quy ước hình ảnh:** Mỗi chức năng có một ảnh chụp màn hình tổng quan từ CMS hiện tại. Ảnh được chọn để thể hiện rõ nhất phạm vi quản lý chính; dữ liệu hiển thị trong ảnh mang tính minh họa và có thể thay đổi khi hệ thống được đưa vào vận hành chính thức.
+> **Quy ước hình ảnh:** Mỗi chức năng có một ảnh chụp màn hình tổng quan từ CMS hiện tại. Ảnh được lưu trên thư mục Google Drive dùng chung để người đọc tài liệu trực tuyến có thể xem mà không cần file local; dữ liệu hiển thị trong ảnh mang tính minh họa và có thể thay đổi khi hệ thống được đưa vào vận hành chính thức.
 
 ---
 
@@ -82,7 +82,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Cung cấp bức tranh nhanh về tình hình nội dung, yêu cầu khách hàng và các công việc cần chú ý trong CMS.
 
-![Màn hình Tổng quan CMS](docs/assets/cms-guide/cms-guide-01.png)
+![Màn hình Tổng quan CMS](https://lh3.googleusercontent.com/d/1jP62uZuE6-VpQOSMylA6aMaIfGMXC9qi=w1600)
 
 *Hình 1. Màn hình Tổng quan với các chỉ số và khu vực công việc cần chú ý.*
 
@@ -110,7 +110,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý toàn bộ bài viết truyền thông, tin doanh nghiệp và tin chuyên ngành đăng trên Website.
 
-![Màn hình quản lý Tin tức](docs/assets/cms-guide/cms-guide-02-tin-tuc.png)
+![Màn hình quản lý Tin tức](https://lh3.googleusercontent.com/d/1iEwpEY26KhqnwLNvTESx9-lT066gcLd6=w1600)
 
 *Hình 2. Danh sách Tin tức và các công cụ theo dõi, tìm kiếm, quản lý trạng thái.*
 
@@ -133,7 +133,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Tổ chức tin tức thành các nhóm rõ ràng để người đọc dễ tìm và bộ phận nội dung dễ quản lý.
 
-![Màn hình quản lý Danh mục tin tức](docs/assets/cms-guide/cms-guide-03-danh-muc-tin-tuc.png)
+![Màn hình quản lý Danh mục tin tức](https://lh3.googleusercontent.com/d/1Bhyl8fI0yTL2IgMdF6lpE0qYO0OfLkw8=w1600)
 
 *Hình 3. Màn hình tổ chức và quản lý Danh mục tin tức.*
 
@@ -155,7 +155,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý nội dung của các trang có bố cục riêng như **Trang chủ, Giới thiệu, Cơ cấu tổ chức, Năng lực & Kinh nghiệm, Liên hệ**, đồng thời cho phép tạo thêm các trang thông tin đơn giản theo mẫu dùng chung của **Chính sách bảo mật** và **Điều khoản sử dụng**. Người quản trị cập nhật nội dung trong từng khu vực (section), còn bố cục tổng thể được hệ thống giữ cố định để không làm sai thiết kế Website.
 
-![Màn hình quản lý Trang nội dung](docs/assets/cms-guide/cms-guide-04-trang-noi-dung.png)
+![Màn hình quản lý Trang nội dung](https://lh3.googleusercontent.com/d/1sjwddrAv7EwvietFT4h4LPavC3otE67S=w1600)
 
 *Hình 4. Danh sách Trang nội dung cùng trạng thái và phiên bản quản lý.*
 
@@ -183,7 +183,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý thông tin hội thảo, đào tạo, chương trình giới thiệu sản phẩm và các sự kiện của công ty.
 
-![Màn hình quản lý Sự kiện](docs/assets/cms-guide/cms-guide-05-su-kien.png)
+![Màn hình quản lý Sự kiện](https://lh3.googleusercontent.com/d/1_LhkrbnDvVr-XdIKytvZQmXFpR1yea_J=w1600)
 
 *Hình 5. Màn hình quản lý Sự kiện theo thời gian và trạng thái công bố.*
 
@@ -205,7 +205,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Giới thiệu và quản lý hồ sơ các dự án tiêu biểu nhằm thể hiện năng lực và kinh nghiệm của công ty.
 
-![Màn hình quản lý Dự án](docs/assets/cms-guide/cms-guide-06-du-an.png)
+![Màn hình quản lý Dự án](https://lh3.googleusercontent.com/d/1aYJVY8xE8QfZfpqOUBTk_yGJPRqvQ3Wk=w1600)
 
 *Hình 6. Danh sách Dự án và các thông tin phục vụ quản lý hồ sơ năng lực.*
 
@@ -233,7 +233,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý tập trung danh mục sản phẩm, phần mềm và giải pháp mà công ty cung cấp.
 
-![Màn hình quản lý Sản phẩm](docs/assets/cms-guide/cms-guide-07-san-pham.png)
+![Màn hình quản lý Sản phẩm](https://lh3.googleusercontent.com/d/11YjXnU4DG3gdYZ0rV4xqml8i2dLhfup3=w1600)
 
 *Hình 7. Màn hình quản lý tập trung danh mục Sản phẩm.*
 
@@ -257,7 +257,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Sắp xếp sản phẩm thành hệ thống danh mục để phục vụ quản lý và tra cứu.
 
-![Màn hình quản lý Danh mục sản phẩm](docs/assets/cms-guide/cms-guide-08-danh-muc-san-pham.png)
+![Màn hình quản lý Danh mục sản phẩm](https://lh3.googleusercontent.com/d/1xG-LpiMJ3Watc0Cyb2tnKb3j3eBdCA27=w1600)
 
 *Hình 8. Màn hình tổ chức Danh mục sản phẩm theo cấu trúc phân cấp.*
 
@@ -278,7 +278,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý thông tin các hãng sản xuất, nhà phát triển hoặc đối tác gắn với sản phẩm.
 
-![Màn hình quản lý Hãng sản xuất](docs/assets/cms-guide/cms-guide-09-hang-san-xuat.png)
+![Màn hình quản lý Hãng sản xuất](https://lh3.googleusercontent.com/d/1apaBZAWCBL0bSnHBF4hQA2G2q5-VbiuB=w1600)
 
 *Hình 9. Danh sách Hãng sản xuất và thông tin nhận diện liên quan.*
 
@@ -300,7 +300,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Phân nhóm sản phẩm theo ngành nghề hoặc nhu cầu ứng dụng thực tế.
 
-![Màn hình quản lý Lĩnh vực ứng dụng](docs/assets/cms-guide/cms-guide-10-linh-vuc-ung-dung.png)
+![Màn hình quản lý Lĩnh vực ứng dụng](https://lh3.googleusercontent.com/d/1H7e-j88SeDaQzGwpswj7NwZPduyJGRNd=w1600)
 
 *Hình 10. Màn hình quản lý các Lĩnh vực ứng dụng của sản phẩm.*
 
@@ -321,7 +321,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Chuẩn hóa cách phân biệt các nhóm sản phẩm theo đặc điểm cung cấp hoặc hình thức sử dụng.
 
-![Màn hình quản lý Loại sản phẩm](docs/assets/cms-guide/cms-guide-11-loai-san-pham.png)
+![Màn hình quản lý Loại sản phẩm](https://lh3.googleusercontent.com/d/1htITc9yC0DXqfTu9A4hBeNg3BpdOXlEv=w1600)
 
 *Hình 11. Danh sách Loại sản phẩm dùng cho phân loại và tra cứu.*
 
@@ -343,7 +343,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý đầu mối chịu trách nhiệm tư vấn, kinh doanh và hỗ trợ đối với từng nhóm sản phẩm.
 
-![Màn hình quản lý Người phụ trách kinh doanh](docs/assets/cms-guide/cms-guide-12-nguoi-phu-trach-kinh-doanh.png)
+![Màn hình quản lý Người phụ trách kinh doanh](https://lh3.googleusercontent.com/d/1ZjXfLijl-at6TRGVzeGN87L4-rWVsBns=w1600)
 
 *Hình 12. Màn hình quản lý đầu mối kinh doanh và phạm vi sản phẩm phụ trách.*
 
@@ -365,7 +365,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý các dịch vụ tư vấn, triển khai và hỗ trợ mà công ty cung cấp.
 
-![Màn hình quản lý Dịch vụ](docs/assets/cms-guide/cms-guide-13-dich-vu.png)
+![Màn hình quản lý Dịch vụ](https://lh3.googleusercontent.com/d/1QiW8ayBKB6Oc46bj95Zf2PUFrTflgJNt=w1600)
 
 *Hình 13. Danh sách Dịch vụ và trạng thái nội dung trên Website.*
 
@@ -394,7 +394,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý hệ thống điều hướng để người xem dễ tiếp cận các khu vực và nội dung trên Website.
 
-![Màn hình quản lý Menu](docs/assets/cms-guide/cms-guide-14-menu.png)
+![Màn hình quản lý Menu](https://lh3.googleusercontent.com/d/1RCRQfB78BoGsSJOZmxV-WCxvc20E4Lum=w1600)
 
 *Hình 14. Màn hình quản lý cấu trúc Menu và thứ tự điều hướng Website.*
 
@@ -422,7 +422,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Lưu trữ và tổ chức tập trung hình ảnh, video và tài liệu dùng trong CMS.
 
-![Màn hình Thư viện media](docs/assets/cms-guide/cms-guide-15-thu-vien-media.png)
+![Màn hình Thư viện media](https://lh3.googleusercontent.com/d/1JMwdZVE1bH1f8cmD89ZNNu7EtuBkE6Ma=w1600)
 
 *Hình 15. Thư viện media với khu vực thư mục, bộ lọc và danh sách tài nguyên.*
 
@@ -451,7 +451,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Quản lý các lời kêu gọi khách hàng thực hiện hành động như đăng ký tư vấn, tải tài liệu hoặc liên hệ.
 
-![Màn hình quản lý CTA](docs/assets/cms-guide/cms-guide-16-cta.png)
+![Màn hình quản lý CTA](https://lh3.googleusercontent.com/d/1B4kEHzfgk-ctXtoY6w4rROGVMUY2Ypbn=w1600)
 
 *Hình 16. Màn hình quản lý CTA và các trạng thái sử dụng.*
 
@@ -473,7 +473,7 @@ Mỗi chức năng dưới đây được trình bày theo năm nội dung: **d�
 
 **Mục đích:** Tạo các biểu mẫu thu thập thông tin khách hàng cho nhiều nhu cầu khác nhau.
 
-![Màn hình quản lý Biểu mẫu](docs/assets/cms-guide/cms-guide-17-bieu-mau.png)
+![Màn hình quản lý Biểu mẫu](https://lh3.googleusercontent.com/d/1yqcSh0jhoJH4Mg9cFdbSIGLRtuDVU6lo=w1600)
 
 *Hình 17. Danh sách Biểu mẫu phục vụ các nhu cầu thu thập thông tin.*
 
@@ -497,7 +497,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quản lý tập trung quá trình tiếp nhận và xử lý nhu cầu của khách hàng từ nhiều nguồn.
 
-![Màn hình quản lý Yêu cầu khách hàng](docs/assets/cms-guide/cms-guide-18-yeu-cau-khach-hang.png)
+![Màn hình quản lý Yêu cầu khách hàng](https://lh3.googleusercontent.com/d/1eRPp5zf39SDC_Hcv2fToh7dWiC_ILu9Z=w1600)
 
 *Hình 18. Màn hình tổng hợp Yêu cầu khách hàng với bộ lọc và trạng thái xử lý.*
 
@@ -520,7 +520,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Chuẩn hóa nội dung email gửi cho khách hàng hoặc nội bộ trong các tình huống nghiệp vụ thường gặp.
 
-![Màn hình quản lý Mẫu email](docs/assets/cms-guide/cms-guide-19-mau-email.png)
+![Màn hình quản lý Mẫu email](https://lh3.googleusercontent.com/d/166vpIVCN3csb2xnz-wETZ7hdu2dV1SD4=w1600)
 
 *Hình 19. Danh sách Mẫu email theo tình huống và trạng thái sử dụng.*
 
@@ -543,7 +543,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Tổng hợp các liên hệ chung, yêu cầu báo giá và đăng ký liên quan tới sản phẩm để bộ phận vận hành tiếp nhận.
 
-![Màn hình Liên hệ và đăng ký sản phẩm](docs/assets/cms-guide/cms-guide-20-lien-he-dang-ky-san-pham.png)
+![Màn hình Liên hệ và đăng ký sản phẩm](https://lh3.googleusercontent.com/d/1d49WUuuc73ad-rrmtkFajRY0SThd9pNv=w1600)
 
 *Hình 20. Màn hình tiếp nhận Liên hệ và đăng ký sản phẩm.*
 
@@ -574,7 +574,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quản lý những người được phép sử dụng CMS và thông tin tài khoản của họ.
 
-![Màn hình quản lý Người dùng](docs/assets/cms-guide/cms-guide-21-nguoi-dung.png)
+![Màn hình quản lý Người dùng](https://lh3.googleusercontent.com/d/1LyjiAxAQt76G9VBlDX0fYmHfwtpicPr6=w1600)
 
 *Hình 21. Danh sách Người dùng và trạng thái tài khoản CMS.*
 
@@ -597,7 +597,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quy định mỗi nhóm người dùng được xem và thực hiện những công việc nào trong CMS.
 
-![Màn hình quản lý Vai trò và quyền](docs/assets/cms-guide/cms-guide-22-vai-tro-quyen.png)
+![Màn hình quản lý Vai trò và quyền](https://lh3.googleusercontent.com/d/1UMTjMO7yo6qf3lqGrO9-4-KEwbeDB_O9=w1600)
 
 *Hình 22. Màn hình quản lý Vai trò, quyền hạn và phạm vi áp dụng.*
 
@@ -626,7 +626,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quản lý các thiết lập dùng chung ảnh hưởng đến cách CMS và Website vận hành.
 
-![Màn hình Cấu hình hệ thống](docs/assets/cms-guide/cms-guide-23-cau-hinh-he-thong.png)
+![Màn hình Cấu hình hệ thống](https://lh3.googleusercontent.com/d/1TalTvfipa60htKFVWJ4au1KWfqeoebMd=w1600)
 
 *Hình 23. Khu vực Cấu hình hệ thống theo các nhóm thiết lập vận hành.*
 
@@ -647,7 +647,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quản lý các câu chữ dùng trên giao diện tiếng Việt và tiếng Anh của Website và CMS.
 
-![Màn hình quản lý Ngôn ngữ giao diện](docs/assets/cms-guide/cms-guide-24-ngon-ngu-giao-dien.png)
+![Màn hình quản lý Ngôn ngữ giao diện](https://lh3.googleusercontent.com/d/1y5UPwazZ5kDUm-f44GYw22YTpcA6Um2s=w1600)
 
 *Hình 24. Màn hình quản lý câu chữ giao diện theo phạm vi và ngôn ngữ.*
 
@@ -668,7 +668,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Ghi nhận và tra cứu các hoạt động quản trị để biết ai đã thực hiện việc gì và vào thời điểm nào.
 
-![Màn hình Nhật ký hoạt động](docs/assets/cms-guide/cms-guide-25-nhat-ky-hoat-dong.png)
+![Màn hình Nhật ký hoạt động](https://lh3.googleusercontent.com/d/1GJ0Q8g6WONaY1oz-hUz-1rhE0TcOht95=w1600)
 
 *Hình 25. Nhật ký hoạt động phục vụ theo dõi và truy vết thao tác quản trị.*
 
@@ -689,7 +689,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quản lý các nội dung đã xóa trước khi quyết định phục hồi hoặc loại bỏ vĩnh viễn.
 
-![Màn hình Thùng rác](docs/assets/cms-guide/cms-guide-26-thung-rac.png)
+![Màn hình Thùng rác](https://lh3.googleusercontent.com/d/1XvPGCwiNGQanuLF9yGkbyOtCgSF3l4SS=w1600)
 
 *Hình 26. Màn hình Thùng rác với các lựa chọn phục hồi hoặc xử lý nội dung đã xóa.*
 
@@ -716,7 +716,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Quản lý cách các trang chức năng chính được mô tả và xuất hiện trên công cụ tìm kiếm.
 
-![Màn hình Cấu hình SEO chức năng](docs/assets/cms-guide/cms-guide-27-cau-hinh-seo.png)
+![Màn hình Cấu hình SEO chức năng](https://lh3.googleusercontent.com/d/19LdTv7HMw_4Zw8V1F_qrPwo1BPKBS0n_=w1600)
 
 *Hình 27. Màn hình Cấu hình SEO theo từng nhóm trang chức năng.*
 
@@ -744,7 +744,7 @@ Khi khách gửi biểu mẫu từ một sản phẩm cụ thể, lượt gửi 
 
 **Mục đích:** Giúp người dùng tìm nhanh nội dung và chức năng trên toàn bộ CMS từ một điểm duy nhất.
 
-![Màn hình Tìm kiếm toàn cục](docs/assets/cms-guide/cms-guide-28-tim-kiem-toan-cuc.png)
+![Màn hình Tìm kiếm toàn cục](https://lh3.googleusercontent.com/d/1bZCyH6-Opcz2r0eNeWzP5UpLzCBPcncS=w1600)
 
 *Hình 28. Màn hình Tìm kiếm toàn cục trên nhiều nhóm dữ liệu CMS.*
 
