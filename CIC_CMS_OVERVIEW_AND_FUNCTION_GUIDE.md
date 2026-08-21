@@ -2,6 +2,22 @@
 
 > CMS giúp CIC chủ động vận hành Website trên một nền tảng tập trung: từ quản lý nội dung, sản phẩm và hình ảnh doanh nghiệp đến tiếp nhận nhu cầu khách hàng, phân công trách nhiệm và kiểm soát thay đổi.
 
+## Mục lục
+
+- [1. CMS mới mở rộng những gì?](#1-cms-mới-mở-rộng-những-gì)
+- [2. Mỗi bộ phận sử dụng CMS như thế nào?](#2-mỗi-bộ-phận-sử-dụng-cms-như-thế-nào)
+- [3. Danh mục chức năng CMS — Tra cứu](#3-danh-mục-chức-năng-cms--tra-cứu)
+  - [3.1. Dashboard](#31-dashboard)
+  - [3.2. Quản lý nội dung](#32-quản-lý-nội-dung)
+  - [3.3. Sản phẩm/Dịch vụ](#33-sản-phẩmdịch-vụ)
+  - [3.4. Trình bày Website](#34-trình-bày-website)
+  - [3.5. Media](#35-media)
+  - [3.6. Tương tác khách hàng](#36-tương-tác-khách-hàng)
+  - [3.7. Người dùng & phân quyền](#37-người-dùng--phân-quyền)
+  - [3.8. Cấu hình hệ thống](#38-cấu-hình-hệ-thống)
+  - [3.9. SEO](#39-seo)
+  - [3.10. Tiện ích CMS](#310-tiện-ích-cms)
+
 ## 1. CMS mới mở rộng những gì?
 
 CMS cũ đã quản lý tin tức, danh mục tin, sự kiện, sản phẩm cùng các dữ liệu phân loại, dịch vụ, menu, Block, người dùng, quyền trực tiếp, cấu hình, ngôn ngữ và thông tin SEO. CMS mới tiếp tục sử dụng các dữ liệu và nghiệp vụ cốt lõi này; phần khác biệt tập trung ở sáu phạm vi được tổ chức lại hoặc bổ sung:
