@@ -39,7 +39,7 @@ export const demoCatalogDataSource: CatalogDataSource = {
   productSettingsGlobal: {
     salesStaff: mockMasterSalesStaff,
     productOptions: [
-      ...mockProducts.map(({ id, name }) => ({ id, name })),
+      ...mockProducts.map(({ id, name, title }) => ({ id, name: name || title })),
       { id: 'prod_demo_006', name: 'SAFE - Phần mềm phân tích thiết kế sàn' },
       { id: 'prod_demo_007', name: 'SAP2000 - Phân tích thiết kế kết cấu tổng hợp' },
       { id: 'prod_demo_008', name: 'CSiBridge - Phần mềm phân tích thiết kế cầu' },

@@ -66,7 +66,7 @@ export interface CustomerRequest extends BaseEntity {
   logs: RequestLog[];
 }
 
-export type RequestListTabType = 'all' | 'new' | 'processing' | 'completed' | 'not_suitable' | 'cancelled' | 'trash';
+export type RequestListTabType = 'all' | 'new' | 'processing' | 'completed' | 'not_suitable' | 'cancelled';
 
 export interface RequestFilterState {
   searchQuery: string;

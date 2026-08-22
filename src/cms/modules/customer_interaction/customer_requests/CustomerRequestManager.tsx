@@ -19,7 +19,7 @@ import {
   UserCheck,
   MessageSquare,
 } from 'lucide-react';
-import { CustomerRequest, RequestListTabType, RequestFilterState } from './types';
+import { CustomerRequest, RequestFilterState } from './types';
 import type { CustomerRequestModuleData } from '../../../data/CustomerInteractionDataSource';
 import { RequestList } from './components/RequestList';
 import { RequestDetailPage } from './components/RequestDetailPage';
@@ -29,7 +29,6 @@ import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../sha
 import type { PriorityLevel } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
-import { CmsTabs } from '../../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import { StaffMember } from '../../contacts/types';
 import { MOCK_STAFF_MEMBERS } from '../../contacts/mockData';
@@ -41,7 +40,6 @@ interface CustomerRequestManagerProps {
 export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ data }) => {
   const [requests, setRequests] = useState<CustomerRequest[]>(data.requests);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<RequestListTabType>('all');
   const [filter, setFilter] = useState<RequestFilterState>({
     searchQuery: '',
     tab: 'all',
@@ -147,7 +145,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
       formId: undefined,
       ctaId: undefined,
       assignedUserId: undefined,
-      tab: activeTab,
+      tab: 'all',
       dateFrom: undefined,
       dateTo: undefined,
     });
@@ -155,18 +153,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
 
   // Multi-condition filtering
   const filteredRequests = requests.filter((request) => {
-    // Tab filter
-    if (activeTab === 'trash') {
-      if (!request.deletedAt) return false;
-    } else {
-      if (request.deletedAt) return false;
-    }
-
-    if (activeTab === 'new' && request.status !== 'new') return false;
-    if (activeTab === 'processing' && request.status !== 'processing') return false;
-    if (activeTab === 'completed' && request.status !== 'completed') return false;
-    if (activeTab === 'not_suitable' && request.status !== 'not_suitable') return false;
-    if (activeTab === 'cancelled' && request.status !== 'cancelled') return false;
+    if (request.deletedAt) return false;
 
     // Search filter across submission values, metadata, form/CTA/page names
     if (filter.searchQuery.trim()) {
@@ -453,11 +440,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     }
   };
 
-  const handleTabChange = (tab: RequestListTabType) => {
-    setActiveTab(tab);
-    setSelectedRequestIds([]);
-  };
-
   const handleQuickStatusToggle = (id: string, currentStatus: string) => {
     const statusFlow: Record<string, string> = {
       new: 'processing',
@@ -561,21 +543,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
                 {requests.filter((r) => !r.deletedAt).length} yêu cầu
               </span>
             }
-          />
-
-          {/* Tabs */}
-          <CmsTabs
-            items={[
-              { id: 'all' as const, label: 'Tất cả', count: requests.filter((r) => !r.deletedAt).length },
-              { id: 'new' as const, label: 'Mới', count: requests.filter((r) => !r.deletedAt && r.status === 'new').length },
-              { id: 'processing' as const, label: 'Đang xử lý', count: requests.filter((r) => !r.deletedAt && r.status === 'processing').length },
-              { id: 'completed' as const, label: 'Hoàn thành', count: requests.filter((r) => !r.deletedAt && r.status === 'completed').length },
-              { id: 'not_suitable' as const, label: 'Không phù hợp', count: requests.filter((r) => !r.deletedAt && r.status === 'not_suitable').length },
-              { id: 'cancelled' as const, label: 'Hủy', count: requests.filter((r) => !r.deletedAt && r.status === 'cancelled').length },
-            ]}
-            value={activeTab}
-            onChange={handleTabChange}
-            ariaLabel="Request status tabs"
           />
 
           {/* Multi-condition Filter Panel */}
@@ -767,7 +734,6 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
           <RequestList
             requests={filteredRequests}
             selectedRequestIds={selectedRequestIds}
-            tab={activeTab}
             onToggleSelectAll={handleToggleSelectAll}
             onToggleSelectRequest={handleToggleSelectRequest}
             onViewRequest={handleViewDetail}

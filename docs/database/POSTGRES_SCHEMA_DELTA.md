@@ -368,13 +368,6 @@ Hai workspace có cùng cấu trúc nhưng quản lý dataset độc lập, khô
 | `end_year` | `smallint` | NULL, CHECK không nhỏ hơn `start_year` |
 | `is_ongoing` | `boolean` | NOT NULL DEFAULT `false`; CHECK ongoing thì `end_year IS NULL` |
 | `image` | `varchar(500)` | NULL |
-| `gallery` | `jsonb` | NOT NULL DEFAULT `'[]'::jsonb`; CHECK là array |
-| `video_title` | `varchar(255)` | NULL |
-| `video_url` | `text` | NULL |
-| `video_thumbnail` | `varchar(500)` | NULL |
-| `document_title` | `varchar(255)` | NULL |
-| `document_url` | `text` | NULL |
-| `document_size` | `varchar(50)` | NULL |
 | `is_featured` | `boolean` | NOT NULL DEFAULT `false` |
 | `published` | `boolean` | NOT NULL DEFAULT `false` |
 | `ordering` | `integer` | NOT NULL DEFAULT `0`, CHECK `ordering >= 0` |
@@ -422,9 +415,9 @@ Hai workspace có cùng cấu trúc nhưng quản lý dataset độc lập, khô
 - `appliedSolutions → technologies` là danh sách text tự do có thứ tự cho “Công nghệ áp dụng”, không phải FK Product/Service.
 - `relatedLinks` map qua bốn bảng nối; không lưu lặp label, ảnh hoặc metadata của entity đích và không lưu ID bằng array/JSONB.
 - `time` trong fixture map thành `start_year`, `end_year`, `is_ongoing`; frontend compose nhãn theo locale.
-- `scope`, `results` và nội dung bài thông thường nằm trong Rich Text `content`; không tạo column theo từng heading/section.
+- `scope`, `results`, gallery, video, tài liệu và nội dung bài thông thường nằm trong Rich Text `content`; không tạo column riêng theo từng heading hoặc loại nội dung.
 - Homepage tiếp tục dùng reference `entityType = project` và `position` của Page Builder; không tạo dataset Project riêng cho trang chủ.
-- Chưa tạo taxonomy cho `sector`, `solution`, `technologies`, `customer_name`; chưa tạo relation Project–Project hoặc bảng gallery riêng.
+- Chưa tạo taxonomy cho `sector`, `solution`, `technologies`, `customer_name`; chưa tạo relation Project–Project.
 - Không có dữ liệu Project legacy để backfill tự động. Chỉ seed/import fixture đã được nghiệp vụ duyệt.
 
 ## Menu

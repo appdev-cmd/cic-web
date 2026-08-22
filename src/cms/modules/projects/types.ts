@@ -14,13 +14,6 @@ export interface CmsProject {
   end_year: number | null;
   is_ongoing: boolean;
   image: string;
-  gallery: string[];
-  video_title: string;
-  video_url: string;
-  video_thumbnail: string;
-  document_title: string;
-  document_url: string;
-  document_size: string;
   products_related: string[];
   services_related: string[];
   is_featured: boolean;

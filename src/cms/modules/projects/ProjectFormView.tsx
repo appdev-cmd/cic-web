@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowLeft, BriefcaseBusiness, Eye, FileText, Image, Link2, Save, Search } from 'lucide-react';
+import { ArrowLeft, BriefcaseBusiness, Eye, FileText, Image, Images, Link2, Save, Search, Upload, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
+import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 import type { CmsProject, ProjectRelationOption } from './types';
 
 interface Props {
@@ -22,12 +23,13 @@ const slugify = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036
 
 export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serviceOptions, onSave, onPreview, onCancel }) => {
   const initial = useMemo<CmsProject>(() => project ?? {
-    id: `project_${Date.now()}`, title: '', alias: '', tagline: '', summary: '', content: '', sector: '', solution: '', technologies: [], customer_name: '', location: '', start_year: null, end_year: null, is_ongoing: false, image: '', gallery: [], video_title: '', video_url: '', video_thumbnail: '', document_title: '', document_url: '', document_size: '', products_related: [], services_related: [], is_featured: false, published: false, ordering: 0, seo_title: '', seo_keyword: '', seo_description: '', created_time: new Date().toISOString(), updated_time: new Date().toISOString(),
+    id: `project_${Date.now()}`, title: '', alias: '', tagline: '', summary: '', content: '', sector: '', solution: '', technologies: [], customer_name: '', location: '', start_year: null, end_year: null, is_ongoing: false, image: '', products_related: [], services_related: [], is_featured: false, published: false, ordering: 0, seo_title: '', seo_keyword: '', seo_description: '', created_time: new Date().toISOString(), updated_time: new Date().toISOString(),
   }, [project]);
   const [form, setForm] = useState(initial);
   const [technologyInput, setTechnologyInput] = useState(initial.technologies.join('\n'));
   const [manualAlias, setManualAlias] = useState(Boolean(project));
   const [error, setError] = useState('');
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const set = <K extends keyof CmsProject>(key: K, value: CmsProject[K]) => setForm((current) => ({ ...current, [key]: value }));
 
   const submit = () => {
@@ -51,14 +53,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
         </div></Section>
         <Section icon={<FileText />} title="Nội dung chi tiết"><RichTextEditor value={form.content} onChange={(value) => set('content', value)} minHeight="380px" /></Section>
         <Section icon={<Image />} title="Media"><div className="grid gap-4 md:grid-cols-2">
-          <Field label="Ảnh đại diện" wide><input className={inputClass} value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="URL hoặc đường dẫn media" /></Field>
-          <Field label="Gallery (mỗi dòng một ảnh)" wide><textarea rows={5} className={inputClass} value={form.gallery.join('\n')} onChange={(e) => set('gallery', splitLines(e.target.value))} /></Field>
-          <Field label="Tiêu đề video"><input className={inputClass} value={form.video_title} onChange={(e) => set('video_title', e.target.value)} /></Field>
-          <Field label="URL video"><input className={inputClass} value={form.video_url} onChange={(e) => set('video_url', e.target.value)} /></Field>
-          <Field label="Thumbnail video" wide><input className={inputClass} value={form.video_thumbnail} onChange={(e) => set('video_thumbnail', e.target.value)} /></Field>
-          <Field label="Tên tài liệu"><input className={inputClass} value={form.document_title} onChange={(e) => set('document_title', e.target.value)} /></Field>
-          <Field label="Dung lượng"><input className={inputClass} value={form.document_size} onChange={(e) => set('document_size', e.target.value)} /></Field>
-          <Field label="URL tài liệu" wide><input className={inputClass} value={form.document_url} onChange={(e) => set('document_url', e.target.value)} /></Field>
+          <Field label="Ảnh đại diện" wide><ImagePickerField value={form.image} onChange={(image) => set('image', image)} onPickFromMedia={() => setMediaPickerOpen(true)} /></Field>
         </div></Section>
         <Section icon={<Link2 />} title="Nội dung liên quan"><div className="space-y-4"><div><span className={labelClass}>Sản phẩm liên quan</span><SearchableMultiSelect options={productOptions} selectedIds={form.products_related} onChange={(ids) => set('products_related', ids)} placeholder="Chọn sản phẩm liên quan..." /></div><div><span className={labelClass}>Dịch vụ liên quan</span><SearchableMultiSelect options={serviceOptions} selectedIds={form.services_related} onChange={(ids) => set('services_related', ids)} placeholder="Chọn dịch vụ liên quan..." /></div></div></Section>
       </div>
@@ -72,10 +67,44 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
           <div className="grid grid-cols-2 gap-3"><Field label="Năm bắt đầu"><input type="number" className={inputClass} value={form.start_year ?? ''} onChange={(e) => set('start_year', e.target.value ? Number(e.target.value) : null)} /></Field><Field label="Năm kết thúc"><input type="number" disabled={form.is_ongoing} className={inputClass} value={form.end_year ?? ''} onChange={(e) => set('end_year', e.target.value ? Number(e.target.value) : null)} /></Field></div>
           <Check label="Đang triển khai" checked={form.is_ongoing} onChange={(checked) => setForm((current) => ({ ...current, is_ongoing: checked, end_year: checked ? null : current.end_year }))} />
         </div></Section>
-        <Section icon={<BriefcaseBusiness />} title="Xuất bản"><div className="space-y-4"><Field label="Thứ tự"><input type="number" min={0} className={inputClass} value={form.ordering} onChange={(e) => set('ordering', Math.max(0, Number(e.target.value) || 0))} /></Field><Check label="Dự án nổi bật" checked={form.is_featured} onChange={(value) => set('is_featured', value)} /><Check label="Xuất bản" checked={form.published} onChange={(value) => set('published', value)} /></div></Section>
+        <Section icon={<BriefcaseBusiness />} title="Hiển thị"><div className="space-y-4"><Field label="Thứ tự"><input type="number" min={0} className={inputClass} value={form.ordering} onChange={(e) => set('ordering', Math.max(0, Number(e.target.value) || 0))} /></Field><Check label="Dự án nổi bật" checked={form.is_featured} onChange={(value) => set('is_featured', value)} /></div></Section>
         <Section icon={<Search />} title="SEO"><div className="space-y-4"><Field label="SEO title"><input className={inputClass} value={form.seo_title} onChange={(e) => set('seo_title', e.target.value)} /></Field><Field label="SEO keyword"><input className={inputClass} value={form.seo_keyword} onChange={(e) => set('seo_keyword', e.target.value)} /></Field><Field label="SEO description"><textarea rows={4} className={inputClass} value={form.seo_description} onChange={(e) => set('seo_description', e.target.value)} /></Field></div></Section>
       </aside>
     </div>
+    {mediaPickerOpen && <PageMediaPickerModal currentId={form.image} returnValue="url" onClose={() => setMediaPickerOpen(false)} onConfirm={(mediaUrl) => set('image', mediaUrl)} />}
+  </div>;
+};
+
+const ImagePickerField: React.FC<{ value: string; onChange: (value: string) => void; onPickFromMedia: () => void }> = ({ value, onChange, onPickFromMedia }) => {
+  const [fileError, setFileError] = useState('');
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return setFileError('Vui lòng chọn đúng định dạng ảnh.');
+    if (file.size > 10 * 1024 * 1024) return setFileError('Ảnh không được vượt quá 10 MB.');
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        onChange(reader.result);
+        setFileError('');
+      }
+    };
+    reader.onerror = () => setFileError('Không thể đọc tệp ảnh. Vui lòng chọn lại.');
+    reader.readAsDataURL(file);
+  };
+
+  return <div className="space-y-2">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+      {value ? <div className="relative"><img src={value} alt="Xem trước ảnh đại diện dự án" className="aspect-[16/7] w-full object-cover" /><button type="button" onClick={() => onChange('')} className="absolute right-2 top-2 rounded-lg bg-slate-950/75 p-1.5 text-white transition hover:bg-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500" aria-label="Bỏ ảnh đã chọn"><X className="size-4" /></button></div> : <div className="flex min-h-32 flex-col items-center justify-center gap-2 px-4 py-6 text-xs text-slate-500"><Image className="size-7" /><span>Chưa chọn ảnh đại diện</span><span className="text-[11px] text-slate-400">JPG, PNG, GIF hoặc WebP · tối đa 10 MB</span></div>}
+      <div className="grid border-t border-slate-200 sm:grid-cols-2 dark:border-slate-700">
+        <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 bg-orange-600 px-3 py-2.5 text-xs font-bold text-white transition-colors hover:bg-orange-700 focus-within:outline-2 focus-within:outline-offset-[-2px] focus-within:outline-orange-300"><Upload className="size-4" />{value ? 'Tải ảnh khác từ máy' : 'Tải ảnh từ máy'}<input type="file" accept="image/*" onChange={handleFileChange} className="sr-only" /></label>
+        <button type="button" onClick={onPickFromMedia} className="flex min-h-11 items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-orange-600 transition-colors hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-orange-500 dark:hover:bg-orange-950/20"><Images className="size-4" />Chọn từ Thư viện Media</button>
+      </div>
+    </div>
+    {fileError && <p className="text-xs font-semibold text-red-600" role="alert">{fileError}</p>}
   </div>;
 };
 

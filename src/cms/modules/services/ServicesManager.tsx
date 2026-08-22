@@ -37,7 +37,6 @@ import type { ServicesModuleData } from '../../data/EditorialContentDataSource';
 import { ServiceFormView } from './ServiceFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
-import { CmsTabs } from '../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
@@ -59,7 +58,6 @@ const editorialStatusLabels: Record<EditorialStatus, string> = {
 
 export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocale, data }) => {
   const [services, setServices] = useState<ServiceItem[]>(() => (data?.services ?? []).map((item) => ({ ...item, editorial_status: item.editorial_status === 'published' ? 'published' : 'draft' })));
-  const [activeTab, setActiveTab] = useState<'all' | 'published' | 'draft' | 'trash'>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Search & Filter state
@@ -90,16 +88,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
   // Filtered Services list
   const filteredServices = useMemo(() => {
     return services.filter((item) => {
-      // Trash filter
-      if (activeTab === 'trash') {
-        if (!item.is_deleted) return false;
-      } else {
-        if (item.is_deleted) return false;
-      }
-
-      // Tab filters
-      if (activeTab === 'published' && item.editorial_status !== 'published') return false;
-      if (activeTab === 'draft' && item.editorial_status !== 'draft') return false;
+      if (item.is_deleted) return false;
 
       // Search term
       if (searchTerm) {
@@ -117,7 +106,6 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
     });
   }, [
     services,
-    activeTab,
     searchTerm,
     filterEditorialStatus,
   ]);
@@ -230,23 +218,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         </CmsButton>}
       />
 
-      {/* 2. TABS */}
-      <CmsTabs
-        ariaLabel="Trạng thái xuất bản"
-        value={activeTab}
-        onChange={(tab) => {
-          setActiveTab(tab as any);
-          setCurrentPage(1);
-        }}
-        items={[
-          { id: 'all', label: 'Tất cả dịch vụ', count: services.filter((s) => !s.is_deleted).length },
-          { id: 'published', label: 'Đã xuất bản', count: services.filter((s) => !s.is_deleted && s.editorial_status === 'published').length },
-          { id: 'draft', label: 'Bản nháp', count: services.filter((s) => !s.is_deleted && s.editorial_status === 'draft').length },
-          { id: 'trash', label: 'Thùng rác', count: services.filter((s) => s.is_deleted).length },
-        ]}
-      />
-
-      {/* 3. TOOLBAR & FILTERS */}
+      {/* TOOLBAR & FILTERS */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Ô Tìm kiếm (Search Box) */}

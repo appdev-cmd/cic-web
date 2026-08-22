@@ -87,7 +87,7 @@ export interface FormFormData {
   submitConfig: FormSubmitConfig;
 }
 
-export type FormListTabType = 'all' | 'active' | 'draft' | 'archived' | 'trash';
+export type FormListTabType = 'all' | 'active' | 'draft' | 'archived';
 
 export interface FormFilterState {
   searchQuery: string;

@@ -44,7 +44,7 @@ export interface CtaFormData {
   status: CtaStatus;
 }
 
-export type CtaListTabType = 'all' | 'active' | 'draft' | 'archived' | 'trash';
+export type CtaListTabType = 'all' | 'active' | 'draft' | 'archived';
 
 export interface CtaFilterState {
   searchQuery: string;

@@ -391,7 +391,7 @@ function HeroSlidesEditor({
               ) : (
                 <div className="flex h-14 w-full items-center justify-center gap-2 text-xs font-semibold text-slate-500">
                   <Image className="h-5 w-5 text-slate-400" />
-                  <span>Chọn ảnh nền từ Thư viện Media</span>
+                  <span>Chọn hoặc tải ảnh nền</span>
                 </div>
               )}
             </button>
@@ -1247,7 +1247,7 @@ function ConfigField({
   if (imageKeys.has(fieldKey)) {
     const currentId = typeof value === 'string' ? value : '';
     const asset = findPageBuilderImage(currentId, mediaImages);
-    return <div className="space-y-1.5"><span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"><Image className="h-3.5 w-3.5 text-slate-400" />{labelFor(fieldKey)}</span><button type="button" onClick={() => onPickImage(path, currentId)} className="group w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800">{asset ? <><img src={asset.thumbnail_url ?? asset.url} alt="" className="aspect-[16/7] w-full object-cover" /><span className="block truncate px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">{asset.title}</span></> : <span className="flex min-h-28 flex-col items-center justify-center gap-2 p-4 text-xs font-semibold text-slate-500"><Image className="h-7 w-7" />Chọn ảnh từ Thư viện Media</span>}</button></div>;
+    return <div className="space-y-1.5"><span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"><Image className="h-3.5 w-3.5 text-slate-400" />{labelFor(fieldKey)}</span><button type="button" onClick={() => onPickImage(path, currentId)} className="group w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800">{asset ? <><img src={asset.thumbnail_url ?? asset.url} alt="" className="aspect-[16/7] w-full object-cover" /><span className="block truncate px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">{asset.title}</span></> : <span className="flex min-h-28 flex-col items-center justify-center gap-2 p-4 text-xs font-semibold text-slate-500"><Image className="h-7 w-7" />Chọn hoặc tải ảnh</span>}</button></div>;
   }
 
   if (fieldKey === 'formId') {

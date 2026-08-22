@@ -220,16 +220,16 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 **Có thể làm gì?**
 
 - Quản lý mô tả, khách hàng, địa điểm, lĩnh vực, giải pháp, công nghệ và thời gian thực hiện.
-- Bổ sung hình ảnh, tài liệu; gắn sản phẩm và dịch vụ liên quan.
+- Chọn một ảnh đại diện; hình ảnh, video và tài liệu khác được chèn trực tiếp trong nội dung chi tiết.
 - Đánh dấu dự án nổi bật, sắp xếp thứ tự hiển thị.
 - Tìm kiếm, lưu nháp, xem trước, công bố hoặc xử lý nhiều dự án cùng lúc.
 
 **Cách sử dụng:**  
-`Tạo dự án → nhập hồ sơ và tài nguyên → gắn sản phẩm, dịch vụ liên quan → xem trước → công bố`
+`Tạo dự án → nhập hồ sơ và nội dung chi tiết → chọn ảnh đại diện → gắn sản phẩm, dịch vụ liên quan → xem trước → công bố`
 
 ![Màn hình quản lý Dự án](https://lh3.googleusercontent.com/d/1aYJVY8xE8QfZfpqOUBTk_yGJPRqvQ3Wk=w1600)
 
-> **Hình 9.** Hồ sơ dự án kết nối nội dung, tài nguyên và các giải pháp liên quan.
+> **Hình 9.** Hồ sơ dự án kết nối nội dung chi tiết, ảnh đại diện và các giải pháp liên quan.
 
 ---
 

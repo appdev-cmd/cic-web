@@ -11,8 +11,7 @@ export type MainTabType =
   | 'documents'
   | 'albums'
   | 'incomplete_metadata'
-  | 'issues'
-  | 'trash';
+  | 'issues';
 
 export type ViewMode = 'grid' | 'list';
 

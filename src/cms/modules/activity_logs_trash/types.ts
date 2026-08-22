@@ -64,9 +64,6 @@ export interface AuditEvent {
 
 export type TrashCategory = 
   | 'all' 
-  | 'content' 
-  | 'media' 
-  | 'config_resources' 
   | 'expiring_soon';
 
 export type DependencyStatus = 'clear' | 'conflict' | 'parent_trashed' | 'schema_mismatch';

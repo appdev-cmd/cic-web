@@ -10,15 +10,15 @@ import {
   TrendingDown,
   Minus,
 } from 'lucide-react';
-import { CtaItem, CtaListTabType } from '../types';
+import { CtaItem } from '../types';
 import { CTA_STATUS_LABELS } from '../../shared/constants/statusTypes';
 import { CmsIconButton } from '../../../../components/ui/CmsButton';
 import { CmsPagination } from '../../../../components/ui/CmsPagination';
+import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionCheckbox';
 
 interface CtaListProps {
   ctas: CtaItem[];
   selectedCtaIds: string[];
-  tab: CtaListTabType;
   onToggleSelectAll: () => void;
   onToggleSelectCta: (id: string) => void;
   onEditCta: (cta: CtaItem) => void;
@@ -32,7 +32,6 @@ interface CtaListProps {
 export const CtaList: React.FC<CtaListProps> = ({
   ctas,
   selectedCtaIds,
-  tab,
   onToggleSelectAll,
   onToggleSelectCta,
   onEditCta,
@@ -82,11 +81,11 @@ export const CtaList: React.FC<CtaListProps> = ({
           <thead>
             <tr className="bg-slate-50/80 dark:bg-slate-850 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 select-none">
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isAllSelected}
                   onChange={onToggleSelectAll}
-                  className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                  indeterminate={selectedCtaIds.length > 0 && !isAllSelected}
+                  label="Chọn tất cả CTA"
                 />
               </th>
               <th className="p-3 min-w-[200px]">Tên quản trị</th>
@@ -110,11 +109,10 @@ export const CtaList: React.FC<CtaListProps> = ({
                 >
                   {/* Checkbox */}
                   <td className="p-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
-                    <input
-                      type="checkbox"
+                    <CmsSelectionCheckbox
                       checked={isSelected}
                       onChange={() => onToggleSelectCta(cta.id)}
-                      className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                      label={`Chọn CTA ${cta.adminName}`}
                     />
                   </td>
 

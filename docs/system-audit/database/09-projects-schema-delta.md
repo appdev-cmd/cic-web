@@ -34,13 +34,6 @@ Hai bảng có cùng cấu trúc nhưng là hai workspace độc lập; không t
 | `end_year` | `smallint` | NULL | CHECK `end_year >= start_year` | Năm kết thúc |
 | `is_ongoing` | `boolean` | NOT NULL DEFAULT `false` | CHECK ongoing thì `end_year IS NULL` | Đang triển khai |
 | `image` | `varchar(500)` | NULL | — | Ảnh đại diện/media path hiện tại |
-| `gallery` | `jsonb` | NOT NULL DEFAULT `'[]'::jsonb` | CHECK là JSON array | Gallery có thứ tự; chưa cần bảng riêng |
-| `video_title` | `varchar(255)` | NULL | — | Tiêu đề video |
-| `video_url` | `text` | NULL | — | URL/embed video |
-| `video_thumbnail` | `varchar(500)` | NULL | — | Thumbnail video |
-| `document_title` | `varchar(255)` | NULL | — | Tên tài liệu/case study |
-| `document_url` | `text` | NULL | — | URL/path tài liệu |
-| `document_size` | `varchar(50)` | NULL | — | Nhãn dung lượng đang hiển thị |
 | `is_featured` | `boolean` | NOT NULL DEFAULT `false` | INDEX cùng publish/order | Dự án nổi bật |
 | `published` | `boolean` | NOT NULL DEFAULT `false` | INDEX cùng ordering | Trạng thái public |
 | `ordering` | `integer` | NOT NULL DEFAULT `0` | CHECK `ordering >= 0` | Thứ tự list |
@@ -81,7 +74,7 @@ Các bảng nối là **BẮT BUỘC** vì CMS hiện chọn nhiều sản phẩ
 - `appliedSolutions → technologies` là danh sách text tự do có thứ tự. Đây là “Công nghệ áp dụng”, không phải sản phẩm hoặc dịch vụ liên quan.
 - `relatedLinks[products/services]` map qua bốn bảng nối; label, ảnh và metadata luôn đọc từ entity đích, không lưu lặp trong Project.
 - `time` của mock được tách thành `start_year`, `end_year`, `is_ongoing`; frontend tự compose nhãn theo locale.
-- `scope`, `results` và nội dung bài viết thông thường tiếp tục nằm trong `content` Rich Text; không tách thêm column.
+- `scope`, `results`, gallery, video, tài liệu và nội dung bài viết thông thường tiếp tục nằm trong `content` Rich Text; không tách thêm column.
 - Homepage dùng reference `entityType = project` và `position` hiện có của Page Builder; không tạo bảng/dataset Project riêng cho trang chủ.
 - Related projects trên detail có thể derive theo `sector`; chưa cần relation Project–Project.
 - Không tạo taxonomy riêng cho `sector`, `solution`, `technologies` hoặc `customer_name` khi CMS mới vẫn quản lý chúng như text/filter label.
@@ -90,6 +83,6 @@ Các bảng nối là **BẮT BUỘC** vì CMS hiện chọn nhiều sản phẩ
 ## Mức độ
 
 - **BẮT BUỘC:** hai bảng Project và bốn bảng quan hệ để đáp ứng contract CMS/frontend hiện tại.
-- **ĐỀ XUẤT:** chưa có bổ sung nào khác. Full-text/trigram, gallery/media relation và taxonomy chỉ xem xét khi có yêu cầu query hoặc integrity thực tế.
+- **ĐỀ XUẤT:** chưa có bổ sung nào khác. Full-text/trigram, media relation và taxonomy chỉ xem xét khi có yêu cầu query hoặc integrity thực tế.
 
 Chưa sửa PostgreSQL và chưa viết migration SQL trong bước audit này.

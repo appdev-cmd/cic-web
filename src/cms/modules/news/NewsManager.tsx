@@ -33,7 +33,6 @@ import type { NewsModuleData } from '../../data/EditorialContentDataSource';
 import { NewsFormView } from './NewsFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
-import { CmsTabs } from '../../components/ui/CmsTabs';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ArticlePreviewModal } from './components/ArticlePreviewModal';
 import { ColumnSettingModal, ColumnVisibility, TableDensity } from './components/ColumnSettingModal';
@@ -43,8 +42,6 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { NewsCategoryManager } from './NewsCategoryManager';
-
-type ViewScopeTab = 'all' | 'trash';
 
 interface NewsManagerProps {
   data?: NewsModuleData;
@@ -58,9 +55,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
   // View Mode: 'list' or 'form'
   const [viewMode, setViewMode] = useState<'list' | 'form' | 'categories'>(() => window.location.pathname.startsWith('/cms/news/categories') ? 'categories' : 'list');
   const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(null);
-
-  // Scope Tabs
-  const [activeScopeTab, setActiveScopeTab] = useState<ViewScopeTab>('all');
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,12 +98,11 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
   // Scope Filtered Articles
   const scopeFilteredArticles = useMemo(() => {
     return articles.filter((item) => {
-      if (activeScopeTab === 'trash') return Boolean(item.in_trash);
       if (item.in_trash) return false;
 
       return true;
     });
-  }, [articles, activeScopeTab]);
+  }, [articles]);
 
   // Final Filtered List
   const filteredArticles = useMemo(() => {
@@ -303,22 +296,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
             meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{articles.filter((article) => !article.in_trash).length} tin bài</span>}
             actions={<CmsButton onClick={handleOpenCreateForm} variant="primary" size="sm" leadingIcon={<Plus />}>Thêm tin tức</CmsButton>}
           />
-
-          {/* VIEW SCOPE NAVIGATION TABS */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <CmsTabs
-              ariaLabel="Phân loại bài viết"
-              value={activeScopeTab}
-              onChange={(tab) => {
-                setActiveScopeTab(tab as any);
-              }}
-              items={[
-                { id: 'all', label: 'Tất cả bài viết', count: articles.filter((a) => !a.in_trash).length },
-                { id: 'trash', label: 'Thùng rác', count: articles.filter((a) => a.in_trash).length },
-              ]}
-            />
-
-          </div>
 
           {/* SEARCH & FILTERS TOOLBAR */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">

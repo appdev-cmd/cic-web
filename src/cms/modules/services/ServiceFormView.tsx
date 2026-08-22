@@ -280,9 +280,9 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Ảnh chính</label>
                 <button type="button" onClick={() => setIsMediaPickerOpen(true)} className="group w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 text-left hover:border-orange-400 dark:border-slate-700 dark:bg-slate-800">
                   {formData.thumbnail_url ? (
-                    <><img src={formData.thumbnail_url} alt="Ảnh đại diện dịch vụ" className="aspect-[16/7] w-full object-cover" /><span className="block px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">Chọn ảnh khác từ Thư viện Media</span></>
+                    <><img src={formData.thumbnail_url} alt="Ảnh đại diện dịch vụ" className="aspect-[16/7] w-full object-cover" /><span className="block px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200">Chọn hoặc tải ảnh khác</span></>
                   ) : (
-                    <span className="flex min-h-32 flex-col items-center justify-center gap-2 p-4 text-xs font-semibold text-slate-500"><ImageIcon className="h-7 w-7" />Chọn ảnh từ Thư viện Media</span>
+                    <span className="flex min-h-32 flex-col items-center justify-center gap-2 p-4 text-xs font-semibold text-slate-500"><ImageIcon className="h-7 w-7" />Chọn hoặc tải ảnh</span>
                   )}
                 </button>
               </div>

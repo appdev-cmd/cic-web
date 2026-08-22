@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Trash2,
   RotateCcw,
@@ -22,6 +22,32 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
+const CMS_TRASH_MODULES = [
+  'Tin tức',
+  'Danh mục tin tức',
+  'Trang nội dung',
+  'Sự kiện',
+  'Dự án',
+  'Sản phẩm',
+  'Danh mục sản phẩm',
+  'Hãng sản xuất',
+  'Lĩnh vực ứng dụng',
+  'Loại sản phẩm',
+  'Người phụ trách kinh doanh',
+  'Dịch vụ',
+  'Menu',
+  'Thư viện media',
+  'CTA',
+  'Biểu mẫu',
+  'Yêu cầu khách hàng',
+  'Mẫu email',
+  'Người dùng',
+  'Vai trò & quyền',
+  'Cấu hình hệ thống',
+  'Ngôn ngữ giao diện',
+  'Cấu hình SEO chức năng',
+] as const;
+
 interface TrashTabProps {
   items: TrashedItem[];
   onOpenItemDetail: (item: TrashedItem) => void;
@@ -40,23 +66,20 @@ export const TrashTab: React.FC<TrashTabProps> = ({
   onBulkDelete,
 }) => {
   const [activeCategory, setActiveCategory] = useState<TrashCategory>('all');
+  const [activeModule, setActiveModule] = useState('all');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
+  const moduleOptions = useMemo(
+    () => Array.from(new Set([...CMS_TRASH_MODULES, ...items.map((item) => item.moduleName)])),
+    [items]
+  );
+
   // Filter items
   const filteredItems = items.filter((item) => {
-    // Category match
-    if (activeCategory === 'content' && !['Bài viết Tin tức', 'Trang tĩnh'].includes(item.itemType)) {
-      return false;
-    }
-    if (activeCategory === 'media' && !['Media Banner', 'Hình ảnh'].includes(item.itemType)) {
-      return false;
-    }
-    if (activeCategory === 'config_resources' && !['Tài nguyên Quản trị', 'Cấu hình'].includes(item.itemType)) {
-      return false;
-    }
+    if (activeModule !== 'all' && item.moduleName !== activeModule) return false;
     if (activeCategory === 'expiring_soon' && item.daysRemaining > 7) {
       return false;
     }
@@ -66,8 +89,9 @@ export const TrashTab: React.FC<TrashTabProps> = ({
       const kw = searchKeyword.toLowerCase();
       const matchTitle = item.title.toLowerCase().includes(kw);
       const matchType = item.itemType.toLowerCase().includes(kw);
+      const matchModule = item.moduleName.toLowerCase().includes(kw);
       const matchDeletedBy = item.deletedBy.name.toLowerCase().includes(kw);
-      if (!matchTitle && !matchType && !matchDeletedBy) return false;
+      if (!matchTitle && !matchType && !matchModule && !matchDeletedBy) return false;
     }
 
     return true;
@@ -105,17 +129,32 @@ export const TrashTab: React.FC<TrashTabProps> = ({
 
       {/* SEARCH & CATEGORY TABS */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3">
-        <div className="relative flex items-center text-xs">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <Search className="w-4 h-4 text-slate-400" />
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="relative flex items-center text-xs">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              placeholder="Tìm theo tên, loại, module hoặc người xóa..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-orange-500"
+            />
           </div>
-          <input
-            type="text"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            placeholder="Tìm theo Tên đối tượng xóa, Người xóa hoặc Loại tài nguyên..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-orange-500"
-          />
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <span className="shrink-0">Module</span>
+            <select
+              value={activeModule}
+              onChange={(event) => setActiveModule(event.target.value)}
+              className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-orange-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            >
+              <option value="all">Tất cả module</option>
+              {moduleOptions.map((moduleName) => (
+                <option key={moduleName} value={moduleName}>{moduleName}</option>
+              ))}
+            </select>
+          </label>
         </div>
 
         {/* SUB-TABS */}
@@ -124,10 +163,7 @@ export const TrashTab: React.FC<TrashTabProps> = ({
           value={activeCategory}
           onChange={(cat) => setActiveCategory(cat as TrashCategory)}
           items={[
-            { id: 'all', label: 'Tất cả mục đã xóa', count: items.length },
-            { id: 'content', label: 'Nội dung (Bài viết / Trang)' },
-            { id: 'media', label: 'Media & Banners' },
-            { id: 'config_resources', label: 'Cấu hình & Quản trị' },
+            { id: 'all', label: 'Tất cả mục đã xóa', count: activeModule === 'all' ? items.length : items.filter((item) => item.moduleName === activeModule).length },
             { id: 'expiring_soon', label: 'Sắp hết hạn lưu giữ (< 7 ngày)', count: items.filter((i) => i.daysRemaining <= 7).length, icon: Clock },
           ]}
         />

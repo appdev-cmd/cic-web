@@ -3440,13 +3440,6 @@ CREATE TABLE "cic_projects" (
   "end_year" smallint NULL CHECK ("end_year" >= "start_year"), -- ← — (bảng mới) | Năm kết thúc.
   "is_ongoing" boolean NOT NULL DEFAULT false CHECK (NOT "is_ongoing" OR "end_year" IS NULL), -- ← — (bảng mới) | Dự án đang triển khai.
   "image" varchar(500) NULL, -- ← — (bảng mới) | Ảnh đại diện.
-  "gallery" jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof("gallery") = 'array'), -- ← — (bảng mới) | Bộ sưu tập ảnh.
-  "video_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề video.
-  "video_url" text NULL, -- ← — (bảng mới) | Link video.
-  "video_thumbnail" varchar(500) NULL, -- ← — (bảng mới) | Ảnh thumbnail video.
-  "document_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề tài liệu đính kèm.
-  "document_url" text NULL, -- ← — (bảng mới) | Link tài liệu.
-  "document_size" varchar(50) NULL, -- ← — (bảng mới) | Kích thước tài liệu (derived).
   "is_featured" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Dự án nổi bật.
   "published" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Trạng thái xuất bản.
   "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0), -- ← — (bảng mới) | Thứ tự hiển thị.
@@ -3477,13 +3470,6 @@ CREATE TABLE "cic_projects_en" (
   "end_year" smallint NULL CHECK ("end_year" >= "start_year"), -- ← — (bảng mới) | Năm kết thúc.
   "is_ongoing" boolean NOT NULL DEFAULT false CHECK (NOT "is_ongoing" OR "end_year" IS NULL), -- ← — (bảng mới) | Dự án đang triển khai.
   "image" varchar(500) NULL, -- ← — (bảng mới) | Ảnh đại diện.
-  "gallery" jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof("gallery") = 'array'), -- ← — (bảng mới) | Bộ sưu tập ảnh.
-  "video_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề video.
-  "video_url" text NULL, -- ← — (bảng mới) | Link video.
-  "video_thumbnail" varchar(500) NULL, -- ← — (bảng mới) | Ảnh thumbnail video.
-  "document_title" varchar(255) NULL, -- ← — (bảng mới) | Tiêu đề tài liệu đính kèm.
-  "document_url" text NULL, -- ← — (bảng mới) | Link tài liệu.
-  "document_size" varchar(50) NULL, -- ← — (bảng mới) | Kích thước tài liệu (derived).
   "is_featured" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Dự án nổi bật.
   "published" boolean NOT NULL DEFAULT false, -- ← — (bảng mới) | Trạng thái xuất bản.
   "ordering" integer NOT NULL DEFAULT 0 CHECK ("ordering" >= 0), -- ← — (bảng mới) | Thứ tự hiển thị.

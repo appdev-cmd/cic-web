@@ -10,15 +10,15 @@ import {
   Clock,
   FilePlus,
 } from 'lucide-react';
-import { FormItem, FormListTabType } from '../types';
+import { FormItem } from '../types';
 import { FORM_STATUS_LABELS } from '../../shared/constants/statusTypes';
 import { CmsIconButton } from '../../../../components/ui/CmsButton';
 import { CmsPagination } from '../../../../components/ui/CmsPagination';
+import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionCheckbox';
 
 interface FormListProps {
   forms: FormItem[];
   selectedFormIds: string[];
-  tab: FormListTabType;
   onToggleSelectAll: () => void;
   onToggleSelectForm: (id: string) => void;
   onEditForm: (form: FormItem) => void;
@@ -32,7 +32,6 @@ interface FormListProps {
 export const FormList: React.FC<FormListProps> = ({
   forms,
   selectedFormIds,
-  tab,
   onToggleSelectAll,
   onToggleSelectForm,
   onEditForm,
@@ -71,11 +70,11 @@ export const FormList: React.FC<FormListProps> = ({
           <thead>
             <tr className="bg-slate-50/80 dark:bg-slate-850 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 select-none">
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isAllSelected}
                   onChange={onToggleSelectAll}
-                  className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                  indeterminate={selectedFormIds.length > 0 && !isAllSelected}
+                  label="Chọn tất cả biểu mẫu"
                 />
               </th>
               <th className="p-3 min-w-[200px]">Tên quản trị</th>
@@ -99,11 +98,10 @@ export const FormList: React.FC<FormListProps> = ({
                 >
                   {/* Checkbox */}
                   <td className="p-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
-                    <input
-                      type="checkbox"
+                    <CmsSelectionCheckbox
                       checked={isSelected}
                       onChange={() => onToggleSelectForm(form.id)}
-                      className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                      label={`Chọn biểu mẫu ${form.adminName}`}
                     />
                   </td>
 

@@ -24,6 +24,7 @@ import {
   Copy,
   Info,
   X,
+  Upload,
 } from 'lucide-react';
 import { CtaItem, CtaFormData, CtaActionConfig, CtaStyleVariant } from './types';
 import { ActionType, ACTION_TYPES } from '../shared/constants/actionTypes';
@@ -754,7 +755,7 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
               )}
 
               {formData.actionConfig.type === 'download_file' && (
-                <div>
+                <div className="space-y-2">
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     Chọn tệp tài liệu cho phép tải xuống <span className="text-red-500">*</span>
                   </label>
@@ -769,10 +770,13 @@ export const CtaFormView: React.FC<CtaFormViewProps> = ({
                     className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-medium cursor-pointer"
                   >
                     <option value="">Chọn tệp từ Thư viện Media</option>
+                    {formData.actionConfig.fileId && !downloadFiles.some((file) => file.id === formData.actionConfig.fileId) && <option value={formData.actionConfig.fileId}>{formData.actionConfig.fileId.replace(/^uploaded_\d+_/, '')}</option>}
                     {downloadFiles.map((file) => (
                       <option key={file.id} value={file.id}>{file.title} ({file.filename})</option>
                     ))}
                   </select>
+                  <label className="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-orange-300 px-3 py-2 text-xs font-bold text-orange-600 transition-colors hover:border-orange-500 hover:bg-orange-50 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-orange-500 dark:hover:bg-orange-950/20"><Upload className="size-4" />Tải tệp mới từ máy<input type="file" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; if (file) setFormData({ ...formData, actionConfig: { ...formData.actionConfig, fileId: `uploaded_${Date.now()}_${file.name}` } }); }} className="sr-only" /></label>
+                  <p className="text-[11px] text-slate-500">Tệp tải từ máy sẽ tự được thêm vào Thư viện Media khi lưu CTA.</p>
                 </div>
               )}
 

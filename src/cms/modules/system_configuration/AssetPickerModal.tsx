@@ -80,6 +80,20 @@ export const AssetPickerModal: React.FC<AssetPickerModalProps> = ({
     }
   };
 
+  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        onSelectAsset(reader.result);
+        onClose();
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -122,14 +136,11 @@ export const AssetPickerModal: React.FC<AssetPickerModalProps> = ({
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => alert('Mở giao diện Tải tệp mới lên Thư viện Media')}
-            className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold rounded-lg border border-orange-500/20 flex items-center gap-1.5 cursor-pointer shrink-0"
-          >
+          <label className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold rounded-lg border border-orange-500/20 flex items-center gap-1.5 cursor-pointer shrink-0 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-orange-500">
             <Upload className="w-3.5 h-3.5" />
-            <span>Tải tệp mới</span>
-          </button>
+            <span>Tải tệp từ máy</span>
+            <input type="file" accept={assetType === 'image' ? 'image/*' : undefined} onChange={handleUpload} className="sr-only" />
+          </label>
         </div>
 
         {/* ASSETS GRID */}

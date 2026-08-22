@@ -117,9 +117,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
     const product = contacts.filter((c) => c.source === 'product_registration' && !c.deleted_at).length;
     const resolved = contacts.filter((c) => (c.status === 'resolved' || c.status === 'closed') && !c.deleted_at).length;
     const spam = contacts.filter((c) => (c.status === 'spam' || c.status === 'duplicate') && !c.deleted_at).length;
-    const trash = contacts.filter((c) => !!c.deleted_at).length;
-
-    return { all, unassigned, overdue, general, product, resolved, spam, trash };
+    return { all, unassigned, overdue, general, product, resolved, spam };
   }, [contacts]);
 
   // Apply tab filter on top of search/filter state
@@ -144,9 +142,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
         break;
       case 'spam':
         result = result.filter((c) => (c.status === 'spam' || c.status === 'duplicate') && !c.deleted_at);
-        break;
-      case 'trash':
-        result = result.filter((c) => !!c.deleted_at);
         break;
       case 'all':
       default:
@@ -497,7 +492,6 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
           { id: 'product', label: 'Liên hệ sản phẩm', count: counts.product },
           { id: 'resolved', label: 'Đã giải quyết', count: counts.resolved },
           { id: 'spam', label: 'Spam hoặc trùng', count: counts.spam },
-          { id: 'trash', label: 'Thùng rác', count: counts.trash },
         ]}
       />
 

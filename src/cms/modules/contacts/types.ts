@@ -120,8 +120,7 @@ export type MainTabType =
   | 'general'       // Liên hệ chung
   | 'product'       // Liên hệ sản phẩm
   | 'resolved'      // Đã giải quyết
-  | 'spam'          // Spam / Duplicate
-  | 'trash';        // Thùng rác
+  | 'spam';         // Spam / Duplicate
 
 export type SavedFilterView = 
   | 'all'

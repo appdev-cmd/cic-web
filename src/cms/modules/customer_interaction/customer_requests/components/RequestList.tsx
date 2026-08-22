@@ -17,15 +17,15 @@ import {
   Plus,
   StickyNote,
 } from 'lucide-react';
-import { CustomerRequest, RequestListTabType } from '../types';
+import { CustomerRequest } from '../types';
 import { REQUEST_STATUS_LABELS } from '../../shared/constants/statusTypes';
 import { CmsIconButton } from '../../../../components/ui/CmsButton';
 import { CmsPagination } from '../../../../components/ui/CmsPagination';
+import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionCheckbox';
 
 interface RequestListProps {
   requests: CustomerRequest[];
   selectedRequestIds: string[];
-  tab: RequestListTabType;
   onToggleSelectAll: () => void;
   onToggleSelectRequest: (id: string) => void;
   onViewRequest: (request: CustomerRequest) => void;
@@ -38,7 +38,6 @@ interface RequestListProps {
 export const RequestList: React.FC<RequestListProps> = ({
   requests,
   selectedRequestIds,
-  tab,
   onToggleSelectAll,
   onToggleSelectRequest,
   onViewRequest,
@@ -122,11 +121,11 @@ export const RequestList: React.FC<RequestListProps> = ({
           <thead>
             <tr className="bg-slate-50/80 dark:bg-slate-850 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 select-none">
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
-                <input
-                  type="checkbox"
+                <CmsSelectionCheckbox
                   checked={isAllSelected}
                   onChange={onToggleSelectAll}
-                  className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                  indeterminate={selectedRequestIds.length > 0 && !isAllSelected}
+                  label="Chọn tất cả yêu cầu khách hàng"
                 />
               </th>
               <th className="p-3 min-w-[170px]">Khách hàng</th>
@@ -158,11 +157,10 @@ export const RequestList: React.FC<RequestListProps> = ({
                 >
                   {/* Checkbox */}
                   <td className="p-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
-                    <input
-                      type="checkbox"
+                    <CmsSelectionCheckbox
                       checked={isSelected}
                       onChange={() => onToggleSelectRequest(request.id)}
-                      className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                      label={`Chọn yêu cầu của ${name}`}
                     />
                   </td>
 

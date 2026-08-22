@@ -7,7 +7,7 @@ import {
   X,
   RotateCcw,
 } from 'lucide-react';
-import { FormItem, FormListTabType, FormFilterState, FormFormData } from './types';
+import { FormItem, FormFilterState, FormFormData } from './types';
 import { FormList } from './components/FormList';
 import { FormBuilderView } from './FormBuilderView';
 import { FormPreviewModal } from './components/FormPreviewModal';
@@ -15,7 +15,6 @@ import { FormSubmissionsModal } from './components/FormSubmissionsModal';
 import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
-import { CmsTabs } from '../../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import type { CmsLocale } from '../../../data/CmsDataSource';
 import type { FormModuleData } from '../../../data/CustomerInteractionDataSource';
@@ -28,7 +27,6 @@ interface FormManagerProps {
 export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data }) => {
   const [forms, setForms] = useState<FormItem[]>(data?.forms ?? []);
   const [selectedFormIds, setSelectedFormIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<FormListTabType>('all');
   const [pageMode, setPageMode] = useState<'list' | 'builder'>('list');
   const [filter, setFilter] = useState<FormFilterState>({
     searchQuery: '',
@@ -41,16 +39,7 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
   // Filter & sort forms based on current filters
   const filteredForms = forms
     .filter((form) => {
-      // Tab filter
-      if (activeTab === 'trash') {
-        if (!form.deletedAt) return false;
-      } else {
-        if (form.deletedAt) return false;
-      }
-
-      if (activeTab === 'active' && form.status !== 'active') return false;
-      if (activeTab === 'draft' && form.status !== 'draft') return false;
-      if (activeTab === 'archived' && form.status !== 'archived') return false;
+      if (form.deletedAt) return false;
 
       // Status filter
       if (filter.status && form.status !== filter.status) return false;
@@ -118,7 +107,6 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
       sortBy: undefined,
       tab: 'all',
     });
-    setActiveTab('all');
   };
 
   // Handlers
@@ -196,38 +184,9 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
     setSubmissionsForm(form);
   };
 
-  const handleTabChange = (tab: FormListTabType) => {
-    setActiveTab(tab);
-    setSelectedFormIds([]);
-
-    // Map top tab selection directly to status filter
-    if (tab === 'active') {
-      setFilter((prev) => ({ ...prev, status: 'active' }));
-    } else if (tab === 'draft') {
-      setFilter((prev) => ({ ...prev, status: 'draft' }));
-    } else if (tab === 'archived') {
-      setFilter((prev) => ({ ...prev, status: 'archived' }));
-    } else {
-      setFilter((prev) => ({ ...prev, status: undefined }));
-    }
-  };
-
   const handleStatusFilterChange = (statusVal: string) => {
     const newStatus = statusVal ? (statusVal as FormStatus) : undefined;
     setFilter((prev) => ({ ...prev, status: newStatus }));
-
-    // Synchronize tab when status filter changes
-    if (!statusVal) {
-      setActiveTab('all');
-    } else if (statusVal === 'active') {
-      setActiveTab('active');
-    } else if (statusVal === 'draft') {
-      setActiveTab('draft');
-    } else if (statusVal === 'archived') {
-      setActiveTab('archived');
-    } else {
-      setActiveTab('all');
-    }
   };
 
   const handleSaveForm = (formData: FormFormData, action: 'draft' | 'publish') => {
@@ -301,20 +260,6 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
         }
       />
 
-      {/* Tabs */}
-      <CmsTabs
-        items={[
-          { id: 'all' as const, label: 'Tất cả', count: forms.filter((f) => !f.deletedAt).length },
-          { id: 'active' as const, label: 'Đang hoạt động', count: forms.filter((f) => !f.deletedAt && f.status === 'active').length },
-          { id: 'draft' as const, label: 'Bản nháp', count: forms.filter((f) => !f.deletedAt && f.status === 'draft').length },
-          { id: 'archived' as const, label: 'Lưu trữ', count: forms.filter((f) => !f.deletedAt && f.status === 'archived').length },
-          { id: 'trash' as const, label: 'Thùng rác', count: forms.filter((f) => f.deletedAt).length },
-        ]}
-        value={activeTab}
-        onChange={handleTabChange}
-        ariaLabel="Form status tabs"
-      />
-
       {/* Filter Bar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -343,7 +288,7 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
 
           {/* Filter Dropdowns & Controls */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs flex-wrap lg:flex-nowrap">
-            {/* Status Dropdown mapped to activeTab */}
+            {/* Status filter */}
             <select
               value={filter.status || ''}
               onChange={(e) => handleStatusFilterChange(e.target.value)}
@@ -435,7 +380,6 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
       <FormList
         forms={filteredForms}
         selectedFormIds={selectedFormIds}
-        tab={activeTab}
         onToggleSelectAll={handleToggleSelectAll}
         onToggleSelectForm={handleToggleSelectForm}
         onEditForm={handleEditForm}

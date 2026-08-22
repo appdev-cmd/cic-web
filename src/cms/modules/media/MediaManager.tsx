@@ -91,12 +91,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
 
   // Filter Assets Logic
   const filteredAssets = assets.filter((ast) => {
-    // Trash tab filter
-    if (activeTab === 'trash') {
-      if (!ast.deleted_at) return false;
-    } else {
-      if (ast.deleted_at) return false;
-    }
+    if (ast.deleted_at) return false;
 
     // Type Tabs
     if (activeTab === 'images' && ast.type !== 'image') return false;
@@ -311,7 +306,6 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
             { id: 'albums', label: 'Albums & Bộ sưu tập', count: albums.length },
             { id: 'incomplete_metadata', label: 'Cần bổ sung Meta', count: assets.filter((a) => !a.deleted_at && a.metadata_status === 'incomplete').length },
             { id: 'issues', label: 'Trùng / Vấn đề', count: issues.length },
-            { id: 'trash', label: 'Thùng rác', count: assets.filter((a) => a.deleted_at).length },
           ]}
         />
 
