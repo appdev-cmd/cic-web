@@ -21,6 +21,7 @@ import { typeNav, typeButton, typeH4, typeCaption } from '@shared/components/Typ
 import { getNavigationData } from '../features/navigation/navigationData';
 
 interface HeaderProps {
+  embedded?: boolean;
   currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
   setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   activeLink: string;
@@ -39,6 +40,7 @@ interface HeaderProps {
 }
 
 export const Header = ({ 
+  embedded = false,
   currentView, 
   setCurrentView, 
   activeLink, 
@@ -107,7 +109,7 @@ export const Header = ({
   return (
     <>
       <header 
-        className={`fixed top-0 w-full z-50 h-18 transition-all duration-300 flex items-center ${
+        className={`${embedded ? 'absolute' : 'fixed'} top-0 w-full z-50 h-18 transition-all duration-300 flex items-center ${
           isHeaderWhite 
             ? 'bg-white shadow-[0_4px_25px_rgba(0,0,0,0.06)] border-b border-slate-100' 
             : 'bg-transparent'

@@ -1,145 +1,32 @@
 import React, { useState } from 'react';
-import { X, Monitor, Tablet, Smartphone, Globe } from 'lucide-react';
-import { ServiceItem } from './types';
+import { Monitor, Smartphone, Tablet, X } from 'lucide-react';
+import { ServicesView } from '../../../web/components/ServicesView';
+import type { ServiceDetail } from '../../../web/features/services/types';
+import { PublicSitePreviewFooter, PublicSitePreviewHeader } from '../../components/PublicSitePreviewChrome';
+import { ResponsiveWebsitePreviewFrame } from '../../components/ResponsiveWebsitePreviewFrame';
+import type { ServiceItem } from './types';
 
-interface ServicePreviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  service: ServiceItem | null;
-}
+interface Props { isOpen: boolean; onClose: () => void; service: ServiceItem | null }
 
-export const ServicePreviewModal: React.FC<ServicePreviewModalProps> = ({
-  isOpen,
-  onClose,
-  service,
-}) => {
-  if (!isOpen || !service) return null;
-
+export const ServicePreviewModal: React.FC<Props> = ({ isOpen, onClose, service }) => {
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [activeLocale, setActiveLocale] = useState<'vi' | 'en'>('vi');
-
+  if (!isOpen || !service) return null;
+  const previewService: ServiceDetail = { id: `cms-preview-${service.id}`, title: service.title, tagline: service.summary, shortDesc: service.summary, category: 'Dịch vụ CIC', image: service.thumbnail_url, htmlContent: service.description };
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/80 backdrop-blur-xs flex flex-col">
-      {/* Top Controls Bar */}
-      <div className="h-14 px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
+    <div className="fixed inset-0 z-[90] flex flex-col bg-slate-950/85" role="dialog" aria-modal="true" aria-label="Xem trước dịch vụ">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-900 px-5 text-white">
+        <div><p className="text-xs font-bold">Xem trước trên Website</p><p className="text-[10px] text-slate-400">/dich-vu/{service.slug}</p></div>
         <div className="flex items-center gap-3">
-          <span className="font-bold text-xs bg-orange-600 px-2.5 py-1 rounded-md text-white">
-            PREVIEW LIVE
-          </span>
-          <span className="text-xs text-slate-300 font-mono truncate max-w-sm">
-            https://cic.com.vn/dich-vu/{service.slug}?lang={activeLocale}
-          </span>
-        </div>
-
-        {/* Viewport controls */}
-        <div className="flex items-center gap-1 bg-slate-800 p-1 rounded-lg">
-          <button
-            onClick={() => setDevice('desktop')}
-            className={`p-1.5 rounded-md text-xs flex items-center gap-1 transition-colors ${
-              device === 'desktop' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-            title="Desktop View"
-          >
-            <Monitor className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setDevice('tablet')}
-            className={`p-1.5 rounded-md text-xs flex items-center gap-1 transition-colors ${
-              device === 'tablet' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-            title="Tablet View"
-          >
-            <Tablet className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setDevice('mobile')}
-            className={`p-1.5 rounded-md text-xs flex items-center gap-1 transition-colors ${
-              device === 'mobile' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-            title="Mobile View"
-          >
-            <Smartphone className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Locale & Close */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-xs">
-            <Globe className="w-4 h-4 text-slate-400" />
-            <button
-              onClick={() => setActiveLocale('vi')}
-              className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                activeLocale === 'vi' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              VI
-            </button>
-            <button
-              onClick={() => setActiveLocale('en')}
-              className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                activeLocale === 'en' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              EN
-            </button>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex rounded-lg bg-slate-800 p-1">{([['desktop', Monitor], ['tablet', Tablet], ['mobile', Smartphone]] as const).map(([value, Icon]) => <button key={value} type="button" onClick={() => setDevice(value)} className={`rounded-md p-1.5 ${device === value ? 'bg-orange-600' : 'text-slate-400'}`} aria-label={`Xem ${value}`}><Icon className="size-4" /></button>)}</div>
+          <button type="button" onClick={onClose} className="rounded-lg p-2 hover:bg-slate-800" aria-label="Đóng xem trước"><X className="size-5" /></button>
         </div>
       </div>
-
-      {/* Main Container Simulation */}
-      <div className="flex-1 bg-slate-950 overflow-auto p-6 flex justify-center items-start">
-        <div
-          className={`bg-white text-slate-900 shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 ${
-            device === 'desktop'
-              ? 'w-full max-w-5xl my-4 min-h-[700px]'
-              : device === 'tablet'
-              ? 'w-[768px] my-4 min-h-[700px]'
-              : 'w-[375px] my-4 min-h-[667px]'
-          }`}
-        >
-          {/* Header Banner */}
-          <div className="relative h-64 w-full bg-slate-900 overflow-hidden">
-            <img
-              src={service.thumbnail_url}
-              alt={service.title}
-              className="w-full h-full object-cover opacity-60"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent flex items-end p-8">
-              <div className="space-y-2 text-white max-w-2xl">
-                <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white">
-                  Dịch vụ CIC
-                </span>
-                <h1 className="text-xl md:text-2xl font-bold leading-tight">
-                  {service.title}
-                </h1>
-              </div>
-            </div>
-          </div>
-
-          {/* Body Content */}
-          <div className="p-8 space-y-8">
-            {/* Short summary card */}
-            <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl text-slate-800 text-sm leading-relaxed font-medium">
-              {service.summary}
-            </div>
-
-            {/* Main description */}
-            <div className="prose prose-slate max-w-none text-sm space-y-4">
-              <h3 className="text-base font-bold text-slate-900 border-b pb-2">
-                Chi tiết dịch vụ
-              </h3>
-              <div dangerouslySetInnerHTML={{ __html: service.description }} />
-            </div>
-
-          </div>
-        </div>
+      <div className="min-h-0 flex-1 overflow-auto overscroll-contain bg-slate-800 p-5">
+        <ResponsiveWebsitePreviewFrame device={device}>
+          <PublicSitePreviewHeader view="services" />
+          <ServicesView initialServiceId={previewService.id} previewService={previewService} onNavigateHome={() => undefined} />
+          <PublicSitePreviewFooter />
+        </ResponsiveWebsitePreviewFrame>
       </div>
     </div>
   );

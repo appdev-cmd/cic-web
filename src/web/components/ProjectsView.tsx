@@ -38,6 +38,7 @@ interface ProjectsViewProps {
   onNavigateToProduct: (productId: number) => void;
   onNavigateHome: () => void;
   onOpenConsultation?: () => void;
+  previewProject?: DetailedProject;
 }
 
 export function ProjectsView({ 
@@ -45,9 +46,13 @@ export function ProjectsView({
   onNavigateToService, 
   onNavigateToProduct, 
   onNavigateHome,
-  onOpenConsultation
+  onOpenConsultation,
+  previewProject,
 }: ProjectsViewProps) {
-  const projectsData = useMemo(getProjectsData, []);
+  const projectsData = useMemo(() => {
+    const projects = getProjectsData();
+    return previewProject ? [previewProject, ...projects.filter((item) => item.id !== previewProject.id)] : projects;
+  }, [previewProject]);
   
   const [activeProjectId, setActiveProjectId] = useState<string | null>(initialProjectId);
   const [searchQuery, setSearchQuery] = useState('');

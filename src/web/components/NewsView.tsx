@@ -69,6 +69,7 @@ interface NewsViewProps {
   onNavigateHome: () => void;
   onNavigateToPrivacy?: () => void;
   onOpenConsultation?: () => void;
+  previewNews?: DetailedNewsItem;
 }
 
 const renderFormattedText = (text: string) => {
@@ -111,18 +112,20 @@ export function NewsView({
   onNavigateToEvent,
   onNavigateHome,
   onNavigateToPrivacy,
-  onOpenConsultation
+  onOpenConsultation,
+  previewNews,
 }: NewsViewProps) {
   const {
-    items: newsData,
+    items: sourceNewsData,
     relatedProducts: productsData,
     relatedProjects: projectsData,
     relatedEvents: eventsData,
   } = React.useMemo(getNewsData, []);
+  const newsData = React.useMemo(() => previewNews ? [previewNews, ...sourceNewsData.filter((item) => item.id !== previewNews.id)] : sourceNewsData, [previewNews, sourceNewsData]);
   
   // Navigation states
   const [activeCategory, setActiveCategory] = useState<'all' | 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder'>('all');
-  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(previewNews?.id || null);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');

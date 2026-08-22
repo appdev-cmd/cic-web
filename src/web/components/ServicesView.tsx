@@ -38,6 +38,7 @@ interface ServicesViewProps {
   initialServiceId?: string | null;
   onNavigateHome?: () => void;
   onOpenConsultation?: () => void;
+  previewService?: ServiceDetail;
 }
 
 const cleanCmsHtml = (htmlString: string): string => {
@@ -90,8 +91,11 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
   return service.tagline || service.title;
 };
 
-export const ServicesView = ({ initialServiceId = null, onNavigateHome }: ServicesViewProps) => {
-  const { services: servicesData } = useMemo(getServicesData, []);
+export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewService }: ServicesViewProps) => {
+  const servicesData = useMemo(() => {
+    const services = getServicesData().services;
+    return previewService ? [previewService, ...services.filter((item) => item.id !== previewService.id)] : services;
+  }, [previewService]);
   const { products: productsData } = useMemo(getProductsData, []);
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
   const [formSubmitted, setFormSubmitted] = useState(false);

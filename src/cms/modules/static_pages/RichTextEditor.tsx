@@ -91,12 +91,14 @@ function UploadAdapterPlugin(editor: Editor) {
 }
 
 type CmsReferenceType = 'cta' | 'form';
+type CmsReferenceAlignment = 'left' | 'center' | 'right' | 'full';
 
 interface CmsReferenceAttributes extends Record<string, unknown> {
   referenceType: CmsReferenceType;
   referenceId: string;
   label: string;
   description: string;
+  alignment: CmsReferenceAlignment;
 }
 
 const YOUTUBE_EMBED_SOURCE = /^https:\/\/(?:www\.)?(?:youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)[A-Za-z0-9_-]+(?:\?[^\s"<>]*)?$/;
@@ -178,7 +180,7 @@ class CmsReferencePlugin extends Plugin {
 
     editor.model.schema.register('cmsReference', {
       inheritAllFrom: '$blockObject',
-      allowAttributes: ['referenceType', 'referenceId', 'label', 'description'],
+      allowAttributes: ['referenceType', 'referenceId', 'label', 'description', 'alignment'],
     });
 
     editor.conversion.for('upcast').elementToElement({
@@ -191,8 +193,9 @@ class CmsReferencePlugin extends Plugin {
         const referenceId = viewElement.getAttribute(`data-${referenceType}-id`) || '';
         const label = viewElement.getAttribute('data-reference-label') || '';
         const description = viewElement.getAttribute('data-reference-description') || '';
+        const alignment = (viewElement.getAttribute('data-reference-alignment') || (referenceType === 'cta' ? 'center' : 'full')) as CmsReferenceAlignment;
 
-        return writer.createElement('cmsReference', { referenceType, referenceId, label, description });
+        return writer.createElement('cmsReference', { referenceType, referenceId, label, description, alignment });
       },
       converterPriority: 'high',
     });
@@ -204,12 +207,14 @@ class CmsReferencePlugin extends Plugin {
         const referenceId = String(modelElement.getAttribute('referenceId') || '');
         const label = String(modelElement.getAttribute('label') || '');
         const description = String(modelElement.getAttribute('description') || '');
+        const alignment = String(modelElement.getAttribute('alignment') || (referenceType === 'cta' ? 'center' : 'full'));
         const container = writer.createContainerElement('div', {
-          class: `cms-rich-reference cms-rich-${referenceType}`,
+          class: `cms-rich-reference cms-rich-${referenceType} cms-rich-align-${alignment}`,
           'data-cms-reference': referenceType,
           [`data-${referenceType}-id`]: referenceId,
           'data-reference-label': label,
           'data-reference-description': description,
+          'data-reference-alignment': alignment,
         });
         writer.insert(writer.createPositionAt(container, 0), writer.createText(label));
 
@@ -224,11 +229,13 @@ class CmsReferencePlugin extends Plugin {
         const referenceId = String(modelElement.getAttribute('referenceId') || '');
         const label = String(modelElement.getAttribute('label') || '');
         const description = String(modelElement.getAttribute('description') || '');
+        const alignment = String(modelElement.getAttribute('alignment') || (referenceType === 'cta' ? 'center' : 'full'));
         const visibleText = description ? `${label} · ${description}` : label;
         const container = writer.createContainerElement('div', {
-          class: `cms-rich-reference cms-rich-${referenceType}`,
+          class: `cms-rich-reference cms-rich-${referenceType} cms-rich-align-${alignment}`,
           'data-cms-reference': referenceType,
           [`data-${referenceType}-id`]: referenceId,
+          'data-reference-alignment': alignment,
         });
         writer.insert(writer.createPositionAt(container, 0), writer.createText(visibleText));
 
@@ -258,6 +265,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const [selectedCtaId, setSelectedCtaId] = useState('');
   const [selectedFormId, setSelectedFormId] = useState('');
   const [referencePicker, setReferencePicker] = useState<CmsReferenceType | null>(null);
+  const [referenceAlignment, setReferenceAlignment] = useState<CmsReferenceAlignment>('center');
 
   // Synchronize when the external value changes and differs from the last emitted editor data
   useEffect(() => {
@@ -278,6 +286,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const activeForms = useMemo(() => getDemoFormModuleData('vi').forms.filter((item) => item.status === 'active'), []);
   const previewCta = activeCtas.find((item) => item.id === selectedCtaId) || null;
   const previewForm = activeForms.find((item) => item.id === selectedFormId) || null;
+  const alignmentLabel: Record<CmsReferenceAlignment, string> = { left: 'Trái', center: 'Giữa', right: 'Phải', full: 'Toàn chiều rộng' };
+  const previewAlignmentClass = referenceAlignment === 'left' ? 'mr-auto' : referenceAlignment === 'right' ? 'ml-auto' : referenceAlignment === 'center' ? 'mx-auto' : 'w-full';
 
   const config = useMemo(() => ({
     licenseKey: 'GPL',
@@ -348,6 +358,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       referenceId: cta.id,
       label: cta.displayText,
       description: cta.adminName,
+      alignment: referenceAlignment,
     });
     setSelectedCtaId('');
     setReferencePicker(null);
@@ -361,6 +372,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       referenceId: form.id,
       label: form.title,
       description: form.adminName,
+      alignment: referenceAlignment,
     });
     setSelectedFormId('');
     setReferencePicker(null);
@@ -394,10 +406,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
 
       <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <button type="button" onClick={() => { setSelectedCtaId((current) => current || activeCtas[0]?.id || ''); setReferencePicker('cta'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white"><Megaphone className="h-4 w-4" />Chèn CTA</button>
+          <button type="button" onClick={() => { setSelectedCtaId((current) => current || activeCtas[0]?.id || ''); setReferenceAlignment('center'); setReferencePicker('cta'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white"><Megaphone className="h-4 w-4" />Chèn CTA</button>
         </div>
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <button type="button" onClick={() => { setSelectedFormId((current) => current || activeForms[0]?.id || ''); setReferencePicker('form'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white dark:bg-slate-600"><FileInput className="h-4 w-4" />Chèn Form</button>
+          <button type="button" onClick={() => { setSelectedFormId((current) => current || activeForms[0]?.id || ''); setReferenceAlignment('full'); setReferencePicker('form'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white dark:bg-slate-600"><FileInput className="h-4 w-4" />Chèn Form</button>
         </div>
       </div>
 
@@ -407,8 +419,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
             <div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"><div><p className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Chọn và xem trước</p><h3 id="reference-preview-title" className="mt-1 text-lg font-bold dark:text-white">{referencePicker === 'cta' ? 'CTA' : 'Biểu mẫu'}</h3></div><button type="button" aria-label="Đóng" onClick={() => setReferencePicker(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X className="h-5 w-5" /></button></div>
             <div className="space-y-5 p-5">
               {referencePicker === 'cta' ? <select aria-label="Chọn CTA để xem trước" value={selectedCtaId} onChange={(event) => setSelectedCtaId(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"><option value="">Chọn CTA từ module CTA</option>{activeCtas.map((cta) => <option key={cta.id} value={cta.id}>{cta.adminName} · {cta.displayText}</option>)}</select> : <select aria-label="Chọn biểu mẫu để xem trước" value={selectedFormId} onChange={(event) => setSelectedFormId(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-900"><option value="">Chọn biểu mẫu từ module Biểu mẫu</option>{activeForms.map((form) => <option key={form.id} value={form.id}>{form.adminName} · {form.title}</option>)}</select>}
-              {referencePicker === 'cta' && previewCta && <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-800"><p className="mb-4 text-xs font-bold text-slate-500">{previewCta.adminName}</p><button type="button" className={`inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold ${previewCta.styleVariant === 'outline' ? 'border border-orange-600 text-orange-600' : previewCta.styleVariant === 'secondary' ? 'bg-slate-800 text-white' : previewCta.styleVariant === 'gradient' ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white' : 'bg-orange-600 text-white'}`}><Megaphone className="h-4 w-4" />{previewCta.displayText}</button><p className="mt-4 text-xs text-slate-500">{previewCta.description}</p></div>}
-              {referencePicker === 'form' && previewForm && <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800"><div><h4 className="font-bold dark:text-white">{previewForm.title}</h4><p className="mt-1 text-xs text-slate-500">{previewForm.description}</p></div>{[...previewForm.fields].filter((field) => field.fieldType !== 'hidden').sort((a, b) => a.position - b.position).map((field) => <div key={field.id}><label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</label>{field.fieldType === 'textarea' ? <textarea disabled rows={3} placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" /> : <input disabled type="text" placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" />}</div>)}<button type="button" disabled className="w-full rounded-xl bg-orange-600 px-4 py-3 text-xs font-bold text-white">{previewForm.submitConfig.submitButtonText || 'Gửi thông tin'}</button></div>}
+              <div><p className="mb-2 text-xs font-bold text-slate-700 dark:text-slate-200">Căn chỉnh hiển thị</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{(['left', 'center', 'right', 'full'] as CmsReferenceAlignment[]).map((alignment) => <button key={alignment} type="button" onClick={() => setReferenceAlignment(alignment)} className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${referenceAlignment === alignment ? 'border-orange-600 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300' : 'border-slate-300 text-slate-600 hover:border-slate-400 dark:border-slate-700 dark:text-slate-300'}`}>{alignmentLabel[alignment]}</button>)}</div><p className="mt-2 text-[11px] text-slate-500">CTA mặc định căn giữa; biểu mẫu mặc định chiếm toàn bộ chiều rộng vùng nội dung.</p></div>
+              {referencePicker === 'cta' && previewCta && <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 dark:border-slate-700 dark:bg-slate-800"><div className={`${previewAlignmentClass} ${referenceAlignment === 'full' ? '' : 'w-fit'} text-center`}><p className="mb-4 text-xs font-bold text-slate-500">{previewCta.adminName}</p><button type="button" className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold ${referenceAlignment === 'full' ? 'w-full' : ''} ${previewCta.styleVariant === 'outline' ? 'border border-orange-600 text-orange-600' : previewCta.styleVariant === 'secondary' ? 'bg-slate-800 text-white' : previewCta.styleVariant === 'gradient' ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white' : 'bg-orange-600 text-white'}`}><Megaphone className="h-4 w-4" />{previewCta.displayText}</button><p className="mt-4 text-xs text-slate-500">{previewCta.description}</p></div></div>}
+              {referencePicker === 'form' && previewForm && <div className={`${previewAlignmentClass} ${referenceAlignment === 'full' ? '' : 'max-w-md'} space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800`}><div><h4 className="font-bold dark:text-white">{previewForm.title}</h4><p className="mt-1 text-xs text-slate-500">{previewForm.description}</p></div>{[...previewForm.fields].filter((field) => field.fieldType !== 'hidden').sort((a, b) => a.position - b.position).map((field) => <div key={field.id}><label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">{field.label}{field.isRequired && <span className="ml-1 text-red-500">*</span>}</label>{field.fieldType === 'textarea' ? <textarea disabled rows={3} placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" /> : <input disabled type="text" placeholder={field.placeholder} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900" />}</div>)}<button type="button" disabled className="w-full rounded-xl bg-orange-600 px-4 py-3 text-xs font-bold text-white">{previewForm.submitConfig.submitButtonText || 'Gửi thông tin'}</button></div>}
               {((referencePicker === 'cta' && !previewCta) || (referencePicker === 'form' && !previewForm)) && <p className="rounded-xl bg-slate-100 p-6 text-center text-sm text-slate-500 dark:bg-slate-800">Chưa có mục khả dụng để xem trước.</p>}
             </div>
             <div className="flex justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-700"><button type="button" onClick={() => setReferencePicker(null)} className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold dark:border-slate-600">Đóng</button><button type="button" disabled={referencePicker === 'cta' ? !previewCta : !previewForm} onClick={() => referencePicker === 'cta' ? insertCta() : insertForm()} className="rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{referencePicker === 'cta' ? 'Chèn CTA này' : 'Chèn biểu mẫu này'}</button></div>

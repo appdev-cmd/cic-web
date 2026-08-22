@@ -95,6 +95,7 @@ const PROVINCES = [
 
 interface ProductsViewProps {
   key?: string | number;
+  previewProduct?: Product;
 }
 
 const PRODUCT_TYPES = ['Phần mềm', 'Thiết bị', 'Giải pháp tích hợp', 'Khác'];
@@ -114,8 +115,11 @@ const getProductType = (product: Product): string => {
   return 'Khác';
 };
 
-export function ProductsView(_props?: ProductsViewProps) {
-  const { products: productsData } = useMemo(getProductsData, []);
+export function ProductsView({ previewProduct }: ProductsViewProps = {}) {
+  const productsData = useMemo(() => {
+    const products = getProductsData().products;
+    return previewProduct ? [previewProduct, ...products.filter((item) => item.id !== previewProduct.id)] : products;
+  }, [previewProduct]);
   const [search, setSearch] = useState('');
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -157,7 +161,7 @@ export function ProductsView(_props?: ProductsViewProps) {
   // Interactive UI states
   const [modalType, setModalType] = useState<'contact' | 'buy' | 'download' | null>(null);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(previewProduct || null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [downloadFormSubmitted, setDownloadFormSubmitted] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);

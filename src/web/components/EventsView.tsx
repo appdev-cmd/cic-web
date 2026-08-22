@@ -45,6 +45,7 @@ interface EventsViewProps {
   onNavigateToService?: (serviceId: string) => void;
   onNavigateToProduct?: (productId: string) => void;
   onOpenConsultation?: () => void;
+  previewEvent?: EventItem;
 }
 
 const cleanEventHtml = (html: string) => {
@@ -61,8 +62,10 @@ export const EventsView: React.FC<EventsViewProps> = ({
   initialIsRegistering,
   onNavigateToProduct,
   onOpenConsultation,
+  previewEvent,
 }) => {
-  const { events: eventsData, relatedProducts: productsData } = React.useMemo(getEventsData, []);
+  const { events: sourceEvents, relatedProducts: productsData } = React.useMemo(getEventsData, []);
+  const eventsData = React.useMemo(() => previewEvent ? [previewEvent, ...sourceEvents.filter((item) => item.id !== previewEvent.id)] : sourceEvents, [previewEvent, sourceEvents]);
   // Navigation & details state
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
 
