@@ -69,6 +69,7 @@ import { getLegacyAboutCapacityContent } from '@shared/page-content/legacyPageCo
 import { bindElement } from '@shared/visual-editing/bindElement';
 import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
+import { GlobalPartnerMap } from './GlobalPartnerMap';
 
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';
@@ -845,6 +846,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     </div>
                   </div>
                   
+                  {/* Global Technology Partner Network Map Component */}
+                  <div className="w-full mb-12">
+                    <GlobalPartnerMap />
+                  </div>
+
                   <a
                     data-page-builder-section-key="about.contact_cta"
                     href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf" 
