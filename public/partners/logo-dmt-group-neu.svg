@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 115.5 113.4" style="enable-background:new 0 0 115.5 113.4;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#001ED2;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+	.st2{display:none;}
+	.st3{display:inline;fill:none;stroke:#00B3FF;stroke-width:0.25;}
+</style>
+<g id="TUeV_NORD">
+	<rect x="0" class="st0" width="115.5" height="113.4"></rect>
+	<path class="st1" d="M21,81.6h-6.9v6.9H21V81.6z M60.3,95.9h-3L50.7,84v15.3h-6.9V70.9h6.3l8.7,16l8.8-16h6.2v28.3h-6.9V83.9   L60.3,95.9z M21,77.1H25c4.5,0,7.8,3.5,7.8,8c0,4.5-3.5,8-7.8,8H21h-6.9v6.2h11.2c8.3,0,14.6-6.3,14.6-14.2   c0-7.9-6.3-14.2-14.6-14.2H14.2v6.2H21z M101.2,70.9v6.2h-8.6v22.2h-6.9V77.1h-8.6v-6.2H101.2z"></path>
+</g>
+<g id="Grid" class="st2">
+	<line class="st3" x1="115.5" y1="56.7" x2="0" y2="56.7"></line>
+	<line class="st3" x1="115.5" y1="14.2" x2="0" y2="14.2"></line>
+	<line class="st3" x1="115.5" y1="70.9" x2="0" y2="70.9"></line>
+	<line class="st3" x1="115.5" y1="76.5" x2="0" y2="76.5"></line>
+	<line class="st3" x1="115.5" y1="93.5" x2="0" y2="93.5"></line>
+	<line class="st3" x1="115.5" y1="28.3" x2="0" y2="28.3"></line>
+	<line class="st3" x1="115.5" y1="87.9" x2="0" y2="87.9"></line>
+	<line class="st3" x1="115.5" y1="82.2" x2="0" y2="82.2"></line>
+	<line class="st3" x1="115.5" y1="0" x2="0" y2="0"></line>
+	<line class="st3" x1="115.5" y1="113.4" x2="0" y2="113.4"></line>
+	<line class="st3" x1="115.5" y1="42.5" x2="0" y2="42.5"></line>
+	<line class="st3" x1="115.5" y1="99.2" x2="0" y2="99.2"></line>
+	<line class="st3" x1="14.2" y1="0" x2="14.2" y2="113.4"></line>
+	<line class="st3" x1="101.3" y1="0" x2="101.3" y2="113.4"></line>
+</g>
+</svg>

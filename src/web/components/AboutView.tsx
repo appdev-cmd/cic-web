@@ -63,6 +63,7 @@ import {
 } from '../data/aboutData';
 
 import { SectionHeader } from '@shared/components/Typography';
+import { GlobalPartnerMap } from './GlobalPartnerMap';
 
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';
@@ -810,6 +811,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                         </p>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Global Technology Partner Network Map Component */}
+                  <div className="w-full mb-12">
+                    <GlobalPartnerMap />
                   </div>
                   
                   <a 

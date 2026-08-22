@@ -1,0 +1,789 @@
+[
+  {
+    "stt": 1,
+    "name": "PYTHA Lab",
+    "country": "Đức",
+    "url": "https://www.pytha.com/",
+    "status": 1.0,
+    "matched_files": [
+      "1.png"
+    ]
+  },
+  {
+    "stt": 2,
+    "name": "Opera Software Company Inc",
+    "country": "Italia",
+    "url": "https://www.operacompany.com/",
+    "status": 1.0,
+    "matched_files": [
+      "2.png"
+    ]
+  },
+  {
+    "stt": 3,
+    "name": "Lantek",
+    "country": "Mỹ",
+    "url": "https://www.lantek.com/us",
+    "status": 1.0,
+    "matched_files": [
+      "3.png"
+    ]
+  },
+  {
+    "stt": 4,
+    "name": "Emmegi",
+    "country": "Italia",
+    "url": "https://www.emmegi.com/en/home",
+    "status": 1.0,
+    "matched_files": [
+      "4.png"
+    ]
+  },
+  {
+    "stt": 5,
+    "name": "Roomvo",
+    "country": "Mỹ",
+    "url": "https://get.roomvo.com/",
+    "status": 1.0,
+    "matched_files": [
+      "5.png"
+    ]
+  },
+  {
+    "stt": 6,
+    "name": "Seequent - Bentley System",
+    "country": "Canada",
+    "url": "https://www.seequent.com/",
+    "status": 1.0,
+    "matched_files": [
+      "logo_seequent.png",
+      "65.logo_seequent.png"
+    ]
+  },
+  {
+    "stt": 7,
+    "name": "Maptek",
+    "country": "Australia",
+    "url": "https://www.maptek.com/",
+    "status": 1.0,
+    "matched_files": [
+      "7.png"
+    ]
+  },
+  {
+    "stt": 8,
+    "name": "Deswik",
+    "country": "Australia",
+    "url": "https://www.deswik.com/",
+    "status": 1.0,
+    "matched_files": [
+      "6763e884c6186cfbb7d64c14_Deswik Logo Blue CMYK.png"
+    ]
+  },
+  {
+    "stt": 9,
+    "name": "Metsims",
+    "country": "Vương Quốc Anh",
+    "url": "https://metsims.com/",
+    "status": 1.0,
+    "matched_files": [
+      "9.png"
+    ]
+  },
+  {
+    "stt": 10,
+    "name": "PRé Sustainability",
+    "country": "Hà Lan",
+    "url": "https://pre-sustainability.com/",
+    "status": null,
+    "matched_files": [
+      "10.png"
+    ]
+  },
+  {
+    "stt": 11,
+    "name": "Gigaton",
+    "country": "Vương Quốc Anh",
+    "url": "https://gigaton.co/",
+    "status": null,
+    "matched_files": [
+      "11.png"
+    ]
+  },
+  {
+    "stt": 12,
+    "name": "Metron",
+    "country": "Australia",
+    "url": "https://www.metron.energy/",
+    "status": null,
+    "matched_files": [
+      "12.png"
+    ]
+  },
+  {
+    "stt": 13,
+    "name": "EcoAct",
+    "country": "Vương Quốc Anh",
+    "url": "https://eco-act.com/",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 14,
+    "name": "Rock Mapper",
+    "country": "Quốc tế",
+    "url": "https://www.rockmapper.net/",
+    "status": null,
+    "matched_files": [
+      "14.jpg"
+    ]
+  },
+  {
+    "stt": 15,
+    "name": "Flyability",
+    "country": "Thụy Sĩ",
+    "url": "https://www.flyability.com/",
+    "status": null,
+    "matched_files": [
+      "15.png"
+    ]
+  },
+  {
+    "stt": 16,
+    "name": "Turkeco",
+    "country": "Thỗ Nhĩ Kỳ",
+    "url": "https://turkeco.com/en/",
+    "status": null,
+    "matched_files": [
+      "16.png"
+    ]
+  },
+  {
+    "stt": 17,
+    "name": "Erke Tasarim",
+    "country": "Thỗ Nhĩ Kỳ",
+    "url": "https://erketasarim.com/en",
+    "status": null,
+    "matched_files": [
+      "17.png"
+    ]
+  },
+  {
+    "stt": 18,
+    "name": "STX",
+    "country": "Mỹ",
+    "url": "https://stxgroup.com/",
+    "status": null,
+    "matched_files": [
+      "18.png",
+      "67. STX.png"
+    ]
+  },
+  {
+    "stt": 19,
+    "name": "Instral",
+    "country": "Hàn Quốc",
+    "url": "",
+    "status": 1.0,
+    "matched_files": [
+      "19.png"
+    ]
+  },
+  {
+    "stt": 20,
+    "name": "CSI",
+    "country": "Mỹ",
+    "url": "https://www.csiamerica.com/",
+    "status": 1.0,
+    "matched_files": [
+      "63.CSI.png",
+      "68.logo-csiamerica.svg",
+      "csi-product.png",
+      "logo-csiamerica.svg"
+    ]
+  },
+  {
+    "stt": 22,
+    "name": "Bentley system",
+    "country": "Mỹ",
+    "url": "https://www.bentley.com/",
+    "status": 1.0,
+    "matched_files": [
+      "22.png",
+      "BentleyLOGO_BLK_complete.png",
+      "openflows-software-logo-white-100X100.svg"
+    ]
+  },
+  {
+    "stt": 23,
+    "name": "Gstarsoft",
+    "country": "Trung Quốc",
+    "url": "https://www.gstarcad.net/",
+    "status": 1.0,
+    "matched_files": [
+      "23.png",
+      "gstarcad-logo.png"
+    ]
+  },
+  {
+    "stt": 24,
+    "name": "RISA",
+    "country": "Mỹ",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "24.png"
+    ]
+  },
+  {
+    "stt": 25,
+    "name": "Prokon",
+    "country": "Ireland",
+    "url": "https://prokon.com/",
+    "status": 1.0,
+    "matched_files": [
+      "25.png",
+      "prokon.svg"
+    ]
+  },
+  {
+    "stt": 26,
+    "name": "Glodon - Cubicost",
+    "country": "China",
+    "url": "https://asia.glodon.com/cubicost",
+    "status": 1.0,
+    "matched_files": [
+      "26.png",
+      "Glodon - Cubicost.svg"
+    ]
+  },
+  {
+    "stt": 27,
+    "name": "Allplan",
+    "country": "Đức",
+    "url": "https://www.allplan.com/index.php?id=13001",
+    "status": 1.0,
+    "matched_files": [
+      "27.png",
+      "allplan-logo.svg"
+    ]
+  },
+  {
+    "stt": 28,
+    "name": "IDEA Statica",
+    "country": "Séc",
+    "url": "https://www.ideastatica.com/vi",
+    "status": 1.0,
+    "matched_files": [
+      "28.png"
+    ]
+  },
+  {
+    "stt": 29,
+    "name": "MIDAS",
+    "country": "Hàn quốc",
+    "url": "https://www.midasuser.com/en",
+    "status": null,
+    "matched_files": [
+      "29.png"
+    ]
+  },
+  {
+    "stt": 30,
+    "name": "Rocscience",
+    "country": "Canada",
+    "url": "https://www.rocscience.com/",
+    "status": null,
+    "matched_files": [
+      "rocscience-logo-primary-for-website2.png"
+    ]
+  },
+  {
+    "stt": 31,
+    "name": "Deltares",
+    "country": "Hà Lan",
+    "url": "https://www.deltares.nl/en",
+    "status": 1.0,
+    "matched_files": [
+      "31.png"
+    ]
+  },
+  {
+    "stt": 32,
+    "name": "MARIN",
+    "country": "Hà Lan",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "32.png"
+    ]
+  },
+  {
+    "stt": 33,
+    "name": "Graitec",
+    "country": "Pháp",
+    "url": "https://graitec.com/uk/",
+    "status": 1.0,
+    "matched_files": [
+      "33.png",
+      "logo-almacam.svg"
+    ]
+  },
+  {
+    "stt": 34,
+    "name": "Thermoflow",
+    "country": "Mỹ",
+    "url": "https://www.thermoflow.com/",
+    "status": null,
+    "matched_files": [
+      "34.png"
+    ]
+  },
+  {
+    "stt": 35,
+    "name": "Hexagon",
+    "country": "Thụy Điển",
+    "url": "https://hexagon.com/",
+    "status": 1.0,
+    "matched_files": [
+      "35.png",
+      "61.Hexagon_Signage_Standard_PMS_Logo.png",
+      "hexagon-01.png",
+      "hexagon.svg"
+    ]
+  },
+  {
+    "stt": 36,
+    "name": "Cype",
+    "country": "Tây Ban Nha",
+    "url": "https://info.cype.com/en/",
+    "status": null,
+    "matched_files": [
+      "36.png",
+      "62.cype_plano-3.png",
+      "CYPE-Logo_200px.webp"
+    ]
+  },
+  {
+    "stt": 37,
+    "name": "PTV",
+    "country": "Đức",
+    "url": "https://www.ptvgroup.com/en",
+    "status": 1.0,
+    "matched_files": [
+      "37.png",
+      "PTV Group (1).png",
+      "PTV Group.png",
+      "ptv group1.png"
+    ]
+  },
+  {
+    "stt": 38,
+    "name": "RPS",
+    "country": "Quốc tế",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "38.png"
+    ]
+  },
+  {
+    "stt": 39,
+    "name": "Piletest",
+    "country": "Israel",
+    "url": "https://www.piletest.com/",
+    "status": 1.0,
+    "matched_files": [
+      "39.png"
+    ]
+  },
+  {
+    "stt": 40,
+    "name": "Zx Lidar",
+    "country": "Anh",
+    "url": "https://www.zxlidars.com/",
+    "status": 1.0,
+    "matched_files": [
+      "40.png"
+    ]
+  },
+  {
+    "stt": 41,
+    "name": "AQS",
+    "country": "Thụy Điển",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "aqsystem.png"
+    ]
+  },
+  {
+    "stt": 42,
+    "name": "Kritikal",
+    "country": "Hoa Kỳ",
+    "url": "https://kritikalsolutions.com/",
+    "status": 1.0,
+    "matched_files": [
+      "42.png"
+    ]
+  },
+  {
+    "stt": 43,
+    "name": "Sunrise Systems",
+    "country": "Hoa Kỳ",
+    "url": "https://www.sunrisesys.com/",
+    "status": null,
+    "matched_files": [
+      "43.png",
+      "sunrise-logo.png"
+    ]
+  },
+  {
+    "stt": 44,
+    "name": "SoftInWay",
+    "country": "Hoa Kỳ",
+    "url": "https://www.softinway.com/",
+    "status": null,
+    "matched_files": [
+      "44.png"
+    ]
+  },
+  {
+    "stt": 45,
+    "name": "TRL",
+    "country": "Vương Quốc Anh",
+    "url": "https://www.trl.co.uk/",
+    "status": null,
+    "matched_files": [
+      "45.png"
+    ]
+  },
+  {
+    "stt": 46,
+    "name": "HTRI",
+    "country": "Hoa Kỳ",
+    "url": "https://www.htri.net/",
+    "status": 1.0,
+    "matched_files": [
+      "64.HTRI-transparent-v.png",
+      "HTRI -trang22.png"
+    ]
+  },
+  {
+    "stt": 47,
+    "name": "DHI",
+    "country": "Đan Mạch",
+    "url": "https://www.dhigroup.com/",
+    "status": null,
+    "matched_files": [
+      "47.png",
+      "MIKE.svg"
+    ]
+  },
+  {
+    "stt": 48,
+    "name": "Schuller",
+    "country": "Đức",
+    "url": "https://www.schullerco.com/sc-bocad",
+    "status": "https://www.bocad.com/",
+    "matched_files": [
+      "48.png",
+      "SCbocad-Logo_flatBlue.png"
+    ]
+  },
+  {
+    "stt": 49,
+    "name": "Sewer Robotics",
+    "country": "Quốc tế",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "49.png"
+    ]
+  },
+  {
+    "stt": 50,
+    "name": "Geosig",
+    "country": "Thụy Sĩ",
+    "url": "https://www.geosig.com/",
+    "status": 1.0,
+    "matched_files": [
+      "50.png"
+    ]
+  },
+  {
+    "stt": 51,
+    "name": "DMT",
+    "country": "Đức",
+    "url": "https://www.dmt-group.com/",
+    "status": null,
+    "matched_files": [
+      "51.png",
+      "logo-dmt-group-neu.svg"
+    ]
+  },
+  {
+    "stt": 52,
+    "name": "DNV",
+    "country": "Nauy",
+    "url": "https://www.dnv.com/",
+    "status": 1.0,
+    "matched_files": [
+      "52.png",
+      "DNV_GL_logo.svg-_1_.png",
+      "DNV_GL_logo.svg (1).webp"
+    ]
+  },
+  {
+    "stt": 53,
+    "name": "Radio Detection - SPX",
+    "country": "Anh",
+    "url": "https://spx.com/our-businesses/radiodetection/",
+    "status": 1.0,
+    "matched_files": [
+      "53.png",
+      "SPX_Technologies_Horiz_Blue_SM.png"
+    ]
+  },
+  {
+    "stt": 54,
+    "name": "ANSYS",
+    "country": "Mỹ",
+    "url": "https://ansys.synopsys.com/",
+    "status": 1.0,
+    "matched_files": [
+      "54.png",
+      "png-transparent-ansys-software-company.png"
+    ]
+  },
+  {
+    "stt": 55,
+    "name": "AVEVA",
+    "country": "Anh",
+    "url": "https://www.aveva.com/en/",
+    "status": null,
+    "matched_files": [
+      "55.png",
+      "AVEVA.svg"
+    ]
+  },
+  {
+    "stt": 56,
+    "name": "Shenhao",
+    "country": "China",
+    "url": "https://www.shenhaorobotics.com/",
+    "status": null,
+    "matched_files": [
+      "56.png"
+    ]
+  },
+  {
+    "stt": 57,
+    "name": "QYSEA",
+    "country": "China",
+    "url": "https://www.qysea.com/",
+    "status": null,
+    "matched_files": [
+      "57.png"
+    ]
+  },
+  {
+    "stt": 58,
+    "name": "Weedoo",
+    "country": "Hoa Kỳ",
+    "url": "https://weedooboats.com/",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 59,
+    "name": "Glodon - Magicad",
+    "country": "China",
+    "url": "https://asia.glodon.com/magicad",
+    "status": 1.0,
+    "matched_files": [
+      "59.png",
+      "bim-collaborate.svg"
+    ]
+  },
+  {
+    "stt": 60,
+    "name": "Goslam",
+    "country": "Trung Quốc",
+    "url": "https://en.goslam.com/",
+    "status": null,
+    "matched_files": [
+      "60.jpg"
+    ]
+  },
+  {
+    "stt": 61,
+    "name": "AGI",
+    "country": "Mỹ",
+    "url": "https://www.agiusa.com/",
+    "status": 1.0,
+    "matched_files": [
+      "AGI-logo.png",
+      "61.Hexagon_Signage_Standard_PMS_Logo.png"
+    ]
+  },
+  {
+    "stt": 62,
+    "name": "IRIS",
+    "country": "Quốc tế",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "62.cype_plano-3.png"
+    ]
+  },
+  {
+    "stt": 63,
+    "name": "Geoscanner",
+    "country": "Thụy Điển",
+    "url": "https://www.geoscanners.com/",
+    "status": 1.0,
+    "matched_files": [
+      "63.CSI.png"
+    ]
+  },
+  {
+    "stt": 64,
+    "name": "Geonor",
+    "country": "Na Uy",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "64.HTRI-transparent-v.png"
+    ]
+  },
+  {
+    "stt": 65,
+    "name": "A.P.Vandenberg",
+    "country": "Hà Lan",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "65.logo_seequent.png"
+    ]
+  },
+  {
+    "stt": 66,
+    "name": "Geotomographie",
+    "country": "Đức",
+    "url": "https://geotomographie.de/",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 67,
+    "name": "Pasi",
+    "country": "Italia",
+    "url": "",
+    "status": null,
+    "matched_files": [
+      "67. STX.png"
+    ]
+  },
+  {
+    "stt": 68,
+    "name": "DJI, Wingtra",
+    "country": "Canada",
+    "url": "https://wingtra.com/dji/",
+    "status": null,
+    "matched_files": [
+      "68.logo-csiamerica.svg"
+    ]
+  },
+  {
+    "stt": 69,
+    "name": "Pavemetrics",
+    "country": "Canada",
+    "url": "https://www.pavemetrics.com/",
+    "status": null,
+    "matched_files": [
+      "Logo_Eddyfi_Pavemetrics.png"
+    ]
+  },
+  {
+    "stt": 70,
+    "name": "FLIR, SONAVU",
+    "country": "Canada",
+    "url": "https://sonavu.com/",
+    "status": null,
+    "matched_files": [
+      "SONAVU.png",
+      "sonavu_logo_white-300x90-1.png"
+    ]
+  },
+  {
+    "stt": 71,
+    "name": "LIDARUSA, GVI, PHOENIX LIDAR",
+    "country": "Hoa Kỳ",
+    "url": "https://phoenixlidar.com/",
+    "status": null,
+    "matched_files": [
+      "PHOENIX LIDAR.svg"
+    ]
+  },
+  {
+    "stt": 73,
+    "name": "EDC HVE",
+    "country": "Quốc tế",
+    "url": "https://edccorp.com/index.php/hve-software/hve",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 74,
+    "name": "MAAP & iMAAP",
+    "country": "Vương Quốc Anh",
+    "url": "https://trlsoftware.com/software/crash-data-analysis/imaap/",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 75,
+    "name": "Lander Simulation",
+    "country": "Tây Ban Nha",
+    "url": "https://www.landersimulation.com/en",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 76,
+    "name": "Geotechnical",
+    "country": "Quốc tế",
+    "url": "",
+    "status": null,
+    "matched_files": []
+  },
+  {
+    "stt": 77,
+    "name": "Foxit",
+    "country": "Mỹ",
+    "url": "https://www.foxit.com/pdf-reader/",
+    "status": 1.0,
+    "matched_files": [
+      "new-foxit-logo.png"
+    ]
+  },
+  {
+    "stt": 78,
+    "name": "Autodesk",
+    "country": "Mỹ",
+    "url": "https://www.autodesk.com/",
+    "status": 1.0,
+    "matched_files": [
+      "Autodesk_Logo_2021.svg.png"
+    ]
+  },
+  {
+    "stt": 79,
+    "name": "BIMAGE",
+    "country": "Singapore",
+    "url": "",
+    "status": 1.0,
+    "matched_files": []
+  }
+]
