@@ -9,9 +9,10 @@ interface AwardItem {
 
 interface AwardsSliderProps {
   awards: AwardItem[];
+  paused?: boolean;
 }
 
-export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards }) => {
+export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards, paused = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true);
@@ -75,12 +76,12 @@ export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards }) => {
 
   // Auto-play timer
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || paused) return;
     const interval = setInterval(() => {
       handleNext();
     }, 3500);
     return () => clearInterval(interval);
-  }, [isHovered, handleNext]);
+  }, [isHovered, handleNext, paused]);
 
   // Touch handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -126,6 +127,7 @@ export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards }) => {
 
   return (
     <div 
+      data-page-collection="award"
       className="relative w-full py-2 px-8 sm:px-12 md:px-16 group/slider select-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -187,4 +189,3 @@ export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards }) => {
     </div>
   );
 };
-

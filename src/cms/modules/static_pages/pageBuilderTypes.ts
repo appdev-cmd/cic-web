@@ -1,3 +1,5 @@
+import type { EditableSectionContract } from '../../../shared/visual-editing/editableSectionContract';
+
 export type PageBuilderStatus = 'draft' | 'published';
 
 export type PageBuilderEntityType =
@@ -11,6 +13,12 @@ export type PageBuilderEntityType =
 export interface PageBuilderReference {
   entityType: PageBuilderEntityType;
   entityIds: string[];
+  source?: {
+    mode: 'manual' | 'latest' | 'taxonomy';
+    taxonomyType?: 'category' | 'brand' | 'application';
+    taxonomyId?: string;
+    limit: number;
+  };
 }
 
 export type PageBuilderConfigValue =
@@ -26,6 +34,8 @@ export interface PageBuilderSection {
   sectionKey: string;
   sectionType: string;
   position: number;
+  visible?: boolean;
+  movable?: boolean;
   config: Record<string, PageBuilderConfigValue>;
   references?: PageBuilderReference[];
 }
@@ -53,6 +63,7 @@ export interface PageBuilderPage {
   systemDefined: boolean;
   draft: PageBuilderVersion;
   published: PageBuilderVersion;
+  history?: PageBuilderVersion[];
 }
 
 export interface PageBuilderEntityOption {
@@ -67,4 +78,7 @@ export interface SectionDefinition {
   label: string;
   description: string;
   referenceLimit?: Partial<Record<PageBuilderEntityType, number>>;
+  canHide?: boolean;
+  canMove?: boolean;
+  editableContract?: EditableSectionContract;
 }

@@ -3,17 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ComponentPropsWithRef } from 'react';
 
 interface CounterProps {
   value: number;
   suffix?: string;
+  motionEnabled?: boolean;
+  elementProps?: ComponentPropsWithRef<'span'>;
 }
 
-export const Counter = ({ value, suffix = '' }: CounterProps) => {
-  const [count, setCount] = useState(0);
+export const Counter = ({ value, suffix = '', motionEnabled = true, elementProps }: CounterProps) => {
+  const [count, setCount] = useState(motionEnabled ? 0 : value);
 
   useEffect(() => {
+    if (!motionEnabled) {
+      setCount(value);
+      return undefined;
+    }
+
     let start = 0;
     const end = value;
     if (start === end) {
@@ -36,7 +43,7 @@ export const Counter = ({ value, suffix = '' }: CounterProps) => {
 
     const animId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animId);
-  }, [value]);
+  }, [motionEnabled, value]);
 
-  return <span>{count.toLocaleString('vi-VN')}{suffix}</span>;
+  return <span {...elementProps}>{count.toLocaleString('vi-VN')}{suffix}</span>;
 };

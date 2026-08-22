@@ -68,7 +68,8 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
     }} onPreview={setPreviewPage} onPublish={(nextPage) => {
       const now = new Date().toISOString();
       const published = { ...JSON.parse(JSON.stringify(nextPage.draft)), status: 'published' as const, publishedAt: now, updatedAt: now };
-      const saved = { ...nextPage, published };
+      const previousHistory = nextPage.published.version > 0 ? [JSON.parse(JSON.stringify(nextPage.published)), ...(nextPage.history ?? [])] : (nextPage.history ?? []);
+      const saved = { ...nextPage, published, history: previousHistory.slice(0, 20) };
       setPages((current) => current.map((page) => page.id === saved.id ? saved : page)); showToast(`Đã xuất bản: https://cic.com.vn${saved.slug}`);
     }} />
     <PageBuilderPreviewModal page={previewPage} onClose={() => setPreviewPage(null)} />

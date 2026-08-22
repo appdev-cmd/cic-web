@@ -31,8 +31,16 @@ import { PrivacyPolicyView } from '@web/components/PrivacyPolicyView';
 import { TermsOfUseView } from '@web/components/TermsOfUseView';
 import { SearchView } from '@web/components/SearchView';
 import { NotFoundView } from '@web/components/NotFoundView';
+import { getLegacyHomePageContent } from '@shared/page-content/legacyPageContent';
+import { resolvePageContent } from '@shared/page-content/resolvePageContent';
 
 type WebsiteView = 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found' | 'cms';
+
+const publicHomePageContent = resolvePageContent({
+  pageType: 'home',
+  version: undefined,
+  legacyFallback: getLegacyHomePageContent(),
+}).content;
 
 function getInitialView(): WebsiteView {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -280,6 +288,7 @@ export default function App() {
       <main className="relative">
         {currentView === 'home' ? (
           <HomeView
+            content={publicHomePageContent}
             setCurrentView={setCurrentView}
             setActiveLink={setActiveLink}
             setActiveServiceId={setActiveServiceId}

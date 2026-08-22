@@ -11,15 +11,28 @@ export const entityTypeLabels: Record<PageBuilderEntityType, string> = {
 };
 
 export const sectionDefinitions: Record<string, SectionDefinition> = {
-  'home.hero': { label: 'Hero', description: 'Carousel mở đầu của Trang chủ.' },
-  'home.intro': { label: 'Giới thiệu ngắn', description: 'Nội dung giới thiệu và video doanh nghiệp.' },
-  'home.stats': { label: 'Thống kê', description: 'Bốn chỉ số theo thiết kế hiện tại.' },
-  'home.awards': { label: 'Giải thưởng', description: 'Danh sách giải thưởng trong slider.' },
-  'home.ecosystem': { label: 'Hệ sinh thái công nghệ', description: 'Các slot sản phẩm và dịch vụ cố định.', referenceLimit: { product: 4, service: 3 } },
-  'home.projects': { label: 'Dự án tiêu biểu', description: 'Chọn thủ công tối đa 3 dự án.', referenceLimit: { project: 3 } },
-  'home.events': { label: 'Sự kiện nổi bật', description: 'Một sự kiện chính và tối đa 3 sự kiện phụ.', referenceLimit: { event: 4 } },
-  'home.news': { label: 'Tin tức và Góc nhìn', description: 'Chọn thủ công tối đa 3 bài viết.', referenceLimit: { news: 3 } },
-  'home.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 } },
+  'home.hero': { label: 'Hero', description: 'Carousel mở đầu của Trang chủ.', canHide: false, canMove: false },
+  'home.intro': { label: 'Giới thiệu ngắn', description: 'Nội dung giới thiệu và video doanh nghiệp.', canHide: true, canMove: true },
+  'home.stats': {
+    label: 'Thống kê', description: 'Bốn chỉ số theo thiết kế hiện tại.', canHide: true, canMove: true,
+    editableContract: {
+      sectionKey: 'home.stats',
+      fields: [
+        { path: 'items.*.value', semantic: 'text', ownership: 'embedded', valueKind: 'number', editing: 'enabled' },
+        { path: 'items.*.suffix', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'blocked', blockedReason: 'representation-mismatch' },
+        { path: 'items.*.label', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      collections: {
+        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } },
+      },
+    },
+  },
+  'home.awards': { label: 'Giải thưởng', description: 'Danh sách giải thưởng trong slider.', canHide: true, canMove: true },
+  'home.ecosystem': { label: 'Hệ sinh thái công nghệ', description: 'Các slot sản phẩm và dịch vụ cố định.', referenceLimit: { product: 4, service: 3 }, canHide: true, canMove: true },
+  'home.projects': { label: 'Dự án tiêu biểu', description: 'Chọn thủ công tối đa 3 dự án.', referenceLimit: { project: 3 }, canHide: true, canMove: true },
+  'home.events': { label: 'Sự kiện nổi bật', description: 'Một sự kiện chính và tối đa 3 sự kiện phụ.', referenceLimit: { event: 4 }, canHide: true, canMove: true },
+  'home.news': { label: 'Tin tức và Góc nhìn', description: 'Chọn thủ công tối đa 3 bài viết.', referenceLimit: { news: 3 }, canHide: true, canMove: true },
+  'home.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 }, canHide: true, canMove: true },
   'home.contact_cta': { label: 'CTA & Form tư vấn', description: 'Nội dung liên hệ và form cố định.' },
   'about.hero': { label: 'Hero Giới thiệu', description: 'Tiêu đề và ảnh mở đầu.' },
   'about.overview': { label: 'Tổng quan doanh nghiệp', description: 'Giới thiệu và video doanh nghiệp.' },
@@ -29,7 +42,22 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
   'about.awards': { label: 'Thành tựu & Giải thưởng', description: 'Danh sách giải thưởng.' },
   'about.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác.', referenceLimit: { partner: 12 } },
   'about.organization': { label: 'Cơ cấu tổ chức', description: 'Sơ đồ và topology được giữ trong code.' },
-  'about.capacity': { label: 'Năng lực doanh nghiệp', description: 'Giới thiệu và bốn chỉ số năng lực.' },
+  'about.capacity': {
+    label: 'Năng lực doanh nghiệp', description: 'Giới thiệu và bốn chỉ số năng lực.',
+    editableContract: {
+      sectionKey: 'about.capacity',
+      fields: [
+        { path: 'title', semantic: 'rich-text', ownership: 'static-unwired', valueKind: 'string', editing: 'blocked', blockedReason: 'representation-mismatch' },
+        { path: 'description', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'separator', semantic: 'decorative', ownership: 'decorative', editing: 'disabled' },
+        { path: 'metrics.*.value', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'metrics.*.label', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      collections: {
+        metrics: { path: 'metrics', identity: 'persistent-item-id', capabilities: { reorder: 'blocked', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } },
+      },
+    },
+  },
   'about.experience': { label: 'Năng lực & Kinh nghiệm', description: 'Danh mục kinh nghiệm theo thiết kế.' },
   'about.software_partners': { label: 'Đối tác phần mềm', description: 'Danh sách đối tác phần mềm.', referenceLimit: { partner: 12 } },
   'about.hardware_partners': { label: 'Đối tác thiết bị', description: 'Danh sách đối tác thiết bị.', referenceLimit: { partner: 12 } },

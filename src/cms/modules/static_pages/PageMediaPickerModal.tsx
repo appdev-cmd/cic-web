@@ -30,6 +30,10 @@ export const pageBuilderImages = getDemoMediaPickerItems('vi');
 
 export function findPageBuilderImage(id: string, images: CmsMediaPickerItem[] = pageBuilderImages) {
   if (id.startsWith('data:image/')) return { id, filename: 'Ảnh tải từ máy', title: 'Ảnh tải từ máy', url: id };
+  if (id.startsWith('/') || id.startsWith('http://') || id.startsWith('https://')) {
+    const filename = id.split('/').pop() || id;
+    return { id, filename, title: filename, url: id };
+  }
   const resolvedId = legacyMockImageAliases[id] ?? id;
   return images.find((asset) => asset.id === resolvedId || asset.url === resolvedId);
 }

@@ -63,14 +63,23 @@ import {
 } from '../data/aboutData';
 
 import { SectionHeader } from '@shared/components/Typography';
+import type { AboutCapacityModel, PageRenderPolicy } from '@shared/page-content/models';
+import { productionRenderPolicy } from '@shared/page-content/models';
+import { getLegacyAboutCapacityContent } from '@shared/page-content/legacyPageContent';
+import { bindElement } from '@shared/visual-editing/bindElement';
+import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
+import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';
   setActiveTab: (tab: 'overview' | 'structure' | 'experience') => void;
   onNavigateToContact?: () => void;
+  capacityContent?: AboutCapacityModel;
+  renderPolicy?: PageRenderPolicy;
+  bindingRegistry?: ElementBindingRegistry;
 }
 
-export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: AboutViewProps) => {
+export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: AboutViewProps) => {
   const homeAwards = useMemo(getHomeAwards, []);
   const partners = useMemo(getHomePartners, []);
   // Interactive active states for redesigned sections
@@ -105,7 +114,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
   return (
     <div className="pt-24 bg-transparent min-h-screen relative">
       {/* Visual Top Hero Banner */}
-      <section className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
+      <section data-page-builder-section-key="about.hero" className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <img 
             src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80" 
@@ -231,24 +240,24 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
               className="w-full space-y-6 lg:space-y-8"
              >
                 {/* 0. Giới Thiệu & Video */}
-                <section className="pb-4 lg:pb-6 bg-transparent relative overflow-hidden z-10 border-b border-slate-100">
+                <section data-page-builder-section-key="about.overview" className="pb-4 lg:pb-6 bg-transparent relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="w-full relative z-10">
                     <SectionHeader 
                       title="Tổng quan doanh nghiệp" 
                     />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                       <div>
-                        <p className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
+                        <p data-page-builder-config-path={JSON.stringify(['paragraphs', 0])} className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
                           Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.
                         </p>
-                        <p className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
+                        <p data-page-builder-config-path={JSON.stringify(['paragraphs', 1])} className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
                           Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.
                         </p>
-                        <p className="text-sm md:text-base text-slate-600 leading-relaxed font-normal text-justify">
+                        <p data-page-builder-config-path={JSON.stringify(['paragraphs', 2])} className="text-sm md:text-base text-slate-600 leading-relaxed font-normal text-justify">
                           Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng, quyết đoán, và năng động cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm. Chúng tôi luôn gắn bó với sứ mệnh: “Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ công nghệ thông tin hiện đại, có tính ứng dụng cao để hỗ trợ các kỹ sư, doanh nghiệp, cơ quan nghiên cứu, các nhà quản lý trong công tác nghiên cứu, sản xuất, điều hành tại Việt Nam và các nước trong khu vực; đồng thời không ngừng phát triển nhằm góp phần vào sự hội nhập và phát triển chung của đất nước, đem lại thu nhập cao ổn định cho cán bộ công nhân viên cũng như hài hoà với lợi ích của cổ đông.”
                         </p>
                       </div>
-                      <div className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black">
+                      <div data-page-builder-video-path={JSON.stringify(['videoUrl'])} className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black">
                         <iframe 
                           className="w-full h-full scale-[1.03] origin-center"
                           src="https://www.youtube.com/embed/hdLFK_09-tU?start=448" 
@@ -264,7 +273,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* 3. Tiến Trình Phát Triển (Timeline) */}
-                <section className="py-6 md:py-8 bg-transparent relative overflow-hidden border-b border-slate-100 z-10">
+                <section data-page-builder-section-key="about.timeline" className="py-6 md:py-8 bg-transparent relative overflow-hidden border-b border-slate-100 z-10">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-[8px] mb-2">
@@ -306,7 +315,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* 2. Định Hướng Chiến Lược */}
-                <section className="py-10 bg-slate-50 border-b border-slate-100 z-10 relative overflow-hidden">
+                <section data-page-builder-section-key="about.strategy" className="py-10 bg-slate-50 border-b border-slate-100 z-10 relative overflow-hidden">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
                       title="Định hướng chiến lược" 
@@ -377,14 +386,17 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* Lĩnh vực kinh doanh */}
-                <section id="solutions" className="py-16 bg-transparent text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
+                <section data-page-builder-section-key="about.offerings" id="solutions" className="py-16 bg-transparent text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
                       title="SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP" 
                       sub="Khẳng định năng lực qua các giải pháp công nghệ cốt lõi" 
                     />
 
-                    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div
+                      data-page-collection="product service"
+                      className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    >
                       {[
                         { title: 'Phát triển phần mềm xây dựng', icon: <BIMIcon />, desc: 'Phát triển các phần mềm chuyên ngành xây dựng, quản lý, quy hoạch làm nên thương hiệu CIC (KPW, Escon, RDW, VinaSAS…) và enjiCAD – phần mềm vẽ kỹ thuật chất lượng cao, giá cạnh tranh hơn nhiều so với CAD ngoại nhập.' },
                         { title: 'Phân phối phần mềm nhập khẩu chính hãng', icon: <ShieldCheck />, desc: 'Phân phối phần mềm bản quyền từ các hãng công nghệ hàng đầu thế giới như Microsoft, Autodesk, CSI, Cubicost, ANSYS, Bentley, DHI, Hexagon, DNV GL, Prokon, Risa…' },
@@ -412,7 +424,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* Awards Section */}
-                <section className="py-16 bg-slate-50/60 relative overflow-hidden z-10 border-b border-slate-200">
+                <section data-page-builder-section-key="about.awards" className="py-16 bg-slate-50/60 relative overflow-hidden z-10 border-b border-slate-200">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
                       title="Thành tựu & Giải thưởng" 
@@ -430,7 +442,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                 </section>
 
                 {/* Partners Section */}
-                <section className="py-10 bg-transparent border-b border-slate-100 overflow-hidden relative z-10">
+                <section data-page-builder-section-key="about.partners" className="py-10 bg-transparent border-b border-slate-100 overflow-hidden relative z-10">
                   <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
                     <SectionHeader 
                       title="Đối tác chiến lược" 
@@ -469,7 +481,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
                     <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
                     
-                    <motion.div 
+                    <motion.div
+                      data-page-collection="partner"
                       animate={{ x: ["0%", "-50%"] }}
                       transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
                       className="flex gap-6 whitespace-nowrap"
@@ -497,6 +510,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
         {/* ==================== 2. CƠ CẤU TỔ CHỨC ==================== */}
         {activeTab === 'structure' && (
           <motion.div
+            data-page-builder-section-key="about.organization"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -734,44 +748,63 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
         {activeTab === 'experience' && (
           <motion.div
             key="capacity"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
+            {...(renderPolicy.motionEnabled ? {
+              initial: { opacity: 0, y: 20 },
+              animate: { opacity: 1, y: 0 },
+              exit: { opacity: 0, y: -20 },
+              transition: { duration: 0.4 },
+            } : { initial: false })}
             className="w-full space-y-16 relative overflow-hidden z-10"
           >
             {/* Top Capacity & Scale Overview */}
-            <div className="w-full bg-transparent">
+            <div data-page-builder-section-key="about.capacity" className="w-full bg-transparent">
               <div className="max-w-7xl mx-auto relative z-10">
                 <div className="flex flex-col items-center text-center pt-2">
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight">
                     Tiềm lực vững vàng, <br/><span className="text-orange-600">vươn tầm quốc tế</span>
                   </h2>
                   <div className="w-16 h-1 bg-orange-600 mx-auto mt-3 mb-6"></div>
-                  <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl">
-                    Trải qua 35 năm hình thành và phát triển, CIC đã xây dựng được một đội ngũ nhân sự chất lượng cao, mạng lưới đối tác toàn cầu và danh mục khách hàng rộng khắp, khẳng định vị thế vững chắc trong lĩnh vực công nghệ và xây dựng.
+                  <p
+                    {...bindElement<HTMLParagraphElement>(createElementBinding({
+                      sectionKey: 'about.capacity', elementPath: 'description', semantic: 'text', ownership: 'embedded', editable: true,
+                    }), bindingRegistry)}
+                    className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl"
+                  >
+                    {capacityContent.description}
                   </p>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full">
-                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
-                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">150+</div>
-                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Nhân sự chất lượng cao</div>
-                    </div>
-                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
-                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">100+</div>
-                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Đối tác toàn cầu</div>
-                    </div>
-                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
-                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">5.000+</div>
-                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Dự án thành công</div>
-                    </div>
-                    <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center hover:border-orange-500 hover:shadow-md transition-all">
-                      <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">35+</div>
-                      <div className="text-xs md:text-sm font-bold text-slate-600 uppercase">Năm kinh nghiệm</div>
-                    </div>
+                  <div
+                    {...bindElement<HTMLDivElement>(createElementBinding({
+                      sectionKey: 'about.capacity', elementPath: 'metrics', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'metrics',
+                    }), bindingRegistry)}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full"
+                  >
+                    {capacityContent.metrics.map((metric) => {
+                      const itemPath = createCollectionItemPath('metrics', metric.id);
+                      return <div
+                        key={metric.id}
+                        {...bindElement<HTMLDivElement>(createElementBinding({
+                          sectionKey: 'about.capacity', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: metric.id, collectionPath: 'metrics',
+                        }), bindingRegistry)}
+                        className={`bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center ${renderPolicy.motionEnabled ? 'hover:border-orange-500 hover:shadow-md transition-all' : ''}`}
+                      >
+                        <div
+                          {...bindElement<HTMLDivElement>(createElementBinding({
+                            sectionKey: 'about.capacity', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
+                          }), bindingRegistry)}
+                          className="text-3xl md:text-4xl font-black text-orange-600 mb-2"
+                        >{metric.value}</div>
+                        <div
+                          {...bindElement<HTMLDivElement>(createElementBinding({
+                            sectionKey: 'about.capacity', elementPath: `${itemPath}.label`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
+                          }), bindingRegistry)}
+                          className="text-xs md:text-sm font-bold text-slate-600 uppercase"
+                        >{metric.label}</div>
+                      </div>;
+                    })}
                   </div>
 
-                  <div className="flex flex-col gap-12 lg:gap-16 text-left w-full mb-12">
+                  <div data-page-builder-section-key="about.experience" className="flex flex-col gap-12 lg:gap-16 text-left w-full mb-12">
                     {/* 1. Phát triển nguồn nhân lực chất lượng cao */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
                       <div className="rounded-[10px] overflow-hidden shadow-md">
@@ -812,7 +845,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact }: Abou
                     </div>
                   </div>
                   
-                  <a 
+                  <a
+                    data-page-builder-section-key="about.contact_cta"
                     href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf" 
                     target="_blank"
                     rel="noopener noreferrer"

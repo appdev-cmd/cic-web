@@ -35,6 +35,10 @@ interface ContactLead {
 export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void }) => {
   // Navigation & Page State
   const [activeBranch, setActiveBranch] = useState<'hn' | 'hcm'>('hn');
+  useEffect(() => {
+    const timer = window.setTimeout(() => window.dispatchEvent(new CustomEvent('page-builder-dom-updated')), 0);
+    return () => window.clearTimeout(timer);
+  }, [activeBranch]);
 
   // Contact Form State
   const [formData, setFormData] = useState({
@@ -90,6 +94,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
       searchQuery: '36 Nguyễn Huy Lượng, Phường 14, Bình Thạnh, TP. Hồ Chí Minh, Việt Nam'
     }
   };
+  const activeBranchIndex = activeBranch === 'hn' ? 0 : 1;
 
 
 
@@ -166,7 +171,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
       <div className="max-w-7xl mx-auto px-6">
 
         {/* HERO TITLE AREA */}
-        <div className="border-b border-slate-200 pb-8 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div data-page-builder-section-key="contact.header" className="border-b border-slate-200 pb-8 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-950">
               Kết nối chuyên gia CIC
@@ -184,7 +189,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
           <div className="lg:col-span-7 space-y-10">
             
             {/* OFFICE BRANCH SELECTOR & INFORMATION */}
-            <div className="bg-white border border-slate-200 p-8 shadow-sm space-y-8 rounded-[10px]">
+            <div data-page-builder-section-key="contact.branches" className="bg-white border border-slate-200 p-8 shadow-sm space-y-8 rounded-[10px]">
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-5 gap-4">
                 <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 flex items-center gap-2">
@@ -199,6 +204,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   ].map((tab) => (
                     <button
                       key={tab.key}
+                      data-page-builder-preview-control="true"
                       onClick={() => setActiveBranch(tab.key as any)}
                       className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer ${
                         activeBranch === tab.key
@@ -225,14 +231,14 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   <div className="space-y-3.5">
                     <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
                       <Building className="text-orange-600 shrink-0" size={19} />
-                      {branches[activeBranch].name}
+                      <span data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'name'])}>{branches[activeBranch].name}</span>
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       
                       <div className="space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Địa chỉ văn phòng</span>
-                        <p className="text-slate-800 leading-relaxed text-xs sm:text-[13px] font-medium">{branches[activeBranch].address}</p>
+                        <p data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'address'])} className="text-slate-800 leading-relaxed text-xs sm:text-[13px] font-medium">{branches[activeBranch].address}</p>
                       </div>
 
                       <div className="space-y-1.5 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
@@ -240,11 +246,11 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         <div className="space-y-1 text-slate-800 text-xs sm:text-[13px] font-medium">
                           <p className="flex items-center gap-2">
                             <Phone className="text-orange-600 shrink-0" size={14} /> 
-                            <span>SĐT: <strong className="font-semibold text-slate-900">{branches[activeBranch].tel}</strong></span>
+                            <span>SĐT: <strong data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'phone'])} className="font-semibold text-slate-900">{branches[activeBranch].tel}</strong></span>
                           </p>
                           <p className="flex items-center gap-2">
                             <Mail className="text-orange-600 shrink-0" size={14} /> 
-                            <span>Email: <strong className="font-semibold text-slate-900">{branches[activeBranch].email}</strong></span>
+                            <span>Email: <strong data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'email'])} className="font-semibold text-slate-900">{branches[activeBranch].email}</strong></span>
                           </p>
                           {branches[activeBranch].fax && (
                             <p className="text-slate-600 font-medium pl-5.5 text-[11px] sm:text-xs">Fax: {branches[activeBranch].fax}</p>
@@ -255,7 +261,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       <div className="md:col-span-2 space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Thời gian làm việc</span>
                         <p className="text-slate-800 text-xs sm:text-[13px] font-medium flex items-center gap-2">
-                          <Clock className="text-orange-600 shrink-0" size={14} /> {branches[activeBranch].workingHours}
+                          <Clock className="text-orange-600 shrink-0" size={14} /> <span data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'workingHours'])}>{branches[activeBranch].workingHours}</span>
                         </p>
                       </div>
 
@@ -305,7 +311,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
           <div className="lg:col-span-5 space-y-8">
             
             {/* MAIN CONTACT FORM CARD */}
-            <div className="bg-white border border-slate-200 p-8 shadow-lg space-y-6 relative rounded-[10px]">
+            <div data-page-builder-section-key="contact.form" className="bg-white border border-slate-200 p-8 shadow-lg space-y-6 relative rounded-[10px]">
               
               {/* Form header */}
               <div className="border-b border-slate-100 pb-4">
@@ -496,7 +502,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
             </div>
 
             {/* SECURITY/CONFIDENCE CARD */}
-            <div className="bg-slate-900 text-slate-300 p-6 border border-white/10 space-y-3 rounded-[10px]">
+            <div data-page-builder-section-key="contact.security" className="bg-slate-900 text-slate-300 p-6 border border-white/10 space-y-3 rounded-[10px]">
               <div className="flex items-center gap-2.5 text-white">
                 <ShieldCheck className="text-orange-500 shrink-0" size={22} />
                 <h4 className="text-sm font-bold uppercase tracking-wider">Chính sách bảo mật & Tiêu chuẩn ISO</h4>

@@ -57,8 +57,8 @@ const capacityPage = withSectionPrefix({
   pageType: 'capacity_experience',
   templateKey: 'capacity_experience',
   systemDefined: true,
-  draft: { ...sourceAbout.draft, sections: sourceAbout.draft.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(section.sectionKey)) },
-  published: { ...sourceAbout.published, sections: sourceAbout.published.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(section.sectionKey)) },
+  draft: { ...sourceAbout.draft, sections: sourceAbout.draft.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.contact_cta'].includes(section.sectionKey)) },
+  published: { ...sourceAbout.published, sections: sourceAbout.published.sections.filter((section) => ['about.hero', 'about.capacity', 'about.experience', 'about.contact_cta'].includes(section.sectionKey)) },
 }, 'capacity');
 
 function escapeHtml(value: unknown): string {

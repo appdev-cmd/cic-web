@@ -43,8 +43,15 @@ import { AwardsSlider } from './AwardsSlider';
 import { getHomeData } from '../features/home/homeData';
 
 import { Project } from '@shared/types';
+import type { HomePageModel, PageRenderPolicy } from '@shared/page-content/models';
+import { productionRenderPolicy } from '@shared/page-content/models';
+import { bindElement } from '@shared/visual-editing/bindElement';
+import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
+import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 
 interface HomeViewProps {
+  content: HomePageModel;
+  renderPolicy?: PageRenderPolicy;
   setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   setActiveLink: (link: string) => void;
   setActiveServiceId: (id: string | null) => void;
@@ -53,9 +60,14 @@ interface HomeViewProps {
   setAboutSubTab: (tab: 'overview' | 'structure' | 'experience') => void;
   setActiveEventId?: (id: string | null) => void;
   setIsRegisteringEvent?: (isReg: boolean) => void;
+  previewSlideIndex?: number;
+  editMode?: boolean;
+  bindingRegistry?: ElementBindingRegistry;
 }
 
 export const HomeView = ({
+  content,
+  renderPolicy = productionRenderPolicy,
   setCurrentView,
   setActiveLink,
   setActiveServiceId,
@@ -63,7 +75,10 @@ export const HomeView = ({
   setPreSelectedNewsCategory,
   setAboutSubTab,
   setActiveEventId,
-  setIsRegisteringEvent
+  setIsRegisteringEvent,
+  previewSlideIndex,
+  editMode = false,
+  bindingRegistry = elementBindingRegistry,
 }: HomeViewProps) => {
   const {
     heroSlides,
@@ -73,10 +88,10 @@ export const HomeView = ({
     marqueeTexts,
     upcomingHomeEvents,
     pastHomeEvents,
-    homeStats,
     homeAwards,
     homeSolutionsList,
   } = React.useMemo(getHomeData, []);
+  const homeStats = content.stats.items;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
   const [activeProjectTab, setActiveProjectTab] = useState('all');
@@ -100,11 +115,16 @@ export const HomeView = ({
       img.src = slide.img;
     });
 
+    if (editMode) return undefined;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [editMode, heroSlides]);
+
+  useEffect(() => {
+    if (typeof previewSlideIndex === 'number' && heroSlides.length > 0) setCurrentSlide(Math.min(Math.max(0, previewSlideIndex), heroSlides.length - 1));
+  }, [heroSlides.length, previewSlideIndex]);
 
   const filteredProjects = projects.filter(p => {
     const matchesTab = activeProjectTab === 'all' || p.type === activeProjectTab;
@@ -145,7 +165,7 @@ export const HomeView = ({
   return (
     <>
       {/* Hero Section */}
-      <section id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10 border-b border-orange-500/60 shadow-lg">
+      <section data-page-builder-section-key="home.hero" id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10 border-b border-orange-500/60 shadow-lg">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.img 
@@ -212,7 +232,7 @@ export const HomeView = ({
           </motion.div>
         </div>
 
-        <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-40">
+        {!editMode && <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-40">
           {heroSlides.map((_, i) => (
             <button 
               key={i} 
@@ -221,7 +241,7 @@ export const HomeView = ({
               title={`Slide ${i + 1}`}
             />
           ))}
-        </div>
+        </div>}
 
         {/* Headline Ticker */}
         <div className="absolute bottom-0 left-0 right-0 bg-slate-950/80 border-t border-white/10 backdrop-blur-md z-30 hidden md:block">
@@ -250,7 +270,7 @@ export const HomeView = ({
       </section>
 
       {/* Intro Section (Hơn 35 năm đồng hành) */}
-      <section id="about" className="py-20 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
+      <section data-page-builder-section-key="home.intro" id="about" className="py-20 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <motion.div 
@@ -263,10 +283,10 @@ export const HomeView = ({
                 Hơn 35 năm <span className="text-orange-600">đồng hành</span><br className="hidden md:block" /> cùng kỹ thuật Việt Nam
               </h2>
               <div className={`${typeProse} space-y-4 text-slate-600 mb-10 text-justify`}>
-                <p>
+                <p data-page-builder-config-path={JSON.stringify(['paragraphs', 0])}>
                   CIC (tiền thân là Trung tâm Tin học - Bộ Xây dựng, thành lập năm 1990) là đơn vị hàng đầu cung cấp phần mềm, thiết bị và giải pháp số cho ngành xây dựng.
                 </p>
-                <p>
+                <p data-page-builder-config-path={JSON.stringify(['paragraphs', 1])}>
                   Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.
                 </p>
               </div>
@@ -298,6 +318,7 @@ export const HomeView = ({
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.2 }}
+              data-page-builder-video-path={JSON.stringify(['videoUrl'])}
               className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-xl border border-slate-200/90 aspect-video bg-slate-900"
             >
               {!isVideoPlaying ? (
@@ -343,43 +364,104 @@ export const HomeView = ({
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
+      <section data-page-builder-section-key="home.stats" className="py-20 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 md:divide-x divide-slate-200">
-            {homeStats.map((stat, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ delay: i * 0.1, duration: 0.8 }}
-                className="text-center group"
-              >
-                <div className={`${typeStat} text-slate-800 mb-4 flex items-center justify-center h-16 group-hover:scale-110 group-hover:text-orange-500 transition-all duration-500`}>
-                  <Counter value={stat.val!} suffix={stat.suffix!} />
-                </div>
-                <div className={`${typeMeta} text-slate-500`}>{stat.label}</div>
-              </motion.div>
-            ))}
+          <div
+            {...bindElement<HTMLDivElement>(createElementBinding({
+              sectionKey: 'home.stats',
+              elementPath: 'items',
+              semantic: 'collection',
+              ownership: 'embedded',
+              editable: false,
+              collectionPath: 'items',
+            }), bindingRegistry)}
+            className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 md:divide-x divide-slate-200"
+          >
+            {homeStats.map((stat, i) => {
+              const itemPath = createCollectionItemPath('items', stat.id);
+              const valueBinding = createElementBinding({
+                sectionKey: 'home.stats',
+                elementPath: `${itemPath}.value`,
+                semantic: 'text',
+                ownership: 'embedded',
+                editable: true,
+                itemId: stat.id,
+                collectionPath: 'items',
+              });
+              const suffixBinding = createElementBinding({
+                sectionKey: 'home.stats',
+                elementPath: `${itemPath}.suffix`,
+                semantic: 'text',
+                ownership: 'embedded',
+                editable: true,
+                itemId: stat.id,
+                collectionPath: 'items',
+              });
+
+              return (
+                <motion.div
+                  key={stat.id}
+                {...bindElement<HTMLDivElement>(createElementBinding({
+                    sectionKey: 'home.stats',
+                    elementPath: itemPath,
+                    semantic: 'embedded-item',
+                    ownership: 'embedded',
+                    editable: false,
+                    itemId: stat.id,
+                    collectionPath: 'items',
+                }), bindingRegistry)}
+                  {...(renderPolicy.motionEnabled ? {
+                    initial: { opacity: 0, y: 40 },
+                    whileInView: { opacity: 1, y: 0 },
+                    viewport: { once: true, margin: "-100px" },
+                    transition: { delay: i * 0.1, duration: 0.8 },
+                  } : { initial: false })}
+                  className="text-center group"
+                >
+                  <div className={`${typeStat} text-slate-800 mb-4 flex items-center justify-center h-16 ${renderPolicy.motionEnabled ? 'group-hover:scale-110 group-hover:text-orange-500 transition-all duration-500' : ''}`}>
+                    <Counter
+                      value={stat.value}
+                      suffix={stat.suffix}
+                      motionEnabled={renderPolicy.motionEnabled}
+                      elementProps={bindElement<HTMLSpanElement>([valueBinding, suffixBinding], bindingRegistry)}
+                    />
+                  </div>
+                  <div
+                    {...bindElement<HTMLDivElement>(createElementBinding({
+                      sectionKey: 'home.stats',
+                      elementPath: `${itemPath}.label`,
+                      semantic: 'text',
+                      ownership: 'embedded',
+                      editable: true,
+                      itemId: stat.id,
+                      collectionPath: 'items',
+                    }), bindingRegistry)}
+                    className={`${typeMeta} text-slate-500`}
+                  >
+                    {stat.label}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Awards Section */}
-      <section className="py-16 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
+      <section data-page-builder-section-key="home.awards" className="py-16 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
             title="Thành tựu & Giải thưởng" 
             sub="Minh chứng cho nỗ lực không ngừng nghỉ" 
           />
           <div className="mt-6">
-            <AwardsSlider awards={homeAwards} />
+            <AwardsSlider awards={homeAwards} paused={editMode} />
           </div>
         </div>
       </section>
 
       {/* Ecosystem Section */}
-      <section id="solutions" className="py-12 bg-slate-50/40 text-slate-950 relative overflow-hidden z-10">
+      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="py-12 bg-slate-50/40 text-slate-950 relative overflow-hidden z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-slate-50/50"></div>
         </div>
@@ -410,7 +492,7 @@ export const HomeView = ({
               <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm transition-all rounded-lg text-sm font-medium" />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+          <div data-page-collection="product service" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
             {/* AI & Smart Tech - Large Feature */}
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
@@ -528,7 +610,7 @@ export const HomeView = ({
       </section>
 
       {/* Featured Projects - 3 Cards Expanding Accordion */}
-      <section id="projects" className="py-16 bg-white relative overflow-hidden border-t border-slate-100 z-10">
+      <section data-page-builder-section-key="home.projects" id="projects" className="py-16 bg-white relative overflow-hidden border-t border-slate-100 z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
              title="Dự án tiêu biểu" 
@@ -577,6 +659,7 @@ export const HomeView = ({
 
           {/* 3 Cards 16:9 Expanding Accordion Container */}
           <div 
+            data-page-collection="project"
             onMouseLeave={() => setHoveredProjectIndex(null)}
             className="flex flex-col md:flex-row items-start justify-start gap-4 lg:gap-4 w-full"
           >
@@ -843,7 +926,7 @@ export const HomeView = ({
         </AnimatePresence>
       </section>
       {/* Events Section */}
-      <section id="events" className="py-12 bg-slate-950/90 text-white relative overflow-hidden border-t border-white/5 z-10">
+      <section data-page-builder-section-key="home.events" id="events" className="py-12 bg-slate-950/90 text-white relative overflow-hidden border-t border-white/5 z-10">
         <div className="absolute inset-0 bg-tech-grid opacity-10 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
@@ -871,7 +954,7 @@ export const HomeView = ({
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div data-page-collection="event" className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -965,7 +1048,7 @@ export const HomeView = ({
       </section>
 
       {/* News & Perspectives Section */}
-      <section id="news" className="py-12 bg-slate-50/40 border-t border-slate-100 z-10 relative">
+      <section data-page-builder-section-key="home.news" id="news" className="py-12 bg-slate-50/40 border-t border-slate-100 z-10 relative">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeader 
             title="Tin tức và Góc nhìn" 
@@ -997,7 +1080,7 @@ export const HomeView = ({
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div data-page-collection="news" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredNews.length > 0 ? filteredNews.slice(0, 3).map((news, i) => (
               <motion.div
                 key={i}
@@ -1061,7 +1144,7 @@ export const HomeView = ({
       </section>
 
       {/* Partners & Strategic Clients Section (Relocated & Optimized to Marquee) */}
-      <section className="py-10 bg-white/40 border-t border-slate-100 overflow-hidden relative z-10">
+      <section data-page-builder-section-key="home.partners" className="py-10 bg-white/40 border-t border-slate-100 overflow-hidden relative z-10">
         <div className="max-w-7xl mx-auto px-6 mb-6 relative z-10">
           <SectionHeader 
             title="Đối tác chiến lược" 
@@ -1075,6 +1158,7 @@ export const HomeView = ({
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none"></div>
           
           <motion.div 
+            data-page-collection="partner"
             animate={{ x: ["0%", "-50%"] }}
             transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
             className="flex gap-4 whitespace-nowrap"
@@ -1097,7 +1181,7 @@ export const HomeView = ({
       </section>
 
       {/* CTA & Contact Section */}
-      <section id="contact" className="py-12 bg-slate-50/50 overflow-hidden relative z-10">
+      <section data-page-builder-section-key="home.contact_cta" id="contact" className="py-12 bg-slate-50/50 overflow-hidden relative z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-600 opacity-5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
         </div>

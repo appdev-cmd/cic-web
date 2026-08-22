@@ -24,14 +24,21 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
   onConfirm,
 }) => {
   const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('');
   const [draftIds, setDraftIds] = useState<string[]>(selectedIds);
 
   React.useEffect(() => {
     if (isOpen) {
       setDraftIds(selectedIds);
       setQuery('');
+      setFilter('');
     }
   }, [isOpen, selectedIds]);
+
+  const availableFilters = useMemo(() => Array.from(new Set(options
+    .filter((item) => item.entityType === entityType)
+    .map((item) => item.description.split('·').at(-1)?.trim())
+    .filter((value): value is string => Boolean(value)))), [entityType, options]);
 
   const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -39,11 +46,12 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
       (item) =>
         item.entityType === entityType &&
         (item.status ?? 'published') === 'published' &&
+        (!filter || item.description.includes(filter)) &&
         (!normalizedQuery ||
           item.label.toLowerCase().includes(normalizedQuery) ||
           item.description.toLowerCase().includes(normalizedQuery)),
     );
-  }, [entityType, options, query]);
+  }, [entityType, filter, options, query]);
 
   if (!isOpen) return null;
 
@@ -70,7 +78,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
           <div>
             <h2 className="text-base font-bold text-slate-950 dark:text-white">Chọn {entityTypeLabels[entityType]}</h2>
-            <p className="mt-1 text-xs text-slate-500">Chọn thủ công tối đa {limit} mục. Không có chế độ tự động.</p>
+            <p className="mt-1 text-xs text-slate-500">Tìm kiếm, lọc và chọn tối đa {limit} mục từ module gốc.</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800" aria-label="Đóng">
             <X className="h-5 w-5" />
@@ -79,11 +87,17 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
 
         <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
           <div className="min-h-0 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r dark:border-slate-800">
-            <div className="relative mb-3 flex items-center">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Search className="h-4 w-4 text-slate-400" />
+            <div className="mb-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_180px]">
+              <div className="relative flex items-center">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Search className="h-4 w-4 text-slate-400" />
+                </div>
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Tìm ${entityTypeLabels[entityType].toLowerCase()}...`} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
               </div>
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Tìm ${entityTypeLabels[entityType].toLowerCase()}...`} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800" />
+              <select value={filter} onChange={(event) => setFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800">
+                <option value="">Tất cả phân loại</option>
+                {availableFilters.map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
             </div>
             <div className="max-h-[48vh] space-y-2 overflow-y-auto pr-1">
               {filteredOptions.map((item) => {
@@ -122,7 +136,7 @@ export const PageEntityPickerModal: React.FC<PageEntityPickerModalProps> = ({
 
         <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
           <CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton>
-          <CmsButton onClick={() => { onConfirm(draftIds); onClose(); }}>Xác nhận lựa chọn</CmsButton>
+          <CmsButton onClick={() => { onConfirm(draftIds); onClose(); }}>Thêm {draftIds.length} mục</CmsButton>
         </div>
       </div>
     </div>
