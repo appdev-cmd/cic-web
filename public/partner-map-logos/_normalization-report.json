@@ -1,0 +1,247 @@
+﻿[
+    {
+        "Asset":  "01-pytha-lab.png",
+        "Original":  "592x165",
+        "Normalized":  "592x165",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "02-opera-software-company-inc.png",
+        "Original":  "500x217",
+        "Normalized":  "500x217",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "04-emmegi.png",
+        "Original":  "1325x321",
+        "Normalized":  "1325x321",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "05-roomvo.png",
+        "Original":  "140x41",
+        "Normalized":  "140x41",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "06-seequent-bentley-system.png",
+        "Original":  "1813x294",
+        "Normalized":  "1813x294",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "08-deswik.png",
+        "Original":  "1587x412",
+        "Normalized":  "1587x412",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "09-metsims.png",
+        "Original":  "148x47",
+        "Normalized":  "148x47",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "10-stx.png",
+        "Original":  "206x78",
+        "Normalized":  "206x78",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "11-instral.png",
+        "Original":  "341x102",
+        "Normalized":  "341x102",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "12-csi.png",
+        "Original":  "300x300",
+        "Normalized":  "300x300",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "13-bentley-system.png",
+        "Original":  "1286x390",
+        "Normalized":  "1286x390",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "14-gstarsoft.png",
+        "Original":  "400x75",
+        "Normalized":  "400x75",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "15-prokon.png",
+        "Original":  "6504x1523",
+        "Normalized":  "6504x1523",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "17-allplan.png",
+        "Original":  "1500x421",
+        "Normalized":  "1500x421",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "18-idea-statica.png",
+        "Original":  "1169x201",
+        "Normalized":  "1169x201",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "19-deltares.png",
+        "Original":  "1600x934",
+        "Normalized":  "1299x636",
+        "Processing":  "transparent-cropped",
+        "Status":  "READY"
+    },
+    {
+        "Asset":  "20-graitec.png",
+        "Original":  "7480x1233",
+        "Normalized":  "7480x1233",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "21-hexagon.png",
+        "Original":  "1234x347",
+        "Normalized":  "1234x347",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "22-ptv.png",
+        "Original":  "2132x737",
+        "Normalized":  "2132x737",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "23-piletest.png",
+        "Original":  "402x200",
+        "Normalized":  "402x200",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "24-zx-lidar.png",
+        "Original":  "496x101",
+        "Normalized":  "496x101",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "25-kritikal.png",
+        "Original":  "1218x418",
+        "Normalized":  "1218x418",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "26-htri.png",
+        "Original":  "130x50",
+        "Normalized":  "130x50",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "27-geosig.png",
+        "Original":  "2584x784",
+        "Normalized":  "2584x784",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "28-dnv.png",
+        "Original":  "330x142",
+        "Normalized":  "330x142",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "29-radio-detection-spx.png",
+        "Original":  "3883x263",
+        "Normalized":  "3883x263",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "30-ansys.png",
+        "Original":  "752x256",
+        "Normalized":  "752x256",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "32-agi.png",
+        "Original":  "245x64",
+        "Normalized":  "245x64",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "33-geoscanner.png",
+        "Original":  "3277x732",
+        "Normalized":  "3277x732",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "34-foxit.png",
+        "Original":  "7052x2842",
+        "Normalized":  "7052x2842",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "35-autodesk.png",
+        "Original":  "2560x428",
+        "Normalized":  "2560x428",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "36-bimage.png",
+        "Original":  "1565x338",
+        "Normalized":  "1565x338",
+        "Processing":  "opaque-or-edge-touching-review",
+        "Status":  "REVIEW"
+    },
+    {
+        "Asset":  "03-lantek.svg",
+        "Original":  "SVG",
+        "Normalized":  "SVG",
+        "Processing":  "original-vector-preserved",
+        "Status":  "READY"
+    },
+    {
+        "Asset":  "07-maptek.svg",
+        "Original":  "SVG",
+        "Normalized":  "SVG",
+        "Processing":  "original-vector-preserved",
+        "Status":  "READY"
+    },
+    {
+        "Asset":  "16-glodon.svg",
+        "Original":  "SVG",
+        "Normalized":  "SVG",
+        "Processing":  "original-vector-preserved",
+        "Status":  "READY"
+    }
+]

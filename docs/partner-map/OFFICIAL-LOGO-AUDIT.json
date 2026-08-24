@@ -1,0 +1,724 @@
+﻿[
+    {
+        "id":  "lantek",
+        "website":  "https://www.lantek.com/us",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "lantek-02.png",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/LOGO_KIMAK._png_1.png",
+                               "contentType":  "image/png",
+                               "bytes":  23670
+                           },
+                           {
+                               "file":  "lantek-03.png",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/mace-LOGO.png",
+                               "contentType":  "image/png",
+                               "bytes":  20947
+                           },
+                           {
+                               "file":  "lantek-04.png",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/Southern-Design-Logo.png",
+                               "contentType":  "image/png",
+                               "bytes":  7620
+                           },
+                           {
+                               "file":  "lantek-05.jpg",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/Seeco_UK_-_Logo.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  22300
+                           },
+                           {
+                               "file":  "lantek-06.jpg",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/Jorgensen_-_Logo_.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  7741
+                           },
+                           {
+                               "file":  "lantek-07.jpg",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/Oxymax__EN__-_Logo.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  4773
+                           },
+                           {
+                               "file":  "lantek-08.png",
+                               "url":  "https://www.lantek.com/media/uploads/casestudies/LOGO_KIMAK._png_.png",
+                               "contentType":  "image/png",
+                               "bytes":  23670
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "roomvo",
+        "website":  "https://get.roomvo.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "roomvo-02.png",
+                               "url":  "https://get.roomvo.com/wp-content/uploads/2024/01/Roomvo-Logo-1000px.png",
+                               "contentType":  "image/png",
+                               "bytes":  14369
+                           },
+                           {
+                               "file":  "roomvo-03.webp",
+                               "url":  "https://get.roomvo.com/wp-content/uploads/2025/07/FC-News-logo-1-1024x150.webp",
+                               "contentType":  "image/webp",
+                               "bytes":  15888
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "stx",
+        "website":  "https://stxgroup.com/",
+        "status":  "BLOCKED",
+        "pageStatus":  null,
+        "candidates":  [
+
+                       ],
+        "error":  "The request was aborted: Could not create SSL/TLS secure channel."
+    },
+    {
+        "id":  "csi",
+        "website":  "https://www.csiamerica.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "bentley",
+        "website":  "https://www.bentley.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "bentley-02.png",
+                               "url":  "https://www.bentley.com/wp-content/uploads/hatch-logo-1-1-2.png",
+                               "contentType":  "image/png",
+                               "bytes":  1679
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "kritikal",
+        "website":  "https://kritikalsolutions.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "kritikal-01.png",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2022/10/KritiKal-Logo-Black.png",
+                               "contentType":  "image/png",
+                               "bytes":  158915
+                           },
+                           {
+                               "file":  "kritikal-02.png",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2022/12/KritiKal-Logo-Black.png",
+                               "contentType":  "image/png",
+                               "bytes":  158915
+                           },
+                           {
+                               "file":  "kritikal-03.jpg",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2022/08/FITT-Logo-150x150.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  4509
+                           },
+                           {
+                               "file":  "kritikal-04.jpg",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2022/08/IIT-Delhi-Logo-150x150.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  8469
+                           },
+                           {
+                               "file":  "kritikal-05.png",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2025/10/bangdesign-logo-150x150.png",
+                               "contentType":  "image/png",
+                               "bytes":  3819
+                           },
+                           {
+                               "file":  "kritikal-06.png",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2025/10/cii-logo-150x150.png",
+                               "contentType":  "image/png",
+                               "bytes":  7247
+                           },
+                           {
+                               "file":  "kritikal-07.png",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2025/11/Microchip-design-partner-logo-150x150.png",
+                               "contentType":  "image/png",
+                               "bytes":  8962
+                           },
+                           {
+                               "file":  "kritikal-08.png",
+                               "url":  "https://kritikalsolutions.com/wp-content/uploads/2025/11/partner-logo-150x150.png",
+                               "contentType":  "image/png",
+                               "bytes":  2590
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "htri",
+        "website":  "https://www.htri.net/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "ansys",
+        "website":  "https://ansys.synopsys.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "agi",
+        "website":  "https://www.agiusa.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "agi-01.png",
+                               "url":  "https://www.agiusa.com/sites/all/themes/agiusa/images/AGI-logo.png",
+                               "contentType":  "image/png",
+                               "bytes":  63557
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "foxit",
+        "website":  "https://www.foxit.com/pdf-reader/",
+        "status":  "BLOCKED",
+        "pageStatus":  null,
+        "candidates":  [
+
+                       ],
+        "error":  "The value size of the cookie is \u0027CSP_CONFIG=%22%20default-src%20https%3A%20wss%3A%20blob%3A%20\u0027self\u0027%20\u0027unsafe-inline\u0027%20*.foxit.com%20*.evergage.com%20*.visualwebsiteoptimizer.com%20*.vwo.com%3B%20img-src%20\u0027self\u0027%20data%3A%20*.google.com%20*.google-analytics.com%20*.googletagmanager.com%20*.stripe.com%20*.clarity.ms%20tribl.io%20*.linkedin.com%20*.bing.com%20*.g2crowd.com%20*.g2.com%20*.outbrain.com%20*.adroll.com%20*.reddit.com%20*.doubleclick.net%20*.facebook.com%20*.trustwave.com%20i.imgur.com%20*.visa.com%20*.mastercard.com%20*.discovercard.com%20*.discover.com%20*.online-metrix.net%20q.quora.com%20d.adroll.com%20*.zendesk.com%20ct.capterra.com%20*.clickagy.com%20srv.stackadapt.com%20*.sitescout.com%20id.rlcdn.com%20*.chilipiper.com%20*.gravatar.com%20secure.gravatar.com%20*.hotjar.com%20*.paypal.com%20*.google.com.hk%20*.google.com.tw%20*.company-target.com%20*.stackadapt.com%20cdn-cookieyes.com%20*.visualwebsiteoptimizer.com%20*.googleapis.com%20app.vwo.com%20useruploads.vwo.io%20*.paypalobjects.com%20fonts.gstatic.com%20*.google....\u0027. This exceeds the configured maximum size, which is \u00274096\u0027."
+    },
+    {
+        "id":  "autodesk",
+        "website":  "https://www.autodesk.com/",
+        "status":  "BLOCKED",
+        "pageStatus":  null,
+        "candidates":  [
+
+                       ],
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "id":  "seequent",
+        "website":  "https://www.seequent.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "seequent-01.png",
+                               "url":  "https://www.seequent.com/wp-content/uploads/cropped-Seequent-Logo_Monogram-White-infill-32x32.png",
+                               "contentType":  "image/png",
+                               "bytes":  349
+                           },
+                           {
+                               "file":  "seequent-02.png",
+                               "url":  "https://www.seequent.com/wp-content/uploads/cropped-Seequent-Logo_Monogram-White-infill-192x192.png",
+                               "contentType":  "image/png",
+                               "bytes":  1596
+                           },
+                           {
+                               "file":  "seequent-03.png",
+                               "url":  "https://www.seequent.com/wp-content/uploads/cropped-Seequent-Logo_Monogram-White-infill-180x180.png",
+                               "contentType":  "image/png",
+                               "bytes":  1497
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "metsims",
+        "website":  "https://metsims.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "metsims-01.png",
+                               "url":  "https://metsims.com/images/metsims-logo-148.png",
+                               "contentType":  "image/png",
+                               "bytes":  3770
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "zx-lidar",
+        "website":  "https://www.zxlidars.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "zx-lidar-06.png",
+                               "url":  "https://www.zxlidars.com/wp-content/uploads/2024/07/Suorakulmio-Logo-Tumma-HAFMEX-600x120.png",
+                               "contentType":  "image/png",
+                               "bytes":  14567
+                           },
+                           {
+                               "file":  "zx-lidar-07.jpg",
+                               "url":  "https://www.zxlidars.com/wp-content/uploads/2022/11/GED-logo-new-600x332.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  21704
+                           },
+                           {
+                               "file":  "zx-lidar-08.jpg",
+                               "url":  "https://www.zxlidars.com/wp-content/uploads/2024/07/PT.-Asia-Niaga-Instrument-logo-600x102.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  13903
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "radiodetection",
+        "website":  "https://spx.com/our-businesses/radiodetection/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "radiodetection-01.png",
+                               "url":  "https://spx.com/wp-content/uploads/2025/08/RADIODET_LOGO_R_RGB-scaled.png",
+                               "contentType":  "image/png",
+                               "bytes":  23274
+                           },
+                           {
+                               "file":  "radiodetection-02.png",
+                               "url":  "https://spx.com/wp-content/uploads/2025/08/logo1-01.png",
+                               "contentType":  "image/png",
+                               "bytes":  3734
+                           },
+                           {
+                               "file":  "radiodetection-03.png",
+                               "url":  "https://spx.com/wp-content/uploads/2025/09/SPX-Ten-Year-Anniversary-Logo-1.png",
+                               "contentType":  "image/png",
+                               "bytes":  23608
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "prokon",
+        "website":  "https://prokon.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "graitec",
+        "website":  "https://graitec.com/uk/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "graitec-03.png",
+                               "url":  "https://graitec.com/fr/wp-content/uploads/sites/16/2022/03/logo-loyalty-program-1.png",
+                               "contentType":  "image/png",
+                               "bytes":  28664
+                           },
+                           {
+                               "file":  "graitec-04.png",
+                               "url":  "https://graitec.com/uk/wp-content/uploads/sites/8/2024/02/autodesk-platinum-partner-logo-rgb-white.png",
+                               "contentType":  "image/png",
+                               "bytes":  11972
+                           },
+                           {
+                               "file":  "graitec-05.png",
+                               "url":  "https://graitec.com/uk/wp-content/uploads/sites/8/2022/09/logo-global-award-homepage-1-300x20.png",
+                               "contentType":  "image/png",
+                               "bytes":  6249
+                           },
+                           {
+                               "file":  "graitec-06.png",
+                               "url":  "https://graitec.com/uk/wp-content/uploads/sites/8/2022/06/autodesk-platinum-partner-logo-rgb-white-1-300x76.png",
+                               "contentType":  "image/png",
+                               "bytes":  12178
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "deltares",
+        "website":  "https://www.deltares.nl/en",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "deltares-01.png",
+                               "url":  "https://www.deltares.nl/images/logos/fabrique.png",
+                               "contentType":  "image/png",
+                               "bytes":  3841
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "pytha",
+        "website":  "https://www.pytha.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "pytha-01.png",
+                               "url":  "https://res.pytha.com/layout-image/a43e2c6a/pytha-logo.png",
+                               "contentType":  "image/png",
+                               "bytes":  116239
+                           },
+                           {
+                               "file":  "pytha-02.png",
+                               "url":  "https://res.pytha.com/layout-image/a43e2c6a/pytha-logo_592.png",
+                               "contentType":  "image/png",
+                               "bytes":  58295
+                           },
+                           {
+                               "file":  "pytha-03.png",
+                               "url":  "https://res.pytha.com/layout-image/a43e2c6a/instagram-logo_32.png",
+                               "contentType":  "image/png",
+                               "bytes":  2137
+                           },
+                           {
+                               "file":  "pytha-04.png",
+                               "url":  "https://res.pytha.com/layout-image/a43e2c6a/facebook-logo_32.png",
+                               "contentType":  "image/png",
+                               "bytes":  1300
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "allplan",
+        "website":  "https://www.allplan.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "allplan-02.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/AutobahnSW_01.png",
+                               "contentType":  "image/png",
+                               "bytes":  15227
+                           },
+                           {
+                               "file":  "allplan-03.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/wayss_freytagsw.png",
+                               "contentType":  "image/png",
+                               "bytes":  9377
+                           },
+                           {
+                               "file":  "allplan-04.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/AFRY_Logotype_Horizontal1_01.png",
+                               "contentType":  "image/png",
+                               "bytes":  7266
+                           },
+                           {
+                               "file":  "allplan-05.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/wtrLogo.png",
+                               "contentType":  "image/png",
+                               "bytes":  15429
+                           },
+                           {
+                               "file":  "allplan-06.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/schmidt_ploecker.png",
+                               "contentType":  "image/png",
+                               "bytes":  9191
+                           },
+                           {
+                               "file":  "allplan-07.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/DULogo.png",
+                               "contentType":  "image/png",
+                               "bytes":  46032
+                           },
+                           {
+                               "file":  "allplan-08.png",
+                               "url":  "https://www.allplan.com/fileadmin/user_upload/shared-files/logos/2024/ash2.png",
+                               "contentType":  "image/png",
+                               "bytes":  3588
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "ptv",
+        "website":  "https://www.ptvgroup.com/en",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "ptv-01.png",
+                               "url":  "https://www.ptvgroup.com/sites/default/files/styles/logo/public/2022-05/myPTV_Vissim_Customer_Aecom_0.png?itok=uusQQgrY",
+                               "contentType":  "image/png",
+                               "bytes":  2813
+                           },
+                           {
+                               "file":  "ptv-02.png",
+                               "url":  "https://www.ptvgroup.com/sites/default/files/styles/logo/public/2022-05/myPTV_Vissim_Customer_Aecom.png?itok=woXiUjm7",
+                               "contentType":  "image/png",
+                               "bytes":  2813
+                           },
+                           {
+                               "file":  "ptv-05.png",
+                               "url":  "https://www.ptvgroup.com/sites/default/files/styles/logo/public/2022-05/myPTV_Vissim_Customer_Atkins_black.png?itok=06jvPB8Z",
+                               "contentType":  "image/png",
+                               "bytes":  2502
+                           },
+                           {
+                               "file":  "ptv-06.png",
+                               "url":  "https://www.ptvgroup.com/sites/default/files/styles/logo/public/2022-05/myPTV_Vissim_Customer_Atkins.png?itok=ALCT7G8h",
+                               "contentType":  "image/png",
+                               "bytes":  2956
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "geosig",
+        "website":  "https://www.geosig.com/",
+        "status":  "BLOCKED",
+        "pageStatus":  null,
+        "candidates":  [
+
+                       ],
+        "error":  "Unable to connect to the remote server"
+    },
+    {
+        "id":  "opera",
+        "website":  "https://www.operacompany.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "opera-01.png",
+                               "url":  "https://www.operacompany.com/wp-content/uploads/2025/04/opera-company-logo-120x50.png",
+                               "contentType":  "image/png",
+                               "bytes":  3302
+                           },
+                           {
+                               "file":  "opera-02.webp",
+                               "url":  "https://www.operacompany.com/wp-content/uploads/2025/04/opera-company-logo-whitebg-2.webp",
+                               "contentType":  "image/webp",
+                               "bytes":  16836
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "emmegi",
+        "website":  "https://www.emmegi.com/en/home",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "emmegi-02.png",
+                               "url":  "https://www.emmegi.com/images/template/emmegi-logo-loading.png",
+                               "contentType":  "image/png",
+                               "bytes":  53736
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "idea-statica",
+        "website":  "https://www.ideastatica.com/vi",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "hexagon",
+        "website":  "https://hexagon.com/",
+        "status":  "BLOCKED",
+        "pageStatus":  null,
+        "candidates":  [
+
+                       ],
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "id":  "geoscanner",
+        "website":  "https://www.geoscanners.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "geoscanner-01.webp",
+                               "url":  "https://www.geoscanners.com/img/Logo.webp",
+                               "contentType":  "image/webp",
+                               "bytes":  4524
+                           },
+                           {
+                               "file":  "geoscanner-02.webp",
+                               "url":  "https://www.geoscanners.com/img/Menu_logo.webp",
+                               "contentType":  "image/webp",
+                               "bytes":  1946
+                           },
+                           {
+                               "file":  "geoscanner-03.webp",
+                               "url":  "https://www.geoscanners.com/img/Footer_logo.webp",
+                               "contentType":  "image/webp",
+                               "bytes":  4870
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "dnv",
+        "website":  "https://www.dnv.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "piletest",
+        "website":  "https://www.piletest.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "piletest-01.jpg",
+                               "url":  "https://static.wixstatic.com/media/655cef_b931158840d14062a9bbd9c105d1fe15~mv2.jpg/v1/fill/w_285,h_147,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Piletest%20logo%20org%20mid-small.jpg",
+                               "contentType":  "image/jpeg",
+                               "bytes":  7986
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "gstarsoft",
+        "website":  "https://www.gstarcad.net/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "gstarsoft-01.png",
+                               "url":  "https://cdn-sg-gw.gstarcad.net/resource/images/logo-newimg1.png",
+                               "contentType":  "image/png",
+                               "bytes":  3778
+                           },
+                           {
+                               "file":  "gstarsoft-02.png",
+                               "url":  "https://cdn-sg-gw.gstarcad.net/resource/images/index-banner-render-logo.png",
+                               "contentType":  "image/png",
+                               "bytes":  29156
+                           },
+                           {
+                               "file":  "gstarsoft-03.png",
+                               "url":  "https://cdn-sg-gw.gstarcad.net/resource/images/special/alert-window-logo.png",
+                               "contentType":  "image/png",
+                               "bytes":  4381
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "glodon",
+        "website":  "https://asia.glodon.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "bimage",
+        "website":  "https://bimageconsulting.com/",
+        "status":  "CANDIDATES_FOUND",
+        "pageStatus":  200,
+        "candidates":  [
+                           {
+                               "file":  "bimage-01.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2022/08/BIMAGE__Consulting_black-logo.png?fit=1565%2C338\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  14609
+                           },
+                           {
+                               "file":  "bimage-02.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2024/08/D5-Render-logo.png?fit=677%2C131\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  7614
+                           },
+                           {
+                               "file":  "bimage-03.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2023/02/autodesk-gold-partner-logo-rgb-black.png?fit=845%2C215\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  5752
+                           },
+                           {
+                               "file":  "bimage-04.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2022/08/SketchUp-logo-e1661837201197.png?fit=3840%2C940\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  34884
+                           },
+                           {
+                               "file":  "bimage-05.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2022/09/ideatelogo.png?fit=3260%2C1158\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  34345
+                           },
+                           {
+                               "file":  "bimage-06.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2022/09/large_enscape_logo_h.png?fit=318%2C140\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  3583
+                           },
+                           {
+                               "file":  "bimage-07.jpg",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2023/02/AUTOTURN_logo_tm-1.jpg?fit=1260%2C476\u0026ssl=1",
+                               "contentType":  "image/jpeg",
+                               "bytes":  79201
+                           },
+                           {
+                               "file":  "bimage-08.png",
+                               "url":  "https://i0.wp.com/bimageconsulting.com/wp-content/uploads/2023/02/v-ray-logo-5829E530DE-seeklogo.com_.png?fit=300%2C107\u0026ssl=1",
+                               "contentType":  "image/png",
+                               "bytes":  5450
+                           }
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "maptek",
+        "website":  "https://www.maptek.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    },
+    {
+        "id":  "deswik",
+        "website":  "https://www.deswik.com/",
+        "status":  "NO_OFFICIAL_ASSET_DISCOVERED",
+        "pageStatus":  200,
+        "candidates":  [
+
+                       ],
+        "error":  null
+    }
+]
