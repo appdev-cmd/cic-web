@@ -144,6 +144,7 @@ const content = {
       label: `Statistic ${index + 1}`,
     })),
   },
+  projects: { items: [] },
 };
 const markup = renderToStaticMarkup(
   <HomeView

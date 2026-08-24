@@ -58,6 +58,7 @@ type EditableSectionContract = {
   sectionKey: string;
   fields: readonly EditableFieldContract[];
   collections?: Readonly<Record<string, EditableCollectionContract>>;
+  references?: Readonly<Record<string, EditableReferenceContract>>;
 };
 ```
 
@@ -271,7 +272,7 @@ Shared visual-editing runtime must not:
 
 - Add a section only after production wiring and ownership are proven.
 - Extend semantics/codecs only after a real implemented case needs them.
-- Reference items retain entity ownership; their child text/image must not become embedded edits.
+- Reference items retain entity ownership; their child text/image must not become embedded edits. `EditableReferenceContract` declares entity/slot identity plus tri-state Replace/Reorder/Add/Remove capabilities, while entity resolution and ID mutation stay outside the interaction runtime.
 - Optional fields may later add `optional` metadata when an actual optional-slot interaction is implemented; Phase 5B does not add it speculatively.
 - Media/reference mutation APIs belong in future phases after a real section proves their contract.
 - New presentation stays in handcrafted production JSX, not a schema renderer.

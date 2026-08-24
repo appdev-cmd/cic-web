@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { AboutView } from '../../../web/components/AboutView';
 import { ContactView } from '../../../web/components/ContactView';
 import { HomeView } from '../../../web/components/HomeView';
-import { getLegacyAboutCapacityContent, getLegacyHomePageContent } from '../../../shared/page-content/legacyPageContent';
+import { getLegacyAboutCapacityContent, getLegacyAboutPageContent, getLegacyContactPageContent, getLegacyHomePageContent } from '../../../shared/page-content/legacyPageContent';
 import { resolvePageContent } from '../../../shared/page-content/resolvePageContent';
 import { ElementBindingRegistry } from '../../../shared/visual-editing/elementBindingRegistry';
 import { VisualEditingOverlay } from './VisualEditingOverlay';
@@ -16,6 +16,7 @@ import { draftSectionSchemas } from './pageBuilderDraftSchema';
 import { sectionDefinitions } from './pageBuilderRegistry';
 import { isCapabilityEnabled } from '../../../shared/visual-editing/editableSectionContract';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
+import { reorderReferenceItems, resolveReferenceItem } from './referenceSectionInteractions';
 
 interface PageBuilderVisualCanvasProps {
   mode?: 'edit' | 'preview';
@@ -80,7 +81,10 @@ function WebsitePage({ page, activeHeroSlide, editMode, bindingRegistry }: { pag
     });
     return <HomeView content={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} setCurrentView={noop} setActiveLink={noop} setActiveServiceId={noop} setActiveProjectId={noop} setPreSelectedNewsCategory={noop} setAboutSubTab={noop} setActiveEventId={noop} setIsRegisteringEvent={noop} previewSlideIndex={activeHeroSlide} editMode={editMode} />;
   }
-  if (page.pageType === 'about') return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} />;
+  if (page.pageType === 'about') {
+    const resolved = resolvePageContent({ pageType: 'about', version: page.draft, legacyFallback: getLegacyAboutPageContent() });
+    return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} aboutContent={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
+  }
   if (page.pageType === 'organization') return <AboutView activeTab="structure" setActiveTab={noop} onNavigateToContact={noop} />;
   if (page.pageType === 'capacity_experience') {
     const resolved = resolvePageContent({
@@ -90,7 +94,10 @@ function WebsitePage({ page, activeHeroSlide, editMode, bindingRegistry }: { pag
     });
     return <AboutView activeTab="experience" setActiveTab={noop} onNavigateToContact={noop} capacityContent={resolved.content.capacity} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
   }
-  if (page.pageType === 'contact') return <ContactView />;
+  if (page.pageType === 'contact') {
+    const resolved = resolvePageContent({ pageType: 'contact', version: page.draft, legacyFallback: getLegacyContactPageContent() });
+    return <ContactView content={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
+  }
   if (page.pageType === 'legal') return <LegalPage sections={page.draft.sections} />;
   return <LegalPage sections={page.draft.sections} />;
 }
@@ -195,17 +202,38 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     const descriptor = sortableDescriptorFromBinding(binding);
     const capability = descriptor
       ? sectionDefinitions[descriptor.sectionKey]?.editableContract?.collections?.[descriptor.collectionPath]?.capabilities.reorder
+        ?? sectionDefinitions[descriptor.sectionKey]?.editableContract?.references?.[descriptor.collectionPath]?.capabilities.reorder
       : undefined;
     return isCapabilityEnabled(capability) ? descriptor : null;
   }, [bindingRegistry]);
   const commitItemReorder = useCallback((request: SortableReorderRequest) => {
-    const capability = sectionDefinitions[request.sectionKey]?.editableContract?.collections?.[request.collectionPath]?.capabilities.reorder;
-    if (!isCapabilityEnabled(capability) || !onConfigValueChange) return false;
+    const definition = sectionDefinitions[request.sectionKey]?.editableContract;
+    const capability = definition?.collections?.[request.collectionPath]?.capabilities.reorder
+      ?? definition?.references?.[request.collectionPath]?.capabilities.reorder;
+    if (!isCapabilityEnabled(capability)) return false;
+    if (definition?.references?.[request.collectionPath]) {
+      const result = reorderReferenceItems(sections, request);
+      if (!result || !onReferenceItemsChange) return false;
+      onReferenceItemsChange(result.sectionId, result.entityType, result.entityIds);
+      return true;
+    }
+    if (!onConfigValueChange) return false;
     const result = reorderHomeStatsItems(sections, request);
     if (!result) return false;
     onConfigValueChange(result.sectionId, result.path, result.items);
     return true;
-  }, [onConfigValueChange, sections]);
+  }, [onConfigValueChange, onReferenceItemsChange, sections]);
+  const resolveReferenceItemByBindingId = useCallback((bindingId: string) => {
+    const node = bindingRegistry.getNode(bindingId);
+    const binding = node && bindingRegistry.getBindings(node).find((candidate) => candidate.bindingId === bindingId);
+    return binding ? resolveReferenceItem(binding) : null;
+  }, [bindingRegistry]);
+  const replaceReferenceItem = useCallback((descriptor: import('../../../shared/visual-editing/referenceItemInteraction').ReferenceItemDescriptor) => {
+    const section = sections.find((candidate) => candidate.sectionKey === descriptor.sectionKey);
+    const reference = section?.references?.find((candidate) => candidate.entityType === descriptor.entityType);
+    const index = reference?.entityIds.indexOf(descriptor.entityId) ?? -1;
+    if (section && index >= 0) onPickReference?.(section.id, reference!.entityType, index);
+  }, [onPickReference, sections]);
 
   useEffect(() => {
     const refresh = () => setDomVersion((version) => version + 1);
@@ -1152,7 +1180,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     {frameBody && createPortal(<>
       <div ref={attachRoot} onClickCapture={(event) => {
         const target = event.target as HTMLElement;
-        if (mode === 'edit' && target.closest('[data-ve-editable="true"]')) return;
+        if (mode === 'edit' && target.closest('[data-ve-editable="true"], [data-ve-semantic~="reference-item"]')) return;
         const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
         if (!sectionNode) { onSelect(''); return; }
         if (!onTextChange) return;
@@ -1184,7 +1212,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       }}>
         <WebsitePage page={{ ...page, draft: { ...page.draft, sections } }} activeHeroSlide={activeHeroSlide} editMode={mode === 'edit'} bindingRegistry={bindingRegistry} />
       </div>
-      <VisualEditingOverlay enabled={mode === 'edit'} root={interactionRoot} registry={bindingRegistry} resolveElementEdit={resolveElementEdit} commitElementEdit={commitElementEdit} resolveSortableItem={resolveSortableItem} commitItemReorder={commitItemReorder} />
+      <VisualEditingOverlay enabled={mode === 'edit'} root={interactionRoot} registry={bindingRegistry} resolveElementEdit={resolveElementEdit} commitElementEdit={commitElementEdit} resolveSortableItem={resolveSortableItem} commitItemReorder={commitItemReorder} resolveReferenceItem={resolveReferenceItemByBindingId} replaceReferenceItem={replaceReferenceItem} />
     </>, frameBody)}
   </div>;
 };

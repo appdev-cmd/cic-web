@@ -1,8 +1,10 @@
-import type { AboutCapacityMetricModel, CapacityExperiencePageModel, HomePageModel, HomeStatModel } from './models';
+import type { AboutCapacityMetricModel, AboutPageModel, AboutStrategyCoreValueModel, AboutTimelineMilestoneModel, CapacityExperiencePageModel, ContactBranchModel, ContactPageModel, HomePageModel, HomeProjectModel, HomeStatModel } from './models';
+import { resolveProjectEntity } from './resolveReferenceEntity';
 
 export interface PageContentSectionSource {
   sectionKey: string;
   config: Record<string, unknown>;
+  references?: readonly { entityType: string; entityIds: readonly string[] }[];
 }
 
 export interface PageContentVersionSource {
@@ -10,8 +12,8 @@ export interface PageContentVersionSource {
 }
 
 export interface PageContentDiagnostic {
-  code: 'INVALID_HOME_STATS' | 'UNPERSISTED_HOME_STAT_ID' | 'INVALID_ABOUT_CAPACITY' | 'UNPERSISTED_ABOUT_CAPACITY_METRIC_ID';
-  sectionKey: 'home.stats' | 'about.capacity';
+  code: 'INVALID_HOME_STATS' | 'UNPERSISTED_HOME_STAT_ID' | 'INVALID_HOME_PROJECTS' | 'UNRESOLVED_REFERENCE_ENTITY' | 'INVALID_ABOUT_CAPACITY' | 'UNPERSISTED_ABOUT_CAPACITY_METRIC_ID' | 'INVALID_ABOUT_TIMELINE' | 'UNPERSISTED_ABOUT_TIMELINE_ID' | 'INVALID_ABOUT_STRATEGY' | 'UNPERSISTED_ABOUT_CORE_VALUE_ID' | 'INVALID_CONTACT_BRANCHES';
+  sectionKey: 'home.stats' | 'home.projects' | 'about.capacity' | 'about.timeline' | 'about.strategy' | 'contact.branches';
   path: string;
   message: string;
 }
@@ -34,6 +36,11 @@ interface ResolveCapacityExperiencePageContentInput {
   legacyFallback: CapacityExperiencePageModel;
 }
 
+interface ResolveAboutPageContentInput { pageType: 'about'; version?: PageContentVersionSource; legacyFallback: AboutPageModel }
+interface ResolveContactPageContentInput { pageType: 'contact'; version?: PageContentVersionSource; legacyFallback: ContactPageModel }
+export interface ResolvedAboutPageContent { content: AboutPageModel; diagnostics: readonly PageContentDiagnostic[]; source: 'page-builder' | 'legacy' | 'invalid' }
+export interface ResolvedContactPageContent { content: ContactPageModel; diagnostics: readonly PageContentDiagnostic[]; source: 'page-builder' | 'legacy' | 'invalid' }
+
 export interface ResolvedCapacityExperiencePageContent {
   content: CapacityExperiencePageModel;
   diagnostics: readonly PageContentDiagnostic[];
@@ -44,23 +51,31 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function resolveHomeStats(
+function resolveHomeContent(
   version: PageContentVersionSource | undefined,
   legacyFallback: HomePageModel,
 ): ResolvedHomePageContent {
   const section = version?.sections.find((item) => item.sectionKey === 'home.stats');
-  if (!section) {
-    return {
-      content: legacyFallback,
-      diagnostics: [],
-      source: 'legacy',
-    };
+  const projectSection = version?.sections.find((item) => item.sectionKey === 'home.projects');
+  if (!section && !projectSection) return { content: legacyFallback, diagnostics: [], source: 'legacy' };
+  const diagnostics: PageContentDiagnostic[] = [];
+  const projectItems: HomeProjectModel[] = [];
+  if (projectSection) {
+    const reference = projectSection.references?.find((item) => item.entityType === 'project');
+    if (!reference) diagnostics.push({ code: 'INVALID_HOME_PROJECTS', sectionKey: 'home.projects', path: 'references.project', message: 'home.projects requires an ordered project reference.' });
+    else reference.entityIds.forEach((entityId, index) => {
+      const entity = resolveProjectEntity(entityId);
+      if (entity) projectItems.push(entity);
+      else diagnostics.push({ code: 'UNRESOLVED_REFERENCE_ENTITY', sectionKey: 'home.projects', path: `references.project.entityIds[${index}]`, message: `Project entity ${entityId} is unavailable in the production entity resolver.` });
+    });
   }
+  const projects = projectSection ? { items: projectItems } : legacyFallback.projects;
+  if (!section) return { content: { ...legacyFallback, projects }, diagnostics, source: 'page-builder' };
 
   const rawItems = section.config.items;
   if (!Array.isArray(rawItems)) {
     return {
-      content: { stats: { items: [] } },
+      content: { stats: { items: [] }, projects },
       diagnostics: [{
         code: 'INVALID_HOME_STATS',
         sectionKey: 'home.stats',
@@ -71,7 +86,6 @@ function resolveHomeStats(
     };
   }
 
-  const diagnostics: PageContentDiagnostic[] = [];
   const items: HomeStatModel[] = [];
 
   for (const [index, rawItem] of rawItems.entries()) {
@@ -82,7 +96,7 @@ function resolveHomeStats(
       || typeof rawItem.label !== 'string'
       || (rawItem.suffix !== undefined && typeof rawItem.suffix !== 'string')) {
       return {
-        content: { stats: { items: [] } },
+        content: { stats: { items: [] }, projects },
         diagnostics: [{
           code: 'INVALID_HOME_STATS',
           sectionKey: 'home.stats',
@@ -112,7 +126,7 @@ function resolveHomeStats(
   }
 
   return {
-    content: { stats: { items } },
+    content: { stats: { items }, projects },
     diagnostics,
     source: 'page-builder',
   };
@@ -150,8 +164,53 @@ function resolveAboutCapacity(input: ResolveCapacityExperiencePageContentInput):
   return { content: { capacity: { description, metrics } }, diagnostics, source: 'page-builder' };
 }
 
+function resolveAboutPage(input: ResolveAboutPageContentInput): ResolvedAboutPageContent {
+  if (!input.version) return { content: input.legacyFallback, diagnostics: [], source: 'legacy' };
+  const timelineSection = input.version.sections.find((item) => item.sectionKey === 'about.timeline');
+  const strategySection = input.version.sections.find((item) => item.sectionKey === 'about.strategy');
+  if (!timelineSection || !strategySection) return { content: input.legacyFallback, diagnostics: [], source: 'legacy' };
+  if (typeof timelineSection.config.title !== 'string' || !Array.isArray(timelineSection.config.milestones)) {
+    return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_TIMELINE', sectionKey: 'about.timeline', path: 'config', message: 'about.timeline requires title and milestones.' }], source: 'invalid' };
+  }
+  const diagnostics: PageContentDiagnostic[] = [];
+  const milestones: AboutTimelineMilestoneModel[] = [];
+  for (const [index, raw] of timelineSection.config.milestones.entries()) {
+    if (!isRecord(raw) || typeof raw.year !== 'string' || typeof raw.description !== 'string') return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_TIMELINE', sectionKey: 'about.timeline', path: `config.milestones[${index}]`, message: 'Timeline milestones require string year and description fields.' }], source: 'invalid' };
+    const persisted = typeof raw.id === 'string' && raw.id.length > 0;
+    if (!persisted) diagnostics.push({ code: 'UNPERSISTED_ABOUT_TIMELINE_ID', sectionKey: 'about.timeline', path: `config.milestones[${index}].id`, message: 'Timeline milestone identity is not persisted.' });
+    milestones.push({ id: persisted ? raw.id as string : `unpersisted-about-timeline-${index + 1}`, year: raw.year, description: raw.description });
+  }
+  const { title, subtitle, vision, mission, coreValues: rawCoreValues } = strategySection.config;
+  if ([title, subtitle, vision, mission].some((value) => typeof value !== 'string') || !Array.isArray(rawCoreValues)) return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_STRATEGY', sectionKey: 'about.strategy', path: 'config', message: 'about.strategy requires string copy and a coreValues array.' }], source: 'invalid' };
+  const coreValues: AboutStrategyCoreValueModel[] = [];
+  for (const [index, raw] of rawCoreValues.entries()) {
+    if (!isRecord(raw) || typeof raw.value !== 'string') return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_STRATEGY', sectionKey: 'about.strategy', path: `config.coreValues[${index}]`, message: 'Core values require an object with a string value.' }], source: 'invalid' };
+    const persisted = typeof raw.id === 'string' && raw.id.length > 0;
+    if (!persisted) diagnostics.push({ code: 'UNPERSISTED_ABOUT_CORE_VALUE_ID', sectionKey: 'about.strategy', path: `config.coreValues[${index}].id`, message: 'Core value identity is not persisted.' });
+    coreValues.push({ id: persisted ? raw.id as string : `unpersisted-about-core-value-${index + 1}`, value: raw.value });
+  }
+  return { content: { timeline: { title: timelineSection.config.title, milestones }, strategy: { title: title as string, subtitle: subtitle as string, vision: vision as string, mission: mission as string, coreValues } }, diagnostics, source: 'page-builder' };
+}
+
+function resolveContactPage(input: ResolveContactPageContentInput): ResolvedContactPageContent {
+  const section = input.version?.sections.find((item) => item.sectionKey === 'contact.branches');
+  if (!section) return { content: input.legacyFallback, diagnostics: [], source: 'legacy' };
+  if (typeof section.config.title !== 'string' || !Array.isArray(section.config.branches)) return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_CONTACT_BRANCHES', sectionKey: 'contact.branches', path: 'config', message: 'contact.branches requires a title and branches array.' }], source: 'invalid' };
+  const branches: ContactBranchModel[] = [];
+  for (const [index, raw] of section.config.branches.entries()) {
+    if (!isRecord(raw) || typeof raw.key !== 'string' || typeof raw.name !== 'string' || typeof raw.address !== 'string' || typeof raw.phone !== 'string' || typeof raw.email !== 'string' || typeof raw.workingHours !== 'string' || typeof raw.mapUrl !== 'string') return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_CONTACT_BRANCHES', sectionKey: 'contact.branches', path: `config.branches[${index}]`, message: 'Each contact branch requires key, name, address, phone, email, workingHours, and mapUrl.' }], source: 'invalid' };
+    branches.push({ id: raw.key, name: raw.name, address: raw.address, phone: raw.phone, email: raw.email, workingHours: raw.workingHours, mapUrl: raw.mapUrl, fax: typeof raw.fax === 'string' ? raw.fax : undefined, searchQuery: typeof raw.searchQuery === 'string' ? raw.searchQuery : raw.address });
+  }
+  return { content: { branches: { title: section.config.title, branches } }, diagnostics: [], source: 'page-builder' };
+}
+
 export function resolvePageContent(input: ResolveHomePageContentInput): ResolvedHomePageContent;
 export function resolvePageContent(input: ResolveCapacityExperiencePageContentInput): ResolvedCapacityExperiencePageContent;
-export function resolvePageContent(input: ResolveHomePageContentInput | ResolveCapacityExperiencePageContentInput): ResolvedHomePageContent | ResolvedCapacityExperiencePageContent {
-  return input.pageType === 'home' ? resolveHomeStats(input.version, input.legacyFallback) : resolveAboutCapacity(input);
+export function resolvePageContent(input: ResolveAboutPageContentInput): ResolvedAboutPageContent;
+export function resolvePageContent(input: ResolveContactPageContentInput): ResolvedContactPageContent;
+export function resolvePageContent(input: ResolveHomePageContentInput | ResolveCapacityExperiencePageContentInput | ResolveAboutPageContentInput | ResolveContactPageContentInput): ResolvedHomePageContent | ResolvedCapacityExperiencePageContent | ResolvedAboutPageContent | ResolvedContactPageContent {
+  if (input.pageType === 'home') return resolveHomeContent(input.version, input.legacyFallback);
+  if (input.pageType === 'about') return resolveAboutPage(input);
+  if (input.pageType === 'contact') return resolveContactPage(input);
+  return resolveAboutCapacity(input);
 }

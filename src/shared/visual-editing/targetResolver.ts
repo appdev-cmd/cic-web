@@ -11,6 +11,7 @@ export interface ResolvedVisualEditingTarget {
 export interface ResolveVisualEditingTargetOptions {
   sectionKey?: string;
   includeStructural?: boolean;
+  includeReferenceItems?: boolean;
 }
 
 export function resolveVisualEditingTarget(
@@ -27,8 +28,13 @@ export function resolveVisualEditingTarget(
     const bindings = registry.getBindings(node)
       .filter((binding) => !options.sectionKey || binding.sectionKey === options.sectionKey);
     const editableBindings = bindings.filter((binding) => binding.editable);
+    const referenceBindings = options.includeReferenceItems
+      ? bindings.filter((binding) => binding.semantic === 'reference-item')
+      : [];
     const candidates = editableBindings.length > 0
       ? editableBindings
+      : referenceBindings.length > 0
+        ? referenceBindings
       : options.includeStructural
         ? bindings
         : [];

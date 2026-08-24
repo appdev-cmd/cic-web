@@ -82,7 +82,6 @@ export const HomeView = ({
 }: HomeViewProps) => {
   const {
     heroSlides,
-    projects,
     newsItems,
     partners,
     marqueeTexts,
@@ -92,6 +91,7 @@ export const HomeView = ({
     homeSolutionsList,
   } = React.useMemo(getHomeData, []);
   const homeStats = content.stats.items;
+  const projects = content.projects.items;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
   const [activeProjectTab, setActiveProjectTab] = useState('all');
@@ -125,6 +125,13 @@ export const HomeView = ({
   useEffect(() => {
     if (typeof previewSlideIndex === 'number' && heroSlides.length > 0) setCurrentSlide(Math.min(Math.max(0, previewSlideIndex), heroSlides.length - 1));
   }, [heroSlides.length, previewSlideIndex]);
+
+  useEffect(() => {
+    if (!editMode) return;
+    setActiveProjectTab('all');
+    setProjectSearchQuery('');
+    setHoveredProjectIndex(null);
+  }, [editMode]);
 
   const filteredProjects = projects.filter(p => {
     const matchesTab = activeProjectTab === 'all' || p.type === activeProjectTab;
@@ -629,6 +636,7 @@ export const HomeView = ({
                 <button
                   key={tab.id}
                   onClick={() => {
+                    if (editMode) return;
                     setActiveProjectTab(tab.id);
                     setHoveredProjectIndex(null);
                   }}
@@ -648,6 +656,7 @@ export const HomeView = ({
                 type="text"
                 placeholder="Tìm kiếm dự án..."
                 value={projectSearchQuery}
+                readOnly={editMode}
                 onChange={(e) => {
                   setProjectSearchQuery(e.target.value);
                   setHoveredProjectIndex(null);
@@ -669,7 +678,7 @@ export const HomeView = ({
                 const totalVisible = displayProjects.length;
 
                 return displayProjects.map((proj, i) => {
-                  const isHovered = hoveredProjectIndex === i;
+                  const isHovered = !editMode && hoveredProjectIndex === i;
 
                   // Base 1/3 column width matching "Tất cả" grid layout
                   const baseWidth = '0 0 calc((100% - 2 * 1.5rem) / 3)';
@@ -712,10 +721,20 @@ export const HomeView = ({
 
                   return (
                     <div
-                      key={proj.id}
-                      onMouseEnter={() => setHoveredProjectIndex(i)}
-                      onFocus={() => setHoveredProjectIndex(i)}
+                      key={proj.entityId}
+                      {...bindElement<HTMLDivElement>(createElementBinding({
+                        sectionKey: 'home.projects',
+                        elementPath: createCollectionItemPath('items', proj.entityId),
+                        semantic: 'reference-item',
+                        ownership: 'reference',
+                        editable: false,
+                        itemId: proj.entityId,
+                        collectionPath: 'items',
+                      }), bindingRegistry)}
+                      onMouseEnter={() => { if (!editMode) setHoveredProjectIndex(i); }}
+                      onFocus={() => { if (!editMode) setHoveredProjectIndex(i); }}
                       onClick={() => {
+                        if (editMode) return;
                         // Toggle expansion on click for touch devices
                         if (hoveredProjectIndex === i) {
                           handleProjectClick();
@@ -724,6 +743,7 @@ export const HomeView = ({
                         }
                       }}
                       onKeyDown={(e) => { 
+                        if (editMode) return;
                         if (e.key === 'Enter' || e.key === ' ') { 
                           e.preventDefault(); 
                           if (hoveredProjectIndex === i) {

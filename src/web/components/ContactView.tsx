@@ -21,6 +21,16 @@ import {
   Search,
   Database
 } from 'lucide-react';
+import type { ContactPageModel, PageRenderPolicy } from '@shared/page-content/models';
+import { productionRenderPolicy } from '@shared/page-content/models';
+import { getLegacyContactPageContent } from '@shared/page-content/legacyPageContent';
+import { bindElement as bindElementRuntime, type BoundElementProps } from '@shared/visual-editing/bindElement';
+import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
+import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
+
+function bindElement<T extends Element>(registry: ElementBindingRegistry, binding: ReturnType<typeof createElementBinding>): BoundElementProps<T> {
+  return bindElementRuntime<T>(binding, registry);
+}
 
 interface ContactLead {
   id: string;
@@ -32,9 +42,16 @@ interface ContactLead {
   submittedAt: string;
 }
 
-export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void }) => {
+interface ContactViewProps {
+  onNavigateHome?: () => void;
+  content?: ContactPageModel;
+  renderPolicy?: PageRenderPolicy;
+  bindingRegistry?: ElementBindingRegistry;
+}
+
+export const ContactView = ({ onNavigateHome, content = getLegacyContactPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: ContactViewProps) => {
   // Navigation & Page State
-  const [activeBranch, setActiveBranch] = useState<'hn' | 'hcm'>('hn');
+  const [activeBranch, setActiveBranch] = useState(content.branches.branches[0]?.id ?? '');
   useEffect(() => {
     const timer = window.setTimeout(() => window.dispatchEvent(new CustomEvent('page-builder-dom-updated')), 0);
     return () => window.clearTimeout(timer);
@@ -71,30 +88,9 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
     });
   };
 
-  // Branch data
-  const branches = {
-    hn: {
-      name: 'Trụ sở chính Hà Nội',
-      address: 'Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Quận Thanh Xuân, Thành phố Hà Nội, Việt Nam',
-      tel: '024 3976 1381',
-      fax: '',
-      email: 'info@cic.com.vn',
-      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:00',
-      mapUrl: 'https://maps.google.com/maps?q=T%C3%B2a+nh%C3%A0+VG+Building%2C+235+Nguy%E1%BB%85n+Tr%C3%A3i%2C+Thanh+Xu%C3%A2n%2C+H%C3%A0+N%E1%BB%99i&t=&z=16&ie=UTF8&iwloc=&output=embed',
-      searchQuery: 'Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội, Việt Nam'
-    },
-    hcm: {
-      name: 'Chi nhánh TP. Hồ Chí Minh',
-      address: 'Số 36 Nguyễn Huy Lượng, Phường 14, Quận Bình Thạnh, TP. Hồ Chí Minh',
-      tel: '088 645 2020 - 028 628 99022 - 028 628 99033',
-      fax: '',
-      email: 'cichcm@cic.com.vn',
-      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:00',
-      mapUrl: 'https://maps.google.com/maps?q=36+Nguy%E1%BB%85n+Huy+L%C6%B0%E1%BB%A3ng%2C+Ph%C6%B0%E1%BB%9Dng+14%2C+B%C3%ACnh+Th%E1%BA%A1nh%2C+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh&t=&z=16&ie=UTF8&iwloc=&output=embed',
-      searchQuery: '36 Nguyễn Huy Lượng, Phường 14, Bình Thạnh, TP. Hồ Chí Minh, Việt Nam'
-    }
-  };
-  const activeBranchIndex = activeBranch === 'hn' ? 0 : 1;
+  const branches = content.branches.branches;
+  const activeBranchModel = branches.find((branch) => branch.id === activeBranch) ?? branches[0];
+  const activeBranchPath = activeBranchModel ? createCollectionItemPath('branches', activeBranchModel.id) : 'branches.unresolved';
 
 
 
@@ -189,56 +185,54 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
           <div className="lg:col-span-7 space-y-10">
             
             {/* OFFICE BRANCH SELECTOR & INFORMATION */}
-            <div data-page-builder-section-key="contact.branches" className="bg-white border border-slate-200 p-8 shadow-sm space-y-8 rounded-[10px]">
+            <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: 'branches', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'branches' }))} data-page-builder-section-key="contact.branches" className="bg-white border border-slate-200 p-8 shadow-sm space-y-8 rounded-[10px]">
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-5 gap-4">
                 <h2 className="text-xl font-black uppercase tracking-tight text-slate-950 flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-orange-600"></span> Bản đồ & Chi nhánh
+                  <span className="w-1.5 h-6 bg-orange-600"></span> <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}>{content.branches.title}</span>
                 </h2>
 
                 {/* Tabs branches */}
                 <div className="flex bg-slate-100 p-1 rounded-[8px]">
-                  {[
-                    { key: 'hn', label: 'Hà Nội' },
-                    { key: 'hcm', label: 'TP. HCM' }
-                  ].map((tab) => (
+                  {branches.map((tab) => (
                     <button
-                      key={tab.key}
+                      key={tab.id}
                       data-page-builder-preview-control="true"
-                      onClick={() => setActiveBranch(tab.key as any)}
+                      onClick={() => setActiveBranch(tab.id)}
                       className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer ${
-                        activeBranch === tab.key
+                        activeBranch === tab.id
                           ? 'bg-white text-slate-950 shadow-xs border border-slate-200/50'
                           : 'text-slate-500 hover:text-slate-900'
                       }`}
                     >
-                      {tab.label}
+                      {tab.name}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Branch Detailed Information */}
-              <AnimatePresence mode="wait">
+              {activeBranchModel && <AnimatePresence mode="wait">
                 <motion.div
+                  {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: activeBranchPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: activeBranchModel.id, collectionPath: 'branches' }))}
                   key={activeBranch}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={renderPolicy.motionEnabled ? { opacity: 0, y: 10 } : false}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+                  exit={renderPolicy.motionEnabled ? { opacity: 0, y: -10 } : undefined}
+                  transition={{ duration: renderPolicy.motionEnabled ? 0.2 : 0 }}
                   className="space-y-5"
                 >
                   <div className="space-y-3.5">
                     <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
                       <Building className="text-orange-600 shrink-0" size={19} />
-                      <span data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'name'])}>{branches[activeBranch].name}</span>
+                      <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.name`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))}>{activeBranchModel.name}</span>
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       
                       <div className="space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Địa chỉ văn phòng</span>
-                        <p data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'address'])} className="text-slate-800 leading-relaxed text-xs sm:text-[13px] font-medium">{branches[activeBranch].address}</p>
+                        <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.address`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))} className="text-slate-800 leading-relaxed text-xs sm:text-[13px] font-medium">{activeBranchModel.address}</p>
                       </div>
 
                       <div className="space-y-1.5 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
@@ -246,14 +240,14 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                         <div className="space-y-1 text-slate-800 text-xs sm:text-[13px] font-medium">
                           <p className="flex items-center gap-2">
                             <Phone className="text-orange-600 shrink-0" size={14} /> 
-                            <span>SĐT: <strong data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'phone'])} className="font-semibold text-slate-900">{branches[activeBranch].tel}</strong></span>
+                            <span>SĐT: <strong {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.phone`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))} className="font-semibold text-slate-900">{activeBranchModel.phone}</strong></span>
                           </p>
                           <p className="flex items-center gap-2">
                             <Mail className="text-orange-600 shrink-0" size={14} /> 
-                            <span>Email: <strong data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'email'])} className="font-semibold text-slate-900">{branches[activeBranch].email}</strong></span>
+                            <span>Email: <strong {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.email`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))} className="font-semibold text-slate-900">{activeBranchModel.email}</strong></span>
                           </p>
-                          {branches[activeBranch].fax && (
-                            <p className="text-slate-600 font-medium pl-5.5 text-[11px] sm:text-xs">Fax: {branches[activeBranch].fax}</p>
+                          {activeBranchModel.fax && (
+                            <p className="text-slate-600 font-medium pl-5.5 text-[11px] sm:text-xs">Fax: {activeBranchModel.fax}</p>
                           )}
                         </div>
                       </div>
@@ -261,7 +255,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                       <div className="md:col-span-2 space-y-1 bg-slate-50 border border-slate-100 p-4 rounded-[8px]">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Thời gian làm việc</span>
                         <p className="text-slate-800 text-xs sm:text-[13px] font-medium flex items-center gap-2">
-                          <Clock className="text-orange-600 shrink-0" size={14} /> <span data-page-builder-config-path={JSON.stringify(['branches', activeBranchIndex, 'workingHours'])}>{branches[activeBranch].workingHours}</span>
+                          <Clock className="text-orange-600 shrink-0" size={14} /> <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.workingHours`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))}>{activeBranchModel.workingHours}</span>
                         </p>
                       </div>
 
@@ -273,7 +267,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Bản đồ Google Maps</span>
                       <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branches[activeBranch].searchQuery)}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activeBranchModel.searchQuery)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-700 hover:underline transition-all"
@@ -285,8 +279,8 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                     {/* Google Maps Embed iframe */}
                     <div className="h-80 bg-slate-200 shadow-inner relative overflow-hidden rounded-[10px] border border-slate-200">
                       <iframe
-                        title={branches[activeBranch].name}
-                        src={branches[activeBranch].mapUrl}
+                        title={activeBranchModel.name}
+                        src={activeBranchModel.mapUrl}
                         width="100%"
                         height="100%"
                         style={{ border: 0 }}
@@ -299,7 +293,7 @@ export const ContactView = ({ onNavigateHome }: { onNavigateHome?: () => void })
                   </div>
 
                 </motion.div>
-              </AnimatePresence>
+              </AnimatePresence>}
 
             </div>
 

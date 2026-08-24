@@ -63,24 +63,29 @@ import {
 } from '../data/aboutData';
 
 import { SectionHeader } from '@shared/components/Typography';
-import type { AboutCapacityModel, PageRenderPolicy } from '@shared/page-content/models';
+import type { AboutCapacityModel, AboutPageModel, PageRenderPolicy } from '@shared/page-content/models';
 import { productionRenderPolicy } from '@shared/page-content/models';
-import { getLegacyAboutCapacityContent } from '@shared/page-content/legacyPageContent';
-import { bindElement } from '@shared/visual-editing/bindElement';
+import { getLegacyAboutCapacityContent, getLegacyAboutPageContent } from '@shared/page-content/legacyPageContent';
+import { bindElement as bindElementRuntime, type BoundElementProps } from '@shared/visual-editing/bindElement';
 import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import { GlobalPartnerMap } from './GlobalPartnerMap';
+
+function bindElement<T extends Element>(registry: ElementBindingRegistry, binding: ReturnType<typeof createElementBinding>): BoundElementProps<T> {
+  return bindElementRuntime<T>(binding, registry);
+}
 
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';
   setActiveTab: (tab: 'overview' | 'structure' | 'experience') => void;
   onNavigateToContact?: () => void;
   capacityContent?: AboutCapacityModel;
+  aboutContent?: AboutPageModel;
   renderPolicy?: PageRenderPolicy;
   bindingRegistry?: ElementBindingRegistry;
 }
 
-export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: AboutViewProps) => {
+export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: AboutViewProps) => {
   const homeAwards = useMemo(getHomeAwards, []);
   const partners = useMemo(getHomePartners, []);
   // Interactive active states for redesigned sections
@@ -278,10 +283,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center mb-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-[8px] mb-2">
-                        <span className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
+                        <span className={`w-2 h-2 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
                         <span className="text-[10px] font-black uppercase tracking-widest">Hành trình 35 năm</span>
                       </div>
-                      <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">Lịch sử phát triển</h2>
+                      <h2 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">{aboutContent.timeline.title}</h2>
                       <p className="text-slate-500 max-w-2xl mx-auto text-sm">Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.</p>
                     </div>
 
@@ -289,27 +294,22 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       {/* Horizontal Line - Thin */}
                       <div className="absolute top-[28px] left-[10%] right-[10%] h-[1px] bg-slate-300 hidden md:block"></div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 relative z-10">
-                        {[
-                          { year: '1990', title: 'Thành lập', desc: 'Ngày 27/11/1990, CIC chính thức ra đời, tiền thân là Trung tâm tin học, thuộc Bộ Xây dựng.' },
-                          { year: '2000', title: 'Trực thuộc Bộ', desc: 'Trở thành Công ty Tin học Xây dựng (CIC) thuộc Bộ Xây dựng.' },
-                          { year: '2006', title: 'Cổ phần hóa', desc: 'Được cổ phần hóa thành Công ty CP Tin học và Tư vấn Xây dựng.' },
-                          { year: '2019', title: 'Đổi tên & Gia nhập', desc: 'Trở thành Công ty CP Công nghệ & Tư vấn CIC (CIC) và thuộc VC Group — Tổ hợp gồm 10 công ty hàng đầu trong lĩnh vực xây dựng & các ngành kỹ thuật liên quan.' },
-                          { year: '2025', title: 'Đổi mới', desc: 'Dấu mốc 35 năm phát triển của CIC, thay đổi nhận diện, mở rộng phát triển, trong đó có các giải pháp AI, Phát triển bền vững một cách mạnh mẽ hơn.' },
-                        ].map((item, index) => (
-                          <div key={item.year} className="relative flex flex-col items-center text-center group">
+                      <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'milestones', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'milestones' }))} className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 relative z-10">
+                        {aboutContent.timeline.milestones.map((item) => {
+                          const itemPath = createCollectionItemPath('milestones', item.id);
+                          return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'milestones' }))} key={item.id} className="relative flex flex-col items-center text-center group">
                             {/* Dot */}
-                            <div className="hidden md:flex w-3 h-3 rounded-full bg-orange-500 ring-[6px] ring-white mb-6 relative z-10 items-center justify-center -translate-y-1/2 mt-[28px] group-hover:scale-150 group-hover:bg-orange-600 transition-all duration-300">
-                              <div className="absolute inset-0 rounded-full bg-orange-500 animate-ping opacity-50"></div>
+                            <div className={`hidden md:flex w-3 h-3 rounded-full bg-orange-500 ring-[6px] ring-white mb-6 relative z-10 items-center justify-center -translate-y-1/2 mt-[28px] ${renderPolicy.motionEnabled ? 'group-hover:scale-150 group-hover:bg-orange-600 transition-all duration-300' : ''}`}>
+                              <div className={`absolute inset-0 rounded-full bg-orange-500 opacity-50 ${renderPolicy.motionEnabled ? 'animate-ping' : ''}`}></div>
                             </div>
                             
                             {/* Content */}
                             <div className="w-full flex flex-col items-center md:-mt-4">
-                              <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">{item.year}</h3>
-                              <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
+                              <h3 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} className="text-3xl font-black text-slate-900 tracking-tighter mb-2">{item.year}</h3>
+                              <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} className="text-slate-600 text-sm leading-relaxed">{item.description}</p>
                             </div>
-                          </div>
-                        ))}
+                          </div>;
+                        })}
                       </div>
                     </div>
                   </div>
@@ -319,14 +319,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                 <section data-page-builder-section-key="about.strategy" className="py-10 bg-slate-50 border-b border-slate-100 z-10 relative overflow-hidden">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
-                      title="Định hướng chiến lược" 
-                      sub="Tầm nhìn kiến tạo giá trị công nghệ bền vững" 
+                      title={aboutContent.strategy.title}
+                      sub={aboutContent.strategy.subtitle}
+                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
                     />
                     
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                       {/* Left: Illustration */}
                       <div className="relative aspect-[4/5] rounded-[10px] overflow-hidden shadow-sm group hidden lg:block">
-                        <img src="/35nam_cic_1.JPG" alt="Định hướng chiến lược" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
+                        <img src="/35nam_cic_1.JPG" alt="Định hướng chiến lược" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
                       </div>
 
@@ -339,9 +341,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           </div>
                           <div>
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">Sứ mệnh</h3>
-                            <p className="text-slate-600 leading-relaxed text-sm md:text-base">
-                              Trở thành nhà cung cấp hàng đầu về các giải pháp ứng dụng công nghệ ICT và khoa học công nghệ khác cho các ngành kỹ thuật tại Việt Nam và các nước trong khu vực.
-                            </p>
+                            <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'mission', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{aboutContent.strategy.mission}</p>
                           </div>
                         </div>
 
@@ -352,9 +352,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           </div>
                           <div>
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">Tầm nhìn</h3>
-                            <p className="text-slate-600 leading-relaxed text-sm md:text-base">
-                              Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ CNTT hiện đại, có tính ứng dụng cao để hỗ trợ công tác nghiên cứu, sản xuất, điều hành tại Việt Nam; không ngừng hội nhập thế giới.
-                            </p>
+                            <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'vision', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{aboutContent.strategy.vision}</p>
                           </div>
                         </div>
 
@@ -365,19 +363,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           </div>
                           <div className="relative z-10 w-full">
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Giá trị cốt lõi</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 w-full">
-                              {[
-                                'Cam kết về chất lượng',
-                                'Tận tụy với khách hàng',
-                                'Đổi mới không ngừng',
-                                'Tinh thần tập thể',
-                                'Khích lệ - hài hoà'
-                              ].map((val, idx) => (
-                                <div key={idx} className="flex items-center gap-3">
+                            <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'coreValues', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'coreValues' }))} className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 w-full">
+                              {aboutContent.strategy.coreValues.map((item) => {
+                                const itemPath = createCollectionItemPath('coreValues', item.id);
+                                return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'coreValues' }))} key={item.id} className="flex items-center gap-3">
                                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></div>
-                                  <span className="text-slate-600 leading-relaxed text-sm md:text-base">{val}</span>
-                                </div>
-                              ))}
+                                  <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'coreValues' }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{item.value}</span>
+                                </div>;
+                              })}
                             </div>
                           </div>
                         </div>
@@ -766,7 +759,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   </h2>
                   <div className="w-16 h-1 bg-orange-600 mx-auto mt-3 mb-6"></div>
                   <p
-                    {...bindElement<HTMLParagraphElement>(createElementBinding({
+                    {...bindElementRuntime<HTMLParagraphElement>(createElementBinding({
                       sectionKey: 'about.capacity', elementPath: 'description', semantic: 'text', ownership: 'embedded', editable: true,
                     }), bindingRegistry)}
                     className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl"
@@ -775,7 +768,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   </p>
                   
                   <div
-                    {...bindElement<HTMLDivElement>(createElementBinding({
+                    {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                       sectionKey: 'about.capacity', elementPath: 'metrics', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'metrics',
                     }), bindingRegistry)}
                     className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full"
@@ -784,19 +777,19 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       const itemPath = createCollectionItemPath('metrics', metric.id);
                       return <div
                         key={metric.id}
-                        {...bindElement<HTMLDivElement>(createElementBinding({
+                        {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                           sectionKey: 'about.capacity', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: metric.id, collectionPath: 'metrics',
                         }), bindingRegistry)}
                         className={`bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center ${renderPolicy.motionEnabled ? 'hover:border-orange-500 hover:shadow-md transition-all' : ''}`}
                       >
                         <div
-                          {...bindElement<HTMLDivElement>(createElementBinding({
+                          {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                             sectionKey: 'about.capacity', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
                           }), bindingRegistry)}
                           className="text-3xl md:text-4xl font-black text-orange-600 mb-2"
                         >{metric.value}</div>
                         <div
-                          {...bindElement<HTMLDivElement>(createElementBinding({
+                          {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                             sectionKey: 'about.capacity', elementPath: `${itemPath}.label`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
                           }), bindingRegistry)}
                           className="text-xs md:text-sm font-bold text-slate-600 uppercase"
@@ -847,7 +840,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   </div>
                   
                   {/* Global Technology Partner Network Map Component */}
-                  <div className="w-full mb-12">
+                  <div className="mb-6 w-full md:mb-8">
                     <GlobalPartnerMap />
                   </div>
 

@@ -4,7 +4,8 @@ import { observeElementGeometry, readTextContentGeometry, type ElementGeometry }
 import { VisualEditingInteractionController } from '../../../shared/visual-editing/interactionState';
 import { resolveVisualEditingTarget } from '../../../shared/visual-editing/targetResolver';
 import { startInlineTextSession, type CommitElementEdit, type InlineTextEditDescriptor, type InlineTextSession } from '../../../shared/visual-editing/inlineTextEditing';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, RefreshCw } from 'lucide-react';
+import type { ReferenceItemDescriptor } from '../../../shared/visual-editing/referenceItemInteraction';
 import {
   adjacentSortableTarget,
   hitTestSortableCollection,
@@ -22,6 +23,8 @@ interface VisualEditingOverlayProps {
   commitElementEdit?: CommitElementEdit;
   resolveSortableItem?: (bindingId: string) => SortableItemDescriptor | null;
   commitItemReorder?: (request: SortableReorderRequest) => boolean;
+  resolveReferenceItem?: (bindingId: string) => ReferenceItemDescriptor | null;
+  replaceReferenceItem?: (descriptor: ReferenceItemDescriptor) => void;
 }
 
 interface DragState {
@@ -79,7 +82,7 @@ function geometryStyle(geometry: ElementGeometry): CSSProperties {
   };
 }
 
-export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enabled, root, registry, resolveElementEdit, commitElementEdit, resolveSortableItem, commitItemReorder }) => {
+export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enabled, root, registry, resolveElementEdit, commitElementEdit, resolveSortableItem, commitItemReorder, resolveReferenceItem, replaceReferenceItem }) => {
   const controller = useMemo(() => new VisualEditingInteractionController(registry), [registry]);
   const interactionState = useSyncExternalStore(
     controller.subscribe,
@@ -143,11 +146,15 @@ export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enab
       return undefined;
     }
 
-    const resolveTarget = (eventTarget: EventTarget | null) => resolveVisualEditingTarget(eventTarget, root, registry);
+    const resolveTarget = (eventTarget: EventTarget | null) => resolveVisualEditingTarget(eventTarget, root, registry, { includeReferenceItems: true });
     const handlePointerMove = (event: PointerEvent) => {
       if (controller.getState().editingBindingId || controller.getState().draggingBindingId) return;
       const fieldTarget = resolveTarget(event.target);
       controller.setHoveredTarget(fieldTarget);
+      if (fieldTarget && resolveReferenceItem?.(fieldTarget.bindingId)) {
+        setSortableHoverBindingId(fieldTarget.bindingId);
+        return;
+      }
       if (fieldTarget || !resolveSortableItem) {
         setSortableHoverBindingId(null);
         return;
@@ -164,6 +171,11 @@ export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enab
     };
     const handleClick = (event: MouseEvent) => {
       const target = resolveTarget(event.target);
+      const referenceTarget = target ? resolveReferenceItem?.(target.bindingId) : null;
+      if (referenceTarget) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       const editingBindingId = controller.getState().editingBindingId;
       const activeNode = editingBindingId ? registry.getNode(editingBindingId) : null;
       const EventTargetNode = activeNode?.ownerDocument.defaultView?.Node;
@@ -210,7 +222,7 @@ export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enab
       controller.clearHover();
       controller.clearSelection();
     };
-  }, [commitElementEdit, controller, enabled, registry, resolveElementEdit, resolveSortableItem, root]);
+  }, [commitElementEdit, controller, enabled, registry, resolveElementEdit, resolveReferenceItem, resolveSortableItem, root]);
 
   const selectedGeometry = useBindingGeometry(
     enabled ? interactionState.selectedBindingId : null,
@@ -234,6 +246,13 @@ export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enab
     registry,
     registryRevision,
   );
+  const activeReferenceBindingId = interactionState.selectedBindingId && resolveReferenceItem?.(interactionState.selectedBindingId)
+    ? interactionState.selectedBindingId
+    : interactionState.hoveredBindingId && resolveReferenceItem?.(interactionState.hoveredBindingId)
+      ? interactionState.hoveredBindingId
+      : null;
+  const activeReference = activeReferenceBindingId ? resolveReferenceItem?.(activeReferenceBindingId) ?? null : null;
+  const referenceGeometry = useBindingGeometry(enabled ? activeReferenceBindingId : null, registry, registryRevision);
 
   const beginDrag = (descriptor: SortableItemDescriptor, clientX: number, clientY: number, keyboard: boolean) => {
     if (controller.getState().editingBindingId) return;
@@ -297,9 +316,24 @@ export const VisualEditingOverlay: React.FC<VisualEditingOverlayProps> = ({ enab
         background: 'transparent',
       }}
     /> : null}
+    {activeReference?.replaceable && referenceGeometry && !dragState ? <button
+      type="button"
+      aria-label="Thay nội dung tham chiếu"
+      data-ve-reference-action="replace"
+      onClick={(event) => { event.preventDefault(); event.stopPropagation(); replaceReferenceItem?.(activeReference); }}
+      style={{
+        position: 'fixed', zIndex: 2147483647,
+        left: referenceGeometry.left + referenceGeometry.width - 58,
+        top: referenceGeometry.top + 6,
+        width: 24, height: 24, display: 'grid', placeItems: 'center',
+        border: '1px solid rgb(148 163 184 / 0.52)', borderRadius: 7,
+        background: 'rgb(255 255 255 / 0.9)', color: '#64748b',
+        boxShadow: '0 2px 7px rgb(15 23 42 / 0.09)', cursor: 'pointer',
+      }}
+    ><RefreshCw aria-hidden="true" size={13} strokeWidth={2} /></button> : null}
     {sortableGeometry && (sortableHoverBindingId || dragState) ? <button
       type="button"
-      aria-label="Kéo để sắp xếp chỉ số"
+      aria-label="Kéo để sắp xếp mục"
       aria-pressed={dragState?.keyboard ?? false}
       data-ve-sortable-handle={`${(dragState?.source ?? resolveSortableItem?.(sortableHoverBindingId ?? ''))?.sectionKey ?? ''}.${(dragState?.source ?? resolveSortableItem?.(sortableHoverBindingId ?? ''))?.collectionPath ?? ''}`}
       onPointerEnter={() => setSortableHoverBindingId(dragState?.source.binding.bindingId ?? sortableHoverBindingId)}

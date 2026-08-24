@@ -74,6 +74,8 @@ interface SectionHeaderProps {
   dark?: boolean;
   className?: string;
   as?: 'h1' | 'h2';
+  titleProps?: React.HTMLAttributes<HTMLHeadingElement> & { ref?: React.Ref<HTMLHeadingElement>; 'data-ve-section'?: string; 'data-ve-element'?: string; 'data-ve-editable'?: 'true'; 'data-ve-semantic'?: string };
+  subProps?: React.HTMLAttributes<HTMLParagraphElement> & { ref?: React.Ref<HTMLParagraphElement>; 'data-ve-section'?: string; 'data-ve-element'?: string; 'data-ve-editable'?: 'true'; 'data-ve-semantic'?: string };
 }
 
 export const SectionHeader = ({
@@ -82,16 +84,18 @@ export const SectionHeader = ({
   dark = false,
   className = '',
   as: Tag = 'h2',
+  titleProps,
+  subProps,
 }: SectionHeaderProps) => {
   const titleColor = dark ? toneText.inverse : toneText.default;
   const subColor = dark ? 'text-slate-400' : toneText.muted;
 
   return (
     <div className={`text-center mb-6 ${className}`.trim()}>
-      <Tag className={`${typeH2} mb-3 ${titleColor}`}>{title}</Tag>
+      <Tag {...titleProps} className={`${typeH2} mb-3 ${titleColor} ${titleProps?.className ?? ''}`.trim()}>{title}</Tag>
       <div className="w-16 h-1 bg-orange-600 mx-auto mb-4" aria-hidden="true" />
       {sub ? (
-        <p className={`${typeCaption} ${subColor} max-w-[52ch] mx-auto`}>{sub}</p>
+        <p {...subProps} className={`${typeCaption} ${subColor} max-w-[52ch] mx-auto ${subProps?.className ?? ''}`.trim()}>{sub}</p>
       ) : null}
     </div>
   );

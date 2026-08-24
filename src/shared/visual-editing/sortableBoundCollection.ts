@@ -37,7 +37,7 @@ export function isPersistentSortableId(itemId: string): boolean {
 }
 
 export function sortableDescriptorFromBinding(binding: EditableElementBinding): SortableItemDescriptor | null {
-  if (binding.semantic !== 'embedded-item'
+  if (!['embedded-item', 'reference-item'].includes(binding.semantic)
     || !binding.itemId
     || !binding.collectionPath
     || !isPersistentSortableId(binding.itemId)) return null;
