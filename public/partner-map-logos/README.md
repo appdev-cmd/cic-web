@@ -13,9 +13,11 @@ download original → detect actual format → decode/validate → remove edge-c
 - Rendering metadata lives in `src/web/data/representativePartners.ts`: every logo uses `fit: contain`, plus a visual-weight class and preferred light/dark surface.
 - Maptek's supplied SVG is white artwork and therefore declares a dark preferred surface. It was not recolored.
 
-## Deduplication
+## Dataset updates
 
-The input contains 36 rows. `Glodon - Cubicost` and `Glodon - Magicad` share the same real brand and source asset, so they resolve to one `Glodon` entry and `16-glodon.svg`. The final dataset contains 35 brands in 17 country groups.
+The original input contains 36 rows. `Glodon - Cubicost` and `Glodon - Magicad` share the same real brand and source asset, so they resolve to one `Glodon` entry and `35-glodon.svg`.
+
+The supplied update replaces the Geoscanner, PYTHA, Autodesk, and Radio Detection - SPX artwork; removes Instral; and adds Gigaton, Lander Simulation, QYSEA, AI Architecture, CHC, Metron, CYPE, and PRé Sustainability. The current dataset contains 42 brands in 17 country groups.
 
 ## Source exceptions
 

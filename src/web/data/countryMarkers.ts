@@ -1,4 +1,5 @@
 export type PercentagePoint = { x: number; y: number };
+export type NormalizedPoint = { x: number; y: number };
 
 export const countryMarkerPositions = {
   usa: { x: 22.8, y: 35.3 },
@@ -11,6 +12,7 @@ export const countryMarkerPositions = {
   switzerland: { x: 52.31, y: 31.21 },
   italy: { x: 53.46, y: 34.11 },
   czechia: { x: 54.42, y: 29.26 },
+  spain: { x: 48.72, y: 36.9 },
   sweden: { x: 54.68, y: 18.25 },
   norway: { x: 53.5, y: 15.5 },
   israel: { x: 59.72, y: 39.791 },
@@ -35,32 +37,33 @@ export type CountryMarkerConfig = {
 export const countryMarkers: readonly CountryMarkerConfig[] = [
   { countryId: 'usa' }, { countryId: 'canada' }, { countryId: 'uk' }, { countryId: 'ireland' },
   { countryId: 'france' }, { countryId: 'netherlands' }, { countryId: 'germany' }, { countryId: 'switzerland' },
-  { countryId: 'italy' }, { countryId: 'czechia' }, { countryId: 'sweden' }, { countryId: 'norway' },
-  { countryId: 'israel' }, { countryId: 'china' }, { countryId: 'south-korea' }, { countryId: 'singapore' },
+  { countryId: 'italy' }, { countryId: 'czechia' }, { countryId: 'spain' }, { countryId: 'sweden' }, { countryId: 'norway' },
+  { countryId: 'israel' }, { countryId: 'china' }, { countryId: 'singapore' },
   { countryId: 'australia' },
 ] as const;
 
 /**
- * Global ocean-layout result. Positions are canvas coordinates, deliberately
+ * Global ocean-layout result. Positions are normalized against the full SVG
+ * canvas so exported edit-mode layouts remain responsive. They are deliberately
  * independent from country order and marker coordinates. The packing pass
  * rasterizes every land path, reserves a 150px Vietnam protection radius,
  * uses full 116x62 logo boxes, balances three horizontal density bands, and
  * rejects placements that touch land, another logo, a pin, or canvas bounds.
  */
 export const partnerLogoPositions = {
-  lantek: { x: 20, y: 30 }, roomvo: { x: 80, y: 125 }, stx: { x: 10, y: 220 },
-  csi: { x: 110, y: 315 }, bentley: { x: 20, y: 410 }, kritikal: { x: 90, y: 505 },
-  htri: { x: 45, y: 600 }, ansys: { x: 450, y: 680 }, agi: { x: 20, y: 800 },
-  foxit: { x: 130, y: 990 }, autodesk: { x: 330, y: 1000 }, seequent: { x: 300, y: 42 },
-  metsims: { x: 620, y: 380 }, 'zx-lidar': { x: 600, y: 450 }, radiodetection: { x: 650, y: 535 },
-  prokon: { x: 465, y: 48 }, graitec: { x: 690, y: 770 }, deltares: { x: 600, y: 40 },
-  pytha: { x: 740, y: 860 }, allplan: { x: 1600, y: 72 }, ptv: { x: 760, y: 48 },
-  geosig: { x: 1110, y: 710 }, opera: { x: 880, y: 980 }, emmegi: { x: 1020, y: 820 },
-  'idea-statica': { x: 1640, y: 142 }, hexagon: { x: 1128, y: 42 }, geoscanner: { x: 1320, y: 36 },
-  dnv: { x: 900, y: 130 }, piletest: { x: 1200, y: 610 }, gstarsoft: { x: 1548, y: 458 },
-  glodon: { x: 1630, y: 540 }, instral: { x: 1628, y: 320 }, bimage: { x: 1320, y: 750 },
-  maptek: { x: 1650, y: 620 }, deswik: { x: 1430, y: 1010 },
-} as const satisfies Readonly<Record<string, { x: number; y: number }>>;
+  lantek: { x: 0.091631, y: 0 }, roomvo: { x: 0.031457, y: 0.069863 }, stx: { x: 0.025037, y: 0.139031 },
+  csi: { x: 0, y: 0.647554 }, bentley: { x: 0.002669, y: 0.201182 }, kritikal: { x: 0.016884, y: 0.286004 },
+  htri: { x: 0.003247, y: 0.35204 }, ansys: { x: 0.251948, y: 0.583837 }, agi: { x: 0.024747, y: 0.708604 },
+  foxit: { x: 0.082612, y: 0.803107 }, autodesk: { x: 0.189178, y: 0.798469 }, seequent: { x: 0.166667, y: 0.0375 },
+  metsims: { x: 0.393145, y: 0.474955 }, 'zx-lidar': { x: 0.377491, y: 0.321429 }, radiodetection: { x: 0.347474, y: 0.382711 }, gigaton: { x: 0.378138, y: 0.290121 },
+  prokon: { x: 0.259632, y: 0.038682 }, graitec: { x: 0.465151, y: 0.048489 }, deltares: { x: 0.393722, y: 0.008166 }, 'pre-sustainability': { x: 0.368253, y: 0.047716 },
+  pytha: { x: 0.340981, y: 0.926021 }, allplan: { x: 0.912266, y: 0.165003 }, ptv: { x: 0.517676, y: 0 }, lander: { x: 0.415404, y: 0.578156 },
+  geosig: { x: 0.557576, y: 0.875581 }, opera: { x: 0.425902, y: 0.850535 }, emmegi: { x: 0.488744, y: 0.916397 },
+  'idea-statica': { x: 0.926667, y: 0.229059 }, hexagon: { x: 0.867577, y: 0.115732 }, geoscanner: { x: 0.832684, y: 0.056591 },
+  dnv: { x: 0.73117, y: 0.020866 }, piletest: { x: 0.622511, y: 0.572819 }, gstarsoft: { x: 0.919092, y: 0.455026 },
+  glodon: { x: 0.924719, y: 0.545744 }, qysea: { x: 0.862885, y: 0.311588 }, chc: { x: 0.892786, y: 0.37529 }, bimage: { x: 0.728787, y: 0.900897 },
+  'ai-architecture': { x: 0.129726, y: 0.715445 }, cype: { x: 0.218615, y: 0.731099 }, maptek: { x: 0.926667, y: 0.7529 }, deswik: { x: 0.812626, y: 0.925324 }, metron: { x: 0.874531, y: 0.860786 },
+} as const satisfies Readonly<Record<string, NormalizedPoint>>;
 
 export const vietnamHub = {
   marker: { x: 79.45, y: 47.12 },

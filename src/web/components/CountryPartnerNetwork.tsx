@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { countryMarkerPositions, countryMarkers, partnerLogoPositions } from '../data/countryMarkers';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { countryMarkerPositions, countryMarkers, partnerLogoPositions, type NormalizedPoint } from '../data/countryMarkers';
 import { representativePartnerCountries, type RepresentativePartner } from '../data/representativePartners';
 import { worldMapPaths } from '../data/worldMapPaths';
 
-const CANVAS = { width: 1800, height: 1120, mapX: 120, mapY: 120, mapWidth: 1560, mapHeight: 858 } as const;
+const CANVAS = { width: 1800, height: 1060, mapX: 175, mapY: 131, mapWidth: 1450, mapHeight: 798 } as const;
+const PARTNER_MAP_EDIT_MODE = false;
+const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
 const LOGO_BOUNDS = {
   compact: { width: 82, height: 58 },
   standard: { width: 106, height: 60 },
@@ -11,12 +13,12 @@ const LOGO_BOUNDS = {
 } as const;
 type Point = { x: number; y: number };
 type Box = { x: number; y: number; width: number; height: number };
-type Curve = { path: string; samples: Point[] };
-const CURVE_RATIO = 0.1;
-const MIN_CURVATURE = 12;
-const MAX_CURVATURE = 52;
-const CONNECTOR_CLEARANCE = 7;
+type Curve = { path: string; samples: Point[]; collisionScore: number };
+type PartnerLayout = Record<string, NormalizedPoint>;
+type DragState = { id: string; pointerId: number; offset: Point };
 const CONNECTOR_GAP = 14;
+const MARKER_SCALE = 1.42;
+const MARKER_CLEARANCE = 10;
 const CONNECTOR_ENDPOINT_TUNING: Readonly<Record<string, { gap: number; x?: number; y?: number }>> = {
   prokon: { gap: 6, x: 10 },
   deltares: { gap: 6, x: 8 },
@@ -26,6 +28,9 @@ const CONNECTOR_ENDPOINT_TUNING: Readonly<Record<string, { gap: number; x?: numb
 const mapPoint = (point: Point): Point => ({ x: CANVAS.mapX + point.x / 100 * CANVAS.mapWidth, y: CANVAS.mapY + point.y / 100 * CANVAS.mapHeight });
 const boxCenter = (box: Box): Point => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
 const expandedBox = (box: Box, padding: number): Box => ({ x: box.x - padding, y: box.y - padding, width: box.width + padding * 2, height: box.height + padding * 2 });
+const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
+const toCanvasPoint = (point: NormalizedPoint): Point => ({ x: point.x * CANVAS.width, y: point.y * CANVAS.height });
+const toNormalizedPoint = (point: Point): NormalizedPoint => ({ x: Number((point.x / CANVAS.width).toFixed(6)), y: Number((point.y / CANVAS.height).toFixed(6)) });
 
 const logoConnectionPoint = (box: Box, marker: Point, partnerId: string): Point => {
   const tuning = CONNECTOR_ENDPOINT_TUNING[partnerId];
@@ -37,45 +42,50 @@ const logoConnectionPoint = (box: Box, marker: Point, partnerId: string): Point 
   return { x: center.x + (tuning?.x ?? 0), y: dy < 0 ? exclusion.y : exclusion.y + exclusion.height };
 };
 
-const quadraticPoint = (start: Point, control: Point, end: Point, t: number): Point => {
+const cubicPoint = (start: Point, controlA: Point, controlB: Point, end: Point, t: number): Point => {
   const inverse = 1 - t;
   return {
-    x: inverse ** 2 * start.x + 2 * inverse * t * control.x + t ** 2 * end.x,
-    y: inverse ** 2 * start.y + 2 * inverse * t * control.y + t ** 2 * end.y,
+    x: inverse ** 3 * start.x + 3 * inverse ** 2 * t * controlA.x + 3 * inverse * t ** 2 * controlB.x + t ** 3 * end.x,
+    y: inverse ** 3 * start.y + 3 * inverse ** 2 * t * controlA.y + 3 * inverse * t ** 2 * controlB.y + t ** 3 * end.y,
   };
 };
 
 const pointInBox = (point: Point, box: Box) => point.x >= box.x && point.x <= box.x + box.width && point.y >= box.y && point.y <= box.y + box.height;
-const pointDistance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
-
-const buildCurve = (marker: Point, end: Point, occupied: readonly Box[], otherMarkers: readonly Point[], existing: readonly Curve[]): Curve => {
+const buildFanCurve = (marker: Point, end: Point, occupied: readonly Box[], fanIndex: number, fanCount: number, direction: -1 | 1): Curve => {
   const markerAngle = Math.atan2(end.y - marker.y, end.x - marker.x);
-  const anchorRadius = 20;
-  const anchor = { x: marker.x + Math.cos(markerAngle) * anchorRadius, y: marker.y + Math.sin(markerAngle) * anchorRadius };
+  const anchor = { x: marker.x + Math.cos(markerAngle) * MARKER_CLEARANCE, y: marker.y + Math.sin(markerAngle) * MARKER_CLEARANCE };
   const dx = end.x - anchor.x;
   const dy = end.y - anchor.y;
   const length = Math.hypot(dx, dy) || 1;
+  const tangent = { x: dx / length, y: dy / length };
   const normal = { x: -dy / length, y: dx / length };
-  const midpoint = { x: (anchor.x + end.x) / 2, y: (anchor.y + end.y) / 2 };
-  const baseCurvature = Math.max(MIN_CURVATURE, Math.min(MAX_CURVATURE, length * CURVE_RATIO));
-  const candidates = ([-1, 1] as const).flatMap((direction) => [0.88, 1, 1.12].map((variation) => {
-    const bow = baseCurvature * variation * direction;
-    const control = { x: midpoint.x + normal.x * bow, y: midpoint.y + normal.y * bow };
-    const samples = Array.from({ length: 49 }, (_, index) => quadraticPoint(anchor, control, end, index / 48));
-    const logoHits = occupied.reduce((hits, box) => hits + (samples.slice(2, -2).some((point) => pointInBox(point, expandedBox(box, CONNECTOR_GAP))) ? 1 : 0), 0);
-    const markerHits = otherMarkers.reduce((hits, point) => hits + (samples.slice(3, -3).some((sample) => pointDistance(sample, point) < 18) ? 1 : 0), 0);
-    const clearanceHits = existing.reduce((hits, curve) => hits + (samples.slice(3, -3).some((point) => curve.samples.slice(3, -3).some((sample) => pointDistance(point, sample) < CONNECTOR_CLEARANCE)) ? 1 : 0), 0);
-    const score = logoHits * 100000 + markerHits * 80000 + clearanceHits * 60000 + Math.abs(variation - 1) * 100;
-    return { path: `M ${anchor.x} ${anchor.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`, samples, score };
-  }));
-  return candidates.sort((a, b) => a.score - b.score)[0];
+  const centeredIndex = fanIndex - (fanCount - 1) / 2;
+  const bow = direction * (clamp(length * 0.16, 34, 96) + centeredIndex * 11);
+  const controlA = { x: anchor.x + tangent.x * length * 0.3 + normal.x * bow, y: anchor.y + tangent.y * length * 0.3 + normal.y * bow };
+  const controlB = { x: end.x - tangent.x * length * 0.28 + normal.x * bow * 0.58, y: end.y - tangent.y * length * 0.28 + normal.y * bow * 0.58 };
+  const samples = Array.from({ length: 49 }, (_, index) => cubicPoint(anchor, controlA, controlB, end, index / 48));
+  const collisionScore = occupied.reduce((score, box) => score + (samples.slice(3, -3).some((point) => pointInBox(point, expandedBox(box, CONNECTOR_GAP))) ? 1 : 0), 0);
+  return { path: `M ${anchor.x} ${anchor.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}`, samples, collisionScore };
 };
 
-const logoBox = (partner: RepresentativePartner): Box => {
-  const position = partnerLogoPositions[partner.id as keyof typeof partnerLogoPositions];
-  if (!position) throw new Error(`Missing global partner-map position for ${partner.id}`);
-  return { ...position, ...LOGO_BOUNDS[partner.logo.visualWeight] };
+const outwardFanDirection = (marker: Point, endpoints: readonly Point[]): -1 | 1 => {
+  const center = endpoints.reduce((sum, point) => ({ x: sum.x + point.x, y: sum.y + point.y }), { x: 0, y: 0 });
+  center.x /= Math.max(endpoints.length, 1);
+  center.y /= Math.max(endpoints.length, 1);
+  const dx = center.x - marker.x;
+  const dy = center.y - marker.y;
+  const normal = { x: -dy, y: dx };
+  const towardCanvasCenter = { x: CANVAS.width / 2 - marker.x, y: CANVAS.height / 2 - marker.y };
+  return normal.x * towardCanvasCenter.x + normal.y * towardCanvasCenter.y > 0 ? -1 : 1;
 };
+
+const logoBox = (partner: RepresentativePartner, positions: PartnerLayout): Box => {
+  const position = positions[partner.id];
+  if (!position) throw new Error(`Missing global partner-map position for ${partner.id}`);
+  return { ...toCanvasPoint(position), ...LOGO_BOUNDS[partner.logo.visualWeight] };
+};
+
+const defaultPartnerLayout = Object.fromEntries(Object.entries(partnerLogoPositions).map(([id, point]) => [id, { ...point }])) as PartnerLayout;
 
 // Supplementary maritime marks use the current artwork's projection and the
 // official 1:9,000,000 administrative map published by Vietnam's national
@@ -88,38 +98,128 @@ const vietnamMaritimeFeatures = [
 ] as const;
 
 export const CountryPartnerNetwork: React.FC = () => {
+  const svgRef = useRef<SVGSVGElement>(null);
   const [activePartnerId, setActivePartnerId] = useState<string | null>(null);
   const [activeCountryId, setActiveCountryId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState<DragState | null>(null);
+  const [exportStatus, setExportStatus] = useState('');
+  const [positions, setPositions] = useState<PartnerLayout>(() => {
+    if (!PARTNER_MAP_EDIT_MODE || typeof window === 'undefined') return defaultPartnerLayout;
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(PARTNER_MAP_LAYOUT_STORAGE_KEY) ?? '{}') as PartnerLayout;
+      return Object.keys(defaultPartnerLayout).every((id) => Number.isFinite(saved[id]?.x) && Number.isFinite(saved[id]?.y)) ? saved : defaultPartnerLayout;
+    } catch {
+      return defaultPartnerLayout;
+    }
+  });
+  const positionsRef = useRef(positions);
+
+  const updatePositions = useCallback((next: PartnerLayout) => {
+    positionsRef.current = next;
+    setPositions(next);
+  }, []);
+
   const layout = useMemo(() => {
     const countries = countryMarkers.map((config) => ({ config, country: representativePartnerCountries.find((entry) => entry.id === config.countryId), marker: mapPoint(countryMarkerPositions[config.countryId]) })).filter((entry) => entry.country);
-    const markers = countries.map((entry) => entry.marker);
-    const boxes = countries.flatMap((entry) => entry.country?.partners.map(logoBox) ?? []);
-    const acceptedCurves: Curve[] = [];
+    const boxes = countries.flatMap((entry) => entry.country?.partners.map((partner) => logoBox(partner, positions)) ?? []);
     let boxOffset = 0;
     return countries.map((entry) => {
       const count = entry.country?.partners.length ?? 0;
       const countryBoxes = boxes.slice(boxOffset, boxOffset + count);
       boxOffset += count;
-      const countryCurves = countryBoxes.map((box, index) => {
-        const partner = entry.country?.partners[index];
-        const curve = buildCurve(entry.marker, logoConnectionPoint(box, entry.marker, partner?.id ?? ''), boxes.filter((candidate) => candidate !== box), markers.filter((candidate) => candidate !== entry.marker), acceptedCurves);
-        acceptedCurves.push(curve);
-        return curve;
-      });
+      const endpoints = countryBoxes.map((box, index) => logoConnectionPoint(box, entry.marker, entry.country?.partners[index]?.id ?? ''));
+      const fanOrder = endpoints.map((end, index) => ({ index, angle: Math.atan2(end.y - entry.marker.y, end.x - entry.marker.x) })).sort((a, b) => a.angle - b.angle);
+      const rankByIndex = new Map(fanOrder.map((item, rank) => [item.index, rank]));
+      const buildCountryFan = (direction: -1 | 1) => endpoints.map((end, index) => buildFanCurve(entry.marker, end, boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, direction));
+      const negativeFan = buildCountryFan(-1);
+      const positiveFan = buildCountryFan(1);
+      const negativeScore = negativeFan.reduce((score, curve) => score + curve.collisionScore, 0);
+      const positiveScore = positiveFan.reduce((score, curve) => score + curve.collisionScore, 0);
+      const preferredDirection = outwardFanDirection(entry.marker, endpoints);
+      const countryCurves = Math.abs(negativeScore - positiveScore) >= 2
+        ? (negativeScore < positiveScore ? negativeFan : positiveFan)
+        : (preferredDirection === -1 ? negativeFan : positiveFan);
       return { ...entry, boxes: countryBoxes, curves: countryCurves };
     });
+  }, [positions]);
+
+  const clientToCanvas = useCallback((clientX: number, clientY: number): Point | null => {
+    const matrix = svgRef.current?.getScreenCTM();
+    if (!matrix) return null;
+    const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
+    return { x: point.x, y: point.y };
   }, []);
+
+  const beginDrag = useCallback((event: React.PointerEvent<HTMLAnchorElement>, item: RepresentativePartner, box: Box) => {
+    if (!PARTNER_MAP_EDIT_MODE) return;
+    const point = clientToCanvas(event.clientX, event.clientY);
+    if (!point) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setActivePartnerId(item.id);
+    setDragging({ id: item.id, pointerId: event.pointerId, offset: { x: point.x - box.x, y: point.y - box.y } });
+  }, [clientToCanvas]);
+
+  const moveDrag = useCallback((event: React.PointerEvent<SVGSVGElement>) => {
+    if (!PARTNER_MAP_EDIT_MODE || !dragging || event.pointerId !== dragging.pointerId) return;
+    const point = clientToCanvas(event.clientX, event.clientY);
+    const partner = representativePartnerCountries.flatMap((country) => country.partners).find((item) => item.id === dragging.id);
+    if (!point || !partner) return;
+    event.preventDefault();
+    const bounds = LOGO_BOUNDS[partner.logo.visualWeight];
+    const nextPoint = toNormalizedPoint({ x: clamp(point.x - dragging.offset.x, 0, CANVAS.width - bounds.width), y: clamp(point.y - dragging.offset.y, 0, CANVAS.height - bounds.height) });
+    updatePositions({ ...positionsRef.current, [dragging.id]: nextPoint });
+  }, [clientToCanvas, dragging, updatePositions]);
+
+  const endDrag = useCallback((event: React.PointerEvent<SVGSVGElement>) => {
+    if (!PARTNER_MAP_EDIT_MODE || !dragging || event.pointerId !== dragging.pointerId) return;
+    window.localStorage.setItem(PARTNER_MAP_LAYOUT_STORAGE_KEY, JSON.stringify(positionsRef.current));
+    setDragging(null);
+  }, [dragging]);
+
+  const resetLayout = useCallback(() => {
+    window.localStorage.removeItem(PARTNER_MAP_LAYOUT_STORAGE_KEY);
+    updatePositions(defaultPartnerLayout);
+    setExportStatus('Đã reset');
+  }, [updatePositions]);
+
+  const exportLayout = useCallback(async () => {
+    const output = JSON.stringify(positionsRef.current, null, 2);
+    console.info('Partner map normalized layout:', output);
+    try {
+      await navigator.clipboard.writeText(output);
+      setExportStatus('Đã copy JSON');
+    } catch {
+      window.prompt('Copy normalized partner-map layout JSON:', output);
+      setExportStatus('JSON đã mở');
+    }
+  }, []);
+
+  const tooltipLayout = layout.find(({ country }) => country && (country.id === activeCountryId || country.partners.some((partner) => partner.id === activePartnerId)));
+  const countryTooltip = tooltipLayout?.country ? (() => {
+    const width = Math.min(220, Math.max(108, tooltipLayout.country.name.length * 7.8 + 30));
+    return {
+      country: tooltipLayout.country,
+      width,
+      x: Math.max(10, Math.min(CANVAS.width - width - 10, tooltipLayout.marker.x - width / 2)),
+      y: Math.max(10, tooltipLayout.marker.y - 70),
+    };
+  })() : null;
+
   return (
     <div className="relative w-full min-w-0 overflow-hidden touch-pan-y" aria-label="Mạng lưới đối tác tiêu biểu theo quốc gia">
-      <svg viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`} preserveAspectRatio="xMidYMid meet" className="block h-auto max-w-full w-full" role="img" aria-labelledby="partner-map-title partner-map-desc">
+      {PARTNER_MAP_EDIT_MODE && <div className="absolute right-2 top-2 z-20 flex items-center gap-1.5 rounded-lg bg-slate-950/90 p-1.5 text-[11px] text-white shadow-md"><button type="button" onClick={resetLayout} className="rounded-md px-2 py-1.5 font-semibold hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">Reset Layout</button><button type="button" onClick={exportLayout} className="rounded-md bg-orange-500 px-2 py-1.5 font-bold text-white hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Export Layout</button>{exportStatus && <span className="px-1 text-white/80" aria-live="polite">{exportStatus}</span>}</div>}
+      <svg ref={svgRef} viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`} preserveAspectRatio="xMidYMid meet" className="block h-auto max-w-full w-full" role="img" aria-labelledby="partner-map-title partner-map-desc" onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
         <style>{`
           foreignObject img { width: calc(100% - 4px); height: calc(100% - 4px); }
           @media (max-width: 767px), (hover: none) {
             .partner-map-logo { filter: none !important; transition: none !important; }
             .partner-map-vietnam { filter: none !important; }
-            .partner-map-connector { opacity: 0.42 !important; stroke-width: 0.8px !important; }
-            .partner-map-connector[data-active='true'] { opacity: 0.9 !important; stroke-width: 1.5px !important; }
+            .partner-map-connector { opacity: 0.34 !important; stroke-width: 0.58px !important; }
+            .partner-map-connector[data-active='true'] { opacity: 0.82 !important; stroke-width: 1px !important; }
           }
+          .partner-map-logo[data-contrast='dark-outline'] { filter: drop-shadow(0 0 1px rgba(15, 23, 42, 0.95)) drop-shadow(0 1px 2px rgba(15, 23, 42, 0.72)) !important; }
+          .partner-map-logo[data-contrast='dark-outline'][data-active='true'] { filter: drop-shadow(0 0 1px rgba(15, 23, 42, 0.95)) drop-shadow(0 1px 2px rgba(15, 23, 42, 0.72)) drop-shadow(0 3px 8px rgba(249, 115, 22, 0.4)) !important; }
         `}</style>
         <title id="partner-map-title">CIC tại Việt Nam kết nối với các đối tác công nghệ tiêu biểu trên thế giới</title>
         <desc id="partner-map-desc">Logo đối tác nằm trong khoảng trống đại dương và nối bằng đường cong tới map pin của quốc gia tương ứng. Việt Nam được tô màu cam.</desc>
@@ -138,21 +238,18 @@ export const CountryPartnerNetwork: React.FC = () => {
           if (!country) return null;
           const markerActive = activeCountryId === country.id;
           const activeCountry = markerActive || country.partners.some((partner) => partner.id === activePartnerId);
-          const tooltipWidth = Math.min(220, Math.max(108, country.name.length * 7.8 + 30));
-          const tooltipX = Math.max(10, Math.min(CANVAS.width - tooltipWidth - 10, marker.x - tooltipWidth / 2));
-          const tooltipY = Math.max(10, marker.y - 58);
           return <g key={country.id} data-country-layout={config.countryId}>
-            {country.partners.map((item, index) => { const emphasized = markerActive || activePartnerId === item.id; return <path key={`${item.id}-curve`} className="partner-map-connector" data-connector="direct-curve" data-active={emphasized} data-country-id={country.id} data-partner-id={item.id} d={curves[index].path} fill="none" stroke={emphasized ? '#f97316' : '#60778d'} strokeWidth={emphasized ? 2 : 1.25} opacity={emphasized ? 0.92 : 0.58} strokeLinecap="round" vectorEffect="non-scaling-stroke" />; })}
+            {country.partners.map((item, index) => { const emphasized = markerActive || activePartnerId === item.id; return <path key={`${item.id}-curve`} className="partner-map-connector" data-connector="direct-curve" data-active={emphasized} data-country-id={country.id} data-partner-id={item.id} d={curves[index].path} fill="none" stroke={emphasized ? '#f97316' : '#60778d'} strokeWidth={emphasized ? 1.3 : 0.76} strokeDasharray="7 2" opacity={emphasized ? 0.86 : 0.46} strokeLinecap="round" vectorEffect="non-scaling-stroke" />; })}
             {country.partners.map((item, index) => {
               const box = boxes[index]; const active = activePartnerId === item.id; const dimmed = (activePartnerId !== null && !active) || (activeCountryId !== null && !markerActive);
               const partnerTooltipWidth = Math.min(270, Math.max(112, item.name.length * 7.5 + 28));
               const partnerTooltipX = Math.max(10, Math.min(CANVAS.width - partnerTooltipWidth - 10, box.x + box.width / 2 - partnerTooltipWidth / 2)); const partnerTooltipY = box.y > 44 ? box.y - 36 : box.y + box.height + 8;
-              return <g key={item.id}><foreignObject x={box.x} y={box.y} width={box.width} height={box.height} overflow="visible"><a href={item.website} target="_blank" rel="noreferrer" aria-label={`${item.name}, ${country.name}`} className="relative flex h-full w-full touch-manipulation items-center justify-center rounded-[8px] outline-none transition-[filter,opacity] focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2" onMouseEnter={() => setActivePartnerId(item.id)} onMouseLeave={() => setActivePartnerId(null)} onFocus={() => setActivePartnerId(item.id)} onBlur={() => setActivePartnerId(null)}>{item.logo.contrastAid === 'soft-light' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-2 rounded-[50%] bg-white/45 blur-[10px]" />}{item.logo.contrastAid === 'soft-light-strong' && <span aria-hidden="true" className="absolute inset-0 rounded-[50%] bg-white/80 blur-[8px]" />}{item.logo.contrastAid === 'maptek-green' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-1 rounded-md bg-[#00843d]" />}<img src={item.logo.src} alt="" className={`partner-map-logo relative z-10 h-[calc(100%-4px)] w-[calc(100%-4px)] object-contain transition-[filter,opacity] ${dimmed ? 'opacity-40' : 'opacity-100'} ${active ? 'drop-shadow-[0_3px_8px_rgba(249,115,22,0.4)]' : 'drop-shadow-[0_2px_2px_rgba(255,255,255,0.42)]'}`} /></a></foreignObject>{active && <g pointerEvents="none"><rect x={partnerTooltipX} y={partnerTooltipY} width={partnerTooltipWidth} height="28" rx="7" fill="#0f172a" stroke="#fb923c" /><text x={partnerTooltipX + partnerTooltipWidth / 2} y={partnerTooltipY + 18.5} textAnchor="middle" fill="#fff7ed" fontSize="12.5" fontWeight="700">{item.name}</text></g>}</g>;
+              return <g key={item.id}><foreignObject x={box.x} y={box.y} width={box.width} height={box.height} overflow="visible"><a href={PARTNER_MAP_EDIT_MODE ? undefined : item.website} target={PARTNER_MAP_EDIT_MODE ? undefined : '_blank'} rel={PARTNER_MAP_EDIT_MODE ? undefined : 'noreferrer'} aria-label={`${item.name}, ${country.name}`} aria-grabbed={PARTNER_MAP_EDIT_MODE ? dragging?.id === item.id : undefined} className={`relative flex h-full w-full items-center justify-center rounded-[8px] outline-none transition-[filter,opacity] focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 ${PARTNER_MAP_EDIT_MODE ? 'cursor-grab touch-none active:cursor-grabbing' : 'touch-manipulation'}`} onClick={(event) => { if (PARTNER_MAP_EDIT_MODE) event.preventDefault(); }} onPointerDown={(event) => beginDrag(event, item, box)} onMouseEnter={() => setActivePartnerId(item.id)} onMouseLeave={() => { if (dragging?.id !== item.id) setActivePartnerId(null); }} onFocus={() => setActivePartnerId(item.id)} onBlur={() => setActivePartnerId(null)}>{item.logo.contrastAid === 'soft-light' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-2 rounded-[50%] bg-white/45 blur-[10px]" />}{item.logo.contrastAid === 'soft-light-strong' && <span aria-hidden="true" className="absolute inset-0 rounded-[50%] bg-white/80 blur-[8px]" />}{item.logo.contrastAid === 'maptek-green' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-1 rounded-md bg-[#00843d]" />}<img src={item.logo.src} alt="" draggable={false} data-contrast={item.id === 'lander' ? 'dark-outline' : undefined} data-active={active} className={`partner-map-logo pointer-events-none relative z-10 h-[calc(100%-4px)] w-[calc(100%-4px)] select-none object-contain transition-[filter,opacity] ${dimmed ? 'opacity-40' : 'opacity-100'} ${active ? 'drop-shadow-[0_3px_8px_rgba(249,115,22,0.4)]' : 'drop-shadow-[0_2px_2px_rgba(255,255,255,0.42)]'}`} /></a></foreignObject>{active && <g pointerEvents="none"><rect x={partnerTooltipX} y={partnerTooltipY} width={partnerTooltipWidth} height="28" rx="7" fill="#0f172a" stroke="#fb923c" /><text x={partnerTooltipX + partnerTooltipWidth / 2} y={partnerTooltipY + 18.5} textAnchor="middle" fill="#fff7ed" fontSize="12.5" fontWeight="700">{item.name}</text></g>}</g>;
             })}
-            <g data-country-id={country.id} transform={`translate(${marker.x} ${marker.y})`} tabIndex={0} aria-label={country.name} className="cursor-pointer outline-none" onMouseEnter={() => setActiveCountryId(country.id)} onMouseLeave={() => setActiveCountryId(null)} onFocus={() => setActiveCountryId(country.id)} onBlur={() => setActiveCountryId(null)}><path d="M 0 0 C -2 -3.5 -6.5 -7.5 -6.5 -12 A 6.5 6.5 0 1 1 6.5 -12 C 6.5 -7.5 2 -3.5 0 0 Z M 0 -14.2 A 2.2 2.2 0 1 0 0 -9.8 A 2.2 2.2 0 1 0 0 -14.2 Z" fill={activeCountry ? '#f97316' : '#334a61'} fillRule="evenodd" stroke="#f8fafc" strokeWidth={activeCountry ? 1.9 : 1.55} strokeLinejoin="round" /></g>
-            {activeCountry && <g pointerEvents="none"><rect x={tooltipX} y={tooltipY} width={tooltipWidth} height="30" rx="7" fill="#0f172a" stroke="#f97316" /><text x={tooltipX + tooltipWidth / 2} y={tooltipY + 20} textAnchor="middle" fill="#fff7ed" fontSize="13" fontWeight="750">{country.name}</text></g>}
+            <g data-country-id={country.id} transform={`translate(${marker.x} ${marker.y})`} tabIndex={0} aria-label={country.name} className="cursor-pointer outline-none" onMouseEnter={() => setActiveCountryId(country.id)} onMouseLeave={() => setActiveCountryId(null)} onFocus={() => setActiveCountryId(country.id)} onBlur={() => setActiveCountryId(null)}><path transform={`scale(${MARKER_SCALE})`} d="M 0 0 C -2 -3.5 -6.5 -7.5 -6.5 -12 A 6.5 6.5 0 1 1 6.5 -12 C 6.5 -7.5 2 -3.5 0 0 Z M 0 -14.2 A 2.2 2.2 0 1 0 0 -9.8 A 2.2 2.2 0 1 0 0 -14.2 Z" fill={activeCountry ? '#f97316' : '#334a61'} fillRule="evenodd" stroke="#f8fafc" strokeWidth={activeCountry ? 1.9 : 1.55} strokeLinejoin="round" /></g>
           </g>;
         })}
+        {countryTooltip && <g pointerEvents="none" data-tooltip-layer="country"><rect x={countryTooltip.x} y={countryTooltip.y} width={countryTooltip.width} height="30" rx="7" fill="#0f172a" stroke="#f97316" /><text x={countryTooltip.x + countryTooltip.width / 2} y={countryTooltip.y + 20} textAnchor="middle" fill="#fff7ed" fontSize="13" fontWeight="750">{countryTooltip.country.name}</text></g>}
       </svg>
     </div>
   );
