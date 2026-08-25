@@ -65,6 +65,8 @@ export const partnerLogoPositions = {
   'ai-architecture': { x: 0.129726, y: 0.715445 }, cype: { x: 0.218615, y: 0.731099 }, maptek: { x: 0.926667, y: 0.7529 }, deswik: { x: 0.812626, y: 0.925324 }, metron: { x: 0.874531, y: 0.860786 },
 } as const satisfies Readonly<Record<string, NormalizedPoint>>;
 
+export const partnerCurveDirections = {} as const satisfies Readonly<Record<string, -1 | 1>>;
+
 export const vietnamHub = {
   marker: { x: 79.45, y: 47.12 },
   label: { x: 85.5, y: 48.5 },
