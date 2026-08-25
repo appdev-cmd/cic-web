@@ -208,69 +208,14 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
               transition={{ duration: 0.4 }}
               className="space-y-12"
             >
-              {/* BLOCK ĐEN TO TRÊN CÙNG (HERO BANNER NỔI BẬT VỚI ẢNH BÊN PHẢI) */}
-              <div className="relative overflow-hidden rounded-[20px] bg-slate-950 text-white p-6 sm:p-10 md:p-12 border border-slate-800 shadow-2xl">
-                {/* Visual Decorative Gradients & Grid */}
-                <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="absolute bottom-0 left-1/3 -mb-16 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
-
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-                  
-                  {/* Left Column: Text & Stats */}
-                  <div className="lg:col-span-7 space-y-6">
-                    {/* Est Badge */}
-                    <div className="flex items-center gap-3">
-                      <span className="w-10 sm:w-12 h-1 bg-orange-600 rounded-full"></span>
-                      <span className="text-orange-500 font-bold tracking-widest text-xs uppercase font-mono">
-                        THÀNH LẬP TỪ NĂM 1990
-                      </span>
-                    </div>
-
-                    {/* Headline */}
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase leading-[1.15]">
-                      GIẢI PHÁP & <span className="text-orange-500">DỊCH VỤ</span> <span className="whitespace-nowrap">CÔNG NGHỆ</span>
-                    </h1>
-
-                    {/* Subtitle / Description */}
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
-                      Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.
-                    </p>
-
-                    {/* Stats Highlights */}
-                    <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80">
-                      <div>
-                        <span className="text-2xl sm:text-3xl font-extrabold text-orange-500 block">35+</span>
-                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Năm Kinh Nghiệm</span>
-                      </div>
-                      <div>
-                        <span className="text-2xl sm:text-3xl font-extrabold text-white block">5.000+</span>
-                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Dự Án Thành Công</span>
-                      </div>
-                      <div>
-                        <span className="text-2xl sm:text-3xl font-extrabold text-white block">100+</span>
-                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Đối Tác Toàn Cầu</span>
-                      </div>
-                      <div>
-                        <span className="text-2xl sm:text-3xl font-extrabold text-orange-500 block">150+</span>
-                        <span className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Nhân Sự Chất Lượng Cao</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Hero Showcase Image */}
-                  <div className="lg:col-span-5 relative group">
-                    <div className="relative rounded-[16px] overflow-hidden border border-slate-800 shadow-2xl bg-slate-900 group-hover:border-orange-500/50 transition-all duration-500">
-                      <img 
-                        src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80" 
-                        alt="Dịch vụ chuyển đổi số và công nghệ kỹ thuật CIC" 
-                        className="w-full h-64 sm:h-80 lg:h-[340px] object-cover transition-transform duration-500 group-hover:scale-105"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                  </div>
-
-                </div>
+              {/* Header section */}
+              <div className="border-l-4 border-orange-600 pl-6 space-y-2">
+                <h1 className="text-3xl md:text-4xl font-bold text-[#444] uppercase tracking-tight">
+                  GIẢI PHÁP &amp; DỊCH VỤ CÔNG NGHỆ
+                </h1>
+                <p className="max-w-4xl text-sm leading-relaxed text-slate-600">
+                  Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.
+                </p>
               </div>
 
               {/* MAIN LAYOUT WITH SIDEBAR (TƯƠNG TỰ FORMAT TRANG SẢN PHẨM) */}
@@ -280,7 +225,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                 <div className="lg:col-span-8 space-y-8">
                   
                   {/* Search Bar & Counter */}
-                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                  <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between bg-slate-100/60 p-4 rounded-[10px]">
                     <div className="relative flex items-center w-full sm:max-w-md">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                         <Search className="text-slate-400" size={16} />
@@ -290,11 +235,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Tìm kiếm dịch vụ, giải pháp..."
-                        className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-orange-500 pl-10 pr-9 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-all font-medium rounded-xl shadow-xs"
+                        className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 pl-10 pr-9 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none transition-all rounded-[8px]"
                       />
                       {searchQuery && (
                         <button 
                           onClick={() => setSearchQuery('')}
+                          aria-label="Xóa nội dung tìm kiếm"
                           className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                         >
                           <X size={14} />

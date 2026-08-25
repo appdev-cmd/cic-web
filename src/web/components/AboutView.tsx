@@ -439,7 +439,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                 <section data-page-builder-section-key="about.partners" className="py-10 bg-transparent border-b border-slate-100 overflow-hidden relative z-10">
                   <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
                     <SectionHeader 
-                      title="Đối tác chiến lược" 
+                      title="Đối tác chiến lược & Khách hàng tiêu biểu"
                       sub="Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" 
                     />
                     
