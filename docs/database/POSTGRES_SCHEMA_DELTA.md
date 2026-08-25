@@ -334,7 +334,7 @@ Không có. Giữ nguyên `cic_contents*` để migrate, đọc và đối soát
 
 - `PageBuilderPage → cic_content_pages`; `draft/published → cic_content_page_revisions`; `sections → cic_content_page_sections`; `references → cic_content_page_section_references`.
 - Chính sách bảo mật, Điều khoản sử dụng và legal page tạo thêm chỉ có `legal.header` và `legal.content`; toàn bộ bài viết thường nằm trong một Rich Text `richTextHtml`.
-- CTA/Form chọn qua modal lưu ID trong config và được backend kiểm tra với `cic_ctas`/`cic_forms`; không nhét HTML CTA/Form vào Rich Text và không thêm column riêng trên Page.
+- CTA/Form ở khu vực bố cục cố định lưu ID trong section config; CTA/Form chèn trong Rich Text lưu reference có cấu trúc tại `cic_content_embeds`. Backend kiểm tra với `cic_ctas`/`cic_forms`; không nhét payload/HTML của CTA/Form vào nội dung và không thêm column riêng trên Page.
 - Media config lưu asset ID, không copy URL/metadata. Template registry, config schema, section order và reference limit nằm trong code, không tạo bảng template động.
 - `cic_contents*` chỉ là nguồn nhập liệu legacy theo manifest được duyệt; không tự chuyển mọi bài cũ thành Page Builder, không migrate hits/rating/tags/display flags khi CMS mới không dùng.
 - VI/EN là hai workspace độc lập; không fallback hoặc tự seed nội dung VI sang EN.
@@ -618,6 +618,7 @@ Không có. Legacy và PostgreSQL hiện tại không có entity CTA generic; li
 | `id` | `bigint` identity | PK |
 | `workspace` | `varchar(5)` | NOT NULL, CHECK theo workspace hỗ trợ |
 | `code` | `varchar(100)` | NOT NULL |
+| `is_system` | `boolean` | NOT NULL DEFAULT `false` |
 | `admin_name` | `varchar(255)` | NOT NULL |
 | `display_text` | `varchar(100)` | NOT NULL |
 | `description` | `text` | NULL |
@@ -636,6 +637,7 @@ Không có. Legacy và PostgreSQL hiện tại không có entity CTA generic; li
 
 - Unique: (`workspace`, `code`).
 - Index: (`workspace`, `status`, `updated_at` DESC), các FK action và partial index record chưa xóa nếu cần.
+- `is_system = true` xác định CTA thuộc nhóm **Hệ thống**; `false` xác định CTA thuộc nhóm **Bổ sung**. CTA Hệ thống cho phép cập nhật nội dung/hành động nhưng không cho xóa hoặc đổi `code`. Các hằng semantic ở frontend map vào `code`, không map vào PK `id`.
 - Quan hệ/action validation: `open_form` cần `form_id`; `download_file` cần `media_asset_id`; `send_email` cần template/email; redirect, scroll và call dùng payload allowlist. FK không thuộc action phải NULL.
 - Mức độ: **BẮT BUỘC** — CMS mới đang quản lý CTA reusable và các module khác chỉ lưu CTA reference.
 
@@ -645,6 +647,29 @@ Không có. Legacy và PostgreSQL hiện tại không có entity CTA generic; li
 - ID Form, Media và Email Template dùng column FK, không giấu trong `action_config`; JSON chỉ giữ URL, target, anchor, phone, email và policy linh hoạt.
 - `usedByCount`/`usedByPages` derive từ Page/config/reference. Analytics, CTR, trend và sort theo clicks đang là fixture, chưa có tracking write contract nên không thêm schema.
 - Size, preview state, CSS/JS/JSX là UI-only. Không thêm `cta_*` vào News, Product, Service hoặc Page.
+
+#### `cic_content_embeds`
+
+| Column | Type | Constraint |
+| ------ | ---- | ---------- |
+| `id` | `bigint` identity | PK |
+| `workspace` | `varchar(5)` | NOT NULL, CHECK theo workspace hỗ trợ |
+| `owner_type` | `varchar(30)` | NOT NULL, CHECK `news`, `event`, `product`, `service`, `content_page` |
+| `owner_id` | `bigint` | NOT NULL |
+| `field_key` | `varchar(100)` | NOT NULL |
+| `embed_type` | `varchar(20)` | NOT NULL, CHECK `cta`, `form` |
+| `cta_id` | `bigint` | NULL, FK → `cic_ctas(id)` ON DELETE RESTRICT |
+| `form_id` | `bigint` | NULL, FK → `cic_forms(id)` ON DELETE RESTRICT |
+| `position` | `integer` | NOT NULL, CHECK `> 0` |
+| `display_config` | `jsonb` | NOT NULL DEFAULT `'{}'::jsonb`, CHECK là object |
+| `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+
+- CHECK theo `embed_type`: `cta` chỉ có `cta_id`; `form` chỉ có `form_id`.
+- Unique: (`workspace`, `owner_type`, `owner_id`, `field_key`, `position`).
+- Index: (`workspace`, `owner_type`, `owner_id`, `field_key`), (`cta_id`), (`form_id`).
+- Bảng này chỉ lưu tham chiếu và thứ tự CTA/Biểu mẫu trong vùng Rich Text được hỗ trợ; không lưu bản sao nội dung CTA/Form và không cho phép thêm thành phần vào vùng bố cục cố định.
+- `owner_type` là polymorphic allowlist nên FK tới owner được kiểm tra ở service; khi xóa owner, service phải xóa các embed trong cùng transaction.
+- Mức độ: **BẮT BUỘC** — tách contract chèn nội dung khỏi HTML và giúp lần refactor editor/backend sau không phải đổi schema domain.
 
 ## Biểu mẫu
 
@@ -661,6 +686,7 @@ Không có. `cic_contact*`, `cic_product_contact` và `cic_order*` tiếp tục 
 | `id` | `bigint` identity | PK |
 | `workspace` | `varchar(5)` | NOT NULL, CHECK theo workspace hỗ trợ |
 | `code` | `varchar(100)` | NOT NULL |
+| `is_system` | `boolean` | NOT NULL DEFAULT `false` |
 | `admin_name` | `varchar(255)` | NOT NULL |
 | `title` | `varchar(255)` | NOT NULL |
 | `description` | `text` | NULL |
@@ -682,6 +708,7 @@ Không có. `cic_contact*`, `cic_product_contact` và `cic_order*` tiếp tục 
 
 - Unique: (`workspace`, `code`).
 - Index: (`workspace`, `status`, `updated_at` DESC) và hai FK Email Template.
+- `is_system = true` xác định Biểu mẫu thuộc nhóm **Hệ thống**; `false` xác định Biểu mẫu thuộc nhóm **Bổ sung**. Biểu mẫu Hệ thống được chỉnh các trường cho phép nhưng không được xóa hoặc đổi `code`. Các hằng semantic ở frontend map vào `code`, không map vào PK `id`.
 - Khi bật gửi email, service phải kiểm tra template tồn tại, active, đúng workspace và audience trước publish.
 - `saveToDatabase` không cần column: Form public hợp lệ luôn lưu submission và CMS hiện bắt buộc điều này khi publish.
 - Mức độ: **BẮT BUỘC**.
@@ -718,10 +745,13 @@ Không có. `cic_contact*`, `cic_product_contact` và `cic_order*` tiếp tục 
 | `source_type` | `varchar(50)` | NULL, CHECK theo allowlist source |
 | `source_id` | `bigint` | NULL |
 | `source_path` | `text` | NULL |
+| `cta_id` | `bigint` | NULL, FK → `cic_ctas(id)` ON DELETE SET NULL |
+| `placement_key` | `varchar(150)` | NULL |
 | `submitted_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
 
-- Index: (`form_id`, `submitted_at` DESC), (`source_type`, `source_id`), (`submitted_at` DESC).
+- Index: (`form_id`, `submitted_at` DESC), (`source_type`, `source_id`), (`cta_id`, `submitted_at` DESC), (`placement_key`), (`submitted_at` DESC).
 - Form dùng soft delete; không cascade làm mất submission đã nhận.
+- `cta_id` lưu CTA đã mở form nếu có; `placement_key` lưu vị trí cố định hoặc vùng Rich Text phát sinh lượt gửi. Tên CTA, tên trang và tiêu đề nội dung được derive bằng join/read model, không snapshot lặp vào submission.
 - Mức độ: **BẮT BUỘC** — CMS yêu cầu lưu DB và xem lượt gửi.
 
 #### `cic_form_submission_values`
@@ -912,72 +942,50 @@ Không có. `cic_email` và `cic_types_email` tiếp tục mang nghĩa người 
 
 ### Bảng hiện có cần mở rộng
 
-Không có. Tiếp tục dùng `cic_permission_tasks`, `cic_permission_fun`, `cic_permission_field` làm danh mục quyền và `cic_users_permission*` làm quyền trực tiếp theo user/compatibility override.
+Không có. `cic_permission_tasks` tiếp tục là danh mục quyền do hệ thống/backend quản lý. `cic_permission_fun`, `cic_permission_field` và `cic_users_permission*` chỉ được giữ trong giai đoạn migration để đối chiếu quyền legacy; giao diện mới không cho tạo Task Definition, không cấp quyền trường dữ liệu và không vận hành quyền trực tiếp song song với role.
 
 ### Bảng mới cần tạo
 
 #### `cic_roles`
 
-- Columns: `id bigint identity`, `code varchar(100)`, `name varchar(255)`, `category varchar(16)`, `risk_level varchar(16)`, `status varchar(24)`, `purpose text NULL`, `description text NULL`, `owner_name varchar(255) NULL`, `reviewer_name varchar(255) NULL`, `review_due_at timestamptz NULL`, `is_protected boolean NOT NULL DEFAULT false`, `created_at timestamptz`, `created_by integer NULL`, `updated_at timestamptz`, `updated_by integer NULL`.
+- Columns: `id bigint identity`, `code varchar(100)`, `name varchar(255)`, `description text NULL`, `status varchar(16) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive'))`, `is_protected boolean NOT NULL DEFAULT false`, `created_at timestamptz`, `created_by integer NULL`, `updated_at timestamptz`, `updated_by integer NULL`.
 - PK: `id`.
 - FK: `created_by`, `updated_by → cic_users(id) ON DELETE SET NULL`.
-- Unique/index: unique `lower(trim(code))`; index (`status`, `category`) và `review_due_at`.
-- Quan hệ: một role có nhiều version và assignment.
-- Mức độ: **BẮT BUỘC** — PostgreSQL hiện chỉ có quyền trực tiếp theo user, không biểu diễn được role của CMS mới.
+- Unique/index: unique `lower(trim(code))`; index (`status`).
+- Quan hệ: một role có nhiều permission và user assignment.
+- Mức độ: **BẮT BUỘC** — biểu diễn vai trò ổn định trong mô hình `User → Role → Permission`.
 
-#### `cic_role_versions`
+#### `cic_role_permissions`
 
-- Columns: `id bigint identity`, `role_id bigint`, `version_number numeric(10,1)`, `status varchar(16)`, `change_note text NULL`, `created_at timestamptz`, `created_by integer NULL`, `activated_at timestamptz NULL`, `activated_by integer NULL`.
-- PK: `id`.
-- FK: `role_id → cic_roles(id) ON DELETE CASCADE`; user audit FK dùng `ON DELETE SET NULL`.
-- Unique/index: unique (`role_id`, `version_number`); partial unique (`role_id`) cho mỗi trạng thái `active` và `draft`.
-- Mức độ: **BẮT BUỘC** — Role editor đang lưu draft/activate, diff và lịch sử version.
-
-#### `cic_role_version_permissions`
-
-- Columns: `role_version_id bigint`, `permission_task_id integer`, `action varchar(24)`, `state varchar(16)`.
-- PK/unique: (`role_version_id`, `permission_task_id`, `action`).
-- FK: `role_version_id → cic_role_versions(id) ON DELETE CASCADE`; `permission_task_id → cic_permission_tasks(id) ON DELETE RESTRICT`.
+- Columns: `role_id bigint`, `permission_task_id integer`, `action varchar(24)`, `allowed boolean NOT NULL DEFAULT false`, `updated_at timestamptz`, `updated_by integer NULL`.
+- PK/unique: (`role_id`, `permission_task_id`, `action`).
+- FK: `role_id → cic_roles(id) ON DELETE CASCADE`; `permission_task_id → cic_permission_tasks(id) ON DELETE RESTRICT`; `updated_by → cic_users(id) ON DELETE SET NULL`.
 - Index: `permission_task_id`.
-- Mức độ: **BẮT BUỘC** — lưu matrix `allowed`, `denied`, `conditional`; tiếp tục tái sử dụng danh mục task legacy.
-
-#### `cic_role_version_scopes`
-
-- Columns: `id bigint identity`, `role_version_id bigint`, `scope_type varchar(24)`, `scope_value varchar(255)`, `description text NULL`.
-- PK: `id`.
-- FK: `role_version_id → cic_role_versions(id) ON DELETE CASCADE`.
-- Unique/index: unique (`role_version_id`, `scope_type`, `scope_value`); index (`scope_type`, `scope_value`).
-- Mức độ: **BẮT BUỘC** — lưu các scope `global`, `site`, `team`, `locale`, `ownership`, mỗi giá trị một dòng.
+- Mức độ: **BẮT BUỘC** — lưu trực tiếp quyền hiệu lực của role; không có `conditional` và không phụ thuộc role version.
 
 #### `cic_user_roles`
 
-- Columns: `id bigint identity`, `user_id integer`, `role_id bigint`, `assigned_at timestamptz`, `assigned_by integer NULL`, `expires_at timestamptz NULL`, `status varchar(16) NOT NULL DEFAULT 'active'`, `scope_summary text NULL`.
+- Columns: `id bigint identity`, `user_id integer`, `role_id bigint`, `assigned_at timestamptz`, `assigned_by integer NULL`, `status varchar(16) NOT NULL DEFAULT 'active'`.
 - PK: `id`.
 - FK: `user_id → cic_users(id) ON DELETE CASCADE`; `role_id → cic_roles(id) ON DELETE RESTRICT`; `assigned_by → cic_users(id) ON DELETE SET NULL`.
-- Unique/index: unique active (`user_id`, `role_id`) nếu không cho gán lặp; index (`user_id`, `status`, `expires_at`) và (`role_id`, `status`).
-- Mức độ: **BẮT BUỘC** — CMS đang gán/thu hồi role, hỗ trợ thời hạn và hiển thị phạm vi.
+- Unique/index: unique active (`user_id`, `role_id`) nếu không cho gán lặp; index (`user_id`, `status`) và (`role_id`, `status`).
+- Mức độ: **BẮT BUỘC** — CMS gán và thu hồi role theo mô hình đơn giản.
 
-#### `cic_permission_policy_issues`
+#### `cic_role_scopes` — chỉ tạo khi nghiệp vụ được phê duyệt
 
-- Columns: `id`, `role_id`, `severity`, `issue_type`, `title`, `description`, `recommendation`, `detected_at`, `resolved_at NULL`, `resolved_by NULL`.
-- PK/FK: `id`; `role_id → cic_roles(id)`, `resolved_by → cic_users(id)`.
-- Index: (`role_id`, `resolved_at`), (`severity`, `resolved_at`).
-- Mức độ: **ĐỀ XUẤT** — chỉ tạo khi có rule engine và yêu cầu lưu vòng đời cảnh báo; tab hiện dùng mock/local state.
-
-#### `cic_access_reviews`
-
-- Columns: `id`, `role_id`, `target_user_id NULL`, `reviewer_user_id`, `due_at`, `status`, `notes NULL`, `completed_at NULL`.
-- PK/FK: `id`; các FK tới `cic_roles` và `cic_users`.
-- Index: (`reviewer_user_id`, `status`, `due_at`), (`role_id`, `status`).
-- Mức độ: **ĐỀ XUẤT** — chỉ tạo khi nghiệp vụ access review được duyệt; UI hiện chưa có luồng tạo campaign thật.
+- Columns đề xuất: `id bigint identity`, `role_id bigint`, `scope_type varchar(24)`, `scope_value varchar(255)`.
+- Chỉ hỗ trợ ban đầu `ownership` và `site`; không tạo `team`, `locale` hoặc policy expression khi chưa có use case.
+- Mức độ: **ĐỀ XUẤT/CÓ ĐIỀU KIỆN** — UI đặt phần này trong thiết lập nâng cao; triển khai DB chỉ sau khi xác nhận nhu cầu phân quyền theo chi nhánh hoặc nội dung phụ trách.
 
 ### Mapping / lưu ý
 
-- Có thể tham khảo/import `fs_users_groups` cũ nhưng không dùng tên nhóm làm permission source duy nhất; dữ liệu cũ không đủ version, scope và permission state mới.
-- `assignedUsersCount`, `assignedGroupCount`, `conflictIssuesCount`, `reviewDueDays` là dữ liệu derive; không tạo column. Chưa có luồng gán role cho group nên không tạo relation role-group.
-- Quyền trực tiếp legacy tiếp tục có hiệu lực. Không tự suy diễn role rộng từ các user có bộ quyền gần giống nhau.
-- Trước khi bật RBAC làm nguồn quyết định quyền phải chứng minh parity quyền hiệu lực 100%; mọi chênh lệch cần được phê duyệt.
-- Task Definition tiếp tục ghi `cic_permission_tasks`; quyền function/field tiếp tục dùng bảng legacy tương ứng, không lưu JSON matrix trên `cic_roles`.
+- Có thể tham khảo/import `fs_users_groups` cũ nhưng phải map sang role ổn định; không dùng tên nhóm làm permission source duy nhất.
+- `assignedUsersCount` là dữ liệu derive; không tạo column. Không tạo relation role-group khi UI chưa có luồng gán group.
+- Quyền trực tiếp legacy được snapshot và đối chiếu trong migration, sau đó ngừng làm nguồn cấp quyền thường trực. Trường hợp ngoại lệ phải được xử lý thành role rõ ràng.
+- Vai trò không dùng quy trình lưu trữ riêng. `inactive` tạm ngừng hiệu lực quyền nhưng giữ nguyên quan hệ gán người dùng để có thể kích hoạt lại; backend chỉ tính quyền từ role `active`.
+- Trước khi chuyển RBAC thành nguồn quyết định quyền phải chứng minh parity quyền hiệu lực 100%; mọi chênh lệch cần được phê duyệt và ghi Audit Log.
+- `cic_permission_tasks` là catalog do code/backend phát hành. UI không tạo/sửa/xóa Task Definition.
+- Không tạo `cic_role_versions`, `cic_role_version_permissions`, policy issue hoặc access review chỉ để phục vụ mock UI cũ. Lịch sử thay đổi role dùng shared Activity Log.
 
 ## Cấu hình hệ thống
 
@@ -993,36 +1001,49 @@ Không có.
 
 - `settingId/path → name`, `liveValue/effectiveValue → value`, kiểu điều khiển → `data_type`; scope map vào đúng bảng `cic_config*` hiện có.
 - Label, group, description, options, sensitivity, regex, unit và used-by là metadata manifest/application; không nhân bản thành column DB.
+- Chính sách lưu cũng nằm trong manifest: cấu hình `standard` không có cảnh báo ảnh hưởng dùng `edit → save → Activity Log`; cấu hình `sensitive`, `secret` hoặc có `impactDescription` mới dùng `draft → compare → publish → version`.
 - Inheritance/effective value và các số liệu issue/override là dữ liệu derive.
-- Draft, atomic publish, version history, validation issue và activity log hiện chỉ thay đổi local state/mock; chưa tạo bảng config workflow chỉ để giữ mockup.
+- Draft, atomic publish và version history chỉ áp dụng cho cấu hình ảnh hưởng lớn. Hiện chúng vẫn là local state/mock; chưa tạo bảng config workflow chỉ để giữ mockup. Lưu trực tiếp và publish đều phải ghi vào shared Activity Log khi backend được triển khai.
 - Secret test/rotate hiện là mô phỏng. Không lưu secret thô hoặc lịch sử secret trong `cic_config*`; production cần cơ chế mã hóa/secret store được duyệt.
 
-## Cấu hình SEO chức năng
+## SEO & URL
 
 ### Bảng hiện có cần mở rộng
 
 | Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
 | ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
-| `cic_config_modules` | `value_seo_keyword` | `varchar(255) NULL` | — | — | **BẮT BUỘC** | Editor Meta keywords route/module VI | Có trong `fs_config_modules`, được code cũ ghi/đọc nhưng bị bỏ sót khỏi PostgreSQL draft. |
+| `cic_config_modules` | `value_seo_keyword` | `varchar(255) NULL` | — | — | **TƯƠNG THÍCH** | Chỉ hiện trong phần legacy nâng cao | Giữ để đọc dữ liệu cũ; không còn là field chính của SEO UI. |
 | `cic_config_modules` | `value_seo_description` | `varchar(255) NULL` | — | — | **BẮT BUỘC** | Editor Meta description route/module VI | Field legacy dùng thật; PostgreSQL draft hiện chỉ giữ `value_seo_title`. |
 | `cic_config_modules` | `seo_indexable` | `boolean NOT NULL DEFAULT true` | — | Chỉ thêm index có điều kiện khi sitemap/noindex query cần | **BẮT BUỘC** | Checkbox cho phép lập chỉ mục VI | `published` là trạng thái cấu hình module, không phải robots index/noindex. |
-| `cic_config_modules_en` | `value_seo_keyword` | `varchar(255) NULL` | — | — | **BẮT BUỘC** | Editor Meta keywords workspace EN | Khôi phục field tương ứng của `fs_config_modules_en` bị bỏ sót. |
+| `cic_config_modules` | `canonical_path` | `varchar(500) NULL` | — | — | **BẮT BUỘC** | Canonical path của route/module VI | Chuẩn hóa path nội bộ; URL tuyệt đối được compose từ domain của workspace. |
+| `cic_config_modules_en` | `value_seo_keyword` | `varchar(255) NULL` | — | — | **TƯƠNG THÍCH** | Chỉ hiện trong phần legacy nâng cao | Giữ để đọc dữ liệu cũ; không dùng làm tiêu chí health chính. |
 | `cic_config_modules_en` | `value_seo_description` | `varchar(255) NULL` | — | — | **BẮT BUỘC** | Editor Meta description workspace EN | Giữ contract SEO title/keyword/description độc lập cho EN. |
 | `cic_config_modules_en` | `seo_indexable` | `boolean NOT NULL DEFAULT true` | — | Chỉ thêm index có điều kiện khi sitemap/noindex query cần | **BẮT BUỘC** | Checkbox cho phép lập chỉ mục EN | Không dùng `published` thay cho robots policy. |
+| `cic_config_modules_en` | `canonical_path` | `varchar(500) NULL` | — | — | **BẮT BUỘC** | Canonical path của route/module EN | Không suy diễn bằng cách nối `/en` nếu route registry có mapping riêng. |
 
 Ngoài column, thêm unique index chuẩn hóa (`module`, `view`, `COALESCE(task, '')`) trên từng bảng VI/EN sau khi profiling NULL, khoảng trắng và record trùng. Mức độ **BẮT BUỘC** vì CMS dùng bộ ba này làm identity route/module.
 
 ### Bảng mới cần tạo
 
-Không có.
+#### `cic_url_redirects`
+
+- Columns: `id bigint identity`, `workspace varchar(16)`, `source_path varchar(1000)`, `target_path varchar(1000)`, `redirect_type smallint`, `source varchar(24)`, `status varchar(16) NOT NULL DEFAULT 'active'`, `created_at timestamptz`, `created_by integer NULL`, `updated_at timestamptz`, `updated_by integer NULL`.
+- Constraint: `redirect_type IN (301, 302)`; source và target phải khác nhau; path phải được normalize trước khi unique check.
+- FK: user audit FK dùng `ON DELETE SET NULL`.
+- Unique/index: unique active (`workspace`, `lower(source_path)`); index (`workspace`, `status`) và (`target_path`).
+- Mức độ: **BẮT BUỘC** — hỗ trợ redirect thủ công và redirect sinh tự động khi đổi slug; backend phải chặn loop và redirect chain không cần thiết.
+
+Sitemap được derive từ route registry cùng content đã publish và `seo_indexable = true`; chưa tạo bảng sitemap riêng. Chỉ thêm bảng snapshot/job khi có yêu cầu lưu lịch sử generate hoặc submit thực tế.
 
 ### Mapping / lưu ý
 
-- `title → value_seo_title`, `keywords → value_seo_keyword`, `description → value_seo_description`, `indexable → seo_indexable`.
+- `title → value_seo_title`, `keywords → value_seo_keyword` (legacy), `description → value_seo_description`, `indexable → seo_indexable`, `canonicalPath → canonical_path`.
 - `routeKey`, path, label, intent, category/detail hierarchy và owner/status compose từ `module + view + task` cùng route registry; không tạo column.
-- `canonicalPath` chỉ dùng preview và không có control chỉnh sửa; derive từ route registry, không thêm `canonical_path`.
+- Canonical mặc định có thể derive từ route registry; khi người dùng lưu override, ghi `canonical_path`. Backend phải kiểm tra canonical cùng workspace hoặc nằm trong allowlist domain.
 - `fields_seo_*` tiếp tục giữ công thức SEO detail legacy; màn này chỉ sửa SEO trang chính của module.
 - Không thêm `updated_at` chỉ vì ViewModel gán timestamp khi save; lịch sử thay đổi thuộc shared Activity Log sau audit riêng.
+- Default title/description/social image và robots vẫn nằm trong `cic_config*`; GA/GTM thuộc nhóm Đo lường & tiếp thị, không thuộc SEO content.
+- Khi slug của entity thay đổi, transaction publish phải tạo `cic_url_redirects` từ URL cũ sang URL mới hoặc yêu cầu người dùng xác nhận không tạo redirect.
 
 ## Ngôn ngữ giao diện
 
@@ -1158,8 +1179,8 @@ Không có. Không thêm `is_trash`, `deleted_at`, payload hoặc metadata resto
 
 - Field mới bắt buộc trên bảng hiện có: **19 column trên 11 bảng vật lý**.
 - Field mới đề xuất có điều kiện trên bảng hiện có: **1** — `cic_users.failed_login_attempts`, chỉ dùng khi authentication/lockout được triển khai thật.
-- Bảng mới bắt buộc: **37** — 35 bảng từ các đợt trước, thêm `cic_activity_logs` và `cic_trash_items`.
-- Bảng mới đề xuất có điều kiện: **5** — `cic_media_variants`, `cic_security_events`, `cic_permission_policy_issues`, `cic_access_reviews`, `cic_audit_export_jobs`.
+- Bảng mới bắt buộc: **36** — đã bỏ ba bảng role-version không còn thuộc contract, bổ sung `cic_url_redirects` và `cic_content_embeds`.
+- Bảng mới đề xuất có điều kiện: **4** — `cic_media_variants`, `cic_security_events`, `cic_role_scopes`, `cic_audit_export_jobs`.
 - Unique index alias mới bắt buộc: **16**, trong đó alias của bảng legacy chỉ áp dụng sau data profiling.
 - Unique index code mới bắt buộc: **3** — (`workspace`, `code`) cho CTA và Form, cùng code chuẩn hóa của Role.
 - Unique index identity Function SEO mới bắt buộc: **2** — (`module`, `view`, `COALESCE(task, '')`) độc lập cho VI/EN, chỉ áp dụng sau profiling.
@@ -1177,7 +1198,7 @@ File đã tổng hợp đủ các nhóm module được audit và không còn nh
 - Sản phẩm: Sản phẩm, Danh mục sản phẩm, Hãng sản xuất, Lĩnh vực ứng dụng, Loại sản phẩm, Người phụ trách kinh doanh.
 - Website dùng chung: Menu, Thư viện media, CTA, Biểu mẫu.
 - Tương tác khách hàng: Yêu cầu khách hàng, Mẫu email.
-- Quản trị: Người dùng, Vai trò & quyền, Cấu hình hệ thống, Cấu hình SEO chức năng, Ngôn ngữ giao diện, Nhật ký hoạt động, Thùng rác.
+- Quản trị: Người dùng, Vai trò & quyền, Cấu hình hệ thống, SEO & URL, Ngôn ngữ giao diện, Nhật ký hoạt động, Thùng rác.
 
 Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schema-delta.md` đến `20-activity-logs-trash-schema-delta.md`. File này chỉ giữ kết quả cần ADD/sửa constraint/index, không chép lại toàn bộ PostgreSQL hiện hữu.
 
@@ -1185,8 +1206,8 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 
 - Mở rộng bảng hiện có: **19 field bắt buộc trên 11 bảng vật lý**.
 - Field có điều kiện: **1 field** bảo mật tài khoản, chỉ triển khai cùng authentication/lockout thật.
-- Bảng mới bắt buộc: **37 bảng**.
-- Bảng mới có điều kiện: **5 bảng**, không tạo cho đến khi chức năng backend tương ứng được duyệt.
+- Bảng mới bắt buộc: **36 bảng**.
+- Bảng mới có điều kiện: **4 bảng**, không tạo cho đến khi chức năng backend tương ứng được duyệt.
 - Không thêm field trùng nghĩa chỉ để khớp tên DTO/ViewModel.
 - Không xóa hoặc rename field legacy.
 - Không rải `deleted_at`, `is_trash`, version, activity hoặc workflow field vào mọi bảng domain.
@@ -1197,8 +1218,8 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 - Core nội dung, sản phẩm, sự kiện, dịch vụ, menu và master data tiếp tục dùng các bảng `cic_*` đã migrate từ legacy.
 - Cấu hình hệ thống tiếp tục dùng `cic_config*`; metadata field/editor nằm trong application manifest.
 - Từ điển giao diện tiếp tục dùng `cic_languages_text` và `cic_languages_text_admin`.
-- Quyền trực tiếp tiếp tục dùng `cic_permission*` và `cic_users_permission*` trong giai đoạn RBAC compatibility.
-- SEO entity tiếp tục dùng các field `seo_*` hiện có; Function SEO dùng `cic_config_modules*` sau khi bổ sung đúng các field bị thiếu.
+- Catalog quyền tiếp tục dùng `cic_permission_tasks`; quyền trực tiếp `cic_users_permission*` chỉ dùng để đối chiếu và chuyển đổi trong giai đoạn migration.
+- SEO entity tiếp tục dùng các field `seo_*` hiện có; SEO & URL dùng `cic_config_modules*` cùng `cic_url_redirects` sau khi bổ sung đúng các field bị thiếu.
 - `cic_history` giữ nguyên nghĩa lịch sử tiền/dịch vụ, không dùng làm audit log quản trị.
 
 ### Gate bắt buộc trước khi viết migration
@@ -1206,7 +1227,7 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 1. Profiling NULL, chuỗi rỗng, khoảng trắng, hoa/thường và dữ liệu trùng trước mọi unique index alias, code, route identity và `lang_key`.
 2. Kiểm tra orphan, sentinel `0`, self-reference và cycle trước khi sửa **8 FK workspace EN** đang trỏ sang bảng VI.
 3. Đối soát `cic_event.end_time` với `updated_time`; dữ liệu audit cũ phải về `NULL` trước khi validate hai CHECK thời gian.
-4. Chốt manifest route/action/entity/workspace và allowlist polymorphic trước khi tạo Function SEO, Activity Log, Trash và Customer Request overlay.
+4. Chốt manifest route/action/entity/workspace và allowlist polymorphic trước khi tạo SEO & URL, Activity Log, Trash và Customer Request overlay.
 5. Chốt ownership, delete rule và restore transaction cho toàn bộ FK/relation/media của các bảng mới; không dựa vào JSON snapshot như cơ chế khôi phục duy nhất.
 6. Chụp manifest quyền hiệu lực từng user và chứng minh parity **100%** trước khi RBAC mới tham gia quyết định quyền.
 7. Kiểm tra dependency vòng của các cặp pointer/version và chỉ thêm FK pointer sau khi bảng đích tồn tại, dữ liệu đã hợp lệ.

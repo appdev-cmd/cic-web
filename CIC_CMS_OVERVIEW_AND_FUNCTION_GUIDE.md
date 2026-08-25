@@ -5,6 +5,7 @@
 ## Mục lục
 
 - [1. CMS mới mở rộng những gì?](#1-cms-mới-mở-rộng-những-gì)
+  - [1.1. Dữ liệu CMS cũ được giữ, chuyển đổi hay thay thế như thế nào?](#11-dữ-liệu-cms-cũ-được-giữ-chuyển-đổi-hay-thay-thế-như-thế-nào)
 - [2. Mỗi bộ phận sử dụng CMS như thế nào?](#2-mỗi-bộ-phận-sử-dụng-cms-như-thế-nào)
 - [3. Danh mục chức năng CMS — Tra cứu](#3-danh-mục-chức-năng-cms--tra-cứu)
   - [3.1. Dashboard](#31-dashboard)
@@ -24,12 +25,52 @@ CMS cũ đã quản lý tin tức, danh mục tin, sự kiện, sản phẩm cù
 
 - **Nội dung Website:** Với các trang có bố cục riêng, **Trang nội dung** thay cách cấu hình từng Block theo module và vị trí của CMS cũ bằng một hồ sơ trang gồm các khu vực cố định. Người biên tập mở trang, sửa từng khu vực, lưu bản nháp, xem trước toàn trang rồi công bố. **Dự án** là chức năng mới; CMS cũ không có module hoặc dữ liệu dự án tương ứng.
 - **Tài nguyên dùng chung:** CMS cũ lưu ảnh và tệp trong các bảng hoặc trường của từng module, còn CMS mới có **Thư viện media** dùng chung với mã tài nguyên ổn định, thư mục, album, metadata, nơi sử dụng và lịch sử thay tệp.
-- **CTA, Biểu mẫu và Mẫu email:** Các trang chính có sẵn CTA và biểu mẫu phù hợp với từng mục đích như liên hệ, đăng ký tư vấn hoặc yêu cầu báo giá. Người quản trị có thể sửa nội dung CTA, thay đổi các trường cần khách hàng cung cấp và cấu hình email xác nhận. Khi có nhu cầu khác, người quản trị tạo thêm CTA hoặc biểu mẫu rồi gắn chúng vào khu vực nội dung của trang. Khách chọn CTA, gửi biểu mẫu và dữ liệu được chuyển thành Yêu cầu khách hàng cùng thông tin về trang hoặc nội dung phát sinh.
+- **CTA, Biểu mẫu và Mẫu email:** Nhóm **Hệ thống** gồm các CTA và Biểu mẫu được cấu hình cho những vị trí, mục đích chính của Website như liên hệ, đăng ký tư vấn hoặc yêu cầu báo giá. Người quản trị có thể sửa nội dung CTA, thay đổi các trường cần khách hàng cung cấp và cấu hình email xác nhận nhưng không thay đổi vị trí thuộc thiết kế cố định. Khi phát sinh nhu cầu khác, người quản trị tạo CTA hoặc Biểu mẫu thuộc nhóm **Bổ sung** rồi chèn vào các vùng nội dung được hỗ trợ. Khách chọn CTA, gửi Biểu mẫu và dữ liệu được chuyển thành Yêu cầu khách hàng cùng thông tin về trang hoặc nội dung phát sinh.
 - **Nhu cầu khách hàng:** CMS cũ đã lưu liên hệ, đăng ký sản phẩm và đơn hàng ở các nguồn riêng. CMS mới không bỏ các dữ liệu này mà hợp nhất chúng khi vận hành thành **Yêu cầu khách hàng**, bổ sung nguồn phát sinh, mức ưu tiên, người phụ trách, trạng thái xử lý, ghi chú và lịch sử diễn biến.
-- **Người dùng và phân quyền:** CMS cũ chủ yếu cấp quyền trực tiếp cho từng tài khoản theo tác vụ, chức năng hoặc trường dữ liệu. CMS mới giữ các quyền đó để tương thích, đồng thời bổ sung vai trò có phiên bản, quyền theo hành động, phạm vi áp dụng và khả năng gán vai trò cho người dùng; quyền có hiệu lực được tổng hợp từ vai trò và quyền trực tiếp.
+- **Người dùng và phân quyền:** CMS mới chuẩn hóa luồng vận hành thành **Người dùng → Vai trò → Quyền**. Danh mục quyền do hệ thống định nghĩa; quản trị viên chỉ tạo vai trò, chọn quyền theo phân hệ và gán vai trò cho người dùng. Quyền trực tiếp legacy chỉ phục vụ chuyển đổi dữ liệu, không còn là một cơ chế quản trị song song trên giao diện.
 - **Kiểm soát và tra cứu liên chức năng:** **Nhật ký hoạt động** ghi thống nhất người thực hiện, hành động, đối tượng, kết quả và dữ liệu trước–sau; **Thùng rác** giữ bản ghi để phục hồi và xử lý xung đột thay cho cách xóa cứng của phần lớn module cũ. **Tìm kiếm toàn cục** cho phép tìm qua nhiều nhóm dữ liệu từ một điểm và chỉ trả về nội dung người dùng có quyền truy cập.
 
-Như vậy, các module nội dung và danh mục cốt lõi chủ yếu được kế thừa; CMS mới tập trung thay đổi cách các module phối hợp, tái sử dụng dữ liệu và kiểm soát toàn bộ quá trình vận hành.
+### 1.1. Dữ liệu CMS cũ được giữ, chuyển đổi hay thay thế như thế nào?
+
+Việc chuyển đổi không thực hiện theo nguyên tắc “mỗi bảng cũ tạo một chức năng mới tương ứng”. Một số module cũ được đặt tên theo cách trình bày trên Website, nhưng bên trong lại chứa nhiều loại dữ liệu có ý nghĩa khác nhau. CMS mới phân loại lại dữ liệu theo **nghiệp vụ thực tế và vị trí sử dụng**, sau đó mới xác định nơi quản lý phù hợp.
+
+Có bốn cách xử lý:
+
+- **Kế thừa:** giữ nghiệp vụ và dữ liệu cốt lõi, đồng thời chuẩn hóa trạng thái, liên kết, media và quy trình công bố.
+- **Chuyển đổi:** giữ dữ liệu còn giá trị nhưng đưa về đúng chức năng hoặc khu vực nội dung mới.
+- **Không tiếp tục thành module riêng:** không tái tạo một màn hình CMS chỉ để giữ cách tổ chức cũ; tệp và dữ liệu cần thiết vẫn được chuyển đổi hoặc lưu để đối soát.
+- **Bổ sung mới:** tạo dữ liệu và nghiệp vụ mà CMS cũ chưa có.
+
+| CMS cũ | Thực tế đang quản lý | Cách xử lý trong CMS mới | Kết luận |
+| --- | --- | --- | --- |
+| **Tin tức, Sự kiện, Sản phẩm, Dịch vụ và các danh mục** | Nội dung và dữ liệu phân loại cốt lõi | Kế thừa, chuẩn hóa trạng thái, bản nháp/công bố, liên kết và media | Giữ và nâng cấp |
+| **Block** | Các mảnh nội dung được gắn theo module và vị trí để ghép thành trang | Chuyển nội dung còn dùng sang từng khu vực cố định của **Trang nội dung**; dữ liệu tham chiếu tiếp tục lấy từ Tin tức, Sản phẩm, Sự kiện, Dự án hoặc Dịch vụ | Thay bằng cách quản lý theo trang và khu vực |
+| **Banner** | Một nhóm dữ liệu trình bày hỗn hợp: ảnh Hero Trang chủ, logo đối tác, thành tựu/giải thưởng và có thể có banner chiến dịch | Không chuyển nguyên bảng thành một module Banner chung. Mỗi bản ghi được phân loại theo nơi sử dụng: Hero vào **Trang chủ → Hero**; giải thưởng vào **Trang chủ/Giới thiệu → Thành tựu & Giải thưởng**; đối tác vào khu vực **Đối tác**; ảnh gốc vào **Thư viện media**; banner chiến dịch còn hiệu lực được gắn vào khu vực nội dung hoặc CTA phù hợp | Tách theo ý nghĩa, không giữ “Banner” như một thùng chứa chung |
+| **Slideshow** | Tên module gợi ý là trình chiếu, nhưng dữ liệu thực tế đang được dùng làm nhóm ảnh/icon ở phần Hero của Trang chủ cũ | Không tạo module Slideshow tương ứng nếu Website mới không còn sử dụng cấu trúc này. Tệp còn giá trị được đưa vào Media; chỉ dữ liệu nào có vị trí tương ứng trong thiết kế mới mới được ánh xạ sang khu vực đó | Không tiếp tục thành module riêng; chuyển chọn lọc |
+| **Ảnh và tệp nằm trong từng module** | Đường dẫn ảnh, icon, video hoặc tài liệu được lưu rải rác | Tạo tài nguyên trong **Thư viện media**, giữ mã ổn định và ghi nhận nơi sử dụng; bản ghi nội dung chỉ tham chiếu tài nguyên | Chuyển sang tài nguyên dùng chung |
+| **Liên hệ, đăng ký sản phẩm và đơn hàng** | Nhu cầu khách hàng nằm ở các nguồn và luồng xử lý riêng | Giữ dữ liệu nguồn để đối soát, đồng thời chuẩn hóa thành **Yêu cầu khách hàng** để ưu tiên, phân công, ghi chú và theo dõi trạng thái | Hợp nhất khi vận hành, không làm mất dữ liệu gốc |
+| **Quyền trực tiếp theo tài khoản/Task** | Quyền được cấp rời rạc cho từng người dùng | Chuyển sang **Người dùng → Vai trò → Quyền**; quyền trực tiếp cũ chỉ dùng để lập bảng ánh xạ và kiểm tra tương đương khi chuyển đổi | Thay cơ chế quản trị |
+| **Dự án, Trang nội dung, Media, CTA, Biểu mẫu, Mẫu email, Nhật ký hoạt động, Thùng rác và Tìm kiếm toàn cục** | Không có module tương ứng đầy đủ trong CMS cũ | Tạo mới hoặc tổ chức lại để hỗ trợ vận hành liên chức năng | Bổ sung mới |
+
+#### Trường hợp cụ thể của Trang chủ
+
+Trang chủ cũ đang được quản lý rời rạc: nội dung hiển thị có thể nằm trong **Banner**, **Slideshow**, **Block** và các module nghiệp vụ khác nhau. Vì vậy, người vận hành phải biết tên module kỹ thuật và vị trí cũ mới xác định được nơi sửa.
+
+Trong CMS mới, Trang chủ là một hồ sơ duy nhất trong **Trang nội dung**, gồm các khu vực có ý nghĩa rõ ràng như **Hero**, **Giới thiệu**, **Số liệu**, **Thành tựu & Giải thưởng**, **Dự án**, **Sự kiện**, **Tin tức**, **Đối tác** và **Liên hệ/CTA**. Mỗi khu vực xác định rõ trường nào được nhập trực tiếp, tài nguyên nào lấy từ Media và nội dung nào tham chiếu từ chức năng khác. Việc này không biến Trang chủ thành trình kéo–thả tự do; bố cục và loại khu vực vẫn do thiết kế Website quy định.
+
+Ví dụ chuyển đổi:
+
+`Banner ảnh Hero cũ → Trang nội dung → Trang chủ → Hero`
+
+`Banner thành tựu/giải thưởng cũ → Trang chủ hoặc Giới thiệu → Thành tựu & Giải thưởng`
+
+`Banner logo đối tác cũ → dữ liệu Đối tác + Media → khu vực Đối tác của Trang chủ/Giới thiệu`
+
+`Icon trong Slideshow chỉ phục vụ Hero cũ → lưu Media nếu cần đối soát; không đưa vào Website mới nếu thiết kế mới không sử dụng`
+
+> **Nguyên tắc kiểm kê trước chuyển đổi:** Tên bảng và cấu trúc schema chỉ cho biết khả năng lưu trữ, không đủ để xác nhận ý nghĩa của từng bản ghi. Danh sách chuyển đổi cuối cùng cần đối chiếu dữ liệu thật, danh mục, đường dẫn tệp và vị trí mà Website cũ đang gọi. Mỗi bản ghi phải được đánh dấu **chuyển sang đâu**, **chỉ lưu đối soát** hoặc **không còn sử dụng**, thay vì sao chép toàn bộ Banner/Slideshow sang hệ thống mới.
+
+Như vậy, các module nội dung và danh mục cốt lõi chủ yếu được kế thừa; CMS mới tập trung thay đổi cách các module phối hợp, tái sử dụng dữ liệu và kiểm soát toàn bộ quá trình vận hành. Riêng các module trình bày cũ như Block, Banner và Slideshow được tháo tách theo ý nghĩa dữ liệu, không được giữ nguyên chỉ vì chúng tồn tại trong database cũ.
 
 ## 2. Mỗi bộ phận sử dụng CMS như thế nào?
 
@@ -45,11 +86,11 @@ Như vậy, các module nội dung và danh mục cốt lõi chủ yếu đượ
 
 ### Truyền thông và nội dung
 
-Bộ phận truyền thông quản lý **Tin tức, Trang nội dung, Sự kiện** và **Dự án**; sử dụng **Thư viện media** để chọn tài nguyên và **Menu** để sắp xếp đường dẫn trên Website. Tại các khu vực cần thu hút khách hàng, người phụ trách có thể chọn CTA và biểu mẫu đã có hoặc tạo thêm rồi gắn vào nội dung. Người biên tập lưu bản nháp và xem trước; việc công bố do tài khoản có quyền thực hiện.
+Bộ phận truyền thông quản lý **Tin tức, Trang nội dung, Sự kiện** và **Dự án**; sử dụng **Thư viện media** để chọn tài nguyên và **Menu** để sắp xếp đường dẫn trên Website. Tại các khu vực cần thu hút khách hàng, người phụ trách cập nhật CTA/Biểu mẫu **Hệ thống** hoặc tạo CTA/Biểu mẫu **Bổ sung** để chèn vào vùng nội dung được hỗ trợ. Người biên tập lưu bản nháp và xem trước; việc công bố do tài khoản có quyền thực hiện.
 
 **Chuẩn bị nội dung → chọn media, CTA hoặc biểu mẫu cần dùng → lưu nháp → xem trước → người có quyền công bố**
 
-![Màn hình quản lý Trang nội dung](https://lh3.googleusercontent.com/d/1sjwddrAv7EwvietFT4h4LPavC3otE67S=w1600)
+![Màn hình quản lý Trang nội dung](https://lh3.googleusercontent.com/d/10vpyNYbrzq1VP8fPT4NTrirpJMoVobwX=w1600)
 
 > **Hình 2.** Mỗi trang được quản lý theo khu vực nội dung, bản nháp và phiên bản đã công bố.
 
@@ -69,17 +110,17 @@ Bộ phận sản phẩm duy trì hồ sơ **Sản phẩm, Dịch vụ** và cá
 
 **Tiếp nhận yêu cầu → kiểm tra nguồn và nội dung khách gửi → đặt ưu tiên → phân công → ghi chú, cập nhật trạng thái → hoàn thành**
 
-![Màn hình quản lý Yêu cầu khách hàng](https://lh3.googleusercontent.com/d/1eRPp5zf39SDC_Hcv2fToh7dWiC_ILu9Z=w1600)
+![Màn hình quản lý Yêu cầu khách hàng](https://lh3.googleusercontent.com/d/1SctN7u8-IcuQhDAtg8sFA1-sCQwdhoci=w1600)
 
 > **Hình 4.** Yêu cầu khách hàng được tập trung để theo dõi trạng thái, mức ưu tiên và người phụ trách.
 
 ### Quản trị hệ thống
 
-Quản trị viên tạo và thay đổi trạng thái **Người dùng**, gán vai trò và phạm vi, đồng thời kiểm tra quyền có hiệu lực từ vai trò và quyền trực tiếp cũ. Quản trị viên duy trì **Cấu hình hệ thống**; việc biên soạn **Ngôn ngữ giao diện** có thể giao cho tài khoản nội dung hoặc biên dịch theo quyền. Khi xử lý sự cố, quản trị viên dùng **Nhật ký hoạt động** để xác định thao tác và **Thùng rác** để kiểm tra ảnh hưởng trước khi phục hồi hoặc xóa vĩnh viễn.
+Quản trị viên tạo và thay đổi trạng thái **Người dùng**, gán vai trò và kiểm tra quyền theo vai trò. Phạm vi nội dung chỉ cấu hình trong phần nâng cao khi có nghiệp vụ theo chi nhánh hoặc nội dung phụ trách. Quản trị viên duy trì **Cấu hình hệ thống**; việc biên soạn **Ngôn ngữ giao diện** có thể giao cho tài khoản nội dung hoặc biên dịch theo quyền. Khi xử lý sự cố, quản trị viên dùng **Nhật ký hoạt động** để xác định thao tác và **Thùng rác** để kiểm tra ảnh hưởng trước khi phục hồi hoặc xóa vĩnh viễn.
 
 **Tạo tài khoản → gán vai trò và phạm vi → kiểm tra quyền có hiệu lực → duy trì cấu hình → tra cứu hoặc phục hồi khi cần**
 
-![Màn hình quản lý Vai trò và quyền](https://lh3.googleusercontent.com/d/1UMTjMO7yo6qf3lqGrO9-4-KEwbeDB_O9=w1600)
+![Màn hình quản lý Vai trò và quyền](https://lh3.googleusercontent.com/d/1dEAgQT8nNcxsLjQlKbuTisMnw-h0XcCd=w1600)
 
 > **Hình 5.** Ma trận quyền xác định rõ mỗi vai trò được xem và thực hiện công việc nào.
 
@@ -114,7 +155,7 @@ Phần này dùng để tra cứu mục đích, khả năng chính và cách s�
 | Cấu hình hệ thống | Ngôn ngữ giao diện | Quản lý câu chữ tiếng Việt và tiếng Anh | Nội dung, quản trị hệ thống |
 | Cấu hình hệ thống | Nhật ký hoạt động | Tra cứu người thực hiện và nội dung thay đổi | Quản lý, quản trị hệ thống |
 | Cấu hình hệ thống | Thùng rác | Phục hồi hoặc loại bỏ dữ liệu đã xóa | Quản trị hệ thống |
-| SEO | Cấu hình SEO chức năng | Quản lý thông tin hiển thị trên công cụ tìm kiếm | Nội dung, quản trị Website |
+| SEO | SEO & URL | Quản lý template SEO, canonical, redirect và sitemap | Nội dung, quản trị Website |
 | Tiện ích CMS | Tìm kiếm toàn cục | Tìm dữ liệu trên toàn CMS và đi tới nơi xử lý | Tất cả người dùng CMS |
 
 > **Quy ước hình ảnh:** Ảnh chụp được lấy từ CMS hiện tại và lưu trên Google Drive dùng chung. Dữ liệu trong ảnh mang tính minh họa và có thể thay đổi khi hệ thống vận hành chính thức.
@@ -391,25 +432,53 @@ Chọn nhóm menu theo vị trí · Tạo nhiều cấp · Sửa tên, liên k�
 
 ### 3.6. Tương tác khách hàng
 
-Bốn chức năng trong nhóm phối hợp theo một quy trình chung:
+Nhóm này gồm bốn chức năng có vai trò riêng nhưng phối hợp trong cùng quá trình thu hút và tiếp nhận nhu cầu khách hàng:
 
-**Khách chọn CTA → gửi Biểu mẫu → CMS tạo Yêu cầu khách hàng → phân công → theo dõi xử lý**
+- **CTA** tạo điểm bắt đầu hành động, chẳng hạn Đăng ký tư vấn, Yêu cầu báo giá, Tải tài liệu, Liên hệ hoặc Xem thêm.
+- **Biểu mẫu** thu thập thông tin khi hành động yêu cầu khách hàng cung cấp dữ liệu.
+- **Yêu cầu khách hàng** là hồ sơ công việc được tạo từ dữ liệu khách gửi để bộ phận phụ trách tiếp nhận, phân công và theo dõi xử lý.
+- **Mẫu email** chuẩn hóa nội dung xác nhận cho khách hàng và thông báo cho bộ phận tiếp nhận.
+
+Một luồng phổ biến là:
+
+**Khách chọn CTA → CTA mở Biểu mẫu → khách gửi thông tin → CMS tạo Yêu cầu khách hàng → gửi email nếu được cấu hình → bộ phận phụ trách tiếp nhận và xử lý**
+
+CTA không bắt buộc phải mở Biểu mẫu. CTA cũng có thể dẫn tới một trang, Website bên ngoài, tài liệu, địa chỉ email hoặc kênh liên hệ được Website hỗ trợ. Chỉ khi khách hàng thực sự gửi thông tin qua Website thì CMS mới phát sinh dữ liệu cần tiếp nhận và theo dõi trong **Yêu cầu khách hàng**.
+
+#### Hai nhóm CTA và Biểu mẫu
+
+CTA và Biểu mẫu được phân thành hai nhóm để người quản trị hiểu rõ phạm vi sử dụng:
+
+| Nhóm | Nguồn hình thành | Cách sử dụng | Giới hạn |
+| --- | --- | --- | --- |
+| **Hệ thống** | Được cấu hình cho các vị trí và nghiệp vụ chính của Website | Cập nhật nội dung, hành động, trường thông tin và cấu hình tiếp nhận trong phạm vi được phép | Không xóa, không đổi mã định danh và không tự chuyển sang vị trí khác làm thay đổi bố cục cố định |
+| **Bổ sung** | Do người quản trị tạo khi phát sinh chiến dịch hoặc nhu cầu nội dung mới | Chèn vào vùng soạn thảo được hỗ trợ hoặc liên kết CTA với Biểu mẫu | Không tự tạo thêm khu vực mới và không thay đổi cấu trúc, thành phần hay bố cục cố định của Website |
+
+Ví dụ về nhóm **Hệ thống** gồm nút **Đăng ký tư vấn** tại trang sản phẩm, Biểu mẫu **Gửi yêu cầu** tại trang Liên hệ hoặc CTA **Yêu cầu báo giá** tại khu vực giới thiệu dịch vụ. Người quản trị không phải tạo lại các thành phần này từ đầu.
+
+Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm** được tạo cho một bài Tin tức hoặc Biểu mẫu đăng ký riêng cho một chiến dịch. Các thành phần này chỉ được chèn vào Tin tức, Sự kiện, Sản phẩm, Dịch vụ, Trang nội dung hoặc vùng soạn thảo khác khi vùng đó được CMS cho phép.
 
 #### CTA
 
-**Dùng để làm gì?** Tạo và quản lý các điểm kêu gọi khách hàng hành động, chẳng hạn đăng ký tư vấn, tải tài liệu hoặc liên hệ.
+**Dùng để làm gì?** Quản lý các nút hoặc điểm kêu gọi khách hàng thực hiện một hành động, chẳng hạn **Đăng ký tư vấn**, **Yêu cầu báo giá**, **Tải tài liệu**, **Liên hệ** hoặc **Xem thêm**.
 
 **Có thể làm gì?**
 
-- Soạn nội dung, chọn hình thức hiển thị và hành động khi khách chọn CTA.
-- Liên kết tới biểu mẫu, tài liệu hoặc kênh liên hệ.
-- Xem trước và kiểm tra các vị trí đang sử dụng.
-- Tìm kiếm, lọc, nhân bản; quản lý trạng thái hoạt động, bản nháp, lưu trữ hoặc thùng rác.
+- Soạn nội dung hiển thị, mô tả, biểu tượng và hình thức trình bày theo các lựa chọn Website hỗ trợ.
+- Cấu hình CTA để mở Biểu mẫu, đi tới đường dẫn trong hoặc ngoài Website, tải tài liệu, mở email hoặc kênh liên hệ được hỗ trợ.
+- Với CTA **Hệ thống**, cập nhật nội dung và hành động nhưng giữ nguyên mã định danh và vị trí thuộc bố cục cố định.
+- Với CTA **Bổ sung**, tạo mới rồi chèn vào vùng nội dung được CMS hỗ trợ.
+- Xem trước, kiểm tra vị trí đang sử dụng, tìm kiếm, lọc và nhân bản.
+- Quản lý trạng thái bản nháp, hoạt động, ngừng hoạt động, lưu trữ hoặc thùng rác theo quyền.
+
+**Ví dụ thực tế:** Nút **Đăng ký tư vấn** thuộc nhóm Hệ thống trên trang sản phẩm được cấu hình để mở Biểu mẫu đăng ký tư vấn. Trong một bài Tin tức, người biên tập có thể tạo CTA **Nhận tư vấn về sản phẩm** thuộc nhóm Bổ sung và chèn CTA đó vào giữa hoặc cuối bài.
 
 **Cách sử dụng:**  
-`Tạo CTA → nhập nội dung → chọn hành động đích → xem trước → công bố → gắn vào vị trí cần dùng`
 
-![Màn hình quản lý CTA](https://lh3.googleusercontent.com/d/1B4kEHzfgk-ctXtoY6w4rROGVMUY2Ypbn=w1600)
+- `CTA Hệ thống: chọn CTA → cập nhật nội dung hoặc hành động → xem trước → công bố`
+- `CTA Bổ sung: tạo CTA → nhập nội dung → chọn hành động đích → xem trước → công bố → chèn vào vùng nội dung được hỗ trợ`
+
+![Màn hình quản lý CTA](https://lh3.googleusercontent.com/d/1saL74haBHyPeDaxgZgey1GAnXB-Mxlkf=w1600)
 
 > **Hình 18.** CTA có thể được tái sử dụng tại nhiều vị trí và dẫn tới đúng hành động.
 
@@ -419,16 +488,22 @@ Bốn chức năng trong nhóm phối hợp theo một quy trình chung:
 
 **Có thể làm gì?**
 
-- Tạo, sắp xếp trường; quy định trường bắt buộc và quy tắc nhập liệu.
-- Cấu hình việc lưu thành yêu cầu khách hàng, thông báo nội bộ và email xác nhận.
+- Với Biểu mẫu **Hệ thống**, điều chỉnh các trường được phép cấu hình mà không phải tạo lại biểu mẫu của trang.
+- Với Biểu mẫu **Bổ sung**, tạo biểu mẫu mới rồi chèn vào vùng nội dung được hỗ trợ hoặc liên kết với CTA.
+- Thêm và sắp xếp trường; quy định trường bắt buộc, kiểu dữ liệu và quy tắc nhập liệu.
+- Cấu hình việc lưu lượt gửi thành Yêu cầu khách hàng, gửi thông báo nội bộ và gửi email xác nhận cho khách.
 - Xem trước biểu mẫu và theo dõi lượt gửi.
 - Tìm kiếm, lọc, nhân bản; quản lý trạng thái hoạt động, bản nháp, lưu trữ hoặc thùng rác.
-- Ghi nhận nguồn phát sinh như sản phẩm, mã nội dung và đường dẫn để bộ phận tiếp nhận hiểu đúng nhu cầu.
+- Ghi nhận nguồn phát sinh gồm Biểu mẫu, CTA, trang hoặc nội dung, vị trí sử dụng và đường dẫn để bộ phận tiếp nhận hiểu khách hàng đang quan tâm đến nội dung nào.
+
+**Ví dụ thực tế:** CTA **Yêu cầu báo giá** tại trang sản phẩm mở Biểu mẫu báo giá. Khách hàng nhập họ tên, số điện thoại, email và nội dung cần tư vấn rồi gửi. CMS lưu lượt gửi, tạo một Yêu cầu khách hàng, đồng thời ghi nhận CTA, sản phẩm và đường dẫn phát sinh. Nếu email đã được cấu hình, khách hàng nhận xác nhận và bộ phận phụ trách nhận thông báo.
 
 **Cách sử dụng:**  
-`Tạo biểu mẫu → thêm và sắp xếp trường → thiết lập tiếp nhận, thông báo → xem trước → công bố → liên kết với CTA hoặc trang nội dung`
 
-![Màn hình quản lý Biểu mẫu](https://lh3.googleusercontent.com/d/1yqcSh0jhoJH4Mg9cFdbSIGLRtuDVU6lo=w1600)
+- `Biểu mẫu Hệ thống: chọn Biểu mẫu → cập nhật trường và cấu hình tiếp nhận → xem trước → công bố`
+- `Biểu mẫu Bổ sung: tạo Biểu mẫu → thêm và sắp xếp trường → thiết lập tiếp nhận, thông báo → xem trước → công bố → chèn vào nội dung hoặc liên kết với CTA`
+
+![Màn hình quản lý Biểu mẫu](https://lh3.googleusercontent.com/d/1A_ZvREUePRr9f7ZLKw-7Ve4FClXmJqCb=w1600)
 
 > **Hình 19.** Các trường và quy tắc được cấu hình theo mục tiêu thu thập thông tin.
 
@@ -438,7 +513,7 @@ Bốn chức năng trong nhóm phối hợp theo một quy trình chung:
 
 **Có thể làm gì?**
 
-- Xem thông tin khách gửi và nguồn phát sinh của yêu cầu.
+- Xem thông tin khách gửi và nguồn phát sinh gồm Biểu mẫu, CTA, trang hoặc nội dung, vị trí và đường dẫn liên quan.
 - Lọc theo trạng thái, mức ưu tiên, nguồn tiếp nhận và người phụ trách.
 - Đặt hoặc thay đổi mức ưu tiên; phân công hoặc đổi người xử lý.
 - Ghi chú, gắn thẻ, cập nhật trạng thái và theo dõi lịch sử diễn biến.
@@ -454,11 +529,15 @@ Bốn chức năng trong nhóm phối hợp theo một quy trình chung:
 
 **Dùng để làm gì?** Chuẩn hóa email gửi khách hàng hoặc nội bộ trong các tình huống như xác nhận đã nhận yêu cầu.
 
-**Có thể làm gì?**  
-Tạo theo sự kiện sử dụng · Soạn tiêu đề, nội dung và đối tượng nhận · Chèn dữ liệu khách hàng, sản phẩm hoặc yêu cầu · Lọc theo trạng thái · Lưu nháp · Xem trước bằng dữ liệu mẫu · Nhân bản · Công bố · Xem nơi đang sử dụng.
+**Có thể làm gì?**
+
+- Tạo mẫu theo tình huống sử dụng và đối tượng nhận là khách hàng hoặc nội bộ.
+- Soạn tiêu đề, nội dung; chèn dữ liệu khách hàng, sản phẩm, Biểu mẫu hoặc Yêu cầu khách hàng.
+- Chọn mẫu trong cấu hình Biểu mẫu để gửi email xác nhận hoặc thông báo khi có lượt gửi.
+- Lọc theo trạng thái, lưu nháp, xem trước bằng dữ liệu mẫu, nhân bản, công bố và xem nơi đang sử dụng.
 
 **Cách sử dụng:**  
-`Chọn tình huống → soạn mẫu và chèn dữ liệu → xem trước → công bố → chọn mẫu trong biểu mẫu hoặc luồng thông báo`
+`Chọn tình huống → soạn mẫu và chèn dữ liệu → xem trước → công bố → chọn mẫu trong Biểu mẫu hoặc luồng thông báo`
 
 ![Màn hình quản lý Mẫu email](https://lh3.googleusercontent.com/d/166vpIVCN3csb2xnz-wETZ7hdu2dV1SD4=w1600)
 
@@ -489,21 +568,22 @@ Tạo theo sự kiện sử dụng · Soạn tiêu đề, nội dung và đối 
 
 #### Vai trò & quyền
 
-**Dùng để làm gì?** Quy định một nhóm người dùng được thao tác gì và trong phạm vi nào. **Người dùng** là tài khoản cụ thể; **vai trò** là nhóm trách nhiệm; **quyền** là hành động được phép như xem, sửa hoặc công bố; **phạm vi** giới hạn nơi quyền đó được áp dụng.
+**Dùng để làm gì?** Quy định một nhóm người dùng được thực hiện thao tác nào trong CMS. Mô hình vận hành chính là **Người dùng → Vai trò → Quyền**; phạm vi chỉ là thiết lập nâng cao khi nghiệp vụ thực tế yêu cầu.
 
 **Có thể làm gì?**
 
-- Tạo vai trò theo trách nhiệm công việc và quản lý danh mục chức năng làm cơ sở phân quyền.
-- Cho phép xem, tạo, sửa, xóa, công bố, xuất dữ liệu hoặc cấu hình theo từng nhóm chức năng.
-- Xác định phạm vi áp dụng; lưu vai trò ở bản nháp trước khi kích hoạt.
-- Gán hoặc thu hồi vai trò; xem quyền thực tế một người dùng nhận được.
-- Khi kích hoạt phiên bản vai trò mới, quyền mới được áp dụng ngay cho các tài khoản đang giữ vai trò đó.
-- Nhân bản, thay thế hoặc lưu trữ vai trò khi tổ chức thay đổi.
+- Tạo vai trò theo trách nhiệm công việc.
+- Chọn quyền xem, tạo, sửa, công bố hoặc xóa theo từng phân hệ.
+- Gán hoặc thu hồi vai trò của người dùng.
+- Bật hoặc tắt vai trò; khi tắt, quyền tạm ngừng hiệu lực nhưng các lượt gán được giữ để có thể bật lại.
+- Giới hạn theo nội dung phụ trách hoặc chi nhánh trong phần nâng cao khi thật sự cần.
+- Danh mục quyền được định nghĩa trong code/backend, không cho quản trị viên tự tạo Task hoặc quyền trường dữ liệu trên giao diện.
+- Mọi thay đổi quyền được ghi vào Nhật ký hoạt động thay cho quy trình versioning riêng của vai trò.
 
 **Ví dụ thực tế:** “Biên tập viên Tin tức” được xem, tạo và sửa bài nhưng không được công bố. “Trưởng phòng Truyền thông” có thêm quyền công bố và xuất dữ liệu. Nhờ đó, hai người cùng làm việc trong chức năng Tin tức nhưng chịu trách nhiệm ở các bước khác nhau.
 
 **Cách sử dụng:**  
-`Tạo hoặc chọn vai trò → chọn nhóm chức năng → thiết lập quyền và phạm vi → kiểm tra → kích hoạt → gán cho người dùng`
+`Tạo hoặc chọn vai trò → chọn quyền theo phân hệ → lưu → gán cho người dùng`
 
 ---
 
@@ -517,16 +597,17 @@ Tạo theo sự kiện sử dụng · Soạn tiêu đề, nội dung và đối 
 
 - Xem và chỉnh sửa cấu hình theo nhóm nghiệp vụ.
 - Phân biệt thiết lập dùng chung và thiết lập theo ngôn ngữ.
-- Lưu thay đổi ở bản nháp; các giá trị đang áp dụng chỉ thay đổi khi bản nháp được công bố.
-- Kiểm tra giá trị cũ–mới và phạm vi ảnh hưởng trước khi công bố đồng thời các thay đổi.
-- Theo dõi lịch sử và so sánh các lần thay đổi.
+- Với cấu hình thông thường như hotline, email, địa chỉ, liên kết mạng xã hội hoặc logo: sửa và lưu trực tiếp; hệ thống ghi Nhật ký hoạt động.
+- Với secret, tích hợp hoặc thiết lập có cảnh báo ảnh hưởng lớn: lưu bản nháp, so sánh giá trị cũ–mới và công bố sau khi kiểm tra.
+- Theo dõi phiên bản riêng của các đợt công bố cấu hình ảnh hưởng lớn; thay đổi thông thường không tạo thêm một phiên bản cấu hình.
 
 **Cách sử dụng:**  
-`Chọn nhóm thiết lập → cập nhật giá trị → lưu bản nháp → kiểm tra thay đổi và ảnh hưởng → công bố`
+- `Cấu hình thường: chọn nhóm → cập nhật → lưu`
+- `Cấu hình ảnh hưởng lớn: cập nhật → lưu nháp → so sánh ảnh hưởng → công bố`
 
-![Màn hình Cấu hình hệ thống](https://lh3.googleusercontent.com/d/1TalTvfipa60htKFVWJ4au1KWfqeoebMd=w1600)
+![Màn hình Cấu hình hệ thống](https://lh3.googleusercontent.com/d/1LuposJ1B5UxPKeT1-lKNtgPCAdP5e-e4=w1600)
 
-> **Hình 22.** Thiết lập dùng chung được tập trung theo nhóm để kiểm tra trước khi áp dụng.
+> **Hình 22.** Thiết lập thông thường được lưu trực tiếp; workflow kiểm tra và công bố chỉ xuất hiện với cấu hình ảnh hưởng lớn.
 
 #### Ngôn ngữ giao diện
 
@@ -582,24 +663,27 @@ Tìm kiếm và sửa câu chữ · Lọc theo Website/CMS, nhóm sử dụng v�
 
 ### 3.9. SEO
 
-#### Cấu hình SEO chức năng
+#### SEO & URL
 
-**Dùng để làm gì?** Quản lý cách các nhóm trang chính được mô tả và cho phép xuất hiện trên Google cùng các công cụ tìm kiếm. Đây là SEO ở cấp chức năng; SEO của từng bài viết hoặc sản phẩm được cập nhật tại chức năng nội dung tương ứng.
+**Dùng để làm gì?** Quản lý SEO theo ba tầng rõ ràng: mặc định toàn website trong **Cấu hình hệ thống**, template của trang hệ thống tại **SEO & URL**, và giá trị ghi đè của từng bài viết/sản phẩm tại form nội dung tương ứng.
 
 **Có thể làm gì?**
 
-- Cập nhật tiêu đề, mô tả và từ khóa định hướng theo từng chức năng.
+- Theo dõi nhanh trang noindex, trang thiếu mô tả và route chưa có nơi quản lý.
+- Cập nhật tiêu đề, mô tả, canonical và quyền lập chỉ mục theo từng chức năng.
 - Nhập nội dung cố định hoặc chèn biến để hệ thống tự điền thông tin phù hợp cho từng trang.
-- Cho phép hoặc hạn chế công cụ tìm kiếm lập chỉ mục.
 - Quản lý riêng trang chính, trang lọc, trang danh mục và trang chi tiết khi được hỗ trợ.
 - Chuyển tới nơi quản lý nội dung chi tiết để hoàn thiện thông tin tìm kiếm liên quan.
+- Thêm, sửa, bật/tắt hoặc xóa redirect 301/302 khi URL thay đổi; hệ thống cảnh báo URL trùng và vòng lặp cơ bản.
+- Theo dõi số URL đủ điều kiện cùng thời điểm cập nhật và mở sitemap để kiểm tra.
+- Meta Keywords chỉ còn trong phần tương thích legacy, không phải trường SEO chính.
 
 **Cách sử dụng:**  
-`Chọn chức năng và cấp trang → cập nhật tiêu đề, mô tả, từ khóa → chọn quyền lập chỉ mục → lưu`
+`Kiểm tra tổng quan → chọn template hoặc URL cần xử lý → cập nhật SEO/canonical hoặc redirect → lưu → kiểm tra sitemap`
 
-![Màn hình Cấu hình SEO chức năng](https://lh3.googleusercontent.com/d/19LdTv7HMw_4Zw8V1F_qrPwo1BPKBS0n_=w1600)
+![Màn hình SEO & URL](https://lh3.googleusercontent.com/d/1TzzvXTPToe5ZCogveir4C7YamIkAkAu0=w1600)
 
-> **Hình 25.** Thông tin tìm kiếm và quyền lập chỉ mục được quản lý theo từng cấp trang.
+> **Hình 25.** Workspace SEO & URL tách tổng quan chất lượng, template trang hệ thống và quản lý redirect/sitemap.
 
 ---
 
