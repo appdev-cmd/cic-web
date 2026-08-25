@@ -4,7 +4,7 @@ import { representativePartnerCountries, type RepresentativePartner } from '../d
 import { worldMapPaths } from '../data/worldMapPaths';
 
 const CANVAS = { width: 1800, height: 1060, mapX: 175, mapY: 131, mapWidth: 1450, mapHeight: 798 } as const;
-const PARTNER_MAP_EDIT_MODE = true;
+const PARTNER_MAP_EDIT_MODE = false;
 const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
 const LOGO_BOUNDS = {
   compact: { width: 82, height: 58 },
