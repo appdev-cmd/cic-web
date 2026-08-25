@@ -17,18 +17,24 @@ const MIN_CURVATURE = 12;
 const MAX_CURVATURE = 52;
 const CONNECTOR_CLEARANCE = 7;
 const CONNECTOR_GAP = 14;
+const CONNECTOR_ENDPOINT_TUNING: Readonly<Record<string, { gap: number; x?: number; y?: number }>> = {
+  prokon: { gap: 6, x: 10 },
+  deltares: { gap: 6, x: 8 },
+  piletest: { gap: 5 },
+};
 
 const mapPoint = (point: Point): Point => ({ x: CANVAS.mapX + point.x / 100 * CANVAS.mapWidth, y: CANVAS.mapY + point.y / 100 * CANVAS.mapHeight });
 const boxCenter = (box: Box): Point => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
 const expandedBox = (box: Box, padding: number): Box => ({ x: box.x - padding, y: box.y - padding, width: box.width + padding * 2, height: box.height + padding * 2 });
 
-const logoConnectionPoint = (box: Box, marker: Point): Point => {
-  const exclusion = expandedBox(box, CONNECTOR_GAP);
+const logoConnectionPoint = (box: Box, marker: Point, partnerId: string): Point => {
+  const tuning = CONNECTOR_ENDPOINT_TUNING[partnerId];
+  const exclusion = expandedBox(box, tuning?.gap ?? CONNECTOR_GAP);
   const center = boxCenter(box);
   const dx = marker.x - center.x;
   const dy = marker.y - center.y;
-  if (Math.abs(dx) >= Math.abs(dy)) return { x: dx < 0 ? exclusion.x : exclusion.x + exclusion.width, y: center.y };
-  return { x: center.x, y: dy < 0 ? exclusion.y : exclusion.y + exclusion.height };
+  if (Math.abs(dx) >= Math.abs(dy)) return { x: dx < 0 ? exclusion.x : exclusion.x + exclusion.width, y: center.y + (tuning?.y ?? 0) };
+  return { x: center.x + (tuning?.x ?? 0), y: dy < 0 ? exclusion.y : exclusion.y + exclusion.height };
 };
 
 const quadraticPoint = (start: Point, control: Point, end: Point, t: number): Point => {
@@ -94,8 +100,9 @@ export const CountryPartnerNetwork: React.FC = () => {
       const count = entry.country?.partners.length ?? 0;
       const countryBoxes = boxes.slice(boxOffset, boxOffset + count);
       boxOffset += count;
-      const countryCurves = countryBoxes.map((box) => {
-        const curve = buildCurve(entry.marker, logoConnectionPoint(box, entry.marker), boxes.filter((candidate) => candidate !== box), markers.filter((candidate) => candidate !== entry.marker), acceptedCurves);
+      const countryCurves = countryBoxes.map((box, index) => {
+        const partner = entry.country?.partners[index];
+        const curve = buildCurve(entry.marker, logoConnectionPoint(box, entry.marker, partner?.id ?? ''), boxes.filter((candidate) => candidate !== box), markers.filter((candidate) => candidate !== entry.marker), acceptedCurves);
         acceptedCurves.push(curve);
         return curve;
       });
