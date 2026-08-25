@@ -738,7 +738,7 @@ export function NewsView({
 
                   <button
                     onClick={handleBackToList}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors bg-white px-3.5 py-1.5 border border-slate-200 shadow-xs cursor-pointer rounded-md shrink-0"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors bg-white px-3.5 py-1.5 border border-slate-200 shadow-xs cursor-pointer rounded-[8px] shrink-0"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Quay lại</span>
