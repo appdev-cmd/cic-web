@@ -9,8 +9,6 @@
 - [HỆ THỐNG QUẢN TRỊ NỘI DUNG WEBSITE CIC](#hệ-thống-quản-trị-nội-dung-website-cic)
   - [Mục lục](#mục-lục)
   - [1. CMS mới mở rộng những gì?](#1-cms-mới-mở-rộng-những-gì)
-    - [1.1. Dữ liệu CMS cũ được giữ, chuyển đổi hay thay thế như thế nào?](#11-dữ-liệu-cms-cũ-được-giữ-chuyển-đổi-hay-thay-thế-như-thế-nào)
-      - [Trường hợp cụ thể của Trang chủ](#trường-hợp-cụ-thể-của-trang-chủ)
   - [2. Mỗi bộ phận sử dụng CMS như thế nào?](#2-mỗi-bộ-phận-sử-dụng-cms-như-thế-nào)
     - [Lãnh đạo và cán bộ quản lý](#lãnh-đạo-và-cán-bộ-quản-lý)
     - [Truyền thông và nội dung](#truyền-thông-và-nội-dung)
@@ -67,16 +65,7 @@ CMS cũ đã quản lý tin tức, danh mục tin, sự kiện, sản phẩm cù
 - **Người dùng và phân quyền:** CMS mới chuẩn hóa luồng vận hành thành **Người dùng → Vai trò → Quyền**. Danh mục quyền do hệ thống định nghĩa; quản trị viên chỉ tạo vai trò, chọn quyền theo phân hệ và gán vai trò cho người dùng. Quyền trực tiếp legacy chỉ phục vụ chuyển đổi dữ liệu, không còn là một cơ chế quản trị song song trên giao diện.
 - **Kiểm soát và tra cứu liên chức năng:** **Nhật ký hoạt động** ghi thống nhất người thực hiện, hành động, đối tượng, kết quả và dữ liệu trước–sau; **Thùng rác** giữ bản ghi để phục hồi và xử lý xung đột thay cho cách xóa cứng của phần lớn module cũ. **Tìm kiếm toàn cục** cho phép tìm qua nhiều nhóm dữ liệu từ một điểm và chỉ trả về nội dung người dùng có quyền truy cập.
 
-### 1.1. Dữ liệu CMS cũ được giữ, chuyển đổi hay thay thế như thế nào?
-
-Việc chuyển đổi không thực hiện theo nguyên tắc “mỗi bảng cũ tạo một chức năng mới tương ứng”. Một số module cũ được đặt tên theo cách trình bày trên Website, nhưng bên trong lại chứa nhiều loại dữ liệu có ý nghĩa khác nhau. CMS mới phân loại lại dữ liệu theo **nghiệp vụ thực tế và vị trí sử dụng**, sau đó mới xác định nơi quản lý phù hợp.
-
-Có bốn cách xử lý:
-
-- **Kế thừa:** giữ nghiệp vụ và dữ liệu cốt lõi, đồng thời chuẩn hóa trạng thái, liên kết, media và quy trình công bố.
-- **Chuyển đổi:** giữ dữ liệu còn giá trị nhưng đưa về đúng chức năng hoặc khu vực nội dung mới.
-- **Không tiếp tục thành module riêng:** không tái tạo một màn hình CMS chỉ để giữ cách tổ chức cũ; tệp và dữ liệu cần thiết vẫn được chuyển đổi hoặc lưu để đối soát.
-- **Bổ sung mới:** tạo dữ liệu và nghiệp vụ mà CMS cũ chưa có.
+CMS mới **không sao chép nguyên cấu trúc của CMS cũ**. Thay vào đó, từng nhóm dữ liệu được xem xét theo ý nghĩa và nơi sử dụng thực tế rồi xử lý theo một trong bốn cách: **giữ và nâng cấp** nghiệp vụ cốt lõi; **chuyển** dữ liệu còn giá trị sang đúng chức năng mới; **bỏ module cũ nhưng vẫn giữ tệp hoặc dữ liệu cần đối soát**; hoặc **bổ sung mới** những nghiệp vụ trước đây chưa có. Bảng dưới đây cho biết cụ thể dữ liệu nào đi đâu:
 
 | CMS cũ | Thực tế đang quản lý | Cách xử lý trong CMS mới | Kết luận |
 | --- | --- | --- | --- |
@@ -89,7 +78,7 @@ Có bốn cách xử lý:
 | **Quyền trực tiếp theo tài khoản/Task** | Quyền được cấp rời rạc cho từng người dùng | Chuyển sang **Người dùng → Vai trò → Quyền**; quyền trực tiếp cũ chỉ dùng để lập bảng ánh xạ và kiểm tra tương đương khi chuyển đổi | Thay cơ chế quản trị |
 | **Dự án, Trang nội dung, Media, CTA, Biểu mẫu, Mẫu email, Nhật ký hoạt động, Thùng rác và Tìm kiếm toàn cục** | Không có module tương ứng đầy đủ trong CMS cũ | Tạo mới hoặc tổ chức lại để hỗ trợ vận hành liên chức năng | Bổ sung mới |
 
-#### Trường hợp cụ thể của Trang chủ
+**Ví dụ cụ thể — Trang chủ**
 
 Trang chủ cũ đang được quản lý rời rạc: nội dung hiển thị có thể nằm trong **Banner**, **Slideshow**, **Block** và các module nghiệp vụ khác nhau. Vì vậy, người vận hành phải biết tên module kỹ thuật và vị trí cũ mới xác định được nơi sửa.
 
