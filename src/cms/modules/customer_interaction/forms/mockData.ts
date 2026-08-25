@@ -6,7 +6,8 @@ import { FieldType, FieldRoleType } from '../shared/constants/fieldTypes';
 
 export const MOCK_FORMS: FormItem[] = [
   {
-    id: 'form_001',
+    id: 'form_home_consultation',
+    governance: { origin: 'system', allowedPlacements: ['fixed_section', 'cta_action'], fixedPlacementKeys: ['home.contact_cta'] },
     adminName: 'Biểu mẫu - Tư vấn ERP',
     title: 'Đăng ký nhận tư vấn',
     description: 'Vui lòng để lại thông tin để đội ngũ TechAZ liên hệ',
@@ -108,7 +109,8 @@ export const MOCK_FORMS: FormItem[] = [
     updatedAt: '2026-02-01T10:15:00Z',
   },
   {
-    id: 'form_002',
+    id: 'form_contact_request',
+    governance: { origin: 'system', allowedPlacements: ['fixed_section', 'cta_action'], fixedPlacementKeys: ['contact.form'] },
     adminName: 'Biểu mẫu - Báo giá',
     title: 'Nhận báo giá',
     description: 'Để lại thông tin để nhận báo giá chi tiết',
@@ -236,6 +238,7 @@ export const MOCK_FORMS: FormItem[] = [
   },
   {
     id: 'form_003',
+    governance: { origin: 'custom', allowedPlacements: ['rich_text', 'cta_action'] },
     adminName: 'Biểu mẫu - Liên hệ',
     title: 'Liên hệ với chúng tôi',
     description: 'Form liên hệ chung',
@@ -357,6 +360,7 @@ export const MOCK_FORMS: FormItem[] = [
   },
   {
     id: 'form_004',
+    governance: { origin: 'custom', allowedPlacements: ['rich_text', 'cta_action'] },
     adminName: 'Biểu mẫu - Đăng ký Demo',
     title: 'Đăng ký dùng thử',
     description: 'Đăng ký để trải nghiệm sản phẩm miễn phí',

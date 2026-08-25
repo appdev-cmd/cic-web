@@ -222,6 +222,7 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
         createdBy: 'Current User',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        governance: { origin: 'custom', allowedPlacements: ['rich_text', 'cta_action'] },
       };
       setForms([newForm, ...forms]);
     }

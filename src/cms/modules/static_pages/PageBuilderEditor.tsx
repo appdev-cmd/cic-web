@@ -76,8 +76,6 @@ const longTextKeys = new Set(['description', 'subtitle', 'text', 'vision', 'miss
 const FORM_OPTIONS = [
   { value: 'form_home_consultation', label: 'Form tư vấn trang chủ (form_home_consultation)' },
   { value: 'form_contact_request', label: 'Form tiếp nhận liên hệ (form_contact_request)' },
-  { value: 'form_001', label: 'Form Đăng ký tư vấn giải pháp ERP (form_001)' },
-  { value: 'form_002', label: 'Form Báo giá bản quyền phần mềm (form_002)' },
   { value: 'form_003', label: 'Form Tải Hồ sơ năng lực CIC (form_003)' },
   { value: 'form_004', label: 'Form Khảo sát Đào tạo BIM (form_004)' },
 ];
@@ -1217,7 +1215,7 @@ function ConfigField({
     return (
       <div className="space-y-1.5 md:col-span-2">
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{labelFor(fieldKey)}</span>
-        <RichTextEditor value={String(value ?? '')} onChange={(nextValue) => onChange(path, nextValue)} minHeight="420px" />
+        <RichTextEditor value={String(value ?? '')} onChange={(nextValue) => onChange(path, nextValue)} minHeight="420px" allowedEmbeds={['cta', 'form']} />
         <span className="block text-[11px] text-slate-400">Dùng heading, đoạn văn, danh sách, bảng, link và ảnh trong cùng một nội dung.</span>
       </div>
     );

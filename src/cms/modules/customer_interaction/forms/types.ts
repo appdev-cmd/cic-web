@@ -3,6 +3,7 @@
 import { BaseEntity, AnalyticsData } from '../shared/types';
 import { FieldType, FieldRoleType } from '../shared/constants/fieldTypes';
 import { FormStatus } from '../shared/constants/statusTypes';
+import type { CustomerInteractionGovernance } from '../../../../shared/customerInteractionContract';
 
 export interface FieldValidation {
   required?: boolean;
@@ -75,6 +76,7 @@ export interface FormItem extends BaseEntity {
     submissions: number;
     conversionRate: number;
   };
+  governance: CustomerInteractionGovernance;
 }
 
 export interface FormFormData {

@@ -33,10 +33,10 @@ export const VersionHistoryTab: React.FC<VersionHistoryTabProps> = ({
         <div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <History className="w-5 h-5 text-orange-500" />
-            <span>Lịch sử Phiên bản & Khôi phục Cấu hình (Version History & Rollback)</span>
+            <span>Phiên bản cấu hình ảnh hưởng lớn</span>
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Mọi đợt xuất bản thành công được lưu vết vĩnh viễn. Hành động "Phục hồi" sẽ tự động tạo một <strong>Bản nháp Mới (New Draft)</strong> để kiểm tra lại trước khi áp dụng.
+            Chỉ các đợt công bố secret, tích hợp hoặc thiết lập có cảnh báo ảnh hưởng mới tạo phiên bản. Thay đổi thông thường được theo dõi trong Nhật ký hoạt động.
           </p>
         </div>
 

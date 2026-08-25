@@ -388,7 +388,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {[
                     { label: 'Hãng sản xuất', sub: 'Quản lý thương hiệu đối tác', path: '/cms/products/brands', icon: Building2 },
-                    { label: 'Cấu hình SEO chức năng', sub: 'Meta title, Schema, Robots', path: '/cms/function-seo', icon: Search },
+                    { label: 'SEO & URL', sub: 'Template SEO, canonical, redirect và sitemap', path: '/cms/function-seo', icon: Search },
                     { label: 'Danh mục sản phẩm', sub: 'Cây phân loại taxonomy', path: '/cms/product-settings', icon: FolderTree },
                     { label: 'Yêu cầu từ khách hàng', sub: 'Leads tư vấn & Báo giá', path: '/cms/customer-requests', icon: Inbox },
                     { label: 'Quản lý Sản phẩm', sub: 'Danh sách phần mềm & thiết bị', path: '/cms/products', icon: Package },

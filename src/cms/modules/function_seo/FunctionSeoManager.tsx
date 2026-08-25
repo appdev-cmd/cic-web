@@ -18,12 +18,16 @@ import {
   Sparkles,
   Info,
   SlidersHorizontal,
+  Link2,
+  ListChecks,
+  Map,
 } from 'lucide-react';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { getDemoFunctionSeoData } from '../../data/FunctionSeoDataSource';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { CmsTabs } from '../../components/ui/CmsTabs';
 import type { FunctionSeoRecord, SeoFacetLevel, SeoOwnerStatus } from './types';
 
 interface Props {
@@ -57,22 +61,30 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) =
     facet: SeoFacetLevel;
   } | null>(null);
 
-  const [expandedIds, setExpandedIds] = useState(() => new Set(records.map((item) => item.id)));
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [toast, setToast] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [activeSection, setActiveSection] = useState<'overview' | 'templates' | 'redirects'>('overview');
+  const [healthFilter, setHealthFilter] = useState<'all' | 'noindex' | 'missing-description' | 'missing-owner'>('all');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return records;
-    return records.filter((item) => {
+    const healthFiltered = records.filter((item) => {
+      if (healthFilter === 'noindex') return !item.indexable;
+      if (healthFilter === 'missing-description') return !item.description.trim();
+      if (healthFilter === 'missing-owner') return item.detailStatus === 'missing' || item.facetLevels?.some((facet) => facet.status === 'missing');
+      return true;
+    });
+    if (!q) return healthFiltered;
+    return healthFiltered.filter((item) => {
       const matchMain = `${item.label} ${item.path} ${item.module}`.toLowerCase().includes(q);
       const matchFacets = item.facetLevels?.some((f) =>
         `${f.title} ${f.pattern}`.toLowerCase().includes(q)
       );
       return matchMain || matchFacets;
     });
-  }, [query, records]);
+  }, [healthFilter, query, records]);
 
   const paginatedRecords = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
@@ -141,22 +153,45 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) =
   return (
     <div className="space-y-4">
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-xl animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-xs font-semibold text-emerald-800 shadow-lg animate-in fade-in slide-in-from-bottom-2 dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span>{toast}</span>
         </div>
       )}
 
       <CmsPageHeader
         icon={<SearchCheck />}
-        title="Cấu hình SEO chức năng"
-        description="Quản lý SEO cho trang chủ module, các trang lọc tiêu chí đơn lẻ và trang chi tiết."
+        title="SEO & URL"
+        description="Kiểm soát khả năng hiển thị trên công cụ tìm kiếm, template SEO và vòng đời URL của website."
         meta={
           <span className="rounded-md bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
             {workspaceLocale.toUpperCase()} · {records.length} module
           </span>
         }
       />
+
+      <CmsTabs
+        ariaLabel="Khu vực SEO và URL"
+        value={activeSection}
+        onChange={(value) => setActiveSection(value as typeof activeSection)}
+        items={[
+          { id: 'overview', label: 'Tổng quan', icon: ListChecks },
+          { id: 'templates', label: 'Trang hệ thống & template', icon: FileText },
+          { id: 'redirects', label: 'Redirect & sitemap', icon: Link2 },
+        ]}
+      />
+
+      {activeSection === 'overview' && <SeoOverview records={records} onOpenTemplates={(filter = 'all') => { setHealthFilter(filter); setActiveSection('templates'); }} onOpenRedirects={() => setActiveSection('redirects')} />}
+      {activeSection === 'redirects' && <RedirectWorkspace records={records} />}
+
+      {activeSection === 'templates' && <>
+
+      {healthFilter !== 'all' && (
+        <div className="flex items-center justify-between rounded-xl border border-orange-200 bg-orange-50/60 px-3 py-2 text-xs text-orange-800 dark:border-orange-900/60 dark:bg-orange-950/20 dark:text-orange-200">
+          <span>Đang lọc theo cảnh báo từ Tổng quan.</span>
+          <button type="button" onClick={() => setHealthFilter('all')} className="inline-flex items-center gap-1 font-bold hover:text-orange-600"><X className="size-3.5" /> Xóa lọc</button>
+        </div>
+      )}
 
       {/* Filter search */}
       <div className="relative flex items-center">
@@ -383,6 +418,7 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) =
           />
         </div>
       )}
+      </>}
 
       {/* Main Page SEO Editor */}
       {editingMain && (
@@ -406,6 +442,94 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) =
     </div>
   );
 };
+
+function SeoOverview({ records, onOpenTemplates, onOpenRedirects }: { records: FunctionSeoRecord[]; onOpenTemplates: (filter?: 'all' | 'noindex' | 'missing-description' | 'missing-owner') => void; onOpenRedirects: () => void }) {
+  const noindexCount = records.filter((record) => !record.indexable).length;
+  const missingDescription = records.filter((record) => !record.description.trim()).length;
+  const missingOwners = records.reduce((total, record) => total + (record.detailStatus === 'missing' ? 1 : 0) + (record.facetLevels?.filter((facet) => facet.status === 'missing').length ?? 0), 0);
+  const healthItems = [
+    { label: 'Trang noindex', value: noindexCount, note: 'Trang đang chặn lập chỉ mục', tone: 'slate', filter: 'noindex' },
+    { label: 'Thiếu mô tả', value: missingDescription, note: 'Cần bổ sung meta description', tone: 'amber', filter: 'missing-description' },
+    { label: 'Thiếu nơi quản lý', value: missingOwners, note: 'Route chưa có màn hình nguồn', tone: 'orange', filter: 'missing-owner' },
+  ] as const;
+
+  return (
+    <div className="space-y-4">
+      <section className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50/60 p-4 dark:border-orange-900/60 dark:bg-orange-950/20">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white text-orange-600 shadow-xs dark:bg-orange-950/50 dark:text-orange-300">
+          <Info className="size-4" />
+        </span>
+        <div>
+          <h2 className="text-sm font-bold text-slate-800 dark:text-orange-100">Ba tầng cấu hình SEO</h2>
+          <p className="mt-1 max-w-4xl text-xs leading-5 text-slate-600 dark:text-orange-200/80">
+            Mặc định toàn website nằm tại Cấu hình hệ thống; template trang hệ thống nằm tại đây;
+            SEO riêng của bài viết, sản phẩm và sự kiện được chỉnh trong form nội dung tương ứng.
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+        <div className="mb-4">
+          <h2 className="text-sm font-bold text-slate-800 dark:text-white">Tình trạng SEO hệ thống</h2>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Các điểm cần kiểm tra trước lần xuất bản tiếp theo.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {healthItems.map((item) => (
+            <button type="button" onClick={() => onOpenTemplates(item.filter)} key={item.label} className="rounded-xl bg-slate-50 p-4 text-left ring-1 ring-inset ring-slate-200/80 transition hover:bg-orange-50 hover:ring-orange-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:bg-slate-800/50 dark:ring-slate-700">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">{item.label}</p>
+                <span className={`size-2 rounded-full ${item.tone === 'amber' ? 'bg-amber-500' : item.tone === 'orange' ? 'bg-orange-500' : 'bg-slate-400'}`} />
+              </div>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-slate-800 dark:text-white">{item.value}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.note}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <button type="button" onClick={() => onOpenTemplates('all')} className="group flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-colors hover:border-orange-300 hover:bg-orange-50/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-orange-800 dark:hover:bg-orange-950/10">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300"><FileText className="size-5" /></span>
+          <span><span className="block text-sm font-bold text-slate-800 dark:text-white">Trang hệ thống & template</span><span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">Quản lý title, description, canonical và indexability của trang danh sách, bộ lọc và trang chi tiết.</span></span>
+        </button>
+        <button type="button" onClick={onOpenRedirects} className="group flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-xs transition-colors hover:border-orange-300 hover:bg-orange-50/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-orange-800 dark:hover:bg-orange-950/10">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300"><Map className="size-5" /></span>
+          <span><span className="block text-sm font-bold text-slate-800 dark:text-white">Redirect & sitemap</span><span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">Theo dõi URL cũ, đích chuyển hướng và trạng thái đưa URL vào sitemap.</span></span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RedirectWorkspace({ records }: { records: FunctionSeoRecord[] }) {
+  const [redirects, setRedirects] = useState([
+    { id: 'redirect_1', from: '/san-pham-cu.html', to: '/san-pham', type: '301', source: 'Đổi slug', active: true },
+    { id: 'redirect_2', from: '/tin-tuc/hoi-thao-bim-2025', to: '/tin-tuc/hoi-thao-bim-2026', type: '302', source: 'Thủ công', active: true },
+  ]);
+  const [showForm, setShowForm] = useState(false);
+  const [sourcePath, setSourcePath] = useState('');
+  const [targetPath, setTargetPath] = useState('');
+  const [redirectType, setRedirectType] = useState<'301' | '302'>('301');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const saveRedirect = () => {
+    const from = sourcePath.trim(); const to = targetPath.trim();
+    if (!from || !to) return setError('Vui lòng nhập đủ URL cũ và URL đích.');
+    if (from === to) return setError('URL cũ và URL đích không được giống nhau.');
+    if (redirects.some((item) => item.id !== editingId && item.from.toLowerCase() === from.toLowerCase())) return setError('URL cũ đã có redirect.');
+    if (redirects.some((item) => item.from === to && item.to === from)) return setError('Redirect này tạo thành vòng lặp.');
+    setRedirects((current) => editingId
+      ? current.map((item) => item.id === editingId ? { ...item, from, to, type: redirectType } : item)
+      : [{ id: `redirect_${Date.now()}`, from, to, type: redirectType, source: 'Thủ công', active: true }, ...current]);
+    setSourcePath(''); setTargetPath(''); setEditingId(null); setError(''); setShowForm(false);
+  };
+  return <div className="space-y-4">
+    <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div><h2 className="text-sm font-bold text-slate-950 dark:text-white">Redirect URL</h2><p className="mt-1 text-xs text-slate-500">URL cũ phải trỏ đến một URL hợp lệ; tránh redirect chain và loop.</p></div><CmsButton size="sm" leadingIcon={<Link2 className="size-4" />} onClick={() => { setEditingId(null); setSourcePath(''); setTargetPath(''); setRedirectType('301'); setError(''); setShowForm((value) => !value); }}>Thêm redirect</CmsButton></div>
+    {showForm && <div className="space-y-2 rounded-xl border border-orange-200 bg-orange-50/60 p-4 dark:border-orange-900/60 dark:bg-orange-950/20"><div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end"><label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"><span>URL cũ</span><input value={sourcePath} onChange={(event) => { setSourcePath(event.target.value); setError(''); }} placeholder="/duong-dan-cu" className={inputClass} /></label><label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"><span>URL đích</span><input value={targetPath} onChange={(event) => { setTargetPath(event.target.value); setError(''); }} placeholder="/duong-dan-moi" className={inputClass} /></label><label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"><span>Loại</span><select value={redirectType} onChange={(event) => setRedirectType(event.target.value as '301' | '302')} className={inputClass}><option value="301">301</option><option value="302">302</option></select></label><CmsButton size="sm" onClick={saveRedirect}>{editingId ? 'Cập nhật' : 'Lưu'}</CmsButton></div>{error && <p className="text-xs font-semibold text-red-600">{error}</p>}</div>}
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"><table className="w-full min-w-[800px] text-left text-xs"><thead className="bg-slate-50 text-slate-500 dark:bg-slate-800/70"><tr><th className="px-4 py-3">URL cũ</th><th className="px-4 py-3">URL đích</th><th className="px-4 py-3">Loại</th><th className="px-4 py-3">Nguồn</th><th className="px-4 py-3">Trạng thái</th><th className="px-4 py-3 text-right">Thao tác</th></tr></thead><tbody className="divide-y divide-slate-100 dark:divide-slate-800">{redirects.map((redirect) => <tr key={redirect.id}><td className="px-4 py-3 font-mono text-slate-700 dark:text-slate-200">{redirect.from}</td><td className="px-4 py-3 font-mono text-slate-700 dark:text-slate-200">{redirect.to}</td><td className="px-4 py-3 font-bold">{redirect.type}</td><td className="px-4 py-3 text-slate-500">{redirect.source}</td><td className={`px-4 py-3 font-semibold ${redirect.active ? 'text-emerald-700' : 'text-slate-400'}`}>{redirect.active ? 'Hoạt động' : 'Tạm tắt'}</td><td className="px-4 py-3"><div className="flex justify-end gap-1"><button type="button" onClick={() => { setEditingId(redirect.id); setSourcePath(redirect.from); setTargetPath(redirect.to); setRedirectType(redirect.type as '301' | '302'); setShowForm(true); setError(''); }} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-orange-600" aria-label="Sửa redirect"><Edit3 className="size-4" /></button><button type="button" onClick={() => setRedirects((current) => current.map((item) => item.id === redirect.id ? { ...item, active: !item.active } : item))} className="rounded-lg px-2 py-1 font-semibold text-slate-500 hover:bg-slate-100">{redirect.active ? 'Tắt' : 'Bật'}</button><button type="button" onClick={() => setRedirects((current) => current.filter((item) => item.id !== redirect.id))} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Xóa redirect"><X className="size-4" /></button></div></td></tr>)}</tbody></table></div>
+    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><div><p className="text-sm font-bold text-slate-950 dark:text-white">Sitemap website</p><p className="mt-1 text-xs text-slate-500">{records.filter((record) => record.indexable).length} URL hệ thống đủ điều kiện · cập nhật gần nhất lúc {new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}.</p></div><a href="/sitemap.xml" target="_blank" rel="noreferrer" className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300">Mở sitemap</a></div>
+  </div>;
+}
 
 function SeoEditor({
   value,
@@ -447,13 +571,7 @@ function SeoEditor({
             />
           </Field>
 
-          <Field label="Meta Keywords">
-            <input
-              className={inputClass}
-              value={value.keywords}
-              onChange={(e) => onChange({ ...value, keywords: e.target.value })}
-            />
-          </Field>
+          <details className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"><summary className="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300">Trường tương thích legacy</summary><div className="mt-3"><Field label="Meta Keywords"><input className={inputClass} value={value.keywords} onChange={(e) => onChange({ ...value, keywords: e.target.value })} /></Field></div></details>
 
           <Field label="Meta Description" count={`${value.description.length}/160`}>
             <textarea
@@ -462,6 +580,10 @@ function SeoEditor({
               value={value.description}
               onChange={(e) => onChange({ ...value, description: e.target.value })}
             />
+          </Field>
+
+          <Field label="Canonical path">
+            <input className={inputClass} value={value.canonicalPath} onChange={(e) => onChange({ ...value, canonicalPath: e.target.value })} placeholder="/duong-dan-chuan" />
           </Field>
 
           <label className="flex items-center justify-between rounded-lg border border-slate-200 p-3 text-xs font-semibold dark:border-slate-700">
@@ -571,14 +693,7 @@ function FacetSeoEditor({
             />
           </Field>
 
-          <Field label="Từ khóa (Meta Keywords)">
-            <input
-              className={inputClass}
-              value={formState.keywordsTemplate || ''}
-              onChange={(e) => setFormState({ ...formState, keywordsTemplate: e.target.value })}
-              placeholder="VD: {Tên danh mục}, phần mềm xây dựng, CIC"
-            />
-          </Field>
+          <details className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"><summary className="cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300">Trường tương thích legacy</summary><div className="mt-3"><Field label="Meta Keywords"><input className={inputClass} value={formState.keywordsTemplate || ''} onChange={(e) => setFormState({ ...formState, keywordsTemplate: e.target.value })} /></Field></div></details>
 
           <Field label="Mô tả (Meta Description)" count={`${(formState.descriptionTemplate || '').length}/160`}>
             <textarea

@@ -70,7 +70,7 @@ export const configGroupsMock: ConfigGroupDef[] = [
   {
     id: 'seo',
     title: 'SEO mặc định',
-    description: 'Meta Title, Description, OpenGraph, Indexing, Google Search Console & Analytics',
+    description: 'Title, description, social image và robots mặc định khi nội dung không có cấu hình riêng',
     iconName: 'Search',
   },
   {
@@ -233,16 +233,6 @@ export const configItemsMock: ConfigItem[] = [
     groupId: 'seo',
     description: 'Mô tả tóm tắt hiển thị trên kết quả tìm kiếm Google (120-160 ký tự)',
     type: 'textarea',
-    sensitivity: 'standard',
-    isShared: false,
-  },
-  {
-    id: 'seo_meta_keywords',
-    path: 'system.seo.meta_keywords',
-    label: 'Meta Keywords',
-    groupId: 'seo',
-    description: 'Các từ khóa SEO cách nhau bởi dấu phẩy',
-    type: 'text',
     sensitivity: 'standard',
     isShared: false,
   },

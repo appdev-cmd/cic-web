@@ -45,7 +45,7 @@ const CMS_TRASH_MODULES = [
   'Vai trò & quyền',
   'Cấu hình hệ thống',
   'Ngôn ngữ giao diện',
-  'Cấu hình SEO chức năng',
+  'SEO & URL',
 ] as const;
 
 interface TrashTabProps {

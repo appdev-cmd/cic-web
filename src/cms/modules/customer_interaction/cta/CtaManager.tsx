@@ -224,6 +224,7 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
         createdBy: 'Current User',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        governance: { origin: 'custom', allowedPlacements: ['rich_text'] },
       };
       setCtas([newCta, ...ctas]);
     }

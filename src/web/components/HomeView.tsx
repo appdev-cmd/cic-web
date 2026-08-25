@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useEffect, FormEvent, CSSProperties } from 'react';
+import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
+import { SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowRight, 
@@ -15,15 +17,12 @@ import {
   ArrowUpRight, 
   Download, 
   ShieldCheck, 
-  Cpu, 
-  Layers, 
   Users, 
   Bell, 
   Search, 
   X, 
   Calendar, 
   MapPin, 
-  Globe, 
   Award, 
   Menu, 
   User, 
@@ -37,8 +36,8 @@ import {
 
 import { Counter } from '@shared/components/Counter';
 import { SectionHeader, typeBadge, typeBodyLead, typeButton, typeHero, typeH2, typeProse, typeStat, typeMeta } from '@shared/components/Typography';
-import { BIMIcon } from '@shared/components/Icons';
 import { AwardsSlider } from './AwardsSlider';
+import { HomeEcosystemSection, type HomeEcosystemItem } from './HomeEcosystemSection';
 
 import { getHomeData } from '../features/home/homeData';
 
@@ -88,7 +87,6 @@ export const HomeView = ({
     upcomingHomeEvents,
     pastHomeEvents,
     homeAwards,
-    homeSolutionsList,
   } = React.useMemo(getHomeData, []);
   const homeStats = content.stats.items;
   const projects = content.projects.items;
@@ -150,9 +148,15 @@ export const HomeView = ({
     return n.category === activeNewsCategory;
   });
 
-  const handleContactSubmit = (e: FormEvent) => {
+  const handleContactSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (fullName.trim() && phoneNumber.trim()) {
+      await submitCustomerInteraction({
+        formId: SYSTEM_FORM_IDS.homeConsultation,
+        formName: 'Tư vấn trang chủ',
+        values: { fullName, phoneNumber, message },
+        source: { pageType: 'home', pageId: 'home', pageUrl: '/', pageTitle: 'Trang chủ', placementKey: 'home.contact_cta' },
+      });
       setFormSubmitted(true);
       setTimeout(() => {
         setFormSubmitted(false);
@@ -162,12 +166,6 @@ export const HomeView = ({
       }, 5000);
     }
   };
-
-  const solutionIcons = [
-    <Cpu size={24} className="transition-all duration-300" />,
-    <Layers size={24} className="transition-all duration-300" />,
-    <Users size={24} className="transition-all duration-300" />
-  ];
 
   return (
     <>
@@ -468,153 +466,74 @@ export const HomeView = ({
       </section>
 
       {/* Ecosystem Section */}
-      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="py-12 bg-slate-50/40 text-slate-950 relative overflow-hidden z-10">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-slate-50/50"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div 
-            onClick={() => {
-              setCurrentView('services');
-              setActiveLink('Dịch vụ');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="text-center mb-6 cursor-pointer group inline-block w-full"
-            title="Nhấn để xem trang Dịch vụ"
-          >
-            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-950 group-hover:text-orange-600 transition-colors inline-flex items-center gap-2 justify-center">
-              Hệ sinh thái Công nghệ CIC
-              <ArrowRight size={26} className="text-orange-600 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all shrink-0 hidden sm:inline-block" />
-            </h2>
-            <div className="w-16 h-1 bg-orange-600 mx-auto mt-2 mb-4 group-hover:w-28 transition-all"></div>
-            <p className="font-bold uppercase tracking-widest text-[10px] text-slate-500 group-hover:text-orange-600 transition-colors">
-              Phần mềm, thiết bị, AI, BIM, Digital Twins & Tư vấn đào tạo — Xem trang Dịch vụ &rarr;
-            </p>
-          </div>
-          <div className="flex justify-center -mt-2 mb-8">
-            <div className="w-full max-w-[280px] relative flex items-center">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Search size={18} className="text-slate-400" />
-              </div>
-              <input type="text" placeholder="Tìm kiếm giải pháp..." className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm transition-all rounded-lg text-sm font-medium" />
-            </div>
-          </div>
-          <div data-page-collection="product service" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
-            {/* AI & Smart Tech - Large Feature */}
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              whileHover={{ y: -4, scale: 1.005 }}
-              onClick={() => {
-                setCurrentView('products');
-                setActiveLink('Sản phẩm');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="lg:col-span-8 group relative p-6 md:p-8 rounded-xl bg-slate-50 shadow-sm border border-slate-100 transition-all overflow-hidden cursor-pointer hover:shadow-lg"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-all duration-500 transform group-hover:rotate-12 text-slate-900">
-                <BIMIcon />
-              </div>
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-600 rounded-[8px] text-[10px] font-black text-white uppercase tracking-widest mb-8">
-                  <div className="w-2 h-2 bg-slate-50 rounded-full animate-pulse"></div>
-                  Advanced Technology
-                </div>
-                <h3 className="text-3xl font-black mb-4 group-hover:text-orange-600 transition-colors">AI & Công nghệ thông minh</h3>
-                <p className="text-base text-slate-500 max-w-2xl leading-relaxed mb-10">
-                  Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình, kiểm soát rủi ro tức thời và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.
-                </p>
-                <button className="flex items-center gap-4 text-orange-600 font-black uppercase tracking-widest group/btn">
-                  Trải nghiệm giải pháp <div className="w-10 h-10 bg-orange-600 text-white rounded-[8px] flex items-center justify-center group-hover/btn:px-6 group-hover/btn:w-auto transition-all duration-300"><ArrowRight size={20} /></div>
-                </button>
-              </div>
-            </motion.div>
-            
-            {/* BIM & Digital Twins */}
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              whileHover={{ y: -4 }}
-              onClick={() => {
-                setCurrentView('services');
-                setActiveLink('Dịch vụ');
-                if (setActiveServiceId) setActiveServiceId('tu-van-bim');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="lg:col-span-4 group p-6 md:p-8 rounded-xl bg-slate-50 shadow-sm border border-slate-100 transition-all relative overflow-hidden hover:shadow-lg cursor-pointer"
-            >
-              <div className="w-16 h-16 bg-slate-50 rounded-[10px] flex items-center justify-center mb-8 border border-slate-100 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 text-slate-600 transition-all">
-                <BIMIcon />
-              </div>
-              <h3 className="text-xl font-black mb-4 group-hover:text-orange-600 transition-colors">BIM & Digital Twins</h3>
-              <p className="text-slate-500 leading-relaxed mb-6">
-                Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.
-              </p>
-              <div className="mt-8 h-1 w-12 bg-slate-200 group-hover:w-full group-hover:bg-orange-600 transition-all duration-500 rounded-full"></div>
-            </motion.div>
-
-            {/* Row 2 */}
-            {[
-              { title: 'Phần mềm kỹ thuật bản quyền', desc: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng, năng lượng do CIC phát triển & phân phối.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
-              { title: 'Thiết bị công nghệ', desc: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR, GPR phục vụ ngành kỹ thuật.', cols: 'lg:col-span-3', view: 'products', link: 'Sản phẩm' },
-              { title: 'Netzero và phát triển bền vững', desc: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và lộ trình Net Zero.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: 'tu-van-kiem-ke-khi-nha-kinh' },
-              { title: 'Tư vấn & Đào tạo', desc: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.', cols: 'lg:col-span-3', view: 'services', link: 'Dịch vụ', serviceId: null },
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.8, delay: 0.1 * i }}
-                whileHover={{ y: -4 }}
-                onClick={() => {
-                  if (item.view === 'products') {
-                    setCurrentView('products');
-                    setActiveLink('Sản phẩm');
-                  } else if (item.view === 'services') {
-                    setCurrentView('services');
-                    setActiveLink('Dịch vụ');
-                    if (setActiveServiceId) setActiveServiceId(item.serviceId || null);
-                  }
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={`${item.cols} p-6 rounded-xl bg-slate-50 border border-slate-100 shadow-sm transition-all group hover:shadow-lg hover:border-slate-200 cursor-pointer`}
-              >
-                <div className="h-1 w-12 bg-slate-200 mb-6 group-hover:w-full group-hover:bg-orange-600 transition-all duration-500 rounded-full"></div>
-                <h3 className="text-xl font-black mb-3 group-hover:text-orange-600 transition-colors text-slate-900">{item.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">{item.desc}</p>
-                <div className="h-0.5 w-8 bg-slate-200 group-hover:w-full group-hover:bg-orange-600 transition-all duration-500 rounded-full"></div>
-              </motion.div>
-            ))}
-
-            {/* Solution by Industry - Full Row accent */}
-            <motion.div 
-              whileHover={{ scale: 0.99 }}
-              onClick={() => {
-                setCurrentView('products');
-                setActiveLink('Sản phẩm');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="lg:col-span-12 p-8 rounded-xl bg-orange-600 text-white flex flex-col md:flex-row items-center justify-between gap-4 group cursor-pointer shadow-lg"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-slate-50/20 rounded-[10px] flex items-center justify-center">
-                  <Globe size={32} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black mb-1">Giải pháp theo ngành</h3>
-                  <p className="text-white/80 font-bold">Xây dựng, Giao thông, Khai thác, Môi trường, Công nghiệp, Cơ khí...</p>
-                </div>
-              </div>
-              <button className="px-5 py-2 bg-[#0b1b36] rounded-[8px] font-black uppercase tracking-widest text-sm hover:px-12 transition-all btn-modern-interaction">Khám phá chi tiết</button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <HomeEcosystemSection
+        editMode={editMode}
+        items={[
+          {
+            id: 'ai-smart-tech',
+            title: 'AI & Công nghệ thông minh',
+            description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
+            badge: 'Advanced Technology',
+            image: heroSlides[2]?.img ?? heroSlides[1]?.img,
+            view: 'products',
+            activeLink: 'Sản phẩm',
+          },
+          {
+            id: 'bim-digital-twins',
+            title: 'BIM & Digital Twins',
+            description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
+            badge: 'BIM & Digital Twins',
+            image: projects[0]?.img ?? heroSlides[1]?.img,
+            view: 'services',
+            activeLink: 'Dịch vụ',
+            serviceId: 'tu-van-bim',
+          },
+          {
+            id: 'licensed-software',
+            title: 'Phần mềm kỹ thuật bản quyền',
+            description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
+            badge: 'Phần mềm',
+            image: heroSlides[3]?.img ?? heroSlides[1]?.img,
+            view: 'products',
+            activeLink: 'Sản phẩm',
+          },
+          {
+            id: 'technology-equipment',
+            title: 'Thiết bị công nghệ',
+            description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.',
+            badge: 'Thiết bị & IoT',
+            image: projects.find((project) => project.type === 'equipment')?.img ?? heroSlides[1]?.img,
+            view: 'products',
+            activeLink: 'Sản phẩm',
+          },
+          {
+            id: 'net-zero',
+            title: 'Net Zero và phát triển bền vững',
+            description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.',
+            badge: 'Sustainability',
+            image: newsItems.find((item) => item.category === 'specialty')?.img ?? heroSlides[1]?.img,
+            view: 'services',
+            activeLink: 'Dịch vụ',
+            serviceId: 'tu-van-kiem-ke-khi-nha-kinh',
+          },
+          {
+            id: 'consulting-training',
+            title: 'Tư vấn & Đào tạo',
+            description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.',
+            badge: 'Tư vấn chuyên sâu',
+            image: newsItems.find((item) => item.category === 'international')?.img ?? heroSlides[1]?.img,
+            view: 'services',
+            activeLink: 'Dịch vụ',
+            serviceId: null,
+          },
+        ] satisfies readonly HomeEcosystemItem[]}
+        onSelect={(item) => {
+          setCurrentView(item.view);
+          setActiveLink(item.activeLink);
+          if (item.view === 'services' && setActiveServiceId) setActiveServiceId(item.serviceId ?? null);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       {/* Featured Projects - 3 Cards Expanding Accordion */}
       <section data-page-builder-section-key="home.projects" id="projects" className="py-16 bg-white relative overflow-hidden border-t border-slate-100 z-10">

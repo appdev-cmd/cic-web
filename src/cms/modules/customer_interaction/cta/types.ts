@@ -3,6 +3,7 @@
 import { BaseEntity, UsageLocation, AnalyticsData } from '../shared/types';
 import { ActionType } from '../shared/constants/actionTypes';
 import { CtaStatus } from '../shared/constants/statusTypes';
+import type { CustomerInteractionGovernance } from '../../../../shared/customerInteractionContract';
 
 export interface CtaActionConfig {
   type: ActionType;
@@ -31,6 +32,7 @@ export interface CtaItem extends BaseEntity {
   usedByCount: number;
   usedByPages: UsageLocation[];
   analytics: AnalyticsData;
+  governance: CustomerInteractionGovernance;
 }
 
 export interface CtaFormData {

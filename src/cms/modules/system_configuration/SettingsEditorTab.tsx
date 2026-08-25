@@ -28,6 +28,7 @@ import {
   ConfigValueRecord,
   ConfigGroupId,
   ValidationIssue,
+  requiresConfigReview,
 } from './types';
 import { NotFoundView } from '@web/components/NotFoundView';
 
@@ -45,6 +46,7 @@ interface SettingsEditorTabProps {
   onOpenSecretModal: (item: ConfigItem) => void;
   onOpenAssetPicker: (title: string, type: 'image' | 'file', onSelect: (url: string) => void) => void;
   onOpenCompareModal: () => void;
+  onSaveDirect: () => void;
   onSaveDraft: () => void;
   onPublish: () => void;
 }
@@ -63,6 +65,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
   onOpenSecretModal,
   onOpenAssetPicker,
   onOpenCompareModal,
+  onSaveDirect,
   onSaveDraft,
   onPublish,
 }) => {
@@ -86,9 +89,9 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
   });
 
   // Calculate draft modified count for active scope
-  const draftModifiedCount = Object.keys(valuesRecord).filter(
-    (key) => valuesRecord[key]?.draftValue !== undefined
-  ).length;
+  const changedItems = items.filter((item) => valuesRecord[item.id]?.draftValue !== undefined);
+  const directModifiedCount = changedItems.filter((item) => !requiresConfigReview(item)).length;
+  const reviewModifiedCount = changedItems.filter(requiresConfigReview).length;
 
   const scopeIssues = issues.filter((i) => i.scopeId === activeScopeId);
 
@@ -136,12 +139,18 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                 </select>
 
                 <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  Đang dùng {activeScope.liveVersion}
+                  Mốc bảo vệ {activeScope.liveVersion}
                 </span>
 
-                {draftModifiedCount > 0 && (
+                {directModifiedCount > 0 && (
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                    Lưu trực tiếp: {directModifiedCount}
+                  </span>
+                )}
+
+                {reviewModifiedCount > 0 && (
                   <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
-                    Bản nháp: {draftModifiedCount} thay đổi
+                    Cần duyệt: {reviewModifiedCount}
                   </span>
                 )}
               </div>
@@ -152,28 +161,41 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={onOpenCompareModal}
-              disabled={draftModifiedCount === 0}
+              disabled={reviewModifiedCount === 0}
               className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
             >
               <GitCompare className="w-4 h-4 text-blue-500" />
               <span>So sánh thay đổi</span>
             </button>
 
-            <button
-              onClick={onSaveDraft}
-              className="px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <Save className="w-4 h-4 text-orange-400" />
-              <span>Lưu bản nháp</span>
-            </button>
+            {directModifiedCount > 0 && (
+              <button
+                onClick={onSaveDirect}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Save className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Lưu thay đổi ({directModifiedCount})</span>
+              </button>
+            )}
 
-            <button
-              onClick={onPublish}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <Send className="w-4 h-4" />
-              <span>Xuất bản</span>
-            </button>
+            {reviewModifiedCount > 0 && (
+              <>
+                <button
+                  onClick={onSaveDraft}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Save className="w-4 h-4 text-orange-500" />
+                  <span>Lưu bản nháp</span>
+                </button>
+                <button
+                  onClick={onPublish}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Kiểm tra & xuất bản ({reviewModifiedCount})</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -261,7 +283,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                     </p>
                   </div>
                   <span className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
-                    DRAFT PREVIEW
+                    XEM TRƯỚC THAY ĐỔI
                   </span>
                 </div>
 
@@ -287,6 +309,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                 };
 
                 const isDraftModified = rec.draftValue !== undefined;
+                const needsReview = requiresConfigReview(item);
                 const isOverridden = rec.inheritanceState === 'overridden';
                 const isInherited = rec.inheritanceState === 'inherited';
                 const isDefault = rec.inheritanceState === 'default';
@@ -298,7 +321,9 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                     key={item.id}
                     className={`p-4 rounded-xl border transition-all space-y-3 ${
                       isDraftModified
-                        ? 'border-amber-400/80 bg-amber-50/20 dark:bg-amber-950/10'
+                        ? needsReview
+                          ? 'border-amber-400/80 bg-amber-50/20 dark:bg-amber-950/10'
+                          : 'border-blue-300 bg-blue-50/20 dark:border-blue-900/60 dark:bg-blue-950/10'
                         : isOverridden
                         ? 'border-blue-300 dark:border-blue-900/60 bg-blue-50/10 dark:bg-blue-950/10'
                         : 'border-slate-200/80 dark:border-slate-800'
@@ -311,6 +336,11 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                           <label className="text-xs font-bold text-slate-900 dark:text-white">
                             {item.label}
                           </label>
+                          {isDraftModified && (
+                            <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${needsReview ? 'border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300' : 'border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300'}`}>
+                              {needsReview ? 'Bản nháp cần duyệt' : 'Chưa lưu'}
+                            </span>
+                          )}
 
                           {/* INHERITANCE TAG */}
                           {isDefault && (

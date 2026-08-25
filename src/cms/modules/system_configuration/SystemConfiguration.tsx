@@ -25,6 +25,7 @@ import {
   ConfigDraft,
   ConfigVersionHistory,
   ConfigActivityLog,
+  requiresConfigReview,
 } from './types';
 
 import type { SystemConfigurationData } from '../../data/ConfigurationDataSource';
@@ -119,6 +120,12 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
 
   const activeScope = scopes.find((s) => s.id === activeScopeId) || scopes[0];
   const currentScopeValues = valuesRecordMap[activeScopeId] || {};
+  const reviewValuesMap = Object.fromEntries(
+    Object.entries(currentScopeValues).filter(([settingId, record]) => {
+      const item = items.find((candidate) => candidate.id === settingId);
+      return record.draftValue !== undefined && item && requiresConfigReview(item);
+    }),
+  );
 
   // Handlers for value edits
   const handleUpdateDraftValue = (settingId: string, newValue: any) => {
@@ -220,17 +227,83 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
   };
 
   const handleSaveDraft = () => {
-    showToast(`Đã lưu Bản nháp cấu hình thành công cho Scope ${activeScope.name}!`);
+    const reviewCount = Object.keys(reviewValuesMap).length;
+    if (reviewCount === 0) {
+      showToast('Không có cấu hình ảnh hưởng lớn nào cần lưu bản nháp.', 'info');
+      return;
+    }
+    const savedAt = new Date();
+    const versionNumber = `${activeScope.liveVersion}-draft`;
+    const nextDraft: ConfigDraft = {
+      id: `draft_${activeScopeId}`,
+      scopeId: activeScopeId,
+      scopeName: activeScope.name,
+      versionNumber,
+      status: 'draft',
+      changedCount: reviewCount,
+      createdBy: 'admin_cic',
+      createdAt: savedAt.toLocaleString(),
+      updatedAt: savedAt.toLocaleString(),
+      changesSummary: Object.keys(reviewValuesMap).map((settingId) => ({
+        settingId,
+        label: items.find((item) => item.id === settingId)?.label || settingId,
+        changeType: 'modified_value',
+        oldValue: reviewValuesMap[settingId].liveValue ?? '(Inherited)',
+        newValue: reviewValuesMap[settingId].draftValue,
+      })),
+    };
+    setDrafts((current) => [nextDraft, ...current.filter((draft) => draft.scopeId !== activeScopeId)]);
+    setScopes((current) => current.map((scope) => scope.id === activeScopeId ? { ...scope, draftVersion: versionNumber } : scope));
+    showToast(`Đã lưu bản nháp ${reviewCount} cấu hình cần kiểm tra tại ${activeScope.name}.`);
+  };
+
+  const handleSaveDirect = () => {
+    const directKeys = Object.keys(currentScopeValues).filter((settingId) => {
+      const item = items.find((candidate) => candidate.id === settingId);
+      return currentScopeValues[settingId]?.draftValue !== undefined && item && !requiresConfigReview(item);
+    });
+
+    if (directKeys.length === 0) {
+      showToast('Không có cấu hình thông thường nào cần lưu.', 'info');
+      return;
+    }
+
+    const savedAt = new Date();
+    setValuesRecordMap((current) => {
+      const scopeValues = { ...(current[activeScopeId] || {}) };
+      directKeys.forEach((settingId) => {
+        const record = scopeValues[settingId];
+        scopeValues[settingId] = {
+          ...record,
+          liveValue: record.draftValue,
+          effectiveValue: record.draftValue,
+          draftValue: undefined,
+          lastUpdatedBy: 'admin_cic',
+          lastUpdatedAt: savedAt.toISOString(),
+        };
+      });
+      return { ...current, [activeScopeId]: scopeValues };
+    });
+
+    setActivityLogs((current) => [{
+      id: `act_direct_${savedAt.getTime()}`,
+      timestamp: savedAt.toLocaleString(),
+      actor: 'admin_cic',
+      scopeId: activeScopeId,
+      scopeName: activeScope.name,
+      action: 'direct_save',
+      details: `Lưu trực tiếp ${directKeys.length} cấu hình thông thường`,
+      ipAddress: '118.70.182.95',
+    }, ...current]);
+    showToast(`Đã lưu ${directKeys.length} thay đổi. Hoạt động đã được ghi nhật ký.`);
   };
 
   const handlePublish = () => {
     // Check if there are draft values
-    const changedKeys = Object.keys(currentScopeValues).filter(
-      (k) => currentScopeValues[k]?.draftValue !== undefined
-    );
+    const changedKeys = Object.keys(reviewValuesMap);
 
     if (changedKeys.length === 0) {
-      showToast('Hiện tại chưa có thay đổi nào trong Bản nháp để xuất bản!', 'info');
+      showToast('Không có cấu hình ảnh hưởng lớn nào cần xuất bản.', 'info');
       return;
     }
 
@@ -248,8 +321,8 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
         settingId: k,
         label: items.find((i) => i.id === k)?.label || k,
         changeType: 'modified_value',
-        oldValue: currentScopeValues[k].liveValue ?? '(Inherited)',
-        newValue: currentScopeValues[k].draftValue,
+        oldValue: reviewValuesMap[k].liveValue ?? '(Inherited)',
+        newValue: reviewValuesMap[k].draftValue,
       })),
     };
 
@@ -274,7 +347,8 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     });
 
     // Remove draft
-    setDrafts((prev) => prev.filter((d) => d.id !== draft.id));
+    setDrafts((prev) => prev.filter((d) => d.scopeId !== draft.scopeId));
+    setScopes((current) => current.map((scope) => scope.id === draft.scopeId ? { ...scope, liveVersion: draft.versionNumber, draftVersion: undefined } : scope));
 
     // Add to Version History
     const newVer: ConfigVersionHistory = {
@@ -347,7 +421,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           { id: 'overview', label: 'Tổng quan', icon: Globe },
           { id: 'editor', label: 'Chỉnh sửa', icon: Sliders },
           { id: 'issues', label: 'Cảnh báo', count: issues.length, icon: ShieldAlert },
-          { id: 'versions', label: 'Phiên bản', icon: History },
+          { id: 'versions', label: 'Phiên bản quan trọng', icon: History },
           { id: 'audit', label: 'Nhật ký', icon: Shield },
         ]}
       />
@@ -395,6 +469,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
             setCompareDraftData(null);
             setCompareModalOpen(true);
           }}
+          onSaveDirect={handleSaveDirect}
           onSaveDraft={handleSaveDraft}
           onPublish={handlePublish}
         />
@@ -431,7 +506,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
         onClose={() => setCompareModalOpen(false)}
         scope={activeScope}
         configItems={items}
-        valuesMap={currentScopeValues}
+        valuesMap={reviewValuesMap}
         draftChanges={compareDraftData}
       />
 

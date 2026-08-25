@@ -58,6 +58,9 @@ export interface ConfigItem {
   usedBy?: string[];
 }
 
+export const requiresConfigReview = (item: ConfigItem) =>
+  item.sensitivity !== 'standard' || Boolean(item.impactDescription);
+
 export interface ConfigValueRecord {
   settingId: string;
   scopeId: ConfigScopeId;
@@ -128,7 +131,7 @@ export interface ConfigActivityLog {
   actor: string;
   scopeId: ConfigScopeId;
   scopeName: string;
-  action: 'save_draft' | 'publish_version' | 'override_field' | 'reset_inherited' | 'secret_rotated' | 'restore_version';
+  action: 'direct_save' | 'save_draft' | 'publish_version' | 'override_field' | 'reset_inherited' | 'secret_rotated' | 'restore_version';
   settingPath?: string;
   details: string;
   ipAddress: string;

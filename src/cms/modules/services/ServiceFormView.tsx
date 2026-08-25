@@ -258,7 +258,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Mô tả chi tiết nội dung dịch vụ (RichText HTML Editor)
               </label>
-              <RichTextEditor value={formData.description} onChange={(value) => handleChange('description', value)} />
+              <RichTextEditor value={formData.description} onChange={(value) => handleChange('description', value)} allowedEmbeds={['cta', 'form']} />
             </div>
 
           </div>

@@ -870,7 +870,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                     Tóm tắt Quyền hạn Hiệu lực (Effective Access)
                   </div>
                   <p className="text-orange-700 dark:text-orange-400">
-                    Bảng tóm tắt dùng quyền trực tiếp đã có của tài khoản, kết hợp vai trò hiển thị (<strong>{currentRole?.name}</strong>) và các phạm vi phụ trách.
+                    Bảng tóm tắt quyền được suy ra từ vai trò <strong>{currentRole?.name}</strong> và phạm vi phụ trách. Quyền trực tiếp legacy không còn được chỉnh sửa tại giao diện.
                   </p>
                 </div>
               </div>

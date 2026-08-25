@@ -42,7 +42,7 @@ export interface CmsUserPermissionTarget {
 // --- MODULE 15: VAI TRÒ & QUYỀN SPECIFICATION TYPES ---
 
 export type RoleRiskLevel = 'standard' | 'elevated' | 'privileged';
-export type RoleStatus = 'active' | 'draft' | 'archived';
+export type RoleStatus = 'active' | 'inactive';
 export type RoleCategory = 'system' | 'custom';
 
 export type MatrixAction =
@@ -138,4 +138,3 @@ export interface AccessReview {
   status: 'pending' | 'confirmed' | 'reduced' | 'revoked';
   notes?: string;
 }
-

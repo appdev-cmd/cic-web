@@ -61,12 +61,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
         <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between">
           <div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Bản nháp cấu hình</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Bản nháp cần kiểm tra</div>
             <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              {pendingDraftsCount} <span className="text-xs font-normal text-slate-400">Bản nháp</span>
+              {pendingDraftsCount} <span className="text-xs font-normal text-slate-400">phạm vi</span>
             </div>
             <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-1 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" /> Có thể xem lại và xuất bản trực tiếp
+              <Clock className="w-3.5 h-3.5" /> Chỉ dành cho cấu hình ảnh hưởng lớn
             </div>
           </div>
           <span className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
@@ -113,7 +113,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             <span>Danh sách Scope / Tên miền Cấu hình Hệ thống</span>
           </h3>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            Mọi thay đổi cấu hình được phân tách theo phạm vi và có thể phục hồi
+            Cấu hình thường lưu trực tiếp; cấu hình ảnh hưởng lớn có phiên bản bảo vệ
           </span>
         </div>
 
@@ -155,13 +155,13 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               {/* SCOPE METRICS */}
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-2 text-xs">
                 <div>
-                  <div className="text-[11px] text-slate-400">Phiên bản Live</div>
+                  <div className="text-[11px] text-slate-400">Mốc bảo vệ</div>
                   <div className="font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                     {scope.liveVersion}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-400">Bản nháp (Draft)</div>
+                  <div className="text-[11px] text-slate-400">Nháp cần duyệt</div>
                   <div className="font-mono font-bold text-amber-600 dark:text-amber-400 mt-0.5">
                     {scope.draftVersion || 'Không có'}
                   </div>
@@ -177,7 +177,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               {/* ACTION FOOTER */}
               <div className="flex items-center justify-between pt-1">
                 <div className="text-[11px] text-slate-400">
-                  Xuất bản gần nhất: {scope.lastPublished}
+                  Công bố cấu hình quan trọng gần nhất: {scope.lastPublished}
                 </div>
                 <button
                   onClick={() => {
@@ -202,7 +202,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
-              <span>Bản nháp cấu hình gần đây</span>
+              <span>Bản nháp cấu hình ảnh hưởng lớn</span>
             </h4>
             <button
               onClick={onGoToDrafts}

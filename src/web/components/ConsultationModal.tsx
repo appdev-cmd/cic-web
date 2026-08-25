@@ -6,6 +6,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Phone, Mail, User, MessageSquare, CheckCircle2, HelpCircle } from 'lucide-react';
+import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
+import { SYSTEM_CTA_IDS, SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -51,13 +53,18 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    // Simulate API request
-    setTimeout(() => {
+    try {
+      await submitCustomerInteraction({
+        formId: SYSTEM_FORM_IDS.homeConsultation,
+        formName: 'Đăng ký tư vấn',
+        values: formData,
+        source: { pageType: 'global', pageId: 'consultation-modal', pageUrl: window.location.pathname, pageTitle: document.title, placementKey: 'global.consultation_modal', ctaId: SYSTEM_CTA_IDS.contact, ctaName: 'Liên hệ ngay' },
+      });
       setIsSubmitting(false);
       setIsSuccess(true);
       setFormData({
@@ -67,7 +74,9 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
         consultationNeed: 'Tư vấn báo giá sản phẩm & giải pháp',
         message: ''
       });
-    }, 1200);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

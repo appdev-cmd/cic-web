@@ -27,6 +27,8 @@ import { getLegacyContactPageContent } from '@shared/page-content/legacyPageCont
 import { bindElement as bindElementRuntime, type BoundElementProps } from '@shared/visual-editing/bindElement';
 import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
+import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
+import { SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
 
 function bindElement<T extends Element>(registry: ElementBindingRegistry, binding: ReturnType<typeof createElementBinding>): BoundElementProps<T> {
   return bindElementRuntime<T>(binding, registry);
@@ -127,15 +129,20 @@ export const ContactView = ({ onNavigateHome, content = getLegacyContactPageCont
   };
 
   // Form Submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
+    try {
+      const submission = await submitCustomerInteraction({
+        formId: SYSTEM_FORM_IDS.contactRequest,
+        formName: 'Gửi yêu cầu liên hệ',
+        values: formData,
+        source: { pageType: 'contact', pageId: 'contact', pageUrl: '/lien-he', pageTitle: 'Liên hệ', placementKey: 'contact.form' },
+      });
       const newLead: ContactLead = {
-        id: 'lead_' + Math.random().toString(36).substr(2, 9),
+        id: submission.requestId,
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -157,7 +164,9 @@ export const ContactView = ({ onNavigateHome, content = getLegacyContactPageCont
         captchaAnswer: ''
       });
       generateNewCaptcha();
-    }, 1200);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 

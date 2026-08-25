@@ -127,6 +127,9 @@ export const CtaList: React.FC<CtaListProps> = ({
                     </button>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="font-mono text-[10px] text-slate-400">{cta.code}</span>
+                      <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-bold ${cta.governance.origin === 'system' ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                        {cta.governance.origin === 'system' ? 'Hệ thống' : 'Bổ sung'}
+                      </span>
                       {cta.description && (
                         <span className="text-[10px] text-slate-400 truncate max-w-[100px]">
                           {cta.description}

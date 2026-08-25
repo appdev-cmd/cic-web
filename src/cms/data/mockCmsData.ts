@@ -261,7 +261,7 @@ export const activityLogsMock: ActivityLog[] = [
     username: 'admin_cic',
     user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     activity_type: 'update',
-    description: 'Cập nhật cấu hình SEO Meta Keywords và Google Analytics tracking ID',
+    description: 'Cập nhật cấu hình SEO mặc định và Google Analytics tracking ID',
     created_time: '2026-07-28 10:05:30',
   },
 ];
@@ -494,7 +494,7 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
       },
       {
         id: 'menu_function_seo',
-        title: 'Cấu hình SEO chức năng',
+        title: 'SEO & URL',
         iconName: 'Search',
         path: '/cms/function-seo',
       },

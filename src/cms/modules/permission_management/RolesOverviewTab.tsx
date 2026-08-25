@@ -12,7 +12,6 @@ import {
   Lock,
   Unlock,
   Eye,
-  Archive,
   RefreshCw,
   Users,
   UserPlus,
@@ -26,8 +25,9 @@ import {
   X,
   Building,
 } from 'lucide-react';
-import { CmsRole, RoleRiskLevel, RoleStatus, RoleCategory, RoleAssignment, CmsUserPermissionTarget } from './types';
+import { CmsRole, RoleCategory, RoleAssignment, CmsUserPermissionTarget } from './types';
 import { CmsIconButton, CmsButton } from '../../components/ui/CmsButton';
+import { CmsPagination } from '../../components/ui/CmsPagination';
 
 interface RolesOverviewTabProps {
   roles: CmsRole[];
@@ -38,7 +38,7 @@ interface RolesOverviewTabProps {
   onOpenCreate: () => void;
   onOpenEdit: (role: CmsRole) => void;
   onCloneRole: (role: CmsRole) => void;
-  onArchiveRole: (roleId: string, replacementRoleId?: string) => void;
+  onToggleRoleStatus: (roleId: string) => void;
 }
 
 export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
@@ -50,23 +50,20 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
   onOpenCreate,
   onOpenEdit,
   onCloneRole,
-  onArchiveRole,
+  onToggleRoleStatus,
 }) => {
   // Filters State
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | RoleCategory | 'archived'>('all');
-  const [riskFilter, setRiskFilter] = useState<'all' | RoleRiskLevel>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | RoleStatus>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | RoleCategory | 'inactive'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  // Archive Replacement Modal State
-  const [archiveTargetRole, setArchiveTargetRole] = useState<CmsRole | null>(null);
-  const [replacementRoleId, setReplacementRoleId] = useState<string>('');
+  const [statusTargetRole, setStatusTargetRole] = useState<CmsRole | null>(null);
 
   // Direct Assign Modal State
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedAssignRoleId, setSelectedAssignRoleId] = useState<string>(roles[0]?.id || '');
   const [selectedAssignUserId, setSelectedAssignUserId] = useState<string>(users[0]?.id || '');
-  const [assignScopeNote, setAssignScopeNote] = useState<string>('Chi nhánh Hà Nội & TP.HCM');
 
   // Role Members Inspection Modal State
   const [inspectingRole, setInspectingRole] = useState<CmsRole | null>(null);
@@ -85,26 +82,23 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
 
       // Category filter
       let matchCat = true;
-      if (categoryFilter === 'system') matchCat = r.category === 'system' && r.status !== 'archived';
-      else if (categoryFilter === 'custom') matchCat = r.category === 'custom' && r.status !== 'archived';
-      else if (categoryFilter === 'archived') matchCat = r.status === 'archived';
+      if (categoryFilter === 'system') matchCat = r.category === 'system';
+      else if (categoryFilter === 'custom') matchCat = r.category === 'custom';
+      else if (categoryFilter === 'inactive') matchCat = r.status === 'inactive';
 
-      // Risk Filter
-      const matchRisk = riskFilter === 'all' || r.riskLevel === riskFilter;
-
-      // Status Filter
-      const matchStatus = statusFilter === 'all' || r.status === statusFilter;
-
-      return matchQuery && matchCat && matchRisk && matchStatus;
+      return matchQuery && matchCat;
     });
-  }, [roles, searchQuery, categoryFilter, riskFilter, statusFilter]);
+  }, [roles, searchQuery, categoryFilter]);
 
-  // Execute Archive Handler
-  const handleConfirmArchive = () => {
-    if (!archiveTargetRole) return;
-    onArchiveRole(archiveTargetRole.id, replacementRoleId || undefined);
-    setArchiveTargetRole(null);
-    setReplacementRoleId('');
+  const paginatedRoles = useMemo(
+    () => filteredRoles.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [currentPage, filteredRoles, pageSize]
+  );
+
+  const handleConfirmStatusChange = () => {
+    if (!statusTargetRole) return;
+    onToggleRoleStatus(statusTargetRole.id);
+    setStatusTargetRole(null);
   };
 
   // Open Direct Assign Modal for a specific role
@@ -113,8 +107,6 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
     if (users.length > 0 && !selectedAssignUserId) {
       setSelectedAssignUserId(users[0].id);
     }
-    const defaultScope = role.scopes[0]?.description || 'Toàn quyền chi nhánh';
-    setAssignScopeNote(defaultScope);
     setIsAssignModalOpen(true);
   };
 
@@ -139,7 +131,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
       avatar: targetUser.avatar,
       roleId: targetRole.id,
       roleName: targetRole.name,
-      scopeSummary: assignScopeNote || targetRole.scopes[0]?.description || 'Global Scope',
+      scopeSummary: targetRole.scopes[0]?.description || 'Toàn bộ nội dung',
       assignedAt: nowStr,
       assignedBy: 'admin_cic',
     };
@@ -149,50 +141,17 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
   };
 
   // Badge Helper
-  const renderRiskBadge = (risk: RoleRiskLevel) => {
-    switch (risk) {
-      case 'privileged':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-            <span>Privileged Access</span>
-          </span>
-        );
-      case 'elevated':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            <span>Elevated Risk</span>
-          </span>
-        );
-      case 'standard':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-            <span>Standard</span>
-          </span>
-        );
-    }
-  };
-
   const renderStatusBadge = (r: CmsRole) => {
-    if (r.status === 'archived') {
+    if (r.status === 'inactive') {
       return (
         <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded text-[10px] font-bold border border-slate-300 dark:border-slate-700">
-          Archived
-        </span>
-      );
-    }
-    if (r.draftVersion) {
-      return (
-        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 rounded text-[10px] font-bold border border-blue-300 dark:border-blue-800">
-          Draft v{r.draftVersion}
+          Không hoạt động
         </span>
       );
     }
     return (
       <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 rounded text-[10px] font-bold border border-emerald-300 dark:border-emerald-800">
-        Active v{r.activeVersion}
+        Đang hoạt động
       </span>
     );
   };
@@ -203,7 +162,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
           {/* Keyword Search */}
-          <div className="lg:col-span-5 relative flex items-center">
+          <div className="lg:col-span-4 relative flex items-center">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <Search className="w-4 h-4 text-slate-400" />
             </div>
@@ -211,60 +170,62 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
               type="text"
               placeholder="Tìm theo Tên vai trò, Mục đích nghiệp vụ, Mô tả..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
           {/* Category Filter Tabs */}
-          <div className="lg:col-span-4 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="lg:col-span-8 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
             <button
-              onClick={() => setCategoryFilter('all')}
-              className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              onClick={() => {
+                setCategoryFilter('all');
+                setCurrentPage(1);
+              }}
+              className={`flex-1 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 categoryFilter === 'all' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Tất cả ({roles.filter((r) => r.status !== 'archived').length})
+              Tất cả ({roles.length})
             </button>
             <button
-              onClick={() => setCategoryFilter('system')}
-              className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              onClick={() => {
+                setCategoryFilter('system');
+                setCurrentPage(1);
+              }}
+              className={`flex-1 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 categoryFilter === 'system' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Hệ thống ({roles.filter((r) => r.category === 'system' && r.status !== 'archived').length})
+              Hệ thống ({roles.filter((r) => r.category === 'system').length})
             </button>
             <button
-              onClick={() => setCategoryFilter('custom')}
-              className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+              onClick={() => {
+                setCategoryFilter('custom');
+                setCurrentPage(1);
+              }}
+              className={`flex-1 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 categoryFilter === 'custom' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Tùy chỉnh ({roles.filter((r) => r.category === 'custom' && r.status !== 'archived').length})
+              Tùy chỉnh ({roles.filter((r) => r.category === 'custom').length})
             </button>
             <button
-              onClick={() => setCategoryFilter('archived')}
-              className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                categoryFilter === 'archived' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
+              onClick={() => {
+                setCategoryFilter('inactive');
+                setCurrentPage(1);
+              }}
+              className={`flex-1 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                categoryFilter === 'inactive' ? 'bg-white dark:bg-slate-900 text-orange-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              Lưu trữ ({roles.filter((r) => r.status === 'archived').length})
+              Không hoạt động ({roles.filter((r) => r.status === 'inactive').length})
             </button>
           </div>
 
-          {/* Risk Level Filter */}
-          <div className="lg:col-span-3">
-            <select
-              value={riskFilter}
-              onChange={(e) => setRiskFilter(e.target.value as any)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer"
-            >
-              <option value="all">Tất cả mức độ rủi ro</option>
-              <option value="standard">Standard Risk (Tiêu chuẩn)</option>
-              <option value="elevated">Elevated Risk (Nâng cao)</option>
-              <option value="privileged">Privileged Risk (Đặc quyền cao)</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -279,9 +240,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                   Tên Vai trò & Loại
                 </th>
                 <th className="py-3 px-4 min-w-[200px]">Mục đích Nghiệp vụ</th>
-                <th className="py-3 px-4 min-w-[130px] text-center">Mức Rủi ro</th>
-                <th className="py-3 px-4 min-w-[140px] text-center">Trạng thái Phiên bản</th>
-                <th className="py-3 px-4 min-w-[140px]">Phạm vi Scope</th>
+                <th className="py-3 px-4 min-w-[140px] text-center">Trạng thái</th>
                 <th className="py-3 px-4 min-w-[150px] text-center">Nhân sự Được Gán</th>
                 <th className="py-3 px-4 min-w-[140px]">Cập nhật cuối</th>
                 {/* Actions (Sticky Right) */}
@@ -293,12 +252,12 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
               {filteredRoles.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-400">
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
                     Không tìm thấy vai trò nào phù hợp với bộ lọc.
                   </td>
                 </tr>
               ) : (
-                filteredRoles.map((role) => {
+                paginatedRoles.map((role) => {
                   const roleAssignments = assignments.filter((a) => a.roleId === role.id);
                   const assignedCount = roleAssignments.length > 0 ? roleAssignments.length : role.assignedUsersCount;
 
@@ -320,6 +279,11 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                               CUSTOM
                             </span>
                           )}
+                          {role.scopes[0]?.type !== 'global' && (
+                            <span className="inline-flex items-center gap-1 rounded bg-orange-50 px-1.5 py-0.5 text-[9px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
+                              <Globe className="size-3" /> {role.scopes[0]?.description}
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5">
                           {role.description}
@@ -331,19 +295,8 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                         <div className="line-clamp-2 text-[11px]">{role.purpose}</div>
                       </td>
 
-                      {/* Risk Badge */}
-                      <td className="py-3 px-4 text-center">{renderRiskBadge(role.riskLevel)}</td>
-
                       {/* Status Badge */}
                       <td className="py-3 px-4 text-center">{renderStatusBadge(role)}</td>
-
-                      {/* Scope Summary */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-800 dark:text-slate-200">
-                          <Globe className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-                          <span>{role.scopes[0]?.description || 'Global'}</span>
-                        </div>
-                      </td>
 
                       {/* Assigned Counts & Inline Avatars & Quick Assign */}
                       <td className="py-3 px-4 text-center">
@@ -369,7 +322,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                                 className="w-5 h-5 rounded-full border border-white dark:border-slate-800 object-cover"
                               />
                             ))}
-                            {role.status !== 'archived' && (
+                            {role.status === 'active' && (
                               <button
                                 onClick={() => handleOpenAssignForRole(role)}
                                 className="w-5 h-5 rounded-full bg-orange-100 hover:bg-orange-200 dark:bg-orange-950 dark:hover:bg-orange-900 text-orange-700 dark:text-orange-300 font-bold text-[10px] flex items-center justify-center border border-white dark:border-slate-800 transition-colors cursor-pointer"
@@ -405,7 +358,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                           />
 
                           {/* Direct Assign Role to User */}
-                          {role.status !== 'archived' && (
+                          {role.status === 'active' && (
                             <CmsIconButton
                               onClick={() => handleOpenAssignForRole(role)}
                               icon={<UserPlus />}
@@ -434,17 +387,14 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                             title="Nhân bản vai trò"
                           />
 
-                          {/* Archive Role */}
-                          {role.status !== 'archived' && (
-                            <CmsIconButton
-                              onClick={() => setArchiveTargetRole(role)}
-                              icon={<Archive />}
-                              size="sm"
-                              variant="danger"
-                              aria-label="Lưu trữ vai trò"
-                              title="Lưu trữ vai trò"
-                            />
-                          )}
+                          <CmsIconButton
+                            onClick={() => setStatusTargetRole(role)}
+                            icon={role.status === 'active' ? <Lock /> : <Unlock />}
+                            size="sm"
+                            variant={role.status === 'active' ? 'danger' : 'default'}
+                            aria-label={role.status === 'active' ? 'Tắt vai trò' : 'Bật vai trò'}
+                            title={role.status === 'active' ? 'Chuyển sang không hoạt động' : 'Chuyển sang hoạt động'}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -454,6 +404,17 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
             </tbody>
           </table>
         </div>
+        <CmsPagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalCount={filteredRoles.length}
+          itemLabel="vai trò"
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
       {/* DIRECT ROLE ASSIGNMENT MODAL */}
@@ -494,7 +455,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                   className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:border-orange-500"
                 >
                   {roles
-                    .filter((r) => r.status !== 'archived')
+                    .filter((r) => r.status === 'active')
                     .map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.name} ({r.category.toUpperCase()} - {r.riskLevel.toUpperCase()})
@@ -540,32 +501,6 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                   </div>
                 );
               })()}
-
-              {/* Scope Constraint */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Phạm vi hiệu lực (Scope):
-                </label>
-                <input
-                  type="text"
-                  value={assignScopeNote}
-                  onChange={(e) => setAssignScopeNote(e.target.value)}
-                  placeholder="Ví dụ: Chi nhánh Hà Nội, Toàn hệ thống, v.v."
-                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
-                />
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {['Toàn hệ thống (Global)', 'Chi nhánh Hà Nội & TP.HCM', 'Chỉ dữ liệu do mình tạo (Ownership)'].map((sc) => (
-                    <button
-                      key={sc}
-                      type="button"
-                      onClick={() => setAssignScopeNote(sc)}
-                      className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-slate-600 dark:text-slate-300 hover:text-orange-600 rounded-md border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
-                    >
-                      {sc}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               {/* Buttons */}
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
@@ -728,7 +663,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
 
             {/* Bottom Actions */}
             <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
-              {inspectingRole.status !== 'archived' && (
+              {inspectingRole.status === 'active' && (
                 <button
                   onClick={() => {
                     const r = inspectingRole;
@@ -753,61 +688,41 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
         </div>
       )}
 
-      {/* ARCHIVE CONFIRMATION MODAL WITH REPLACEMENT PLAN */}
-      {archiveTargetRole && (
+      {statusTargetRole && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl max-w-md w-full space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl">
-                <Archive className="w-6 h-6" />
+                {statusTargetRole.status === 'active' ? <Lock className="w-6 h-6" /> : <Unlock className="w-6 h-6" />}
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Lưu trữ Role: {archiveTargetRole.name}
+                  {statusTargetRole.status === 'active' ? 'Tắt' : 'Bật'} vai trò: {statusTargetRole.name}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Vai trò đang được gán cho <strong>{archiveTargetRole.assignedUsersCount} tài khoản</strong>.
+                  Vai trò đang được gán cho <strong>{statusTargetRole.assignedUsersCount} tài khoản</strong>.
                 </p>
               </div>
             </div>
 
-            {archiveTargetRole.assignedUsersCount > 0 && (
-              <div className="space-y-2 text-xs">
-                <label className="block font-bold text-slate-700 dark:text-slate-300">
-                  Chọn Vai trò thay thế (Replacement Plan):
-                </label>
-                <select
-                  value={replacementRoleId}
-                  onChange={(e) => setReplacementRoleId(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-medium cursor-pointer"
-                >
-                  <option value="">-- Không chuyển đổi (Gỡ gán quyền) --</option>
-                  {roles
-                    .filter((r) => r.id !== archiveTargetRole.id && r.status === 'active')
-                    .map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name} ({r.category})
-                      </option>
-                    ))}
-                </select>
-                <p className="text-[11px] text-slate-500">
-                  Mọi tài khoản đang giữ vai trò cũ sẽ được chuyển tự động sang vai trò thay thế này.
-                </p>
-              </div>
-            )}
+            <p className="rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
+              {statusTargetRole.status === 'active'
+                ? 'Người dùng sẽ tạm thời không nhận quyền từ vai trò này. Các lượt gán được giữ nguyên để có thể bật lại.'
+                : 'Vai trò sẽ có hiệu lực trở lại ngay với các người dùng đang được gán.'}
+            </p>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
-                onClick={() => setArchiveTargetRole(null)}
+                onClick={() => setStatusTargetRole(null)}
                 className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
               >
                 Hủy
               </button>
               <button
-                onClick={handleConfirmArchive}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-md"
+                onClick={handleConfirmStatusChange}
+                className={`px-4 py-2 text-white text-xs font-bold rounded-xl cursor-pointer shadow-md ${statusTargetRole.status === 'active' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
               >
-                Xác nhận Lưu trữ
+                Xác nhận {statusTargetRole.status === 'active' ? 'tắt' : 'bật'}
               </button>
             </div>
           </div>
@@ -816,4 +731,3 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
     </div>
   );
 };
-

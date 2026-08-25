@@ -416,8 +416,8 @@ export const CMS_COMMANDS: SearchResultItem[] = [
   },
   {
     id: 'cmd_function_seo',
-    title: 'Đi tới → Cấu hình SEO chức năng',
-    subtitle: 'Thiết lập Meta title, Canonical, Schema JSON-LD, Robots, OpenGraph',
+    title: 'Đi tới → SEO & URL',
+    subtitle: 'Template SEO, canonical, redirect và sitemap',
     module: 'command',
     moduleLabel: 'Chức năng CMS',
     category: 'Cấu hình',

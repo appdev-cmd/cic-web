@@ -51,11 +51,13 @@ import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 import { FileInput, Megaphone, X } from 'lucide-react';
 import { getDemoCtaModuleData, getDemoFormModuleData } from '../../data/demoCustomerInteractionDataSource';
+import type { CustomerInteractionEmbed } from '../../../shared/customerInteractionContract';
 
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   minHeight?: string;
+  allowedEmbeds?: CustomerInteractionEmbed[];
 }
 
 class UploadAdapter {
@@ -258,7 +260,7 @@ const editorPlugins: PluginConstructor<Editor>[] = [
   MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin, CmsMediaEmbedPlugin,
 ];
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, minHeight = '280px' }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, minHeight = '280px', allowedEmbeds = [] }) => {
   const editorRef = useRef<Editor | null>(null);
   const lastDataRef = useRef<string>(value || '');
   const [editorData, setEditorData] = useState<string>(value || '');
@@ -282,8 +284,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     }
   }, [value]);
 
-  const activeCtas = useMemo(() => getDemoCtaModuleData('vi').ctas.filter((item) => item.status === 'active'), []);
-  const activeForms = useMemo(() => getDemoFormModuleData('vi').forms.filter((item) => item.status === 'active'), []);
+  const activeCtas = useMemo(
+    () => getDemoCtaModuleData('vi').ctas.filter((item) => item.status === 'active' && item.governance.allowedPlacements.includes('rich_text')),
+    [],
+  );
+  const activeForms = useMemo(
+    () => getDemoFormModuleData('vi').forms.filter((item) => item.status === 'active' && item.governance.allowedPlacements.includes('rich_text')),
+    [],
+  );
   const previewCta = activeCtas.find((item) => item.id === selectedCtaId) || null;
   const previewForm = activeForms.find((item) => item.id === selectedFormId) || null;
   const alignmentLabel: Record<CmsReferenceAlignment, string> = { left: 'Trái', center: 'Giữa', right: 'Phải', full: 'Toàn chiều rộng' };
@@ -404,14 +412,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         }}
       />
 
-      <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+      {allowedEmbeds.length > 0 && <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+        {allowedEmbeds.includes('cta') && (
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
           <button type="button" onClick={() => { setSelectedCtaId((current) => current || activeCtas[0]?.id || ''); setReferenceAlignment('center'); setReferencePicker('cta'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white"><Megaphone className="h-4 w-4" />Chèn CTA</button>
         </div>
+        )}
+        {allowedEmbeds.includes('form') && (
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
           <button type="button" onClick={() => { setSelectedFormId((current) => current || activeForms[0]?.id || ''); setReferenceAlignment('full'); setReferencePicker('form'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white dark:bg-slate-600"><FileInput className="h-4 w-4" />Chèn Form</button>
         </div>
-      </div>
+        )}
+      </div>}
 
       {referencePicker && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="reference-preview-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setReferencePicker(null); }}>

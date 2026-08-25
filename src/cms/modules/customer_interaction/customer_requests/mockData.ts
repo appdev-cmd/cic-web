@@ -7,7 +7,7 @@ export const MOCK_CUSTOMER_REQUESTS: CustomerRequest[] = [
   {
     id: 'req_001',
     sourceConfig: {
-      formId: 'form_001',
+      formId: 'form_home_consultation',
       formVersion: 2,
       formName: 'Biểu mẫu - Tư vấn ERP',
       ctaId: 'cta_001',
@@ -83,7 +83,7 @@ export const MOCK_CUSTOMER_REQUESTS: CustomerRequest[] = [
   {
     id: 'req_002',
     sourceConfig: {
-      formId: 'form_002',
+      formId: 'form_contact_request',
       formVersion: 1,
       formName: 'Biểu mẫu - Báo giá',
       ctaId: 'cta_002',
@@ -306,7 +306,7 @@ export const MOCK_CUSTOMER_REQUESTS: CustomerRequest[] = [
   {
     id: 'req_004',
     sourceConfig: {
-      formId: 'form_001',
+      formId: 'form_home_consultation',
       formVersion: 2,
       formName: 'Biểu mẫu - Tư vấn ERP',
       ctaId: 'cta_001',
@@ -382,7 +382,7 @@ export const MOCK_CUSTOMER_REQUESTS: CustomerRequest[] = [
   {
     id: 'req_005',
     sourceConfig: {
-      formId: 'form_002',
+      formId: 'form_contact_request',
       formVersion: 1,
       formName: 'Biểu mẫu - Báo giá',
       ctaId: 'cta_002',
