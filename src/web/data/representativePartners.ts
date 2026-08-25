@@ -25,7 +25,7 @@ export const representativePartnerCountries: readonly RepresentativePartnerCount
     partner('usa', 'ai-architecture', 'ARCHITEChTURES', '12-ai-architecture.svg', 'https://architechtures.com/en', 'wide'),
     partner('usa', 'cype', 'CYPE', '13-cype.webp', 'https://info.cype.com/en/', 'wide'),
   ] },
-  { id: 'canada', name: 'Canada', partners: [partner('canada', 'seequent', 'Seequent', '14-seequent-bentley-system.png', 'https://www.seequent.com/', 'wide', 'light', 'soft-light')] },
+  { id: 'canada', name: 'Canada', partners: [partner('canada', 'seequent', 'Seequent - Bentley System', '14-seequent-bentley-system.png', 'https://www.seequent.com/', 'wide', 'light', 'soft-light')] },
   { id: 'uk', name: 'Vương quốc Anh', partners: [
     partner('uk', 'metsims', 'Metsims', '15-metsims.png', 'https://metsims.com/', 'standard', 'light', 'soft-light'),
     partner('uk', 'zx-lidar', 'ZX Lidars', '16-zx-lidar.png', 'https://www.zxlidars.com/'),
