@@ -2,22 +2,59 @@
 
 > CMS giúp CIC chủ động vận hành Website trên một nền tảng tập trung: từ quản lý nội dung, sản phẩm và hình ảnh doanh nghiệp đến tiếp nhận nhu cầu khách hàng, phân công trách nhiệm và kiểm soát thay đổi.
 
+**Truy cập CMS:** [https://cic-web-sandy.vercel.app/cms/](https://cic-web-sandy.vercel.app/cms/)
+
 ## Mục lục
 
-- [1. CMS mới mở rộng những gì?](#1-cms-mới-mở-rộng-những-gì)
-  - [1.1. Dữ liệu CMS cũ được giữ, chuyển đổi hay thay thế như thế nào?](#11-dữ-liệu-cms-cũ-được-giữ-chuyển-đổi-hay-thay-thế-như-thế-nào)
-- [2. Mỗi bộ phận sử dụng CMS như thế nào?](#2-mỗi-bộ-phận-sử-dụng-cms-như-thế-nào)
-- [3. Danh mục chức năng CMS — Tra cứu](#3-danh-mục-chức-năng-cms--tra-cứu)
-  - [3.1. Dashboard](#31-dashboard)
-  - [3.2. Quản lý nội dung](#32-quản-lý-nội-dung)
-  - [3.3. Sản phẩm/Dịch vụ](#33-sản-phẩmdịch-vụ)
-  - [3.4. Trình bày Website](#34-trình-bày-website)
-  - [3.5. Media](#35-media)
-  - [3.6. Tương tác khách hàng](#36-tương-tác-khách-hàng)
-  - [3.7. Người dùng & phân quyền](#37-người-dùng--phân-quyền)
-  - [3.8. Cấu hình hệ thống](#38-cấu-hình-hệ-thống)
-  - [3.9. SEO](#39-seo)
-  - [3.10. Tiện ích CMS](#310-tiện-ích-cms)
+- [HỆ THỐNG QUẢN TRỊ NỘI DUNG WEBSITE CIC](#hệ-thống-quản-trị-nội-dung-website-cic)
+  - [Mục lục](#mục-lục)
+  - [1. CMS mới mở rộng những gì?](#1-cms-mới-mở-rộng-những-gì)
+    - [1.1. Dữ liệu CMS cũ được giữ, chuyển đổi hay thay thế như thế nào?](#11-dữ-liệu-cms-cũ-được-giữ-chuyển-đổi-hay-thay-thế-như-thế-nào)
+      - [Trường hợp cụ thể của Trang chủ](#trường-hợp-cụ-thể-của-trang-chủ)
+  - [2. Mỗi bộ phận sử dụng CMS như thế nào?](#2-mỗi-bộ-phận-sử-dụng-cms-như-thế-nào)
+    - [Lãnh đạo và cán bộ quản lý](#lãnh-đạo-và-cán-bộ-quản-lý)
+    - [Truyền thông và nội dung](#truyền-thông-và-nội-dung)
+    - [Sản phẩm](#sản-phẩm)
+    - [Kinh doanh và tiếp nhận yêu cầu](#kinh-doanh-và-tiếp-nhận-yêu-cầu)
+    - [Quản trị hệ thống](#quản-trị-hệ-thống)
+  - [3. Danh mục chức năng CMS — Tra cứu](#3-danh-mục-chức-năng-cms--tra-cứu)
+    - [3.1. Dashboard](#31-dashboard)
+    - [3.2. Quản lý nội dung](#32-quản-lý-nội-dung)
+      - [Tin tức](#tin-tức)
+      - [Danh mục tin tức](#danh-mục-tin-tức)
+      - [Trang nội dung](#trang-nội-dung)
+      - [Sự kiện](#sự-kiện)
+      - [Dự án](#dự-án)
+    - [3.3. Sản phẩm/Dịch vụ](#33-sản-phẩmdịch-vụ)
+      - [Sản phẩm](#sản-phẩm-1)
+      - [Danh mục sản phẩm](#danh-mục-sản-phẩm)
+      - [Hãng sản xuất](#hãng-sản-xuất)
+      - [Lĩnh vực ứng dụng](#lĩnh-vực-ứng-dụng)
+      - [Loại sản phẩm](#loại-sản-phẩm)
+      - [Người phụ trách kinh doanh](#người-phụ-trách-kinh-doanh)
+      - [Dịch vụ](#dịch-vụ)
+    - [3.4. Trình bày Website](#34-trình-bày-website)
+      - [Menu](#menu)
+    - [3.5. Media](#35-media)
+      - [Thư viện media](#thư-viện-media)
+    - [3.6. Tương tác khách hàng](#36-tương-tác-khách-hàng)
+      - [Hai nhóm CTA và Biểu mẫu](#hai-nhóm-cta-và-biểu-mẫu)
+      - [CTA](#cta)
+      - [Biểu mẫu](#biểu-mẫu)
+      - [Yêu cầu khách hàng](#yêu-cầu-khách-hàng)
+      - [Mẫu email](#mẫu-email)
+    - [3.7. Người dùng \& phân quyền](#37-người-dùng--phân-quyền)
+      - [Người dùng](#người-dùng)
+      - [Vai trò \& quyền](#vai-trò--quyền)
+    - [3.8. Cấu hình hệ thống](#38-cấu-hình-hệ-thống)
+      - [Cấu hình hệ thống](#cấu-hình-hệ-thống)
+      - [Ngôn ngữ giao diện](#ngôn-ngữ-giao-diện)
+      - [Nhật ký hoạt động](#nhật-ký-hoạt-động)
+      - [Thùng rác](#thùng-rác)
+    - [3.9. SEO](#39-seo)
+      - [SEO \& URL](#seo--url)
+    - [3.10. Tiện ích CMS](#310-tiện-ích-cms)
+      - [Tìm kiếm toàn cục](#tìm-kiếm-toàn-cục)
 
 ## 1. CMS mới mở rộng những gì?
 
@@ -45,7 +82,7 @@ Có bốn cách xử lý:
 | --- | --- | --- | --- |
 | **Tin tức, Sự kiện, Sản phẩm, Dịch vụ và các danh mục** | Nội dung và dữ liệu phân loại cốt lõi | Kế thừa, chuẩn hóa trạng thái, bản nháp/công bố, liên kết và media | Giữ và nâng cấp |
 | **Block** | Các mảnh nội dung được gắn theo module và vị trí để ghép thành trang | Chuyển nội dung còn dùng sang từng khu vực cố định của **Trang nội dung**; dữ liệu tham chiếu tiếp tục lấy từ Tin tức, Sản phẩm, Sự kiện, Dự án hoặc Dịch vụ | Thay bằng cách quản lý theo trang và khu vực |
-| **Banner** | Một nhóm dữ liệu trình bày hỗn hợp: ảnh Hero Trang chủ, logo đối tác, thành tựu/giải thưởng và có thể có banner chiến dịch | Không chuyển nguyên bảng thành một module Banner chung. Mỗi bản ghi được phân loại theo nơi sử dụng: Hero vào **Trang chủ → Hero**; giải thưởng vào **Trang chủ/Giới thiệu → Thành tựu & Giải thưởng**; đối tác vào khu vực **Đối tác**; ảnh gốc vào **Thư viện media**; banner chiến dịch còn hiệu lực được gắn vào khu vực nội dung hoặc CTA phù hợp | Tách theo ý nghĩa, không giữ “Banner” như một thùng chứa chung |
+| **Banner** | Một nhóm dữ liệu trình bày hỗn hợp: ảnh Hero Trang chủ, logo đối tác, thành tựu/giải thưởng và có thể có banner chiến dịch | Không chuyển nguyên bảng thành một module Banner chung. Mỗi bản ghi được phân loại theo nơi sử dụng: Hero vào **Trang chủ → Hero**; giải thưởng vào **Trang chủ/Giới thiệu → Thành tựu & Giải thưởng**; đối tác vào khu vực **Đối tác**; ảnh gốc vào **Thư viện media** | Tách theo ý nghĩa, không giữ “Banner” như một thùng chứa chung |
 | **Slideshow** | Tên module gợi ý là trình chiếu, nhưng dữ liệu thực tế đang được dùng làm nhóm ảnh/icon ở phần Hero của Trang chủ cũ | Không tạo module Slideshow tương ứng nếu Website mới không còn sử dụng cấu trúc này. Tệp còn giá trị được đưa vào Media; chỉ dữ liệu nào có vị trí tương ứng trong thiết kế mới mới được ánh xạ sang khu vực đó | Không tiếp tục thành module riêng; chuyển chọn lọc |
 | **Ảnh và tệp nằm trong từng module** | Đường dẫn ảnh, icon, video hoặc tài liệu được lưu rải rác | Tạo tài nguyên trong **Thư viện media**, giữ mã ổn định và ghi nhận nơi sử dụng; bản ghi nội dung chỉ tham chiếu tài nguyên | Chuyển sang tài nguyên dùng chung |
 | **Liên hệ, đăng ký sản phẩm và đơn hàng** | Nhu cầu khách hàng nằm ở các nguồn và luồng xử lý riêng | Giữ dữ liệu nguồn để đối soát, đồng thời chuẩn hóa thành **Yêu cầu khách hàng** để ưu tiên, phân công, ghi chú và theo dõi trạng thái | Hợp nhất khi vận hành, không làm mất dữ liệu gốc |

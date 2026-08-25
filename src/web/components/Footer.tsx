@@ -197,16 +197,6 @@ export const Footer = ({
             >
               ĐIỀU KHOẢN SỬ DỤNG
             </a>
-            <button 
-              onClick={() => {
-                setCurrentView('cms');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="text-slate-600 hover:text-orange-500 transition-all cursor-pointer text-[10px] font-semibold tracking-normal normal-case border-l border-slate-800 pl-4"
-              title="Truy cập hệ thống quản trị"
-            >
-              Hệ thống CMS
-            </button>
           </div>
         </div>
       </div>
