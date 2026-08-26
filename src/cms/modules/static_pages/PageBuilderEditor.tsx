@@ -1488,7 +1488,11 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     if (action === 'add') {
       const defaults: Record<string, PageBuilderConfigValue> = {
         slides: { title: '', subtitle: '', backgroundImageId: '', mobileImageId: '', primaryCtaId: '', secondaryCtaId: '' },
-        items: section?.sectionType === 'award_slider' ? { name: '', year: '', description: '', imageId: '' } : { value: 0, suffix: '+', label: '' },
+        items: section?.sectionType === 'award_slider'
+          ? { name: '', year: '', description: '', imageId: '' }
+          : section?.sectionType === 'technology_ecosystem'
+            ? { id: `ecosystem_${items.length + 1}`, title: 'Giải pháp mới', description: 'Nhập mô tả.', badge: 'Công nghệ', imageId: '', link: '/' }
+            : { value: 0, suffix: '+', label: '' },
         paragraphs: 'Nhập đoạn nội dung mới',
         tickerItems: 'Nhập thông báo mới',
         milestones: { year: '2026', title: 'Cột mốc mới', description: 'Nhập mô tả cột mốc.' },
@@ -1708,17 +1712,12 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
                           <p className="text-sm font-bold text-slate-900 dark:text-white">{entityTypeLabels[reference.entityType]} đã chọn</p>
                           <p className="text-xs text-slate-500">{reference.entityIds.length}/{limit} mục · đúng thứ tự hiển thị</p>
                         </div>
-                        {source.mode === 'manual' && <CmsButton size="sm" variant="secondary" leadingIcon={<Link2 />} onClick={() => setPicker({ sectionId: section.id, entityType: reference.entityType, selectedIds: reference.entityIds, limit })}>Chọn nội dung</CmsButton>}
-                      </div>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <label className="space-y-1.5"><span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nguồn dữ liệu</span><select value={source.mode} onChange={(event) => updateReferenceSource(section.id, reference.entityType, { ...source, mode: event.target.value as typeof source.mode })} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-900"><option value="manual">Chọn thủ công</option><option value="latest">Mới nhất</option><option value="taxonomy">Theo danh mục / phân loại</option></select></label>
-                        <label className="space-y-1.5"><span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Số lượng hiển thị</span><input type="number" min={1} max={limit} value={source.limit} onChange={(event) => updateReferenceSource(section.id, reference.entityType, { ...source, limit: Math.max(1, Math.min(limit, Number(event.target.value) || 1)) })} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-900" /></label>
-                        {source.mode === 'taxonomy' && <><label className="space-y-1.5"><span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Kiểu phân loại</span><select value={source.taxonomyType ?? 'category'} onChange={(event) => updateReferenceSource(section.id, reference.entityType, { ...source, taxonomyType: event.target.value as NonNullable<typeof source.taxonomyType> })} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-900"><option value="category">Danh mục</option>{reference.entityType === 'product' && <><option value="brand">Hãng</option><option value="application">Lĩnh vực</option></>}</select></label><label className="space-y-1.5"><span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Mã phân loại</span><input value={source.taxonomyId ?? ''} onChange={(event) => updateReferenceSource(section.id, reference.entityType, { ...source, taxonomyId: event.target.value })} placeholder="Chọn từ danh mục module gốc" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-900" /></label></>}
                       </div>
                       <div className="mt-3 space-y-1.5">
                         {reference.entityIds.map((id, index) => (
-                          <div key={id} className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                            {index + 1}. {entityOptions.find((item) => item.id === id)?.label ?? id}
+                          <div key={id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <span>{index + 1}. {entityOptions.find((item) => item.id === id)?.label ?? id}</span>
+                            <CmsButton size="sm" variant="secondary" leadingIcon={<Link2 />} onClick={() => setPicker({ sectionId: section.id, entityType: reference.entityType, selectedIds: [], excludedIds: reference.entityIds.filter((_, itemIndex) => itemIndex !== index), limit: 1, replaceIndex: index })}>Thay</CmsButton>
                           </div>
                         ))}
                       </div>

@@ -18,7 +18,7 @@ export const draftSectionSchemas: Record<string, DraftElementDefinition[]> = {
   'home.intro': [text('eyebrow', 'Nhãn'), text('title', 'Tiêu đề'), item('paragraphs', 'Các đoạn giới thiệu'), media('imageId', 'Ảnh'), { key: 'videoUrl', label: 'Video', kind: 'video', optional: true }, { key: 'primaryCtaId', label: 'CTA', kind: 'cta', optional: true }, { key: 'downloadMediaId', label: 'Tệp tải', kind: 'media', optional: true }],
   'home.stats': [item('items', 'Các chỉ số')],
   'home.awards': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), item('items', 'Giải thưởng')],
-  'home.ecosystem': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), item('slots', 'Các ô giải pháp'), reference('product', 'Sản phẩm'), reference('service', 'Dịch vụ')],
+  'home.ecosystem': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), item('items', 'Nội dung carousel')],
   'home.projects': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('project', 'Dự án')],
   'home.events': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('event', 'Sự kiện')],
   'home.news': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('news', 'Tin tức')],

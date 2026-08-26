@@ -35,14 +35,29 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     },
   },
   'home.awards': { label: 'Giải thưởng', description: 'Danh sách giải thưởng trong slider.', canHide: true, canMove: true, editableContract: blockedContract('home.awards', { media: { images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'blocked', blockedReason: 'identity-unresolved' } } }) },
-  'home.ecosystem': { label: 'Hệ sinh thái công nghệ', description: 'Các slot sản phẩm và dịch vụ cố định.', referenceLimit: { product: 4, service: 3 }, canHide: true, canMove: true, editableContract: blockedContract('home.ecosystem') },
+  'home.ecosystem': {
+    label: 'Hệ sinh thái công nghệ', description: 'Carousel nội dung nhập trực tiếp, mỗi mục có ảnh và liên kết riêng.', canHide: true, canMove: true,
+    editableContract: {
+      sectionKey: 'home.ecosystem',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.badge', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.title', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.description', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.link', semantic: 'link', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: { images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'enabled' } },
+      collections: { items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } },
+    },
+  },
   'home.projects': {
     label: 'Dự án tiêu biểu', description: 'Chọn thủ công tối đa 3 dự án.', referenceLimit: { project: 3 }, canHide: true, canMove: true,
     editableContract: {
       sectionKey: 'home.projects',
       fields: [],
       references: {
-        items: { path: 'items', entityType: 'project', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 3, layoutBehavior: { wrap: false } },
+        items: { path: 'items', entityType: 'project', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'blocked', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 3, layoutBehavior: { wrap: false } },
       },
     },
   },

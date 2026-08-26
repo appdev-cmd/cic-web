@@ -995,11 +995,41 @@ Không có field cần thêm. Tiếp tục dùng `cic_config`, `cic_config_en` v
 
 ### Bảng mới cần tạo
 
-Không có.
+#### `cic_branches`
+
+| Column | Type | Constraint |
+| ------ | ---- | ---------- |
+| `id` | `bigint` identity | PK |
+| `workspace` | `varchar(5)` | NOT NULL, CHECK thuộc `vi`, `en` |
+| `code` | `varchar(100)` | NOT NULL |
+| `name` | `varchar(255)` | NOT NULL |
+| `address` | `text` | NOT NULL, CHECK sau trim không rỗng |
+| `phone` | `varchar(255)` | NULL |
+| `email` | `varchar(255)` | NULL |
+| `fax` | `varchar(100)` | NULL |
+| `working_hours` | `varchar(255)` | NULL |
+| `map_embed_url` | `text` | NULL |
+| `map_search_query` | `text` | NULL |
+| `is_head_office` | `boolean` | NOT NULL DEFAULT `false` |
+| `published` | `boolean` | NOT NULL DEFAULT `true` |
+| `ordering` | `integer` | NOT NULL DEFAULT `0`, CHECK `ordering >= 0` |
+| `created_by` | `integer` | NULL, FK → `cic_users(id)` ON DELETE SET NULL |
+| `updated_by` | `integer` | NULL, FK → `cic_users(id)` ON DELETE SET NULL |
+| `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+
+- Unique: (`workspace`, `code`); partial unique (`workspace`) WHERE `is_head_office = true AND published = true` để mỗi workspace chỉ có một trụ sở chính đang hiển thị.
+- Index: (`workspace`, `published`, `ordering`, `id`), (`created_by`), (`updated_by`).
+- Quan hệ: mỗi workspace quản lý tập chi nhánh độc lập; Trang Liên hệ và Footer đọc các record `published = true` theo `ordering`.
+- Mức độ: **BẮT BUỘC** — một cặp `address/map` trong `cic_config*` không biểu diễn được nhiều chi nhánh và làm phát sinh field cố định theo tên thành phố.
+- Không lưu iframe HTML; `map_embed_url` chỉ nhận URL nhúng đã qua allowlist/validation. `map_search_query` là fallback để frontend tạo liên kết mở bản đồ.
 
 ### Mapping / lưu ý
 
 - `settingId/path → name`, `liveValue/effectiveValue → value`, kiểu điều khiển → `data_type`; scope map vào đúng bảng `cic_config*` hiện có.
+- `system.company.branches` trong CMS là màn quản trị collection trên `cic_branches`, không serialize cả danh sách vào một row `cic_config.value`.
+- Dữ liệu pháp nhân, hotline và email chung tiếp tục nằm trong `cic_config*`; địa chỉ, điện thoại, email, giờ làm việc và map gắn với từng địa điểm nằm trong `cic_branches`.
+- Page Builder chỉ giữ nội dung và cấu hình trình bày của section Liên hệ. Không lưu bản sao danh sách chi nhánh trong section config/reference; website resolve dữ liệu theo workspace khi đọc Published revision.
 - Label, group, description, options, sensitivity, regex, unit và used-by là metadata manifest/application; không nhân bản thành column DB.
 - Chính sách lưu cũng nằm trong manifest: cấu hình `standard` không có cảnh báo ảnh hưởng dùng `edit → save → Activity Log`; cấu hình `sensitive`, `secret` hoặc có `impactDescription` mới dùng `draft → compare → publish → version`.
 - Inheritance/effective value và các số liệu issue/override là dữ liệu derive.
@@ -1179,7 +1209,7 @@ Không có. Không thêm `is_trash`, `deleted_at`, payload hoặc metadata resto
 
 - Field mới bắt buộc trên bảng hiện có: **19 column trên 11 bảng vật lý**.
 - Field mới đề xuất có điều kiện trên bảng hiện có: **1** — `cic_users.failed_login_attempts`, chỉ dùng khi authentication/lockout được triển khai thật.
-- Bảng mới bắt buộc: **36** — đã bỏ ba bảng role-version không còn thuộc contract, bổ sung `cic_url_redirects` và `cic_content_embeds`.
+- Bảng mới bắt buộc: **37** — đã bỏ ba bảng role-version không còn thuộc contract, bổ sung `cic_url_redirects`, `cic_content_embeds` và `cic_branches`.
 - Bảng mới đề xuất có điều kiện: **4** — `cic_media_variants`, `cic_security_events`, `cic_role_scopes`, `cic_audit_export_jobs`.
 - Unique index alias mới bắt buộc: **16**, trong đó alias của bảng legacy chỉ áp dụng sau data profiling.
 - Unique index code mới bắt buộc: **3** — (`workspace`, `code`) cho CTA và Form, cùng code chuẩn hóa của Role.
@@ -1206,7 +1236,7 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 
 - Mở rộng bảng hiện có: **19 field bắt buộc trên 11 bảng vật lý**.
 - Field có điều kiện: **1 field** bảo mật tài khoản, chỉ triển khai cùng authentication/lockout thật.
-- Bảng mới bắt buộc: **36 bảng**.
+- Bảng mới bắt buộc: **37 bảng**.
 - Bảng mới có điều kiện: **4 bảng**, không tạo cho đến khi chức năng backend tương ứng được duyệt.
 - Không thêm field trùng nghĩa chỉ để khớp tên DTO/ViewModel.
 - Không xóa hoặc rename field legacy.

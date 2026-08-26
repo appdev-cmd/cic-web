@@ -31,6 +31,7 @@ import {
   requiresConfigReview,
 } from './types';
 import { NotFoundView } from '@web/components/NotFoundView';
+import { BranchesSettingsEditor } from './BranchesSettingsEditor';
 
 interface SettingsEditorTabProps {
   scopes: ConfigScope[];
@@ -454,6 +455,14 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
 
                     {/* INPUT FORM ELEMENTS DEPENDING ON TYPE */}
                     <div className="pt-1">
+                      {item.type === 'list' && item.id === 'comp_branches' && (
+                        <BranchesSettingsEditor
+                          value={displayValue}
+                          disabled={isInherited}
+                          onChange={(branches) => onUpdateDraftValue(item.id, branches)}
+                        />
+                      )}
+
                       {item.type === 'text' && (
                         <input
                           type="text"

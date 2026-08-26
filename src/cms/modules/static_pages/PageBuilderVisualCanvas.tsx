@@ -254,6 +254,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       const section = sections.find((item) => item.sectionKey === node.dataset.pageBuilderSectionKey) ?? sections[index];
       if (!section) return;
       const definition = sectionDefinitions[section.sectionKey];
+      const allowsCollectionStructureChanges = section.sectionType === 'hero_carousel' || section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem';
       node.dataset.pageBuilderSectionId = section.id;
       node.dataset.pageBuilderSectionKey = section.sectionKey;
       node.style.display = section.visible === false ? (onTextChange ? '' : 'none') : '';
@@ -353,39 +354,6 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             entityLabel.textContent = sectionDefinitions[section.sectionKey]?.label ?? reference.entityType;
             entityLabel.style.cssText = 'padding:0 5px;color:#0f172a;';
             toolbar.appendChild(entityLabel);
-            const source = reference.source ?? { mode: 'manual' as const, limit: Math.max(1, reference.entityIds.length || 6) };
-            const select = node.ownerDocument.createElement('select');
-            select.setAttribute('aria-label', `Nguồn ${reference.entityType}`);
-            select.innerHTML = '<option value="latest">Mới nhất</option><option value="taxonomy">Theo danh mục</option><option value="manual">Chọn thủ công</option>';
-            select.value = source.mode;
-            select.style.cssText = 'border:1px solid #cbd5e1;border-radius:7px;padding:6px 8px;background:#fff;color:#334155;font:700 11px/1 system-ui;';
-            const changeMode = () => onReferenceSourceChange?.(section.id, reference.entityType, { ...source, mode: select.value as typeof source.mode });
-            select.addEventListener('change', changeMode); toolbar.appendChild(select);
-            actionCleanups.push(() => select.removeEventListener('change', changeMode));
-
-            if (source.mode === 'taxonomy') {
-              const taxonomy = node.ownerDocument.createElement('select');
-              taxonomy.setAttribute('aria-label', 'Danh mục');
-              const allOption = node.ownerDocument.createElement('option'); allOption.value = ''; allOption.textContent = 'Danh mục: Tất cả'; taxonomy.appendChild(allOption);
-              if (source.taxonomyId) { const currentOption = node.ownerDocument.createElement('option'); currentOption.value = source.taxonomyId; currentOption.textContent = `Danh mục: ${source.taxonomyId}`; taxonomy.appendChild(currentOption); }
-              taxonomy.value = source.taxonomyId ?? '';
-              taxonomy.style.cssText = select.style.cssText;
-              const changeTaxonomy = () => onReferenceSourceChange?.(section.id, reference.entityType, { ...source, taxonomyType: 'category', taxonomyId: taxonomy.value });
-              taxonomy.addEventListener('change', changeTaxonomy); toolbar.appendChild(taxonomy);
-              actionCleanups.push(() => taxonomy.removeEventListener('change', changeTaxonomy));
-            }
-
-            const quantity = node.ownerDocument.createElement('select');
-            quantity.setAttribute('aria-label', 'Số lượng hiển thị');
-            [3, 4, 6, 8, 12].forEach((value) => { const option = node.ownerDocument.createElement('option'); option.value = String(value); option.textContent = `${value} mục`; quantity.appendChild(option); });
-            quantity.value = String(source.limit);
-            quantity.style.cssText = select.style.cssText;
-            const changeLimit = () => onReferenceSourceChange?.(section.id, reference.entityType, { ...source, limit: Number(quantity.value) });
-            quantity.addEventListener('change', changeLimit); toolbar.appendChild(quantity);
-            actionCleanups.push(() => quantity.removeEventListener('change', changeLimit));
-            if (source.mode === 'manual') {
-              addButton('+ Thêm', () => onPickReference?.(section.id, reference.entityType));
-            }
           });
         }
         if (definition?.canHide) addButton(section.visible === false ? 'Hiện' : 'Ẩn', () => onSectionAction?.(section.id, 'toggle'));
@@ -428,6 +396,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
           groupMeta.textContent = count === undefined ? (element.optional ? 'Tùy chọn' : 'Nội dung') : `${count} mục`;
           groupMeta.style.cssText = 'border-radius:999px;padding:4px 7px;background:#f1f5f9;color:#64748b;font:700 10px/1 system-ui;';
           groupHeader.append(groupLabel, groupMeta);
+          if ((section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem') && element.key === 'items') groupHeader.style.display = 'none';
           group.appendChild(groupHeader);
 
           const makeAction = (label: string, handler: () => void, danger = false) => {
@@ -536,7 +505,6 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             reference.entityIds.forEach((id, itemIndex) => {
               const card = node.ownerDocument.createElement('div');
               card.style.cssText = 'position:relative;display:flex;flex-direction:column;gap:9px;min-height:240px;border:1px solid #e2e8f0;border-radius:12px;padding:11px;background:#fff;overflow:hidden;';
-              const handle = node.ownerDocument.createElement('span'); handle.textContent = '⠿ Kéo'; handle.style.cssText = 'cursor:grab;color:#334155;font:800 11px/1 system-ui;';
               const item = entityOptions.find((option) => option.id === id);
               const visual = node.ownerDocument.createElement('div'); visual.style.cssText = 'display:flex;height:105px;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);color:#94a3b8;font:900 28px/1 system-ui;'; visual.textContent = (item?.label ?? id).slice(0, 1).toUpperCase();
               const name = node.ownerDocument.createElement('span');
@@ -545,36 +513,31 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
               const description = node.ownerDocument.createElement('span'); description.textContent = item?.description ?? 'Dữ liệu tham chiếu từ module gốc'; description.style.cssText = 'display:-webkit-box;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:#64748b;font:600 11px/1.4 system-ui;';
               const actions = node.ownerDocument.createElement('div'); actions.style.cssText = 'position:absolute;z-index:3;top:9px;left:9px;right:9px;display:flex;align-items:center;gap:7px;padding:7px;border-radius:10px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(15,23,42,.16);';
               const replace = makeAction('Thay', () => { setPendingReferenceSlot(null); onPickReference?.(section.id, reference.entityType, itemIndex); });
-              const remove = makeAction('Bỏ', () => onReferenceItemsChange?.(section.id, reference.entityType, reference.entityIds.filter((itemId) => itemId !== id)), true);
-              actions.append(handle, replace, remove); card.append(visual, name, description, actions); cards.appendChild(card);
+              actions.append(replace); card.append(visual, name, description, actions); cards.appendChild(card);
               revealActionsOnHover(card, actions);
-              wireDrag(handle, itemIndex, (from, to) => { const ids = [...reference.entityIds]; const [moved] = ids.splice(from, 1); ids.splice(to, 0, moved); onReferenceItemsChange?.(section.id, reference.entityType, ids); }, card);
             });
-            const pendingKey = `${section.id}:${reference.entityType}`;
-            if (pendingReferenceSlot === pendingKey) {
-              const emptySlot = makeAction(`+ Chọn ${element.label}`, () => { setPendingReferenceSlot(null); onPickReference?.(section.id, reference.entityType); });
-              emptySlot.style.minHeight = '72px'; emptySlot.style.borderStyle = 'dashed'; emptySlot.style.borderColor = '#fb923c'; emptySlot.style.background = '#fff7ed';
-              cards.appendChild(emptySlot);
-            } else cards.appendChild(makeAction(`+ Thêm slot ${element.label}`, () => setPendingReferenceSlot(pendingKey)));
             group.appendChild(cards);
           } else if (element.kind === 'collection' && Array.isArray(value)) {
             const cards = node.ownerDocument.createElement('div'); cards.style.cssText = `display:grid;grid-template-columns:${section.sectionType === 'hero_carousel' ? '1fr' : 'repeat(auto-fit,minmax(240px,1fr))'};gap:12px;`;
             value.forEach((collectionItem, itemIndex) => {
               const isAward = section.sectionType === 'award_slider' && element.key === 'items';
               const isSlide = section.sectionType === 'hero_carousel' && element.key === 'slides';
+              const isEcosystem = section.sectionType === 'technology_ecosystem' && element.key === 'items';
               const card = node.ownerDocument.createElement('article');
-              card.style.cssText = `position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;overflow:hidden;${isAward ? 'min-height:320px;' : ''}${isSlide ? 'min-height:440px;justify-content:flex-end;background:#0f172a;color:#fff;' : 'padding:12px;'}`;
+              card.style.cssText = `position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;overflow:hidden;${isAward ? 'min-height:310px;padding:20px;align-items:center;box-shadow:0 1px 3px rgba(15,23,42,.08);' : ''}${isEcosystem ? 'min-height:430px;padding:8px;background:#f1f5f9;' : ''}${isSlide ? 'min-height:440px;justify-content:flex-end;background:#0f172a;color:#fff;' : isAward || isEcosystem ? '' : 'padding:12px;'}`;
               const dragHandle = node.ownerDocument.createElement('span'); dragHandle.textContent = '⠿ Kéo'; dragHandle.style.cssText = 'cursor:grab;color:#334155;font:800 11px/1 system-ui;';
               const objectItem = collectionItem && typeof collectionItem === 'object' && !Array.isArray(collectionItem) ? collectionItem as Record<string, PageBuilderConfigValue> : null;
               const fields: Array<[string, PageBuilderConfigValue]> = isAward
-                ? ['imageId', 'name', 'year', 'description'].map((key) => [key, objectItem?.[key] ?? ''])
+                ? ['imageId', 'name'].map((key) => [key, objectItem?.[key] ?? ''])
+                : isEcosystem
+                  ? ['imageId', 'badge', 'description', 'title', 'link'].map((key) => [key, objectItem?.[key] ?? ''])
                 : isSlide
                   ? ['backgroundImageId', 'mobileImageId', 'title', 'subtitle', 'primaryCtaId', 'secondaryCtaId'].map((key) => [key, objectItem?.[key] ?? ''])
                   : objectItem ? Object.entries(objectItem) : [['value', collectionItem]];
               const content = node.ownerDocument.createElement('div');
               content.style.cssText = isSlide
                 ? 'position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:32px;max-width:720px;'
-                : 'display:flex;flex:1;flex-direction:column;gap:8px;';
+                : `display:flex;flex:1;flex-direction:column;gap:8px;${isAward ? 'width:100%;align-items:center;justify-content:space-between;' : ''}${isEcosystem ? 'width:100%;' : ''}`;
               fields.forEach(([fieldKey, fieldValue]) => {
                 if (typeof fieldValue === 'object' && fieldValue !== null) return;
                 const path = fieldKey === 'value' && (typeof collectionItem !== 'object' || collectionItem === null) ? [element.key, itemIndex] : [element.key, itemIndex, fieldKey];
@@ -587,15 +550,22 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                     else mediaButton.textContent = '+ Chọn ảnh nền';
                     card.prepend(mediaButton);
                   } else {
-                    mediaButton.style.cssText += `height:${isSlide ? '56px' : '170px'};width:${isSlide ? 'auto' : '100%'};border-style:dashed;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:${isSlide ? '9px 12px' : '0'};`;
-                    if (asset) { const preview = node.ownerDocument.createElement('img'); preview.src = asset.thumbnail_url ?? asset.url; preview.alt = ''; preview.style.cssText = `width:${isSlide ? '72px' : '100%'};height:100%;object-fit:cover;`; mediaButton.appendChild(preview); mediaButton.title = 'Thay ảnh'; }
+                    mediaButton.style.cssText += `height:${isSlide ? '56px' : isEcosystem ? '260px' : '170px'};width:${isSlide ? 'auto' : '100%'};border-style:dashed;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:${isSlide ? '9px 12px' : isAward ? '8px' : '0'};${isEcosystem ? 'border-radius:9px;background:#0f172a;' : ''}`;
+                    if (asset) { const preview = node.ownerDocument.createElement('img'); preview.src = asset.thumbnail_url ?? asset.url; preview.alt = ''; preview.style.cssText = `width:${isSlide ? '72px' : '100%'};height:100%;object-fit:${isAward ? 'contain' : 'cover'};`; mediaButton.appendChild(preview); mediaButton.title = 'Thay ảnh'; if (isAward) mediaButton.style.cssText += 'border-color:transparent;background:transparent;'; }
                     else mediaButton.textContent = isSlide ? '+ Ảnh mobile' : '+ Chọn ảnh';
                     content.appendChild(mediaButton);
                   }
                 } else {
-                  const placeholders: Record<string, string> = { name: 'Nhập tên giải thưởng...', year: 'Nhập năm...', description: 'Nhập mô tả...', title: 'Nhập tiêu đề...', subtitle: 'Nhập mô tả...', primaryCtaId: '+ Thêm CTA chính', secondaryCtaId: '+ Thêm CTA phụ' };
-                  const variant = fieldKey === 'title' || fieldKey === 'name' ? 'title' : fieldKey === 'year' ? 'meta' : fieldKey.toLowerCase().includes('cta') ? 'cta' : 'body';
+                  const placeholders: Record<string, string> = { name: 'Nhập tên giải thưởng...', year: 'Nhập năm...', badge: 'Nhập nhãn...', link: 'Nhập đường dẫn...', description: 'Nhập mô tả...', title: 'Nhập tiêu đề...', subtitle: 'Nhập mô tả...', primaryCtaId: '+ Thêm CTA chính', secondaryCtaId: '+ Thêm CTA phụ' };
+                  const variant = fieldKey === 'title' || fieldKey === 'name' ? 'title' : fieldKey === 'year' || fieldKey === 'badge' ? 'meta' : fieldKey === 'link' || fieldKey.toLowerCase().includes('cta') ? 'cta' : 'body';
                   const editable = makeInlineText(path, fieldValue as PageBuilderConfigValue, placeholders[fieldKey] ?? 'Nhập nội dung...', variant);
+                  if (isAward && variant === 'title') editable.style.cssText += 'text-align:center;text-transform:uppercase;letter-spacing:.045em;font-size:13px;';
+                  if (isEcosystem) {
+                    if (fieldKey === 'description') editable.style.cssText += 'margin:-118px 14px 52px;padding:0;color:#f8fafc;position:relative;z-index:2;';
+                    else if (fieldKey === 'badge') editable.style.cssText += 'position:absolute;top:24px;left:22px;z-index:3;border-radius:999px;padding:7px 10px;background:#ea580c;color:#fff;';
+                    else if (fieldKey === 'title') editable.style.cssText += 'padding:4px 10px 0;font-size:19px;';
+                    else if (fieldKey === 'link') editable.style.cssText += 'margin:0 10px 8px;background:#0f172a;';
+                  }
                   if (isSlide) {
                     if (variant === 'title') editable.style.cssText += 'font-size:32px;color:#fff;';
                     else if (variant === 'body') editable.style.cssText += 'color:#e2e8f0;';
@@ -603,26 +573,42 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                   content.appendChild(editable);
                 }
               });
-              const actions = node.ownerDocument.createElement('div'); actions.style.cssText = 'position:absolute;z-index:4;top:9px;right:9px;display:flex;align-items:center;gap:7px;padding:7px;border-radius:10px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(15,23,42,.16);';
-              actions.append(makeAction('Nhân bản', () => onCollectionAction?.(section.id, element.key, 'duplicate', itemIndex)), makeAction('Xóa mục', () => onCollectionAction?.(section.id, element.key, 'remove', itemIndex), true));
-              actions.prepend(dragHandle);
-              card.append(content, actions); cards.appendChild(card);
-              revealActionsOnHover(card, actions);
-              wireDrag(dragHandle, itemIndex, (from, to) => { const reordered = [...value]; const [moved] = reordered.splice(from, 1); reordered.splice(to, 0, moved); onConfigValueChange?.(section.id, [element.key], reordered); }, card);
+              card.appendChild(content);
+              if (allowsCollectionStructureChanges) {
+                const actions = node.ownerDocument.createElement('div'); actions.style.cssText = 'position:absolute;z-index:4;top:9px;right:9px;display:flex;align-items:center;gap:7px;padding:7px;border-radius:10px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(15,23,42,.16);';
+                actions.append(makeAction('Nhân bản', () => onCollectionAction?.(section.id, element.key, 'duplicate', itemIndex)), makeAction('Xóa mục', () => onCollectionAction?.(section.id, element.key, 'remove', itemIndex), true));
+                actions.prepend(dragHandle);
+                card.appendChild(actions);
+                revealActionsOnHover(card, actions);
+                wireDrag(dragHandle, itemIndex, (from, to) => { const reordered = [...value]; const [moved] = reordered.splice(from, 1); reordered.splice(to, 0, moved); onConfigValueChange?.(section.id, [element.key], reordered); }, card);
+              }
+              cards.appendChild(card);
             });
-            cards.appendChild(makeAction(`+ Thêm ${element.label}`, () => onCollectionAction?.(section.id, element.key, 'add', count ?? 0)));
+            if (allowsCollectionStructureChanges) cards.appendChild(makeAction(`+ Thêm ${element.label}`, () => onCollectionAction?.(section.id, element.key, 'add', count ?? 0)));
             group.appendChild(cards);
           }
           inventory.appendChild(group);
         });
-        // The schema inventory is intentionally not mounted. Edit mode augments the
-        // production nodes below instead of swapping in a parallel editor layout.
+        // Carousel content needs a complete, stable editing surface. Rendering its
+        // schema inventory as a grid keeps every item visible while the website and
+        // preview continue to use the production slider.
+        const showFullCollectionInventory = section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem';
+        if (showFullCollectionInventory) {
+          inventory.style.cssText = 'display:block;margin:18px 0 8px;';
+          draftLayer.appendChild(inventory);
+        }
         const collectionType = section.sectionType === 'award_slider' ? 'award' : section.references?.[0]?.entityType;
         const collectionAnchor = collectionType ? node.querySelector<HTMLElement>(`[data-page-collection~="${collectionType}"]`) : null;
         if (collectionAnchor) collectionAnchor.parentElement?.insertBefore(draftLayer, collectionAnchor);
         else node.insertBefore(draftLayer, node.firstChild);
 
-        if (collectionAnchor) {
+        if (showFullCollectionInventory && collectionAnchor) {
+          const previousDisplay = collectionAnchor.style.display;
+          collectionAnchor.style.display = 'none';
+          actionCleanups.push(() => { collectionAnchor.style.display = previousDisplay; });
+        }
+
+        if (collectionAnchor && !showFullCollectionInventory) {
           const reference = section.references?.find((item) => collectionAnchor.matches(`[data-page-collection~="${item.entityType}"]`));
           const isAwardCollection = section.sectionType === 'award_slider';
           const itemContainer = isAwardCollection
@@ -676,18 +662,12 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             const controls = node.ownerDocument.createElement('div');
             controls.dataset.pageBuilderAction = 'card-controls';
             controls.style.cssText = 'position:absolute;z-index:20;top:8px;right:8px;display:flex;align-items:center;gap:6px;padding:6px;border-radius:10px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(15,23,42,.18);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity 140ms ease,transform 140ms ease;';
-            const handle = createCardAction('⠿ Kéo', () => undefined);
-            handle.style.cursor = 'grab';
-            controls.appendChild(handle);
             if (reference) {
-              controls.append(
-                createCardAction('Thay', () => onPickReference?.(section.id, reference.entityType, itemIndex)),
-                createCardAction('Xóa', () => onReferenceItemsChange?.(section.id, reference.entityType, reference.entityIds.filter((_, index) => index !== itemIndex)), true),
-              );
-              attachProductionDrag(handle, card, itemIndex, (from, to) => {
-                const ids = [...reference.entityIds]; const [moved] = ids.splice(from, 1); ids.splice(to, 0, moved); onReferenceItemsChange?.(section.id, reference.entityType, ids);
-              });
+              controls.append(createCardAction('Thay', () => onPickReference?.(section.id, reference.entityType, itemIndex)));
             } else if (isAwardCollection && Array.isArray(section.config.items)) {
+              const handle = createCardAction('⠿ Kéo', () => undefined);
+              handle.style.cursor = 'grab';
+              controls.appendChild(handle);
               controls.append(
                 createCardAction('Nhân bản', () => onCollectionAction?.(section.id, 'items', 'duplicate', itemIndex)),
                 createCardAction('Xóa', () => onCollectionAction?.(section.id, 'items', 'remove', itemIndex), true),
@@ -716,26 +696,21 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             card.appendChild(controls);
           });
 
-          if (itemContainer && (reference || isAwardCollection)) {
-            const pendingKey = reference ? `${section.id}:${reference.entityType}` : '';
+          if (itemContainer && isAwardCollection) {
             const addSlot = node.ownerDocument.createElement('button');
             addSlot.type = 'button'; addSlot.dataset.pageBuilderAction = 'add-slot';
-            addSlot.textContent = reference && pendingReferenceSlot === pendingKey ? `+ Chọn ${reference.entityType}` : isAwardCollection ? '+ Thêm giải thưởng' : `+ Thêm ${reference?.entityType ?? 'mục'}`;
+            addSlot.textContent = '+ Thêm giải thưởng';
             addSlot.style.cssText = 'min-height:180px;min-width:210px;border:2px dashed #fb923c;border-radius:12px;padding:18px;background:#fff7ed;color:#9a3412;font:800 13px/1.3 system-ui;cursor:pointer;align-self:stretch;';
             const add = (event: MouseEvent) => {
               event.preventDefault(); event.stopPropagation();
-              if (isAwardCollection) onCollectionAction?.(section.id, 'items', 'add', Array.isArray(section.config.items) ? section.config.items.length : 0);
-              else if (reference) {
-                if (pendingReferenceSlot === pendingKey) { setPendingReferenceSlot(null); onPickReference?.(section.id, reference.entityType); }
-                else setPendingReferenceSlot(pendingKey);
-              }
+              onCollectionAction?.(section.id, 'items', 'add', Array.isArray(section.config.items) ? section.config.items.length : 0);
             };
             addSlot.addEventListener('click', add); actionCleanups.push(() => addSlot.removeEventListener('click', add));
             if (isAwardCollection) {
               const wrapper = node.ownerDocument.createElement('div'); wrapper.dataset.pageBuilderAction = 'add-slot-wrapper'; wrapper.className = productionCards[0]?.parentElement?.className ?? 'flex-none px-3'; wrapper.appendChild(addSlot); itemContainer.appendChild(wrapper);
             } else itemContainer.appendChild(addSlot);
           }
-        } else {
+        } else if (!showFullCollectionInventory) {
           const embeddedCollections = (draftSectionSchemas[section.sectionKey] ?? []).filter((element) => element.kind === 'collection');
           embeddedCollections.forEach((element) => {
             const items = section.config[element.key];
@@ -784,6 +759,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                 button.style.cssText = `min-height:36px;border:1px solid ${danger ? '#fecaca' : '#cbd5e1'};border-radius:8px;padding:8px 10px;background:${danger ? '#fff1f2' : '#fff'};color:${danger ? '#be123c' : '#334155'};font:800 11px/1 system-ui;cursor:pointer;`;
                 const click = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); handler(); }; button.addEventListener('click', click); actionCleanups.push(() => button.removeEventListener('click', click)); return button;
               };
+              if (!allowsCollectionStructureChanges) return;
               const handle = makeButton('⠿ Kéo', () => undefined); handle.draggable = true; handle.style.cursor = 'grab';
               controls.append(handle, makeButton('Nhân bản', () => onCollectionAction?.(section.id, element.key, 'duplicate', itemIndex)), makeButton('Xóa', () => onCollectionAction?.(section.id, element.key, 'remove', itemIndex), true));
               const dragStart = (event: DragEvent) => { event.dataTransfer?.setData('text/page-builder-generic-index', String(itemIndex)); card.style.opacity = '.45'; };
@@ -796,7 +772,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
               actionCleanups.push(() => { handle.removeEventListener('dragstart', dragStart); card.removeEventListener('dragover', dragOver); card.removeEventListener('dragleave', dragLeave); card.removeEventListener('drop', drop); handle.removeEventListener('dragend', dragEnd); card.removeEventListener('mouseenter', show); card.removeEventListener('mouseleave', hide); card.removeEventListener('focusin', show); card.removeEventListener('focusout', hide); });
               card.appendChild(controls);
             });
-            if (collectionParent) {
+            if (collectionParent && allowsCollectionStructureChanges) {
               const addSlot = cards[0].cloneNode(false) as HTMLElement; addSlot.dataset.pageBuilderAction = 'add-slot'; addSlot.removeAttribute('style'); addSlot.style.cssText = 'display:flex;min-height:140px;align-items:center;justify-content:center;border:2px dashed #fb923c;border-radius:12px;background:#fff7ed;color:#9a3412;cursor:pointer;';
               const addButton = node.ownerDocument.createElement('button'); addButton.type = 'button'; addButton.textContent = `+ Thêm ${element.label}`; addButton.style.cssText = 'border:0;background:transparent;color:inherit;font:800 13px/1.3 system-ui;cursor:pointer;';
               const add = (event: MouseEvent) => { event.preventDefault(); event.stopPropagation(); onCollectionAction?.(section.id, element.key, 'add', items.length); };
