@@ -301,7 +301,7 @@ export const CountryPartnerNetwork: React.FC = () => {
         </defs>
         <rect width={CANVAS.width} height={CANVAS.height} fill="url(#partner-map-surface)" /><rect width={CANVAS.width} height={CANVAS.height} fill="url(#partner-map-focus)" />
         <svg x={CANVAS.mapX} y={CANVAS.mapY} width={CANVAS.mapWidth} height={CANVAS.mapHeight} viewBox="0 0 1000 550" aria-hidden="true">
-          <g fill="#aebdcb" stroke="#f8fafc" strokeWidth="0.68" strokeOpacity="0.42">{worldMapPaths.filter((path) => path.name !== 'Vietnam').map((path) => <path key={path.name} data-country={path.name} d={path.d} />)}</g>
+          <g fill="#9fb2c4" stroke="#ffffff" strokeWidth="0.72" strokeOpacity="0.56">{worldMapPaths.filter((path) => path.name !== 'Vietnam').map((path) => <path key={path.name} data-country={path.name} d={path.d} />)}</g>
           <g className="partner-map-vietnam" fill="#f97316" stroke="#fff7ed" strokeWidth="1.25" filter="url(#vietnam-territory-glow)">{worldMapPaths.filter((path) => path.name === 'Vietnam').map((path) => <path key={path.name} data-country={path.name} d={path.d} />)}{vietnamMaritimeFeatures.map((path, index) => <path key={`vietnam-maritime-${index}`} d={path} />)}</g>
         </svg>
 

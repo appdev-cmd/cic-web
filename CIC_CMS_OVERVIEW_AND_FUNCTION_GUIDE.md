@@ -9,186 +9,135 @@
 - [HỆ THỐNG QUẢN TRỊ NỘI DUNG WEBSITE CIC](#hệ-thống-quản-trị-nội-dung-website-cic)
   - [Mục lục](#mục-lục)
   - [1. CMS mới mở rộng những gì?](#1-cms-mới-mở-rộng-những-gì)
-  - [2. Mỗi bộ phận sử dụng CMS như thế nào?](#2-mỗi-bộ-phận-sử-dụng-cms-như-thế-nào)
-    - [Lãnh đạo và cán bộ quản lý](#lãnh-đạo-và-cán-bộ-quản-lý)
-    - [Truyền thông và nội dung](#truyền-thông-và-nội-dung)
-    - [Sản phẩm](#sản-phẩm)
-    - [Kinh doanh và tiếp nhận yêu cầu](#kinh-doanh-và-tiếp-nhận-yêu-cầu)
-    - [Quản trị hệ thống](#quản-trị-hệ-thống)
-  - [3. Danh mục chức năng CMS — Tra cứu](#3-danh-mục-chức-năng-cms--tra-cứu)
-    - [3.1. Dashboard](#31-dashboard)
-    - [3.2. Quản lý nội dung](#32-quản-lý-nội-dung)
+  - [2. Danh mục chức năng CMS — Tra cứu](#2-danh-mục-chức-năng-cms--tra-cứu)
+    - [2.1. Tổng quan](#21-tổng-quan)
+    - [2.2. Nội dung](#22-nội-dung)
       - [Tin tức](#tin-tức)
       - [Danh mục tin tức](#danh-mục-tin-tức)
       - [Trang nội dung](#trang-nội-dung)
       - [Sự kiện](#sự-kiện)
       - [Dự án](#dự-án)
-    - [3.3. Sản phẩm/Dịch vụ](#33-sản-phẩmdịch-vụ)
-      - [Sản phẩm](#sản-phẩm-1)
+      - [Dịch vụ](#dịch-vụ)
+    - [2.3. Sản phẩm](#23-sản-phẩm)
+      - [Sản phẩm](#sản-phẩm)
       - [Danh mục sản phẩm](#danh-mục-sản-phẩm)
       - [Hãng sản xuất](#hãng-sản-xuất)
       - [Lĩnh vực ứng dụng](#lĩnh-vực-ứng-dụng)
       - [Loại sản phẩm](#loại-sản-phẩm)
       - [Người phụ trách kinh doanh](#người-phụ-trách-kinh-doanh)
-      - [Dịch vụ](#dịch-vụ)
-    - [3.4. Trình bày Website](#34-trình-bày-website)
+    - [2.4. Website](#24-website)
       - [Menu](#menu)
-    - [3.5. Media](#35-media)
       - [Thư viện media](#thư-viện-media)
-    - [3.6. Tương tác khách hàng](#36-tương-tác-khách-hàng)
+    - [2.5. Tương tác khách hàng](#25-tương-tác-khách-hàng)
       - [Hai nhóm CTA và Biểu mẫu](#hai-nhóm-cta-và-biểu-mẫu)
       - [CTA](#cta)
       - [Biểu mẫu](#biểu-mẫu)
       - [Yêu cầu khách hàng](#yêu-cầu-khách-hàng)
       - [Mẫu email](#mẫu-email)
-    - [3.7. Người dùng \& phân quyền](#37-người-dùng--phân-quyền)
+    - [2.6. Quản trị hệ thống](#26-quản-trị-hệ-thống)
       - [Người dùng](#người-dùng)
       - [Vai trò \& quyền](#vai-trò--quyền)
-    - [3.8. Cấu hình hệ thống](#38-cấu-hình-hệ-thống)
       - [Cấu hình hệ thống](#cấu-hình-hệ-thống)
+      - [SEO \& URL](#seo--url)
       - [Ngôn ngữ giao diện](#ngôn-ngữ-giao-diện)
       - [Nhật ký hoạt động](#nhật-ký-hoạt-động)
       - [Thùng rác](#thùng-rác)
-    - [3.9. SEO](#39-seo)
-      - [SEO \& URL](#seo--url)
-    - [3.10. Tiện ích CMS](#310-tiện-ích-cms)
-      - [Tìm kiếm toàn cục](#tìm-kiếm-toàn-cục)
+    - [2.7. Tìm kiếm toàn cục](#27-tìm-kiếm-toàn-cục)
 
 ## 1. CMS mới mở rộng những gì?
 
-CMS cũ đã quản lý tin tức, danh mục tin, sự kiện, sản phẩm cùng các dữ liệu phân loại, dịch vụ, menu, Block, người dùng, quyền trực tiếp, cấu hình, ngôn ngữ và thông tin SEO. CMS mới tiếp tục sử dụng các dữ liệu và nghiệp vụ cốt lõi này; phần khác biệt tập trung ở sáu phạm vi được tổ chức lại hoặc bổ sung:
+CMS mới không làm lại toàn bộ nghiệp vụ của CMS cũ. Hệ thống tiếp tục sử dụng dữ liệu còn giá trị, đồng thời nâng cấp hoặc thay đổi nơi quản lý để người vận hành làm việc theo nội dung và trách nhiệm thay vì phải hiểu cấu trúc module kỹ thuật cũ.
 
-- **Nội dung Website:** Với các trang có bố cục riêng, **Trang nội dung** thay cách cấu hình từng Block theo module và vị trí của CMS cũ bằng một hồ sơ trang gồm các khu vực cố định. Người biên tập mở trang, sửa từng khu vực, lưu bản nháp, xem trước toàn trang rồi công bố. **Dự án** là chức năng mới; CMS cũ không có module hoặc dữ liệu dự án tương ứng.
-- **Tài nguyên dùng chung:** CMS cũ lưu ảnh và tệp trong các bảng hoặc trường của từng module, còn CMS mới có **Thư viện media** dùng chung với mã tài nguyên ổn định, thư mục, album, metadata, nơi sử dụng và lịch sử thay tệp.
-- **CTA, Biểu mẫu và Mẫu email:** Nhóm **Hệ thống** gồm các CTA và Biểu mẫu được cấu hình cho những vị trí, mục đích chính của Website như liên hệ, đăng ký tư vấn hoặc yêu cầu báo giá. Người quản trị có thể sửa nội dung CTA, thay đổi các trường cần khách hàng cung cấp và cấu hình email xác nhận nhưng không thay đổi vị trí thuộc thiết kế cố định. Khi phát sinh nhu cầu khác, người quản trị tạo CTA hoặc Biểu mẫu thuộc nhóm **Bổ sung** rồi chèn vào các vùng nội dung được hỗ trợ. Khách chọn CTA, gửi Biểu mẫu và dữ liệu được chuyển thành Yêu cầu khách hàng cùng thông tin về trang hoặc nội dung phát sinh.
-- **Nhu cầu khách hàng:** CMS cũ đã lưu liên hệ, đăng ký sản phẩm và đơn hàng ở các nguồn riêng. CMS mới không bỏ các dữ liệu này mà hợp nhất chúng khi vận hành thành **Yêu cầu khách hàng**, bổ sung nguồn phát sinh, mức ưu tiên, người phụ trách, trạng thái xử lý, ghi chú và lịch sử diễn biến.
-- **Người dùng và phân quyền:** CMS mới chuẩn hóa luồng vận hành thành **Người dùng → Vai trò → Quyền**. Danh mục quyền do hệ thống định nghĩa; quản trị viên chỉ tạo vai trò, chọn quyền theo phân hệ và gán vai trò cho người dùng. Quyền trực tiếp legacy chỉ phục vụ chuyển đổi dữ liệu, không còn là một cơ chế quản trị song song trên giao diện.
-- **Kiểm soát và tra cứu liên chức năng:** **Nhật ký hoạt động** ghi thống nhất người thực hiện, hành động, đối tượng, kết quả và dữ liệu trước–sau; **Thùng rác** giữ bản ghi để phục hồi và xử lý xung đột thay cho cách xóa cứng của phần lớn module cũ. **Tìm kiếm toàn cục** cho phép tìm qua nhiều nhóm dữ liệu từ một điểm và chỉ trả về nội dung người dùng có quyền truy cập.
-
-CMS mới **không sao chép nguyên cấu trúc của CMS cũ**. Thay vào đó, từng nhóm dữ liệu được xem xét theo ý nghĩa và nơi sử dụng thực tế rồi xử lý theo một trong bốn cách: **giữ và nâng cấp** nghiệp vụ cốt lõi; **chuyển** dữ liệu còn giá trị sang đúng chức năng mới; **bỏ module cũ nhưng vẫn giữ tệp hoặc dữ liệu cần đối soát**; hoặc **bổ sung mới** những nghiệp vụ trước đây chưa có. Bảng dưới đây cho biết cụ thể dữ liệu nào đi đâu:
-
-| CMS cũ | Thực tế đang quản lý | Cách xử lý trong CMS mới | Kết luận |
+| Phạm vi / chức năng | CMS cũ | CMS mới | Kết luận |
 | --- | --- | --- | --- |
-| **Tin tức, Sự kiện, Sản phẩm, Dịch vụ và các danh mục** | Nội dung và dữ liệu phân loại cốt lõi | Kế thừa, chuẩn hóa trạng thái, bản nháp/công bố, liên kết và media | Giữ và nâng cấp |
-| **Block** | Các mảnh nội dung được gắn theo module và vị trí để ghép thành trang | Chuyển nội dung còn dùng sang từng khu vực cố định của **Trang nội dung**; dữ liệu tham chiếu tiếp tục lấy từ Tin tức, Sản phẩm, Sự kiện, Dự án hoặc Dịch vụ | Thay bằng cách quản lý theo trang và khu vực |
-| **Banner** | Một nhóm dữ liệu trình bày hỗn hợp: ảnh Hero Trang chủ, logo đối tác, thành tựu/giải thưởng và có thể có banner chiến dịch | Không chuyển nguyên bảng thành một module Banner chung. Mỗi bản ghi được phân loại theo nơi sử dụng: Hero vào **Trang chủ → Hero**; giải thưởng vào **Trang chủ/Giới thiệu → Thành tựu & Giải thưởng**; đối tác vào khu vực **Đối tác**; ảnh gốc vào **Thư viện media** | Tách theo ý nghĩa, không giữ “Banner” như một thùng chứa chung |
-| **Slideshow** | Tên module gợi ý là trình chiếu, nhưng dữ liệu thực tế đang được dùng làm nhóm ảnh/icon ở phần Hero của Trang chủ cũ | Không tạo module Slideshow tương ứng nếu Website mới không còn sử dụng cấu trúc này. Tệp còn giá trị được đưa vào Media; chỉ dữ liệu nào có vị trí tương ứng trong thiết kế mới mới được ánh xạ sang khu vực đó | Không tiếp tục thành module riêng; chuyển chọn lọc |
-| **Ảnh và tệp nằm trong từng module** | Đường dẫn ảnh, icon, video hoặc tài liệu được lưu rải rác | Tạo tài nguyên trong **Thư viện media**, giữ mã ổn định và ghi nhận nơi sử dụng; bản ghi nội dung chỉ tham chiếu tài nguyên | Chuyển sang tài nguyên dùng chung |
-| **Liên hệ, đăng ký sản phẩm và đơn hàng** | Nhu cầu khách hàng nằm ở các nguồn và luồng xử lý riêng | Giữ dữ liệu nguồn để đối soát, đồng thời chuẩn hóa thành **Yêu cầu khách hàng** để ưu tiên, phân công, ghi chú và theo dõi trạng thái | Hợp nhất khi vận hành, không làm mất dữ liệu gốc |
-| **Quyền trực tiếp theo tài khoản/Task** | Quyền được cấp rời rạc cho từng người dùng | Chuyển sang **Người dùng → Vai trò → Quyền**; quyền trực tiếp cũ chỉ dùng để lập bảng ánh xạ và kiểm tra tương đương khi chuyển đổi | Thay cơ chế quản trị |
-| **Dự án, Trang nội dung, Media, CTA, Biểu mẫu, Mẫu email, Nhật ký hoạt động, Thùng rác và Tìm kiếm toàn cục** | Không có module tương ứng đầy đủ trong CMS cũ | Tạo mới hoặc tổ chức lại để hỗ trợ vận hành liên chức năng | Bổ sung mới |
+| **Dashboard** | Trang đầu chủ yếu cung cấp menu và lối tắt tới từng module | Tổng hợp chỉ số, nội dung cần chú ý, yêu cầu khách hàng và hoạt động gần đây; cho phép đi thẳng tới nơi xử lý | **Thêm mới** |
+| **Tin tức** | Đã quản lý bài viết, ảnh, tệp, tin nổi bật, hiển thị Trang chủ, SEO và liên kết với tin hoặc sản phẩm khác | Tiếp tục sử dụng nội dung cũ; bổ sung quy trình bản nháp, xem trước, công bố, phiên bản và chọn tài nguyên từ Media | **Kế thừa + nâng cấp** |
+| **Danh mục tin tức** | Đã tổ chức tin theo danh mục nhiều cấp và lựa chọn hiển thị Trang chủ | Tiếp tục dùng để phân loại tin, đồng thời chuẩn hóa trạng thái, thứ tự và ràng buộc với bài viết | **Kế thừa + nâng cấp** |
+| **Sự kiện** | Đã có nội dung, thời gian, địa điểm, liên kết đăng ký, sự kiện nổi bật, hiển thị Trang chủ, SEO và nội dung liên quan | Kế thừa dữ liệu; bổ sung trạng thái theo thời gian, bản nháp, xem trước, công bố và liên kết nội dung thống nhất | **Kế thừa + nâng cấp** |
+| **Dịch vụ** | Đã có module Dịch vụ; một số nội dung dịch vụ còn được lưu trong Trang tĩnh | Đưa nội dung dịch vụ còn sử dụng về một chức năng Dịch vụ, có bản nháp, xem trước, công bố và liên kết sản phẩm | **Tổ chức lại + nâng cấp** |
+| **Sản phẩm** | Đã quản lý nội dung, ảnh, video, tài liệu, giá, SEO, sản phẩm liên quan và nhiều loại email theo hành động | Tiếp tục sử dụng hồ sơ sản phẩm; chuẩn hóa trạng thái công bố, Media, tài liệu, nội dung liên quan và đầu mối kinh doanh | **Kế thừa + nâng cấp** |
+| **Danh mục, hãng, ứng dụng và loại sản phẩm** | Đã có các danh mục phân loại riêng phục vụ quản lý và hiển thị sản phẩm | Tiếp tục sử dụng, chuẩn hóa tên gọi thành Danh mục sản phẩm, Hãng sản xuất, Lĩnh vực ứng dụng và Loại sản phẩm; giữ liên kết với sản phẩm cũ | **Kế thừa + nâng cấp** |
+| **Nhân viên kinh doanh** | Đã lưu tên, số điện thoại, Skype/Zalo và gắn với sản phẩm | Quản lý thành hồ sơ **Người phụ trách kinh doanh**, bổ sung vai trò và phạm vi theo sản phẩm hoặc khu vực; không phải tài khoản CMS | **Kế thừa + nâng cấp** |
+| **Trang tĩnh / Trang nội dung** | Đã có Trang tĩnh cho Giới thiệu, Chính sách và một số Dịch vụ; nội dung các trang còn được phối hợp qua Block, Banner và Slideshow | Mỗi trang được quản lý thành một hồ sơ trong **Trang nội dung**, gồm các khu vực rõ nghĩa, bản nháp, xem trước toàn trang và phiên bản công bố | **Kế thừa Trang tĩnh + tổ chức lại** |
+| **Block** | Xác định loại nội dung, vị trí và nơi xuất hiện để ghép các phần của trang | Không còn quản lý như các Block rời rạc; nội dung còn sử dụng được đưa vào khu vực tương ứng của Trang nội dung hoặc tham chiếu từ chức năng nghiệp vụ | **Thay thế**; không tiếp tục module Block riêng |
+| **Banner** | Quản lý ảnh, liên kết, nội dung, danh mục và nơi xuất hiện; dữ liệu thực tế phục vụ nhiều mục đích như đối tác hoặc khu vực trình bày | Không giữ một module Banner chung; nội dung được đưa về đúng khu vực của Trang nội dung, còn ảnh được quản lý trong Media | **Tổ chức lại**; không tiếp tục module Banner riêng |
+| **Slideshow** | Đã quản lý ảnh, ảnh thu nhỏ, liên kết, tóm tắt, danh mục và thứ tự; có thể được gọi qua Block tại các vị trí trình bày | Chỉ giữ nội dung phù hợp với thiết kế Website mới; nội dung được đưa vào khu vực trang tương ứng và tài nguyên được đưa vào Media | **Tổ chức lại / bỏ module cũ**; không xóa tài nguyên còn giá trị |
+| **Thư viện ảnh / Media** | Đã có Thư viện ảnh, nhưng ảnh và tệp vẫn nằm rải rác trong Tin tức, Sản phẩm, Banner, Slideshow và các module khác | **Thư viện media** tập trung ảnh, video và tài liệu dùng chung; quản lý thông tin mô tả, nơi sử dụng và việc thay thế tài nguyên | **Kế thừa + mở rộng + tập trung hóa** |
+| **Dự án** | Không có module quản lý hồ sơ dự án | Có chức năng Dự án để giới thiệu khách hàng, lĩnh vực, giải pháp, công nghệ và liên kết với sản phẩm, dịch vụ | **Thêm mới** |
+| **Menu** | Đã có nhóm menu và danh sách mục menu với liên kết, thứ tự và trạng thái | Tiếp tục quản lý điều hướng Website, bổ sung cây nhiều cấp và xem trước cấu trúc | **Kế thừa + nâng cấp** |
+| **CTA** | Các nút hoặc liên kết hành động nằm trong sản phẩm, sự kiện, banner hay từng vị trí cố định; chưa có nơi quản lý CTA dùng chung | Có chức năng CTA để quản lý nội dung, hành động đích và nơi sử dụng; phân biệt CTA Hệ thống và CTA Bổ sung | **Thêm mới ở cấp chức năng quản trị**; kế thừa các hành động cũ còn dùng |
+| **Biểu mẫu** | Có các biểu mẫu cố định cho Liên hệ Website và đăng ký sản phẩm; chưa có chức năng thiết kế biểu mẫu dùng chung | Có chức năng Biểu mẫu để cấu hình trường, quy tắc nhập, tiếp nhận, thông báo và liên kết với CTA | **Thêm mới ở cấp chức năng quản trị**; tổ chức lại các biểu mẫu cố định |
+| **Liên hệ Website** | Được lưu thành danh sách liên hệ riêng với thông tin người gửi và nội dung | Dữ liệu tiếp tục được giữ, đồng thời được đưa vào Yêu cầu khách hàng với nguồn phát sinh là biểu mẫu hoặc trang Liên hệ | **Tổ chức lại / hợp nhất** |
+| **Đăng ký mua, liên hệ sản phẩm và tải tài liệu** | Được lưu chung trong Danh sách đăng ký sản phẩm nhưng tách khỏi Liên hệ Website và chưa có quy trình xử lý thống nhất | Dữ liệu được đưa vào Yêu cầu khách hàng, giữ thông tin loại yêu cầu, sản phẩm và nguồn phát sinh | **Tổ chức lại / hợp nhất** |
+| **Yêu cầu khách hàng** | Nhu cầu khách hàng nằm ở các danh sách Liên hệ Website và Đăng ký sản phẩm riêng | Tập trung các nguồn thành hồ sơ công việc có mức ưu tiên, người phụ trách, trạng thái, ghi chú và lịch sử xử lý | **Tổ chức lại + nâng cấp** |
+| **Email theo hành động sản phẩm / Mẫu email** | Đã có mẫu email cho các hành động như liên hệ, đăng ký mua, tải sản phẩm và nhận báo giá | Kế thừa mẫu còn sử dụng và mở rộng thành **Mẫu email** dùng chung cho Biểu mẫu, Yêu cầu khách hàng, khách hàng và thông báo nội bộ | **Kế thừa + tổ chức lại + nâng cấp** |
+| **Người dùng** | Đã quản lý tài khoản, họ tên, email, điện thoại, địa chỉ, trạng thái và mật khẩu | Kế thừa tài khoản và hồ sơ; bổ sung vai trò, quyền có hiệu lực, phạm vi phụ trách và lịch sử trạng thái | **Kế thừa + nâng cấp** |
+| **Task và quyền trực tiếp / Vai trò & quyền** | Quyền Task được cấp trực tiếp cho từng tài khoản theo module | Danh mục quyền do hệ thống định nghĩa; quản trị viên tạo vai trò, chọn quyền và gán vai trò cho người dùng | **Thay thế cơ chế quản trị**; quyền trực tiếp cũ chỉ dùng để xác định quyền tương đương khi chuyển đổi |
+| **Cấu hình chung** | Đã quản lý thông tin Website như tên, logo, hotline, email, chân trang, mạng xã hội, mã theo dõi và một số nội dung Trang chủ | Kế thừa thiết lập dùng chung; thông tin trình bày thuộc từng trang được đưa về Trang nội dung, tài nguyên đưa vào Media, phần còn lại quản lý trong Cấu hình hệ thống | **Kế thừa + tổ chức lại** |
+| **Địa chỉ liên hệ** | Có module riêng lưu địa chỉ và thông tin liên hệ doanh nghiệp | Thông tin chung được đưa vào Cấu hình hệ thống; nội dung trình bày và bản đồ của trang Liên hệ được quản lý tại Trang nội dung | **Tổ chức lại**; không tiếp tục module Địa chỉ liên hệ riêng |
+| **Cấu hình Enjicad** | Có module riêng chứa cả cấu hình chung, nội dung giới thiệu, hình ảnh, SEO và các thông tin dành riêng cho Enjicad | Nội dung còn sử dụng được đưa về đúng chức năng: Cấu hình hệ thống, Trang nội dung, Sản phẩm hoặc Dịch vụ, Media và SEO & URL; nội dung không còn trên Website mới chỉ được lưu để tham chiếu | **Tách theo mục đích / bỏ module riêng**; không hiểu là xóa toàn bộ dữ liệu |
+| **SEO** | Đã có SEO chung, SEO theo module và SEO riêng trên Tin tức, Sản phẩm, Sự kiện, Trang tĩnh | Kế thừa các giá trị còn phù hợp; phân rõ thiết lập toàn Website, thiết lập theo loại trang và thông tin riêng của từng nội dung; bổ sung tổng quan chất lượng, URL chính thức, chuyển hướng và danh sách trang cung cấp cho công cụ tìm kiếm | **Kế thừa + tập trung + mở rộng** |
+| **Ngôn ngữ giao diện** | Đã quản lý câu chữ tiếng Việt/Anh riêng cho frontend và backend | Kế thừa câu chữ, tổ chức lại theo Website/CMS, nhóm sử dụng và tình trạng bản dịch | **Kế thừa + nâng cấp** |
+| **Nhật ký hoạt động** | Một số module lưu người tạo hoặc người sửa, nhưng không có nhật ký thống nhất cho toàn CMS | Ghi tập trung người thực hiện, hành động, đối tượng, kết quả và dữ liệu trước–sau | **Thêm mới** |
+| **Thùng rác** | Không có nơi tập trung để kiểm tra và phục hồi dữ liệu đã xóa | Giữ dữ liệu đã xóa để xem ảnh hưởng, phục hồi hoặc xác nhận xóa vĩnh viễn | **Thêm mới** |
+| **Tìm kiếm toàn cục** | Người dùng phải mở từng module để tìm dữ liệu | Tìm từ một điểm trên nhiều chức năng và chỉ trả về dữ liệu người dùng có quyền truy cập | **Thêm mới** |
 
-**Ví dụ cụ thể — Trang chủ**
+**Nhìn nhanh thay đổi**
 
-Trang chủ cũ đang được quản lý rời rạc: nội dung hiển thị có thể nằm trong **Banner**, **Slideshow**, **Block** và các module nghiệp vụ khác nhau. Vì vậy, người vận hành phải biết tên module kỹ thuật và vị trí cũ mới xác định được nơi sửa.
+- **Kế thừa và nâng cấp:** Tin tức · Danh mục tin tức · Sự kiện · Dịch vụ · Sản phẩm · Danh mục sản phẩm · Hãng sản xuất · Lĩnh vực ứng dụng · Loại sản phẩm · Người phụ trách kinh doanh · Menu · Người dùng · Cấu hình hệ thống · SEO & URL · Ngôn ngữ giao diện.
+- **Tổ chức lại / thay thế:** Trang nội dung · Thư viện media · CTA và Biểu mẫu Hệ thống · Yêu cầu khách hàng · Mẫu email · Vai trò & quyền.
+- **Thêm mới:** Dashboard · Dự án · Chức năng quản trị CTA · Chức năng quản trị Biểu mẫu · Nhật ký hoạt động · Thùng rác · Tìm kiếm toàn cục.
+- **Không tiếp tục dưới dạng module riêng:** Block · Banner · Slideshow · Thư viện ảnh cũ · Danh sách Liên hệ Website · Danh sách đăng ký sản phẩm · Email theo hành động sản phẩm · Địa chỉ liên hệ · Cấu hình Enjicad · quyền Task trực tiếp.
 
-Trong CMS mới, Trang chủ là một hồ sơ duy nhất trong **Trang nội dung**, gồm các khu vực có ý nghĩa rõ ràng như **Hero**, **Giới thiệu**, **Số liệu**, **Thành tựu & Giải thưởng**, **Dự án**, **Sự kiện**, **Tin tức**, **Đối tác** và **Liên hệ/CTA**. Mỗi khu vực xác định rõ trường nào được nhập trực tiếp, tài nguyên nào lấy từ Media và nội dung nào tham chiếu từ chức năng khác. Việc này không biến Trang chủ thành trình kéo–thả tự do; bố cục và loại khu vực vẫn do thiết kế Website quy định.
+**Ví dụ Trang chủ — trước và sau**
 
-Ví dụ chuyển đổi:
+`CMS cũ: Trang tĩnh + Block + Banner + Slideshow + dữ liệu từ Tin tức, Sản phẩm, Sự kiện và các module khác`
 
-`Banner ảnh Hero cũ → Trang nội dung → Trang chủ → Hero`
+↓
 
-`Banner thành tựu/giải thưởng cũ → Trang chủ hoặc Giới thiệu → Thành tựu & Giải thưởng`
+`CMS mới: Trang nội dung → Trang chủ → các khu vực rõ nghĩa + Media + nội dung tham chiếu từ các chức năng nghiệp vụ`
 
-`Banner logo đối tác cũ → dữ liệu Đối tác + Media → khu vực Đối tác của Trang chủ/Giới thiệu`
+Trong CMS cũ, người vận hành phải biết nội dung Trang chủ đang nằm trong module nào và được gọi ở vị trí nào. Trong CMS mới, người biên tập mở **Trang nội dung → Trang chủ**, sau đó chọn trực tiếp các khu vực như **Hero, Giới thiệu, Số liệu, Thành tựu & Giải thưởng, Dự án, Sự kiện, Tin tức, Đối tác** hoặc **Liên hệ/CTA**.
 
-`Icon trong Slideshow chỉ phục vụ Hero cũ → lưu Media nếu cần đối soát; không đưa vào Website mới nếu thiết kế mới không sử dụng`
+Block không còn được cấu hình riêng theo vị trí; Banner và Slideshow không còn là các thùng chứa nội dung dùng chung. Nội dung còn giá trị được đưa về đúng khu vực của trang, hình ảnh và tệp được quản lý trong Media, còn Tin tức, Sản phẩm, Sự kiện, Dự án và Dịch vụ tiếp tục được lấy từ các chức năng nghiệp vụ tương ứng. Nhờ đó, bố cục Website vẫn được kiểm soát theo thiết kế nhưng nơi cập nhật nội dung trở nên rõ ràng hơn.
 
-> **Nguyên tắc kiểm kê trước chuyển đổi:** Tên bảng và cấu trúc schema chỉ cho biết khả năng lưu trữ, không đủ để xác nhận ý nghĩa của từng bản ghi. Danh sách chuyển đổi cuối cùng cần đối chiếu dữ liệu thật, danh mục, đường dẫn tệp và vị trí mà Website cũ đang gọi. Mỗi bản ghi phải được đánh dấu **chuyển sang đâu**, **chỉ lưu đối soát** hoặc **không còn sử dụng**, thay vì sao chép toàn bộ Banner/Slideshow sang hệ thống mới.
-
-Như vậy, các module nội dung và danh mục cốt lõi chủ yếu được kế thừa; CMS mới tập trung thay đổi cách các module phối hợp, tái sử dụng dữ liệu và kiểm soát toàn bộ quá trình vận hành. Riêng các module trình bày cũ như Block, Banner và Slideshow được tháo tách theo ý nghĩa dữ liệu, không được giữ nguyên chỉ vì chúng tồn tại trong database cũ.
-
-## 2. Mỗi bộ phận sử dụng CMS như thế nào?
-
-### Lãnh đạo và cán bộ quản lý
-
-**Dashboard** tập hợp các chỉ số về sản phẩm, tin tức, trang nội dung, người dùng và yêu cầu khách hàng; đồng thời hiển thị nội dung chờ xử lý và hoạt động gần đây. Từ một chỉ số hoặc danh sách, người quản lý có thể mở đúng hồ sơ cần xem. **Yêu cầu khách hàng** cho biết nguồn phát sinh, mức ưu tiên, trạng thái và người phụ trách; **Nhật ký hoạt động** được dùng khi người quản lý có quyền cần kiểm tra một thay đổi cụ thể.
-
-**Xem Dashboard → mở nội dung hoặc yêu cầu cần chú ý → kiểm tra trạng thái và người phụ trách → theo dõi kết quả**
-
-![Màn hình Dashboard CMS](https://lh3.googleusercontent.com/d/1jP62uZuE6-VpQOSMylA6aMaIfGMXC9qi=w1600)
-
-> **Hình 1.** Các chỉ số và danh sách cần chú ý giúp người quản lý xác định nhanh công việc ưu tiên.
-
-### Truyền thông và nội dung
-
-Bộ phận truyền thông quản lý **Tin tức, Trang nội dung, Sự kiện** và **Dự án**; sử dụng **Thư viện media** để chọn tài nguyên và **Menu** để sắp xếp đường dẫn trên Website. Tại các khu vực cần thu hút khách hàng, người phụ trách cập nhật CTA/Biểu mẫu **Hệ thống** hoặc tạo CTA/Biểu mẫu **Bổ sung** để chèn vào vùng nội dung được hỗ trợ. Người biên tập lưu bản nháp và xem trước; việc công bố do tài khoản có quyền thực hiện.
-
-**Chuẩn bị nội dung → chọn media, CTA hoặc biểu mẫu cần dùng → lưu nháp → xem trước → người có quyền công bố**
-
-![Màn hình quản lý Trang nội dung](https://lh3.googleusercontent.com/d/10vpyNYbrzq1VP8fPT4NTrirpJMoVobwX=w1600)
-
-> **Hình 2.** Mỗi trang được quản lý theo khu vực nội dung, bản nháp và phiên bản đã công bố.
-
-### Sản phẩm
-
-Bộ phận sản phẩm duy trì hồ sơ **Sản phẩm, Dịch vụ** và các dữ liệu dùng để phân loại gồm danh mục, hãng sản xuất, lĩnh vực ứng dụng và loại sản phẩm. Mỗi sản phẩm có thể được bổ sung ảnh, video, tài liệu và gắn hồ sơ **Người phụ trách kinh doanh** theo sản phẩm hoặc khu vực.
-
-**Cập nhật hồ sơ → chọn dữ liệu phân loại → thêm tài nguyên → gắn đầu mối kinh doanh → xem trước → công bố theo quyền**
-
-![Màn hình quản lý Sản phẩm](https://lh3.googleusercontent.com/d/11YjXnU4DG3gdYZ0rV4xqml8i2dLhfup3=w1600)
-
-> **Hình 3.** Sản phẩm được quản lý cùng dữ liệu phân loại, tài liệu và đầu mối phụ trách.
-
-### Kinh doanh và tiếp nhận yêu cầu
-
-**Yêu cầu khách hàng** tập hợp dữ liệu liên hệ, đăng ký sản phẩm, đơn hàng cũ và các lượt gửi từ Biểu mẫu mới. Cán bộ tiếp nhận xem được biểu mẫu, CTA, trang hoặc nội dung đã phát sinh yêu cầu; sau đó đặt mức ưu tiên, giao người xử lý, ghi chú và cập nhật trạng thái. **Mẫu email** được chọn trong luồng thông báo hoặc xác nhận để nội dung gửi khách hàng và nội bộ thống nhất theo từng tình huống.
-
-**Tiếp nhận yêu cầu → kiểm tra nguồn và nội dung khách gửi → đặt ưu tiên → phân công → ghi chú, cập nhật trạng thái → hoàn thành**
-
-![Màn hình quản lý Yêu cầu khách hàng](https://lh3.googleusercontent.com/d/1SctN7u8-IcuQhDAtg8sFA1-sCQwdhoci=w1600)
-
-> **Hình 4.** Yêu cầu khách hàng được tập trung để theo dõi trạng thái, mức ưu tiên và người phụ trách.
-
-### Quản trị hệ thống
-
-Quản trị viên tạo và thay đổi trạng thái **Người dùng**, gán vai trò và kiểm tra quyền theo vai trò. Phạm vi nội dung chỉ cấu hình trong phần nâng cao khi có nghiệp vụ theo chi nhánh hoặc nội dung phụ trách. Quản trị viên duy trì **Cấu hình hệ thống**; việc biên soạn **Ngôn ngữ giao diện** có thể giao cho tài khoản nội dung hoặc biên dịch theo quyền. Khi xử lý sự cố, quản trị viên dùng **Nhật ký hoạt động** để xác định thao tác và **Thùng rác** để kiểm tra ảnh hưởng trước khi phục hồi hoặc xóa vĩnh viễn.
-
-**Tạo tài khoản → gán vai trò và phạm vi → kiểm tra quyền có hiệu lực → duy trì cấu hình → tra cứu hoặc phục hồi khi cần**
-
-![Màn hình quản lý Vai trò và quyền](https://lh3.googleusercontent.com/d/1dEAgQT8nNcxsLjQlKbuTisMnw-h0XcCd=w1600)
-
-> **Hình 5.** Ma trận quyền xác định rõ mỗi vai trò được xem và thực hiện công việc nào.
-
-## 3. Danh mục chức năng CMS — Tra cứu
+## 2. Danh mục chức năng CMS — Tra cứu
 
 Phần này dùng để tra cứu mục đích, khả năng chính và cách sử dụng của 27 chức năng CMS.
 
 | Nhóm | Chức năng | Mục đích chính | Người sử dụng chính |
 | --- | --- | --- | --- |
-| Dashboard | Dashboard | Theo dõi chỉ số và công việc cần chú ý | Lãnh đạo, quản lý, cán bộ vận hành |
-| Quản lý nội dung | Tin tức | Quản lý bài viết và quá trình công bố | Truyền thông, nội dung |
-| Quản lý nội dung | Danh mục tin tức | Tổ chức tin tức theo cấu trúc | Truyền thông, nội dung |
-| Quản lý nội dung | Trang nội dung | Cập nhật các khu vực và trang thông tin của Website | Truyền thông, nội dung |
-| Quản lý nội dung | Sự kiện | Quản lý chương trình, thời gian và thông tin đăng ký | Truyền thông, nội dung |
-| Quản lý nội dung | Dự án | Quản lý hồ sơ dự án và nội dung thể hiện năng lực | Truyền thông, kinh doanh |
-| Sản phẩm/Dịch vụ | Sản phẩm | Quản lý thông tin, tài liệu, phân loại và đầu mối | Sản phẩm, kinh doanh |
-| Sản phẩm/Dịch vụ | Danh mục sản phẩm | Tổ chức sản phẩm theo cấu trúc nhiều cấp | Sản phẩm, kinh doanh |
-| Sản phẩm/Dịch vụ | Hãng sản xuất | Quản lý thông tin hãng và đối tác sản phẩm | Sản phẩm, kinh doanh |
-| Sản phẩm/Dịch vụ | Lĩnh vực ứng dụng | Phân nhóm sản phẩm theo nhu cầu và ngành nghề | Sản phẩm, kinh doanh |
-| Sản phẩm/Dịch vụ | Loại sản phẩm | Chuẩn hóa loại sản phẩm phục vụ phân loại | Sản phẩm, kinh doanh |
-| Sản phẩm/Dịch vụ | Người phụ trách kinh doanh | Quản lý đầu mối theo sản phẩm và phạm vi | Kinh doanh, quản lý |
-| Sản phẩm/Dịch vụ | Dịch vụ | Quản lý nội dung dịch vụ và sản phẩm liên quan | Sản phẩm, kinh doanh, nội dung |
-| Trình bày Website | Menu | Quản lý cấu trúc điều hướng Website | Nội dung, quản trị hệ thống |
-| Media | Thư viện media | Tập trung ảnh, video và tài liệu dùng chung | Nội dung và các bộ phận vận hành |
-| Tương tác khách hàng | CTA | Quản lý các điểm kêu gọi khách hàng hành động | Nội dung, kinh doanh |
-| Tương tác khách hàng | Biểu mẫu | Thu thập thông tin khách hàng có cấu trúc | Nội dung, kinh doanh, chăm sóc khách hàng |
-| Tương tác khách hàng | Yêu cầu khách hàng | Tiếp nhận, ưu tiên, phân công và theo dõi xử lý | Kinh doanh, chăm sóc khách hàng, quản lý |
-| Tương tác khách hàng | Mẫu email | Chuẩn hóa email phản hồi và thông báo | Nội dung, chăm sóc khách hàng |
-| Người dùng & phân quyền | Người dùng | Quản lý tài khoản, trạng thái và phạm vi truy cập | Quản trị hệ thống |
-| Người dùng & phân quyền | Vai trò & quyền | Xác định quyền và trách nhiệm theo vai trò | Quản trị hệ thống, quản lý |
-| Cấu hình hệ thống | Cấu hình hệ thống | Quản lý các thiết lập dùng chung | Quản trị hệ thống |
-| Cấu hình hệ thống | Ngôn ngữ giao diện | Quản lý câu chữ tiếng Việt và tiếng Anh | Nội dung, quản trị hệ thống |
-| Cấu hình hệ thống | Nhật ký hoạt động | Tra cứu người thực hiện và nội dung thay đổi | Quản lý, quản trị hệ thống |
-| Cấu hình hệ thống | Thùng rác | Phục hồi hoặc loại bỏ dữ liệu đã xóa | Quản trị hệ thống |
-| SEO | SEO & URL | Quản lý template SEO, canonical, redirect và sitemap | Nội dung, quản trị Website |
-| Tiện ích CMS | Tìm kiếm toàn cục | Tìm dữ liệu trên toàn CMS và đi tới nơi xử lý | Tất cả người dùng CMS |
-
-> **Quy ước hình ảnh:** Ảnh chụp được lấy từ CMS hiện tại và lưu trên Google Drive dùng chung. Dữ liệu trong ảnh mang tính minh họa và có thể thay đổi khi hệ thống vận hành chính thức.
+| Tổng quan | Dashboard | Theo dõi tổng quan hoạt động và công việc trên CMS | Lãnh đạo, quản lý, cán bộ vận hành |
+| Nội dung | Tin tức | Quản lý tin tức và bài viết trên Website | Truyền thông, nội dung |
+| Nội dung | Danh mục tin tức | Quản lý cấu trúc phân loại tin tức trên Website | Truyền thông, nội dung |
+| Nội dung | Trang nội dung | Quản lý nội dung các trang cố định trên Website | Truyền thông, nội dung |
+| Nội dung | Sự kiện | Quản lý thông tin sự kiện của CIC trên Website | Truyền thông, nội dung |
+| Nội dung | Dự án | Quản lý hồ sơ dự án tiêu biểu của CIC | Truyền thông, kinh doanh |
+| Nội dung | Dịch vụ | Quản lý thông tin dịch vụ CIC cung cấp trên Website | Sản phẩm, kinh doanh, nội dung |
+| Sản phẩm | Sản phẩm | Quản lý thông tin sản phẩm kinh doanh trên Website | Sản phẩm, kinh doanh |
+| Sản phẩm | Danh mục sản phẩm | Quản lý cấu trúc phân loại sản phẩm trên Website | Sản phẩm, kinh doanh |
+| Sản phẩm | Hãng sản xuất | Quản lý thông tin hãng sản xuất và đối tác sản phẩm | Sản phẩm, kinh doanh |
+| Sản phẩm | Lĩnh vực ứng dụng | Quản lý lĩnh vực ứng dụng dùng để phân nhóm sản phẩm | Sản phẩm, kinh doanh |
+| Sản phẩm | Loại sản phẩm | Quản lý loại sản phẩm dùng cho phân loại | Sản phẩm, kinh doanh |
+| Sản phẩm | Người phụ trách kinh doanh | Quản lý đầu mối kinh doanh theo sản phẩm và khu vực | Kinh doanh, quản lý |
+| Website | Menu | Quản lý cấu trúc điều hướng của Website | Nội dung, quản trị hệ thống |
+| Website | Thư viện media | Quản lý tập trung ảnh, video và tài liệu dùng chung | Nội dung và các bộ phận vận hành |
+| Tương tác khách hàng | CTA | Quản lý điểm kêu gọi hành động trên Website | Nội dung, kinh doanh |
+| Tương tác khách hàng | Biểu mẫu | Quản lý biểu mẫu thu thập thông tin khách hàng | Nội dung, kinh doanh, chăm sóc khách hàng |
+| Tương tác khách hàng | Yêu cầu khách hàng | Quản lý các yêu cầu khách hàng gửi từ Website | Kinh doanh, chăm sóc khách hàng, quản lý |
+| Tương tác khách hàng | Mẫu email | Quản lý mẫu email gửi khách hàng và nội bộ | Nội dung, chăm sóc khách hàng |
+| Quản trị hệ thống | Người dùng | Quản lý tài khoản truy cập CMS | Quản trị hệ thống |
+| Quản trị hệ thống | Vai trò & quyền | Quản lý vai trò và quyền truy cập CMS | Quản trị hệ thống, quản lý |
+| Quản trị hệ thống | Cấu hình hệ thống | Quản lý thông tin chung dùng trên CMS và Website | Quản trị hệ thống |
+| Quản trị hệ thống | SEO & URL | Kiểm soát cách Website hiển thị trên công cụ tìm kiếm | Nội dung, quản trị Website |
+| Quản trị hệ thống | Ngôn ngữ giao diện | Quản lý câu chữ giao diện tiếng Việt và tiếng Anh | Nội dung, quản trị hệ thống |
+| Quản trị hệ thống | Nhật ký hoạt động | Theo dõi hoạt động và thay đổi thực hiện trên CMS | Quản lý, quản trị hệ thống |
+| Quản trị hệ thống | Thùng rác | Quản lý dữ liệu đã xóa và khả năng phục hồi | Quản trị hệ thống |
+| Tiện ích CMS | Tìm kiếm toàn cục | Hỗ trợ tìm nhanh dữ liệu và chức năng trên CMS | Tất cả người dùng CMS |
 
 ---
 
-### 3.1. Dashboard
+### 2.1. Tổng quan
 
 **Dùng để làm gì?** Cung cấp bức tranh nhanh về nội dung, yêu cầu khách hàng, hoạt động gần đây và các công việc cần chú ý.
 
@@ -202,9 +151,13 @@ Phần này dùng để tra cứu mục đích, khả năng chính và cách s�
 **Cách sử dụng:**  
 `Chọn khoảng thời gian → xem chỉ số và danh sách cần chú ý → mở công việc ưu tiên → xử lý tại chức năng tương ứng`
 
+![Màn hình Dashboard CMS](https://lh3.googleusercontent.com/d/1jP62uZuE6-VpQOSMylA6aMaIfGMXC9qi=w1600)
+
+> **Hình 1.** Các chỉ số và danh sách cần chú ý giúp người quản lý xác định nhanh công việc ưu tiên.
+
 ---
 
-### 3.2. Quản lý nội dung
+### 2.2. Nội dung
 
 #### Tin tức
 
@@ -222,7 +175,7 @@ Phần này dùng để tra cứu mục đích, khả năng chính và cách s�
 
 ![Màn hình quản lý Tin tức](https://lh3.googleusercontent.com/d/1uN0v7HDn2Yeof10fNJUtmBFB5iBCtJph=w1600)
 
-> **Hình 6.** Bài viết được tập trung theo trạng thái để theo dõi và công bố có kiểm soát.
+> **Hình 2.** Bài viết được tập trung theo trạng thái để theo dõi và công bố có kiểm soát.
 
 #### Danh mục tin tức
 
@@ -236,7 +189,7 @@ Tạo · Sửa · Sắp xếp cấp cha–con · Đặt thứ tự và trạng t
 
 ![Màn hình quản lý Danh mục tin tức](https://lh3.googleusercontent.com/d/1Bhyl8fI0yTL2IgMdF6lpE0qYO0OfLkw8=w1600)
 
-> **Hình 7.** Cấu trúc cha–con cho biết vị trí và phạm vi sử dụng của từng danh mục.
+> **Hình 3.** Cấu trúc cha–con cho biết vị trí và phạm vi sử dụng của từng danh mục.
 
 #### Trang nội dung
 
@@ -260,6 +213,10 @@ CMS cũng cho phép tạo trang thông tin đơn giản theo mẫu dùng chung, 
 **Cách sử dụng:**  
 `Chọn trang → chọn khu vực → cập nhật nội dung → lưu bản nháp → xem trước toàn trang → công bố`
 
+![Màn hình quản lý Trang nội dung](https://lh3.googleusercontent.com/d/10vpyNYbrzq1VP8fPT4NTrirpJMoVobwX=w1600)
+
+> **Hình 4.** Mỗi trang được quản lý theo khu vực nội dung, bản nháp và phiên bản đã công bố.
+
 #### Sự kiện
 
 **Dùng để làm gì?** Quản lý hội thảo, đào tạo, chương trình giới thiệu sản phẩm và các sự kiện của CIC.
@@ -278,7 +235,7 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 
 ![Màn hình quản lý Sự kiện](https://lh3.googleusercontent.com/d/1_LhkrbnDvVr-XdIKytvZQmXFpR1yea_J=w1600)
 
-> **Hình 8.** Thời gian, trạng thái công bố và thông tin đăng ký được theo dõi tại cùng một nơi.
+> **Hình 5.** Thời gian, trạng thái công bố và thông tin đăng ký được theo dõi tại cùng một nơi.
 
 #### Dự án
 
@@ -296,11 +253,31 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 
 ![Màn hình quản lý Dự án](https://lh3.googleusercontent.com/d/1aYJVY8xE8QfZfpqOUBTk_yGJPRqvQ3Wk=w1600)
 
-> **Hình 9.** Hồ sơ dự án kết nối nội dung chi tiết, ảnh đại diện và các giải pháp liên quan.
+> **Hình 6.** Hồ sơ dự án kết nối nội dung chi tiết, ảnh đại diện và các giải pháp liên quan.
+
+#### Dịch vụ
+
+**Dùng để làm gì?** Quản lý nội dung các dịch vụ tư vấn, triển khai và hỗ trợ CIC cung cấp.
+
+**Có thể làm gì?**
+
+- Quản lý mô tả, hình ảnh và thông tin hỗ trợ tìm kiếm.
+- Gắn sản phẩm liên quan; xem yêu cầu khách hàng và vị trí đang sử dụng dịch vụ.
+- Theo dõi phiên bản và hoạt động chỉnh sửa.
+- Khi sửa một dịch vụ đã công bố, hệ thống tạo bản nháp làm việc mới; phiên bản đang công khai vẫn được giữ cho đến lần công bố tiếp theo.
+- Tìm kiếm, lọc, lưu nháp, xem trước, công bố hoặc chuyển vào thùng rác.
+
+**Cách sử dụng:**
+`Tạo dịch vụ → cập nhật nội dung và hình ảnh → gắn sản phẩm liên quan → xem trước → công bố`
+
+![Màn hình quản lý Dịch vụ](https://lh3.googleusercontent.com/d/1QiW8ayBKB6Oc46bj95Zf2PUFrTflgJNt=w1600)
+
+> **Hình 7.** Dịch vụ được quản lý cùng trạng thái công bố và sản phẩm hỗ trợ liên quan.
+
 
 ---
 
-### 3.3. Sản phẩm/Dịch vụ
+### 2.3. Sản phẩm
 
 Các dữ liệu phân loại và đầu mối đang được sản phẩm sử dụng không thể xóa vĩnh viễn. Khi không còn dùng cho dữ liệu mới, người quản trị có thể chuyển chúng sang trạng thái ngừng sử dụng; các sản phẩm cũ vẫn giữ nguyên liên kết.
 
@@ -322,6 +299,10 @@ Các dữ liệu phân loại và đầu mối đang được sản phẩm sử 
 **Cách sử dụng:**  
 `Tạo sản phẩm → nhập thông tin và phân loại → thêm hình ảnh, video và tài liệu → gắn người phụ trách → xem trước → công bố`
 
+![Màn hình quản lý Sản phẩm](https://lh3.googleusercontent.com/d/11YjXnU4DG3gdYZ0rV4xqml8i2dLhfup3=w1600)
+
+> **Hình 8.** Sản phẩm được quản lý cùng dữ liệu phân loại, tài liệu và đầu mối phụ trách.
+
 #### Danh mục sản phẩm
 
 **Dùng để làm gì?** Tổ chức sản phẩm theo cấu trúc nhiều cấp để quản lý và tra cứu thống nhất.
@@ -334,7 +315,7 @@ Tạo · Sửa · Chọn cấp cha–con · Sắp xếp · Bật/tắt hiển th
 
 ![Màn hình quản lý Danh mục sản phẩm](https://lh3.googleusercontent.com/d/1xG-LpiMJ3Watc0Cyb2tnKb3j3eBdCA27=w1600)
 
-> **Hình 10.** Danh mục nhiều cấp tạo cấu trúc thống nhất cho danh sách sản phẩm.
+> **Hình 9.** Danh mục nhiều cấp tạo cấu trúc thống nhất cho danh sách sản phẩm.
 
 #### Hãng sản xuất
 
@@ -348,7 +329,7 @@ Tạo · Sửa tên, logo, quốc gia và Website · Sắp xếp · Quản lý t
 
 ![Màn hình quản lý Hãng sản xuất](https://lh3.googleusercontent.com/d/1apaBZAWCBL0bSnHBF4hQA2G2q5-VbiuB=w1600)
 
-> **Hình 11.** Thông tin nhận diện của hãng được dùng chung cho các sản phẩm liên quan.
+> **Hình 10.** Thông tin nhận diện của hãng được dùng chung cho các sản phẩm liên quan.
 
 #### Lĩnh vực ứng dụng
 
@@ -362,7 +343,7 @@ Tạo · Sửa tên, biểu tượng và màu nhận diện · Quản lý trạn
 
 ![Màn hình quản lý Lĩnh vực ứng dụng](https://lh3.googleusercontent.com/d/1H7e-j88SeDaQzGwpswj7NwZPduyJGRNd=w1600)
 
-> **Hình 12.** Lĩnh vực giúp khách hàng thu hẹp sản phẩm theo nhu cầu thực tế.
+> **Hình 11.** Lĩnh vực giúp khách hàng thu hẹp sản phẩm theo nhu cầu thực tế.
 
 #### Loại sản phẩm
 
@@ -376,7 +357,7 @@ Tạo · Sửa tên và biểu tượng · Quản lý trạng thái · Sắp x�
 
 ![Màn hình quản lý Loại sản phẩm](https://lh3.googleusercontent.com/d/1htITc9yC0DXqfTu9A4hBeNg3BpdOXlEv=w1600)
 
-> **Hình 13.** Loại sản phẩm là dữ liệu chuẩn dùng cho phân loại, bộ lọc và thống kê.
+> **Hình 12.** Loại sản phẩm là dữ liệu chuẩn dùng cho phân loại, bộ lọc và thống kê.
 
 #### Người phụ trách kinh doanh
 
@@ -392,30 +373,11 @@ Quản lý thông tin liên hệ · Xác định vai trò · Gắn sản phẩm 
 
 ![Màn hình quản lý Người phụ trách kinh doanh](https://lh3.googleusercontent.com/d/1ZjXfLijl-at6TRGVzeGN87L4-rWVsBns=w1600)
 
-> **Hình 14.** Mỗi đầu mối được gắn với vai trò và phạm vi sản phẩm cụ thể.
-
-#### Dịch vụ
-
-**Dùng để làm gì?** Quản lý nội dung các dịch vụ tư vấn, triển khai và hỗ trợ CIC cung cấp.
-
-**Có thể làm gì?**
-
-- Quản lý mô tả, hình ảnh và thông tin hỗ trợ tìm kiếm.
-- Gắn sản phẩm liên quan; xem yêu cầu khách hàng và vị trí đang sử dụng dịch vụ.
-- Theo dõi phiên bản và hoạt động chỉnh sửa.
-- Khi sửa một dịch vụ đã công bố, hệ thống tạo bản nháp làm việc mới; phiên bản đang công khai vẫn được giữ cho đến lần công bố tiếp theo.
-- Tìm kiếm, lọc, lưu nháp, xem trước, công bố hoặc chuyển vào thùng rác.
-
-**Cách sử dụng:**  
-`Tạo dịch vụ → cập nhật nội dung và hình ảnh → gắn sản phẩm liên quan → xem trước → công bố`
-
-![Màn hình quản lý Dịch vụ](https://lh3.googleusercontent.com/d/1QiW8ayBKB6Oc46bj95Zf2PUFrTflgJNt=w1600)
-
-> **Hình 15.** Dịch vụ được quản lý cùng trạng thái công bố và sản phẩm hỗ trợ liên quan.
+> **Hình 13.** Mỗi đầu mối được gắn với vai trò và phạm vi sản phẩm cụ thể.
 
 ---
 
-### 3.4. Trình bày Website
+### 2.4. Website
 
 #### Menu
 
@@ -429,11 +391,8 @@ Chọn nhóm menu theo vị trí · Tạo nhiều cấp · Sửa tên, liên k�
 
 ![Màn hình quản lý Menu](https://lh3.googleusercontent.com/d/1RCRQfB78BoGsSJOZmxV-WCxvc20E4Lum=w1600)
 
-> **Hình 16.** Cây menu cho biết rõ cấp điều hướng, thứ tự và trạng thái hiển thị.
+> **Hình 14.** Cây menu cho biết rõ cấp điều hướng, thứ tự và trạng thái hiển thị.
 
----
-
-### 3.5. Media
 
 #### Thư viện media
 
@@ -452,11 +411,11 @@ Chọn nhóm menu theo vị trí · Tạo nhiều cấp · Sửa tên, liên k�
 
 ![Màn hình Thư viện media](https://lh3.googleusercontent.com/d/1JMwdZVE1bH1f8cmD89ZNNu7EtuBkE6Ma=w1600)
 
-> **Hình 17.** Tài nguyên được tổ chức tập trung và có thể kiểm tra nơi đang sử dụng.
+> **Hình 15.** Tài nguyên được tổ chức tập trung và có thể kiểm tra nơi đang sử dụng.
 
 ---
 
-### 3.6. Tương tác khách hàng
+### 2.5. Tương tác khách hàng
 
 Nhóm này gồm bốn chức năng có vai trò riêng nhưng phối hợp trong cùng quá trình thu hút và tiếp nhận nhu cầu khách hàng:
 
@@ -506,7 +465,7 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 
 ![Màn hình quản lý CTA](https://lh3.googleusercontent.com/d/1saL74haBHyPeDaxgZgey1GAnXB-Mxlkf=w1600)
 
-> **Hình 18.** CTA có thể được tái sử dụng tại nhiều vị trí và dẫn tới đúng hành động.
+> **Hình 16.** CTA có thể được tái sử dụng tại nhiều vị trí và dẫn tới đúng hành động.
 
 #### Biểu mẫu
 
@@ -531,7 +490,7 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 
 ![Màn hình quản lý Biểu mẫu](https://lh3.googleusercontent.com/d/1A_ZvREUePRr9f7ZLKw-7Ve4FClXmJqCb=w1600)
 
-> **Hình 19.** Các trường và quy tắc được cấu hình theo mục tiêu thu thập thông tin.
+> **Hình 17.** Các trường và quy tắc được cấu hình theo mục tiêu thu thập thông tin.
 
 #### Yêu cầu khách hàng
 
@@ -551,6 +510,10 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 **Cách sử dụng:**  
 `Tiếp nhận → xác định nguồn → đặt ưu tiên → phân công → xử lý và ghi chú → cập nhật trạng thái → hoàn thành`
 
+![Màn hình quản lý Yêu cầu khách hàng](https://lh3.googleusercontent.com/d/1SctN7u8-IcuQhDAtg8sFA1-sCQwdhoci=w1600)
+
+> **Hình 18.** Yêu cầu khách hàng được tập trung để theo dõi trạng thái, mức ưu tiên và người phụ trách.
+
 #### Mẫu email
 
 **Dùng để làm gì?** Chuẩn hóa email gửi khách hàng hoặc nội bộ trong các tình huống như xác nhận đã nhận yêu cầu.
@@ -567,11 +530,11 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 
 ![Màn hình quản lý Mẫu email](https://lh3.googleusercontent.com/d/166vpIVCN3csb2xnz-wETZ7hdu2dV1SD4=w1600)
 
-> **Hình 20.** Mẫu email được quản lý theo tình huống và đối tượng nhận.
+> **Hình 19.** Mẫu email được quản lý theo tình huống và đối tượng nhận.
 
 ---
 
-### 3.7. Người dùng & phân quyền
+### 2.6. Quản trị hệ thống
 
 #### Người dùng
 
@@ -590,7 +553,7 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 
 ![Màn hình quản lý Người dùng](https://lh3.googleusercontent.com/d/1LyjiAxAQt76G9VBlDX0fYmHfwtpicPr6=w1600)
 
-> **Hình 21.** Danh sách tài khoản cho biết trạng thái, vai trò và phạm vi của từng người.
+> **Hình 20.** Danh sách tài khoản cho biết trạng thái, vai trò và phạm vi của từng người.
 
 #### Vai trò & quyền
 
@@ -611,29 +574,51 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 **Cách sử dụng:**  
 `Tạo hoặc chọn vai trò → chọn quyền theo phân hệ → lưu → gán cho người dùng`
 
----
+![Màn hình quản lý Vai trò và quyền](https://lh3.googleusercontent.com/d/1dEAgQT8nNcxsLjQlKbuTisMnw-h0XcCd=w1600)
 
-### 3.8. Cấu hình hệ thống
+> **Hình 21.** Ma trận quyền xác định rõ mỗi vai trò được xem và thực hiện công việc nào.
+
 
 #### Cấu hình hệ thống
 
-**Dùng để làm gì?** Quản lý các thiết lập dùng chung ảnh hưởng đến CMS và Website, chẳng hạn thông tin liên hệ doanh nghiệp.
+**Dùng để làm gì?** Quản lý thông tin chung được sử dụng trên toàn Website và CMS, giúp thông tin doanh nghiệp hiển thị thống nhất và các kết nối của hệ thống hoạt động đúng.
 
 **Có thể làm gì?**
 
-- Xem và chỉnh sửa cấu hình theo nhóm nghiệp vụ.
-- Phân biệt thiết lập dùng chung và thiết lập theo ngôn ngữ.
-- Với cấu hình thông thường như hotline, email, địa chỉ, liên kết mạng xã hội hoặc logo: sửa và lưu trực tiếp; hệ thống ghi Nhật ký hoạt động.
-- Với secret, tích hợp hoặc thiết lập có cảnh báo ảnh hưởng lớn: lưu bản nháp, so sánh giá trị cũ–mới và công bố sau khi kiểm tra.
-- Theo dõi phiên bản riêng của các đợt công bố cấu hình ảnh hưởng lớn; thay đổi thông thường không tạo thêm một phiên bản cấu hình.
+- Cập nhật hotline, email, địa chỉ, logo và liên kết mạng xã hội của CIC tại một nơi.
+- Quản lý thông tin dùng chung và thông tin thay đổi theo ngôn ngữ.
+- Lưu trực tiếp các thay đổi thông thường; hệ thống ghi lại người thực hiện và nội dung đã sửa.
+- Với thiết lập quan trọng liên quan bảo mật hoặc kết nối dịch vụ khác, hệ thống yêu cầu kiểm tra giá trị cũ–mới trước khi áp dụng.
+- Xem lại lịch sử các lần thay đổi quan trọng khi cần đối chiếu.
 
 **Cách sử dụng:**  
-- `Cấu hình thường: chọn nhóm → cập nhật → lưu`
-- `Cấu hình ảnh hưởng lớn: cập nhật → lưu nháp → so sánh ảnh hưởng → công bố`
+- `Thông tin thông thường: chọn nhóm → cập nhật → lưu`
+- `Thiết lập quan trọng: cập nhật → kiểm tra thay đổi → áp dụng`
 
 ![Màn hình Cấu hình hệ thống](https://lh3.googleusercontent.com/d/1LuposJ1B5UxPKeT1-lKNtgPCAdP5e-e4=w1600)
 
-> **Hình 22.** Thiết lập thông thường được lưu trực tiếp; workflow kiểm tra và công bố chỉ xuất hiện với cấu hình ảnh hưởng lớn.
+> **Hình 22.** Thông tin dùng chung của CIC được tập trung theo nhóm để cập nhật và kiểm soát thống nhất.
+
+#### SEO & URL
+
+**Dùng để làm gì?** Kiểm soát cách Website CIC xuất hiện trên Google và các công cụ tìm kiếm, đồng thời bảo đảm người dùng vẫn đến đúng nội dung khi địa chỉ trang thay đổi.
+
+**Có thể làm gì?**
+
+- Phát hiện trang đang thiếu tiêu đề, mô tả hoặc chưa được phép xuất hiện trên công cụ tìm kiếm.
+- Quy định tiêu đề và mô tả mặc định cho từng loại trang; từng bài viết hoặc sản phẩm vẫn có thể dùng nội dung riêng.
+- Xác định địa chỉ chính thức của một nội dung khi có nhiều đường dẫn cùng trỏ tới nội dung đó.
+- Chuyển người dùng từ đường dẫn cũ sang đường dẫn mới để tránh trang lỗi khi đổi URL.
+- Kiểm tra danh sách các trang Website cung cấp cho công cụ tìm kiếm thu thập.
+- Đi tới đúng bài viết, sản phẩm hoặc trang nội dung để bổ sung thông tin còn thiếu.
+
+**Cách sử dụng:**
+`Kiểm tra trang còn thiếu thông tin → cập nhật cách hiển thị tìm kiếm hoặc đường dẫn → lưu → kiểm tra kết quả`
+
+![Màn hình SEO & URL](https://lh3.googleusercontent.com/d/1TzzvXTPToe5ZCogveir4C7YamIkAkAu0=w1600)
+
+> **Hình 23.** Màn hình cho biết trang nào cần bổ sung thông tin tìm kiếm và đường dẫn nào cần điều chỉnh.
+
 
 #### Ngôn ngữ giao diện
 
@@ -647,7 +632,7 @@ Tìm kiếm và sửa câu chữ · Lọc theo Website/CMS, nhóm sử dụng v�
 
 ![Màn hình quản lý Ngôn ngữ giao diện](https://lh3.googleusercontent.com/d/1y5UPwazZ5kDUm-f44GYw22YTpcA6Um2s=w1600)
 
-> **Hình 23.** Câu chữ hai ngôn ngữ được kiểm soát theo khu vực sử dụng.
+> **Hình 24.** Câu chữ hai ngôn ngữ được kiểm soát theo khu vực sử dụng.
 
 #### Nhật ký hoạt động
 
@@ -683,39 +668,11 @@ Tìm kiếm và sửa câu chữ · Lọc theo Website/CMS, nhóm sử dụng v�
 
 ![Màn hình Thùng rác](https://lh3.googleusercontent.com/d/1XvPGCwiNGQanuLF9yGkbyOtCgSF3l4SS=w1600)
 
-> **Hình 24.** Dữ liệu đã xóa được giữ lại để kiểm tra trước khi phục hồi hoặc xóa vĩnh viễn.
+> **Hình 25.** Dữ liệu đã xóa được giữ lại để kiểm tra trước khi phục hồi hoặc xóa vĩnh viễn.
 
 ---
 
-### 3.9. SEO
-
-#### SEO & URL
-
-**Dùng để làm gì?** Quản lý SEO theo ba tầng rõ ràng: mặc định toàn website trong **Cấu hình hệ thống**, template của trang hệ thống tại **SEO & URL**, và giá trị ghi đè của từng bài viết/sản phẩm tại form nội dung tương ứng.
-
-**Có thể làm gì?**
-
-- Theo dõi nhanh trang noindex, trang thiếu mô tả và route chưa có nơi quản lý.
-- Cập nhật tiêu đề, mô tả, canonical và quyền lập chỉ mục theo từng chức năng.
-- Nhập nội dung cố định hoặc chèn biến để hệ thống tự điền thông tin phù hợp cho từng trang.
-- Quản lý riêng trang chính, trang lọc, trang danh mục và trang chi tiết khi được hỗ trợ.
-- Chuyển tới nơi quản lý nội dung chi tiết để hoàn thiện thông tin tìm kiếm liên quan.
-- Thêm, sửa, bật/tắt hoặc xóa redirect 301/302 khi URL thay đổi; hệ thống cảnh báo URL trùng và vòng lặp cơ bản.
-- Theo dõi số URL đủ điều kiện cùng thời điểm cập nhật và mở sitemap để kiểm tra.
-- Meta Keywords chỉ còn trong phần tương thích legacy, không phải trường SEO chính.
-
-**Cách sử dụng:**  
-`Kiểm tra tổng quan → chọn template hoặc URL cần xử lý → cập nhật SEO/canonical hoặc redirect → lưu → kiểm tra sitemap`
-
-![Màn hình SEO & URL](https://lh3.googleusercontent.com/d/1TzzvXTPToe5ZCogveir4C7YamIkAkAu0=w1600)
-
-> **Hình 25.** Workspace SEO & URL tách tổng quan chất lượng, template trang hệ thống và quản lý redirect/sitemap.
-
----
-
-### 3.10. Tiện ích CMS
-
-#### Tìm kiếm toàn cục
+### 2.7. Tìm kiếm toàn cục
 
 **Dùng để làm gì?** Tìm nhanh nội dung và chức năng trên toàn CMS từ một điểm duy nhất.
 
