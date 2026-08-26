@@ -3,7 +3,9 @@ import { countryMarkerPositions, countryMarkers, partnerCurveBends, partnerLogoP
 import { representativePartnerCountries, type RepresentativePartner } from '../data/representativePartners';
 import { worldMapPaths } from '../data/worldMapPaths';
 
-const CANVAS = { width: 1800, height: 1060, mapX: 175, mapY: 131, mapWidth: 1450, mapHeight: 798 } as const;
+// Keep the overall block shallow while reserving more partner space above the
+// map than below it. The geographic map remains centered within the canvas.
+const CANVAS = { width: 2000, height: 1060, mapX: 340, mapY: 185, mapWidth: 1320, mapHeight: 726 } as const;
 const PARTNER_MAP_EDIT_MODE = false;
 const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
 const LOGO_BOUNDS = {
@@ -22,12 +24,7 @@ type DragState =
   | { kind: 'curve'; id: string; pointerId: number; marker: Point; end: Point };
 const CONNECTOR_GAP = 14;
 const MARKER_SCALE = 1.42;
-const MARKER_CLEARANCE = 10;
-const CONNECTOR_ENDPOINT_TUNING: Readonly<Record<string, { gap: number; x?: number; y?: number }>> = {
-  prokon: { gap: 6, x: 10 },
-  deltares: { gap: 6, x: 8 },
-  piletest: { gap: 5 },
-};
+const MARKER_CLEARANCE = 0;
 
 const mapPoint = (point: Point): Point => ({ x: CANVAS.mapX + point.x / 100 * CANVAS.mapWidth, y: CANVAS.mapY + point.y / 100 * CANVAS.mapHeight });
 const boxCenter = (box: Box): Point => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
@@ -36,15 +33,21 @@ const clamp = (value: number, minimum: number, maximum: number) => Math.max(mini
 const toCanvasPoint = (point: NormalizedPoint): Point => ({ x: point.x * CANVAS.width, y: point.y * CANVAS.height });
 const toNormalizedPoint = (point: Point): NormalizedPoint => ({ x: Number((point.x / CANVAS.width).toFixed(6)), y: Number((point.y / CANVAS.height).toFixed(6)) });
 
-const logoConnectionPoint = (box: Box, marker: Point, partnerId: string): Point => {
-  const tuning = CONNECTOR_ENDPOINT_TUNING[partnerId];
-  const exclusion = expandedBox(box, tuning?.gap ?? CONNECTOR_GAP);
+// Aim at the logo center but stop exactly where that ray meets the logo box.
+// This keeps the connector visually centered without drawing through the logo.
+const logoConnectionPoint = (box: Box, marker: Point): Point => {
   const center = boxCenter(box);
   const dx = marker.x - center.x;
   const dy = marker.y - center.y;
-  if (Math.abs(dx) >= Math.abs(dy)) return { x: dx < 0 ? exclusion.x : exclusion.x + exclusion.width, y: center.y + (tuning?.y ?? 0) };
-  return { x: center.x + (tuning?.x ?? 0), y: dy < 0 ? exclusion.y : exclusion.y + exclusion.height };
+  const scaleX = dx === 0 ? Number.POSITIVE_INFINITY : box.width / 2 / Math.abs(dx);
+  const scaleY = dy === 0 ? Number.POSITIVE_INFINITY : box.height / 2 / Math.abs(dy);
+  const scale = Math.min(scaleX, scaleY);
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
 };
+
+// The geographic coordinate is the pin tip; the connector targets the center
+// of the pin head and is then covered by the filled pin artwork.
+const pinConnectionPoint = (marker: Point): Point => ({ x: marker.x, y: marker.y - 12 * MARKER_SCALE });
 
 const cubicPoint = (start: Point, controlA: Point, controlB: Point, end: Point, t: number): Point => {
   const inverse = 1 - t;
@@ -67,7 +70,9 @@ const buildFanCurve = (marker: Point, end: Point, occupied: readonly Box[], fanI
   const baseBow = clamp(length * 0.16, 34, 96);
   const bow = bend * baseBow + (includeFanOffset ? Math.sign(bend) * centeredIndex * 11 : 0);
   const controlA = { x: anchor.x + tangent.x * length * 0.3 + normal.x * bow, y: anchor.y + tangent.y * length * 0.3 + normal.y * bow };
-  const controlB = { x: end.x - tangent.x * length * 0.28 + normal.x * bow * 0.58, y: end.y - tangent.y * length * 0.28 + normal.y * bow * 0.58 };
+  // Keep the final tangent on the center-to-center axis so the curve visibly
+  // points into the middle of the logo instead of arriving at a sideways angle.
+  const controlB = { x: end.x - tangent.x * length * 0.28, y: end.y - tangent.y * length * 0.28 };
   const samples = Array.from({ length: 49 }, (_, index) => cubicPoint(anchor, controlA, controlB, end, index / 48));
   const collisionScore = occupied.reduce((score, box) => score + (samples.slice(3, -3).some((point) => pointInBox(point, expandedBox(box, CONNECTOR_GAP))) ? 1 : 0), 0);
   return { path: `M ${anchor.x} ${anchor.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}`, samples, collisionScore };
@@ -149,21 +154,22 @@ export const CountryPartnerNetwork: React.FC = () => {
       const count = entry.country?.partners.length ?? 0;
       const countryBoxes = boxes.slice(boxOffset, boxOffset + count);
       boxOffset += count;
-      const endpoints = countryBoxes.map((box, index) => logoConnectionPoint(box, entry.marker, entry.country?.partners[index]?.id ?? ''));
+      const connectorStart = pinConnectionPoint(entry.marker);
+      const endpoints = countryBoxes.map((box) => logoConnectionPoint(box, connectorStart));
       const fanOrder = endpoints.map((end, index) => ({ index, angle: Math.atan2(end.y - entry.marker.y, end.x - entry.marker.x) })).sort((a, b) => a.angle - b.angle);
       const rankByIndex = new Map(fanOrder.map((item, rank) => [item.index, rank]));
-      const buildCountryFan = (direction: -1 | 1) => endpoints.map((end, index) => buildFanCurve(entry.marker, end, boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, direction));
+      const buildCountryFan = (direction: -1 | 1) => endpoints.map((end, index) => buildFanCurve(connectorStart, end, boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, direction));
       const negativeFan = buildCountryFan(-1);
       const positiveFan = buildCountryFan(1);
       const negativeScore = negativeFan.reduce((score, curve) => score + curve.collisionScore, 0);
       const positiveScore = positiveFan.reduce((score, curve) => score + curve.collisionScore, 0);
-      const preferredDirection = outwardFanDirection(entry.marker, endpoints);
+      const preferredDirection = outwardFanDirection(connectorStart, endpoints);
       const automaticDirection = Math.abs(negativeScore - positiveScore) >= 2 ? (negativeScore < positiveScore ? -1 : 1) : preferredDirection;
       const bends = Object.fromEntries((entry.country?.partners ?? []).map((partner) => [partner.id, curveBends[partner.id] ?? automaticDirection])) as CurveBends;
       const curves = (entry.country?.partners ?? []).map((partner, index) => curveBends[partner.id] === undefined
         ? (automaticDirection === -1 ? negativeFan[index] : positiveFan[index])
-        : buildFanCurve(entry.marker, endpoints[index], boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, bends[partner.id], false));
-      return { ...entry, boxes: countryBoxes, curves, endpoints, bends };
+        : buildFanCurve(connectorStart, endpoints[index], boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, bends[partner.id], false));
+      return { ...entry, boxes: countryBoxes, curves, endpoints, bends, connectorStart };
     });
   }, [curveBends, positions]);
 
@@ -295,11 +301,11 @@ export const CountryPartnerNetwork: React.FC = () => {
         </defs>
         <rect width={CANVAS.width} height={CANVAS.height} fill="url(#partner-map-surface)" /><rect width={CANVAS.width} height={CANVAS.height} fill="url(#partner-map-focus)" />
         <svg x={CANVAS.mapX} y={CANVAS.mapY} width={CANVAS.mapWidth} height={CANVAS.mapHeight} viewBox="0 0 1000 550" aria-hidden="true">
-          <g fill="#aebdcb" stroke="#587087" strokeWidth="0.78" strokeOpacity="0.88">{worldMapPaths.filter((path) => path.name !== 'Vietnam').map((path) => <path key={path.name} data-country={path.name} d={path.d} />)}</g>
+          <g fill="#aebdcb" stroke="#f8fafc" strokeWidth="0.68" strokeOpacity="0.42">{worldMapPaths.filter((path) => path.name !== 'Vietnam').map((path) => <path key={path.name} data-country={path.name} d={path.d} />)}</g>
           <g className="partner-map-vietnam" fill="#f97316" stroke="#fff7ed" strokeWidth="1.25" filter="url(#vietnam-territory-glow)">{worldMapPaths.filter((path) => path.name === 'Vietnam').map((path) => <path key={path.name} data-country={path.name} d={path.d} />)}{vietnamMaritimeFeatures.map((path, index) => <path key={`vietnam-maritime-${index}`} d={path} />)}</g>
         </svg>
 
-        {layout.map(({ config, country, marker, boxes, curves, endpoints }) => {
+        {layout.map(({ config, country, marker, boxes, curves, endpoints, connectorStart }) => {
           if (!country) return null;
           const markerActive = activeCountryId === country.id;
           const activeCountry = markerActive || country.partners.some((partner) => partner.id === activePartnerId);
@@ -307,7 +313,7 @@ export const CountryPartnerNetwork: React.FC = () => {
           return <g key={country.id} data-country-layout={config.countryId}>
             {country.partners.map((item, index) => {
               const emphasized = markerActive || activePartnerId === item.id;
-              return <React.Fragment key={`${item.id}-curve`}>{PARTNER_MAP_EDIT_MODE && <path d={curves[index].path} fill="none" stroke="transparent" strokeWidth="16" pointerEvents="stroke" className="cursor-ns-resize" onPointerDown={(event) => beginCurveDrag(event, item.id, marker, endpoints[index])} />}<path className="partner-map-connector" data-connector="direct-curve" data-active={emphasized} data-dimmed={!emphasized && relationshipFocused} data-country-id={country.id} data-partner-id={item.id} d={curves[index].path} fill="none" stroke={emphasized ? '#f97316' : '#60778d'} strokeWidth={emphasized ? 1.2 : 0.8} strokeDasharray={emphasized ? undefined : '7 2'} opacity={emphasized ? 0.98 : relationshipFocused ? 0.14 : 0.64} strokeLinecap="round" vectorEffect="non-scaling-stroke" pointerEvents="none" /></React.Fragment>;
+              return <React.Fragment key={`${item.id}-curve`}>{PARTNER_MAP_EDIT_MODE && <path d={curves[index].path} fill="none" stroke="transparent" strokeWidth="16" pointerEvents="stroke" className="cursor-ns-resize" onPointerDown={(event) => beginCurveDrag(event, item.id, connectorStart, endpoints[index])} />}<path className="partner-map-connector" data-connector="direct-curve" data-active={emphasized} data-dimmed={!emphasized && relationshipFocused} data-country-id={country.id} data-partner-id={item.id} d={curves[index].path} fill="none" stroke={emphasized ? '#f97316' : '#587188'} strokeWidth={emphasized ? 1.2 : 0.82} strokeDasharray={emphasized ? undefined : '7 2'} opacity={emphasized ? 0.98 : relationshipFocused ? 0.14 : 0.62} strokeLinecap="round" vectorEffect="non-scaling-stroke" pointerEvents="none" /></React.Fragment>;
             })}
             {country.partners.map((item, index) => {
               const box = boxes[index]; const active = activePartnerId === item.id; const dimmed = (activePartnerId !== null && !active) || (activeCountryId !== null && !markerActive);

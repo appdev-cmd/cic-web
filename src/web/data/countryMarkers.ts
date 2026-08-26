@@ -51,21 +51,27 @@ export const countryMarkers: readonly CountryMarkerConfig[] = [
  * rejects placements that touch land, another logo, a pin, or canvas bounds.
  */
 export const partnerLogoPositions = {
-  lantek: { x: 0.091631, y: 0 }, roomvo: { x: 0.031457, y: 0.069863 }, stx: { x: 0.025037, y: 0.139031 },
-  csi: { x: 0, y: 0.647554 }, bentley: { x: 0.002669, y: 0.201182 }, kritikal: { x: 0.016884, y: 0.286004 },
-  htri: { x: 0.003247, y: 0.35204 }, ansys: { x: 0.251948, y: 0.583837 }, agi: { x: 0.024747, y: 0.708604 },
-  foxit: { x: 0.082612, y: 0.803107 }, autodesk: { x: 0.189178, y: 0.798469 }, seequent: { x: 0.166667, y: 0.0375 },
-  metsims: { x: 0.393145, y: 0.474955 }, 'zx-lidar': { x: 0.377491, y: 0.321429 }, radiodetection: { x: 0.347474, y: 0.382711 }, gigaton: { x: 0.378138, y: 0.290121 },
-  prokon: { x: 0.259632, y: 0.038682 }, graitec: { x: 0.465151, y: 0.048489 }, deltares: { x: 0.393722, y: 0.008166 }, 'pre-sustainability': { x: 0.368253, y: 0.047716 },
-  pytha: { x: 0.340981, y: 0.926021 }, allplan: { x: 0.912266, y: 0.165003 }, ptv: { x: 0.517676, y: 0 }, lander: { x: 0.415404, y: 0.578156 },
-  geosig: { x: 0.557576, y: 0.875581 }, opera: { x: 0.425902, y: 0.850535 }, emmegi: { x: 0.488744, y: 0.916397 },
-  'idea-statica': { x: 0.926667, y: 0.229059 }, hexagon: { x: 0.867577, y: 0.115732 }, geoscanner: { x: 0.832684, y: 0.056591 },
-  dnv: { x: 0.73117, y: 0.020866 }, piletest: { x: 0.622511, y: 0.572819 }, gstarsoft: { x: 0.919092, y: 0.455026 },
-  glodon: { x: 0.924719, y: 0.545744 }, qysea: { x: 0.862885, y: 0.311588 }, chc: { x: 0.892786, y: 0.37529 }, bimage: { x: 0.728787, y: 0.900897 },
-  'ai-architecture': { x: 0.129726, y: 0.715445 }, cype: { x: 0.218615, y: 0.731099 }, maptek: { x: 0.926667, y: 0.7529 }, deswik: { x: 0.812626, y: 0.925324 }, metron: { x: 0.874531, y: 0.860786 },
+  lantek: { x: 0.413065, y: 0.874798 }, roomvo: { x: 0.12042, y: 0.923833 }, stx: { x: 0.03218, y: 0.65852 },
+  csi: { x: 0.026624, y: 0.837461 }, bentley: { x: 0.013707, y: 0.380062 }, kritikal: { x: 0.089613, y: 0.409751 },
+  htri: { x: 0.028572, y: 0.526019 }, ansys: { x: 0.377924, y: 0.926896 }, agi: { x: 0.097476, y: 0.811522 },
+  foxit: { x: 0.20729, y: 0.729595 }, autodesk: { x: 0.2684, y: 0.820523 }, seequent: { x: 0, y: 0.29602 },
+  metsims: { x: 0.410027, y: 0.645258 }, 'zx-lidar': { x: 0.382036, y: 0.419445 }, radiodetection: { x: 0.390982, y: 0.478277 }, gigaton: { x: 0.393723, y: 0.348931 },
+  prokon: { x: 0.033655, y: 0.197959 }, graitec: { x: 0.489826, y: 0.650586 }, deltares: { x: 0.064496, y: 0.062485 }, 'pre-sustainability': { x: 0.079287, y: 0.1409 },
+  pytha: { x: 0.384489, y: 0.068612 }, allplan: { x: 0.185632, y: 0.014704 }, ptv: { x: 0.307933, y: 0.035531 }, lander: { x: 0.448519, y: 0.749685 },
+  geosig: { x: 0.904984, y: 0.311985 }, opera: { x: 0.526553, y: 0.931398 }, emmegi: { x: 0.595239, y: 0.895568 },
+  'idea-statica': { x: 0.848744, y: 0.23641 }, hexagon: { x: 0.920175, y: 0.180668 }, geoscanner: { x: 0.902164, y: 0.093346 },
+  dnv: { x: 0.77208, y: 0.072325 }, piletest: { x: 0.652381, y: 0.600999 }, gstarsoft: { x: 0.876884, y: 0.571421 },
+  glodon: { x: 0.764327, y: 0.507762 }, qysea: { x: 0.869713, y: 0.415731 }, chc: { x: 0.933047, y: 0.518639 }, bimage: { x: 0.721644, y: 0.904573 },
+  'ai-architecture': { x: 0.226481, y: 0.905353 }, cype: { x: 0.317318, y: 0.8867 }, maptek: { x: 0.926667, y: 0.7529 }, deswik: { x: 0.85938, y: 0.93145 }, metron: { x: 0.923233, y: 0.843633 },
 } as const satisfies Readonly<Record<string, NormalizedPoint>>;
 
-export const partnerCurveBends = {} as const satisfies Readonly<Record<string, number>>;
+export const partnerCurveBends = {
+  ptv: 1.068, allplan: 1.203, 'pre-sustainability': 1.353, pytha: 1.073,
+  lander: 0.558, metsims: -0.219, radiodetection: -0.739, 'zx-lidar': -1.058,
+  gigaton: -1.032, graitec: 0, kritikal: 1.5, agi: 0.921, csi: 1.5,
+  deltares: 1.374, geosig: 0.76, 'idea-statica': -1.038, seequent: 0.161,
+  bentley: 1.5,
+} as const satisfies Readonly<Record<string, number>>;
 
 export const vietnamHub = {
   marker: { x: 79.45, y: 47.12 },

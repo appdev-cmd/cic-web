@@ -748,7 +748,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
               exit: { opacity: 0, y: -20 },
               transition: { duration: 0.4 },
             } : { initial: false })}
-            className="w-full space-y-16 relative overflow-hidden z-10"
+            className="relative z-10 w-full space-y-16"
           >
             {/* Top Capacity & Scale Overview */}
             <div data-page-builder-section-key="about.capacity" className="w-full bg-transparent">
@@ -840,7 +840,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   </div>
                   
                   {/* Global Technology Partner Network Map Component */}
-                  <div className="mb-6 w-full md:mb-8">
+                  <div className="mx-auto mb-6 w-full md:mb-8">
                     <GlobalPartnerMap />
                   </div>
 
