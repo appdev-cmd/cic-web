@@ -26,6 +26,7 @@ const CONNECTOR_GAP = 14;
 const MARKER_SCALE = 1.42;
 const MARKER_CLEARANCE = 0;
 const LOGO_OPTICAL_SCALE: Readonly<Record<string, number>> = {
+  kritikal: 1.08,
   htri: 0.92,
   stx: 0.9,
   foxit: 0.84,
