@@ -25,6 +25,12 @@ type DragState =
 const CONNECTOR_GAP = 14;
 const MARKER_SCALE = 1.42;
 const MARKER_CLEARANCE = 0;
+const LOGO_OPTICAL_SCALE: Readonly<Record<string, number>> = {
+  htri: 0.92,
+  stx: 0.9,
+  foxit: 0.84,
+  dnv: 0.88,
+};
 
 const mapPoint = (point: Point): Point => ({ x: CANVAS.mapX + point.x / 100 * CANVAS.mapWidth, y: CANVAS.mapY + point.y / 100 * CANVAS.mapHeight });
 const boxCenter = (box: Box): Point => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
@@ -95,6 +101,14 @@ const logoBox = (partner: RepresentativePartner, positions: PartnerLayout): Box 
   return { ...toCanvasPoint(position), ...LOGO_BOUNDS[partner.logo.visualWeight] };
 };
 
+const opticalLogoBox = (partner: RepresentativePartner, box: Box): Box => {
+  const scale = LOGO_OPTICAL_SCALE[partner.id] ?? 1;
+  const center = boxCenter(box);
+  const width = box.width * scale;
+  const height = box.height * scale;
+  return { x: center.x - width / 2, y: center.y - height / 2, width, height };
+};
+
 const defaultPartnerLayout = Object.fromEntries(Object.entries(partnerLogoPositions).map(([id, point]) => [id, { ...point }])) as PartnerLayout;
 const defaultCurveBends = { ...partnerCurveBends } as CurveBends;
 
@@ -155,7 +169,7 @@ export const CountryPartnerNetwork: React.FC = () => {
       const countryBoxes = boxes.slice(boxOffset, boxOffset + count);
       boxOffset += count;
       const connectorStart = pinConnectionPoint(entry.marker);
-      const endpoints = countryBoxes.map((box) => logoConnectionPoint(box, connectorStart));
+      const endpoints = countryBoxes.map((box, index) => logoConnectionPoint(opticalLogoBox(entry.country!.partners[index], box), connectorStart));
       const fanOrder = endpoints.map((end, index) => ({ index, angle: Math.atan2(end.y - entry.marker.y, end.x - entry.marker.x) })).sort((a, b) => a.angle - b.angle);
       const rankByIndex = new Map(fanOrder.map((item, rank) => [item.index, rank]));
       const buildCountryFan = (direction: -1 | 1) => endpoints.map((end, index) => buildFanCurve(connectorStart, end, boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, direction));
@@ -319,7 +333,7 @@ export const CountryPartnerNetwork: React.FC = () => {
               const box = boxes[index]; const active = activePartnerId === item.id; const dimmed = (activePartnerId !== null && !active) || (activeCountryId !== null && !markerActive);
               const partnerTooltipWidth = Math.min(270, Math.max(112, item.name.length * 7.5 + 28));
               const partnerTooltipX = Math.max(10, Math.min(CANVAS.width - partnerTooltipWidth - 10, box.x + box.width / 2 - partnerTooltipWidth / 2)); const partnerTooltipY = box.y > 44 ? box.y - 36 : box.y + box.height + 8;
-              return <g key={item.id}><foreignObject x={box.x} y={box.y} width={box.width} height={box.height} overflow="visible"><a href={PARTNER_MAP_EDIT_MODE ? undefined : item.website} target={PARTNER_MAP_EDIT_MODE ? undefined : '_blank'} rel={PARTNER_MAP_EDIT_MODE ? undefined : 'noreferrer'} aria-label={`${item.name}, ${country.name}`} aria-grabbed={PARTNER_MAP_EDIT_MODE ? dragging?.id === item.id : undefined} className={`relative flex h-full w-full items-center justify-center rounded-[8px] outline-none transition-[filter,opacity] focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 ${PARTNER_MAP_EDIT_MODE ? 'cursor-grab touch-none active:cursor-grabbing' : 'touch-manipulation'}`} onClick={(event) => { if (PARTNER_MAP_EDIT_MODE) event.preventDefault(); }} onPointerDown={(event) => beginDrag(event, item, box)} onMouseEnter={() => setActivePartnerId(item.id)} onMouseLeave={() => { if (dragging?.id !== item.id) setActivePartnerId(null); }} onFocus={() => setActivePartnerId(item.id)} onBlur={() => setActivePartnerId(null)}>{item.logo.contrastAid === 'soft-light' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-2 rounded-[50%] bg-white/45 blur-[10px]" />}{item.logo.contrastAid === 'soft-light-strong' && <span aria-hidden="true" className="absolute inset-0 rounded-[50%] bg-white/80 blur-[8px]" />}{item.logo.contrastAid === 'maptek-green' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-1 rounded-md bg-[#00843d]" />}<img src={item.logo.src} alt="" draggable={false} data-contrast={item.id === 'lander' ? 'dark-outline' : undefined} data-active={active} className={`partner-map-logo pointer-events-none relative z-10 h-[calc(100%-4px)] w-[calc(100%-4px)] select-none object-contain transition-[filter,opacity] ${dimmed ? 'opacity-40' : 'opacity-100'} ${active ? 'drop-shadow-[0_3px_8px_rgba(249,115,22,0.4)]' : 'drop-shadow-[0_2px_2px_rgba(255,255,255,0.42)]'}`} /></a></foreignObject>{active && <g pointerEvents="none"><rect x={partnerTooltipX} y={partnerTooltipY} width={partnerTooltipWidth} height="28" rx="7" fill="#0f172a" stroke="#fb923c" /><text x={partnerTooltipX + partnerTooltipWidth / 2} y={partnerTooltipY + 18.5} textAnchor="middle" fill="#fff7ed" fontSize="12.5" fontWeight="700">{item.name}</text></g>}</g>;
+              return <g key={item.id}><foreignObject x={box.x} y={box.y} width={box.width} height={box.height} overflow="visible"><a href={PARTNER_MAP_EDIT_MODE ? undefined : item.website} target={PARTNER_MAP_EDIT_MODE ? undefined : '_blank'} rel={PARTNER_MAP_EDIT_MODE ? undefined : 'noreferrer'} aria-label={`${item.name}, ${country.name}`} aria-grabbed={PARTNER_MAP_EDIT_MODE ? dragging?.id === item.id : undefined} className={`relative flex h-full w-full items-center justify-center rounded-[8px] outline-none transition-[filter,opacity] focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 ${PARTNER_MAP_EDIT_MODE ? 'cursor-grab touch-none active:cursor-grabbing' : 'touch-manipulation'}`} onClick={(event) => { if (PARTNER_MAP_EDIT_MODE) event.preventDefault(); }} onPointerDown={(event) => beginDrag(event, item, box)} onMouseEnter={() => setActivePartnerId(item.id)} onMouseLeave={() => { if (dragging?.id !== item.id) setActivePartnerId(null); }} onFocus={() => setActivePartnerId(item.id)} onBlur={() => setActivePartnerId(null)}>{item.logo.contrastAid === 'soft-light' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-2 rounded-[50%] bg-white/45 blur-[10px]" />}{item.logo.contrastAid === 'soft-light-strong' && <span aria-hidden="true" className="absolute inset-0 rounded-[50%] bg-white/80 blur-[8px]" />}{item.logo.contrastAid === 'maptek-green' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-1 rounded-md bg-[#00843d]" />}<img src={item.logo.src} alt="" draggable={false} data-contrast={item.id === 'lander' ? 'dark-outline' : undefined} data-active={active} style={{ transform: `scale(${LOGO_OPTICAL_SCALE[item.id] ?? 1})` }} className={`partner-map-logo pointer-events-none relative z-10 h-[calc(100%-4px)] w-[calc(100%-4px)] select-none object-contain transition-[filter,opacity,transform] ${dimmed ? 'opacity-40' : 'opacity-100'} ${active ? 'drop-shadow-[0_3px_8px_rgba(249,115,22,0.4)]' : 'drop-shadow-[0_2px_2px_rgba(255,255,255,0.42)]'}`} /></a></foreignObject>{active && <g pointerEvents="none"><rect x={partnerTooltipX} y={partnerTooltipY} width={partnerTooltipWidth} height="28" rx="7" fill="#0f172a" stroke="#fb923c" /><text x={partnerTooltipX + partnerTooltipWidth / 2} y={partnerTooltipY + 18.5} textAnchor="middle" fill="#fff7ed" fontSize="12.5" fontWeight="700">{item.name}</text></g>}</g>;
             })}
             <g data-country-id={country.id} transform={`translate(${marker.x} ${marker.y})`} tabIndex={0} aria-label={country.name} className="cursor-pointer outline-none" onMouseEnter={() => setActiveCountryId(country.id)} onMouseLeave={() => setActiveCountryId(null)} onFocus={() => setActiveCountryId(country.id)} onBlur={() => setActiveCountryId(null)}><path transform={`scale(${MARKER_SCALE})`} d="M 0 0 C -2 -3.5 -6.5 -7.5 -6.5 -12 A 6.5 6.5 0 1 1 6.5 -12 C 6.5 -7.5 2 -3.5 0 0 Z M 0 -14.2 A 2.2 2.2 0 1 0 0 -9.8 A 2.2 2.2 0 1 0 0 -14.2 Z" fill={activeCountry ? '#f97316' : '#334a61'} fillRule="evenodd" stroke="#f8fafc" strokeWidth={activeCountry ? 1.9 : 1.55} strokeLinejoin="round" /></g>
           </g>;
