@@ -30,6 +30,7 @@
       - [Thư viện media](#thư-viện-media)
     - [2.5. Tương tác khách hàng](#25-tương-tác-khách-hàng)
       - [Hai nhóm CTA và Biểu mẫu](#hai-nhóm-cta-và-biểu-mẫu)
+      - [Phạm vi CTA và Biểu mẫu](#phạm-vi-cta-và-biểu-mẫu)
       - [CTA](#cta)
       - [Biểu mẫu](#biểu-mẫu)
       - [Yêu cầu khách hàng](#yêu-cầu-khách-hàng)
@@ -58,7 +59,7 @@ CMS mới không làm lại toàn bộ nghiệp vụ của CMS cũ. Hệ thống
 | **Sản phẩm** | Đã quản lý nội dung, ảnh, video, tài liệu, giá, SEO, sản phẩm liên quan và nhiều loại email theo hành động | Kế thừa hồ sơ Sản phẩm hiện có; ảnh và tài liệu được chọn từ Thư viện media, còn các hành động đăng ký, tải tài liệu và yêu cầu báo giá dùng CTA, Biểu mẫu và Mẫu email chung. | **Kế thừa + nâng cấp** |
 | **Danh mục, hãng, ứng dụng và loại sản phẩm** | Đã có các danh mục phân loại riêng phục vụ quản lý và hiển thị sản phẩm | Kế thừa các dữ liệu phân loại và liên kết Sản phẩm hiện có; tiếp tục quản lý riêng thành Danh mục sản phẩm, Hãng sản xuất, Lĩnh vực ứng dụng và Loại sản phẩm. | **Kế thừa + nâng cấp** |
 | **Nhân viên kinh doanh** | Đã lưu tên, số điện thoại, Skype/Zalo và gắn với sản phẩm | Kế thừa danh sách nhân viên kinh doanh và phạm vi Sản phẩm đang phụ trách; quản lý dưới tên **Người phụ trách kinh doanh** và không sử dụng như tài khoản CMS. | **Kế thừa + nâng cấp** |
-| **Trang tĩnh / Trang nội dung** | Đã có Trang tĩnh cho Giới thiệu, Chính sách và một số Dịch vụ; nội dung các trang còn được phối hợp qua Block, Banner và Slideshow | Kế thừa nội dung các Trang tĩnh còn sử dụng và quản lý lại theo từng trang cố định như Trang chủ, Giới thiệu, Liên hệ. Người biên tập chỉnh từng khu vực của trang, xem trước toàn trang rồi công bố. | **Kế thừa Trang tĩnh + tổ chức lại** |
+| **Trang tĩnh / Trang nội dung** | Đã có Trang tĩnh cho Giới thiệu, Chính sách và một số Dịch vụ; nội dung các trang còn được phối hợp qua Block, Banner và Slideshow | Kế thừa nội dung còn sử dụng và quản lý lại thành hai nhóm: các trang mặc định có thiết kế riêng như Trang chủ, nhóm Giới thiệu và Liên hệ; các trang dùng **mẫu trang thông tin chuẩn** như Chính sách bảo mật và Điều khoản sử dụng. Mẫu chuẩn gồm phần đầu trang và một vùng nội dung soạn thảo; trang mặc định chỉ được sửa, không được xóa, còn người quản trị có thể tạo thêm trang theo mẫu này. | **Kế thừa Trang tĩnh + tổ chức lại** |
 | **Block** | Xác định loại nội dung, vị trí và nơi xuất hiện để ghép các phần của trang | Không còn module Block riêng. Nội dung còn sử dụng được chuyển vào các khu vực tương ứng của Trang nội dung hoặc được chọn trực tiếp từ Tin tức, Sản phẩm, Dịch vụ và các chức năng liên quan. | **Thay thế**; không tiếp tục module Block riêng |
 | **Banner** | Quản lý ảnh, liên kết, nội dung, danh mục và nơi xuất hiện; dữ liệu thực tế phục vụ nhiều mục đích như đối tác hoặc khu vực trình bày | Không còn module Banner dùng chung. Banner dạng slide được chuyển vào khu vực Banner của Trang nội dung; ảnh được quản lý trong Media, còn dữ liệu thuộc chức năng khác được chọn từ danh sách tương ứng. | **Tổ chức lại**; không tiếp tục module Banner riêng |
 | **Slideshow** | Đã quản lý ảnh, ảnh thu nhỏ, liên kết, tóm tắt, danh mục và thứ tự; có thể được gọi qua Block tại các vị trí trình bày | Không còn module Slideshow riêng. Các slideshow còn phù hợp được chuyển vào khu vực slide/carousel của Trang nội dung; ảnh cũ còn giá trị được đưa vào Thư viện media. | **Tổ chức lại / bỏ module cũ**; không xóa tài nguyên còn giá trị |
@@ -66,13 +67,13 @@ CMS mới không làm lại toàn bộ nghiệp vụ của CMS cũ. Hệ thống
 | **Dự án** | Không có module quản lý hồ sơ dự án | Thêm chức năng quản lý danh sách và trang chi tiết Dự án tiêu biểu, gồm nội dung giới thiệu, khách hàng, lĩnh vực, giải pháp, công nghệ, thời gian thực hiện và các Sản phẩm hoặc Dịch vụ liên quan. | **Thêm mới** |
 | **Menu** | Đã có nhóm menu và danh sách mục menu với liên kết, thứ tự và trạng thái | Kế thừa các nhóm và mục Menu hiện có; bổ sung quản lý cây nhiều cấp và xem trước toàn bộ cấu trúc trước khi lưu. | **Kế thừa + nâng cấp** |
 | **CTA** | Các nút hoặc liên kết hành động nằm trong sản phẩm, sự kiện, banner hay từng vị trí cố định; chưa có nơi quản lý CTA dùng chung | Thêm nơi quản lý dùng chung các nút như **Đăng ký tư vấn**, **Yêu cầu báo giá**, **Tải tài liệu**, **Liên hệ** và **Xem thêm**. CTA có thể dẫn tới trang, tài liệu, kênh liên hệ hoặc mở Biểu mẫu. | **Thêm mới ở cấp chức năng quản trị**; kế thừa các hành động cũ còn dùng |
-| **Biểu mẫu** | Có các biểu mẫu cố định cho Liên hệ Website và đăng ký sản phẩm; chưa có chức năng thiết kế biểu mẫu dùng chung | Thêm nơi quản lý các Biểu mẫu như **Liên hệ**, **Đăng ký tư vấn** và **Yêu cầu báo giá**, gồm các thông tin khách cần nhập và cách tiếp nhận sau khi gửi. Lượt gửi được lưu và có thể tạo Yêu cầu khách hàng. | **Thêm mới ở cấp chức năng quản trị**; tổ chức lại các biểu mẫu cố định |
+| **Biểu mẫu** | Có các biểu mẫu cố định cho Liên hệ Website và đăng ký sản phẩm; chưa có chức năng thiết kế biểu mẫu dùng chung | Thêm nơi quản lý các Biểu mẫu như **Liên hệ**, **Đăng ký tư vấn** và **Yêu cầu báo giá**, gồm các trường khách cần nhập và cách tiếp nhận sau khi gửi. Lượt gửi được lưu và có thể tạo Yêu cầu khách hàng. | **Thêm mới ở cấp chức năng quản trị**; tổ chức lại các biểu mẫu cố định |
 | **Liên hệ Website** | Được lưu thành danh sách liên hệ riêng với thông tin người gửi và nội dung | Không còn theo dõi riêng tại Danh sách Liên hệ Website. Dữ liệu cũ được giữ và hiển thị trong Yêu cầu khách hàng với nguồn là Trang Liên hệ. | **Tổ chức lại / hợp nhất** |
 | **Đăng ký mua, liên hệ sản phẩm và tải tài liệu** | Được lưu chung trong Danh sách đăng ký sản phẩm nhưng tách khỏi Liên hệ Website và chưa có quy trình xử lý thống nhất | Không còn theo dõi riêng trong Danh sách đăng ký sản phẩm. Dữ liệu cũ được giữ và đưa vào Yêu cầu khách hàng cùng Sản phẩm và loại yêu cầu đã phát sinh. | **Tổ chức lại / hợp nhất** |
 | **Yêu cầu khách hàng** | Nhu cầu khách hàng nằm ở các danh sách Liên hệ Website và Đăng ký sản phẩm riêng | Hợp nhất Liên hệ Website, đăng ký mua, liên hệ Sản phẩm và lượt gửi Biểu mẫu vào một nơi xử lý chung. Nhân viên có thể phân công người phụ trách, đặt ưu tiên, cập nhật trạng thái, ghi chú và theo dõi quá trình xử lý. | **Tổ chức lại + nâng cấp** |
 | **Email theo hành động sản phẩm / Mẫu email** | Đã có mẫu email cho các hành động như liên hệ, đăng ký mua, tải sản phẩm và nhận báo giá | Kế thừa các mẫu email còn sử dụng và tập trung thành chức năng Mẫu email dùng chung. Biểu mẫu hoặc CTA chọn mẫu xác nhận khách hàng và mẫu thông báo nội bộ phù hợp. | **Kế thừa + tổ chức lại + nâng cấp** |
 | **Người dùng** | Đã quản lý tài khoản, họ tên, email, điện thoại, địa chỉ, trạng thái và mật khẩu | Kế thừa tài khoản và hồ sơ người dùng hiện có; bổ sung trạng thái tài khoản chi tiết, gán Vai trò & quyền và lưu lịch sử thay đổi trạng thái. | **Kế thừa + nâng cấp** |
-| **Task và quyền trực tiếp / Vai trò & quyền** | Quyền Task được cấp trực tiếp cho từng tài khoản theo module | Thay việc cấp quyền trực tiếp cho từng tài khoản bằng Vai trò & quyền. Quản trị viên tạo vai trò như **Biên tập viên**, **Quản lý**, **Admin**, chọn chức năng được phép sử dụng rồi gán vai trò cho người dùng. | **Thay thế cơ chế quản trị**; quyền trực tiếp cũ chỉ dùng để xác định quyền tương đương khi chuyển đổi |
+| **Vai trò & quyền** | Quyền Task được cấp trực tiếp cho từng tài khoản theo module | Thay việc cấp quyền trực tiếp cho từng tài khoản bằng Vai trò & quyền. Quản trị viên tạo vai trò như **Biên tập viên**, **Quản lý**, **Admin**, chọn chức năng được phép sử dụng rồi gán vai trò cho người dùng. | **Thay thế cơ chế quản trị**; quyền trực tiếp cũ chỉ dùng để xác định quyền tương đương khi chuyển đổi |
 | **Cấu hình chung** | Đã quản lý thông tin Website như tên, logo, hotline, email, chân trang, mạng xã hội, mã theo dõi và một số nội dung Trang chủ | Kế thừa các thiết lập Website còn sử dụng; nội dung riêng của từng trang chuyển sang Trang nội dung, ảnh và tệp chuyển sang Media, còn thông tin dùng chung tiếp tục quản lý tại Cấu hình hệ thống. | **Kế thừa + tổ chức lại** |
 | **Địa chỉ liên hệ** | Có module riêng lưu địa chỉ và thông tin liên hệ doanh nghiệp | Không còn module Địa chỉ liên hệ riêng. Danh sách trụ sở và chi nhánh chuyển vào Cấu hình hệ thống; Trang Liên hệ và Footer cùng sử dụng nguồn dữ liệu này. | **Tổ chức lại**; không tiếp tục module Địa chỉ liên hệ riêng và không nhập lặp địa chỉ trong Page Builder |
 | **Cấu hình Enjicad** | Có module riêng chứa cả cấu hình chung, nội dung giới thiệu, hình ảnh, SEO và các thông tin dành riêng cho Enjicad | Không còn module Cấu hình Enjicad riêng. Dữ liệu còn sử dụng được chuyển theo mục đích sang Cấu hình hệ thống, Trang nội dung, Sản phẩm hoặc Dịch vụ, Media và SEO & URL. | **Tách theo mục đích / bỏ module riêng**; không hiểu là xóa toàn bộ dữ liệu |
@@ -193,25 +194,37 @@ Tạo · Sửa · Sắp xếp cấp cha–con · Đặt thứ tự và trạng t
 
 #### Trang nội dung
 
-**Dùng để làm gì?** Quản lý các trang có bố cục riêng như Trang chủ, Giới thiệu, Cơ cấu tổ chức, Năng lực & Kinh nghiệm và Liên hệ. Khác với trình soạn bài thông thường, người dùng sửa nội dung theo từng khu vực; hệ thống giữ cố định bố cục tổng thể để hạn chế làm sai thiết kế Website.
+**Dùng để làm gì?** Quản lý các trang mặc định của Website gồm Trang chủ, các trang Giới thiệu, Liên hệ, Chính sách bảo mật và Điều khoản sử dụng; đồng thời cho phép tạo thêm trang theo **mẫu trang thông tin chuẩn**. Khác với trình soạn bài thông thường, người dùng sửa nội dung theo từng khu vực; hệ thống giữ cố định bố cục tổng thể để hạn chế làm sai thiết kế Website.
 
 Chức năng này thay thế cách CMS cũ quản lý các khu vực Website bằng từng Block theo module và vị trí. Thay vì cấu hình các Block riêng lẻ, người dùng mở một trang và cập nhật các khu vực thuộc bố cục của trang đó.
 
-CMS cũng cho phép tạo trang thông tin đơn giản theo mẫu dùng chung, tương tự Chính sách bảo mật hoặc Điều khoản sử dụng.
+> **Nguyên tắc phân chia:** Trang nội dung quản lý cách một trang cố định được trình bày; Tin tức, Sản phẩm, Dịch vụ, Dự án và các chức năng nghiệp vụ quản lý dữ liệu được trang đó sử dụng. Ví dụ, Dự án xuất hiện trên Trang chủ vẫn được sửa tại chức năng **Dự án**; trong **Trang nội dung → Trang chủ**, người biên tập chỉ chọn Dự án nào được đưa vào khu vực tương ứng khi bố cục hỗ trợ.
+
+Trang nội dung gồm hai nhóm:
+
+- **Trang mặc định:** Trang chủ, các trang Giới thiệu, Liên hệ, Chính sách bảo mật và Điều khoản sử dụng. Đây là các trang Website cần có, được tạo sẵn theo đúng bố cục; người quản trị có thể sửa nội dung nhưng không xóa trang.
+- **Trang thông tin bổ sung:** Do người quản trị tạo khi cần thêm nội dung như quy chế, hướng dẫn hoặc thông báo dài hạn. Trang mới dùng cùng mẫu với Chính sách bảo mật và Điều khoản sử dụng, gồm:
+  - **Phần đầu trang cố định:** phân loại, tiêu đề, mô tả ngắn, ngày cập nhật và thời gian đọc nếu cần.
+  - **Một vùng nội dung soạn thảo:** nhập tiêu đề mục, đoạn văn, danh sách, liên kết và các nội dung định dạng được trình soạn thảo hỗ trợ.
+
+Mẫu này không có các khu vực thiết kế riêng như Hero, carousel, danh sách thẻ, số liệu hoặc khối Dự án/Sản phẩm; người quản trị không thêm, xóa hay sắp xếp các khu vực bố cục của trang.
 
 **Có thể làm gì?**
 
 - Chọn từng khu vực trên danh sách hoặc vùng xem trước để sửa đúng loại dữ liệu: tiêu đề, mô tả, ảnh, video, số liệu, CTA, biểu mẫu hoặc nội dung lấy từ chức năng khác.
 - Quản lý riêng các khu vực của Trang chủ và nhóm trang Giới thiệu mà không phải sửa mã nguồn hay bố cục.
-- Tạo trang thông tin mới theo mẫu chuẩn; hệ thống tự tạo đường dẫn, người dùng nhập phần đầu trang và nội dung.
+- Tạo trang thông tin mới theo mẫu trang thông tin chuẩn; hệ thống tự tạo đường dẫn, người dùng nhập thông tin đầu trang và nội dung soạn thảo.
+- Sửa nhưng không xóa các trang mặc định của Website.
 - Lưu bản nháp mà chưa ảnh hưởng Website hiện tại.
 - Xem trước toàn trang trên máy tính, máy tính bảng và điện thoại trước khi công bố.
 - Phân biệt phiên bản nháp, phiên bản đã công bố và nội dung còn thay đổi chưa xuất bản.
 
 **Ví dụ thực tế:** Muốn đổi banner Trang chủ, người biên tập mở **Trang chủ → khu vực mở đầu (Hero)**, thay tiêu đề, mô tả, ảnh nền hoặc CTA, lưu nháp, xem trước rồi mới công bố.
 
-**Cách sử dụng:**  
-`Chọn trang → chọn khu vực → cập nhật nội dung → lưu bản nháp → xem trước toàn trang → công bố`
+**Cách sử dụng:**
+
+- `Trang mặc định: chọn trang → chọn khu vực → cập nhật nội dung → lưu bản nháp → xem trước toàn trang → công bố`
+- `Trang bổ sung: tạo trang → nhập tên trang → hệ thống tạo đường dẫn và mẫu gồm phần đầu trang + vùng nội dung → cập nhật nội dung → xem trước → công bố`
 
 ![Màn hình quản lý Trang nội dung](https://lh3.googleusercontent.com/d/10vpyNYbrzq1VP8fPT4NTrirpJMoVobwX=w1600)
 
@@ -432,6 +445,8 @@ CTA không bắt buộc phải mở Biểu mẫu. CTA cũng có thể dẫn tớ
 
 #### Hai nhóm CTA và Biểu mẫu
 
+> **Hiểu nhanh:** **Hệ thống** = Website đã có sẵn vị trí sử dụng; **Bổ sung** = người quản trị tự tạo để dùng tại các vùng CMS cho phép.
+
 CTA và Biểu mẫu được phân thành hai nhóm để người quản trị hiểu rõ phạm vi sử dụng:
 
 | Nhóm | Nguồn hình thành | Cách sử dụng | Giới hạn |
@@ -442,6 +457,14 @@ CTA và Biểu mẫu được phân thành hai nhóm để người quản trị
 Ví dụ về nhóm **Hệ thống** gồm nút **Đăng ký tư vấn** tại trang sản phẩm, Biểu mẫu **Gửi yêu cầu** tại trang Liên hệ hoặc CTA **Yêu cầu báo giá** tại khu vực giới thiệu dịch vụ. Người quản trị không phải tạo lại các thành phần này từ đầu.
 
 Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm** được tạo cho một bài Tin tức hoặc Biểu mẫu đăng ký riêng cho một chiến dịch. Các thành phần này chỉ được chèn vào Tin tức, Sự kiện, Sản phẩm, Dịch vụ, Trang nội dung hoặc vùng soạn thảo khác khi vùng đó được CMS cho phép.
+
+#### Phạm vi CTA và Biểu mẫu
+
+Phạm vi hiện tại được giới hạn như sau:
+
+- Biểu mẫu dùng các loại trường và quy tắc nhập liệu Website hỗ trợ. **Mã trường do hệ thống tự sinh và không cho sửa trực tiếp** để dữ liệu gửi về, Mẫu email và Yêu cầu khách hàng không bị sai liên kết.
+- Sau khi gửi, hệ thống có thể lưu lượt gửi, tạo Yêu cầu khách hàng, thông báo nội bộ và gửi xác nhận cho khách theo cấu hình.
+- Phạm vi hiện tại không phải công cụ dựng landing page, không thiết kế luồng nhiều bước hoặc điều kiện rẽ nhánh, không chấm điểm lead, không tự chạy chiến dịch marketing và không thay thế CRM. Khả năng kết nối CRM chỉ là hướng tích hợp trong tương lai được nêu tại phần Yêu cầu khách hàng.
 
 #### CTA
 
@@ -476,6 +499,7 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 - Với Biểu mẫu **Hệ thống**, điều chỉnh các trường được phép cấu hình mà không phải tạo lại biểu mẫu của trang.
 - Với Biểu mẫu **Bổ sung**, tạo biểu mẫu mới rồi chèn vào vùng nội dung được hỗ trợ hoặc liên kết với CTA.
 - Thêm và sắp xếp trường; quy định trường bắt buộc, kiểu dữ liệu và quy tắc nhập liệu.
+- Mã của từng trường được hệ thống tự sinh và chỉ hiển thị để đối chiếu; người quản trị không nhập hoặc sửa mã này.
 - Cấu hình việc lưu lượt gửi thành Yêu cầu khách hàng, gửi thông báo nội bộ và gửi email xác nhận cho khách.
 - Xem trước biểu mẫu và theo dõi lượt gửi.
 - Tìm kiếm, lọc, nhân bản; quản lý trạng thái hoạt động, bản nháp, lưu trữ hoặc thùng rác.
@@ -563,11 +587,14 @@ Ví dụ về nhóm **Bổ sung** là CTA **Nhận tư vấn về sản phẩm**
 
 **Dùng để làm gì?** Quy định một nhóm người dùng được thực hiện thao tác nào trong CMS. Mô hình vận hành chính là **Người dùng → Vai trò → Quyền**; phạm vi chỉ là thiết lập nâng cao khi nghiệp vụ thực tế yêu cầu.
 
+Ví dụ về phạm vi: một người dùng có quyền sửa **Sản phẩm**, nhưng nếu được giới hạn theo phạm vi phụ trách thì chỉ sửa được các Sản phẩm được giao cho mình. Phạm vi không phải một tầng quyền bắt buộc; khi không thiết lập giới hạn, quyền có hiệu lực trên toàn bộ dữ liệu mà vai trò được phép truy cập.
+
 **Có thể làm gì?**
 
 - Tạo vai trò theo trách nhiệm công việc.
 - Chọn quyền xem, tạo, sửa, công bố hoặc xóa theo từng phân hệ.
 - Gán hoặc thu hồi vai trò của người dùng.
+- Nếu người dùng không có bất kỳ quyền nào trong một chức năng, chức năng đó không xuất hiện trên menu CMS. Khi được cấp ít nhất một quyền phù hợp, menu mới được hiển thị; hệ thống vẫn kiểm tra quyền khi người dùng mở hoặc thao tác trên chức năng.
 - Bật hoặc tắt vai trò; khi tắt, quyền tạm ngừng hiệu lực nhưng các lượt gán được giữ để có thể bật lại.
 - Giới hạn theo nội dung phụ trách hoặc chi nhánh trong phần nâng cao khi thật sự cần.
 - Danh mục quyền được định nghĩa trong code/backend, không cho quản trị viên tự tạo Task hoặc quyền trường dữ liệu trên giao diện.
