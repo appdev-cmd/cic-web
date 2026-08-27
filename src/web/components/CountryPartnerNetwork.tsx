@@ -6,7 +6,7 @@ import { worldMapPaths } from '../data/worldMapPaths';
 // Keep the overall block shallow while reserving more partner space above the
 // map than below it. The geographic map remains centered within the canvas.
 const CANVAS = { width: 2000, height: 1060, mapX: 340, mapY: 185, mapWidth: 1320, mapHeight: 726 } as const;
-const PARTNER_MAP_EDIT_MODE = false;
+const PARTNER_MAP_EDIT_MODE = true;
 const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
 const LOGO_BOUNDS = {
   compact: { width: 82, height: 58 },
@@ -32,6 +32,7 @@ const LOGO_OPTICAL_SCALE: Readonly<Record<string, number>> = {
   foxit: 0.84,
   dnv: 0.88,
 };
+const EUROPE_COUNTRY_IDS = new Set(['uk', 'ireland', 'france', 'netherlands', 'germany', 'switzerland', 'italy', 'czechia', 'spain', 'sweden', 'norway']);
 
 const mapPoint = (point: Point): Point => ({ x: CANVAS.mapX + point.x / 100 * CANVAS.mapWidth, y: CANVAS.mapY + point.y / 100 * CANVAS.mapHeight });
 const boxCenter = (box: Box): Point => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
@@ -65,7 +66,39 @@ const cubicPoint = (start: Point, controlA: Point, controlB: Point, end: Point, 
 };
 
 const pointInBox = (point: Point, box: Box) => point.x >= box.x && point.x <= box.x + box.width && point.y >= box.y && point.y <= box.y + box.height;
-const buildFanCurve = (marker: Point, end: Point, occupied: readonly Box[], fanIndex: number, fanCount: number, bend: number, includeFanOffset = true): Curve => {
+const deterministicVariation = (id: string, salt: number): number => {
+  let hash = 2166136261 ^ salt;
+  for (let index = 0; index < id.length; index += 1) {
+    hash ^= id.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return ((hash >>> 0) / 4294967295) * 2 - 1;
+};
+
+const rotateVector = (vector: Point, angle: number): Point => ({
+  x: vector.x * Math.cos(angle) - vector.y * Math.sin(angle),
+  y: vector.x * Math.sin(angle) + vector.y * Math.cos(angle),
+});
+
+const destinationArrivalTangent = (end: Point, directTangent: Point, variation: number): Point => {
+  const edgeDistances = [
+    { distance: end.x, tangent: { x: -1, y: 0 } },
+    { distance: CANVAS.width - end.x, tangent: { x: 1, y: 0 } },
+    { distance: end.y, tangent: { x: 0, y: -1 } },
+    { distance: CANVAS.height - end.y, tangent: { x: 0, y: 1 } },
+  ];
+  const edgeTangent = edgeDistances.reduce((nearest, candidate) => candidate.distance < nearest.distance ? candidate : nearest).tangent;
+  const isBottomArrival = edgeTangent.y > 0.5;
+  const edgeInfluence = (isBottomArrival ? 0.25 : 0.36) + variation * 0.03;
+  const blended = {
+    x: edgeTangent.x * edgeInfluence + directTangent.x * (1 - edgeInfluence),
+    y: edgeTangent.y * edgeInfluence + directTangent.y * (1 - edgeInfluence),
+  };
+  const blendedLength = Math.hypot(blended.x, blended.y) || 1;
+  return { x: blended.x / blendedLength, y: blended.y / blendedLength };
+};
+
+const buildFanCurve = (partnerId: string, marker: Point, end: Point, familyTangent: Point, familyIndex: number, familyCount: number, fanIndex: number, fanCount: number, departureBias: number, microRefineStraightPath: boolean, occupied: readonly Box[], bend: number, includeBundleShaping = true): Curve => {
   const markerAngle = Math.atan2(end.y - marker.y, end.x - marker.x);
   const anchor = { x: marker.x + Math.cos(markerAngle) * MARKER_CLEARANCE, y: marker.y + Math.sin(markerAngle) * MARKER_CLEARANCE };
   const dx = end.x - anchor.x;
@@ -73,13 +106,61 @@ const buildFanCurve = (marker: Point, end: Point, occupied: readonly Box[], fanI
   const length = Math.hypot(dx, dy) || 1;
   const tangent = { x: dx / length, y: dy / length };
   const normal = { x: -dy / length, y: dx / length };
-  const centeredIndex = fanIndex - (fanCount - 1) / 2;
-  const baseBow = clamp(length * 0.16, 34, 96);
-  const bow = bend * baseBow + (includeFanOffset ? Math.sign(bend) * centeredIndex * 11 : 0);
-  const controlA = { x: anchor.x + tangent.x * length * 0.3 + normal.x * bow, y: anchor.y + tangent.y * length * 0.3 + normal.y * bow };
-  // Keep the final tangent on the center-to-center axis so the curve visibly
-  // points into the middle of the logo instead of arriving at a sideways angle.
-  const controlB = { x: end.x - tangent.x * length * 0.28, y: end.y - tangent.y * length * 0.28 };
+  const rankPosition = fanCount <= 1 ? 0.5 : fanIndex / (fanCount - 1);
+  const centeredRank = rankPosition - 0.5;
+  const density = clamp((fanCount - 1) / 10, 0, 1);
+  const variationA = deterministicVariation(partnerId, 17);
+  const variationB = deterministicVariation(partnerId, 53);
+  const variationC = deterministicVariation(partnerId, 89);
+  const variationD = deterministicVariation(partnerId, 131);
+  const bendDirection = bend === 0 ? (variationA >= 0 ? 1 : -1) : Math.sign(bend);
+  const progressiveRank = bendDirection > 0 ? rankPosition : 1 - rankPosition;
+  const familyPosition = familyCount <= 1 ? 0.5 : familyIndex / (familyCount - 1);
+  const centeredFamilyPosition = familyPosition - 0.5;
+  // Small families resemble one another without sharing one exact lane. Some
+  // paths peel away immediately; only a few retain the family flow to 15%.
+  const departureShare = includeBundleShaping
+    ? clamp(0.072 + variationA * 0.068 + Math.abs(variationC) * 0.018, 0.008, 0.15)
+    : 0.025;
+  const familyInfluence = includeBundleShaping ? clamp(departureShare / 0.15, 0.08, 1) : 0;
+  const directInfluence = 0.82 - familyInfluence * 0.56 + Math.abs(centeredFamilyPosition) * 0.08;
+  const startTangentRaw = {
+    x: familyTangent.x * (1 - directInfluence) + tangent.x * directInfluence,
+    y: familyTangent.y * (1 - directInfluence) + tangent.y * directInfluence,
+  };
+  const startTangentLength = Math.hypot(startTangentRaw.x, startTangentRaw.y) || 1;
+  const sharedTangent = { x: startTangentRaw.x / startTangentLength, y: startTangentRaw.y / startTangentLength };
+  const departureAngle = includeBundleShaping
+    ? departureBias + centeredFamilyPosition * 0.035 + centeredRank * density * 0.012 + variationB * 0.018
+    : variationB * 0.016;
+  const startTangent = rotateVector(sharedTangent, departureAngle);
+  const arrivalBase = destinationArrivalTangent(end, tangent, variationD);
+  const endTangent = rotateVector(arrivalBase, variationB * 0.012 - bendDirection * 0.009);
+  const distanceFactor = clamp((length - 150) / 1350, 0, 1);
+  const easedDistance = Math.pow(distanceFactor, 0.72) * (1.08 - 0.08 * distanceFactor);
+  // Distance widens the gesture without deepening it: the ratio grows slowly,
+  // keeping long routes broad and quiet instead of progressively more bowed.
+  const curvatureRatio = 0.0315 + easedDistance * 0.052;
+  const bendStrength = Math.abs(bend) < 0.08 ? 0.3 : clamp(Math.abs(bend), 0.42, 1.3);
+  const rhythm = [0.86, 1, 0.9, 0.82, 1.04, 0.88, 0.84, 0.92, 0.72, 0.87][fanIndex % 10];
+  const straightPathLift = microRefineStraightPath && rhythm <= 0.92 ? 1.125 + variationA * 0.025 : 1;
+  const individualFlow = rhythm * straightPathLift * (0.99 + variationC * 0.025);
+  const progressiveFlow = includeBundleShaping ? 0.9 + progressiveRank * density * 0.22 + variationD * 0.08 : 1;
+  const bundleSeparation = includeBundleShaping ? length * centeredFamilyPosition * 0.006 : 0;
+  const curvature = Math.min(length * 0.13, length * curvatureRatio * bendStrength * individualFlow * progressiveFlow);
+  const bow = bendDirection * curvature + bundleSeparation;
+  const firstOffset = bow * (0.04 + variationC * 0.012);
+  const secondOffset = bow * (0.35 + variationD * 0.04);
+  const controlABackDistance = length * clamp(0.075 + departureShare * 0.78 + variationB * 0.018, 0.065, 0.205);
+  const controlBBackDistance = length * clamp(0.125 + variationB * 0.025 + Math.abs(centeredFamilyPosition) * 0.01, 0.09, 0.165);
+  const controlA = {
+    x: anchor.x + startTangent.x * controlABackDistance + normal.x * firstOffset,
+    y: anchor.y + startTangent.y * controlABackDistance + normal.y * firstOffset,
+  };
+  const controlB = {
+    x: end.x - endTangent.x * controlBBackDistance + normal.x * secondOffset,
+    y: end.y - endTangent.y * controlBBackDistance + normal.y * secondOffset,
+  };
   const samples = Array.from({ length: 49 }, (_, index) => cubicPoint(anchor, controlA, controlB, end, index / 48));
   const collisionScore = occupied.reduce((score, box) => score + (samples.slice(3, -3).some((point) => pointInBox(point, expandedBox(box, CONNECTOR_GAP))) ? 1 : 0), 0);
   return { path: `M ${anchor.x} ${anchor.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}`, samples, collisionScore };
@@ -171,9 +252,49 @@ export const CountryPartnerNetwork: React.FC = () => {
       boxOffset += count;
       const connectorStart = pinConnectionPoint(entry.marker);
       const endpoints = countryBoxes.map((box, index) => logoConnectionPoint(opticalLogoBox(entry.country!.partners[index], box), connectorStart));
-      const fanOrder = endpoints.map((end, index) => ({ index, angle: Math.atan2(end.y - entry.marker.y, end.x - entry.marker.x) })).sort((a, b) => a.angle - b.angle);
+      const mapCenter = { x: CANVAS.mapX + CANVAS.mapWidth / 2, y: CANVAS.mapY + CANVAS.mapHeight / 2 };
+      const outwardDx = connectorStart.x - mapCenter.x;
+      const outwardDy = connectorStart.y - mapCenter.y;
+      const outwardLength = Math.hypot(outwardDx, outwardDy) || 1;
+      const outward = { x: outwardDx / outwardLength, y: outwardDy / outwardLength };
+      const fanOrder = endpoints.map((end, index) => ({ index, angle: Math.atan2(end.y - entry.marker.y, end.x - entry.marker.x), y: end.y })).sort((a, b) => Math.abs(a.angle - b.angle) < 0.035 ? a.y - b.y : a.angle - b.angle);
       const rankByIndex = new Map(fanOrder.map((item, rank) => [item.index, rank]));
-      const buildCountryFan = (direction: -1 | 1) => endpoints.map((end, index) => buildFanCurve(connectorStart, end, boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, direction));
+      const familySize = count <= 4 ? Math.max(count, 1) : count >= 10 ? 3 : 2;
+      const usaBands = entry.config.countryId === 'usa'
+        ? [
+          fanOrder.filter(({ index }) => endpoints[index].y < CANVAS.height * 0.45),
+          fanOrder.filter(({ index }) => endpoints[index].y >= CANVAS.height * 0.45 && endpoints[index].y < CANVAS.height * 0.62),
+          fanOrder.filter(({ index }) => endpoints[index].y >= CANVAS.height * 0.62 && endpoints[index].y < CANVAS.height * 0.79),
+          fanOrder.filter(({ index }) => endpoints[index].y >= CANVAS.height * 0.79),
+        ].filter((family) => family.length > 0)
+        : null;
+      const families = usaBands ?? Array.from({ length: Math.ceil(fanOrder.length / familySize) }, (_, familyIndex) => fanOrder.slice(familyIndex * familySize, (familyIndex + 1) * familySize));
+      const usaDepartureBiases = [-0.08, 0.015, -0.035, 0.075] as const;
+      const familyByIndex = new Map<number, { tangent: Point; memberIndex: number; memberCount: number; departureBias: number }>();
+      families.forEach((members, familyIndex) => {
+        const familyCenter = members.reduce((sum, item) => ({ x: sum.x + endpoints[item.index].x, y: sum.y + endpoints[item.index].y }), { x: 0, y: 0 });
+        familyCenter.x /= Math.max(members.length, 1);
+        familyCenter.y /= Math.max(members.length, 1);
+        const familyDx = familyCenter.x - connectorStart.x;
+        const familyDy = familyCenter.y - connectorStart.y;
+        const familyLength = Math.hypot(familyDx, familyDy) || 1;
+        const directFamilyTangent = { x: familyDx / familyLength, y: familyDy / familyLength };
+        const outwardAlignment = directFamilyTangent.x * outward.x + directFamilyTangent.y * outward.y;
+        const outwardWeight = outwardAlignment > 0 ? 0.14 : 0.06;
+        const tangentRaw = { x: directFamilyTangent.x * (1 - outwardWeight) + outward.x * outwardWeight, y: directFamilyTangent.y * (1 - outwardWeight) + outward.y * outwardWeight };
+        const tangentLength = Math.hypot(tangentRaw.x, tangentRaw.y) || 1;
+        const familyTangent = { x: tangentRaw.x / tangentLength, y: tangentRaw.y / tangentLength };
+        const departureBias = entry.config.countryId === 'usa' ? usaDepartureBiases[familyIndex] ?? 0 : deterministicVariation(`${entry.config.countryId}-${familyIndex}`, 211) * 0.025;
+        members.forEach((member, memberIndex) => familyByIndex.set(member.index, { tangent: familyTangent, memberIndex, memberCount: members.length, departureBias }));
+      });
+      const buildCountryFan = (direction: -1 | 1) => endpoints.map((end, index) => {
+        const directLength = Math.hypot(end.x - connectorStart.x, end.y - connectorStart.y) || 1;
+        const family = familyByIndex.get(index) ?? { tangent: { x: (end.x - connectorStart.x) / directLength, y: (end.y - connectorStart.y) / directLength }, memberIndex: 0, memberCount: 1, departureBias: 0 };
+        const microRefineStraightPath = (entry.config.countryId === 'usa' && end.y >= CANVAS.height * 0.62)
+          || (entry.config.countryId === 'china' && end.x >= CANVAS.width * 0.7)
+          || (EUROPE_COUNTRY_IDS.has(entry.config.countryId) && end.y >= CANVAS.height * 0.62);
+        return buildFanCurve(entry.country!.partners[index].id, connectorStart, end, family.tangent, family.memberIndex, family.memberCount, rankByIndex.get(index) ?? index, count, family.departureBias, microRefineStraightPath, boxes.filter((box) => box !== countryBoxes[index]), direction);
+      });
       const negativeFan = buildCountryFan(-1);
       const positiveFan = buildCountryFan(1);
       const negativeScore = negativeFan.reduce((score, curve) => score + curve.collisionScore, 0);
@@ -183,7 +304,14 @@ export const CountryPartnerNetwork: React.FC = () => {
       const bends = Object.fromEntries((entry.country?.partners ?? []).map((partner) => [partner.id, curveBends[partner.id] ?? automaticDirection])) as CurveBends;
       const curves = (entry.country?.partners ?? []).map((partner, index) => curveBends[partner.id] === undefined
         ? (automaticDirection === -1 ? negativeFan[index] : positiveFan[index])
-        : buildFanCurve(connectorStart, endpoints[index], boxes.filter((box) => box !== countryBoxes[index]), rankByIndex.get(index) ?? index, count, bends[partner.id], false));
+        : (() => {
+          const family = familyByIndex.get(index)!;
+          const end = endpoints[index];
+          const microRefineStraightPath = (entry.config.countryId === 'usa' && end.y >= CANVAS.height * 0.62)
+            || (entry.config.countryId === 'china' && end.x >= CANVAS.width * 0.7)
+            || (EUROPE_COUNTRY_IDS.has(entry.config.countryId) && end.y >= CANVAS.height * 0.62);
+          return buildFanCurve(partner.id, connectorStart, end, family.tangent, family.memberIndex, family.memberCount, rankByIndex.get(index) ?? index, count, family.departureBias, microRefineStraightPath, boxes.filter((box) => box !== countryBoxes[index]), bends[partner.id], true);
+        })());
       return { ...entry, boxes: countryBoxes, curves, endpoints, bends, connectorStart };
     });
   }, [curveBends, positions]);
@@ -225,7 +353,8 @@ export const CountryPartnerNetwork: React.FC = () => {
       const length = Math.hypot(dx, dy) || 1;
       const normal = { x: -dy / length, y: dx / length };
       const midpoint = { x: (dragging.marker.x + dragging.end.x) / 2, y: (dragging.marker.y + dragging.end.y) / 2 };
-      const baseBow = clamp(length * 0.16, 34, 96);
+      const distanceFactor = clamp((length - 180) / 1250, 0, 1);
+      const baseBow = length * (0.0325 + distanceFactor * 0.05);
       const rawBend = ((point.x - midpoint.x) * normal.x + (point.y - midpoint.y) * normal.y) / baseBow;
       const bend = Math.abs(rawBend) < 0.08 ? 0 : Number(clamp(rawBend, -1.5, 1.5).toFixed(3));
       const next: CurveBends = { ...curveBendsRef.current, [dragging.id]: bend };
@@ -292,7 +421,7 @@ export const CountryPartnerNetwork: React.FC = () => {
 
   return (
     <div className="relative w-full min-w-0 overflow-hidden touch-pan-y" aria-label="Mạng lưới đối tác tiêu biểu theo quốc gia">
-      {PARTNER_MAP_EDIT_MODE && <div className="absolute right-2 top-2 z-20 flex items-center gap-1.5 rounded-lg bg-slate-950/90 p-1.5 text-[11px] text-white shadow-md"><span className="px-1 text-white/75">Kéo đường để uốn</span><button type="button" onClick={resetLayout} className="rounded-md px-2 py-1.5 font-semibold hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">Reset Layout</button><button type="button" onClick={exportLayout} className="rounded-md bg-orange-500 px-2 py-1.5 font-bold text-white hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Export Layout</button>{exportStatus && <span className="px-1 text-white/80" aria-live="polite">{exportStatus}</span>}</div>}
+      {PARTNER_MAP_EDIT_MODE && <div className="relative z-20 mb-2 ml-auto flex w-fit max-w-[calc(100%-0.5rem)] items-center gap-1 rounded-lg bg-slate-950/90 p-1 text-[10px] text-white shadow-md sm:absolute sm:right-2 sm:top-2 sm:mb-0 sm:gap-1.5 sm:p-1.5 sm:text-[11px]"><span className="hidden px-1 text-white/75 md:inline">Kéo đường để uốn</span><button type="button" onClick={resetLayout} className="rounded-md px-2 py-1.5 font-semibold hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">Reset Layout</button><button type="button" onClick={exportLayout} className="rounded-md bg-orange-500 px-2 py-1.5 font-bold text-white hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Export Layout</button>{exportStatus && <span className="px-1 text-white/80" aria-live="polite">{exportStatus}</span>}</div>}
       <svg ref={svgRef} viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`} preserveAspectRatio="xMidYMid meet" className="block h-auto max-w-full w-full" role="img" aria-labelledby="partner-map-title partner-map-desc" onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
         <style>{`
           foreignObject img { width: calc(100% - 4px); height: calc(100% - 4px); }
@@ -328,7 +457,7 @@ export const CountryPartnerNetwork: React.FC = () => {
           return <g key={country.id} data-country-layout={config.countryId}>
             {country.partners.map((item, index) => {
               const emphasized = markerActive || activePartnerId === item.id;
-              return <React.Fragment key={`${item.id}-curve`}>{PARTNER_MAP_EDIT_MODE && <path d={curves[index].path} fill="none" stroke="transparent" strokeWidth="16" pointerEvents="stroke" className="cursor-ns-resize" onPointerDown={(event) => beginCurveDrag(event, item.id, connectorStart, endpoints[index])} />}<path className="partner-map-connector" data-connector="direct-curve" data-active={emphasized} data-dimmed={!emphasized && relationshipFocused} data-country-id={country.id} data-partner-id={item.id} d={curves[index].path} fill="none" stroke={emphasized ? '#f97316' : '#587188'} strokeWidth={emphasized ? 1.2 : 0.86} strokeDasharray={emphasized ? undefined : '7 2'} opacity={emphasized ? 0.98 : relationshipFocused ? 0.14 : 0.68} strokeLinecap="round" vectorEffect="non-scaling-stroke" pointerEvents="none" /></React.Fragment>;
+              return <React.Fragment key={`${item.id}-curve`}>{PARTNER_MAP_EDIT_MODE && <path d={curves[index].path} fill="none" stroke="transparent" strokeWidth="16" pointerEvents="stroke" className="cursor-ns-resize" onPointerDown={(event) => beginCurveDrag(event, item.id, connectorStart, endpoints[index])} />}<path className="partner-map-connector" data-connector="direct-curve" data-active={emphasized} data-dimmed={!emphasized && relationshipFocused} data-country-id={country.id} data-partner-id={item.id} d={curves[index].path} fill="none" stroke={emphasized ? '#f97316' : '#587188'} strokeWidth={emphasized ? 1.2 : 0.86} strokeDasharray={emphasized ? undefined : '3 3'} opacity={emphasized ? 0.98 : relationshipFocused ? 0.14 : 0.6} strokeLinecap="round" vectorEffect="non-scaling-stroke" pointerEvents="none" /></React.Fragment>;
             })}
             {country.partners.map((item, index) => {
               const box = boxes[index]; const active = activePartnerId === item.id; const dimmed = (activePartnerId !== null && !active) || (activeCountryId !== null && !markerActive);

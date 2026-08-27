@@ -51,26 +51,29 @@ export const countryMarkers: readonly CountryMarkerConfig[] = [
  * rejects placements that touch land, another logo, a pin, or canvas bounds.
  */
 export const partnerLogoPositions = {
-  lantek: { x: 0.413065, y: 0.874798 }, roomvo: { x: 0.12042, y: 0.923833 }, stx: { x: 0.03218, y: 0.65852 },
-  csi: { x: 0.026624, y: 0.837461 }, bentley: { x: 0.013707, y: 0.380062 }, kritikal: { x: 0.089613, y: 0.409751 },
-  htri: { x: 0.028572, y: 0.526019 }, ansys: { x: 0.377924, y: 0.926896 }, agi: { x: 0.097476, y: 0.811522 },
-  foxit: { x: 0.20729, y: 0.729595 }, autodesk: { x: 0.2684, y: 0.820523 }, seequent: { x: 0.044806, y: 0.294795 },
-  metsims: { x: 0.410027, y: 0.645258 }, 'zx-lidar': { x: 0.382036, y: 0.419445 }, radiodetection: { x: 0.390982, y: 0.478277 }, gigaton: { x: 0.393723, y: 0.348931 },
-  prokon: { x: 0.033655, y: 0.197959 }, graitec: { x: 0.489826, y: 0.650586 }, deltares: { x: 0.064496, y: 0.062485 }, 'pre-sustainability': { x: 0.079287, y: 0.1409 },
-  pytha: { x: 0.384489, y: 0.068612 }, allplan: { x: 0.185632, y: 0.014704 }, ptv: { x: 0.307933, y: 0.035531 }, lander: { x: 0.448519, y: 0.749685 },
-  geosig: { x: 0.904984, y: 0.311985 }, opera: { x: 0.526553, y: 0.931398 }, emmegi: { x: 0.595239, y: 0.895568 },
-  'idea-statica': { x: 0.848744, y: 0.23641 }, hexagon: { x: 0.920175, y: 0.180668 }, geoscanner: { x: 0.902164, y: 0.093346 },
-  dnv: { x: 0.77208, y: 0.072325 }, piletest: { x: 0.652381, y: 0.600999 }, gstarsoft: { x: 0.876884, y: 0.571421 },
-  glodon: { x: 0.764327, y: 0.507762 }, qysea: { x: 0.869713, y: 0.415731 }, chc: { x: 0.933047, y: 0.518639 }, bimage: { x: 0.721644, y: 0.904573 },
-  'ai-architecture': { x: 0.226481, y: 0.905353 }, cype: { x: 0.317318, y: 0.8867 }, maptek: { x: 0.926667, y: 0.7529 }, deswik: { x: 0.85938, y: 0.93145 }, metron: { x: 0.923233, y: 0.843633 },
+  lantek: { x: 0.392935, y: 0.831915 }, roomvo: { x: 0.068472, y: 0.813565 }, stx: { x: 0.033479, y: 0.507819 },
+  csi: { x: 0.042858, y: 0.615698 }, bentley: { x: 0.107865, y: 0.285719 }, kritikal: { x: 0.086366, y: 0.350942 },
+  htri: { x: 0.055196, y: 0.431678 }, ansys: { x: 0.338312, y: 0.763943 }, agi: { x: 0.038384, y: 0.720856 },
+  foxit: { x: 0.118328, y: 0.885196 }, autodesk: { x: 0.256713, y: 0.799695 }, seequent: { x: 0.060391, y: 0.179624 },
+  metsims: { x: 0.400936, y: 0.640357 }, 'zx-lidar': { x: 0.397622, y: 0.391265 }, radiodetection: { x: 0.389035, y: 0.470925 }, gigaton: { x: 0.421645, y: 0.734869 },
+  prokon: { x: 0.399894, y: 0.314355 }, graitec: { x: 0.520346, y: 0.864998 }, deltares: { x: 0.308006, y: 0.024503 }, 'pre-sustainability': { x: 0.298121, y: 0.095565 },
+  pytha: { x: 0.477997, y: 0.018378 }, allplan: { x: 0.383688, y: 0.05881 }, ptv: { x: 0.448845, y: 0.084539 }, lander: { x: 0.464754, y: 0.660243 },
+  geosig: { x: 0.805632, y: 0.357317 }, opera: { x: 0.594736, y: 0.890966 }, emmegi: { x: 0.616668, y: 0.717913 },
+  'idea-statica': { x: 0.857185, y: 0.281742 }, hexagon: { x: 0.918226, y: 0.191695 }, geoscanner: { x: 0.849566, y: 0.103148 },
+  dnv: { x: 0.644156, y: 0.084577 }, piletest: { x: 0.649134, y: 0.604675 }, gstarsoft: { x: 0.87039, y: 0.549367 },
+  glodon: { x: 0.755885, y: 0.515113 }, qysea: { x: 0.869064, y: 0.423082 }, chc: { x: 0.93045, y: 0.506387 }, bimage: { x: 0.721644, y: 0.904573 },
+  'ai-architecture': { x: 0.185571, y: 0.855121 }, cype: { x: 0.28485, y: 0.736 }, maptek: { x: 0.913679, y: 0.729621 }, deswik: { x: 0.844445, y: 0.906946 }, metron: { x: 0.888167, y: 0.837507 },
 } as const satisfies Readonly<Record<string, NormalizedPoint>>;
 
 export const partnerCurveBends = {
-  ptv: 1.068, allplan: 1.203, 'pre-sustainability': 1.353, pytha: 1.073,
-  lander: 0.558, metsims: -0.219, radiodetection: -0.739, 'zx-lidar': -1.058,
-  gigaton: -1.032, graitec: 0, kritikal: 1.5, agi: 0.921, csi: 1.5,
-  deltares: 1.374, geosig: 0.76, 'idea-statica': -1.038, seequent: 0.161,
-  bentley: 1.5,
+  ptv: 1.068, allplan: 1.203, 'pre-sustainability': 1.5, pytha: 1.073,
+  lander: -0.373, metsims: -0.994, radiodetection: -1.5, 'zx-lidar': -1.5,
+  gigaton: 1.5, graitec: -1.5, kritikal: -1.5, agi: -0.697, csi: -1.5,
+  deltares: 1.5, geosig: 1.5, 'idea-statica': -1.038, seequent: 1.5,
+  bentley: -1.5, bimage: -1.5, piletest: -1.5, prokon: 1.393,
+  htri: -0.754, stx: -1.291, 'ai-architecture': 1.453, autodesk: 0.51,
+  ansys: 1.5, lantek: 1.5, hexagon: 1.5,
+  roomvo: 0.481, chc: 1.254, gstarsoft: 0.462, glodon: 1.5, qysea: 1.5,
 } as const satisfies Readonly<Record<string, number>>;
 
 export const vietnamHub = {
