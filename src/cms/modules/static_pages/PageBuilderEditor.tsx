@@ -1492,6 +1492,8 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
           ? { name: '', year: '', description: '', imageId: '' }
           : section?.sectionType === 'technology_ecosystem'
             ? { id: `ecosystem_${items.length + 1}`, title: 'Giải pháp mới', description: 'Nhập mô tả.', badge: 'Công nghệ', imageId: '', link: '/' }
+            : section?.sectionType === 'partner_marquee'
+              ? { id: `partner_${items.length + 1}`, imageId: '' }
             : { value: 0, suffix: '+', label: '' },
         paragraphs: 'Nhập đoạn nội dung mới',
         tickerItems: 'Nhập thông báo mới',

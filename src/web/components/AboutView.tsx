@@ -83,11 +83,35 @@ interface AboutViewProps {
   aboutContent?: AboutPageModel;
   renderPolicy?: PageRenderPolicy;
   bindingRegistry?: ElementBindingRegistry;
+  pageSections?: readonly { sectionKey: string; config: Record<string, unknown>; references?: readonly { entityType: string; entityIds: readonly string[] }[] }[];
+  resolveMediaUrl?: (id: string) => string;
 }
 
-export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: AboutViewProps) => {
+export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry, pageSections, resolveMediaUrl = (id) => id }: AboutViewProps) => {
   const homeAwards = useMemo(getHomeAwards, []);
   const partners = useMemo(getHomePartners, []);
+  const configFor = (sectionKey: string) => pageSections?.find((section) => section.sectionKey === sectionKey)?.config ?? {};
+  const textFrom = (config: Record<string, unknown>, key: string, fallback: string) => typeof config[key] === 'string' ? config[key] as string : fallback;
+  const heroConfig = configFor('about.hero');
+  const overviewConfig = configFor('about.overview');
+  const strategyConfig = configFor('about.strategy');
+  const offeringsConfig = configFor('about.offerings');
+  const awardsConfig = configFor('about.awards');
+  const partnersConfig = configFor('about.partners');
+  const overviewParagraphs = Array.isArray(overviewConfig.paragraphs) ? overviewConfig.paragraphs : [];
+  const defaultOverviewParagraphs = [
+    'Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.',
+    'Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.',
+    'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
+  ];
+  const displayedOverviewParagraphs = defaultOverviewParagraphs.map((fallback, index) => typeof overviewParagraphs[index] === 'string' ? overviewParagraphs[index] as string : fallback);
+  const displayedPartners = useMemo(() => {
+    const items = Array.isArray(partnersConfig.items) ? partnersConfig.items : [];
+    if (!items.length) return partners.map((partner, index) => ({ ...partner, entityId: `legacy-partner-${index + 1}`, link: '' }));
+    return items.flatMap((item, index) => item && typeof item === 'object' && !Array.isArray(item)
+      ? [{ entityId: typeof item.id === 'string' ? item.id : `partner-${index + 1}`, name: typeof item.name === 'string' ? item.name : '', logo: typeof item.imageId === 'string' ? resolveMediaUrl(item.imageId) : '', link: typeof item.link === 'string' ? item.link : '' }]
+      : []);
+  }, [partners, partnersConfig.items, resolveMediaUrl]);
   // Interactive active states for redesigned sections
   const [activeCoreIndex, setActiveCoreIndex] = useState(0);
   const [activeFieldIndex, setActiveFieldIndex] = useState(0);
@@ -122,14 +146,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
       {/* Visual Top Hero Banner */}
       <section data-page-builder-section-key="about.hero" className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <img 
-            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80" 
+          <img
+            data-page-builder-media-path={JSON.stringify(['backgroundImageId'])}
+            data-page-builder-media-id={textFrom(heroConfig, 'backgroundImageId', '')}
+            src={resolveMediaUrl(textFrom(heroConfig, 'backgroundImageId', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80'))}
             alt="CIC Technology Banner"
             className="w-full h-full object-cover opacity-75 scale-105 filter brightness-105 contrast-105"
           />
           <video 
-            autoPlay 
-            loop 
+            autoPlay={renderPolicy.motionEnabled}
+            loop={renderPolicy.motionEnabled}
             muted 
             playsInline 
             className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen scale-105"
@@ -141,18 +167,18 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/60 border border-white/20 rounded-[8px] mb-4 lg:mb-6 backdrop-blur-md shadow-lg">
-            <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
+            <span className={`flex h-2 w-2 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
               Về chúng tôi
             </span>
           </div>
           
-          <h1 className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-3 lg:mb-4 tracking-tighter max-w-full mx-auto whitespace-nowrap [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]">
-            HƠN 35 NĂM NHỊP BƯỚC <span className="text-orange-500">CÙNG CÔNG NGHỆ</span>
+          <h1 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-3 lg:mb-4 tracking-tighter max-w-full mx-auto [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]">
+            {textFrom(heroConfig, 'title', 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ')}
           </h1>
 
-          <p className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]">
-            Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.
+          <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]">
+            {textFrom(heroConfig, 'subtitle', 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.')}
           </p>
         </div>
       </section>
@@ -237,36 +263,26 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
         
         {/* ==================== 1. TỔNG QUAN DOANH NGHIỆP ==================== */}
         {activeTab === 'overview' && (
-             <motion.div 
+             <motion.div
               key="overview"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+              {...(renderPolicy.motionEnabled ? { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -20 }, transition: { duration: 0.4 } } : { initial: false })}
               className="w-full space-y-6 lg:space-y-8"
              >
                 {/* 0. Giới Thiệu & Video */}
                 <section data-page-builder-section-key="about.overview" className="pb-4 lg:pb-6 bg-transparent relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="w-full relative z-10">
-                    <SectionHeader 
-                      title="Tổng quan doanh nghiệp" 
+                    <SectionHeader
+                      title={textFrom(overviewConfig, 'title', 'Tổng quan doanh nghiệp')}
+                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
                     />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                       <div>
-                        <p data-page-builder-config-path={JSON.stringify(['paragraphs', 0])} className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
-                          Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.
-                        </p>
-                        <p data-page-builder-config-path={JSON.stringify(['paragraphs', 1])} className="text-sm md:text-base text-slate-600 mb-4 leading-relaxed font-normal text-justify">
-                          Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.
-                        </p>
-                        <p data-page-builder-config-path={JSON.stringify(['paragraphs', 2])} className="text-sm md:text-base text-slate-600 leading-relaxed font-normal text-justify">
-                          Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng, quyết đoán, và năng động cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm. Chúng tôi luôn gắn bó với sứ mệnh: “Cung cấp những sản phẩm phần mềm, thiết bị, dịch vụ công nghệ thông tin hiện đại, có tính ứng dụng cao để hỗ trợ các kỹ sư, doanh nghiệp, cơ quan nghiên cứu, các nhà quản lý trong công tác nghiên cứu, sản xuất, điều hành tại Việt Nam và các nước trong khu vực; đồng thời không ngừng phát triển nhằm góp phần vào sự hội nhập và phát triển chung của đất nước, đem lại thu nhập cao ổn định cho cán bộ công nhân viên cũng như hài hoà với lợi ích của cổ đông.”
-                        </p>
+                        {displayedOverviewParagraphs.map((paragraph, index) => <p key={index} data-page-builder-config-path={JSON.stringify(['paragraphs', index])} className="text-sm md:text-base text-slate-600 mb-4 last:mb-0 leading-relaxed font-normal text-justify">{paragraph}</p>)}
                       </div>
                       <div data-page-builder-video-path={JSON.stringify(['videoUrl'])} className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black">
                         <iframe 
                           className="w-full h-full scale-[1.03] origin-center"
-                          src="https://www.youtube.com/embed/hdLFK_09-tU?start=448" 
+                          src={textFrom(overviewConfig, 'videoUrl', 'https://www.youtube.com/embed/hdLFK_09-tU?start=448').replace('watch?v=', 'embed/').replace('&t=', '?start=')}
                           title="YouTube video player" 
                           frameBorder="0" 
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -287,7 +303,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                         <span className="text-[10px] font-black uppercase tracking-widest">Hành trình 35 năm</span>
                       </div>
                       <h2 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">{aboutContent.timeline.title}</h2>
-                      <p className="text-slate-500 max-w-2xl mx-auto text-sm">Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.</p>
+                      <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-500 max-w-2xl mx-auto text-sm">{textFrom(configFor('about.timeline'), 'description', 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.')}</p>
                     </div>
 
                     <div className="relative max-w-6xl mx-auto px-4 mt-4 md:mt-6">
@@ -328,7 +344,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                       {/* Left: Illustration */}
                       <div className="relative aspect-[4/5] rounded-[10px] overflow-hidden shadow-sm group hidden lg:block">
-                        <img src="/35nam_cic_1.JPG" alt="Định hướng chiến lược" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
+                        <img data-page-builder-media-path={JSON.stringify(['imageId'])} data-page-builder-media-id={textFrom(strategyConfig, 'imageId', '')} src={resolveMediaUrl(textFrom(strategyConfig, 'imageId', '/35nam_cic_1.JPG'))} alt="Định hướng chiến lược" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
                       </div>
 
@@ -383,8 +399,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                 <section data-page-builder-section-key="about.offerings" id="solutions" className="py-16 bg-transparent text-slate-900 relative overflow-hidden z-10 border-b border-slate-100">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
-                      title="SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP" 
-                      sub="Khẳng định năng lực qua các giải pháp công nghệ cốt lõi" 
+                      title={textFrom(offeringsConfig, 'title', 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP')}
+                      sub={textFrom(offeringsConfig, 'subtitle', 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi')}
+                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.offerings', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.offerings', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
                     />
 
                     <div
@@ -421,8 +439,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                 <section data-page-builder-section-key="about.awards" className="py-16 bg-slate-50/60 relative overflow-hidden z-10 border-b border-slate-200">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
-                      title="Thành tựu & Giải thưởng" 
-                      sub="Minh chứng cho nỗ lực không ngừng nghỉ" 
+                      title={textFrom(awardsConfig, 'title', 'Thành tựu & Giải thưởng')}
+                      sub={textFrom(awardsConfig, 'subtitle', 'Minh chứng cho nỗ lực không ngừng nghỉ')}
+                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
                     />
                     <div className="text-center mt-6 mb-12">
                       <p className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify">
@@ -430,7 +450,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       </p>
                     </div>
                     <div className="mt-8">
-                      <AwardsSlider awards={homeAwards} />
+                      <AwardsSlider paused={!renderPolicy.motionEnabled} awards={Array.isArray(awardsConfig.items) ? awardsConfig.items.flatMap((item) => item && typeof item === 'object' && !Array.isArray(item) && typeof item.name === 'string' && typeof item.imageId === 'string' ? [{ name: item.name, img: resolveMediaUrl(item.imageId) }] : []) : homeAwards} />
                     </div>
                   </div>
                 </section>
@@ -439,32 +459,34 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                 <section data-page-builder-section-key="about.partners" className="py-10 bg-transparent border-b border-slate-100 overflow-hidden relative z-10">
                   <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
                     <SectionHeader 
-                      title="Đối tác chiến lược & Khách hàng tiêu biểu"
-                      sub="Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" 
+                      title={textFrom(partnersConfig, 'title', 'Đối tác chiến lược & Khách hàng tiêu biểu')}
+                      sub={textFrom(partnersConfig, 'subtitle', 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới')}
+                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
                     />
                     
                     <div className="text-center mt-6 mb-12">
-                      <p className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify">
-                        Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam. Đồng thời, CIC là partner chính thức của hơn 100 hãng công nghệ hàng đầu thế giới, mang đến các giải pháp tiên tiến, hiện đại, chính hãng và có bản quyền đầy đủ. Không dừng lại ở thị trường trong nước, CIC đang tiếp tục mở rộng, hướng tới phục vụ cả khách hàng quốc tế, khẳng định vị thế trên hành trình chuyển đổi số ngành Xây dựng.
+                      <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify">
+                        {textFrom(partnersConfig, 'description', 'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.')}
                       </p>
                     </div>
                     
                     {/* Modern Photo Album (Bento Grid) */}
                     <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[250px] mb-12">
                       <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Activity" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-[10px]" />
+                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     </div>
@@ -477,21 +499,21 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     
                     <motion.div
                       data-page-collection="partner"
-                      animate={{ x: ["0%", "-50%"] }}
-                      transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
-                      className="flex gap-6 whitespace-nowrap"
+                      {...(renderPolicy.motionEnabled ? { animate: { x: ["0%", "-50%"] }, transition: { repeat: Infinity, duration: 40, ease: "linear" } } : { initial: false })}
+                      className={renderPolicy.motionEnabled ? 'flex gap-6 whitespace-nowrap' : 'mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 md:grid-cols-4'}
                     >
-                      {[...partners, ...partners].map((partner, i) => (
+                      {(renderPolicy.motionEnabled ? [...displayedPartners, ...displayedPartners] : displayedPartners).map((partner, i) => (
                         <motion.div 
-                          key={i}
-                          whileHover={{ scale: 1.05, y: -5 }}
+                          key={`${partner.entityId}-${i}`}
+                          {...bindElement<HTMLDivElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: createCollectionItemPath('items', partner.entityId), semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: partner.entityId, collectionPath: 'items' }))}
+                          {...(renderPolicy.motionEnabled ? { whileHover: { scale: 1.05, y: -5 } } : {})}
                           className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-[10px] bg-white border border-slate-100 hover:shadow-xl hover:border-orange-200 transition-all cursor-pointer h-20 md:h-24 w-44 md:w-48 group"
                         >
-                          <img 
+                          {partner.logo ? <img
                             src={partner.logo} 
                             alt={partner.name} 
                             className="max-h-12 md:max-h-14 w-full object-contain grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500" 
-                          />
+                          /> : <span className="whitespace-normal text-center text-sm font-bold capitalize text-slate-700">{partner.name}</span>}
                         </motion.div>
                       ))}
                     </motion.div>

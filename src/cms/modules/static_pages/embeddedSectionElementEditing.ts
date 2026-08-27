@@ -15,7 +15,7 @@ function recordArray(value: PageBuilderConfigValue | undefined): Array<Record<st
     : [];
 }
 
-function createEmbeddedTextAdapter(config: EmbeddedTextAdapterConfig): PageBuilderVisualElementEditingAdapter {
+export function createEmbeddedTextAdapter(config: EmbeddedTextAdapterConfig): PageBuilderVisualElementEditingAdapter {
   return {
     sectionKey: config.sectionKey,
     resolveInlineTextEdit(sections, binding) {

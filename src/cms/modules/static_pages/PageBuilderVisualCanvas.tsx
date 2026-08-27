@@ -83,9 +83,9 @@ function WebsitePage({ page, activeHeroSlide, editMode, bindingRegistry }: { pag
   }
   if (page.pageType === 'about') {
     const resolved = resolvePageContent({ pageType: 'about', version: page.draft, legacyFallback: getLegacyAboutPageContent() });
-    return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} aboutContent={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
+    return <AboutView activeTab="overview" setActiveTab={noop} onNavigateToContact={noop} aboutContent={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} pageSections={page.draft.sections} resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} />;
   }
-  if (page.pageType === 'organization') return <AboutView activeTab="structure" setActiveTab={noop} onNavigateToContact={noop} />;
+  if (page.pageType === 'organization') return <AboutView activeTab="structure" setActiveTab={noop} onNavigateToContact={noop} renderPolicy={{ motionEnabled: !editMode }} />;
   if (page.pageType === 'capacity_experience') {
     const resolved = resolvePageContent({
       pageType: 'capacity_experience',
@@ -254,7 +254,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       const section = sections.find((item) => item.sectionKey === node.dataset.pageBuilderSectionKey) ?? sections[index];
       if (!section) return;
       const definition = sectionDefinitions[section.sectionKey];
-      const allowsCollectionStructureChanges = section.sectionType === 'hero_carousel' || section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem';
+      const allowsCollectionStructureChanges = section.sectionType === 'hero_carousel' || section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem' || section.sectionType === 'partner_marquee';
       node.dataset.pageBuilderSectionId = section.id;
       node.dataset.pageBuilderSectionKey = section.sectionKey;
       node.style.display = section.visible === false ? (onTextChange ? '' : 'none') : '';
@@ -348,6 +348,13 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
           label.style.cssText = 'padding:0 5px;color:#0f172a;';
           toolbar.appendChild(label);
           addButton('+ Thêm', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+        } else if (section.sectionType === 'partner_marquee' && Array.isArray(section.config.items)) {
+          const items = section.config.items;
+          const label = node.ownerDocument.createElement('strong');
+          label.textContent = `Logo đối tác · ${items.length} ảnh`;
+          label.style.cssText = 'padding:0 5px;color:#0f172a;';
+          toolbar.appendChild(label);
+          addButton('+ Thêm ảnh', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
         } else if (section.references?.length) {
           section.references.forEach((reference) => {
             const entityLabel = node.ownerDocument.createElement('strong');
@@ -523,6 +530,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
               const isAward = section.sectionType === 'award_slider' && element.key === 'items';
               const isSlide = section.sectionType === 'hero_carousel' && element.key === 'slides';
               const isEcosystem = section.sectionType === 'technology_ecosystem' && element.key === 'items';
+              const isPartner = section.sectionType === 'partner_marquee' && element.key === 'items';
               const card = node.ownerDocument.createElement('article');
               card.style.cssText = `position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;overflow:hidden;${isAward ? 'min-height:310px;padding:20px;align-items:center;box-shadow:0 1px 3px rgba(15,23,42,.08);' : ''}${isEcosystem ? 'min-height:430px;padding:8px;background:#f1f5f9;' : ''}${isSlide ? 'min-height:440px;justify-content:flex-end;background:#0f172a;color:#fff;' : isAward || isEcosystem ? '' : 'padding:12px;'}`;
               const dragHandle = node.ownerDocument.createElement('span'); dragHandle.textContent = '⠿ Kéo'; dragHandle.style.cssText = 'cursor:grab;color:#334155;font:800 11px/1 system-ui;';
@@ -533,6 +541,8 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                   ? ['imageId', 'badge', 'description', 'title', 'link'].map((key) => [key, objectItem?.[key] ?? ''])
                 : isSlide
                   ? ['backgroundImageId', 'mobileImageId', 'title', 'subtitle', 'primaryCtaId', 'secondaryCtaId'].map((key) => [key, objectItem?.[key] ?? ''])
+                  : isPartner
+                    ? [['imageId', objectItem?.imageId ?? '']]
                   : objectItem ? Object.entries(objectItem) : [['value', collectionItem]];
               const content = node.ownerDocument.createElement('div');
               content.style.cssText = isSlide
@@ -551,7 +561,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                     card.prepend(mediaButton);
                   } else {
                     mediaButton.style.cssText += `height:${isSlide ? '56px' : isEcosystem ? '260px' : '170px'};width:${isSlide ? 'auto' : '100%'};border-style:dashed;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:${isSlide ? '9px 12px' : isAward ? '8px' : '0'};${isEcosystem ? 'border-radius:9px;background:#0f172a;' : ''}`;
-                    if (asset) { const preview = node.ownerDocument.createElement('img'); preview.src = asset.thumbnail_url ?? asset.url; preview.alt = ''; preview.style.cssText = `width:${isSlide ? '72px' : '100%'};height:100%;object-fit:${isAward ? 'contain' : 'cover'};`; mediaButton.appendChild(preview); mediaButton.title = 'Thay ảnh'; if (isAward) mediaButton.style.cssText += 'border-color:transparent;background:transparent;'; }
+                    if (asset || (typeof fieldValue === 'string' && fieldValue)) { const preview = node.ownerDocument.createElement('img'); preview.src = asset?.thumbnail_url ?? asset?.url ?? String(fieldValue); preview.alt = ''; preview.style.cssText = `width:${isSlide ? '72px' : '100%'};height:100%;object-fit:${isAward || isPartner ? 'contain' : 'cover'};`; mediaButton.appendChild(preview); mediaButton.title = 'Thay ảnh'; if (isAward || isPartner) mediaButton.style.cssText += 'border-color:transparent;background:transparent;'; }
                     else mediaButton.textContent = isSlide ? '+ Ảnh mobile' : '+ Chọn ảnh';
                     content.appendChild(mediaButton);
                   }
@@ -592,12 +602,12 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         // Carousel content needs a complete, stable editing surface. Rendering its
         // schema inventory as a grid keeps every item visible while the website and
         // preview continue to use the production slider.
-        const showFullCollectionInventory = section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem';
+        const showFullCollectionInventory = section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem' || section.sectionType === 'partner_marquee';
         if (showFullCollectionInventory) {
           inventory.style.cssText = 'display:block;margin:18px 0 8px;';
           draftLayer.appendChild(inventory);
         }
-        const collectionType = section.sectionType === 'award_slider' ? 'award' : section.references?.[0]?.entityType;
+        const collectionType = section.sectionType === 'award_slider' ? 'award' : section.sectionType === 'partner_marquee' ? 'partner' : section.references?.[0]?.entityType;
         const collectionAnchor = collectionType ? node.querySelector<HTMLElement>(`[data-page-collection~="${collectionType}"]`) : null;
         if (collectionAnchor) collectionAnchor.parentElement?.insertBefore(draftLayer, collectionAnchor);
         else node.insertBefore(draftLayer, node.firstChild);

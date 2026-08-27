@@ -1098,21 +1098,20 @@ export const HomeView = ({
           
           <motion.div 
             data-page-collection="partner"
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
-            className="flex gap-4 whitespace-nowrap"
+            {...(renderPolicy.motionEnabled ? { animate: { x: ["0%", "-50%"] }, transition: { repeat: Infinity, duration: 40, ease: "linear" } } : { initial: false })}
+            className={renderPolicy.motionEnabled ? 'flex gap-4 whitespace-nowrap' : 'mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 md:grid-cols-4'}
           >
-            {[...partners, ...partners].map((partner, i) => (
+            {(renderPolicy.motionEnabled ? [...partners, ...partners] : partners).map((partner, i) => (
               <motion.div 
                 key={i}
-                whileHover={{ scale: 1.05, y: -5 }}
+                {...(renderPolicy.motionEnabled ? { whileHover: { scale: 1.05, y: -5 } } : {})}
                 className="flex-shrink-0 flex items-center justify-center p-4 md:p-6 rounded-[10px] bg-white border border-slate-100 hover:shadow-xl hover:border-orange-200 transition-all cursor-pointer h-20 md:h-24 w-44 md:w-48 group"
               >
-                <img 
+                {partner.logo ? <img
                   src={partner.logo} 
                   alt={partner.name} 
                   className="max-h-12 md:max-h-14 w-full object-contain grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500" 
-                />
+                /> : <span className="whitespace-normal text-center text-sm font-bold capitalize text-slate-700">{partner.name}</span>}
               </motion.div>
             ))}
           </motion.div>

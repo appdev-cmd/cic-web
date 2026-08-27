@@ -576,13 +576,12 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
                   <input
                     type="text"
                     value={selectedField.fieldKey}
-                    onChange={(e) => updateField(selectedField.id, { fieldKey: e.target.value })}
-                    disabled={selectedField.isLocked}
-                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-60"
+                    readOnly
+                    aria-readonly="true"
+                    title="Mã trường do hệ thống tự sinh và không thể chỉnh sửa"
+                    className="w-full cursor-not-allowed px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-mono text-xs focus:outline-none"
                   />
-                  {selectedField.isLocked && (
-                    <p className="text-[10px] text-amber-600 mt-1">Mã trường đã bị khóa để bảo toàn dữ liệu cũ.</p>
-                  )}
+                  <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">Mã trường được hệ thống tự sinh khi thêm trường và không thể chỉnh sửa.</p>
                 </div>
 
                 <div>
