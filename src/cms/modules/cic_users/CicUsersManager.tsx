@@ -478,7 +478,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                         </span>
                       </td>
 
-                      {/* Agency & Category Scope count */}
+                      {/* Agency scope */}
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {user.agencies.map((aid) => {
@@ -489,9 +489,6 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                               </span>
                             );
                           })}
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">
-                          {user.products_categories.length + user.news_categories.length} danh mục phụ trách
                         </div>
                       </td>
 
@@ -587,8 +584,6 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         userToEdit={userToEdit}
         existingUsers={users}
         agencies={data.agencies}
-        productCategories={data.productCategories}
-        newsCategoryOptions={data.newsCategories}
         roles={data.roles}
         permissionTasks={data.permissionTasks}
         userPermissions={data.userPermissions}

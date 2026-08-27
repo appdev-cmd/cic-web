@@ -17,7 +17,6 @@ import {
   UserPlus,
   UserCheck,
   UserX,
-  Globe,
   Sliders,
   Sparkles,
   ChevronRight,
@@ -131,7 +130,6 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
       avatar: targetUser.avatar,
       roleId: targetRole.id,
       roleName: targetRole.name,
-      scopeSummary: targetRole.scopes[0]?.description || 'Toàn bộ nội dung',
       assignedAt: nowStr,
       assignedBy: 'admin_cic',
     };
@@ -277,11 +275,6 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                           ) : (
                             <span className="px-1.5 py-0.2 bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[9px] font-mono font-bold rounded">
                               CUSTOM
-                            </span>
-                          )}
-                          {role.scopes[0]?.type !== 'global' && (
-                            <span className="inline-flex items-center gap-1 rounded bg-orange-50 px-1.5 py-0.5 text-[9px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-                              <Globe className="size-3" /> {role.scopes[0]?.description}
                             </span>
                           )}
                         </div>
@@ -579,8 +572,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                       (a) =>
                         a.userFullName.toLowerCase().includes(q) ||
                         a.username.toLowerCase().includes(q) ||
-                        a.userEmail.toLowerCase().includes(q) ||
-                        a.scopeSummary.toLowerCase().includes(q)
+                        a.userEmail.toLowerCase().includes(q)
                     );
 
                 if (roleAsgs.length === 0) {
@@ -632,11 +624,6 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                             {asg.userEmail} {targetUser?.department ? `• ${targetUser.department}` : ''}
                           </div>
                           <div className="text-[10px] text-slate-400 flex flex-wrap items-center gap-1.5 mt-0.5">
-                            <span className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300 font-medium">
-                              <Globe className="w-3 h-3 text-orange-600" />
-                              <span>{asg.scopeSummary}</span>
-                            </span>
-                            <span>•</span>
                             <span>Gán lúc: {asg.assignedAt}</span>
                             <span>•</span>
                             <span>Bởi: {asg.assignedBy}</span>

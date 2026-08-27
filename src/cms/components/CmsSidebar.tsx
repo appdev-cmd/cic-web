@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   LayoutDashboard,
   UserCheck,
@@ -127,6 +128,28 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   ]);
 
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [collapsedMenuTooltip, setCollapsedMenuTooltip] = useState<{
+    id: string;
+    title: string;
+    badgeCount?: number;
+    top: number;
+    left: number;
+  } | null>(null);
+
+  const showCollapsedMenuTooltip = (
+    item: CmsMenuGroup['items'][number],
+    target: HTMLElement
+  ) => {
+    if (!isCollapsed) return;
+    const rect = target.getBoundingClientRect();
+    setCollapsedMenuTooltip({
+      id: item.id,
+      title: item.title,
+      badgeCount: item.badgeCount,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 10,
+    });
+  };
 
   const toggleGroup = (groupId: string) => {
     if (isCollapsed) return;
@@ -243,7 +266,14 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                     const isActive = isParentActive || isChildActive;
 
                     return (
-                      <div key={item.id} className="relative group">
+                      <div
+                        key={item.id}
+                        className="relative group"
+                        onMouseEnter={(event) => showCollapsedMenuTooltip(item, event.currentTarget)}
+                        onMouseLeave={() => setCollapsedMenuTooltip(null)}
+                        onFocus={(event) => showCollapsedMenuTooltip(item, event.currentTarget)}
+                        onBlur={() => setCollapsedMenuTooltip(null)}
+                      >
                         <div
                           className={`w-full px-2.5 py-2 rounded-lg text-[13px] font-medium leading-5 transition-all flex items-center gap-2.5 ${
                             isActive
@@ -253,6 +283,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                         >
                           <button
                             type="button"
+                            aria-describedby={isCollapsed ? `collapsed-menu-tooltip-${item.id}` : undefined}
                             onClick={() => {
                               if (hasChildren && !isCollapsed) {
                                 setExpandedSubItemIds((prev) =>
@@ -303,36 +334,6 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                             </button>
                           )}
                         </div>
-
-                        {/* Collapsed Tooltip or Flyout Submenu */}
-                        {isCollapsed && (
-                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-800 text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50 border border-slate-700 min-w-40 space-y-1">
-                            <div className="font-bold border-b border-slate-700 pb-1 flex items-center justify-between">
-                              <span>{item.title}</span>
-                              {item.badgeCount && (
-                                <span className="text-orange-400 font-bold ml-2">({item.badgeCount})</span>
-                              )}
-                            </div>
-                            {hasChildren && (
-                              <div className="pt-1 space-y-1">
-                                {item.children?.map((child) => (
-                                  <div
-                                    key={child.id}
-                                    onClick={() => {
-                                      onSelectMenu(child.path, child.title);
-                                      if (isMobileOpen) onCloseMobile();
-                                    }}
-                                    className={`px-2 py-1 rounded text-[11px] cursor-pointer hover:bg-orange-600 hover:text-white ${
-                                      activePath === child.path ? 'text-orange-400 font-bold' : 'text-slate-300'
-                                    }`}
-                                  >
-                                    • {child.title}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
 
                         {/* Expanded Sub-items List */}
                         {!isCollapsed && hasChildren && isSubExpanded && (
@@ -419,6 +420,22 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
           </div>
         </div>
       )}
+
+      {isCollapsed && collapsedMenuTooltip && typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            id={`collapsed-menu-tooltip-${collapsedMenuTooltip.id}`}
+            role="tooltip"
+            className="pointer-events-none fixed z-[70] -translate-y-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg dark:bg-slate-700"
+            style={{ top: collapsedMenuTooltip.top, left: collapsedMenuTooltip.left }}
+          >
+            {collapsedMenuTooltip.title}
+            {collapsedMenuTooltip.badgeCount !== undefined && (
+              <span className="ml-2 text-orange-300">{collapsedMenuTooltip.badgeCount}</span>
+            )}
+          </div>,
+          document.body
+        )}
     </>
   );
 };

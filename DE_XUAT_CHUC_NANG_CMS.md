@@ -566,28 +566,26 @@ Phạm vi hiện tại được giới hạn như sau:
 
 #### Người dùng
 
-**Dùng để làm gì?** Quản lý tài khoản của những người được phép truy cập CMS. Mỗi tài khoản đại diện cho một người cụ thể và được gán vai trò, phạm vi làm việc phù hợp.
+**Dùng để làm gì?** Quản lý tài khoản của những người được phép truy cập CMS. Mỗi tài khoản đại diện cho một người cụ thể và được gán vai trò phù hợp.
 
 **Có thể làm gì?**
 
 - Tạo và cập nhật hồ sơ người dùng.
 - Kích hoạt, tạm khóa hoặc ngừng sử dụng tài khoản mà không làm mất lịch sử công việc.
-- Gán vai trò, xem quyền có hiệu lực và quản lý phạm vi phụ trách.
+- Gán vai trò và xem quyền có hiệu lực.
 - Đổi mật khẩu, gửi yêu cầu đặt lại mật khẩu và quản lý thông tin bảo mật.
 - Theo dõi lịch sử trạng thái; tìm kiếm, lọc và đổi trạng thái nhiều tài khoản.
 
 **Cách sử dụng:**  
-`Tạo tài khoản → cập nhật hồ sơ → gán vai trò và phạm vi → kích hoạt → điều chỉnh trạng thái khi nhân sự thay đổi`
+`Tạo tài khoản → cập nhật hồ sơ → gán vai trò → kích hoạt → điều chỉnh trạng thái khi nhân sự thay đổi`
 
 ![Màn hình quản lý Người dùng](https://lh3.googleusercontent.com/d/1LyjiAxAQt76G9VBlDX0fYmHfwtpicPr6=w1600)
 
-> **Hình 20.** Danh sách tài khoản cho biết trạng thái, vai trò và phạm vi của từng người.
+> **Hình 20.** Danh sách tài khoản cho biết trạng thái và vai trò của từng người.
 
 #### Vai trò & quyền
 
-**Dùng để làm gì?** Quy định một nhóm người dùng được thực hiện thao tác nào trong CMS. Mô hình vận hành chính là **Người dùng → Vai trò → Quyền**; phạm vi chỉ là thiết lập nâng cao khi nghiệp vụ thực tế yêu cầu.
-
-Ví dụ về phạm vi: một người dùng có quyền sửa **Sản phẩm**, nhưng nếu được giới hạn theo phạm vi phụ trách thì chỉ sửa được các Sản phẩm được giao cho mình. Phạm vi không phải một tầng quyền bắt buộc; khi không thiết lập giới hạn, quyền có hiệu lực trên toàn bộ dữ liệu mà vai trò được phép truy cập.
+**Dùng để làm gì?** Quy định một nhóm người dùng được thực hiện thao tác nào trong CMS theo mô hình **Người dùng → Vai trò → Quyền**.
 
 **Có thể làm gì?**
 
@@ -596,7 +594,6 @@ Ví dụ về phạm vi: một người dùng có quyền sửa **Sản phẩm**
 - Gán hoặc thu hồi vai trò của người dùng.
 - Nếu người dùng không có bất kỳ quyền nào trong một chức năng, chức năng đó không xuất hiện trên menu CMS. Khi được cấp ít nhất một quyền phù hợp, menu mới được hiển thị; hệ thống vẫn kiểm tra quyền khi người dùng mở hoặc thao tác trên chức năng.
 - Bật hoặc tắt vai trò; khi tắt, quyền tạm ngừng hiệu lực nhưng các lượt gán được giữ để có thể bật lại.
-- Giới hạn theo nội dung phụ trách hoặc chi nhánh trong phần nâng cao khi thật sự cần.
 - Danh mục quyền được định nghĩa trong code/backend, không cho quản trị viên tự tạo Task hoặc quyền trường dữ liệu trên giao diện.
 - Mọi thay đổi quyền được ghi vào Nhật ký hoạt động thay cho quy trình versioning riêng của vai trò.
 

@@ -2,6 +2,10 @@
 
 Tài liệu này chỉ tổng hợp những thay đổi cần bổ sung vào PostgreSQL hiện tại sau từng đợt audit. Đây không phải tài liệu mô tả toàn bộ schema, không chứa migration SQL và không thay thế bước profiling dữ liệu legacy.
 
+Nguyên tắc migrate là bảo toàn bảng/cột nghiệp vụ legacy hoặc ánh xạ rõ ràng sang tên PostgreSQL đã tối ưu. Ngoại lệ là 11 bảng backup/copy đã được đánh dấu gạch bỏ trong `database.html`; các bảng này không được tạo và không được nhập vào PostgreSQL.
+
+Các cặp bảng dữ liệu VI/EN dùng cùng contract vật lý: cùng danh sách cột và cùng kiểu dữ liệu theo bảng VI. Dữ liệu ngôn ngữ vẫn nằm độc lập; constraint/FK có thể trỏ tới bảng cùng workspace tương ứng.
+
 ## Tin tức
 
 ### Bảng hiện có cần mở rộng
@@ -933,7 +937,7 @@ Không có. `cic_email` và `cic_types_email` tiếp tục mang nghĩa người 
 ### Mapping / lưu ý
 
 - `avatar → image`, `status_online → isOnline`; các field hồ sơ, thời gian truy cập và số lượt truy cập đã có trên `cic_users`.
-- Tiếp tục dùng `agencies`, `products_categories`, `news_categories` để tương thích `none`, `all` và danh sách ID legacy; chưa tạo relation chỉ để chuẩn hóa.
+- Tiếp tục dùng `agencies` để tương thích `none`, `all` và danh sách ID legacy; chưa tạo relation chỉ để chuẩn hóa.
 - `primaryRoleId` là projection từ `cic_user_roles`; không thêm `role_id` vào `cic_users`.
 - Password dùng `cic_users.password`. Form React hiện validate password nhưng chưa đưa password vào object lưu; đây là lỗi implementation contract, không phải field DB còn thiếu.
 - Chỉ thêm unique index username/email chuẩn hóa sau khi profiling NULL, chuỗi rỗng, khoảng trắng, hoa/thường và dữ liệu trùng legacy.
@@ -970,12 +974,6 @@ Không có. `cic_permission_tasks` tiếp tục là danh mục quyền do hệ t
 - FK: `user_id → cic_users(id) ON DELETE CASCADE`; `role_id → cic_roles(id) ON DELETE RESTRICT`; `assigned_by → cic_users(id) ON DELETE SET NULL`.
 - Unique/index: unique active (`user_id`, `role_id`) nếu không cho gán lặp; index (`user_id`, `status`) và (`role_id`, `status`).
 - Mức độ: **BẮT BUỘC** — CMS gán và thu hồi role theo mô hình đơn giản.
-
-#### `cic_role_scopes` — chỉ tạo khi nghiệp vụ được phê duyệt
-
-- Columns đề xuất: `id bigint identity`, `role_id bigint`, `scope_type varchar(24)`, `scope_value varchar(255)`.
-- Chỉ hỗ trợ ban đầu `ownership` và `site`; không tạo `team`, `locale` hoặc policy expression khi chưa có use case.
-- Mức độ: **ĐỀ XUẤT/CÓ ĐIỀU KIỆN** — UI đặt phần này trong thiết lập nâng cao; triển khai DB chỉ sau khi xác nhận nhu cầu phân quyền theo chi nhánh hoặc nội dung phụ trách.
 
 ### Mapping / lưu ý
 
@@ -1210,7 +1208,7 @@ Không có. Không thêm `is_trash`, `deleted_at`, payload hoặc metadata resto
 - Field mới bắt buộc trên bảng hiện có: **19 column trên 11 bảng vật lý**.
 - Field mới đề xuất có điều kiện trên bảng hiện có: **1** — `cic_users.failed_login_attempts`, chỉ dùng khi authentication/lockout được triển khai thật.
 - Bảng mới bắt buộc: **37** — đã bỏ ba bảng role-version không còn thuộc contract, bổ sung `cic_url_redirects`, `cic_content_embeds` và `cic_branches`.
-- Bảng mới đề xuất có điều kiện: **4** — `cic_media_variants`, `cic_security_events`, `cic_role_scopes`, `cic_audit_export_jobs`.
+- Bảng mới đề xuất có điều kiện: **3** — `cic_media_variants`, `cic_security_events`, `cic_audit_export_jobs`.
 - Unique index alias mới bắt buộc: **16**, trong đó alias của bảng legacy chỉ áp dụng sau data profiling.
 - Unique index code mới bắt buộc: **3** — (`workspace`, `code`) cho CTA và Form, cùng code chuẩn hóa của Role.
 - Unique index identity Function SEO mới bắt buộc: **2** — (`module`, `view`, `COALESCE(task, '')`) độc lập cho VI/EN, chỉ áp dụng sau profiling.
@@ -1237,7 +1235,7 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 - Mở rộng bảng hiện có: **19 field bắt buộc trên 11 bảng vật lý**.
 - Field có điều kiện: **1 field** bảo mật tài khoản, chỉ triển khai cùng authentication/lockout thật.
 - Bảng mới bắt buộc: **37 bảng**.
-- Bảng mới có điều kiện: **4 bảng**, không tạo cho đến khi chức năng backend tương ứng được duyệt.
+- Bảng mới có điều kiện: **3 bảng**, không tạo cho đến khi chức năng backend tương ứng được duyệt: `cic_media_variants`, `cic_security_events`, `cic_audit_export_jobs`.
 - Không thêm field trùng nghĩa chỉ để khớp tên DTO/ViewModel.
 - Không xóa hoặc rename field legacy.
 - Không rải `deleted_at`, `is_trash`, version, activity hoặc workflow field vào mọi bảng domain.

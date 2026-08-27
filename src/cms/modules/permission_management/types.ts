@@ -56,14 +56,6 @@ export type MatrixAction =
 
 export type CellPermissionState = 'denied' | 'allowed' | 'conditional';
 
-export type ScopeType = 'global' | 'site' | 'team' | 'locale' | 'ownership';
-
-export interface ScopeConstraint {
-  type: ScopeType;
-  allowedValues: string[];
-  description: string;
-}
-
 // Module Resource -> Action -> Permission State
 export type ModulePermissionMatrix = Record<string, Partial<Record<MatrixAction, CellPermissionState>>>;
 
@@ -74,7 +66,6 @@ export interface RoleVersion {
   status: 'active' | 'draft' | 'superseded';
   changeNote: string;
   matrix: ModulePermissionMatrix;
-  scopes: ScopeConstraint[];
 }
 
 export interface CmsRole {
@@ -91,7 +82,6 @@ export interface CmsRole {
   draftVersion?: number;
   versions: RoleVersion[];
   matrix: ModulePermissionMatrix;
-  scopes: ScopeConstraint[];
   assignedUsersCount: number;
   assignedGroupCount: number;
   reviewDueDays?: number;
@@ -109,7 +99,6 @@ export interface RoleAssignment {
   avatar: string;
   roleId: string;
   roleName: string;
-  scopeSummary: string;
   assignedAt: string;
   assignedBy: string;
   expiresAt?: string;

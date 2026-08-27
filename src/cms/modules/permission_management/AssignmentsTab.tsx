@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Trash2,
   Eye,
-  Globe,
   Calendar,
   UserCheck,
   Building,
@@ -40,7 +39,6 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [targetUserId, setTargetUserId] = useState<string>(users[0]?.id || '');
   const [selectedRoleId, setSelectedRoleId] = useState<string>(roles[0]?.id || '');
-  const [scopeCustomNote, setScopeCustomNote] = useState('Chi nhánh Hà Nội & TP.HCM');
 
   // Effective Access Simulator Drawer State
   const [simulatorUser, setSimulatorUser] = useState<RoleAssignment | null>(null);
@@ -78,7 +76,6 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
       avatar: targetUser.avatar,
       roleId: targetRole.id,
       roleName: targetRole.name,
-      scopeSummary: scopeCustomNote || targetRole.scopes[0]?.description || 'Global Scope',
       assignedAt: nowStr,
       assignedBy: 'admin_cic',
     };
@@ -143,7 +140,6 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
                 <th className="p-3 w-12 text-center">Avatar</th>
                 <th className="p-3">Họ tên & Tài khoản</th>
                 <th className="p-3">Vai trò (Role Được Gán)</th>
-                <th className="p-3">Phạm vi Scope Áp dụng</th>
                 <th className="p-3">Thời gian Gán</th>
                 <th className="p-3">Người Gán</th>
                 <th className="p-3 text-right pr-5">Thao tác</th>
@@ -152,7 +148,7 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
               {filteredAssignments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                  <td colSpan={6} className="p-8 text-center text-slate-400">
                     Chưa có tài khoản nào được gán vai trò theo tìm kiếm.
                   </td>
                 </tr>
@@ -179,14 +175,6 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
                       <span className="px-2.5 py-1 bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold rounded-lg border border-orange-500/20">
                         {asg.roleName}
                       </span>
-                    </td>
-
-                    {/* Scope */}
-                    <td className="p-3">
-                      <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold">
-                        <Globe className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-                        <span>{asg.scopeSummary}</span>
-                      </div>
                     </td>
 
                     {/* Assigned At */}
@@ -278,18 +266,6 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Ghi chú Phạm vi Scope (Scope Customization)
-                </label>
-                <input
-                  type="text"
-                  value={scopeCustomNote}
-                  onChange={(e) => setScopeCustomNote(e.target.value)}
-                  placeholder="Ví dụ: Chi nhánh Hà Nội & TP.HCM"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-medium"
-                />
-              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">

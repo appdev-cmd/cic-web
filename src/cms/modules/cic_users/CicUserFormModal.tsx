@@ -17,7 +17,6 @@ import {
   AlertCircle,
   KeyRound,
   Shield,
-  Layers,
   History,
   ShieldCheck,
   Smartphone,
@@ -26,8 +25,7 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import { AgencyOption, CategoryOption, CicUser, RoleOption, UserAccountStatus, UserStatusHistory } from './types';
-import { SearchableMultiSelect } from './SearchableMultiSelect';
+import { AgencyOption, CicUser, RoleOption, UserAccountStatus, UserStatusHistory } from './types';
 import type { PermissionTask, UserPermissionState } from '../permission_management/types';
 
 interface CicUserFormModalProps {
@@ -37,8 +35,6 @@ interface CicUserFormModalProps {
   userToEdit: CicUser | null;
   existingUsers: CicUser[];
   agencies: AgencyOption[];
-  productCategories: CategoryOption[];
-  newsCategoryOptions: CategoryOption[];
   roles: RoleOption[];
   permissionTasks: PermissionTask[];
   userPermissions: Record<string, UserPermissionState>;
@@ -51,8 +47,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   userToEdit,
   existingUsers,
   agencies,
-  productCategories,
-  newsCategoryOptions,
   roles,
   permissionTasks,
   userPermissions,
@@ -72,11 +66,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
   const [fname, setFname] = useState('');
   const [lname, setLname] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [isFullNameManuallyEdited, setIsFullNameManuallyEdited] = useState(false);
 
   const [phone, setPhone] = useState('');
-  const [country, setCountry] = useState('Việt Nam');
   const [address, setAddress] = useState('');
   const [summary, setSummary] = useState('');
 
@@ -85,8 +76,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   const [roleId, setRoleId] = useState('role_editor');
   const [ordering, setOrdering] = useState(0);
   const [selectedAgencies, setSelectedAgencies] = useState<string[]>(['agency_hn']);
-  const [productsCategories, setProductsCategories] = useState<string[]>([]);
-  const [newsCategories, setNewsCategories] = useState<string[]>([]);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   // Status Change Reason modal / input
@@ -106,11 +95,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
       setFname(userToEdit.fname || '');
       setLname(userToEdit.lname || '');
-      setFullName(userToEdit.full_name || '');
-      setIsFullNameManuallyEdited(true);
 
       setPhone(userToEdit.phone || '');
-      setCountry(userToEdit.country || 'Việt Nam');
       setAddress(userToEdit.address || '');
       setSummary(userToEdit.summary || '');
 
@@ -119,8 +105,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       setRoleId(userToEdit.primaryRoleId || 'role_editor');
       setOrdering(userToEdit.ordering || 0);
       setSelectedAgencies(userToEdit.agencies || ['agency_hn']);
-      setProductsCategories(userToEdit.products_categories || []);
-      setNewsCategories(userToEdit.news_categories || []);
       setTwoFactorEnabled(userToEdit.two_factor_enabled || false);
     } else {
       setUsername('');
@@ -131,11 +115,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
       setFname('');
       setLname('');
-      setFullName('');
-      setIsFullNameManuallyEdited(false);
 
       setPhone('');
-      setCountry('Việt Nam');
       setAddress('');
       setSummary('');
 
@@ -144,33 +125,12 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       setRoleId('role_editor');
       setOrdering(existingUsers.length + 1);
       setSelectedAgencies(['agency_hn']);
-      setProductsCategories([]);
-      setNewsCategories([]);
       setTwoFactorEnabled(false);
     }
     setErrors({});
     setActiveTab('profile');
     setStatusReason('');
   }, [userToEdit, isOpen, existingUsers.length]);
-
-  const handleFnameChange = (val: string) => {
-    setFname(val);
-    if (!isFullNameManuallyEdited) {
-      setFullName(`${lname} ${val}`.trim());
-    }
-  };
-
-  const handleLnameChange = (val: string) => {
-    setLname(val);
-    if (!isFullNameManuallyEdited) {
-      setFullName(`${val} ${fname}`.trim());
-    }
-  };
-
-  const handleFullNameChange = (val: string) => {
-    setFullName(val);
-    setIsFullNameManuallyEdited(true);
-  };
 
   const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -247,9 +207,9 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       email: email.trim(),
       fname: fname.trim(),
       lname: lname.trim(),
-      full_name: fullName.trim() || `${lname} ${fname}`.trim() || username,
+      full_name: `${lname} ${fname}`.trim() || userToEdit?.full_name || username,
       phone: phone.trim(),
-      country: country.trim(),
+      country: userToEdit?.country || 'Việt Nam',
       address: address.trim(),
       summary: summary.trim(),
       avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
@@ -257,8 +217,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       primaryRoleId: roleId,
       ordering: Number(ordering) || 0,
       agencies: selectedAgencies,
-      products_categories: productsCategories,
-      news_categories: newsCategories,
+      products_categories: userToEdit?.products_categories || [],
+      news_categories: userToEdit?.news_categories || [],
       two_factor_enabled: twoFactorEnabled,
       passwordChangedAt: isChangingPassword ? nowStr : userToEdit?.passwordChangedAt,
       failed_login_attempts: userToEdit?.failed_login_attempts || 0,
@@ -538,7 +498,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                       <input
                         type="text"
                         value={fname}
-                        onChange={(e) => handleFnameChange(e.target.value)}
+                        onChange={(e) => setFname(e.target.value)}
                         placeholder="vd: Quản Trị"
                         className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
                       />
@@ -551,7 +511,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                       <input
                         type="text"
                         value={lname}
-                        onChange={(e) => handleLnameChange(e.target.value)}
+                        onChange={(e) => setLname(e.target.value)}
                         placeholder="vd: Nguyễn Văn"
                         className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
                       />
@@ -560,47 +520,15 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Họ và tên đầy đủ (Full Name)
+                      Số điện thoại
                     </label>
                     <input
                       type="text"
-                      value={fullName}
-                      onChange={(e) => handleFullNameChange(e.target.value)}
-                      placeholder="vd: Nguyễn Văn Quản Trị"
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="vd: 0912345678"
+                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Số điện thoại
-                      </label>
-                      <input
-                        type="text"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="vd: 0912345678"
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Quốc gia
-                      </label>
-                      <select
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
-                      >
-                        <option value="Việt Nam">Việt Nam</option>
-                        <option value="Nhật Bản">Nhật Bản</option>
-                        <option value="Hàn Quốc">Hàn Quốc</option>
-                        <option value="Mỹ">Mỹ (United States)</option>
-                        <option value="Singapore">Singapore</option>
-                      </select>
-                    </div>
                   </div>
 
                   <div className="space-y-1">
@@ -832,31 +760,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                 </div>
               </div>
 
-              {/* Category Scopes */}
-              <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-orange-600 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
-                  <Layers className="w-4 h-4" />
-                  <span>Phạm vi Phân quyền Danh mục Nội dung</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <SearchableMultiSelect
-                    label="Danh mục Sản phẩm phụ trách"
-                    placeholder="Chọn danh mục sản phẩm..."
-                    options={productCategories}
-                    selectedIds={productsCategories}
-                    onChange={setProductsCategories}
-                  />
-
-                  <SearchableMultiSelect
-                    label="Danh mục Tin tức phụ trách"
-                    placeholder="Chọn danh mục tin tức..."
-                    options={newsCategoryOptions}
-                    selectedIds={newsCategories}
-                    onChange={setNewsCategories}
-                  />
-                </div>
-              </div>
             </div>
           )}
 
@@ -875,7 +778,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
                   <div className="text-[11px] font-bold uppercase text-slate-400">Vai trò chính</div>
                   <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -903,16 +806,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   </div>
                 </div>
 
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">Phạm vi Danh mục</div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-emerald-600" />
-                    <span>{productsCategories.length + newsCategories.length} Danh mục</span>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    {productsCategories.length} sản phẩm + {newsCategories.length} tin tức
-                  </p>
-                </div>
               </div>
 
               {/* Matrix List of Modules */}

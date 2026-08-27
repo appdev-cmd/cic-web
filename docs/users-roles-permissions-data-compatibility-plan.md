@@ -141,15 +141,6 @@ Một vai trò chỉ có tối đa một version `active` và một version `dra
 
 `permission_task_id` tham chiếu `cic_permission_tasks`, nhờ đó không tạo một danh mục module/quyền thứ hai tách rời legacy.
 
-#### `cic_role_version_scopes`
-
-- `role_version_id`
-- `scope_type`: `global`, `site`, `team`, `locale`, `ownership`.
-- `scope_value`
-- `description`
-
-Mỗi giá trị scope lưu thành một dòng; không lưu mảng tùy ý trong một cột text.
-
 ### 3.4. Gán vai trò
 
 #### `cic_user_roles`
@@ -160,7 +151,6 @@ Mỗi giá trị scope lưu thành một dòng; không lưu mảng tùy ý trong
 - `assigned_at`, `assigned_by`
 - `expires_at`
 - `status`: `active`, `revoked`, `expired`.
-- `scope_summary`: snapshot để hiển thị nhanh, không phải nguồn kiểm tra quyền.
 
 Không lưu `role_name` lặp lại. API join từ `cic_roles`.
 

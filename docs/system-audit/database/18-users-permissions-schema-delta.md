@@ -79,17 +79,9 @@ Không có field bắt buộc cần thêm vào các bảng quyền legacy. Tiế
 - Quan hệ: mapper đổi matrix `module/action/state` của ViewModel sang task legacy tương ứng; không tạo danh mục permission thứ hai.
 - Lý do: CMS mới ghi `allowed`, `denied`, `conditional` cho từng action của từng role version.
 
-#### `cic_role_version_scopes` — **BẮT BUỘC**
-
-- Columns: `id bigint identity`, `role_version_id bigint`, `scope_type varchar(24)`, `scope_value varchar(255)`, `description text NULL`.
-- PK: `id`.
-- FK: `role_version_id → cic_role_versions(id) ON DELETE CASCADE`.
-- Index/unique: unique `(role_version_id, scope_type, scope_value)`; index `(scope_type, scope_value)`.
-- Lý do: Role editor đang cho cấu hình `global`, `site`, `team`, `locale`, `ownership` với nhiều giá trị; mỗi giá trị phải là một dòng, không lưu mảng tùy ý trong text.
-
 #### `cic_user_roles` — **BẮT BUỘC**
 
-- Columns: `id bigint identity`, `user_id integer`, `role_id bigint`, `assigned_at timestamptz`, `assigned_by integer NULL`, `expires_at timestamptz NULL`, `status varchar(16) NOT NULL DEFAULT 'active'`, `scope_summary text NULL`.
+- Columns: `id bigint identity`, `user_id integer`, `role_id bigint`, `assigned_at timestamptz`, `assigned_by integer NULL`, `expires_at timestamptz NULL`, `status varchar(16) NOT NULL DEFAULT 'active'`.
 - PK: `id`.
 - FK: `user_id → cic_users(id) ON DELETE CASCADE`; `role_id → cic_roles(id) ON DELETE RESTRICT`; `assigned_by → cic_users(id) ON DELETE SET NULL`.
 - Index/unique: index `(user_id, status, expires_at)` và `(role_id, status)`; unique active assignment `(user_id, role_id)` nếu một user không được gán lặp cùng role.
@@ -120,6 +112,6 @@ Không có field bắt buộc cần thêm vào các bảng quyền legacy. Tiế
 ## Kết luận delta
 
 - `cic_users`: **3 field bắt buộc**, **1 field đề xuất**.
-- Bảng mới bắt buộc: `cic_user_status_history`, `cic_roles`, `cic_role_versions`, `cic_role_version_permissions`, `cic_role_version_scopes`, `cic_user_roles`.
+- Bảng mới bắt buộc: `cic_user_status_history`, `cic_roles`, `cic_role_versions`, `cic_role_version_permissions`, `cic_user_roles`.
 - Bảng mới đề xuất, chưa triển khai khi chỉ có mock: `cic_security_events`, `cic_permission_policy_issues`, `cic_access_reviews`.
 - Không thay thế hoặc xóa các bảng quyền trực tiếp legacy; không thêm `role_id` vào `cic_users`.

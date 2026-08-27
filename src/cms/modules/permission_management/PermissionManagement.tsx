@@ -71,7 +71,6 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
           status: 'draft',
           changeNote: `Nhân bản từ role ${roleToClone.name}`,
           matrix: roleToClone.matrix,
-          scopes: roleToClone.scopes,
         },
       ],
       assignedUsersCount: 0,
@@ -158,7 +157,6 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData }>
         onSaveRole={handleSaveRole}
         roleToEdit={roleToEdit}
         existingRoles={roles}
-        agencies={data.agencies}
       />
     </div>
   );
