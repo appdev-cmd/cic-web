@@ -6,7 +6,7 @@ import { worldMapPaths } from '../data/worldMapPaths';
 // Keep the overall block shallow while reserving more partner space above the
 // map than below it. The geographic map remains centered within the canvas.
 const CANVAS = { width: 2000, height: 1060, mapX: 340, mapY: 185, mapWidth: 1320, mapHeight: 726 } as const;
-const PARTNER_MAP_EDIT_MODE = true;
+const PARTNER_MAP_EDIT_MODE = false;
 const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
 const LOGO_BOUNDS = {
   compact: { width: 82, height: 58 },
