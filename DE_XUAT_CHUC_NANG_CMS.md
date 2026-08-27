@@ -59,7 +59,7 @@ CMS mới không làm lại toàn bộ nghiệp vụ của CMS cũ. Hệ thống
 | **Sản phẩm** | Đã quản lý nội dung, ảnh, video, tài liệu, giá, SEO, sản phẩm liên quan và nhiều loại email theo hành động | Kế thừa hồ sơ Sản phẩm hiện có; ảnh và tài liệu được chọn từ Thư viện media, còn các hành động đăng ký, tải tài liệu và yêu cầu báo giá dùng CTA, Biểu mẫu và Mẫu email chung. | **Kế thừa + nâng cấp** |
 | **Danh mục, hãng, ứng dụng và loại sản phẩm** | Đã có các danh mục phân loại riêng phục vụ quản lý và hiển thị sản phẩm | Kế thừa các dữ liệu phân loại và liên kết Sản phẩm hiện có; tiếp tục quản lý riêng thành Danh mục sản phẩm, Hãng sản xuất, Lĩnh vực ứng dụng và Loại sản phẩm. | **Kế thừa + nâng cấp** |
 | **Nhân viên kinh doanh** | Đã lưu tên, số điện thoại, Skype/Zalo và gắn với sản phẩm | Kế thừa danh sách nhân viên kinh doanh và phạm vi Sản phẩm đang phụ trách; quản lý dưới tên **Người phụ trách kinh doanh** và không sử dụng như tài khoản CMS. | **Kế thừa + nâng cấp** |
-| **Trang tĩnh / Trang nội dung** | Đã có Trang tĩnh cho Giới thiệu, Chính sách và một số Dịch vụ; nội dung các trang còn được phối hợp qua Block, Banner và Slideshow | Kế thừa nội dung còn sử dụng và quản lý lại thành hai nhóm: các trang mặc định có thiết kế riêng như Trang chủ, nhóm Giới thiệu và Liên hệ; các trang dùng **mẫu trang thông tin chuẩn** như Chính sách bảo mật và Điều khoản sử dụng. Mẫu chuẩn gồm phần đầu trang và một vùng nội dung soạn thảo; trang mặc định chỉ được sửa, không được xóa, còn người quản trị có thể tạo thêm trang theo mẫu này. | **Kế thừa Trang tĩnh + tổ chức lại** |
+| **Trang tĩnh / Trang nội dung** | Đã có Trang tĩnh cho Giới thiệu, Chính sách và một số Dịch vụ; nội dung các trang còn được phối hợp qua Block, Banner và Slideshow | Kế thừa nội dung còn sử dụng và quản lý lại thành hai nhóm: các trang mặc định có thiết kế riêng như Trang chủ và nhóm Giới thiệu; các trang dùng **mẫu trang thông tin chuẩn** như Chính sách bảo mật và Điều khoản sử dụng. Trang Liên hệ không quản lý tại đây mà được hệ thống dựng từ Cấu hình hệ thống và Biểu mẫu liên hệ. | **Kế thừa Trang tĩnh + tổ chức lại** |
 | **Block** | Xác định loại nội dung, vị trí và nơi xuất hiện để ghép các phần của trang | Không còn module Block riêng. Nội dung còn sử dụng được chuyển vào các khu vực tương ứng của Trang nội dung hoặc được chọn trực tiếp từ Tin tức, Sản phẩm, Dịch vụ và các chức năng liên quan. | **Thay thế**; không tiếp tục module Block riêng |
 | **Banner** | Quản lý ảnh, liên kết, nội dung, danh mục và nơi xuất hiện; dữ liệu thực tế phục vụ nhiều mục đích như đối tác hoặc khu vực trình bày | Không còn module Banner dùng chung. Banner dạng slide được chuyển vào khu vực Banner của Trang nội dung; ảnh được quản lý trong Media, còn dữ liệu thuộc chức năng khác được chọn từ danh sách tương ứng. | **Tổ chức lại**; không tiếp tục module Banner riêng |
 | **Slideshow** | Đã quản lý ảnh, ảnh thu nhỏ, liên kết, tóm tắt, danh mục và thứ tự; có thể được gọi qua Block tại các vị trí trình bày | Không còn module Slideshow riêng. Các slideshow còn phù hợp được chuyển vào khu vực slide/carousel của Trang nội dung; ảnh cũ còn giá trị được đưa vào Thư viện media. | **Tổ chức lại / bỏ module cũ**; không xóa tài nguyên còn giá trị |
@@ -194,7 +194,7 @@ Tạo · Sửa · Sắp xếp cấp cha–con · Đặt thứ tự và trạng t
 
 #### Trang nội dung
 
-**Dùng để làm gì?** Quản lý các trang mặc định của Website gồm Trang chủ, các trang Giới thiệu, Liên hệ, Chính sách bảo mật và Điều khoản sử dụng; đồng thời cho phép tạo thêm trang theo **mẫu trang thông tin chuẩn**. Khác với trình soạn bài thông thường, người dùng sửa nội dung theo từng khu vực; hệ thống giữ cố định bố cục tổng thể để hạn chế làm sai thiết kế Website.
+**Dùng để làm gì?** Quản lý các trang mặc định có nội dung biên tập riêng gồm Trang chủ, các trang Giới thiệu, Chính sách bảo mật và Điều khoản sử dụng; đồng thời cho phép tạo thêm trang theo **mẫu trang thông tin chuẩn**. Trang Liên hệ không nằm trong chức năng này: hệ thống tự dựng trang từ thông tin doanh nghiệp, trụ sở/chi nhánh trong Cấu hình hệ thống và Biểu mẫu liên hệ thuộc nhóm Tương tác khách hàng.
 
 Chức năng này thay thế cách CMS cũ quản lý các khu vực Website bằng từng Block theo module và vị trí. Thay vì cấu hình các Block riêng lẻ, người dùng mở một trang và cập nhật các khu vực thuộc bố cục của trang đó.
 
@@ -202,7 +202,7 @@ Chức năng này thay thế cách CMS cũ quản lý các khu vực Website b�
 
 Trang nội dung gồm hai nhóm:
 
-- **Trang mặc định:** Trang chủ, các trang Giới thiệu, Liên hệ, Chính sách bảo mật và Điều khoản sử dụng. Đây là các trang Website cần có, được tạo sẵn theo đúng bố cục; người quản trị có thể sửa nội dung nhưng không xóa trang.
+- **Trang mặc định:** Trang chủ, các trang Giới thiệu, Chính sách bảo mật và Điều khoản sử dụng. Đây là các trang Website cần có nội dung biên tập riêng, được tạo sẵn theo đúng bố cục; người quản trị có thể sửa nội dung nhưng không xóa trang.
 - **Trang thông tin bổ sung:** Do người quản trị tạo khi cần thêm nội dung như quy chế, hướng dẫn hoặc thông báo dài hạn. Trang mới dùng cùng mẫu với Chính sách bảo mật và Điều khoản sử dụng, gồm:
   - **Phần đầu trang cố định:** phân loại, tiêu đề, mô tả ngắn, ngày cập nhật và thời gian đọc nếu cần.
   - **Một vùng nội dung soạn thảo:** nhập tiêu đề mục, đoạn văn, danh sách, liên kết và các nội dung định dạng được trình soạn thảo hỗ trợ.

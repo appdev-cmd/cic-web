@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import type { ContactPageModel, PageRenderPolicy } from '@shared/page-content/models';
 import { productionRenderPolicy } from '@shared/page-content/models';
-import { getLegacyContactPageContent } from '@shared/page-content/legacyPageContent';
+import { getPublicContactContentFromConfiguration } from '../../shared/configuration/publicWebsiteConfiguration';
 import { bindElement as bindElementRuntime, type BoundElementProps } from '@shared/visual-editing/bindElement';
 import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
@@ -51,7 +51,7 @@ interface ContactViewProps {
   bindingRegistry?: ElementBindingRegistry;
 }
 
-export const ContactView = ({ onNavigateHome, content = getLegacyContactPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: ContactViewProps) => {
+export const ContactView = ({ onNavigateHome, content = getPublicContactContentFromConfiguration('vi'), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: ContactViewProps) => {
   // Navigation & Page State
   const [activeBranch, setActiveBranch] = useState(content.branches.branches[0]?.id ?? '');
   useEffect(() => {

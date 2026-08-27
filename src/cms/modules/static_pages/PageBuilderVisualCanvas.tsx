@@ -17,6 +17,7 @@ import { sectionDefinitions } from './pageBuilderRegistry';
 import { isCapabilityEnabled } from '../../../shared/visual-editing/editableSectionContract';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 import { reorderReferenceItems, resolveReferenceItem } from './referenceSectionInteractions';
+import { RichTextEditor } from './RichTextEditor';
 
 interface PageBuilderVisualCanvasProps {
   mode?: 'edit' | 'preview';
@@ -43,21 +44,81 @@ interface PageBuilderVisualCanvasProps {
 
 const noop = () => undefined;
 
-function LegalPage({ sections }: { sections: PageBuilderSection[] }) {
+function InlineLegalRichText({ section, minHeight, onCommit }: {
+  section: PageBuilderSection;
+  minHeight: string;
+  onCommit?: (sectionId: string, value: string) => void;
+}) {
+  const externalValue = String(section.config.richTextHtml ?? '');
+  const [value, setValue] = useState(externalValue);
+  const latestValueRef = useRef(externalValue);
+  const committedValueRef = useRef(externalValue);
+  const dirtyRef = useRef(false);
+
+  useEffect(() => {
+    if (dirtyRef.current) return;
+    if (externalValue === committedValueRef.current || externalValue === latestValueRef.current) return;
+    latestValueRef.current = externalValue;
+    committedValueRef.current = externalValue;
+    setValue(externalValue);
+  }, [externalValue]);
+
+  const commit = () => {
+    const nextValue = latestValueRef.current;
+    if (!dirtyRef.current || nextValue === committedValueRef.current) return;
+    dirtyRef.current = false;
+    committedValueRef.current = nextValue;
+    onCommit?.(section.id, nextValue);
+  };
+
+  return <div data-page-builder-native-editor="richtext" onClick={(event) => event.stopPropagation()}>
+    <RichTextEditor
+      value={value}
+      onChange={(nextValue) => {
+        latestValueRef.current = nextValue;
+        dirtyRef.current = true;
+        setValue(nextValue);
+      }}
+      onBlur={(nextValue) => {
+        latestValueRef.current = nextValue;
+        commit();
+      }}
+      minHeight={minHeight}
+      allowedEmbeds={['cta', 'form']}
+    />
+  </div>;
+}
+
+function LegalPage({ sections, editMode, selectedId, onConfigValueChange }: {
+  sections: PageBuilderSection[];
+  editMode: boolean;
+  selectedId: string;
+  onConfigValueChange?: (sectionId: string, path: Array<string | number>, value: PageBuilderConfigValue) => void;
+}) {
   const [header, ...content] = sections;
+  const commit = (sectionId: string, value: string) => onConfigValueChange?.(sectionId, ['richTextHtml'], value);
   return <div className="min-h-screen bg-slate-50 px-4 py-10 text-slate-800 sm:px-6 lg:px-8">
-    <div className="mx-auto max-w-6xl rounded-3xl bg-white p-6 shadow-sm sm:p-10">
-      <header className="border-b border-slate-200 pb-7">
-        <p className="text-sm font-bold uppercase tracking-wider text-orange-600">{String(header?.config.categoryTag ?? 'Thông tin pháp lý')}</p>
-        <h1 className="mt-3 text-3xl font-black sm:text-4xl">{String(header?.config.title ?? '')}</h1>
-        <p className="mt-3 max-w-3xl text-slate-600">{String(header?.config.subtitle ?? '')}</p>
-        <p className="mt-4 text-xs text-slate-500">Cập nhật: {String(header?.config.lastUpdated ?? '')} · {String(header?.config.readingTime ?? '')}</p>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <header
+        data-page-builder-section-id={header?.id}
+        data-page-builder-section-key={header?.sectionKey}
+        className={`rounded-2xl border bg-white p-6 sm:p-10 ${selectedId === header?.id ? 'border-orange-400 ring-2 ring-orange-500/20' : 'border-slate-200'}`}
+      >
+        {editMode && selectedId === header?.id
+          ? <InlineLegalRichText section={header} minHeight="220px" onCommit={commit} />
+          : <div className="ck-content legal-header-content" dangerouslySetInnerHTML={{ __html: String(header?.config.richTextHtml ?? '') }} />}
       </header>
-      <article className="mt-8 space-y-8">
-        {content.map((section) => <section key={section.id}>
-          {section.config.title && <h2 className="text-xl font-black text-slate-900">{String(section.config.title)}</h2>}
+      <article className="space-y-8">
+        {content.map((section) => <section
+          key={section.id}
+          data-page-builder-section-id={section.id}
+          data-page-builder-section-key={section.sectionKey}
+          className={`rounded-2xl border bg-white p-6 sm:p-10 ${selectedId === section.id ? 'border-orange-400 ring-2 ring-orange-500/20' : 'border-slate-200'}`}
+        >
           {typeof section.config.richTextHtml === 'string' ? (
-            <div data-page-builder-richtext-path={JSON.stringify(['richTextHtml'])} className="ck-content mt-3 text-sm leading-7 text-slate-600" dangerouslySetInnerHTML={{ __html: section.config.richTextHtml }} />
+            editMode && selectedId === section.id ? (
+              <InlineLegalRichText section={section} minHeight="420px" onCommit={commit} />
+            ) : <div className="ck-content mt-3 text-sm leading-7 text-slate-600" dangerouslySetInnerHTML={{ __html: section.config.richTextHtml }} />
           ) : <div className="mt-3 space-y-3 text-sm leading-7 text-slate-600">
             {Array.isArray(section.config.blocks) ? section.config.blocks.map((block, index) => {
               if (!block || typeof block !== 'object' || Array.isArray(block)) return null;
@@ -72,7 +133,7 @@ function LegalPage({ sections }: { sections: PageBuilderSection[] }) {
   </div>;
 }
 
-function WebsitePage({ page, activeHeroSlide, editMode, bindingRegistry }: { page: PageBuilderPage; activeHeroSlide?: number; editMode: boolean; bindingRegistry: ElementBindingRegistry }) {
+function WebsitePage({ page, activeHeroSlide, editMode, bindingRegistry, selectedId, onConfigValueChange }: { page: PageBuilderPage; activeHeroSlide?: number; editMode: boolean; bindingRegistry: ElementBindingRegistry; selectedId: string; onConfigValueChange?: PageBuilderVisualCanvasProps['onConfigValueChange'] }) {
   if (page.pageType === 'home') {
     const resolved = resolvePageContent({
       pageType: 'home',
@@ -98,8 +159,8 @@ function WebsitePage({ page, activeHeroSlide, editMode, bindingRegistry }: { pag
     const resolved = resolvePageContent({ pageType: 'contact', version: page.draft, legacyFallback: getLegacyContactPageContent() });
     return <ContactView content={resolved.content} renderPolicy={{ motionEnabled: !editMode }} bindingRegistry={bindingRegistry} />;
   }
-  if (page.pageType === 'legal') return <LegalPage sections={page.draft.sections} />;
-  return <LegalPage sections={page.draft.sections} />;
+  if (page.pageType === 'legal') return <LegalPage sections={page.draft.sections} editMode={editMode} selectedId={selectedId} onConfigValueChange={onConfigValueChange} />;
+  return <LegalPage sections={page.draft.sections} editMode={editMode} selectedId={selectedId} onConfigValueChange={onConfigValueChange} />;
 }
 
 function editableNodes(root: HTMLElement, page: PageBuilderPage): HTMLElement[] {
@@ -244,6 +305,9 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    // Legal pages own their section markers and editor state in React. The generic
+    // visual-editing DOM mutations interfere with native CKEditor selection/caret.
+    if (page.pageType === 'legal') return;
     const nodes = editableNodes(root, page);
     if (page.pageType === 'home') {
       root.style.display = 'flex';
@@ -1154,6 +1218,39 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     setFrameBody(frameDocument.body);
   };
 
+  if (page.pageType === 'legal') {
+    return <div
+      className="relative mx-auto min-h-[600px] overflow-hidden rounded-xl bg-white shadow-2xl"
+      style={{ width: viewportWidth, maxWidth: '100%' }}
+    >
+      <div
+        ref={attachRoot}
+        onPointerDownCapture={(event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest('[data-page-builder-native-editor]')) return;
+          const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
+          const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? '';
+          if (sectionId && sectionId !== selectedId) onSelect(sectionId);
+        }}
+        onClickCapture={(event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest('[data-page-builder-native-editor]')) return;
+          const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
+          if (!sectionNode) { onSelect(''); return; }
+          const sectionId = sectionNode.dataset.pageBuilderSectionId ?? '';
+          if (sectionId && sectionId !== selectedId) onSelect(sectionId);
+        }}
+      >
+        <LegalPage
+          sections={sections}
+          editMode={mode === 'edit'}
+          selectedId={selectedId}
+          onConfigValueChange={onConfigValueChange}
+        />
+      </div>
+    </div>;
+  }
+
   return <div className="relative mx-auto overflow-hidden rounded-xl bg-white shadow-2xl transition-[width] duration-200" style={{ width: viewportWidth * scale, height: contentHeight * scale }}>
     <iframe
       ref={frameRef}
@@ -1166,6 +1263,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
     {frameBody && createPortal(<>
       <div ref={attachRoot} onClickCapture={(event) => {
         const target = event.target as HTMLElement;
+        if (target.closest('[data-page-builder-native-editor]')) return;
         if (mode === 'edit' && target.closest('[data-ve-editable="true"], [data-ve-semantic~="reference-item"]')) return;
         const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
         if (!sectionNode) { onSelect(''); return; }
@@ -1196,7 +1294,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         }
         if (!target.closest('[data-page-builder-inline-edit]')) event.preventDefault();
       }}>
-        <WebsitePage page={{ ...page, draft: { ...page.draft, sections } }} activeHeroSlide={activeHeroSlide} editMode={mode === 'edit'} bindingRegistry={bindingRegistry} />
+        <WebsitePage page={{ ...page, draft: { ...page.draft, sections } }} activeHeroSlide={activeHeroSlide} editMode={mode === 'edit'} bindingRegistry={bindingRegistry} selectedId={selectedId} onConfigValueChange={onConfigValueChange} />
       </div>
       <VisualEditingOverlay enabled={mode === 'edit'} root={interactionRoot} registry={bindingRegistry} resolveElementEdit={resolveElementEdit} commitElementEdit={commitElementEdit} resolveSortableItem={resolveSortableItem} commitItemReorder={commitItemReorder} resolveReferenceItem={resolveReferenceItemByBindingId} replaceReferenceItem={replaceReferenceItem} />
     </>, frameBody)}

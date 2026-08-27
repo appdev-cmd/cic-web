@@ -56,6 +56,7 @@ import type { CustomerInteractionEmbed } from '../../../shared/customerInteracti
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: (value: string) => void;
   minHeight?: string;
   allowedEmbeds?: CustomerInteractionEmbed[];
 }
@@ -260,7 +261,7 @@ const editorPlugins: PluginConstructor<Editor>[] = [
   MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin, CmsMediaEmbedPlugin,
 ];
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, minHeight = '280px', allowedEmbeds = [] }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, onBlur, minHeight = '280px', allowedEmbeds = [] }) => {
   const editorRef = useRef<Editor | null>(null);
   const lastDataRef = useRef<string>(value || '');
   const [editorData, setEditorData] = useState<string>(value || '');
@@ -315,6 +316,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     heading: {
       options: [
         { model: 'paragraph' as const, title: 'Đoạn văn', class: 'ck-heading_paragraph' },
+        { model: 'heading1' as const, view: 'h1', title: 'Tiêu đề H1', class: 'ck-heading_heading1' },
         { model: 'heading2' as const, view: 'h2', title: 'Tiêu đề H2', class: 'ck-heading_heading2' },
         { model: 'heading3' as const, view: 'h3', title: 'Tiêu đề H3', class: 'ck-heading_heading3' },
         { model: 'heading4' as const, view: 'h4', title: 'Tiêu đề H4', class: 'ck-heading_heading4' },
@@ -404,6 +406,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
             console.warn('CKEditor getData warning:', err);
           }
         }}
+        onBlur={(_, editor) => onBlur?.(editor.getData())}
         onError={(error, details) => {
           console.warn('CKEditor runtime error captured:', error, details);
         }}

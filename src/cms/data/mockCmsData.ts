@@ -26,7 +26,7 @@ export const kpiStatsMock: KpiStats = {
   published_products: 45,
   published_news: 128,
   static_pages: 16,
-  published_members: 340,
+  upcoming_events: 2,
   unprocessed_contacts: 3,
   unprocessed_registrations: 5,
 };
@@ -284,10 +284,10 @@ export const monthlyTrafficMock: TrafficStat[] = [
 ];
 
 export const weeklyContentStatsMock: WeeklyContentStat[] = [
-  { week_label: 'Tuần 27', news_count: 14, product_count: 3, static_page_count: 1 },
-  { week_label: 'Tuần 28', news_count: 18, product_count: 5, static_page_count: 2 },
-  { week_label: 'Tuần 29', news_count: 22, product_count: 8, static_page_count: 0 },
-  { week_label: 'Tuần 30', news_count: 16, product_count: 4, static_page_count: 3 },
+  { week_label: 'Tuần 27', news_count: 14, product_count: 3, event_count: 1 },
+  { week_label: 'Tuần 28', news_count: 18, product_count: 5, event_count: 2 },
+  { week_label: 'Tuần 29', news_count: 22, product_count: 8, event_count: 0 },
+  { week_label: 'Tuần 30', news_count: 16, product_count: 4, event_count: 3 },
 ];
 
 export const notificationsMock: NotificationItem[] = [

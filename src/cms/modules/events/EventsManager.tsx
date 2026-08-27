@@ -114,7 +114,12 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   // Filter States (Dual Statuses)
   const [searchTitle, setSearchTitle] = useState('');
   const [editorialFilter, setEditorialFilter] = useState<string>('all');
-  const [eventStatusFilter, setEventStatusFilter] = useState<string>('all');
+  const [eventStatusFilter, setEventStatusFilter] = useState<string>(() => {
+    const requestedFilter = new URLSearchParams(window.location.search).get('progress');
+    return requestedFilter === 'upcoming' || requestedFilter === 'ongoing' || requestedFilter === 'ended'
+      ? requestedFilter
+      : 'all';
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 

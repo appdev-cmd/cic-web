@@ -41,7 +41,7 @@ export const draftSectionSchemas: Record<string, DraftElementDefinition[]> = {
   'contact.branches': [text('title', 'Tiêu đề'), item('branches', 'Chi nhánh và bản đồ')],
   'contact.form': [text('title', 'Tiêu đề'), { key: 'formId', label: 'Biểu mẫu', kind: 'form' }, text('submitLabel', 'Nhãn gửi'), text('successTitle', 'Tiêu đề thành công'), text('successMessage', 'Thông báo thành công')],
   'contact.security': [text('title', 'Tiêu đề'), text('description', 'Mô tả'), { key: 'policyPageId', label: 'Trang chính sách', kind: 'link' }],
-  'legal.header': [text('categoryTag', 'Phân loại'), text('title', 'Tiêu đề'), text('subtitle', 'Mô tả'), text('lastUpdated', 'Ngày cập nhật'), text('readingTime', 'Thời gian đọc', true)],
+  'legal.header': [{ key: 'richTextHtml', label: 'Phần đầu trang', kind: 'richtext' }],
   'legal.content': [{ key: 'richTextHtml', label: 'Nội dung', kind: 'richtext' }],
   'privacy.collection': [text('title', 'Tiêu đề'), item('blocks', 'Khối nội dung')],
   'privacy.usage': [text('title', 'Tiêu đề'), item('blocks', 'Khối nội dung')],

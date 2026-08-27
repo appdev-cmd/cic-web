@@ -5,7 +5,7 @@ import {
   Package,
   Newspaper,
   FileText,
-  Users,
+  CalendarDays,
   MessageSquare,
   FileCheck,
   ChevronRight,
@@ -254,7 +254,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.published_products}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Đang Published</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Đang hoạt động</p>
                 </div>
               </div>
 
@@ -273,17 +273,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.published_news}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Bài viết tin tức</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Đã xuất bản</p>
                 </div>
               </div>
 
-              {/* KPI 3: Independent Static Pages */}
+              {/* KPI 3: Content Pages */}
               <div
-                onClick={() => onNavigate('/cms/static-pages', 'Quản lý Trang tĩnh')}
+                onClick={() => onNavigate('/cms/static-pages', 'Quản lý Trang nội dung')}
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs hover:border-purple-500/50 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Trang tĩnh</span>
+                  <span>Trang nội dung</span>
                   <div className="p-1.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
                     <FileText className="w-4 h-4" />
                   </div>
@@ -292,26 +292,26 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.static_pages}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Trang giới thiệu / Chính sách</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Đang hoạt động</p>
                 </div>
               </div>
 
-              {/* KPI 4: Active Members */}
+              {/* KPI 4: Upcoming Events */}
               <div
-                onClick={() => onNavigate('/cms/users', 'Quản lý Người dùng')}
+                onClick={() => onNavigate('/cms/events?progress=upcoming', 'Sự kiện sắp diễn ra')}
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs hover:border-emerald-500/50 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Thành viên</span>
+                  <span>Sự kiện</span>
                   <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
-                    <Users className="w-4 h-4" />
+                    <CalendarDays className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="mt-3">
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
-                    {data.kpi.published_members}
+                    {data.kpi.upcoming_events}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Đã kích hoạt</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Sắp diễn ra</p>
                 </div>
               </div>
 
@@ -413,7 +413,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <h3 className="font-bold text-slate-900 dark:text-white text-sm">
                         Nội dung mới cập nhật
                       </h3>
-                      <p className="text-[11px] text-slate-400">Sản phẩm, Tin tức & Trang tĩnh vừa tạo</p>
+                      <p className="text-[11px] text-slate-400">Sản phẩm, Tin tức & Trang nội dung vừa tạo</p>
                     </div>
                   </div>
                   <button
@@ -443,7 +443,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             ? 'Sản phẩm'
                             : item.content_type === 'news'
                             ? 'Tin tức'
-                            : 'Trang tĩnh'}
+                            : 'Trang nội dung'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-slate-400">
@@ -549,7 +549,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       Thống kê Nội dung xuất bản theo tuần
                     </h3>
                     <p className="text-[11px] text-slate-400">
-                      Phân bổ 3 loại nội dung: Tin tức, Sản phẩm, Trang tĩnh
+                      Phân bổ 3 loại nội dung: Tin tức, Sản phẩm, Sự kiện
                     </p>
                   </div>
                 </div>
@@ -576,8 +576,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <Bar dataKey="news_count" name="Tin tức" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="product_count" name="Sản phẩm" fill="#ea580c" radius={[4, 4, 0, 0]} />
                       <Bar
-                        dataKey="static_page_count"
-                        name="Trang tĩnh"
+                        dataKey="event_count"
+                        name="Sự kiện"
                         fill="#a855f7"
                         radius={[4, 4, 0, 0]}
                       />

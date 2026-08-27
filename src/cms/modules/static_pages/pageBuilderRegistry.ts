@@ -139,8 +139,20 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
   },
   'contact.form': { label: 'Form liên hệ', description: 'Form nghiệp vụ được tham chiếu bằng ID.', editableContract: blockedContract('contact.form') },
   'contact.security': { label: 'Thông báo bảo mật', description: 'Nội dung dẫn tới chính sách bảo mật.', editableContract: blockedContract('contact.security') },
-  'legal.header': { label: 'Header chính sách', description: 'Thông tin đầu trang pháp lý.', editableContract: blockedContract('legal.header') },
-  'legal.content': { label: 'Nội dung', description: 'Toàn bộ nội dung biên tập bằng Rich Text Editor.', editableContract: blockedContract('legal.content', { fields: [{ path: 'richTextHtml', semantic: 'rich-text', ownership: 'section-config', valueKind: 'string', editing: 'blocked', blockedReason: 'contract-missing' }] }) },
+  'legal.header': {
+    label: 'Phần đầu trang',
+    description: 'Soạn tự do toàn bộ phần đầu trang bằng Rich Text Editor.',
+    editableContract: blockedContract('legal.header', {
+      fields: [{ path: 'richTextHtml', semantic: 'rich-text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }],
+    }),
+  },
+  'legal.content': {
+    label: 'Nội dung',
+    description: 'Soạn thảo trực quan hoặc chỉnh HTML bằng Rich Text Editor đầy đủ.',
+    editableContract: blockedContract('legal.content', {
+      fields: [{ path: 'richTextHtml', semantic: 'rich-text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }],
+    }),
+  },
   'privacy.collection': { label: 'Mục đích thu thập', description: 'Mục 01 của chính sách.', editableContract: blockedContract('privacy.collection') },
   'privacy.usage': { label: 'Phạm vi sử dụng', description: 'Mục 02 của chính sách.', editableContract: blockedContract('privacy.usage') },
   'privacy.retention': { label: 'Thời gian lưu trữ', description: 'Mục 03 của chính sách.', editableContract: blockedContract('privacy.retention') },

@@ -59,7 +59,7 @@ export interface KpiStats {
   published_products: number;
   published_news: number;
   static_pages: number;
-  published_members: number;
+  upcoming_events: number;
   unprocessed_contacts: number;
   unprocessed_registrations: number;
 }
@@ -74,7 +74,7 @@ export interface WeeklyContentStat {
   week_label: string;
   news_count: number;
   product_count: number;
-  static_page_count: number;
+  event_count: number;
 }
 
 export interface NotificationItem {

@@ -21,11 +21,9 @@ function withSectionPrefix(page: PageBuilderPage, idPrefix: string): PageBuilder
 
 const sourceHome = clonePage(sourcePages.find((page) => page.code === 'home')!);
 const sourceAbout = clonePage(sourcePages.find((page) => page.code === 'about')!);
-const sourceContact = clonePage(sourcePages.find((page) => page.code === 'contact')!);
 const sourcePrivacy = clonePage(sourcePages.find((page) => page.code === 'privacy_policy')!);
 
 const homePage: PageBuilderPage = { ...sourceHome, templateKey: 'home', systemDefined: true };
-const contactPage: PageBuilderPage = { ...sourceContact, templateKey: 'contact', systemDefined: true };
 const aboutSectionKeys = new Set(['about.hero', 'about.overview', 'about.timeline', 'about.strategy', 'about.offerings', 'about.awards', 'about.partners', 'about.contact_cta']);
 const aboutPage: PageBuilderPage = {
   ...sourceAbout,
@@ -89,13 +87,22 @@ function legacyLegalSectionsToHtml(sections: PageBuilderPage['draft']['sections'
   }).join('');
 }
 
+function legacyLegalHeaderToHtml(config: PageBuilderPage['draft']['sections'][number]['config']): string {
+  if (typeof config.richTextHtml === 'string') return config.richTextHtml;
+  const category = typeof config.categoryTag === 'string' && config.categoryTag ? `<p><strong>${escapeHtml(config.categoryTag)}</strong></p>` : '';
+  const title = `<h1>${escapeHtml(config.title)}</h1>`;
+  const subtitle = typeof config.subtitle === 'string' && config.subtitle ? `<p>${escapeHtml(config.subtitle)}</p>` : '';
+  const meta = [config.lastUpdated ? `Cập nhật: ${escapeHtml(config.lastUpdated)}` : '', config.readingTime ? escapeHtml(config.readingTime) : ''].filter(Boolean).join(' · ');
+  return `${category}${title}${subtitle}${meta ? `<p>${meta}</p>` : ''}`;
+}
+
 function normalizeLegalPage(page: PageBuilderPage, idPrefix: string): PageBuilderPage {
   const normalizeVersion = (version: PageBuilderPage['draft']) => {
     const header = version.sections[0];
     return {
       ...version,
       sections: [
-        { ...header, id: `${idPrefix}_header`, sectionKey: 'legal.header', sectionType: 'legal_header', position: 1 },
+        { ...header, id: `${idPrefix}_header`, sectionKey: 'legal.header', sectionType: 'rich_text_header', position: 1, config: { richTextHtml: legacyLegalHeaderToHtml(header.config) } },
         {
           id: `${idPrefix}_content`,
           sectionKey: 'legal.content',
@@ -127,7 +134,7 @@ export function createLegalPage(input: { id: string; code: string; name: string;
   }, input.code);
   page.draft.seo = { ...page.draft.seo, title: input.name, description: '' };
   page.draft.sections = page.draft.sections.map((section, index) => index === 0
-    ? { ...section, id: `${input.code}_header`, config: { ...section.config, categoryTag: 'Trang nội dung', title: input.name, subtitle: `Thông tin về ${input.name.toLowerCase()}.` } }
+    ? { ...section, id: `${input.code}_header`, sectionType: 'rich_text_header', config: { richTextHtml: `<h1>${escapeHtml(input.name)}</h1>` } }
     : { ...section, id: `${input.code}_content`, config: { richTextHtml: '<p>Nhập nội dung tại đây.</p>' } });
   page.published = JSON.parse(JSON.stringify(page.draft)) as PageBuilderPage['published'];
   page.published.version = 0;
@@ -138,7 +145,7 @@ export function createLegalPage(input: { id: string; code: string; name: string;
 const termsPage = createLegalPage({ id: 'page_terms_vi', code: 'terms_of_use', name: 'Điều khoản sử dụng', slug: '/dieu-khoan-su-dung' });
 termsPage.systemDefined = true;
 
-export const pageBuilderPagesMock: PageBuilderPage[] = [homePage, aboutPage, organizationPage, capacityPage, contactPage, privacyPage, termsPage];
+export const pageBuilderPagesMock: PageBuilderPage[] = [homePage, aboutPage, organizationPage, capacityPage, privacyPage, termsPage];
 
 export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
   { id: 'product_ai_platform', label: 'Nền tảng AI CIC', description: 'Sản phẩm · AI và dữ liệu', entityType: 'product' },

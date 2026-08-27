@@ -297,7 +297,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
 
   const navigateToCmsPath = (path: string, title: string) => {
     window.history.pushState({}, '', path);
-    setActivePath(path);
+    setActivePath(new URL(path, window.location.origin).pathname);
     setCurrentPageTitle(title);
   };
 
