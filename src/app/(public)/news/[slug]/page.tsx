@@ -5,6 +5,7 @@ import { LegacyHtml } from '@/web/components/LegacyHtml';
 import { NewsDetailActions } from '@/web/components/NewsDetailActions';
 import { NewsConsultationForm } from '@/web/components/NewsConsultationForm';
 import { Calendar, Eye } from 'lucide-react';
+import { NewsTicker } from '@/web/components/NewsTicker';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,7 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
           </div>
         </section>
         <div className="overflow-hidden border border-orange-100 bg-white px-4 py-3 text-xs"><div className="flex min-w-max items-center gap-4"><span className="font-black uppercase tracking-wider text-orange-600">HOT NEWS</span>{ticker.map((entry) => <a key={entry.id} href={`/news/${entry.slug}`} className="text-slate-600 hover:text-orange-600">{entry.title} •</a>)}</div></div>
+        <NewsTicker items={ticker} />
         <div className="grid items-start gap-8 lg:grid-cols-12">
           <div className="space-y-8 lg:col-span-8">
             <article className="space-y-8 rounded-[10px] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-10 lg:p-12">

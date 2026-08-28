@@ -196,3 +196,4 @@ html.dark, body.dark, .dark { color-scheme: dark; }
   .public-shell section, .public-shell article { padding-inline: 1rem; }
   .public-shell h1 { font-size: clamp(1.75rem, 8vw, 2.5rem); line-height: 1.15; }
 }
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
