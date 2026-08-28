@@ -53,7 +53,6 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
           </div>
         </section>
         <div className="overflow-hidden border border-orange-100 bg-white px-4 py-3 text-xs"><div className="flex min-w-max items-center gap-4"><span className="font-black uppercase tracking-wider text-orange-600">HOT NEWS</span>{ticker.map((entry) => <a key={entry.id} href={`/news/${entry.slug}`} className="text-slate-600 hover:text-orange-600">{entry.title} •</a>)}</div></div>
-        <NewsTicker items={ticker} />
         <div className="grid items-start gap-8 lg:grid-cols-12">
           <div className="space-y-8 lg:col-span-8">
             <article className="space-y-8 rounded-[10px] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-10 lg:p-12">
@@ -66,7 +65,6 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
           </div>
           <NewsRelatedSections projects={related(projects, (item as any).projectsRelated)} events={related(events, (item as any).eventsRelated)} products={related(products, (item as any).productsRelated)} />
           <aside className="space-y-6 lg:col-span-4">
-            {headings.length > 0 && <NewsToc items={headings} />}
             {headings.length > 0 && <section className="overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm"><h2 className="border-b border-slate-100 p-4 text-xs font-black uppercase tracking-wider text-orange-600">Mục lục bài viết</h2><nav className="space-y-1 p-4">{headings.map((heading) => <a key={heading.id} href={`#${heading.id}`} className="block text-xs leading-5 text-slate-600 hover:text-orange-600">{heading.title}</a>)}</nav></section>}
             <section className="rounded-[10px] border border-slate-200/80 bg-white p-5 shadow-sm"><h2 className="border-b border-slate-200 pb-3 text-sm font-black uppercase tracking-wider text-slate-900">Tin mới nhất</h2>{latest.map((entry) => <a key={entry.id} href={`/news/${entry.slug}`} className="block border-b border-slate-100 py-4 text-sm font-semibold leading-6 text-slate-700 hover:text-orange-600">{entry.title}</a>)}</section>
           </aside>
