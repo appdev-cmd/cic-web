@@ -6,6 +6,10 @@ import { NewsDetailActions } from '@/web/components/NewsDetailActions';
 import { NewsConsultationForm } from '@/web/components/NewsConsultationForm';
 import { Calendar, Eye } from 'lucide-react';
 import { NewsTicker } from '@/web/components/NewsTicker';
+import { NewsRelatedSections } from '@/web/components/NewsRelatedSections';
+import { listPublishedProjects } from '@/features/projects/server/queries';
+import { listPublishedEvents } from '@/features/events/server/queries';
+import { listPublishedProducts } from '@/features/products/server/queries';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +36,8 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
   const latest = all.filter((entry) => entry.id !== item.id).slice(0, 5);
   const ticker = all.filter((entry) => entry.id !== item.id).slice(0, 6);
   const headings = headingsFromHtml(item.content);
+  const [projects, events, products] = await Promise.all([listPublishedProjects(), listPublishedEvents(), listPublishedProducts()]);
+  const related = (values: any[], ids: string[] = []) => values.filter((v) => ids.includes(String(v.id)) || ids.includes(String(v.slug)) || ids.includes(String(v.alias)));
   return (
     <main className="relative bg-slate-50/50 pb-20 pt-28">
       <div className="fixed left-0 top-[72px] z-[45] h-1 w-full bg-slate-200/80"><div className="h-full w-2/3 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700" /></div>
@@ -57,6 +63,7 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
             <section className="rounded-[10px] border border-orange-200 border-l-4 border-l-orange-500 bg-orange-50/50 p-6 shadow-sm sm:p-8"><h2 className="text-base font-bold uppercase tracking-tight text-slate-900">Đăng ký nhận tư vấn</h2><p className="mt-2 text-xs leading-relaxed text-slate-600">Nhận thông tin tư vấn từ chuyên gia CIC Tech.</p><NewsConsultationForm /></section>
             <section className="rounded-[10px] border border-orange-200 border-l-4 border-l-orange-500 bg-orange-50/50 p-6 shadow-sm sm:p-8"><h2 className="text-base font-bold uppercase tracking-tight text-slate-900">Đăng ký nhận tư vấn</h2><p className="mt-2 text-xs leading-relaxed text-slate-600">Nhận thông tin tư vấn bản quyền, giải pháp phần mềm kỹ thuật hoặc chuyển đổi số từ chuyên gia CIC Tech.</p><a href="/contact" className="mt-4 inline-flex rounded-lg bg-[#FC5115] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-orange-600">Gửi yêu cầu tư vấn</a></section>
           </div>
+          <NewsRelatedSections projects={related(projects, (item as any).projectsRelated)} events={related(events, (item as any).eventsRelated)} products={related(products, (item as any).productsRelated)} />
           <aside className="space-y-6 lg:col-span-4">
             {headings.length > 0 && <section className="overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm"><h2 className="border-b border-slate-100 p-4 text-xs font-black uppercase tracking-wider text-orange-600">Mục lục bài viết</h2><nav className="space-y-1 p-4">{headings.map((heading) => <a key={heading.id} href={`#${heading.id}`} className="block text-xs leading-5 text-slate-600 hover:text-orange-600">{heading.title}</a>)}</nav></section>}
             <section className="rounded-[10px] border border-slate-200/80 bg-white p-5 shadow-sm"><h2 className="border-b border-slate-200 pb-3 text-sm font-black uppercase tracking-wider text-slate-900">Tin mới nhất</h2>{latest.map((entry) => <a key={entry.id} href={`/news/${entry.slug}`} className="block border-b border-slate-100 py-4 text-sm font-semibold leading-6 text-slate-700 hover:text-orange-600">{entry.title}</a>)}</section>
