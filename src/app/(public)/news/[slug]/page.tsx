@@ -7,6 +7,7 @@ import { NewsConsultationForm } from '@/web/components/NewsConsultationForm';
 import { Calendar, Eye } from 'lucide-react';
 import { NewsTicker } from '@/web/components/NewsTicker';
 import { NewsRelatedSections } from '@/web/components/NewsRelatedSections';
+import { NewsToc } from '@/web/components/NewsToc';
 import { listPublishedProjects } from '@/features/projects/server/queries';
 import { listPublishedEvents } from '@/features/events/server/queries';
 import { listPublishedProducts } from '@/features/products/server/queries';
@@ -65,6 +66,7 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
           </div>
           <NewsRelatedSections projects={related(projects, (item as any).projectsRelated)} events={related(events, (item as any).eventsRelated)} products={related(products, (item as any).productsRelated)} />
           <aside className="space-y-6 lg:col-span-4">
+            {headings.length > 0 && <NewsToc items={headings} />}
             {headings.length > 0 && <section className="overflow-hidden rounded-[10px] border border-slate-200/80 bg-white shadow-sm"><h2 className="border-b border-slate-100 p-4 text-xs font-black uppercase tracking-wider text-orange-600">Mục lục bài viết</h2><nav className="space-y-1 p-4">{headings.map((heading) => <a key={heading.id} href={`#${heading.id}`} className="block text-xs leading-5 text-slate-600 hover:text-orange-600">{heading.title}</a>)}</nav></section>}
             <section className="rounded-[10px] border border-slate-200/80 bg-white p-5 shadow-sm"><h2 className="border-b border-slate-200 pb-3 text-sm font-black uppercase tracking-wider text-slate-900">Tin mới nhất</h2>{latest.map((entry) => <a key={entry.id} href={`/news/${entry.slug}`} className="block border-b border-slate-100 py-4 text-sm font-semibold leading-6 text-slate-700 hover:text-orange-600">{entry.title}</a>)}</section>
           </aside>
