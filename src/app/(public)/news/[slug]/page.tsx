@@ -37,7 +37,7 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
   const latest = all.filter((entry) => entry.id !== item.id).slice(0, 5);
   const ticker = all.filter((entry) => entry.id !== item.id).slice(0, 6);
   const headings = headingsFromHtml(item.content);
-  const [projects, events, products] = await Promise.all([listPublishedProjects(), listPublishedEvents(), listPublishedProducts()]);
+  const [projects, events, products] = await Promise.all([listPublishedProjects().catch(() => []), listPublishedEvents().catch(() => []), listPublishedProducts().catch(() => [])]);
   const related = (values: any[], ids: string[] = []) => values.filter((v) => ids.includes(String(v.id)) || ids.includes(String(v.slug)) || ids.includes(String(v.alias)));
   return (
     <main className="relative bg-slate-50/50 pb-20 pt-28">
