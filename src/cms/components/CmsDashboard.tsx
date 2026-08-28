@@ -13,7 +13,11 @@ import { ChangePasswordModal } from './ChangePasswordModal';
 import { ContactMessage, ProductRegistration, PendingContent, CmsUser } from '../types';
 import { resolveCmsModule } from '../routing';
 import { demoCmsDataSource } from '../data/demoCmsDataSource';
-import type { CmsLocale } from '../data/CmsDataSource';
+import type { CmsDashboardData, CmsLocale } from '../data/CmsDataSource';
+import type { CmsSearchRecord } from '@/features/cms-search/types';
+import type { PermissionsGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
+import type { SystemConfigurationData } from '../data/ConfigurationDataSource';
+import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
 
 const getProductSettingsDataType = (path: string): MasterDataType => {
@@ -31,37 +35,13 @@ const getProductSettingsDataType = (path: string): MasterDataType => {
   return 'categories';
 };
 
-const CicUsersManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/cic_users/CicUsersManager'), import('../data/demoGovernanceDataSource')]);
-  return { default: () => <module.CicUsersManager data={dataModule.demoGovernanceDataSource.users} /> };
-});
-const PermissionManagement = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/permission_management/PermissionManagement'), import('../data/demoGovernanceDataSource')]);
-  return { default: () => <module.PermissionManagement data={dataModule.demoGovernanceDataSource.permissions} /> };
-});
+const CicUsersManager = lazy(() => import('../modules/cic_users/CicUsersManager').then((module) => ({ default: module.CicUsersManager })));
+const PermissionManagement = lazy(() => import('../modules/permission_management/PermissionManagement').then((module) => ({ default: module.PermissionManagement })));
 const SystemConfiguration = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/system_configuration/SystemConfiguration'), import('../data/demoConfigurationDataSource')]);
-  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-    <module.SystemConfiguration
-      websiteData={dataModule.demoConfigurationDataSource.websiteConfigByLocale[workspaceLocale]}
-      globalData={dataModule.demoConfigurationDataSource.globalConfig}
-    />
-  ) };
+  const module = await import('../modules/system_configuration/SystemConfiguration');
+  return { default: module.SystemConfiguration };
 });
-const FunctionSeoManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([
-    import('../modules/function_seo/FunctionSeoManager'),
-    import('../data/FunctionSeoDataSource'),
-  ]);
-  return {
-    default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-      <module.FunctionSeoManager
-        workspaceLocale={workspaceLocale}
-        data={dataModule.getDemoFunctionSeoData(workspaceLocale)}
-      />
-    ),
-  };
-});
+const FunctionSeoManager = lazy(() => import('../modules/function_seo/FunctionSeoManager').then((module) => ({ default: module.FunctionSeoManager })));
 const ActivityLogsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/ActivityLogsManager'), import('../data/demoGovernanceDataSource')]);
   return { default: () => <module.ActivityLogsManager data={dataModule.demoGovernanceDataSource.audit} /> };
@@ -207,9 +187,19 @@ const CmsGlobalSearchPage = lazy(async () => {
 
 interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
+  dashboardData?: CmsDashboardData;
+  searchRecords?: CmsSearchRecord[];
+  userRole?: string;
+  usersData?: UsersGovernanceData | null;
+  userCapabilities?: { create: boolean; edit: boolean };
+  permissionsData?: PermissionsGovernanceData | null;
+  permissionCapabilities?: { create: boolean; edit: boolean };
+  settingsData?: SystemConfigurationData | null;
+  settingsCapabilities?: { edit: boolean };
+  functionSeoData?: FunctionSeoRecord[];
 }
 
-export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite }) => {
+export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false }, permissionsData = null, permissionCapabilities = { create: false, edit: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [] }) => {
   // Theme & Layout States (Persisted & Synced)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -260,10 +250,10 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Lists state
-  const dashboardData = demoCmsDataSource.dashboardByLocale[workspaceLocale];
-  const [contacts, setContacts] = useState<ContactMessage[]>(demoCmsDataSource.dashboardByLocale.vi?.contacts ?? []);
-  const [registrations, setRegistrations] = useState<ProductRegistration[]>(demoCmsDataSource.dashboardByLocale.vi?.productRegistrations ?? []);
-  const [pendingItems, setPendingItems] = useState<PendingContent[]>(demoCmsDataSource.dashboardByLocale.vi?.pendingContents ?? []);
+  const dashboardData = workspaceLocale === 'vi' ? initialDashboardData : undefined;
+  const [contacts, setContacts] = useState<ContactMessage[]>(initialDashboardData?.contacts ?? []);
+  const [registrations, setRegistrations] = useState<ProductRegistration[]>(initialDashboardData?.productRegistrations ?? []);
+  const [pendingItems, setPendingItems] = useState<PendingContent[]>(initialDashboardData?.pendingContents ?? []);
   const activeModule = resolveCmsModule(activePath);
 
   useEffect(() => {
@@ -409,19 +399,20 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
             <CmsGlobalSearchPage
               key={`${workspaceLocale}:${activePath}`}
               workspaceLocale={workspaceLocale}
-              userRole={demoCmsDataSource.currentUser.role}
+              userRole={userRole}
+              records={searchRecords}
               onNavigate={(path, title) => {
                 navigateToCmsPath(path, title);
               }}
             />
           ) : activeModule === 'users' ? (
-            <CicUsersManager />
+            usersData ? <CicUsersManager data={usersData} capabilities={userCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem danh sách người dùng CMS.</div>
           ) : activeModule === 'permissions' ? (
-            <PermissionManagement />
+            permissionsData ? <PermissionManagement data={permissionsData} capabilities={permissionCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem phân quyền CMS.</div>
           ) : activeModule === 'settings' ? (
-            <SystemConfiguration workspaceLocale={workspaceLocale} />
+            settingsData ? <SystemConfiguration websiteData={settingsData} capabilities={settingsCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem cấu hình hệ thống.</div>
           ) : activeModule === 'function_seo' ? (
-            <FunctionSeoManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
+            <FunctionSeoManager key={workspaceLocale} workspaceLocale={workspaceLocale} data={functionSeoData} />
           ) : activeModule === 'activity_logs' ? (
             <ActivityLogsManager />
           ) : activeModule === 'trash' ? (
@@ -493,8 +484,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite })
       <CmsCommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
-        userRole={demoCmsDataSource.currentUser.role}
+        userRole={userRole}
         workspaceLocale={workspaceLocale}
+        records={searchRecords}
         onSelectAction={(path, label) => {
           navigateToCmsPath(path, label);
           setToastMessage(`Đã chuyển sang: ${label}`);

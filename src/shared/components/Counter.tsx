@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -17,15 +19,14 @@ export const Counter = ({ value, suffix = '', motionEnabled = true, elementProps
 
   useEffect(() => {
     if (!motionEnabled) {
-      setCount(value);
       return undefined;
     }
 
-    let start = 0;
+    const start = 0;
     const end = value;
     if (start === end) {
-      setCount(value);
-      return;
+      const resetId = requestAnimationFrame(() => setCount(value));
+      return () => cancelAnimationFrame(resetId);
     }
 
     const duration = 2000;
@@ -45,5 +46,7 @@ export const Counter = ({ value, suffix = '', motionEnabled = true, elementProps
     return () => cancelAnimationFrame(animId);
   }, [motionEnabled, value]);
 
-  return <span {...elementProps}>{count.toLocaleString('vi-VN')}{suffix}</span>;
+  const displayCount = motionEnabled ? count : value;
+
+  return <span {...elementProps}>{displayCount.toLocaleString('vi-VN')}{suffix}</span>;
 };

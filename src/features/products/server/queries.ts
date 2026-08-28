@@ -1,0 +1,7 @@
+import 'server-only';
+import { getDatabaseClient } from '@/server/db/foundation';
+import type { ProductViewModel } from '../types';
+type ProductRow = { id: number; code: string | null; category_alias: string | null; description: string | null; image: string | null; published: boolean | null; ordering: number | null; status: string | null };
+const map = (row: ProductRow): ProductViewModel => ({ id: String(row.id), title: row.code ?? `Product ${row.id}`, slug: row.code ?? String(row.id), summary: row.description, image: row.image, category: row.category_alias, published: row.published === true, ordering: row.ordering ?? 0 });
+export async function listPublishedProducts() { const client = await getDatabaseClient(); const { data, error } = await client.from('cic_products').select('id,code,category_alias,description,image,published,ordering,status').eq('published', true).order('ordering', { ascending: true }).order('id', { ascending: true }); if (error) throw new Error(`Unable to load products: ${error.message}`); return ((data ?? []) as unknown as ProductRow[]).map(map); }
+export async function getPublishedProductBySlug(slug: string) { const client = await getDatabaseClient(); const { data, error } = await client.from('cic_products').select('id,code,category_alias,description,image,published,ordering,status').eq('published', true).eq('code', slug).maybeSingle(); if (error) throw new Error('Unable to load product.'); return data ? map(data as unknown as ProductRow) : null; }

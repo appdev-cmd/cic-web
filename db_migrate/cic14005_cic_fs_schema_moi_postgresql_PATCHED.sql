@@ -143,7 +143,7 @@
 
 -- ============================================================
 -- Schema MỚI đề xuất (PostgreSQL) — cic14005_cic_fs
--- Xuất tự động từ tài liệu tham chiếu — 2026-08-27
+-- Xuất tự động từ tài liệu tham chiếu — 2026-08-28
 -- ============================================================
 
 -- Danh sách địa chỉ / chi nhánh / văn phòng của công ty (tên, điện thoại, địa chỉ, tọa độ bản đồ).
@@ -808,11 +808,11 @@ CREATE TABLE "cic_blocks" (
   "image" varchar(255), -- ← fs_blocks.image | Đường dẫn ảnh chính.
   "type_background" integer, -- ← fs_blocks.type_background | Loại nền hiển thị.
   "created_time" timestamptz, -- ← fs_blocks.created_time | Đổi datetime → timestamptz; nên thêm DEFAULT now().
-  "title" varchar(255) NULL, -- ← fs_blocks.title | Giữ để migrate đầy đủ dữ liệu legacy. Tiêu đề.
-  "content" text NULL, -- ← fs_blocks.content | Giữ để migrate đầy đủ dữ liệu legacy. Nội dung chi tiết (thường là HTML).
-  "contents_categories" text NULL, -- ← fs_blocks.contents_categories | Giữ để migrate đầy đủ dữ liệu legacy. Tên/mã danh mục nội dung liên kết.
-  "contents_categories_alias" varchar(255) NULL, -- ← fs_blocks.contents_categories_alias | Giữ để migrate đầy đủ dữ liệu legacy. Alias danh mục nội dung liên kết.
-  "summary" text NULL, -- ← fs_blocks.summary | Giữ để migrate đầy đủ dữ liệu legacy. Tóm tắt nội dung.
+  "title" varchar(255), -- ← fs_blocks.title + fs_blocks_en.title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "content" text, -- ← fs_blocks.content + fs_blocks_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "contents_categories" text, -- ← fs_blocks.contents_categories + fs_blocks_en.contents_categories | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "contents_categories_alias" varchar(255), -- ← fs_blocks.contents_categories_alias + fs_blocks_en.contents_categories_alias | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "summary" text, -- ← fs_blocks.summary + fs_blocks_en.summary | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "actflg" varchar(1) NULL, -- ← fs_blocks.actflg | Giữ để migrate đầy đủ dữ liệu legacy. Cờ trạng thái hoạt động (Active Flag) — trường kỹ thuật kế thừa từ hệ thống khác.
   "ctdusr" varchar(5) NULL, -- ← fs_blocks.ctdusr | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: người dùng tạo bản ghi (Created User).
   "ctdwks" varchar(15) NULL, -- ← fs_blocks.ctdwks | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: trạm làm việc tạo bản ghi (Created Workstation).
@@ -821,41 +821,37 @@ CREATE TABLE "cic_blocks" (
   "mdfwks" varchar(15) NULL, -- ← fs_blocks.mdfwks | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: trạm làm việc chỉnh sửa gần nhất (Modified Workstation).
   "lstmdf" timestamptz NULL, -- ← fs_blocks.lstmdf | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: lần chỉnh sửa cuối (Last Modified).
   "cdtpgm" varchar(20) NULL, -- ← fs_blocks.cdtpgm | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: chương trình tạo bản ghi (Created Program) — thường từ hệ thống cũ.
-  "mdfpgm" varchar(20) NULL, -- ← fs_blocks.mdfpgm | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: chương trình chỉnh sửa gần nhất (Modified Program).
-  "entity_id" integer NOT NULL, -- ← fs_blocks.id / fs_blocks_en.id · đồng bộ contract VI/EN | Khoá ngoại trỏ về blocks.id — thay cho cách "dùng chung id" giữa 2 bảng như thiết kế cũ.
-  "locale" varchar(5) NOT NULL DEFAULT 'vi' -- ← (mới — suy ra từ việc bản ghi thuộc bảng gốc (vi) hay bảng _en (en)) · đồng bộ contract VI/EN | 'vi' hoặc 'en'. Kết hợp UNIQUE(entity_id, locale) để đảm bảo mỗi bản ghi chỉ có đúng 1 bản dịch / ngôn ngữ.
+  "mdfpgm" varchar(20) NULL -- ← fs_blocks.mdfpgm | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: chương trình chỉnh sửa gần nhất (Modified Program).
 );
 
--- Nội dung đa ngôn ngữ (vi/en) của blocks — tách riêng khỏi bảng gốc, thay cho mô hình "1 bảng/ngôn ngữ" cũ.
-DROP TABLE IF EXISTS "cic_blocks_translations" CASCADE;
-CREATE TABLE "cic_blocks_translations" (
-  "id" integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Khoá chính riêng của dòng bản dịch (không dùng chung id với bảng gốc nữa).
-  "entity_id" integer NOT NULL REFERENCES cic_blocks(id) ON DELETE CASCADE, -- ← fs_blocks.id / fs_blocks_en.id | Khoá ngoại trỏ về blocks.id — thay cho cách "dùng chung id" giữa 2 bảng như thiết kế cũ.
-  "locale" varchar(5) NOT NULL DEFAULT 'vi', -- ← (mới — suy ra từ việc bản ghi thuộc bảng gốc (vi) hay bảng _en (en)) | 'vi' hoặc 'en'. Kết hợp UNIQUE(entity_id, locale) để đảm bảo mỗi bản ghi chỉ có đúng 1 bản dịch / ngôn ngữ.
-  "title" varchar(255), -- ← fs_blocks.title + fs_blocks_en.title | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
-  "content" text, -- ← fs_blocks.content + fs_blocks_en.content | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
-  "contents_categories" text, -- ← fs_blocks.contents_categories + fs_blocks_en.contents_categories | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
-  "contents_categories_alias" varchar(255), -- ← fs_blocks.contents_categories_alias + fs_blocks_en.contents_categories_alias | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
-  "summary" text, -- ← fs_blocks.summary + fs_blocks_en.summary | Chuyển sang bảng dịch riêng vì đây là nội dung hiển thị theo ngôn ngữ.
-  "ordering" integer NULL, -- ← fs_blocks_en.ordering | Giữ để migrate đầy đủ dữ liệu legacy. Thứ tự sắp xếp hiển thị.
-  "published" boolean NULL, -- ← fs_blocks_en.published | Giữ để migrate đầy đủ dữ liệu legacy. Trạng thái xuất bản/hiển thị (1: hiện, 0: ẩn).
-  "module" varchar(255) NULL, -- ← fs_blocks_en.module | Giữ để migrate đầy đủ dữ liệu legacy. Tên module chức năng.
-  "position" varchar(250) NULL, -- ← fs_blocks_en.position | Giữ để migrate đầy đủ dữ liệu legacy. Vị trí hiển thị (ví dụ trên trang/module).
-  "listItemid" varchar(255) NULL, -- ← fs_blocks_en.listItemid | Giữ để migrate đầy đủ dữ liệu legacy. Danh sách ID các mục (dạng chuỗi phân tách).
-  "params" text NULL, -- ← fs_blocks_en.params | Giữ để migrate đầy đủ dữ liệu legacy. Tham số cấu hình (dạng JSON/chuỗi).
-  "showTitle" boolean NULL, -- ← fs_blocks_en.showTitle | Giữ để migrate đầy đủ dữ liệu legacy. Bật/tắt hiển thị tiêu đề.
-  "hide_admin" boolean NULL, -- ← fs_blocks_en.hide_admin | Giữ để migrate đầy đủ dữ liệu legacy. Ẩn khỏi giao diện quản trị.
-  "news_categories" text NULL, -- ← fs_blocks_en.news_categories | Giữ để migrate đầy đủ dữ liệu legacy. Tên/mã danh mục tin tức liên kết.
-  "url" varchar(255) NULL, -- ← fs_blocks_en.url | Giữ để migrate đầy đủ dữ liệu legacy. Đường dẫn URL.
-  "text_replace" varchar(255) NULL, -- ← fs_blocks_en.text_replace | Giữ để migrate đầy đủ dữ liệu legacy. Văn bản dùng để thay thế.
-  "text_color" varchar(255) NULL, -- ← fs_blocks_en.text_color | Giữ để migrate đầy đủ dữ liệu legacy. Mã màu chữ.
-  "module_id" integer NULL, -- ← fs_blocks_en.module_id | Giữ để migrate đầy đủ dữ liệu legacy. Khóa ngoại liên kết tới module.
-  "module_name" varchar(255) NULL, -- ← fs_blocks_en.module_name | Giữ để migrate đầy đủ dữ liệu legacy. Tên module.
-  "type_html" varchar(255) NULL, -- ← fs_blocks_en.type_html | Giữ để migrate đầy đủ dữ liệu legacy. Loại định dạng HTML.
-  "background_color" varchar(255) NULL, -- ← fs_blocks_en.background_color | Giữ để migrate đầy đủ dữ liệu legacy. Mã màu nền.
-  "image" varchar(255) NULL, -- ← fs_blocks_en.image | Giữ để migrate đầy đủ dữ liệu legacy. Đường dẫn ảnh chính.
-  "type_background" integer NULL, -- ← fs_blocks_en.type_background | Giữ để migrate đầy đủ dữ liệu legacy. Loại nền hiển thị.
-  "created_time" timestamptz NULL, -- ← fs_blocks_en.created_time | Giữ để migrate đầy đủ dữ liệu legacy. Thời điểm tạo bản ghi.
+-- Các khối nội dung (block) có thể chèn vào trang.
+DROP TABLE IF EXISTS "cic_blocks_en" CASCADE;
+CREATE TABLE "cic_blocks_en" (
+  "id" integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← fs_blocks.id / fs_blocks_en.id | Khoá chính tự tăng của bảng gốc, dùng identity thay AUTO_INCREMENT.
+  "ordering" integer, -- ← fs_blocks.ordering · fs_blocks_en.ordering | Thứ tự sắp xếp hiển thị.
+  "published" boolean, -- ← fs_blocks.published · fs_blocks_en.published | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
+  "module" varchar(255), -- ← fs_blocks.module · fs_blocks_en.module | Tên module chức năng.
+  "position" varchar(250), -- ← fs_blocks.position · fs_blocks_en.position | Vị trí hiển thị (ví dụ trên trang/module).
+  "listItemid" varchar(255), -- ← fs_blocks.listItemid · fs_blocks_en.listItemid | Danh sách ID các mục (dạng chuỗi phân tách).
+  "params" text, -- ← fs_blocks.params · fs_blocks_en.params | Tham số cấu hình (dạng JSON/chuỗi).
+  "showTitle" boolean, -- ← fs_blocks.showTitle · fs_blocks_en.showTitle | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
+  "hide_admin" boolean, -- ← fs_blocks.hide_admin · fs_blocks_en.hide_admin | Đổi tinyint(4) dạng cờ 0/1 sang boolean thật của Postgres; khuyến nghị NOT NULL DEFAULT.
+  "news_categories" text, -- ← fs_blocks.news_categories · fs_blocks_en.news_categories | Tên/mã danh mục tin tức liên kết.
+  "url" varchar(255), -- ← fs_blocks.url · fs_blocks_en.url | Đường dẫn URL.
+  "text_replace" varchar(255), -- ← fs_blocks.text_replace · fs_blocks_en.text_replace | Văn bản dùng để thay thế.
+  "text_color" varchar(255), -- ← fs_blocks.text_color · fs_blocks_en.text_color | Mã màu chữ.
+  "module_id" integer REFERENCES cic_config_modules_en(id), -- ← fs_blocks.module_id · fs_blocks_en.module_id | ✅ FK CHUẨN: Bảng đích config_modules_en tồn tại rõ ràng trong schema này — khai báo REFERENCES config_modules_en(id) tường minh (điều mà schema MySQL cũ dùng MyISAM không hỗ trợ).
+  "module_name" varchar(255), -- ← fs_blocks.module_name · fs_blocks_en.module_name | Tên module.
+  "type_html" varchar(255), -- ← fs_blocks.type_html · fs_blocks_en.type_html | Loại định dạng HTML.
+  "background_color" varchar(255), -- ← fs_blocks.background_color · fs_blocks_en.background_color | Mã màu nền.
+  "image" varchar(255), -- ← fs_blocks.image · fs_blocks_en.image | Đường dẫn ảnh chính.
+  "type_background" integer, -- ← fs_blocks.type_background · fs_blocks_en.type_background | Loại nền hiển thị.
+  "created_time" timestamptz, -- ← fs_blocks.created_time · fs_blocks_en.created_time | Đổi datetime → timestamptz; nên thêm DEFAULT now().
+  "title" varchar(255), -- ← fs_blocks.title + fs_blocks_en.title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "content" text, -- ← fs_blocks.content + fs_blocks_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "contents_categories" text, -- ← fs_blocks.contents_categories + fs_blocks_en.contents_categories | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "contents_categories_alias" varchar(255), -- ← fs_blocks.contents_categories_alias + fs_blocks_en.contents_categories_alias | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+  "summary" text, -- ← fs_blocks.summary + fs_blocks_en.summary | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "actflg" varchar(1) NULL, -- ← fs_blocks_en.actflg | Giữ để migrate đầy đủ dữ liệu legacy. Cờ trạng thái hoạt động (Active Flag) — trường kỹ thuật kế thừa từ hệ thống khác.
   "ctdusr" varchar(5) NULL, -- ← fs_blocks_en.ctdusr | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: người dùng tạo bản ghi (Created User).
   "ctdwks" varchar(15) NULL, -- ← fs_blocks_en.ctdwks | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: trạm làm việc tạo bản ghi (Created Workstation).
@@ -864,8 +860,7 @@ CREATE TABLE "cic_blocks_translations" (
   "mdfwks" varchar(15) NULL, -- ← fs_blocks_en.mdfwks | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: trạm làm việc chỉnh sửa gần nhất (Modified Workstation).
   "lstmdf" timestamptz NULL, -- ← fs_blocks_en.lstmdf | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: lần chỉnh sửa cuối (Last Modified).
   "cdtpgm" varchar(20) NULL, -- ← fs_blocks_en.cdtpgm | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: chương trình tạo bản ghi (Created Program) — thường từ hệ thống cũ.
-  "mdfpgm" varchar(20) NULL, -- ← fs_blocks_en.mdfpgm | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: chương trình chỉnh sửa gần nhất (Modified Program).
-  CONSTRAINT "uq_cic_blocks_translations_entity_locale" UNIQUE ("entity_id", "locale")
+  "mdfpgm" varchar(20) NULL -- ← fs_blocks_en.mdfpgm | Giữ để migrate đầy đủ dữ liệu legacy. Trường kỹ thuật kế thừa: chương trình chỉnh sửa gần nhất (Modified Program).
 );
 
 -- Danh sách các block đã tồn tại/được sử dụng trong hệ thống.
@@ -4070,8 +4065,7 @@ CREATE INDEX IF NOT EXISTS "idx_cic_menus_items_en_alias" ON "cic_menus_items_en
 CREATE INDEX IF NOT EXISTS "idx_cic_branches_created_by" ON "cic_branches" ("created_by");
 CREATE INDEX IF NOT EXISTS "idx_cic_branches_updated_by" ON "cic_branches" ("updated_by");
 CREATE INDEX IF NOT EXISTS "idx_cic_blocks_module_id" ON "cic_blocks" ("module_id");
-CREATE INDEX IF NOT EXISTS "idx_cic_blocks_entity_id" ON "cic_blocks" ("entity_id");
-CREATE INDEX IF NOT EXISTS "idx_cic_blocks_translations_entity_id" ON "cic_blocks_translations" ("entity_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_blocks_en_module_id" ON "cic_blocks_en" ("module_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_extends_groups_alias" ON "cic_extends_groups" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_extends_items_alias" ON "cic_extends_items" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_extends_items_group_id" ON "cic_extends_items" ("group_id");

@@ -35,6 +35,7 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 
 interface ColumnVisibility {
   title: boolean;
@@ -168,6 +169,16 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     );
   };
 
+  const handleToggleFeatured = (id: string) => {
+    const target = events.find((item) => item.id === id);
+    if (!target?.is_hot && events.filter((item) => item.is_hot).length >= FEATURED_CONTENT_LIMITS.event) {
+      showToast(`Đã có ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn sự kiện hiện tại trước.`);
+      return;
+    }
+    setEvents((current) => current.map((item) => item.id === id ? { ...item, is_hot: !item.is_hot } : item));
+    showToast(target?.is_hot ? 'Đã bỏ Sự kiện nổi bật.' : 'Đã chọn Sự kiện nổi bật.');
+  };
+
   // Selection Checkbox Logic
   const handleSelectAll = () => {
     if (selectedIds.length === filteredEvents.length) {
@@ -235,6 +246,10 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
 
   // Save Form Handler
   const handleSaveEvent = (data: Partial<EventItem>) => {
+    if (data.is_hot && !eventToEdit?.is_hot && events.filter((item) => item.is_hot).length >= FEATURED_CONTENT_LIMITS.event) {
+      showToast(`Chỉ được chọn ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn sự kiện hiện tại trước.`);
+      return;
+    }
     if (eventToEdit) {
       // Edit existing
       setEvents((prev) =>
@@ -318,6 +333,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
           relatedArticles={data?.relatedArticles ?? []}
           relatedProducts={data?.relatedProducts ?? []}
           mediaImages={data?.mediaImages ?? []}
+          featuredCount={events.filter((item) => item.id !== eventToEdit?.id && item.is_hot).length}
           onSave={handleSaveEvent}
           onOpenPreview={setPreviewEvent}
           onCancel={() => {
@@ -486,11 +502,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
 
                               <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono flex-wrap">
                                 <span>/{ev.alias}</span>
-                                {ev.is_hot && (
-                                  <span className="px-1.5 py-0.2 bg-amber-500/10 text-amber-500 font-bold rounded flex items-center gap-0.5">
-                                    <Star className="w-3 h-3 fill-amber-500" /> Hot
-                                  </span>
-                                )}
+                                <button type="button" onClick={() => handleToggleFeatured(ev.id)} aria-pressed={ev.is_hot} className={`px-1.5 py-0.5 font-bold rounded flex items-center gap-0.5 transition-colors ${ev.is_hot ? 'bg-amber-500/10 text-amber-600' : 'bg-slate-100 text-slate-400 hover:text-amber-600'}`}>
+                                  <Star className={`w-3 h-3 ${ev.is_hot ? 'fill-current' : ''}`} /> {ev.is_hot ? 'Nổi bật' : 'Không nổi bật'}
+                                </button>
                               </div>
                             </div>
                           </div>

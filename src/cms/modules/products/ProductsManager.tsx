@@ -30,6 +30,7 @@ import type { MasterApplicationItem, MasterProductTypeItem } from '../product_se
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ProductsModuleData } from '../../data/CatalogDataSource';
 import { ProductsFormView } from './ProductsFormView';
+import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { ProductPreviewModal } from './ProductPreviewModal';
@@ -299,11 +300,26 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
   };
 
   const handleBatchToggleHot = (isHot: boolean) => {
+    const featuredOutsideSelection = products.filter((product) => product.is_hot && !selectedIds.includes(product.id)).length;
+    if (isHot && featuredOutsideSelection + selectedIds.length > FEATURED_CONTENT_LIMITS.product) {
+      showToast(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật.`);
+      return;
+    }
     setProducts((prev) =>
       prev.map((p) => (selectedIds.includes(p.id) ? { ...p, is_hot: isHot } : p))
     );
     showToast(`Đã ${isHot ? 'đánh dấu tiêu biểu' : 'bỏ đánh dấu tiêu biểu'} cho ${selectedIds.length} sản phẩm!`);
     setSelectedIds([]);
+  };
+
+  const handleToggleFeatured = (id: string) => {
+    const target = products.find((product) => product.id === id);
+    if (!target?.is_hot && products.filter((product) => product.is_hot).length >= FEATURED_CONTENT_LIMITS.product) {
+      showToast(`Đã đủ ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật. Hãy bỏ chọn một sản phẩm khác trước.`);
+      return;
+    }
+    setProducts((current) => current.map((product) => product.id === id ? { ...product, is_hot: !product.is_hot } : product));
+    showToast(target?.is_hot ? 'Đã bỏ Sản phẩm nổi bật.' : 'Đã chọn Sản phẩm nổi bật.');
   };
 
   const handleBatchDelete = () => {
@@ -317,6 +333,10 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     productData: Partial<ProductItem>,
     actionType: 'draft' | 'publish'
   ) => {
+    if (productData.is_hot && !selectedProductForForm?.is_hot && products.filter((product) => product.is_hot).length >= FEATURED_CONTENT_LIMITS.product) {
+      showToast(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật.`);
+      return;
+    }
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const editorialStatus: EditorialStatus = actionType === 'publish' ? 'published' : 'draft';
     const prodName = productData.name || productData.title || 'Sản phẩm mới';
@@ -485,6 +505,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
           productTypes={productTypes}
           relatedProducts={products}
           owners={owners}
+          featuredCount={products.filter((product) => product.id !== selectedProductForForm?.id && product.is_hot).length}
           onSave={handleSaveProductFromForm}
           onCancel={() => {
             setViewMode('list');
@@ -942,14 +963,10 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                       {/* Tiêu biểu */}
                       {columnVisibility.is_hot && (
                         <td className="py-3 px-3 text-center">
-                          {p.is_hot ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                              <Star className="w-3 h-3 fill-amber-500" />
-                              Tiêu biểu
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 text-xs">—</span>
-                          )}
+                          <button type="button" onClick={() => handleToggleFeatured(p.id)} aria-pressed={Boolean(p.is_hot)} aria-label={`${p.is_hot ? 'Bỏ' : 'Đánh dấu'} sản phẩm nổi bật: ${prodName}`} className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold transition-colors ${p.is_hot ? 'border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'border-slate-200 bg-slate-50 text-slate-400 hover:text-amber-600 dark:border-slate-700 dark:bg-slate-800'}`}>
+                            <Star className={`w-3 h-3 ${p.is_hot ? 'fill-current' : ''}`} />
+                            {p.is_hot ? 'Nổi bật' : 'Không nổi bật'}
+                          </button>
                         </td>
                       )}
 

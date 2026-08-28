@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   RefreshCw,
   Search,
@@ -34,8 +35,10 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { bulkUpdateCmsUserStatusAction, createCmsUserAction, sendCmsPasswordResetAction, updateCmsUserAction, updateCmsUserStatusAction } from '@/features/users/server/actions';
 
-export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data }) => {
+export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities: { create: boolean; edit: boolean } }> = ({ data, capabilities }) => {
+  const router = useRouter();
   // Main Users State
   const [users, setUsers] = useState<CicUser[]>(data.users);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -63,6 +66,9 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+
+  useEffect(() => setUsers(data.users), [data.users]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -115,6 +121,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
 
   // Refresh Handler
   const handleRefresh = () => {
+    router.refresh();
     showToast('Đã làm mới danh sách tài khoản quản trị!');
   };
 
@@ -136,21 +143,28 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
   };
 
   // Batch Status Update (e.g. Suspend or Activate selected)
-  const handleBatchStatusChange = (newSt: UserAccountStatus) => {
+  const handleBatchStatusChange = async (newSt: UserAccountStatus) => {
     if (selectedIds.length === 0) return;
     const label = newSt === 'active' ? 'Kích hoạt' : newSt === 'suspended' ? 'Tạm khóa' : 'Ngừng sử dụng';
     if (confirm(`Bạn có chắc muốn ${label} ${selectedIds.length} tài khoản đã chọn?`)) {
-      setUsers((prev) =>
-        prev.map((u) => (selectedIds.includes(u.id) ? { ...u, status: newSt } : u))
-      );
-      showToast(`Đã ${label} thành công ${selectedIds.length} tài khoản!`);
-      setSelectedIds([]);
+      setIsMutating(true);
+      try {
+        await bulkUpdateCmsUserStatusAction(selectedIds, newSt);
+        setUsers((prev) => prev.map((u) => (selectedIds.includes(u.id) ? { ...u, status: newSt } : u)));
+        showToast(`Đã ${label} thành công ${selectedIds.length} tài khoản!`);
+        setSelectedIds([]);
+        router.refresh();
+      } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể cập nhật tài khoản.'); }
+      finally { setIsMutating(false); }
     }
   };
 
   // Execute Status Change from Prompt Modal
-  const confirmStatusChange = () => {
+  const confirmStatusChange = async () => {
     if (!statusPromptUser) return;
+    setIsMutating(true);
+    try {
+      await updateCmsUserStatusAction(statusPromptUser.id, targetStatus, changeReason.trim() || `Chuyển trạng thái sang ${targetStatus}`);
     const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
     setUsers((prev) =>
       prev.map((u) => {
@@ -178,25 +192,39 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
     showToast(`Đã chuyển trạng thái tài khoản "${statusPromptUser.username}" sang ${targetStatus}`);
     setStatusPromptUser(null);
     setChangeReason('');
+    router.refresh();
+    } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể đổi trạng thái tài khoản.'); }
+    finally { setIsMutating(false); }
   };
 
   // Reset Password Link Action
-  const handleSendResetPassword = (user: CicUser) => {
-    showToast(`Đã gửi liên kết khôi phục mật khẩu tới email: ${user.email}`);
+  const handleSendResetPassword = async (user: CicUser) => {
+    setIsMutating(true);
+    try { await sendCmsPasswordResetAction(user.email); showToast(`Đã gửi liên kết khôi phục mật khẩu tới email: ${user.email}`); }
+    catch (error) { showToast(error instanceof Error ? error.message : 'Không thể gửi email khôi phục.'); }
+    finally { setIsMutating(false); }
   };
 
   // Save User Handler (Create/Update)
-  const handleSaveUser = (savedUser: CicUser) => {
+  const handleSaveUser = async (savedUser: CicUser, password?: string) => {
+    setIsMutating(true);
+    try {
     const exists = users.some((u) => u.id === savedUser.id);
+    const payload = { username: savedUser.username, email: savedUser.email, password, fname: savedUser.fname, lname: savedUser.lname, phone: savedUser.phone, country: savedUser.country, address: savedUser.address, summary: savedUser.summary, avatar: savedUser.avatar, status: savedUser.status, roleId: savedUser.primaryRoleId, ordering: savedUser.ordering, agencies: savedUser.agencies, productCategories: savedUser.products_categories, newsCategories: savedUser.news_categories, twoFactorEnabled: savedUser.two_factor_enabled ?? false, statusReason: '' };
     if (exists) {
+      await updateCmsUserAction(savedUser.id, payload);
       setUsers((prev) => prev.map((u) => (u.id === savedUser.id ? savedUser : u)));
       showToast(`Đã cập nhật tài khoản "${savedUser.username}"`);
     } else {
-      setUsers((prev) => [savedUser, ...prev]);
+      const created = await createCmsUserAction(payload);
+      setUsers((prev) => [{ ...savedUser, id: created.id }, ...prev]);
       showToast(`Đã tạo mới tài khoản "${savedUser.username}" thành công!`);
     }
     setIsModalOpen(false);
     setUserToEdit(null);
+    router.refresh();
+    } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể lưu tài khoản.'); }
+    finally { setIsMutating(false); }
   };
 
   // Helper badge renderers
@@ -234,7 +262,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200" aria-busy={isMutating}>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 right-6 z-50 px-4 py-2.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-in slide-in-from-top-2">
@@ -248,7 +276,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         title="Người dùng CMS"
         description="Quản lý tài khoản, hồ sơ, vai trò và trạng thái truy cập hệ thống."
         meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{users.length} tài khoản</span>}
-        actions={(
+        actions={capabilities.create ? (
           <CmsButton
             onClick={() => {
               setUserToEdit(null);
@@ -260,7 +288,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
           >
             Thêm người dùng
           </CmsButton>
-        )}
+        ) : undefined}
       />
 
       {/* KPI STATS CARDS */}
@@ -381,11 +409,11 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
           </div>
 
         </div>
-        <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="tài khoản" onClear={() => setSelectedIds([])} actions={[
+        {capabilities.edit && <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="tài khoản" onClear={() => setSelectedIds([])} actions={[
           { label: 'Kích hoạt', onClick: () => handleBatchStatusChange('active'), icon: Unlock, variant: 'primary' },
           { label: 'Tạm khóa', onClick: () => handleBatchStatusChange('suspended'), icon: Lock },
           { label: 'Ngừng sử dụng', onClick: () => handleBatchStatusChange('deactivated'), icon: UserX, variant: 'danger' },
-        ]} />
+        ]} />}
       </div>
 
       {/* DATA TABLE VIEW */}
@@ -519,7 +547,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                       <td className="py-3 px-4 sticky right-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800/80 border-l border-slate-100 dark:border-slate-800 text-center">
                         <div className="flex items-center justify-center gap-1">
                           {/* Edit button */}
-                          <CmsIconButton
+                          {capabilities.edit && <CmsIconButton
                             onClick={() => {
                               setUserToEdit(user);
                               setIsModalOpen(true);
@@ -528,7 +556,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                             title="Sửa người dùng"
                             icon={<Edit />}
                             size="sm"
-                          />
+                          />}
 
                           {/* Audit activity drawer trigger */}
                           <CmsIconButton
@@ -540,16 +568,16 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                           />
 
                           {/* Quick Reset Password Link */}
-                          <CmsIconButton
+                          {capabilities.edit && <CmsIconButton
                             onClick={() => handleSendResetPassword(user)}
                             aria-label="Gửi liên kết đặt lại mật khẩu"
                             title="Gửi liên kết đặt lại mật khẩu"
                             icon={<Mail />}
                             size="sm"
-                          />
+                          />}
 
                           {/* Status toggle modal trigger */}
-                          <CmsIconButton
+                          {capabilities.edit && <CmsIconButton
                             onClick={() => {
                               setStatusPromptUser(user);
                               setTargetStatus(user.status === 'active' ? 'suspended' : 'active');
@@ -559,7 +587,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
                             title={user.status === 'active' ? 'Tạm khóa tài khoản' : 'Kích hoạt tài khoản'}
                             icon={user.status === 'active' ? <Lock /> : <Unlock />}
                             size="sm"
-                          />
+                          />}
                         </div>
                       </td>
                     </tr>
@@ -587,6 +615,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData }> = ({ data 
         roles={data.roles}
         permissionTasks={data.permissionTasks}
         userPermissions={data.userPermissions}
+        isSaving={isMutating}
       />
 
       {/* STATUS CHANGE PROMPT MODAL */}

@@ -1,0 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
+import { listPublishedServices } from '@/features/services/server/queries';
+export const dynamic = 'force-dynamic';
+export default async function ServicesPage() { const services = await listPublishedServices(); return <section className="mx-auto max-w-7xl px-6 py-16"><h1 className="text-4xl font-extrabold">Dịch vụ</h1><div className="mt-10 grid gap-6 md:grid-cols-3">{services.map((s) => <a key={s.id} href={`/services/${s.slug}`} className="overflow-hidden rounded-xl border border-slate-200 bg-white">{s.image && <img src={s.image} alt={s.title} className="aspect-video w-full object-cover" />}<div className="p-5"><p className="text-xs font-bold uppercase text-orange-600">{s.category}</p><h2 className="mt-2 font-bold">{s.title}</h2>{s.summary && <p className="mt-2 text-sm text-slate-600">{s.summary}</p>}</div></a>)}</div></section>; }

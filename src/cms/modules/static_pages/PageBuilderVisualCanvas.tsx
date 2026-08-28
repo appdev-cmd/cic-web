@@ -425,6 +425,21 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             entityLabel.textContent = sectionDefinitions[section.sectionKey]?.label ?? reference.entityType;
             entityLabel.style.cssText = 'padding:0 5px;color:#0f172a;';
             toolbar.appendChild(entityLabel);
+            if (['home.projects', 'home.events', 'home.news'].includes(section.sectionKey)) {
+              const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[reference.entityType] ?? reference.source?.limit ?? reference.entityIds.length;
+              addButton(
+                reference.source?.mode === 'featured' ? `Tự động: Nổi bật (${limit})` : 'Lấy tự động từ Nổi bật',
+                () => onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'featured', limit }),
+                reference.source?.mode === 'featured',
+              );
+              addButton(
+                'Chọn thủ công',
+                () => {
+                  onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'manual', limit });
+                  onPickReference?.(section.id, reference.entityType);
+                },
+              );
+            }
           });
         }
         if (definition?.canHide) addButton(section.visible === false ? 'Hiện' : 'Ẩn', () => onSectionAction?.(section.id, 'toggle'));

@@ -64,6 +64,36 @@ EXCLUDED_TABLES = {
 # manifest.json (xem cot "columns" cua tung bang). Neu khong co trong day,
 # fallback ve heuristic doan ten nhu cu.
 #
+# ============================================================
+# COT "SYNTHETIC" O BANG GOC (khong ton tai trong MySQL nguon)
+# ============================================================
+# Mot so bang sau khi patch schema Postgres duoc them cot moi (vd entity_id,
+# locale o cic_blocks) de dong bo hop dong VI/EN, nhung MySQL nguon (fs_blocks)
+# khong co cot nay. export_base_table() von se tu dong loai bo cot khong ton
+# tai o nguon (xem doan try/except errno 1054 ben duoi) -> neu cot do la
+# NOT NULL va khong co DEFAULT trong schema Postgres thi INSERT se loi
+# "null value in column ... violates not-null constraint".
+#
+# Khai bao o day de tu dong dien gia tri cho cac cot synthetic do, THAY VI de
+# chung bi loai am tham. Moi entry: table_name -> list (col, source, is_literal)
+#   - is_literal=False: source la ten mot cot KHAC da co gia tri trong row_dict
+#     (vd "id"), gia tri se duoc COPY sang cot moi.
+#   - is_literal=True: source la mot bieu thuc SQL da-quote san (vd "'vi'"),
+#     dung nguyen van lam gia tri cho moi dong.
+SYNTHETIC_BASE_COLUMNS = {
+    # cic_blocks KHONG con dung co che entity_id/locale/translations-table.
+    # Schema hien tai (xem cic_blocks_en trong file schema) da quay lai thiet
+    # ke TACH BANG doc lap giong moi bang "_en" khac trong he thong nay (vd
+    # cic_news/cic_news_en, cic_contents/cic_contents_en...): khong co cot
+    # entity_id/locale, ma co bang cic_blocks_en rieng doc du lieu tu MySQL
+    # fs_blocks_en. Xem export_blocks_en_table() va FK_COLUMN_OVERRIDES o
+    # duoi de biet cach cic_blocks_en duoc xuat.
+    #
+    # Day la lan import DAU TIEN (khong phai re-import du lieu cu), nen o day
+    # co tinh don gian hoa: khong giu lai co che entity_id/locale nua, xoa han
+    # cho khop voi schema hien tai.
+}
+
 # key: (child_table, dep_table) -> list cac ten cot FK thuc su trong child_table
 FK_COLUMN_OVERRIDES = {
     ("cic_news", "cic_news_categories"): ["category_id"],
@@ -85,6 +115,7 @@ FK_COLUMN_OVERRIDES = {
     ("cic_image_en", "cic_cities_en"): ["city_id"],
     ("cic_image_images_en", "cic_image_en"): ["record_id"],
     ("cic_blocks", "cic_config_modules"): ["module_id"],
+    ("cic_blocks_en", "cic_config_modules_en"): ["module_id"],
 }
 
 # key: (child_table, fk_column) -> value: dep_table can tao stub
@@ -161,25 +192,42 @@ def generate_stub_rows(sql_file, dep_table, missing_ids, manifest, valid_ids):
         fk_col_names.update(possible_cols)
 
     pg_col_names = ["id"] + [c["col"] for c in cols]
+
+    # Them cac cot synthetic (vd entity_id, locale) khong ton tai o MySQL nguon
+    # nhung bat buoc phai co gia tri o Postgres - xem SYNTHETIC_BASE_COLUMNS.
+    # Neu khong lam buoc nay, dong stub cho cac bang nay se van thieu cot va
+    # loi NOT NULL y het truong hop khong phai stub.
+    synthetic_specs = SYNTHETIC_BASE_COLUMNS.get(dep_table, [])
+    for col_name, _source, _is_literal in synthetic_specs:
+        if col_name not in pg_col_names:
+            pg_col_names.append(col_name)
+
     col_quoted = ", ".join(f'"{c}"' for c in pg_col_names)
 
     rows = []
     for mid in sorted(missing_ids):
-        values = [str(mid)]
+        row_dict = {"id": str(mid)}
         for c in cols:
             if label_col is not None and c is label_col:
                 label = f"[Du lieu da bi xoa - ID goc: {mid}]"
                 escaped = label.replace("\\", "\\\\").replace("'", "''")
-                values.append(f"'{escaped}'")
+                row_dict[c["col"]] = f"'{escaped}'"
             else:
                 # FK columns should be NULL to avoid FK violations
                 if c["col"] in fk_col_names:
-                    values.append("NULL")
+                    row_dict[c["col"]] = "NULL"
                 # Use empty string for varchar NOT NULL columns
                 elif c["pg_type"] == "varchar":
-                    values.append("''")
+                    row_dict[c["col"]] = "''"
                 else:
-                    values.append(STUB_TYPE_DEFAULTS.get(c["pg_type"], "NULL"))
+                    row_dict[c["col"]] = STUB_TYPE_DEFAULTS.get(c["pg_type"], "NULL")
+
+        # Dien gia tri cho cac cot synthetic (vd entity_id = id cho stub row).
+        for col_name, source, is_literal in synthetic_specs:
+            if col_name not in row_dict:
+                row_dict[col_name] = source if is_literal else row_dict.get(source, "NULL")
+
+        values = [row_dict[col] for col in pg_col_names]
         rows.append(f"  ({', '.join(values)})")
 
     if rows:
@@ -194,6 +242,51 @@ def generate_stub_rows(sql_file, dep_table, missing_ids, manifest, valid_ids):
         valid_ids[dep_table].update(missing_ids)
 
     return len(rows)
+
+
+def export_blocks_en_table(sql_file, manifest, valid_ids, fk_stats):
+    """Xuat cic_blocks_en nhu MOT BANG DOC LAP, dung export_base_table().
+
+    Thay the hoan toan cho co che entity_id/locale/cic_blocks_translations
+    cu (da bo o SYNTHETIC_BASE_COLUMNS). Schema hien tai co san bang
+    cic_blocks_en voi CUNG cot nhu cic_blocks (tru khong co entity_id/locale),
+    va comment trong schema xac nhan no doc tu MySQL "fs_blocks_en" - dung
+    convention giong moi cap bang_X/bang_X_en khac trong he thong nay.
+
+    Gia dinh (khop convention chung cua toan bo codebase): fs_blocks_en co
+    CUNG TEN COT nhu fs_blocks (chi khac ten bang). Neu MySQL nguon fs_blocks_en
+    co it cot hon (thieu mot so cot so voi fs_blocks), export_base_table() da
+    tu dong loai bo rieng tung cot khong ton tai (xem doan try/except errno
+    1054 trong export_base_table) nen se khong loi - chi la se export it cot
+    hon, ghi WARNING vao log de biet.
+    """
+    base_info = manifest.get("cic_blocks")
+    if not base_info:
+        log.warning("Bo qua cic_blocks_en: khong tim thay manifest['cic_blocks']")
+        return 0
+
+    # "info" rieng cho cic_blocks_en: giu nguyen dinh nghia cot (columns) cua
+    # cic_blocks (id/ordering/title/content/...), chi doi source_table sang
+    # ban EN. export_base_table() tu dong loai cot "synthetic" nen du manifest
+    # cu con luu entity_id/locale trong info["columns"] cung khong sao.
+    info = dict(base_info)
+    info["source_table"] = "fs_blocks_en"
+
+    self_ref_cols = set(base_info.get("self_ref_cols", []))
+
+    # module_id cua cic_blocks_en tham chieu cic_config_modules_en (khong phai
+    # cic_config_modules nhu ban VI) - xem schema. Anh xa lai depends_on va
+    # dua vao FK_COLUMN_OVERRIDES[("cic_blocks_en","cic_config_modules_en")]
+    # da khai bao o tren de tim dung cot module_id.
+    depends_on = [
+        "cic_config_modules_en" if d == "cic_config_modules" else d
+        for d in base_info.get("depends_on", [])
+    ]
+
+    return export_base_table(
+        sql_file, "cic_blocks_en", info, self_ref_cols, depends_on,
+        valid_ids, manifest, fk_stats,
+    )
 
 
 def load_manifest(path="manifest.json"):
@@ -430,6 +523,14 @@ def export_base_table(sql_file, table_name, info, self_ref_cols, depends_on, val
     my_cur.execute(f"SELECT {col_list_sql} FROM `{source_table}`")
 
     pg_col_names = ["id"] + [c["col"] for c in data_cols]
+
+    # Them cac cot synthetic (vd entity_id, locale) khong ton tai o MySQL
+    # nguon nhung bat buoc phai co gia tri o Postgres (xem SYNTHETIC_BASE_COLUMNS).
+    synthetic_specs = SYNTHETIC_BASE_COLUMNS.get(table_name, [])
+    for col_name, _source, _is_literal in synthetic_specs:
+        if col_name not in pg_col_names:
+            pg_col_names.append(col_name)
+
     col_quoted = ", ".join(f'"{c}"' for c in pg_col_names)
 
     rows = []
@@ -564,6 +665,12 @@ def export_base_table(sql_file, table_name, info, self_ref_cols, depends_on, val
                 self_ref_updates.append((str(row_id), deferred))
                 for c in deferred:
                     row_dict[c] = "NULL"
+
+        # Dien gia tri cho cac cot synthetic (xem SYNTHETIC_BASE_COLUMNS) - phai
+        # lam sau cung vi co the copy tu cot khac (vd entity_id copy tu id).
+        for col_name, source, is_literal in synthetic_specs:
+            if col_name not in row_dict:
+                row_dict[col_name] = source if is_literal else row_dict.get(source, "NULL")
 
         values = [row_dict[col] for col in pg_col_names]
         values_str = ", ".join(values)
@@ -830,6 +937,18 @@ def main():
     base_tables_raw = [t for t, i in manifest.items() if not i["is_translation"]]
     translation_tables = [t for t, i in manifest.items() if i["is_translation"]]
 
+    # cic_blocks_translations: KHONG con dung duong nay nua. Bang nay khong
+    # ton tai trong schema hien tai, va du lieu no tao ra (neu manifest van
+    # con khai bao) cung khong mang noi dung that (chi entity_id+locale, xem
+    # export_translation_table). cic_blocks_en duoc xuat rieng ben duoi bang
+    # export_blocks_en_table() - thiet ke TACH BANG doc lap, khop voi schema.
+    if "cic_blocks_translations" in translation_tables:
+        translation_tables.remove("cic_blocks_translations")
+        log.info(
+            "Bo qua cic_blocks_translations (manifest) - da chuyen sang "
+            "xuat cic_blocks_en nhu bang doc lap, xem export_blocks_en_table()."
+        )
+
     no_pk_tables = [t for t in base_tables_raw if manifest[t].get("no_pk")]
     base_tables = [t for t in base_tables_raw if t not in no_pk_tables]
 
@@ -839,7 +958,15 @@ def main():
     base_tables = toposort_base_tables(manifest, base_tables)
 
     output_file = "export_data.sql"
-    with open(output_file, "w", encoding="utf-8") as sql_file:
+    # QUAN TRONG: newline="" de tat "universal newline translation" cua Python.
+    # Neu khong co newline="", tren Windows moi ky tu "\n" ghi ra se bi doi
+    # thanh "\r\n" - bao gom ca \n nam trong \r\n co san cua du lieu rich-text
+    # lay tu MySQL, khien no bi nhan doi thanh "\r\r\n". File sinh ra van la
+    # SQL hop le, nhung ky tu \r thua nam sat cac dau dollar-quote ($etl$...$etl$)
+    # de lam mot so cong cu GUI chay script (tu tach cau lenh theo dong/";")
+    # bi lech nhip va bao loi "unterminated dollar quote" / "syntax error"
+    # ngay giua noi dung HTML, du ban than cau SQL khong sai.
+    with open(output_file, "w", encoding="utf-8", newline="") as sql_file:
         sql_file.write("-- PostgreSQL Data Export from MySQL\n")
         sql_file.write(f"-- Generated: {datetime.now().isoformat()}\n")
         sql_file.write("-- Run this file in PostgreSQL after creating the schema\n\n")
@@ -880,6 +1007,18 @@ def main():
                 log.exception("LOI khi export bang %s", table_name)
                 report[table_name] = "ERROR"
         
+        # cic_blocks_en: xuat nhu bang doc lap (fs_blocks_en -> cic_blocks_en),
+        # thay the hoan toan co che entity_id/locale/cic_blocks_translations cu.
+        # Dat sau khi TAT CA base tables da export xong de valid_ids day du
+        # (kem ca cic_config_modules_en, can cho FK module_id).
+        try:
+            n = export_blocks_en_table(sql_file, manifest, valid_ids, fk_stats)
+            report["cic_blocks_en"] = n
+            log.info("OK  %-35s %6d dong", "cic_blocks_en", n)
+        except Exception:
+            log.exception("LOI khi export bang cic_blocks_en")
+            report["cic_blocks_en"] = "ERROR"
+
         # Second pass: validate and fix orphan FKs in base tables
         # This handles cases where parent tables were exported after child tables
         for table_name in base_tables:

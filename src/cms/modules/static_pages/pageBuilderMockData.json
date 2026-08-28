@@ -115,7 +115,7 @@
               "subtitle": "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện"
             },
             "references": [
-              { "entityType": "project", "entityIds": ["project_landmark_81", "project_cao_toc_bac_nam", "project_dien_gio_mui_dinh"] }
+              { "entityType": "project", "entityIds": ["project_landmark_81", "project_cao_toc_bac_nam", "project_dien_gio_mui_dinh"], "source": { "mode": "featured", "limit": 3 } }
             ]
           },
           {
@@ -128,7 +128,7 @@
               "subtitle": "Kết nối chuyên gia và cập nhật công nghệ"
             },
             "references": [
-              { "entityType": "event", "entityIds": ["event_bentley_2026", "event_bim_enterprise", "event_net_zero", "event_ai_construction"] }
+              { "entityType": "event", "entityIds": ["event_bentley_2026"], "source": { "mode": "featured", "limit": 1 } }
             ]
           },
           {
@@ -141,7 +141,7 @@
               "subtitle": "Cập nhật xu hướng công nghệ và chuyển đổi số mới nhất"
             },
             "references": [
-              { "entityType": "news", "entityIds": ["news_05", "news_02", "news_08"] }
+              { "entityType": "news", "entityIds": ["news_05", "news_02", "news_08"], "source": { "mode": "featured", "limit": 4 } }
             ]
           },
           {
@@ -187,9 +187,9 @@
           { "id": "home_stats", "sectionKey": "home.stats", "sectionType": "statistics", "position": 3, "config": { "items": [{ "id": "home_stat_experience", "value": 35, "suffix": "+", "label": "Năm kinh nghiệm" }, { "id": "home_stat_people", "value": 150, "suffix": "+", "label": "Nhân sự" }, { "id": "home_stat_partners", "value": 100, "suffix": "+", "label": "Đối tác toàn cầu" }, { "id": "home_stat_projects", "value": 5000, "suffix": "+", "label": "Dự án thành công" }] } },
           { "id": "home_awards", "sectionKey": "home.awards", "sectionType": "award_slider", "position": 4, "config": { "title": "Thành tựu & Giải thưởng", "subtitle": "Minh chứng cho nỗ lực không ngừng nghỉ", "items": [{ "name": "Huân chương Lao động hạng 3", "imageId": "https://www.cic.com.vn/images/banners/original/huan-chuong-lao-dong-hang-3_1582012829.jpg" }, { "name": "Giải thưởng Sao Khuê 2014", "imageId": "https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2014_1582012560.jpg" }, { "name": "Cúp CNTT năm 2003", "imageId": "https://www.cic.com.vn/images/banners/original/cup-cntt-nam-2004_1582012378.jpg" }, { "name": "Giải thưởng Sao Khuê 2015", "imageId": "https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2015_1582012665.jpg" }, { "name": "Cúp CNTT năm 2004", "imageId": "https://www.cic.com.vn/images/banners/original/cup-cntt-nam-2004_1582012378_1583307621.jpg" }, { "name": "Giải thưởng VIFOTEC", "imageId": "https://www.cic.com.vn/images/banners/original/giai-thuong-vifotec_1582012769.jpg" }, { "name": "Bằng khen Bộ Xây dựng", "imageId": "https://www.cic.com.vn/images/banners/original/huan-chuong-lao-dong-hang-3_1582012829.jpg" }, { "name": "Bằng khen Hiệp hội VINASA", "imageId": "https://www.cic.com.vn/images/banners/original/giai-thuong-sao-khue-2015_1582012665.jpg" }] } },
           { "id": "home_ecosystem", "sectionKey": "home.ecosystem", "sectionType": "technology_ecosystem", "position": 5, "config": { "title": "Hệ sinh thái Công nghệ CIC", "subtitle": "Phần mềm, thiết bị, AI, BIM, Digital Twins và tư vấn đào tạo", "slots": [{ "slotKey": "primary", "title": "AI & Công nghệ thông minh", "description": "Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa." }, { "slotKey": "secondary", "title": "BIM & Digital Twins", "description": "Đào tạo, tạo lập và thẩm tra mô hình BIM." }, { "slotKey": "small_1", "title": "Phần mềm kỹ thuật bản quyền", "description": "Hệ sinh thái CAD, BIM, kết cấu và hạ tầng." }, { "slotKey": "small_2", "title": "Thiết bị công nghệ", "description": "Thiết bị khảo sát, kiểm định, UAV, LiDAR và GPR." }, { "slotKey": "small_3", "title": "Net Zero và phát triển bền vững", "description": "Kiểm kê phát thải, LCA, EPD và CBAM." }, { "slotKey": "small_4", "title": "Tư vấn & Đào tạo", "description": "Đào tạo và chuyển giao công nghệ chuyên sâu." }, { "slotKey": "full", "title": "Giải pháp theo ngành", "description": "Xây dựng, giao thông, khai thác, môi trường và công nghiệp." }] }, "references": [{ "entityType": "product", "entityIds": ["product_ai_platform", "product_software_catalog", "product_equipment_catalog", "product_industry_solutions"] }, { "entityType": "service", "entityIds": ["service_tu_van_bim", "service_digital_transformation", "service_training"] }] },
-          { "id": "home_projects", "sectionKey": "home.projects", "sectionType": "project_highlight", "position": 6, "config": { "title": "Dự án tiêu biểu", "subtitle": "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện" }, "references": [{ "entityType": "project", "entityIds": ["project_landmark_81", "project_cao_toc_bac_nam", "project_dien_gio_mui_dinh"] }] },
-          { "id": "home_events", "sectionKey": "home.events", "sectionType": "event_highlight", "position": 7, "config": { "title": "Sự kiện nổi bật", "subtitle": "Kết nối chuyên gia và cập nhật công nghệ" }, "references": [{ "entityType": "event", "entityIds": ["event_bentley_2026", "event_bim_enterprise", "event_net_zero", "event_ai_construction"] }] },
-          { "id": "home_news", "sectionKey": "home.news", "sectionType": "news_highlight", "position": 8, "config": { "title": "Tin tức và Góc nhìn", "subtitle": "Cập nhật xu hướng công nghệ và chuyển đổi số mới nhất" }, "references": [{ "entityType": "news", "entityIds": ["news_05", "news_02", "news_08"] }] },
+          { "id": "home_projects", "sectionKey": "home.projects", "sectionType": "project_highlight", "position": 6, "config": { "title": "Dự án tiêu biểu", "subtitle": "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện" }, "references": [{ "entityType": "project", "entityIds": ["project_landmark_81", "project_cao_toc_bac_nam", "project_dien_gio_mui_dinh"], "source": { "mode": "featured", "limit": 3 } }] },
+          { "id": "home_events", "sectionKey": "home.events", "sectionType": "event_highlight", "position": 7, "config": { "title": "Sự kiện nổi bật", "subtitle": "Kết nối chuyên gia và cập nhật công nghệ" }, "references": [{ "entityType": "event", "entityIds": ["event_bentley_2026"], "source": { "mode": "featured", "limit": 1 } }] },
+          { "id": "home_news", "sectionKey": "home.news", "sectionType": "news_highlight", "position": 8, "config": { "title": "Tin tức và Góc nhìn", "subtitle": "Cập nhật xu hướng công nghệ và chuyển đổi số mới nhất" }, "references": [{ "entityType": "news", "entityIds": ["news_05", "news_02", "news_08"], "source": { "mode": "featured", "limit": 4 } }] },
           { "id": "home_partners", "sectionKey": "home.partners", "sectionType": "partner_marquee", "position": 9, "config": { "title": "Đối tác chiến lược", "subtitle": "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" }, "references": [{ "entityType": "partner", "entityIds": ["partner_bentley", "partner_autodesk", "partner_csi", "partner_plaxis"] }] },
           { "id": "home_contact_cta", "sectionKey": "home.contact_cta", "sectionType": "contact_cta_form", "position": 10, "config": { "title": "Sẵn sàng kiến tạo Tương lai số", "description": "Đội ngũ chuyên gia CIC sẵn sàng lắng nghe và tư vấn giải pháp phù hợp.", "phone": "024 3976 1381", "email": "info@cic.com.vn", "formId": "form_home_consultation", "submitLabel": "Gửi thông tin ngay" } }
         ]

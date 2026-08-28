@@ -1,0 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
+import { listPublishedProducts } from '@/features/products/server/queries';
+export const dynamic = 'force-dynamic';
+export default async function ProductsPage() { const products = await listPublishedProducts(); return <section className="mx-auto max-w-7xl px-6 py-16"><h1 className="text-4xl font-extrabold">Sản phẩm</h1><div className="mt-10 grid gap-6 md:grid-cols-3">{products.map((p) => <a key={p.id} href={`/products/${p.slug}`} className="overflow-hidden rounded-xl border border-slate-200 bg-white"><>{p.image && <img src={p.image} alt={p.title} className="aspect-video w-full object-cover" />}</><div className="p-5"><h2 className="font-bold">{p.title}</h2>{p.summary && <p className="mt-2 text-sm text-slate-600">{p.summary}</p>}</div></a>)}</div></section>; }

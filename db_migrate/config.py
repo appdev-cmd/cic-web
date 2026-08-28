@@ -18,13 +18,13 @@ MYSQL = {
 #     "dbname": "postgres",
 # }
 
-# Config localhost PostgreSQL (để test local, tạm comment lại)
+# PostgreSQL Supabase
 POSTGRES = {
-    "host": "localhost",
+    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
     "port": 5432,
-    "user": "postgres",
-    "password": "postgres",
-    "dbname": "mydb",
+    "user": "postgres.tjkytlstopieiqqiiisy",
+    "password": "HpnzwRsl1J45Xpkn",
+    "dbname": "postgres",
 }
 
 MANIFEST_PATH = "manifest.json"

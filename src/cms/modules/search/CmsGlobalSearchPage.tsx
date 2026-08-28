@@ -36,14 +36,16 @@ import {
   SearchResultModule,
   saveRecentSearch,
   saveRecentVisitedItem,
-} from '../../services/globalSearchService';
+} from '../../services/globalSearchRuntime';
 import type { CmsLocale } from '../../data/CmsDataSource';
+import type { CmsSearchRecord } from '@/features/cms-search/types';
 
 interface CmsGlobalSearchPageProps {
   workspaceLocale?: CmsLocale;
   initialQuery?: string;
   initialModule?: SearchResultModule | 'all';
   userRole?: string;
+  records: CmsSearchRecord[];
   onNavigate: (path: string, title: string) => void;
 }
 
@@ -52,6 +54,7 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
   initialQuery = '',
   initialModule = 'all',
   userRole = 'superadmin',
+  records,
   onNavigate,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
@@ -79,12 +82,13 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
       return { totalResults: 0, groupedResults: [], allFlatResults: [] };
     }
     return executeGlobalSearch(searchQuery, {
+      records,
       locale: workspaceLocale,
       userRole,
       maxResultsPerGroup: 100, // lấy đầy đủ cho trang toàn diện
       moduleFilter: selectedModule,
     });
-  }, [searchQuery, workspaceLocale, userRole, selectedModule]);
+  }, [searchQuery, workspaceLocale, userRole, selectedModule, records]);
 
   // Lọc thêm theo trạng thái và sắp xếp
   const filteredAndSortedResults = useMemo(() => {
@@ -109,6 +113,7 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
   const moduleCounts = useMemo(() => {
     if (!searchQuery.trim()) return {};
     const fullRes = executeGlobalSearch(searchQuery, {
+      records,
       locale: workspaceLocale,
       userRole,
       maxResultsPerGroup: 500,
@@ -120,7 +125,7 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
       counts[g.module] = g.totalCount;
     });
     return counts;
-  }, [searchQuery, workspaceLocale, userRole]);
+  }, [searchQuery, workspaceLocale, userRole, records]);
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);

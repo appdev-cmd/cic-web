@@ -52,7 +52,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     },
   },
   'home.projects': {
-    label: 'Dự án tiêu biểu', description: 'Chọn thủ công tối đa 3 dự án.', referenceLimit: { project: 3 }, canHide: true, canMove: true,
+    label: 'Dự án tiêu biểu', description: 'Tự động lấy tối đa 3 dự án đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { project: 3 }, canHide: true, canMove: true,
     editableContract: {
       sectionKey: 'home.projects',
       fields: [],
@@ -61,8 +61,8 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       },
     },
   },
-  'home.events': { label: 'Sự kiện nổi bật', description: 'Một sự kiện chính và tối đa 3 sự kiện phụ.', referenceLimit: { event: 4 }, canHide: true, canMove: true, editableContract: blockedContract('home.events') },
-  'home.news': { label: 'Tin tức và Góc nhìn', description: 'Chọn thủ công tối đa 3 bài viết.', referenceLimit: { news: 3 }, canHide: true, canMove: true, editableContract: blockedContract('home.news') },
+  'home.events': { label: 'Sự kiện nổi bật', description: 'Tự động lấy 1 sự kiện đã đánh dấu Nổi bật.', referenceLimit: { event: 1 }, canHide: true, canMove: true, editableContract: blockedContract('home.events') },
+  'home.news': { label: 'Tin tức và Góc nhìn', description: 'Tự động lấy tối đa 4 tin đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { news: 4 }, canHide: true, canMove: true, editableContract: blockedContract('home.news') },
   'home.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 }, canHide: true, canMove: true, editableContract: blockedContract('home.partners') },
   'home.contact_cta': { label: 'CTA & Form tư vấn', description: 'Nội dung liên hệ và form cố định.', editableContract: blockedContract('home.contact_cta') },
   'about.hero': { label: 'Hero Giới thiệu', description: 'Tiêu đề và ảnh mở đầu.', editableContract: { sectionKey: 'about.hero', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { background: { path: 'backgroundImageId', semantic: 'background-image', ownership: 'section-config', replace: 'enabled' } } } },

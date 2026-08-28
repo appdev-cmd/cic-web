@@ -9,7 +9,6 @@ import {
   Globe,
   MapPin,
   FileText,
-  Upload,
   Eye,
   EyeOff,
   Building,
@@ -31,13 +30,14 @@ import type { PermissionTask, UserPermissionState } from '../permission_manageme
 interface CicUserFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: CicUser) => void;
+  onSave: (user: CicUser, password?: string) => void | Promise<void>;
   userToEdit: CicUser | null;
   existingUsers: CicUser[];
   agencies: AgencyOption[];
   roles: RoleOption[];
   permissionTasks: PermissionTask[];
   userPermissions: Record<string, UserPermissionState>;
+  isSaving?: boolean;
 }
 
 export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
@@ -50,6 +50,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   roles,
   permissionTasks,
   userPermissions,
+  isSaving = false,
 }) => {
   const isEditMode = !!userToEdit;
 
@@ -122,24 +123,15 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
       setAvatar('');
       setStatus('active');
-      setRoleId('role_editor');
+      setRoleId(roles[0]?.id ?? '');
       setOrdering(existingUsers.length + 1);
-      setSelectedAgencies(['agency_hn']);
+      setSelectedAgencies(agencies[0] ? [agencies[0].id] : []);
       setTwoFactorEnabled(false);
     }
     setErrors({});
     setActiveTab('profile');
     setStatusReason('');
-  }, [userToEdit, isOpen, existingUsers.length]);
-
-  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setAvatar(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
+  }, [userToEdit, isOpen, existingUsers.length, roles, agencies]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -169,7 +161,15 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
     if (!isEditMode || (isEditMode && isChangingPassword)) {
       if (!password) newErrors.password = 'Mật khẩu không được để trống';
+      else if (password.length < 8) newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
       if (password !== confirmPassword) newErrors.confirmPassword = 'Mật khẩu xác nhận không trùng khớp';
+    }
+
+    if (username.trim() && !/^[A-Za-z0-9._-]{3,50}$/.test(username.trim())) {
+      newErrors.username = 'Tên đăng nhập dùng 3-50 ký tự chữ, số, dấu chấm, gạch ngang hoặc gạch dưới';
+    }
+    if (avatar.trim() && (avatar.length > 255 || !/^(https?:\/\/|\/)/i.test(avatar.trim()))) {
+      newErrors.avatar = 'Avatar phải là URL http(s) hoặc đường dẫn website hợp lệ';
     }
 
     setErrors(newErrors);
@@ -178,6 +178,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     if (!validateForm()) {
       setActiveTab('profile');
       return;
@@ -212,7 +213,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       country: userToEdit?.country || 'Việt Nam',
       address: address.trim(),
       summary: summary.trim(),
-      avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      avatar: avatar.trim(),
       status,
       primaryRoleId: roleId,
       ordering: Number(ordering) || 0,
@@ -231,7 +232,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       nums_visit: userToEdit?.nums_visit || 0,
     };
 
-    onSave(finalUser);
+    void onSave(finalUser, isChangingPassword ? password : undefined);
   };
 
   if (!isOpen) return null;
@@ -589,11 +590,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                     )}
 
                     <div className="space-y-2 w-full">
-                      <label className="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors w-full">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Tải ảnh từ máy tính</span>
-                        <input type="file" accept="image/*" onChange={handleAvatarFileChange} className="hidden" />
-                      </label>
                       <input
                         type="text"
                         value={avatar}
@@ -601,6 +597,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                         placeholder="Hoặc dán URL ảnh..."
                         className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-md text-[11px] text-slate-700 dark:text-slate-300 focus:outline-none"
                       />
+                      {errors.avatar && <p className="text-[11px] text-red-500">{errors.avatar}</p>}
+                      <p className="text-[10px] text-slate-400">Dùng URL ảnh đã được lưu trữ; upload trực tiếp sẽ khả dụng khi Media được cấu hình.</p>
                     </div>
                   </div>
                 </div>
@@ -929,6 +927,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
           <button
             type="button"
             onClick={onClose}
+            disabled={isSaving}
             className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
           >
             Hủy bỏ
@@ -950,6 +949,8 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             <button
               type="button"
               onClick={handleSubmit}
+              disabled={isSaving}
+              aria-busy={isSaving}
               className="flex items-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 cursor-pointer transition-all"
             >
               <Save className="w-4 h-4" />

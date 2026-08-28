@@ -50,6 +50,7 @@ interface SettingsEditorTabProps {
   onSaveDirect: () => void;
   onSaveDraft: () => void;
   onPublish: () => void;
+  readOnly?: boolean;
 }
 
 export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
@@ -69,6 +70,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
   onSaveDirect,
   onSaveDraft,
   onPublish,
+  readOnly = false,
 }) => {
   const [activeGroupId, setActiveGroupId] = useState<ConfigGroupId>('general');
   const [searchTerm, setSearchTerm] = useState('');
@@ -458,7 +460,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                       {item.type === 'list' && item.id === 'comp_branches' && (
                         <BranchesSettingsEditor
                           value={displayValue}
-                          disabled={isInherited}
+                          disabled={readOnly || isInherited}
                           onChange={(branches) => onUpdateDraftValue(item.id, branches)}
                         />
                       )}
@@ -467,7 +469,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                         <input
                           type="text"
                           value={displayValue ?? ''}
-                          disabled={isInherited}
+                          disabled={readOnly || isInherited}
                           onChange={(e) => onUpdateDraftValue(item.id, e.target.value)}
                           placeholder={item.placeholder}
                           className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60"
@@ -478,7 +480,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                         <textarea
                           rows={3}
                           value={displayValue ?? ''}
-                          disabled={isInherited}
+                          disabled={readOnly || isInherited}
                           onChange={(e) => onUpdateDraftValue(item.id, e.target.value)}
                           placeholder={item.placeholder}
                           className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono disabled:opacity-60"
@@ -490,7 +492,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                           <input
                             type="number"
                             value={displayValue ?? 0}
-                            disabled={isInherited}
+                            disabled={readOnly || isInherited}
                             onChange={(e) => onUpdateDraftValue(item.id, Number(e.target.value))}
                             className="w-48 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60 font-mono font-bold"
                           />
@@ -505,7 +507,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                           <input
                             type="checkbox"
                             checked={Boolean(displayValue)}
-                            disabled={isInherited}
+                            disabled={readOnly || isInherited}
                             onChange={(e) => onUpdateDraftValue(item.id, e.target.checked)}
                             className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer"
                           />
@@ -518,7 +520,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                       {item.type === 'select' && item.options && (
                         <select
                           value={displayValue ?? ''}
-                          disabled={isInherited}
+                          disabled={readOnly || isInherited}
                           onChange={(e) => onUpdateDraftValue(item.id, e.target.value)}
                           className="w-full sm:w-64 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60 cursor-pointer"
                         >
@@ -576,7 +578,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                                 onUpdateDraftValue(item.id, url)
                               )
                             }
-                            disabled={isInherited}
+                            disabled={readOnly || isInherited}
                             className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold text-xs rounded-xl border border-orange-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                           >
                             <FileImage className="w-3.5 h-3.5" />

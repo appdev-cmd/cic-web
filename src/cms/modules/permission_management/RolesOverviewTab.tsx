@@ -38,6 +38,8 @@ interface RolesOverviewTabProps {
   onOpenEdit: (role: CmsRole) => void;
   onCloneRole: (role: CmsRole) => void;
   onToggleRoleStatus: (roleId: string) => void;
+  canCreate?: boolean;
+  canEdit?: boolean;
 }
 
 export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
@@ -50,6 +52,8 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
   onOpenEdit,
   onCloneRole,
   onToggleRoleStatus,
+  canCreate = false,
+  canEdit = false,
 }) => {
   // Filters State
   const [searchQuery, setSearchQuery] = useState('');
@@ -315,7 +319,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                                 className="w-5 h-5 rounded-full border border-white dark:border-slate-800 object-cover"
                               />
                             ))}
-                            {role.status === 'active' && (
+                            {canEdit && role.status === 'active' && (
                               <button
                                 onClick={() => handleOpenAssignForRole(role)}
                                 className="w-5 h-5 rounded-full bg-orange-100 hover:bg-orange-200 dark:bg-orange-950 dark:hover:bg-orange-900 text-orange-700 dark:text-orange-300 font-bold text-[10px] flex items-center justify-center border border-white dark:border-slate-800 transition-colors cursor-pointer"
@@ -351,7 +355,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                           />
 
                           {/* Direct Assign Role to User */}
-                          {role.status === 'active' && (
+                          {canEdit && role.status === 'active' && (
                             <CmsIconButton
                               onClick={() => handleOpenAssignForRole(role)}
                               icon={<UserPlus />}
@@ -363,31 +367,31 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                           )}
 
                           {/* Edit Draft */}
-                          <CmsIconButton
+                          {canEdit && <CmsIconButton
                             onClick={() => onOpenEdit(role)}
                             icon={<Edit />}
                             size="sm"
                             aria-label="Sửa vai trò"
                             title="Sửa bản nháp & Ma trận quyền"
-                          />
+                          />}
 
                           {/* Clone Role */}
-                          <CmsIconButton
+                          {canCreate && <CmsIconButton
                             onClick={() => onCloneRole(role)}
                             icon={<Copy />}
                             size="sm"
                             aria-label="Nhân bản vai trò"
                             title="Nhân bản vai trò"
-                          />
+                          />}
 
-                          <CmsIconButton
+                          {canEdit && <CmsIconButton
                             onClick={() => setStatusTargetRole(role)}
                             icon={role.status === 'active' ? <Lock /> : <Unlock />}
                             size="sm"
                             variant={role.status === 'active' ? 'danger' : 'default'}
                             aria-label={role.status === 'active' ? 'Tắt vai trò' : 'Bật vai trò'}
                             title={role.status === 'active' ? 'Chuyển sang không hoạt động' : 'Chuyển sang hoạt động'}
-                          />
+                          />}
                         </div>
                       </td>
                     </tr>
@@ -632,7 +636,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
                       </div>
 
                       {/* Revoke / Delete Action */}
-                      {onRevokeAssignment && (
+                      {canEdit && onRevokeAssignment && (
                         <button
                           onClick={() => onRevokeAssignment(asg.id)}
                           className="px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/60 text-red-600 dark:text-red-300 text-xs font-bold rounded-xl border border-red-200 dark:border-red-800 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:shadow-xs shrink-0"
@@ -650,7 +654,7 @@ export const RolesOverviewTab: React.FC<RolesOverviewTabProps> = ({
 
             {/* Bottom Actions */}
             <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
-              {inspectingRole.status === 'active' && (
+              {canEdit && inspectingRole.status === 'active' && (
                 <button
                   onClick={() => {
                     const r = inspectingRole;

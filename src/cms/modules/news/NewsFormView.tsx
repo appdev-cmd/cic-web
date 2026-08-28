@@ -7,6 +7,7 @@ import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
 import { ProductFileInput } from '../products/ProductFileInput';
 import type { NewsArticle, NewsCategory, RelatedProductItem } from './types';
+import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 
 interface NewsFormViewProps {
   articleToEdit: NewsArticle | null;
@@ -14,6 +15,7 @@ interface NewsFormViewProps {
   relatedArticles: NewsArticle[];
   relatedProducts: RelatedProductItem[];
   mediaImages: CmsMediaPickerItem[];
+  placementCounts: { featured: number; homepage: number };
   onSave: (data: Partial<NewsArticle>) => void;
   onCancel: () => void;
 }
@@ -22,7 +24,7 @@ const slugify = (text: string) => text.toLowerCase().normalize('NFD').replace(/[
 const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300';
 
-export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categories, relatedArticles, relatedProducts, mediaImages, onSave, onCancel }) => {
+export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categories, relatedArticles, relatedProducts, mediaImages, placementCounts, onSave, onCancel }) => {
   const [title, setTitle] = useState(articleToEdit?.title || '');
   const [alias, setAlias] = useState(articleToEdit?.alias || '');
   const [manualAlias, setManualAlias] = useState(false);
@@ -51,6 +53,8 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
 
   const save = (nextPublished: boolean) => {
     if (!title.trim() || !categoryId) return alert('Vui lòng nhập tiêu đề và chọn danh mục.');
+    if (isHot && placementCounts.featured >= NEWS_PLACEMENT_LIMITS.featured && !articleToEdit?.is_hot) return alert(`Hot News chỉ được chọn tối đa ${NEWS_PLACEMENT_LIMITS.featured} tin.`);
+    if (showInHomepage && placementCounts.homepage >= NEWS_PLACEMENT_LIMITS.homepage && !articleToEdit?.show_in_homepage) return alert(`Trang chủ chỉ được chọn tối đa ${NEWS_PLACEMENT_LIMITS.homepage} tin.`);
     onSave({
       title, alias: alias || slugify(title), other_languages1: otherLanguages1, category_id: categoryId,
       ordering: Number(ordering) || 1, image, tawk_to: tawkTo, file_upload: fileUpload,
@@ -79,7 +83,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
       <aside className="space-y-5">
         <ContentQualityPanel title="Kiểm tra chất lượng bài viết" checks={[{ label: 'Có tiêu đề tin', passed: Boolean(title.trim()) }, { label: 'Đã chọn danh mục', passed: Boolean(categoryId) }, { label: 'Có tóm tắt', passed: Boolean(summary.trim()) }, { label: 'Có nội dung bài viết', passed: content.replace(/<[^>]+>/g, '').trim().length > 30 }, { label: 'Có hình ảnh', passed: Boolean(image) }, { label: 'Có cấu hình SEO', passed: Boolean(seoTitle.trim() && seoDescription.trim()) }]} />
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><ImageIcon className="h-5 w-5 text-orange-600" />Media và tệp</div><div className="space-y-4"><div><label className={labelClass}>Hình ảnh</label>{image && <img src={selectedImage?.thumbnail_url ?? selectedImage?.url ?? image} alt="" className="mb-2 aspect-video w-full rounded-xl object-cover" />}<button type="button" onClick={() => setMediaPickerOpen(true)} className="w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn hoặc tải ảnh</button></div><ProductFileInput label="File đính kèm" value={fileUpload} onChange={setFileUpload} placeholder="Tải file đính kèm từ máy..." /><div><label className={labelClass}>Tags</label><textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="Phân cách bằng dấu phẩy" /></div></div></section>
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Xuất bản</div><div className="space-y-3">{[['Tin nổi bật', isHot, setIsHot], ['Hiển thị trang chủ', showInHomepage, setShowInHomepage]].map(([label, checked, setter]) => <label key={String(label)} className="flex items-center justify-between text-sm font-semibold dark:text-slate-200"><span>{String(label)}</span><input type="checkbox" checked={Boolean(checked)} onChange={(e) => (setter as React.Dispatch<React.SetStateAction<boolean>>)(e.target.checked)} /></label>)}<div><label className={labelClass}>Thời gian xuất bản</label><input type="datetime-local" className={inputClass} value={createdTime} onChange={(e) => setCreatedTime(e.target.value)} /></div></div></section>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Xuất bản</div><div className="space-y-3"><label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200"><span><span className="block">Tin nổi bật <span className="text-xs font-normal text-slate-400">({placementCounts.featured + Number(isHot)}/{NEWS_PLACEMENT_LIMITS.featured})</span></span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Hiện trong khu Hot News của trang Tin tức.</span></span><input type="checkbox" checked={isHot} disabled={!isHot && placementCounts.featured >= NEWS_PLACEMENT_LIMITS.featured} onChange={(e) => setIsHot(e.target.checked)} /></label><label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200"><span><span className="block">Hiện Trang chủ <span className="text-xs font-normal text-slate-400">({placementCounts.homepage + Number(showInHomepage)}/{NEWS_PLACEMENT_LIMITS.homepage})</span></span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Cho phép bài xuất hiện tại khu Tin tức trên Trang chủ, độc lập với Tin nổi bật.</span></span><input type="checkbox" checked={showInHomepage} disabled={!showInHomepage && placementCounts.homepage >= NEWS_PLACEMENT_LIMITS.homepage} onChange={(e) => setShowInHomepage(e.target.checked)} /></label><div><label className={labelClass}>Thời gian xuất bản</label><input type="datetime-local" className={inputClass} value={createdTime} onChange={(e) => setCreatedTime(e.target.value)} /></div></div></section>
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Search className="h-5 w-5 text-orange-600" />SEO</div><div className="space-y-4"><div><label className={labelClass}>SEO title</label><input className={inputClass} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} /></div><div><label className={labelClass}>SEO keyword</label><input className={inputClass} value={seoKeyword} onChange={(e) => setSeoKeyword(e.target.value)} /></div><div><label className={labelClass}>SEO description</label><textarea rows={4} className={inputClass} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} /></div><div><label className={labelClass}>Tawk.to</label><textarea rows={3} className={inputClass} value={tawkTo} onChange={(e) => setTawkTo(e.target.value)} /></div></div></section>
       </aside>
     </div>

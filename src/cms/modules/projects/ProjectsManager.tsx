@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BriefcaseBusiness, CheckCircle2, Edit3, Eye, Plus, RotateCcw, Search, Star, Trash2, X } from 'lucide-react';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
@@ -8,12 +8,24 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { ProjectFormView } from './ProjectFormView';
 import { ProjectPreviewModal } from './ProjectPreviewModal';
 import type { CmsProject, ProjectsModuleData } from './types';
+import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
+import { createProjectAction, updateProjectAction, deleteProjectAction, bulkUpdateProjectsAction } from '@/features/projects/server/actions';
 
 interface Props { data: ProjectsModuleData; }
 type StatusFilter = 'all' | 'published' | 'draft';
 
 export const ProjectsManager: React.FC<Props> = ({ data }) => {
-  const [projects, setProjects] = useState(data.projects);
+  const [projects, setProjectsState] = useState(data.projects);
+  const setProjects = (updater: typeof data.projects | ((current: typeof data.projects) => typeof data.projects)) => {
+    setProjectsState((current) => {
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      const removed = current.filter((item) => !next.some((candidate) => candidate.id === item.id));
+      if (removed.length) void Promise.all(removed.map((item) => deleteProjectAction(item.id))).catch(() => undefined);
+      return next;
+    });
+  };
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { let active = true; fetch('/api/cms/projects').then(async (response) => { if (!response.ok) throw new Error('Không thể tải danh sách dự án.'); const body = await response.json() as { projects?: CmsProject[] }; if (active && body.projects) setProjects(body.projects); }).catch(() => undefined).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
   const [editing, setEditing] = useState<CmsProject | null | undefined>(undefined);
   const [previewProject, setPreviewProject] = useState<CmsProject | null>(null);
   const [query, setQuery] = useState('');
@@ -43,20 +55,40 @@ export const ProjectsManager: React.FC<Props> = ({ data }) => {
   const reset = () => { setQuery(''); setStatus('all'); setSector('all'); setFeatured('all'); setCurrentPage(1); };
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(''), 3000); };
 
-  const save = (saved: CmsProject) => {
+  const save = async (saved: CmsProject) => {
+    const payload = { ...saved, id: undefined };
+    try {
+      const result = saved.id.startsWith('project_') ? await createProjectAction(payload) : await updateProjectAction(saved.id, payload);
+      saved = { ...saved, id: String((result as { id?: string | number }).id ?? saved.id) };
+    } catch (error) { return notify(error instanceof Error ? error.message : 'Không thể lưu dự án.'); }
     if (projects.some((item) => item.id !== saved.id && item.alias === saved.alias)) return notify('Đường dẫn này đã được một dự án khác sử dụng.');
+    if (saved.is_featured && !projects.find((item) => item.id === saved.id)?.is_featured && projects.filter((item) => item.is_featured).length >= FEATURED_CONTENT_LIMITS.project) return notify(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.project} dự án nổi bật.`);
     const exists = projects.some((item) => item.id === saved.id);
     setProjects((current) => exists ? current.map((item) => item.id === saved.id ? saved : item) : [saved, ...current]);
     setEditing(undefined);
     notify(exists ? 'Đã cập nhật dự án.' : 'Đã thêm dự án.');
   };
-  const updateSelected = (patch: Partial<CmsProject>, message: string) => {
+  const toggleFeatured = async (id: string) => {
+    const target = projects.find((item) => item.id === id);
+    if (!target) return;
+    if (!target?.is_featured && projects.filter((item) => item.is_featured).length >= FEATURED_CONTENT_LIMITS.project) return notify(`Đã đủ ${FEATURED_CONTENT_LIMITS.project} dự án nổi bật. Hãy bỏ chọn một dự án khác trước.`);
+    try { await bulkUpdateProjectsAction([id], { is_featured: !target.is_featured }); } catch (error) { return notify(error instanceof Error ? error.message : 'Không thể cập nhật dự án.'); }
+    setProjects((current) => current.map((item) => item.id === id ? { ...item, is_featured: !item.is_featured, updated_time: new Date().toISOString() } : item));
+    notify(target?.is_featured ? 'Đã bỏ dự án khỏi nhóm Nổi bật.' : 'Đã thêm dự án vào nhóm Nổi bật.');
+  };
+const removeProject = async (id: string) => { try { await deleteProjectAction(id); setProjects((current) => current.filter((item) => item.id !== id)); notify('Đã xóa dự án.'); } catch (error) { notify(error instanceof Error ? error.message : 'Không thể xóa dự án.'); } };
+  const removeSelectedProjects = async () => {
+    try { await Promise.all(selectedIds.map((id) => deleteProjectAction(id))); setProjects((current) => current.filter((item) => !selectedIds.includes(item.id))); setSelectedIds([]); notify('Đã xóa các dự án đã chọn.'); }
+    catch (error) { notify(error instanceof Error ? error.message : 'Không thể xóa các dự án đã chọn.'); }
+  };
+  const updateSelected = async (patch: Partial<CmsProject>, message: string) => {
+    try { await bulkUpdateProjectsAction(selectedIds, { published: patch.published, is_featured: patch.is_featured }); } catch (error) { return notify(error instanceof Error ? error.message : 'Không thể cập nhật các dự án.'); }
     setProjects((current) => current.map((item) => selectedIds.includes(item.id) ? { ...item, ...patch, updated_time: new Date().toISOString() } : item));
     setSelectedIds([]);
     notify(message);
   };
 
-  if (editing !== undefined) return <><ProjectFormView project={editing} productOptions={data.productOptions} serviceOptions={data.serviceOptions} onSave={save} onPreview={setPreviewProject} onCancel={() => setEditing(undefined)} /><ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} /></>;
+  if (editing !== undefined) return <><ProjectFormView project={editing} productOptions={data.productOptions} serviceOptions={data.serviceOptions} featuredCount={projects.filter((item) => item.id !== editing?.id && item.is_featured).length} onSave={save} onPreview={setPreviewProject} onCancel={() => setEditing(undefined)} /><ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} /></>;
 
   return <div className="relative space-y-6 pb-16">
     {toast && <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl"><CheckCircle2 className="size-4 text-emerald-400" />{toast}</div>}

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Settings,
   Globe,
@@ -41,25 +42,25 @@ import { SecretRotateModal } from './SecretRotateModal';
 import { AssetPickerModal } from './AssetPickerModal';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsTabs } from '../../components/ui/CmsTabs';
+import { saveCmsSystemSettingsAction } from '@/features/system-settings/server/actions';
 
 interface SystemConfigurationProps {
   websiteData?: SystemConfigurationData;
-  globalData: SystemConfigurationData;
+  globalData?: SystemConfigurationData;
+  capabilities: { edit: boolean };
 }
 
-export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websiteData, globalData }) => {
+const emptyConfiguration = (): SystemConfigurationData => ({ scopes: [], groups: [], items: [], values: {}, issues: [], drafts: [], versions: [], activityLogs: [] });
+
+export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websiteData, globalData, capabilities }) => {
+  const router = useRouter();
+  const [isMutating, setIsMutating] = useState(false);
   const mergedData = useMemo<SystemConfigurationData>(() => {
-    const localized = websiteData ?? { scopes: [], groups: [], items: [], values: {}, issues: [], drafts: [], versions: [], activityLogs: [] };
+    const localized = websiteData ?? emptyConfiguration();
+    const global = globalData ?? emptyConfiguration();
     const uniqueById = <T extends { id: string }>(items: T[]) => Array.from(new Map(items.map((item) => [item.id, item])).values());
     return {
-      scopes: uniqueById([...localized.scopes, ...globalData.scopes]),
-      groups: uniqueById([...localized.groups, ...globalData.groups]),
-      items: uniqueById([...localized.items, ...globalData.items]),
-      values: { ...localized.values, ...globalData.values },
-      issues: uniqueById([...localized.issues, ...globalData.issues]),
-      drafts: uniqueById([...localized.drafts, ...globalData.drafts]),
-      versions: uniqueById([...localized.versions, ...globalData.versions]),
-      activityLogs: uniqueById([...localized.activityLogs, ...globalData.activityLogs]),
+      scopes: uniqueById([...localized.scopes, ...global.scopes]), groups: uniqueById([...localized.groups, ...global.groups]), items: uniqueById([...localized.items, ...global.items]), values: { ...localized.values, ...global.values }, issues: uniqueById([...localized.issues, ...global.issues]), drafts: uniqueById([...localized.drafts, ...global.drafts]), versions: uniqueById([...localized.versions, ...global.versions]), activityLogs: uniqueById([...localized.activityLogs, ...global.activityLogs]),
     };
   }, [websiteData, globalData]);
   const [activeTab, setActiveTab] = useState<
@@ -226,12 +227,19 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     setActivityLogs((prev) => [newLog, ...prev]);
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     const reviewCount = Object.keys(reviewValuesMap).length;
     if (reviewCount === 0) {
       showToast('Không có cấu hình ảnh hưởng lớn nào cần lưu bản nháp.', 'info');
       return;
     }
+    if (!capabilities.edit || isMutating) return;
+    setIsMutating(true);
+    try {
+      await saveCmsSystemSettingsAction({ changes: Object.keys(reviewValuesMap).filter((settingId) => settingId !== 'comp_branches').map((settingId) => ({ scopeId: activeScopeId, settingId, value: reviewValuesMap[settingId].draftValue ?? null })) });
+      router.refresh();
+    } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể lưu bản nháp.', 'error'); }
+    finally { setIsMutating(false); }
     const savedAt = new Date();
     const versionNumber = `${activeScope.liveVersion}-draft`;
     const nextDraft: ConfigDraft = {
@@ -257,7 +265,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
     showToast(`Đã lưu bản nháp ${reviewCount} cấu hình cần kiểm tra tại ${activeScope.name}.`);
   };
 
-  const handleSaveDirect = () => {
+  const handleSaveDirect = async () => {
     const directKeys = Object.keys(currentScopeValues).filter((settingId) => {
       const item = items.find((candidate) => candidate.id === settingId);
       return currentScopeValues[settingId]?.draftValue !== undefined && item && !requiresConfigReview(item);
@@ -268,7 +276,14 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       return;
     }
 
+    if (!capabilities.edit || isMutating) return;
     const savedAt = new Date();
+    setIsMutating(true);
+    try {
+      await saveCmsSystemSettingsAction({
+        changes: directKeys.filter((settingId) => settingId !== 'comp_branches').map((settingId) => ({ scopeId: activeScopeId, settingId, value: currentScopeValues[settingId].draftValue ?? null })),
+        branches: directKeys.includes('comp_branches') ? { workspace: activeScopeId === 'site_english' ? 'en' : 'vi', items: currentScopeValues.comp_branches?.draftValue ?? [] } : undefined,
+      });
     setValuesRecordMap((current) => {
       const scopeValues = { ...(current[activeScopeId] || {}) };
       directKeys.forEach((settingId) => {
@@ -295,10 +310,16 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       details: `Lưu trực tiếp ${directKeys.length} cấu hình thông thường`,
       ipAddress: '118.70.182.95',
     }, ...current]);
-    showToast(`Đã lưu ${directKeys.length} thay đổi. Hoạt động đã được ghi nhật ký.`);
+    showToast(`Đã lưu ${directKeys.length} thay đổi vào PostgreSQL.`);
+    router.refresh();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể lưu cấu hình.', 'error');
+    } finally {
+      setIsMutating(false);
+    }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     // Check if there are draft values
     const changedKeys = Object.keys(reviewValuesMap);
 
@@ -306,6 +327,13 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
       showToast('Không có cấu hình ảnh hưởng lớn nào cần xuất bản.', 'info');
       return;
     }
+    if (!capabilities.edit || isMutating) return;
+    setIsMutating(true);
+    try {
+      await saveCmsSystemSettingsAction({ changes: changedKeys.filter((settingId) => settingId !== 'comp_branches').map((settingId) => ({ scopeId: activeScopeId, settingId, value: reviewValuesMap[settingId].draftValue ?? null })) });
+      router.refresh();
+    } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể xuất bản cấu hình.', 'error'); }
+    finally { setIsMutating(false); }
 
     const newDraft: ConfigDraft = {
       id: `draft_${activeScopeId}_${Date.now()}`,
@@ -389,7 +417,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200" aria-busy={isMutating}>
       {/* TOAST NOTIFICATION BANNER */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
@@ -472,6 +500,7 @@ export const SystemConfiguration: React.FC<SystemConfigurationProps> = ({ websit
           onSaveDirect={handleSaveDirect}
           onSaveDraft={handleSaveDraft}
           onPublish={handlePublish}
+          readOnly={!capabilities.edit || isMutating}
         />
       )}
 

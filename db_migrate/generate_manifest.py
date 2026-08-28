@@ -148,19 +148,36 @@ def generate_manifest():
                 if "mới" in comment.lower() or "chưa rõ" in comment.lower():
                     synthetic = True
                 else:
-                    parts = re.split(r'\s*[/+]\s*', comment)
+                    # NOTE: ngoai "/" va "+", cac cot dung chung cau truc
+                    # (khong phai noi dung theo ngon ngu) trong bang "_en"
+                    # con dung dau "·" (middle dot) de noi 2 nguon, vd:
+                    # "fs_contents_categories.parent_id · fs_contents_categories_en.parent_id".
+                    # Truoc day khong tach duoc o "·" nen ca chuoi bi coi la
+                    # 1 phan, roi p.split('.', 1) chi cat o dau cham DAU
+                    # TIEN -> tbl sai (lay nham bang VI) va ten cot bi garble
+                    # (dinh ca doan "· fs_..._en.xxx" vao sau). Cot bi garble
+                    # se khong khop MySQL -> bi danh nham synthetic=True ->
+                    # bi loai khoi INSERT -> vo NOT NULL neu khong co DEFAULT.
+                    parts = re.split(r'\s*[/+·]\s*', comment)
                     for p in parts:
-                        if '.' in p:
-                            tbl, c = p.split('.', 1)
-                            # Loại bỏ tiền tố cic_ nếu có trong comment (chỉ dùng fs_ cho MySQL)
-                            tbl_clean = tbl.strip()
-                            if tbl_clean.startswith("cic_"):
-                                tbl_clean = "fs_" + tbl_clean[4:]  # cic_products -> fs_products
-                            elif tbl_clean.startswith("fs_cic_"):
-                                tbl_clean = "fs_" + tbl_clean[7:]  # fs_cic_products -> fs_products
-                            sources.append({"col": c.strip()})
-                            if tbl_clean not in source_tables:
-                                source_tables.append(tbl_clean)
+                        # Dung regex bat dung "table.column" o DAU chuoi,
+                        # bo qua moi ghi chu/ngoac don phia sau (vd
+                        # "fs_products.category_id (CSV, phan tu tach ra)")
+                        # thay vi p.split('.', 1) ngay ca khi khong con "·"
+                        # de tranh dinh ram chu thich vao ten cot.
+                        m = re.match(r'([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)', p.strip())
+                        if not m:
+                            continue
+                        tbl, c = m.group(1), m.group(2)
+                        # Loại bỏ tiền tố cic_ nếu có trong comment (chỉ dùng fs_ cho MySQL)
+                        tbl_clean = tbl.strip()
+                        if tbl_clean.startswith("cic_"):
+                            tbl_clean = "fs_" + tbl_clean[4:]  # cic_products -> fs_products
+                        elif tbl_clean.startswith("fs_cic_"):
+                            tbl_clean = "fs_" + tbl_clean[7:]  # fs_cic_products -> fs_products
+                        sources.append({"col": c.strip()})
+                        if tbl_clean not in source_tables:
+                            source_tables.append(tbl_clean)
 
             # Kiểm tra xem cột có tồn tại trong MySQL không
             if mysql_cur and not synthetic and sources:

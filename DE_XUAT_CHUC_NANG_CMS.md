@@ -168,6 +168,7 @@ Phần này dùng để tra cứu mục đích, khả năng chính và cách s�
 
 - Tạo, sửa, phân loại, tìm kiếm, lọc và theo dõi trạng thái bài viết.
 - Quản lý tóm tắt, ảnh đại diện, thông tin tìm kiếm và tin nổi bật.
+- Quản lý riêng hai phạm vi hiển thị: tối đa **4 Tin nổi bật** trong khu Hot News của trang Tin tức và tối đa **4 tin** tại khu Tin tức trên Trang chủ. Hai lựa chọn độc lập; một tin có thể nổi bật trên trang Tin tức nhưng không xuất hiện ở Trang chủ.
 - Xem trước, xuất bản hoặc chuyển nhiều bài về bản nháp.
 - Xem lịch sử, phiên bản; chuyển vào thùng rác, phục hồi hoặc xóa vĩnh viễn.
 
@@ -199,6 +200,8 @@ Tạo · Sửa · Sắp xếp cấp cha–con · Đặt thứ tự và trạng t
 Chức năng này thay thế cách CMS cũ quản lý các khu vực Website bằng từng Block theo module và vị trí. Thay vì cấu hình các Block riêng lẻ, người dùng mở một trang và cập nhật các khu vực thuộc bố cục của trang đó.
 
 > **Nguyên tắc phân chia:** Trang nội dung quản lý cách một trang cố định được trình bày; Tin tức, Sản phẩm, Dịch vụ, Dự án và các chức năng nghiệp vụ quản lý dữ liệu được trang đó sử dụng. Ví dụ, Dự án xuất hiện trên Trang chủ vẫn được sửa tại chức năng **Dự án**; trong **Trang nội dung → Trang chủ**, người biên tập chỉ chọn Dự án nào được đưa vào khu vực tương ứng khi bố cục hỗ trợ.
+
+Các section nội dung tham chiếu hỗ trợ hai cách lấy dữ liệu: **Tự động từ Nổi bật** hoặc **Chọn thủ công**. Với chế độ tự động, Trang chủ lấy tối đa **4 Tin tức nổi bật**, **1 Sự kiện nổi bật** và **3 Dự án nổi bật** theo thứ tự đã cấu hình tại từng chức năng. Cờ **Sản phẩm nổi bật** được chuẩn bị cho section Sản phẩm trong tương lai và hiện không cấp dữ liệu cho khu **Hệ sinh thái Công nghệ CIC**; khu này thuộc phạm vi Dịch vụ.
 
 Trang nội dung gồm hai nhóm:
 
@@ -240,6 +243,7 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 
 - Quản lý nội dung, hình ảnh, thời gian, địa điểm và thông tin đăng ký.
 - Theo dõi trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc.
+- Chỉ chọn tối đa **1 Sự kiện nổi bật** làm sự kiện chính; section Sự kiện trên Trang chủ có thể tự động lấy sự kiện này.
 - Gắn tin tức, sản phẩm và sự kiện liên quan; đánh dấu nổi bật hoặc hiển thị trên trang chủ.
 - Tìm kiếm, lọc, xem trước, xuất bản hoặc xử lý nhiều sự kiện cùng lúc.
 
@@ -259,6 +263,7 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 - Quản lý mô tả, khách hàng, địa điểm, lĩnh vực, giải pháp, công nghệ và thời gian thực hiện.
 - Chọn một ảnh đại diện; hình ảnh, video và tài liệu khác được chèn trực tiếp trong nội dung chi tiết.
 - Đánh dấu dự án nổi bật, sắp xếp thứ tự hiển thị.
+- Chỉ chọn tối đa **3 Dự án nổi bật**; section Dự án tiêu biểu trên Trang chủ có thể tự động lấy các dự án này hoặc chuyển sang chọn thủ công.
 - Tìm kiếm, lưu nháp, xem trước, công bố hoặc xử lý nhiều dự án cùng lúc.
 
 **Cách sử dụng:**  
@@ -271,6 +276,8 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 #### Dịch vụ
 
 **Dùng để làm gì?** Quản lý nội dung các dịch vụ tư vấn, triển khai và hỗ trợ CIC cung cấp.
+
+> **Phân biệt phạm vi:** Khu **Hệ sinh thái Công nghệ CIC** trên Trang chủ sử dụng nội dung Dịch vụ, không phải Sản phẩm. Vì vậy Dịch vụ không có cờ **Nổi bật**; nội dung của khu này được quản lý theo đúng cấu trúc section, còn cờ Sản phẩm nổi bật chỉ dành cho một section Sản phẩm có thể bổ sung trong tương lai.
 
 **Có thể làm gì?**
 
@@ -303,7 +310,7 @@ Các dữ liệu phân loại và đầu mối đang được sản phẩm sử 
 - Quản lý tên, mã, mô tả, trạng thái và thông tin chi tiết sản phẩm.
 - Phân loại theo danh mục, hãng, lĩnh vực ứng dụng và loại sản phẩm.
 - Quản lý ảnh, video, tài liệu và nội dung tải xuống.
-- Gắn người phụ trách kinh doanh; đánh dấu sản phẩm tiêu biểu.
+- Gắn người phụ trách kinh doanh; đánh dấu tối đa **6 Sản phẩm nổi bật** để chuẩn bị cho section Sản phẩm trong tương lai. Hiện chưa có section Trang nội dung nào tự động sử dụng tập này.
 - Tìm kiếm, lọc, xem trước, nhân bản và theo dõi hoạt động liên quan.
 - Xuất bản, chuyển về bản nháp hoặc xử lý nhiều sản phẩm cùng lúc.
 

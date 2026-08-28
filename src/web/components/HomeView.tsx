@@ -1019,8 +1019,8 @@ export const HomeView = ({
             ))}
           </div>
 
-          <div data-page-collection="news" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredNews.length > 0 ? filteredNews.slice(0, 3).map((news, i) => (
+          <div data-page-collection="news" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {filteredNews.length > 0 ? filteredNews.slice(0, 4).map((news, i) => (
               <motion.div
                 key={i}
                 whileHover={{ y: -4 }}

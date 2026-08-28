@@ -498,7 +498,7 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
   records.push(...CMS_COMMANDS);
 
   // 2. Sản phẩm (Products)
-  const productData = demoCatalogDataSource.productsByLocale[locale]?.products || demoCatalogDataSource.productsByLocale.vi.products;
+  const productData = demoCatalogDataSource.productsByLocale[locale]?.products ?? demoCatalogDataSource.productsByLocale.vi?.products ?? [];
   if (productData) {
     productData.forEach((p) => {
       const brandName = p.brand_name || '';
@@ -544,7 +544,7 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
   }
 
   // 3. Tin tức & Bài viết (News & Articles)
-  const newsData = demoEditorialContentDataSource.newsByLocale[locale]?.articles || demoEditorialContentDataSource.newsByLocale.vi.articles;
+  const newsData = demoEditorialContentDataSource.newsByLocale[locale]?.articles ?? demoEditorialContentDataSource.newsByLocale.vi?.articles ?? [];
   if (newsData) {
     newsData.forEach((art) => {
       const isPublished = art.published;
@@ -581,7 +581,7 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
   }
 
   // 4. Yêu cầu khách hàng (Customer Requests & Leads)
-  const requestData = demoCustomerInteractionDataSource.customerRequestByLocale[locale]?.requests || demoCustomerInteractionDataSource.customerRequestByLocale.vi.requests;
+  const requestData = demoCustomerInteractionDataSource.customerRequestByLocale[locale]?.requests ?? demoCustomerInteractionDataSource.customerRequestByLocale.vi?.requests ?? [];
   if (requestData) {
     requestData.forEach((req) => {
       const fullName = req.submissionValues.find(v => v.fieldKey === 'full_name')?.valueText || 'Khách hàng';
@@ -738,7 +738,7 @@ export function getAllSearchableRecords(locale: CmsLocale = 'vi'): SearchResultI
   }
 
   // 8. Dịch vụ (Services)
-  const servicesData = demoEditorialContentDataSource.servicesByLocale[locale]?.services || demoEditorialContentDataSource.servicesByLocale.vi.services;
+  const servicesData = demoEditorialContentDataSource.servicesByLocale[locale]?.services ?? demoEditorialContentDataSource.servicesByLocale.vi?.services ?? [];
   if (servicesData) {
     servicesData.forEach((srv) => {
       records.push({

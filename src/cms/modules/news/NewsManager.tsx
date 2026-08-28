@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Globe,
   AlertTriangle,
+  Home,
 } from 'lucide-react';
 import { NewsArticle, NewsCategory } from './types';
 import type { NewsModuleData } from '../../data/EditorialContentDataSource';
@@ -42,6 +43,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { NewsCategoryManager } from './NewsCategoryManager';
+import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 
 interface NewsManagerProps {
   data?: NewsModuleData;
@@ -143,6 +145,11 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
 
   // Toggle Hot
   const handleToggleHot = (id: string) => {
+    const target = articles.find((article) => article.id === id);
+    if (!target?.is_hot && articles.filter((article) => !article.in_trash && article.is_hot).length >= NEWS_PLACEMENT_LIMITS.featured) {
+      showToast(`Hot News đã đủ ${NEWS_PLACEMENT_LIMITS.featured} tin. Hãy bỏ Nổi bật một tin khác trước.`);
+      return;
+    }
     setArticles((prev) =>
       prev.map((a) => {
         if (a.id === id) {
@@ -152,6 +159,22 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
         }
         return a;
       })
+    );
+  };
+
+  const handleToggleHomepage = (id: string) => {
+    const target = articles.find((article) => article.id === id);
+    if (!target?.show_in_homepage && articles.filter((article) => !article.in_trash && article.show_in_homepage).length >= NEWS_PLACEMENT_LIMITS.homepage) {
+      showToast(`Trang chủ đã đủ ${NEWS_PLACEMENT_LIMITS.homepage} tin. Hãy ẩn một tin khác khỏi Trang chủ trước.`);
+      return;
+    }
+    setArticles((prev) =>
+      prev.map((article) => {
+        if (article.id !== id) return article;
+        const nextValue = !article.show_in_homepage;
+        showToast(nextValue ? 'Đã cho phép hiển thị bài viết trên Trang chủ!' : 'Đã ẩn bài viết khỏi Trang chủ!');
+        return { ...article, show_in_homepage: nextValue };
+      }),
     );
   };
 
@@ -233,7 +256,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
         published: formData.published ?? false,
         is_hot: formData.is_hot ?? false,
         is_new: formData.is_new ?? true,
-        show_in_homepage: formData.show_in_homepage ?? true,
+        show_in_homepage: formData.show_in_homepage ?? false,
         ordering: formData.ordering || 1,
         seo_title: formData.seo_title || formData.title || '',
         seo_keyword: formData.seo_keyword || '',
@@ -276,6 +299,10 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
           relatedArticles={articles}
           relatedProducts={data?.relatedProducts ?? []}
           mediaImages={data?.mediaImages ?? []}
+          placementCounts={{
+            featured: articles.filter((article) => !article.in_trash && article.id !== editingArticle?.id && article.is_hot).length,
+            homepage: articles.filter((article) => !article.in_trash && article.id !== editingArticle?.id && article.show_in_homepage).length,
+          }}
           onSave={handleSaveArticleFromForm}
           onCancel={() => {
             setViewMode('list');
@@ -371,6 +398,8 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
                     <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
                     {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
                     {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả</th>}
+                    <th className="p-3 min-w-[92px] text-center">Nổi bật</th>
+                    <th className="p-3 min-w-[100px] text-center">Trang chủ</th>
                     {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
                     {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
                     {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">Cập nhật</th>}
@@ -457,6 +486,32 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
                               </div>
                             </td>
                           )}
+
+                          <td className={`p-3 text-center ${getRowPadding()}`}>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleHot(art.id)}
+                              aria-pressed={art.is_hot}
+                              aria-label={`${art.is_hot ? 'Bỏ' : 'Đánh dấu'} tin nổi bật: ${art.title}`}
+                              title={art.is_hot ? 'Đang hiện tại Hot News trang Tin tức' : 'Không hiện tại Hot News trang Tin tức'}
+                              className={`inline-flex size-9 items-center justify-center rounded-lg transition-colors ${art.is_hot ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' : 'bg-slate-100 text-slate-400 hover:text-amber-600 dark:bg-slate-800'}`}
+                            >
+                              <Star className={`h-4 w-4 ${art.is_hot ? 'fill-current' : ''}`} />
+                            </button>
+                          </td>
+
+                          <td className={`p-3 text-center ${getRowPadding()}`}>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleHomepage(art.id)}
+                              aria-pressed={art.show_in_homepage}
+                              aria-label={`${art.show_in_homepage ? 'Ẩn khỏi' : 'Hiện tại'} Trang chủ: ${art.title}`}
+                              title={art.show_in_homepage ? 'Được phép xuất hiện tại khu Tin tức Trang chủ' : 'Không xuất hiện tại Trang chủ'}
+                              className={`inline-flex size-9 items-center justify-center rounded-lg transition-colors ${art.show_in_homepage ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300' : 'bg-slate-100 text-slate-400 hover:text-blue-600 dark:bg-slate-800'}`}
+                            >
+                              <Home className="h-4 w-4" />
+                            </button>
+                          </td>
 
                           {/* Publication Status Badge */}
                           {columnVisibility.status && (

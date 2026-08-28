@@ -22,7 +22,7 @@ export const draftSectionSchemas: Record<string, DraftElementDefinition[]> = {
   'home.projects': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('project', 'Dự án')],
   'home.events': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('event', 'Sự kiện')],
   'home.news': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('news', 'Tin tức')],
-  'home.partners': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('partner', 'Đối tác')],
+  'home.partners': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), item('items', 'Logo đối tác')],
   'home.contact_cta': [text('title', 'Tiêu đề'), text('description', 'Mô tả'), text('phone', 'Điện thoại', true), text('email', 'Email', true), { key: 'formId', label: 'Biểu mẫu', kind: 'form' }, text('submitLabel', 'Nhãn gửi')],
   'about.hero': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả'), media('backgroundImageId', 'Ảnh nền')],
   'about.overview': [text('title', 'Tiêu đề'), item('paragraphs', 'Các đoạn nội dung'), { key: 'videoUrl', label: 'Video', kind: 'video', optional: true }],

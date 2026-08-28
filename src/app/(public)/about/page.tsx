@@ -1,0 +1,3 @@
+import { getPublishedAboutContent } from '@/features/about/server/queries';
+export const dynamic = 'force-dynamic';
+export default async function AboutPage() { const items = await getPublishedAboutContent(); return <section className="mx-auto max-w-5xl px-6 py-16"><h1 className="text-4xl font-extrabold">Về CIC Technology</h1><div className="mt-8 space-y-6">{items.length ? items.map((item) => <section key={item.key}><h2 className="text-xl font-bold">{item.title}</h2><p className="mt-2 whitespace-pre-wrap text-slate-600">{item.value}</p></section>) : <p className="text-slate-600">Thông tin đang được cập nhật.</p>}</div></section>; }

@@ -14,7 +14,7 @@ export interface PageBuilderReference {
   entityType: PageBuilderEntityType;
   entityIds: string[];
   source?: {
-    mode: 'manual' | 'latest' | 'taxonomy';
+    mode: 'manual' | 'featured' | 'latest' | 'taxonomy';
     taxonomyType?: 'category' | 'brand' | 'application';
     taxonomyId?: string;
     limit: number;

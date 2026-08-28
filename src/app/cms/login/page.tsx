@@ -1,0 +1,3 @@
+import { loginAction } from './actions';
+export const metadata = { title: 'CMS Login', robots: { index: false, follow: false } };
+export default function CmsLoginPage() { return <main className="mx-auto flex min-h-screen max-w-md items-center px-6"><form action={loginAction} className="w-full space-y-4 rounded-lg bg-white p-8 shadow"><h1 className="text-2xl font-semibold">CMS Login</h1><label className="block text-sm">Email<input name="email" type="email" required className="mt-1 w-full rounded border p-2" /></label><label className="block text-sm">Password<input name="password" type="password" required className="mt-1 w-full rounded border p-2" /></label><button className="w-full rounded bg-slate-900 px-4 py-2 text-white" type="submit">Sign in</button></form></main>; }

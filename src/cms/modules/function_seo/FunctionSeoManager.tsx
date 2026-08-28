@@ -23,7 +23,7 @@ import {
   Map,
 } from 'lucide-react';
 import type { CmsLocale } from '../../data/CmsDataSource';
-import { getDemoFunctionSeoData } from '../../data/FunctionSeoDataSource';
+import { updateFunctionSeo } from '@/features/function-seo/server/actions';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
@@ -39,9 +39,7 @@ const inputClass =
   'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400';
 
 export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) => {
-  const initialData = useMemo(() => {
-    return data && data.length > 0 ? data : getDemoFunctionSeoData(workspaceLocale);
-  }, [data, workspaceLocale]);
+  const initialData = useMemo(() => data ?? [], [data]);
 
   const [records, setRecords] = useState<FunctionSeoRecord[]>(() =>
     initialData.map((item) => ({ ...item, facetLevels: item.facetLevels?.map((f) => ({ ...f })) }))
@@ -93,8 +91,9 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) =
     if (currentPage > lastPage) setCurrentPage(lastPage);
   }, [currentPage, filtered.length, pageSize]);
 
-  const saveMainSeo = () => {
+  const saveMainSeo = async () => {
     if (!editingMain || !editingMain.title.trim()) return;
+    await updateFunctionSeo({ id: editingMain.id, locale: workspaceLocale, title: editingMain.title, keywords: editingMain.keywords, description: editingMain.description, indexable: editingMain.indexable });
     setRecords((current) =>
       current.map((item) =>
         item.id === editingMain.id ? { ...editingMain, updatedAt: new Date().toISOString() } : item

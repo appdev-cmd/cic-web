@@ -45,8 +45,9 @@ import {
   SearchResultModule,
   RecentSearchItem,
   RecentVisitedItem,
-} from '../services/globalSearchService';
+} from '../services/globalSearchRuntime';
 import type { CmsLocale } from '../data/CmsDataSource';
+import type { CmsSearchRecord } from '@/features/cms-search/types';
 
 interface CmsCommandPaletteProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ interface CmsCommandPaletteProps {
   userRole?: string;
   workspaceLocale?: CmsLocale;
   onViewAllResults?: (query: string, module?: SearchResultModule | 'all') => void;
+  records: CmsSearchRecord[];
 }
 
 export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
@@ -64,6 +66,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
   userRole = 'superadmin',
   workspaceLocale = 'vi',
   onViewAllResults,
+  records,
 }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -117,12 +120,13 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
       return { totalResults: 0, groupedResults: [], allFlatResults: [] };
     }
     return executeGlobalSearch(query, {
+      records,
       locale: workspaceLocale,
       userRole,
       maxResultsPerGroup: 5,
       moduleFilter: activeModuleFilter,
     });
-  }, [query, workspaceLocale, userRole, activeModuleFilter]);
+  }, [query, workspaceLocale, userRole, activeModuleFilter, records]);
 
   // Tạo danh sách phẳng tất cả các items hiển thị để phục vụ điều hướng bằng phím mũi tên
   const flatSelectableItems = useMemo(() => {

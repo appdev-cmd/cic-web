@@ -6,11 +6,13 @@ import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 import type { CmsProject, ProjectRelationOption } from './types';
+import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 
 interface Props {
   project: CmsProject | null;
   productOptions: ProjectRelationOption[];
   serviceOptions: ProjectRelationOption[];
+  featuredCount: number;
   onSave: (project: CmsProject) => void;
   onPreview: (project: CmsProject) => void;
   onCancel: () => void;
@@ -21,7 +23,7 @@ const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slat
 const splitLines = (value: string) => value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
 const slugify = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serviceOptions, onSave, onPreview, onCancel }) => {
+export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serviceOptions, featuredCount, onSave, onPreview, onCancel }) => {
   const initial = useMemo<CmsProject>(() => project ?? {
     id: `project_${Date.now()}`, title: '', alias: '', tagline: '', summary: '', content: '', sector: '', solution: '', technologies: [], customer_name: '', location: '', start_year: null, end_year: null, is_ongoing: false, image: '', products_related: [], services_related: [], is_featured: false, published: false, ordering: 0, seo_title: '', seo_keyword: '', seo_description: '', created_time: new Date().toISOString(), updated_time: new Date().toISOString(),
   }, [project]);
@@ -36,6 +38,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
     if (!form.title.trim()) return setError('Vui lòng nhập tên dự án.');
     if (!form.alias.trim()) return setError('Vui lòng nhập đường dẫn dự án.');
     if (form.start_year && form.end_year && form.end_year < form.start_year) return setError('Năm kết thúc không được nhỏ hơn năm bắt đầu.');
+    if (form.is_featured && !project?.is_featured && featuredCount >= FEATURED_CONTENT_LIMITS.project) return setError(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.project} dự án nổi bật. Hãy bỏ chọn một dự án khác trước.`);
     setError('');
     onSave({ ...form, title: form.title.trim(), alias: slugify(form.alias), technologies: splitLines(technologyInput), end_year: form.is_ongoing ? null : form.end_year, updated_time: new Date().toISOString() });
   };
@@ -67,7 +70,7 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
           <div className="grid grid-cols-2 gap-3"><Field label="Năm bắt đầu"><input type="number" className={inputClass} value={form.start_year ?? ''} onChange={(e) => set('start_year', e.target.value ? Number(e.target.value) : null)} /></Field><Field label="Năm kết thúc"><input type="number" disabled={form.is_ongoing} className={inputClass} value={form.end_year ?? ''} onChange={(e) => set('end_year', e.target.value ? Number(e.target.value) : null)} /></Field></div>
           <Check label="Đang triển khai" checked={form.is_ongoing} onChange={(checked) => setForm((current) => ({ ...current, is_ongoing: checked, end_year: checked ? null : current.end_year }))} />
         </div></Section>
-        <Section icon={<BriefcaseBusiness />} title="Hiển thị"><div className="space-y-4"><Field label="Thứ tự"><input type="number" min={0} className={inputClass} value={form.ordering} onChange={(e) => set('ordering', Math.max(0, Number(e.target.value) || 0))} /></Field><Check label="Dự án nổi bật" checked={form.is_featured} onChange={(value) => set('is_featured', value)} /></div></Section>
+        <Section icon={<BriefcaseBusiness />} title="Hiển thị"><div className="space-y-4"><Field label="Thứ tự"><input type="number" min={0} className={inputClass} value={form.ordering} onChange={(e) => set('ordering', Math.max(0, Number(e.target.value) || 0))} /></Field><label className="flex items-start gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"><input type="checkbox" checked={form.is_featured} disabled={!form.is_featured && featuredCount >= FEATURED_CONTENT_LIMITS.project} onChange={(e) => set('is_featured', e.target.checked)} className="mt-0.5 size-4 accent-orange-600" /><span>Dự án nổi bật <span className="font-normal text-slate-400">({featuredCount + Number(form.is_featured)}/{FEATURED_CONTENT_LIMITS.project})</span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Nguồn tự động cho section Dự án tiêu biểu.</span></span></label></div></Section>
         <Section icon={<Search />} title="SEO"><div className="space-y-4"><Field label="SEO title"><input className={inputClass} value={form.seo_title} onChange={(e) => set('seo_title', e.target.value)} /></Field><Field label="SEO keyword"><input className={inputClass} value={form.seo_keyword} onChange={(e) => set('seo_keyword', e.target.value)} /></Field><Field label="SEO description"><textarea rows={4} className={inputClass} value={form.seo_description} onChange={(e) => set('seo_description', e.target.value)} /></Field></div></Section>
       </aside>
     </div>
