@@ -8,11 +8,7 @@ import { worldMapPaths } from '../data/worldMapPaths';
 const CANVAS = { width: 2000, height: 1060, mapX: 340, mapY: 185, mapWidth: 1320, mapHeight: 726 } as const;
 const PARTNER_MAP_EDIT_MODE = false;
 const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
-const LOGO_BOUNDS = {
-  compact: { width: 82, height: 58 },
-  standard: { width: 106, height: 60 },
-  wide: { width: 132, height: 56 },
-} as const;
+const UNIFORM_LOGO_BOUNDS = { width: 120, height: 60 } as const;
 type Point = { x: number; y: number };
 type Box = { x: number; y: number; width: number; height: number };
 type Curve = { path: string; samples: Point[]; collisionScore: number };
@@ -25,12 +21,45 @@ type DragState =
 const CONNECTOR_GAP = 14;
 const MARKER_SCALE = 1.42;
 const MARKER_CLEARANCE = 0;
+const MAX_CURVE_BEND = 12;
+const MAX_CURVATURE_RATIO = 0.72;
+const CURVE_DRAG_SENSITIVITY = 2.4;
+const LOGO_SCALE_BY_WEIGHT: Readonly<Record<RepresentativePartner['logo']['visualWeight'], number>> = {
+  compact: 0.92,
+  standard: 1,
+  wide: 1.12,
+};
 const LOGO_OPTICAL_SCALE: Readonly<Record<string, number>> = {
-  kritikal: 1.08,
-  htri: 0.92,
-  stx: 0.9,
-  foxit: 0.84,
-  dnv: 0.88,
+  'sunrise-systems': 1.55,
+  seequent: 1.35,
+  'ai-architecture': 1.34,
+  graitec: 1.32,
+  prokon: 1.4,
+  hexagon: 1.38,
+  'idea-statica': 1.38,
+  emmegi: 1.34,
+  'ap-vandenberg': 1.3,
+  softinway: 1.14,
+  kritikal: 1.16,
+  autodesk: 1.2,
+  gstarsoft: 1.14,
+  geoscanner: 0.66,
+  bimage: 1.1,
+  radiodetection: 1.08,
+  dnv: 1.08,
+  lander: 0.9,
+  maptek: 1.08,
+  dhi: 0.86,
+  marin: 0.84,
+  opera: 0.82,
+  cype: 0.8,
+  csi: 0.8,
+  foxit: 0.68,
+  flyability: 0.82,
+  piletest: 0.8,
+  wingtra: 0.54,
+  htri: 0.68,
+  stx: 0.86,
 };
 const EUROPE_COUNTRY_IDS = new Set(['uk', 'ireland', 'france', 'netherlands', 'germany', 'switzerland', 'italy', 'czechia', 'spain', 'sweden', 'norway']);
 
@@ -141,16 +170,16 @@ const buildFanCurve = (partnerId: string, marker: Point, end: Point, familyTange
   // Distance widens the gesture without deepening it: the ratio grows slowly,
   // keeping long routes broad and quiet instead of progressively more bowed.
   const curvatureRatio = 0.0315 + easedDistance * 0.052;
-  const bendStrength = Math.abs(bend) < 0.08 ? 0.3 : clamp(Math.abs(bend), 0.42, 1.3);
+  const bendStrength = Math.abs(bend) < 0.08 ? 0.3 : clamp(Math.abs(bend) * 1.75, 0.42, MAX_CURVE_BEND);
   const rhythm = [0.86, 1, 0.9, 0.82, 1.04, 0.88, 0.84, 0.92, 0.72, 0.87][fanIndex % 10];
   const straightPathLift = microRefineStraightPath && rhythm <= 0.92 ? 1.125 + variationA * 0.025 : 1;
   const individualFlow = rhythm * straightPathLift * (0.99 + variationC * 0.025);
   const progressiveFlow = includeBundleShaping ? 0.9 + progressiveRank * density * 0.22 + variationD * 0.08 : 1;
   const bundleSeparation = includeBundleShaping ? length * centeredFamilyPosition * 0.006 : 0;
-  const curvature = Math.min(length * 0.13, length * curvatureRatio * bendStrength * individualFlow * progressiveFlow);
+  const curvature = Math.min(length * MAX_CURVATURE_RATIO, length * curvatureRatio * bendStrength * individualFlow * progressiveFlow);
   const bow = bendDirection * curvature + bundleSeparation;
-  const firstOffset = bow * (0.04 + variationC * 0.012);
-  const secondOffset = bow * (0.35 + variationD * 0.04);
+  const firstOffset = bow * (0.08 + variationC * 0.018);
+  const secondOffset = bow * (0.58 + variationD * 0.055);
   const controlABackDistance = length * clamp(0.075 + departureShare * 0.78 + variationB * 0.018, 0.065, 0.205);
   const controlBBackDistance = length * clamp(0.125 + variationB * 0.025 + Math.abs(centeredFamilyPosition) * 0.01, 0.09, 0.165);
   const controlA = {
@@ -180,11 +209,13 @@ const outwardFanDirection = (marker: Point, endpoints: readonly Point[]): -1 | 1
 const logoBox = (partner: RepresentativePartner, positions: PartnerLayout): Box => {
   const position = positions[partner.id];
   if (!position) throw new Error(`Missing global partner-map position for ${partner.id}`);
-  return { ...toCanvasPoint(position), ...LOGO_BOUNDS[partner.logo.visualWeight] };
+  return { ...toCanvasPoint(position), ...UNIFORM_LOGO_BOUNDS };
 };
 
+const logoOpticalScale = (partner: RepresentativePartner): number => LOGO_OPTICAL_SCALE[partner.id] ?? LOGO_SCALE_BY_WEIGHT[partner.logo.visualWeight];
+
 const opticalLogoBox = (partner: RepresentativePartner, box: Box): Box => {
-  const scale = LOGO_OPTICAL_SCALE[partner.id] ?? 1;
+  const scale = logoOpticalScale(partner);
   const center = boxCenter(box);
   const width = box.width * scale;
   const height = box.height * scale;
@@ -355,8 +386,8 @@ export const CountryPartnerNetwork: React.FC = () => {
       const midpoint = { x: (dragging.marker.x + dragging.end.x) / 2, y: (dragging.marker.y + dragging.end.y) / 2 };
       const distanceFactor = clamp((length - 180) / 1250, 0, 1);
       const baseBow = length * (0.0325 + distanceFactor * 0.05);
-      const rawBend = ((point.x - midpoint.x) * normal.x + (point.y - midpoint.y) * normal.y) / baseBow;
-      const bend = Math.abs(rawBend) < 0.08 ? 0 : Number(clamp(rawBend, -1.5, 1.5).toFixed(3));
+      const rawBend = ((point.x - midpoint.x) * normal.x + (point.y - midpoint.y) * normal.y) / baseBow * CURVE_DRAG_SENSITIVITY;
+      const bend = Math.abs(rawBend) < 0.08 ? 0 : Number(clamp(rawBend, -MAX_CURVE_BEND, MAX_CURVE_BEND).toFixed(3));
       const next: CurveBends = { ...curveBendsRef.current, [dragging.id]: bend };
       curveBendsRef.current = next;
       setCurveBends(next);
@@ -364,7 +395,7 @@ export const CountryPartnerNetwork: React.FC = () => {
     }
     const partner = representativePartnerCountries.flatMap((country) => country.partners).find((item) => item.id === dragging.id);
     if (!partner) return;
-    const bounds = LOGO_BOUNDS[partner.logo.visualWeight];
+    const bounds = UNIFORM_LOGO_BOUNDS;
     const nextPoint = toNormalizedPoint({ x: clamp(point.x - dragging.offset.x, 0, CANVAS.width - bounds.width), y: clamp(point.y - dragging.offset.y, 0, CANVAS.height - bounds.height) });
     updatePositions({ ...positionsRef.current, [dragging.id]: nextPoint });
   }, [clientToCanvas, dragging, updatePositions]);
@@ -410,12 +441,12 @@ export const CountryPartnerNetwork: React.FC = () => {
 
   const tooltipLayout = layout.find(({ country }) => country && (country.id === activeCountryId || country.partners.some((partner) => partner.id === activePartnerId)));
   const countryTooltip = tooltipLayout?.country ? (() => {
-    const width = Math.min(220, Math.max(108, tooltipLayout.country.name.length * 7.8 + 30));
+    const width = Math.min(270, Math.max(124, tooltipLayout.country.name.length * 9.2 + 34));
     return {
       country: tooltipLayout.country,
       width,
       x: Math.max(10, Math.min(CANVAS.width - width - 10, tooltipLayout.marker.x - width / 2)),
-      y: Math.max(10, tooltipLayout.marker.y - 70),
+      y: Math.max(10, tooltipLayout.marker.y - 76),
     };
   })() : null;
 
@@ -461,14 +492,14 @@ export const CountryPartnerNetwork: React.FC = () => {
             })}
             {country.partners.map((item, index) => {
               const box = boxes[index]; const active = activePartnerId === item.id; const dimmed = (activePartnerId !== null && !active) || (activeCountryId !== null && !markerActive);
-              const partnerTooltipWidth = Math.min(270, Math.max(112, item.name.length * 7.5 + 28));
-              const partnerTooltipX = Math.max(10, Math.min(CANVAS.width - partnerTooltipWidth - 10, box.x + box.width / 2 - partnerTooltipWidth / 2)); const partnerTooltipY = box.y > 44 ? box.y - 36 : box.y + box.height + 8;
-              return <g key={item.id}><foreignObject x={box.x} y={box.y} width={box.width} height={box.height} overflow="visible"><a href={PARTNER_MAP_EDIT_MODE ? undefined : item.website} target={PARTNER_MAP_EDIT_MODE ? undefined : '_blank'} rel={PARTNER_MAP_EDIT_MODE ? undefined : 'noreferrer'} aria-label={`${item.name}, ${country.name}`} aria-grabbed={PARTNER_MAP_EDIT_MODE ? dragging?.id === item.id : undefined} className={`relative flex h-full w-full items-center justify-center rounded-[8px] outline-none transition-[filter,opacity] focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 ${PARTNER_MAP_EDIT_MODE ? 'cursor-grab touch-none active:cursor-grabbing' : 'touch-manipulation'}`} onClick={(event) => { if (PARTNER_MAP_EDIT_MODE) event.preventDefault(); }} onPointerDown={(event) => beginDrag(event, item, box)} onMouseEnter={() => setActivePartnerId(item.id)} onMouseLeave={() => { if (dragging?.id !== item.id) setActivePartnerId(null); }} onFocus={() => setActivePartnerId(item.id)} onBlur={() => setActivePartnerId(null)}>{item.logo.contrastAid === 'soft-light' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-2 rounded-[50%] bg-white/45 blur-[10px]" />}{item.logo.contrastAid === 'soft-light-strong' && <span aria-hidden="true" className="absolute inset-0 rounded-[50%] bg-white/80 blur-[8px]" />}{item.logo.contrastAid === 'maptek-green' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-1 rounded-md bg-[#00843d]" />}<img src={item.logo.src} alt="" draggable={false} data-contrast={item.id === 'lander' ? 'dark-outline' : undefined} data-active={active} style={{ transform: `scale(${LOGO_OPTICAL_SCALE[item.id] ?? 1})` }} className={`partner-map-logo pointer-events-none relative z-10 h-[calc(100%-4px)] w-[calc(100%-4px)] select-none object-contain transition-[filter,opacity,transform] ${dimmed ? 'opacity-40' : 'opacity-100'} ${active ? 'drop-shadow-[0_3px_8px_rgba(249,115,22,0.4)]' : 'drop-shadow-[0_2px_2px_rgba(255,255,255,0.42)]'}`} /></a></foreignObject>{active && <g pointerEvents="none"><rect x={partnerTooltipX} y={partnerTooltipY} width={partnerTooltipWidth} height="28" rx="7" fill="#0f172a" stroke="#fb923c" /><text x={partnerTooltipX + partnerTooltipWidth / 2} y={partnerTooltipY + 18.5} textAnchor="middle" fill="#fff7ed" fontSize="12.5" fontWeight="700">{item.name}</text></g>}</g>;
+              const partnerTooltipWidth = Math.min(310, Math.max(128, item.name.length * 9 + 34));
+              const partnerTooltipX = Math.max(10, Math.min(CANVAS.width - partnerTooltipWidth - 10, box.x + box.width / 2 - partnerTooltipWidth / 2)); const partnerTooltipY = box.y > 50 ? box.y - 43 : box.y + box.height + 9;
+              return <g key={item.id}><foreignObject x={box.x} y={box.y} width={box.width} height={box.height} overflow="visible"><a href={PARTNER_MAP_EDIT_MODE ? undefined : item.website} target={PARTNER_MAP_EDIT_MODE ? undefined : '_blank'} rel={PARTNER_MAP_EDIT_MODE ? undefined : 'noreferrer'} aria-label={`${item.name}, ${country.name}`} aria-grabbed={PARTNER_MAP_EDIT_MODE ? dragging?.id === item.id : undefined} className={`relative flex h-full w-full items-center justify-center rounded-[8px] outline-none transition-[filter,opacity] focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 ${PARTNER_MAP_EDIT_MODE ? 'cursor-grab touch-none active:cursor-grabbing' : 'touch-manipulation'}`} onClick={(event) => { if (PARTNER_MAP_EDIT_MODE) event.preventDefault(); }} onPointerDown={(event) => beginDrag(event, item, box)} onMouseEnter={() => setActivePartnerId(item.id)} onMouseLeave={() => { if (dragging?.id !== item.id) setActivePartnerId(null); }} onFocus={() => setActivePartnerId(item.id)} onBlur={() => setActivePartnerId(null)}>{item.logo.contrastAid === 'soft-light' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-2 rounded-[50%] bg-white/45 blur-[10px]" />}{item.logo.contrastAid === 'soft-light-strong' && <span aria-hidden="true" className="absolute inset-0 rounded-[50%] bg-white/80 blur-[8px]" />}{item.logo.contrastAid === 'dark-surface' && <span aria-hidden="true" className="absolute inset-x-1 inset-y-1 rounded-md bg-slate-800" />}<img src={item.logo.src} alt="" draggable={false} data-contrast={item.id === 'lander' || item.id === 'maptek' ? 'dark-outline' : undefined} data-active={active} style={{ transform: `scale(${logoOpticalScale(item)})` }} className={`partner-map-logo pointer-events-none relative z-10 h-[calc(100%-4px)] w-[calc(100%-4px)] select-none object-contain transition-[filter,opacity,transform] ${dimmed ? 'opacity-40' : 'opacity-100'} ${active ? 'drop-shadow-[0_3px_8px_rgba(249,115,22,0.4)]' : 'drop-shadow-[0_2px_2px_rgba(255,255,255,0.42)]'}`} /></a></foreignObject>{active && <g pointerEvents="none"><rect x={partnerTooltipX} y={partnerTooltipY} width={partnerTooltipWidth} height="34" rx="8" fill="#0f172a" stroke="#fb923c" strokeWidth="1.2" /><text x={partnerTooltipX + partnerTooltipWidth / 2} y={partnerTooltipY + 22.5} textAnchor="middle" fill="#fff7ed" fontSize="15" fontWeight="750">{item.name}</text></g>}</g>;
             })}
             <g data-country-id={country.id} transform={`translate(${marker.x} ${marker.y})`} tabIndex={0} aria-label={country.name} className="cursor-pointer outline-none" onMouseEnter={() => setActiveCountryId(country.id)} onMouseLeave={() => setActiveCountryId(null)} onFocus={() => setActiveCountryId(country.id)} onBlur={() => setActiveCountryId(null)}><path transform={`scale(${MARKER_SCALE})`} d="M 0 0 C -2 -3.5 -6.5 -7.5 -6.5 -12 A 6.5 6.5 0 1 1 6.5 -12 C 6.5 -7.5 2 -3.5 0 0 Z M 0 -14.2 A 2.2 2.2 0 1 0 0 -9.8 A 2.2 2.2 0 1 0 0 -14.2 Z" fill={activeCountry ? '#f97316' : '#334a61'} fillRule="evenodd" stroke="#f8fafc" strokeWidth={activeCountry ? 1.9 : 1.55} strokeLinejoin="round" /></g>
           </g>;
         })}
-        {countryTooltip && <g pointerEvents="none" data-tooltip-layer="country"><rect x={countryTooltip.x} y={countryTooltip.y} width={countryTooltip.width} height="30" rx="7" fill="#0f172a" stroke="#f97316" /><text x={countryTooltip.x + countryTooltip.width / 2} y={countryTooltip.y + 20} textAnchor="middle" fill="#fff7ed" fontSize="13" fontWeight="750">{countryTooltip.country.name}</text></g>}
+        {countryTooltip && <g pointerEvents="none" data-tooltip-layer="country"><rect x={countryTooltip.x} y={countryTooltip.y} width={countryTooltip.width} height="36" rx="8" fill="#0f172a" stroke="#f97316" strokeWidth="1.2" /><text x={countryTooltip.x + countryTooltip.width / 2} y={countryTooltip.y + 24} textAnchor="middle" fill="#fff7ed" fontSize="16" fontWeight="750">{countryTooltip.country.name}</text></g>}
       </svg>
     </div>
   );
