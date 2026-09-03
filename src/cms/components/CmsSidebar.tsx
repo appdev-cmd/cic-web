@@ -281,10 +281,12 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                               : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
                           } ${isCollapsed ? 'justify-center px-0' : ''}`}
                         >
-                          <button
-                            type="button"
+                          <a
+                            href={item.path || '#'}
                             aria-describedby={isCollapsed ? `collapsed-menu-tooltip-${item.id}` : undefined}
-                            onClick={() => {
+                            onClick={(event) => {
+                              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                              event.preventDefault();
                               if (hasChildren && !isCollapsed) {
                                 setExpandedSubItemIds((prev) =>
                                   prev.includes(item.id)
@@ -316,7 +318,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                                 {item.badgeCount}
                               </span>
                             )}
-                          </button>
+                          </a>
 
                           {/* Nested Sub-Menu Toggle Arrow */}
                           {!isCollapsed && hasChildren && (
@@ -347,9 +349,12 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                               .map((child) => {
                                 const isSubActive = activePath === child.path;
                                 return (
-                                  <button
+                                  <a
                                     key={child.id}
-                                    onClick={() => {
+                                    href={child.path}
+                                    onClick={(event) => {
+                                      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                                      event.preventDefault();
                                       onSelectMenu(child.path, child.title);
                                       if (isMobileOpen) onCloseMobile();
                                     }}
@@ -365,7 +370,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                                         {child.badgeCount}
                                       </span>
                                     )}
-                                  </button>
+                                  </a>
                                 );
                               })}
                           </div>

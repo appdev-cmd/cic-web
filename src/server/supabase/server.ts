@@ -16,8 +16,7 @@ export async function createSupabaseServerClient() {
         try {
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
-          // Server Components cannot write cookies. A future auth proxy/middleware
-          // will own session refresh when the authentication flow is implemented.
+          // Server Components cannot write cookies. The request proxy owns session refresh.
         }
       },
     },

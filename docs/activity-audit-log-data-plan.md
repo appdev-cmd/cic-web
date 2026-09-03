@@ -382,3 +382,174 @@ Không tạo cột tạm chỉ để khớp mock frontend; mọi trường mới
 7. Có yêu cầu legal hold thực tế hay chỉ giữ khả năng mở rộng.
 
 Các quyết định này ảnh hưởng backend và vận hành, nhưng không yêu cầu thay đổi bố cục chính của giao diện CMS mới.
+
+---
+
+## 16. Audit module từ bốn nguồn — 2026-09-03
+
+### A. Scope Nhật ký hoạt động
+
+Phạm vi gồm route `/cms/activity-logs`, list/filter/pagination, event detail, export jobs, dashboard timeline, global-search command, user/security/config/PII views và drawer theo entity. Website public không có surface hoặc quyền đọc audit. Thùng rác là module khác; nó chỉ là producer/consumer integration của audit writer.
+
+### B. UI Reference Map
+
+| Surface/reference | Dữ liệu và hierarchy | Visual/interaction/state | Responsive classification |
+|---|---|---|---|
+| `CmsDashboard` → `ActivityLogsManager` | Page header: Shield, “Nhật ký hoạt động”, mô tả, badge tổng bản ghi; dưới là Audit tab và hai drawer | `space-y-5`, fade 200ms, palette orange/slate, dark mode; không image/video/gallery/CTA | **KEEP** cấu trúc; header/meta phải wrap ở màn hẹp |
+| `AuditTab` toolbar | Shield tím + heading/mô tả; Download + “Tạo Báo cáo Export” | Card bo `2xl`, padding 4/5, column→row ở `md` | **ADAPT** nút full-width/touch ≥44px trên mobile |
+| Search/filter/category | Search actor/event ID/target/action; time today/7/30/all; severity; result; tabs all/sensitive/permissions-users/config-publish/export | Grid 1→12 cột; Search/Calendar/Lock icons; focus border cam; active tab | **FIX** date state không lọc; “Denied / Failed” chỉ match denied; filter đổi không reset page; tab dài có thể overflow |
+| Main table | Time; Actor + IP/role; Action + code/sensitive Lock; Target + module; Scope; Result; Eye detail | Hover row, monospace metadata, result badges, empty row, shared pagination/page-size | **ADAPT** horizontal-scroll table không đủ làm mobile acceptance; **FIX** failed/partial presentation và filtering |
+| `EventDetailDrawer` | Header ID/copy/action/severity; immutable notice; tabs Summary, Before/After, Technical; actor, result, target/scope, diff/redaction, session/correlation/HTTP; close footer | Right drawer `max-w-2xl`, full height, backdrop/blur, slide 300ms; copy feedback; empty diff | **FIX** dialog semantics, labels, focus trap/restore, Escape, scroll lock, tabs ARIA; **ADAPT** long tabs/key-value rows. **DO_NOT_COPY** ISO 27001 claim without formal evidence |
+| `ExportJobsDrawer` | Range 7/30 days; create request; job history with requester/scope/filter/status/count/size/expiry/download | Right drawer `max-w-xl`; fake 1.2s processing spinner; completed download; close | **REPLACE behavior** with async job; **FIX** keyboard/dialog semantics; **ADAPT** mobile actions/touch targets |
+| Dashboard timeline | 10 recent events; actor/avatar, action, target, time; “Xem chi tiết log” | Vertical timeline, hover background/dot scale, click opens `CmsRightDrawer` | **KEEP** compact view; add real empty/loading/error later; same audit source required |
+| Global search command | “Đi tới → Nhật ký hoạt động & Lịch sử thao tác”, navigation keywords | Command-only result to `/cms/activity-logs` | **KEEP**; never index sensitive event content without permission |
+| Entity drawers | Product “Nhật ký Hoạt động & Phiên bản”; News/Services/Events timelines; planned Menu/Pages target logs | Module-owned compact presentation filtered by entity | **KEEP UI**, **REPLACE data** mocks/fallbacks by shared target query; do not share main-table UI |
+| User/security surfaces | User audit drawer + Security tab: visits/2FA/password metadata, status history, login/action log, IP/UA, empty states | Right drawer/cards/timeline | **KEEP UI**, query by actor/target/category; sensitive permission required |
+| Configuration/PII | Config audit table; secret rotation entries; contact PII access modal | Scope/action/IP table and security messaging | **REFACTOR data** to common writer/query/redaction; unverified compliance copy is **DO_NOT_COPY** |
+
+Reference has no create/edit/preview page, hero, gallery, media selector, SEO form, relation selector, bulk edit, draft/publish or per-event trash/restore. Loading/error states are missing; empty states exist. These absences must not be filled by invented CRUD.
+
+### C. CMS capability/form/list map
+
+- List columns: Time, Actor, Action, Target, Scope, Result, Detail. Default sort is newest first; pagination must be server-side.
+- Search/filter requirement from CMS docs: user, date/time, function/module and result; design/docs additionally support event ID/target/action, category, severity, workspace/site and locale.
+- No CMS editable fields and no create/edit form. Events are read-only and immutable through normal APIs.
+- Detail: summary, actor, result/severity, target/scope, redacted before/after and technical correlation.
+- No bulk update/delete. Special actions are copy event ID, open target where allowed, create/list/download export job.
+- Export is asynchronous. User cannot fabricate `completed` state or receive a permanent public storage URL.
+- Permissions: `audit.view`, `audit.view_sensitive`, `audit.export`; future `audit.manage_retention` and `audit.manage_legal_hold`. UI hiding is not enforcement.
+
+### D. DB tables + relation map
+
+| Source | Authority finding | Relation/status |
+|---|---|---|
+| `cic_activity_logs` | **Tồn tại live**, 28 columns đúng contract, 0 rows tại 2026-09-03 | UUID PK; nullable `actor_id → cic_users(id) ON DELETE SET NULL`; target là controlled polymorphic identity |
+| `cic_audit_export_jobs` | **Tồn tại live**, 12 columns, 0 rows tại 2026-09-03 | UUID PK; nullable `requested_by → cic_users(id) ON DELETE SET NULL`; worker/storage lifecycle chưa được chứng minh |
+| `cic_users` | Actor identity source | join current actor profile, with `actor_label` snapshot/fallback |
+| `cic_history` | Existing legacy table but wrong domain | money/service history; never use or backfill as CMS audit |
+| Domain entities | No universal FK | resolve `entity_type/entity_id/module` through approved registry; preserve `entity_title` snapshot |
+
+Live catalog audit ngày 2026-09-03 xác nhận cả hai bảng đã được apply. `cic_activity_logs` có CHECK cho `severity`, `result`, `execution_time_ms`; hai bảng có PK/FK/NOT NULL cơ bản. Tuy nhiên live chỉ có PK và index đơn `actor_id`, `entity_id`, `requested_by`; thiếu time/composite/filter indexes trong schema docs. Cả hai bảng chưa bật/force RLS, không có policy hoặc trigger; catalog chỉ thấy owner `postgres` có toàn quyền. “Append-only” hiện là application contract, chưa được DB enforcement chứng minh.
+
+### E. Field Usage Map
+
+There are no `CMS_EDITABLE` and no `PUBLIC_READ` fields.
+
+| Class | `cic_activity_logs` fields |
+|---|---|
+| `CMS_OPERATIONAL` | `occurred_at`, `actor_id`, `actor_label`, `action_code`, `category`, `severity`, `is_sensitive`, `entity_type`, `entity_id`, `entity_title`, `module`, `workspace`, `locale`, `result`, `result_message` |
+| `SYSTEM_MANAGED` | `id`, `session_id`, `correlation_id`, `source_app`, `environment`, `ip_address`, `user_agent`, `http_method`, `endpoint`, `execution_time_ms`, `before_data`, `after_data`, `redacted_fields` |
+| `RELATION` | `actor_id`; `entity_type + entity_id` is polymorphic reference, not FK |
+| `AUDIT` | all fields in the table; `occurred_at` is authoritative event time |
+| `LEGACY_UNUSED` | all `cic_history` fields for this module: `username`, `money`, `type`, `description`, `created_time`, `service_name`, `service_id` |
+| `UNKNOWN` | retention/legal-hold columns described by an older logical proposal but absent from final `POSTGRES_SCHEMA_DELTA`; do not add/default/null/delete without a later decision |
+
+Explicit projections:
+
+- Public list/detail: none.
+- CMS list: event ID/time, actor ID/label, action/category/severity/sensitive, entity identity/title/module, workspace/locale, result/message.
+- CMS detail: list fields plus session/correlation/source/environment/IP/UA/HTTP/endpoint/duration and redacted before/after.
+- Dashboard: ID/time, minimal actor display/avatar projection, action label, entity display, result.
+- Target/user lookup: list/detail fields constrained by target or actor/category and permission scope.
+- Export jobs: ID/request time/requester/workspace/filter/status/count/file size/expiry/error/completion; `file_path` remains server-only.
+
+### F. Website ↔ CMS shared-domain map and data flow
+
+Website has no audit UI/query. Shared server/domain assets should be action-code registry, category/severity/result constants, redaction policy, immutable event-input schema, writer, target resolver and list/detail mapper. Website and CMS must not share presentation components merely because a governed public entity appears as an audit target.
+
+Read: `cic_activity_logs → permission/scope-aware server query → explicit row type → mapper/redaction → list/detail/dashboard/target ViewModel → CMS UI`.
+
+Write: `CMS/business input → validation → authentication/authorization → domain transaction (business mutation + server audit writer/redaction) → commit → cic_activity_logs → uncached/request-scoped CMS read refresh`. Producer cần audit thành công dùng chung transaction để không commit nghiệp vụ mà thiếu event. Frontend never creates a trusted event. There is no `CMS Form → audit mutation → Website read` flow because audit has no editable form and no public consumer.
+
+### G. Hard dependencies
+
+| Dependency | Direction/use | Exists? | Blocks implementation? |
+|---|---|---|---|
+| Complete audit indexes + append-only grants/RLS enforcement | Activity Logs → persistence/security/performance | tables/PK/FK/check tồn tại; indexes/security enforcement chưa đủ | **Yes** |
+| Auth principal + approved `audit.*` permissions | query/detail/export → authorization and actor | auth foundation exists; live permission catalog/assignments incomplete | **Yes** |
+| Redaction allowlist + append-only writer | every governed mutation → trustworthy event | not implemented | **Yes** |
+| Action/entity/workspace registry | writer/query → stable code, label, route, scope | not finalized | **Yes** |
+| Real producer events + audit go-live timestamp | list/detail → truthful records | absent | **Yes** |
+
+Required modules/foundations to run first: database schema/security approval, Auth/RBAC permission contract, then shared audit writer/redaction/registry. No fake repository/event is acceptable.
+
+### H. Soft/integration dependencies
+
+- Dashboard, user/security, configuration/PII and entity drawers can connect after core list/detail; they must use the same source before module can reach `[x]`.
+- Trash and all governed domains are producers. Individual missing producer integrations do not prevent initial core query, but keep final status at `[I]`.
+- Export worker, private storage, expiring token and cleanup block export integration only, not core read-only list/detail.
+- Security/Legal retention, IP masking and legal-hold decisions block production completion and management capabilities, not the initial read core.
+
+### I. Next KEEP / REFACTOR / REPLACE / REMOVE
+
+- **KEEP:** route resolver; CMS shell; page/header/table/drawer visual composition as reference; shared page header/tabs/pagination; global command; feature-local `src/features/activity-logs` boundary.
+- **REFACTOR:** CMS-owned types (`any` in changes); query into explicit row + mapper + typed ViewModels; permission/scope filtering; server pagination/filtering; result/category vocabulary; accessibility and responsive issues; inject current-user-sensitive data at server boundary.
+- **REPLACE:** `select('*').limit(200)` and raw-row return; client-only filtering/pagination; lazy demo-data import; fake export timer/download; news fallback event and all per-module audit mocks; unsupported ISO claims.
+- **REMOVE only after real replacement works:** runtime `demoGovernanceDataSource.audit`, `initialAuditLogsMock`, `initialExportJobsMock` and the replaced module-local activity mocks/fallbacks. Do not remove React reference or Trash fixtures in this task.
+
+### J. Implementation order inside module
+
+1. Giữ schema live hiện có; review và verify missing indexes, least-privileged grants/RLS/append-only enforcement cùng action/entity/workspace registries trong task DB được duyệt.
+2. Approve permission, privacy/redaction, retention/IP and writer-failure semantics.
+3. Implement/test server-only append writer and a small approved producer set: auth, users/permissions, publish and configuration, including denied/failed paths.
+4. Implement typed list/detail query, permission scope, explicit projections, mapper and server filtering/pagination.
+5. Inject real read model into the existing CMS route while preserving reference UI; fix documented responsive/accessibility defects in `MODULE_RESPONSIVE`.
+6. Connect dashboard/user/config/target projections; remove only replaced mocks.
+7. Implement export only after worker/storage/expiry infrastructure exists.
+8. Verify cross-module coverage, redaction, immutability, performance and go-live disclosure before raising status.
+
+### K. Acceptance checklist
+
+- [ ] Live table/PK/FK/check đã verified; missing indexes và grant/RLS/append-only enforcement được xử lý; không dùng `cic_history` hoặc synthetic backfill.
+- [ ] Trusted writer is server-only and append-only; success occurs after commit; failed/denied and writer-failure policy are tested.
+- [ ] Password/token/cookie/OTP/secret/raw sensitive payload never persists; redaction happens before insert and at read scope.
+- [ ] Guest/public cannot query audit; view/sensitive/export permissions are enforced server-side and on direct URLs.
+- [ ] List/detail use explicit projections, server sort/filter/pagination and bounded queries.
+- [ ] Success/failed/partial/denied remain independently filterable and visually distinguishable.
+- [ ] Events cannot be edited/deleted through ordinary API; retention/legal hold uses approved policy.
+- [ ] Dashboard/user/config/entity projections reconcile with the same source and permission scope.
+- [ ] Export respects exact filter/scope, is asynchronous/private/expiring and audits request/download.
+- [ ] Loading, empty, error and forbidden states exist; drawers pass keyboard/focus/Escape/scroll and mobile checks.
+- [ ] UI hierarchy/copy/icons/colors/spacing/interactions match reference except documented `FIX`/`DO_NOT_COPY` items.
+- [ ] Full-history start timestamp is disclosed; no unsupported ISO-compliance claim is shown.
+
+### 17. Infrastructure closure — 2026-09-03
+
+- Shared writer: `src/server/audit/writer.ts`; actor chỉ nhận từ `CmsPrincipal`, action/entity/workspace qua typed registry và payload được redact trước INSERT.
+- Permission catalog bootstrap: module `audit`, actions `view`, `view_sensitive`, `export`; không tự gán cho role.
+- Migration tái lập: `db_migrate/migrations/20260903_activity_audit_foundation.sql`, chạy idempotent bằng `npm run db:apply-audit-foundation`.
+- Raw audit tables deny browser roles; server DAL authorize trước khi đọc. Activity log có append-only trigger, retention chỉ được mở bằng transaction setting riêng.
+- Export CSV đồng bộ tối đa 50.000 dòng, bucket `audit-exports` private, object thuộc requester, hết hạn một giờ, signed URL 60 giây và cleanup opportunistic khi tạo export mới.
+- Producer thật đã tích hợp: `saveCmsSystemSettingsAction` → validation → `settings.edit` → DB mutation → shared writer. Role `superadmin` protected và assignment cho `admin@cic.com.vn` được migration bootstrap idempotent theo phê duyệt; runtime roundtrip còn chờ tạo Supabase Auth identity tương ứng.
+- Verification DB pass: permission allow/deny, sensitive action, raw-table denial, append-only, private bucket và ba storage policy; state kiểm thử được tạo/xóa trong cùng transaction.
+
+Fresh setup: apply base schema/data → `npm run db:apply-audit-foundation` → cấu hình server-only `SUPABASE_SERVICE_ROLE_KEY`, `CMS_BOOTSTRAP_ADMIN_EMAIL`, `CMS_BOOTSTRAP_ADMIN_PASSWORD` → `npm run bootstrap:cms-admin` → `npm run verify:audit-foundation` → start app. Bootstrap dùng Supabase Auth Admin API, không ghi trực tiếp `auth.users`, không có mật khẩu mặc định và chạy lặp an toàn.
+
+**COMPLETE:** CMS read tables cần cho shell được cấp `SELECT` riêng cho `authenticated` và RLS theo permission module; raw audit tables vẫn server-DAL-only. Live roundtrip đã pass: Supabase Auth → Settings mutation → `settings.updated` actor `9` → Audit CMS read → private CSV export completed → short-lived signed download. Giá trị kiểm thử `cic_config.id=63` đã phục hồi chính xác về `NULL`. Activity Logs đạt `[x]` theo sáu infrastructure gates; các projection producer của module nghiệp vụ tương lai tiếp tục reuse writer/registry, không tạo audit system khác.
+
+### 18. Module implementation closure — 2026-09-03
+
+- Route CMS dùng read model thật với projection tường minh; search, date, severity, result, category, count và phân trang đều chạy server-side, giới hạn 10–100 dòng/trang.
+- List có loading/error/empty state; total header và pagination dùng tổng số bản ghi từ DB, không dùng độ dài page hiện tại.
+- Detail/export drawer giữ visual reference và bổ sung dialog semantics, focus entry/restore, Tab wrapping, Escape, backdrop close và body scroll lock.
+- QA live pass tại desktop 1440×1000, tablet 820×1000 và mobile 390×844 với event producer thật `settings.updated`; không có public website surface theo scope audit đã duyệt.
+- Các timeline/drawer thuộc module nghiệp vụ chưa migrate vẫn là integration của chính module đó. Chúng phải chuyển sang query projection chung khi module tương ứng được migrate và không được dùng làm producer giả cho Audit.
+
+### 19. Responsive hardening — 2026-09-03
+
+- **KEEP:** hierarchy, orange/slate tokens, CMS shell, toolbar/filter/tab/table/detail/export structure và desktop density của React reference.
+- **ADAPT:** toolbar action full-width trên mobile; footer 1→2→12-column layout; drawer padding/header/meta rows; touch targets tối thiểu 44px; long IDs, URLs và JSON được wrap trong container.
+- **FIX:** Tailwind `source(none)` trước đây không scan Header, Footer và CMS nên breakpoint utilities không được sinh; source discovery đã bổ sung đúng cây. Header desktop hiện nav tại `lg`, hamburger chỉ dưới `lg`; footer không còn nowrap/form overflow.
+- **DO_NOT_COPY:** reference mobile che các cột nghiệp vụ của bảng. Implementation giữ một semantic table, min-width ổn định và vùng cuộn ngang bằng touch/keyboard thay vì render hai tree hoặc xóa cột.
+- Visual regression đối chiếu `https://cic-web-sandy.vercel.app/cms/activity-logs`; automated layout checks pass ở 360, 390, 768, 1024, 1280 và 1440, không có document-level horizontal overflow, overlap hoặc drawer vượt viewport. Desktop reference không bị thay hierarchy/design direction.
+
+### 20. Post-implementation hardening — 2026-09-03
+
+- Export-job metadata chỉ được đọc khi có `audit.export` và chỉ theo `requested_by` của principal hiện tại; signed download vẫn kiểm tra permission, ownership, trạng thái và expiry trên server.
+- CSV neutralize ký tự công thức `=`, `+`, `-`, `@` sau khi chuẩn hóa newline để tránh spreadsheet formula injection.
+- Producer Cấu hình hệ thống ghi mutation và `settings.updated` trong cùng PostgreSQL transaction; writer lỗi làm rollback mutation thay vì để dữ liệu và audit lệch nhau.
+- Cleanup chỉ chuyển job sang `expired` sau khi Storage xác nhận xóa artifact; lỗi xóa không còn bị bỏ qua. Export job có bốn CHECK đã validate cho status, workspace và counter không âm.
+- Bộ lọc `today` dùng ngày tại `Asia/Ho_Chi_Minh`, không phụ thuộc timezone runtime. Initial server data không bị fetch lại trong production ngay sau hydration.
+- Redaction che cả secret-key fields và credential pattern trong chuỗi tự do (`token=`, Bearer token, JWT); `entityTitle`/`resultMessage` cũng đi qua policy trước khi persist. Verification policy chạy từ code thật trong `src/server/audit/redaction.ts`.
+- Live apply/verification pass: permission allow/deny, sensitive permission, CMS RLS, raw-table denial, append-only, private bucket/policies và bốn validated constraints. Build, typecheck, lint server Audit, boundary và data-foundation checks đều pass.
+- Audit data là canonical system data: action/entity/workspace/result/severity không dịch hoặc nhân bản theo locale; `locale` chỉ ghi scope chịu tác động. Module không có public content/slug/SEO và không cần bảng nội dung VI/EN riêng.

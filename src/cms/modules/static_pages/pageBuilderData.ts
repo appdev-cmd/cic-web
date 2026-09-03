@@ -5,7 +5,7 @@ import type {
   PageBuilderPage,
 } from './pageBuilderTypes';
 
-const sourcePages = rawMockData.pages as Omit<PageBuilderPage, 'templateKey' | 'systemDefined'>[];
+const sourcePages = rawMockData.pages as unknown as Omit<PageBuilderPage, 'templateKey' | 'systemDefined'>[];
 
 function clonePage(page: Omit<PageBuilderPage, 'templateKey' | 'systemDefined'>): PageBuilderPage {
   return JSON.parse(JSON.stringify(page)) as PageBuilderPage;

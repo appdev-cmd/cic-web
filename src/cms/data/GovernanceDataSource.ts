@@ -37,6 +37,7 @@ export interface PermissionsGovernanceData {
 
 export interface AuditGovernanceData {
   auditLogs: AuditEvent[];
+  auditTotal: number;
   exportJobs: ExportJob[];
 }
 

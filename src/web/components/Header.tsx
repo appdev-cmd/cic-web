@@ -58,6 +58,7 @@ export const Header = ({
   onOpenConsultation 
 }: HeaderProps) => {
   const { headerLinks: navLinks } = getNavigationData();
+  const resolvePublicHref = (href: string) => href.startsWith('/') ? href : `/services/${href.replace(/^\/+/, '')}`;
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
@@ -72,6 +73,7 @@ export const Header = ({
       setCurrentView('search');
       setActiveLink('');
       setIsSearchOpen(false);
+      window.location.assign(`/search?q=${encodeURIComponent(localSearchQuery.trim())}`);
     }
   };
 
@@ -115,15 +117,17 @@ export const Header = ({
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between h-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex items-center justify-between h-full gap-3">
           <div className="flex items-center gap-2 h-full">
             <a 
-              href="#home" 
+              href="/"
               onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 setCurrentView('home');
                 setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.location.assign('/');
               }}
               className="flex items-center group h-full"
             >
@@ -135,7 +139,7 @@ export const Header = ({
             </a>
           </div>
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center justify-center gap-3 xl:gap-6 min-w-0">
             {navLinks.map((link) => {
               const hasDropdown = !!link.dropdown;
               const isActive = (currentView === 'products' && link.name === 'Sản phẩm') || 
@@ -149,8 +153,10 @@ export const Header = ({
               return (
                 <div key={link.name} className="relative group py-1">
                   <a 
-                    href={link.href}
+                    href={resolvePublicHref(link.href)}
                     onClick={(e) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                      window.location.assign(resolvePublicHref(link.href));
                       if (link.name === 'Sản phẩm') {
                         e.preventDefault();
                         setCurrentView('products');
@@ -222,8 +228,10 @@ export const Header = ({
                         {link.dropdown?.map((subItem) => (
                           <a
                             key={subItem.name}
-                            href={subItem.href}
+                            href={resolvePublicHref(subItem.href)}
                             onClick={(e) => {
+                              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                              window.location.assign(resolvePublicHref(subItem.href));
                               if (link.name === 'Giới thiệu') {
                                 e.preventDefault();
                                 setCurrentView('about');
@@ -273,7 +281,7 @@ export const Header = ({
             })}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 xl:gap-4 shrink-0">
             {/* Language Selector */}
             <div className={`hidden md:flex items-center gap-1 p-1 rounded-[8px] border backdrop-blur-md transition-all duration-500 ${
               isHeaderWhite ? 'bg-slate-100 border-slate-200' : 'bg-white/10 border-white/20'
@@ -305,12 +313,12 @@ export const Header = ({
             </button>
             <button 
               onClick={onOpenConsultation}
-              className="hidden sm:inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-bold tracking-wide transition-all active:scale-95 shadow-sm shadow-orange-600/20 btn-modern-interaction cursor-pointer"
+              className="hidden xl:inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-bold tracking-wide transition-all active:scale-95 shadow-sm shadow-orange-600/20 btn-modern-interaction cursor-pointer"
             >
               Tư vấn ngay
             </button>
             <button 
-              className="lg:hidden p-2 text-white rounded-[8px]" 
+              className="lg:hidden min-h-11 min-w-11 inline-flex items-center justify-center p-2 text-white rounded-[8px]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
@@ -439,9 +447,11 @@ export const Header = ({
                         isActive ? 'bg-orange-500/10 text-orange-500 font-bold' : 'hover:bg-slate-800/60 text-slate-200 hover:text-white'
                       }`}>
                         <a
-                          href={link.href}
+                          href={resolvePublicHref(link.href)}
                           className="text-base font-semibold transition-colors flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded"
                           onClick={(e) => {
+                            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                            window.location.assign(resolvePublicHref(link.href));
                             setMobileMenuOpen(false);
                             if (link.name === 'Sản phẩm') {
                               e.preventDefault();
@@ -516,9 +526,11 @@ export const Header = ({
                           {link.dropdown?.map((subItem) => (
                             <a
                               key={subItem.name}
-                              href={subItem.href}
+                              href={resolvePublicHref(subItem.href)}
                               className="text-sm font-normal text-slate-300 hover:text-orange-400 transition-colors py-1.5 px-2 rounded hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-orange-500"
                               onClick={(e) => {
+                                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                                window.location.assign(resolvePublicHref(subItem.href));
                                 setMobileMenuOpen(false);
                                 if (link.name === 'Giới thiệu') {
                                   e.preventDefault();

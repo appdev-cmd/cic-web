@@ -1,11 +1,10 @@
 import 'server-only';
-import { withTransaction } from '@/server/db/postgres';
+import type { Sql } from 'postgres';
 import type { SaveSettingsInput } from '../schemas/settingsInput';
 
 const tableFor = (scope: string) => scope === 'site_cic' ? 'cic_config' : scope === 'site_english' ? 'cic_config_en' : 'cic_config_enjicad';
 const serialize = (value: string | number | boolean | null) => value === null ? null : typeof value === 'string' ? value : String(value);
-export async function saveSystemSettings(input: SaveSettingsInput, actorId: number) {
-  return withTransaction(async (sql) => {
+export async function saveSystemSettings(input: SaveSettingsInput, actorId: number, sql: Sql) {
     for (const change of input.changes) {
       const [scope, rawId] = change.settingId.split(':'); const id = Number(rawId);
       if (scope !== change.scopeId || !Number.isSafeInteger(id) || id <= 0) throw new Error('Khóa cấu hình không hợp lệ.');
@@ -21,5 +20,4 @@ export async function saveSystemSettings(input: SaveSettingsInput, actorId: numb
         else await sql`INSERT INTO cic_branches ${sql({ ...row, created_by: actorId })}`;
       }
     }
-  });
 }

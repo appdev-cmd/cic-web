@@ -123,7 +123,9 @@ def generate_manifest():
             if not line.startswith('"'): continue
 
             # extract pg_col and pg_type
-            match_col = re.match(r'"([^"]+)"\s+([a-zA-Z0-9_\(\)]+)', line)
+            # PostgreSQL array suffix (vd text[]) la mot phan cua type.
+            # Regex cu bo mat [] va lam manifest sai persistence contract.
+            match_col = re.match(r'"([^"]+)"\s+([a-zA-Z0-9_\(\)]+(?:\[\])*)', line)
             if not match_col: continue
 
             pg_col = match_col.group(1)

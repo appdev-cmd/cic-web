@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   X,
   Shield,
@@ -33,6 +33,26 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'summary' | 'diff' | 'technical'>('summary');
   const [copiedId, setCopiedId] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
+    const onKeyDown = (keyboardEvent: KeyboardEvent) => {
+      if (keyboardEvent.key === 'Escape') onClose();
+      if (keyboardEvent.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = [...dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+      if (!focusable.length) return;
+      const first = focusable[0]; const last = focusable.at(-1)!;
+      if (keyboardEvent.shiftKey && document.activeElement === first) { keyboardEvent.preventDefault(); last.focus(); }
+      else if (!keyboardEvent.shiftKey && document.activeElement === last) { keyboardEvent.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', onKeyDown); previousFocus?.focus(); };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !event) return null;
 
@@ -43,11 +63,11 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200" onMouseDown={(mouseEvent) => { if (mouseEvent.target === mouseEvent.currentTarget) onClose(); }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="audit-event-title" tabIndex={-1} className="w-full max-w-2xl bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-300 outline-none">
         {/* DRAWER HEADER */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-start sm:items-center justify-between gap-3 shrink-0">
+          <div className="flex items-start sm:items-center gap-3 min-w-0">
             <div
               className={`p-2.5 rounded-xl text-white shadow-md ${
                 event.action.severity === 'critical'
@@ -59,9 +79,9 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
             >
               <Shield className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-slate-500">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-mono text-xs font-bold text-slate-500 truncate">
                   [{event.id}]
                 </span>
                 <button
@@ -72,7 +92,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
                   {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+              <h2 id="audit-event-title" className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
                 {event.action.label}
               </h2>
             </div>
@@ -80,17 +100,18 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-all cursor-pointer"
+            aria-label="Đóng chi tiết sự kiện"
+            className="min-h-11 min-w-11 inline-flex items-center justify-center p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-all cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* IMMUTABLE NOTICE BANNER */}
-        <div className="bg-purple-500/10 border-b border-purple-500/20 px-5 py-2.5 flex items-center justify-between text-xs text-purple-700 dark:text-purple-300">
+        <div className="bg-purple-500/10 border-b border-purple-500/20 px-4 sm:px-5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-purple-700 dark:text-purple-300">
           <span className="flex items-center gap-2 font-medium">
             <Lock className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
-            Bản ghi Nhật ký Bất biến (Immutable Audit Event) — Tuân thủ chuẩn ISO 27001
+            Bản ghi Nhật ký Bất biến (Immutable Audit Event) — chỉ đọc và được bảo vệ khỏi sửa/xóa
           </span>
           <span className="font-mono text-[10px] bg-purple-500/20 px-2 py-0.5 rounded font-bold">
             READ-ONLY
@@ -98,10 +119,10 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
         </div>
 
         {/* DRAWER TAB NAVIGATION */}
-        <div className="flex items-center border-b border-slate-200 dark:border-slate-800 px-5 gap-4 text-xs font-bold">
+        <div className="flex items-center border-b border-slate-200 dark:border-slate-800 px-4 sm:px-5 gap-4 text-xs font-bold overflow-x-auto overscroll-x-contain">
           <button
             onClick={() => setActiveTab('summary')}
-            className={`py-3 border-b-2 transition-colors cursor-pointer ${
+            className={`min-h-11 py-3 border-b-2 transition-colors cursor-pointer shrink-0 ${
               activeTab === 'summary'
                 ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -112,7 +133,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
 
           <button
             onClick={() => setActiveTab('diff')}
-            className={`py-3 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+            className={`min-h-11 py-3 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
               activeTab === 'diff'
                 ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -128,7 +149,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
 
           <button
             onClick={() => setActiveTab('technical')}
-            className={`py-3 border-b-2 transition-colors cursor-pointer ${
+            className={`min-h-11 py-3 border-b-2 transition-colors cursor-pointer shrink-0 ${
               activeTab === 'technical'
                 ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -139,12 +160,12 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
         </div>
 
         {/* DRAWER BODY CONTENT */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
           {activeTab === 'summary' && (
             <div className="space-y-5 text-xs">
               {/* RESULT BADGE CARD */}
               <div
-                className={`p-4 rounded-2xl border flex items-start justify-between gap-3 ${
+                className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start justify-between gap-3 ${
                   event.result === 'success'
                     ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
                     : 'bg-red-500/5 border-red-500/20 text-red-800 dark:text-red-300'
@@ -221,19 +242,19 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
                 </h4>
 
                 <div className="space-y-2 text-slate-600 dark:text-slate-300">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
                     <span className="text-slate-400">Loại đối tượng (Target Type):</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded">
                       {event.target.type}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
                     <span className="text-slate-400">Tên/Tiêu đề đối tượng:</span>
                     <strong className="text-slate-900 dark:text-white">{event.target.title}</strong>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
                     <span className="text-slate-400">Phạm vi Scope:</span>
                     <span className="font-bold text-orange-600 dark:text-orange-400">
                       {event.scope.siteName} [{event.scope.siteId}]
@@ -241,9 +262,9 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
                   </div>
 
                   {event.target.url && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
                       <span className="text-slate-400">Đường dẫn URL:</span>
-                      <span className="font-mono text-blue-500 underline truncate max-w-[250px]">
+                      <span className="font-mono text-blue-500 underline break-all sm:truncate sm:max-w-[250px]">
                         {event.target.url}
                       </span>
                     </div>
@@ -286,7 +307,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
                       {change.isRedacted ? (
                         <div className="p-3 bg-purple-500/5 text-purple-700 dark:text-purple-300 text-[11px]">
                           <strong>Giải thích Che khuất (Redaction Policy):</strong>{' '}
-                          {change.redactionReason || 'Trường dữ liệu chứa thông tin nhạy cảm (API Keys/Passwords/PII) đã tự động bị che khuất tuân thủ ISO 27001.'}
+                          {change.redactionReason || 'Trường dữ liệu chứa thông tin nhạy cảm (API key, mật khẩu hoặc PII) đã tự động được che khuất theo chính sách bảo mật.'}
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-800 text-xs">
@@ -294,7 +315,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
                             <span className="text-[10px] font-bold uppercase text-red-600 block">
                               Giá trị Cũ (Old Value)
                             </span>
-                            <pre className="font-mono whitespace-pre-wrap text-slate-700 dark:text-slate-300">
+                            <pre className="font-mono whitespace-pre-wrap break-words text-slate-700 dark:text-slate-300">
                               {typeof change.oldValue === 'object'
                                 ? JSON.stringify(change.oldValue, null, 2)
                                 : String(change.oldValue ?? '(null)')}
@@ -305,7 +326,7 @@ export const EventDetailDrawer: React.FC<EventDetailDrawerProps> = ({
                             <span className="text-[10px] font-bold uppercase text-emerald-600 block">
                               Giá trị Mới (New Value)
                             </span>
-                            <pre className="font-mono whitespace-pre-wrap font-bold text-emerald-700 dark:text-emerald-300">
+                            <pre className="font-mono whitespace-pre-wrap break-words font-bold text-emerald-700 dark:text-emerald-300">
                               {typeof change.newValue === 'object'
                                 ? JSON.stringify(change.newValue, null, 2)
                                 : String(change.newValue ?? '(null)')}

@@ -50,8 +50,8 @@ export interface AuditEvent {
   };
   changes?: {
     field: string;
-    oldValue: any;
-    newValue: any;
+    oldValue: unknown;
+    newValue: unknown;
     isRedacted?: boolean;
     redactionReason?: string;
   }[];
@@ -60,6 +60,21 @@ export interface AuditEvent {
     endpoint?: string;
     executionTimeMs?: number;
   };
+}
+
+export interface AuditListQuery {
+  page: number;
+  pageSize: number;
+  search: string;
+  date: 'today' | '7days' | '30days' | 'all';
+  severity: AuditSeverity | 'all';
+  result: AuditResult | 'all';
+  category: AuditCategory;
+}
+
+export interface AuditListPage {
+  items: AuditEvent[];
+  total: number;
 }
 
 export type TrashCategory = 

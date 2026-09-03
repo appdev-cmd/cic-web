@@ -10,9 +10,10 @@ import type {
   TrafficStat,
   WeeklyContentStat,
 } from '../types';
+import type { AppLocale } from '@/shared/i18n/config';
 
-export type CmsLocale = 'vi' | 'en';
-export type CmsUiLanguage = 'vi' | 'en';
+export type CmsLocale = AppLocale;
+export type CmsUiLanguage = AppLocale;
 
 export interface CmsDashboardData {
   kpi: KpiStats;

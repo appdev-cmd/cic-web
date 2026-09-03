@@ -5749,16 +5749,16 @@ button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visibl
   <h1>Schema PostgreSQL đề xuất <code>(next.js fullstack)</code></h1>
   <p>Schema đích kế thừa dữ liệu từ 113 bảng MySQL/MyISAM legacy, sau đó bổ sung các module đã chốt trong <b>Schema Delta</b> cho CMS/website Next.js Fullstack. Mỗi bảng và cột đều ghi rõ nguồn legacy hoặc lý do bổ sung để phục vụ ETL; mock frontend không tự động quyết định schema.</p>
   <div class="stat-row">
-    <div class="stat"><div class="n">147</div><div class="l">Bảng PostgreSQL đích</div></div>
+    <div class="stat"><div class="n">144</div><div class="l">Tổng bảng PostgreSQL được xuất</div></div>
     <div class="stat"><div class="n">104</div><div class="l">Kế thừa từ mapping legacy</div></div>
-    <div class="stat"><div class="n">43</div><div class="l">Bổ sung từ Schema Delta</div></div>
-    <div class="stat"><div class="n">30×2</div><div class="l">VI/EN độc lập (Đợt 7 — tách khỏi mô hình translations)</div></div>
-    <div class="stat"><div class="n">11</div><div class="l">Bảng loại bỏ</div></div>
+    <div class="stat"><div class="n">40</div><div class="l">Bổ sung từ Schema Delta (đã nằm trong tổng 144)</div></div>
+    <div class="stat"><div class="n">31 cặp</div><div class="l">VI/EN độc lập (đã nằm trong tổng 144)</div></div>
+    <div class="stat"><div class="n">11</div><div class="l">Bảng legacy loại bỏ (không nằm trong tổng)</div></div>
   </div>
 </div>
 <div class="principle-box" style="border-color:rgba(86,199,184,.35);">
   <h3 style="color:var(--teal);">Phạm vi bổ sung sau các đợt Schema Delta</h3>
-  <p style="margin:0 0 10px;color:var(--text-dim);font-size:12.3px;line-height:1.7;"><b>43 bảng bổ sung</b> gồm <b>38 bảng bắt buộc</b> và <b>5 bảng đề xuất có điều kiện</b>. Schema cũng mở rộng <b>19 cột bắt buộc</b> trên các bảng hiện có và <b>1 cột đề xuất</b>; không xóa hoặc rename destructive cột legacy.</p>
+  <p style="margin:0 0 10px;color:var(--text-dim);font-size:12.3px;line-height:1.7;"><b>Công thức tổng: 104 bảng từ mapping legacy + 40 bảng Schema Delta = 144 bảng PostgreSQL được xuất.</b> Trong 40 bảng bổ sung có <b>37 bảng bắt buộc</b> và <b>3 bảng đề xuất có điều kiện</b>. Các số liệu về cặp VI/EN chỉ mô tả cách tổ chức bên trong 144 bảng, không cộng thêm vào tổng. Schema cũng mở rộng <b>19 cột bắt buộc</b> trên các bảng hiện có và <b>1 cột đề xuất</b>; không xóa hoặc rename destructive cột legacy.</p>
   <ul style="margin:6px 0;padding-left:20px;font-size:12.3px;color:var(--text-dim);line-height:1.7;">
     <li><b>Dịch vụ × Sản phẩm:</b> 2 bảng quan hệ VI/EN.</li>
     <li><b>Thư viện Media:</b> 8 bảng asset, bản dịch, folder, album, version và variant.</li>
@@ -5799,7 +5799,7 @@ button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visibl
 
   <div style="color:var(--amber);font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin:14px 0 6px;">3. Kết quả cuối cùng</div>
   <ul>
-    <li><b>147 bảng</b> được tạo (tiền tố <code>cic_</code>): <b>104 bảng</b> từ mapping legacy và <b>43 bảng</b> bổ sung theo Schema Delta; <b>11 bảng legacy</b> loại bỏ không migrate.</li>
+    <li><b>144 bảng</b> được tạo (tiền tố <code>cic_</code>): <b>104 bảng</b> từ mapping legacy và <b>40 bảng</b> bổ sung theo Schema Delta (<b>37 bắt buộc + 3 đề xuất có điều kiện</b>); <b>11 bảng legacy</b> loại bỏ không migrate và không nằm trong tổng 144.</li>
     <li><b>77 + 37 = 114 cột</b> có <code>REFERENCES</code> (FK) tường minh; <b>không còn bảng</b> <code>*_translations</code> nào trong schema mới (bảng cuối cùng, <code>blocks_translations</code>, đã được gộp thành <code>cic_blocks</code>/<code>cic_blocks_en</code> ở Đợt 7b); toàn bộ <b>31 cặp bảng</b> đã tách thành VI/EN độc lập, không còn entity_id/locale.</li>
     <li><b>Index bổ sung</b> tự suy ra cho toàn bộ cột FK-candidate và cột <code>alias</code> (thay cho mảng gõ tay dễ sai trước đây).</li>
     <li><b>39 cột</b> thời gian (<code>edited_time</code>/<code>updated_time</code>/<code>edit_time</code>) có trigger auto-update thật khi UPDATE.</li>
@@ -9260,6 +9260,31 @@ function buildNewSQL(){
   out.push('-- ============================================================\n');
 
   const cards = document.querySelectorAll('#page-new .table-card:not(.removed-card)');
+  // Schema Delta contract guard: RBAC dung quyen truc tiep, khong dung role versioning.
+  // Dung export ngay neu tai lieu HTML bi sua lech khoi contract da duoc phe duyet.
+  const exportedTableNames = new Set(
+    Array.from(cards, card => card.querySelector('.tname').textContent.trim())
+  );
+  const requiredDeltaTables = [
+    'cic_branches',
+    'cic_content_embeds',
+    'cic_role_permissions'
+  ];
+  const removedDeltaTables = [
+    'cic_access_reviews',
+    'cic_permission_policy_issues',
+    'cic_role_versions',
+    'cic_role_version_permissions',
+    'cic_role_version_scopes'
+  ];
+  const missingDeltaTables = requiredDeltaTables.filter(name => !exportedTableNames.has(name));
+  const staleDeltaTables = removedDeltaTables.filter(name => exportedTableNames.has(name));
+  if(missingDeltaTables.length || staleDeltaTables.length){
+    throw new Error(
+      'Schema Delta mismatch. Missing required tables: [' + missingDeltaTables.join(', ') +
+      ']. Removed tables still present: [' + staleDeltaTables.join(', ') + '].'
+    );
+  }
   // Preserve-first: không loại field legacy khỏi file export. Field đổi tên
   // được nhận diện qua cột "Cột cũ tương ứng" ở bước compatibility phía trên.
   const excludedColumnsByTable = {};
@@ -9309,6 +9334,20 @@ function buildNewSQL(){
     cic_customer_request_states: [['workspace', 'source_type', 'source_id']],
     cic_email_template_versions: [['template_id', 'version_number']]
   };
+  // Index nghiep vu/composite khong the suy ra an toan tu tung column.
+  // Khong parse .pk-note vi do la noi dung hien thi tu do; manifest nay la
+  // contract thuc thi va giup exporter khong am tham lam roi DDL.
+  const businessIndexes = [
+    ['idx_cic_activity_logs_occurred_at', 'cic_activity_logs', '"occurred_at" DESC'],
+    ['idx_cic_activity_logs_actor_occurred_at', 'cic_activity_logs', '"actor_id", "occurred_at" DESC'],
+    ['idx_cic_activity_logs_action_occurred_at', 'cic_activity_logs', '"action_code", "occurred_at" DESC'],
+    ['idx_cic_activity_logs_entity_occurred_at', 'cic_activity_logs', '"entity_type", "entity_id", "occurred_at" DESC'],
+    ['idx_cic_activity_logs_category_result_occurred_at', 'cic_activity_logs', '"category", "result", "occurred_at" DESC'],
+    ['idx_cic_activity_logs_correlation_id', 'cic_activity_logs', '"correlation_id"'],
+    ['idx_cic_audit_export_jobs_requester_requested_at', 'cic_audit_export_jobs', '"requested_by", "requested_at" DESC'],
+    ['idx_cic_audit_export_jobs_status_requested_at', 'cic_audit_export_jobs', '"status", "requested_at"'],
+    ['idx_cic_audit_export_jobs_expires_at', 'cic_audit_export_jobs', '"expires_at"']
+  ];
 
   cards.forEach((card, cardIdx)=>{
     const name = card.querySelector('.tname').textContent.trim();
@@ -9577,6 +9616,10 @@ function buildNewSQL(){
     out.push('CREATE INDEX IF NOT EXISTS "' + indexName + '" ON "' + fullTable + '" ("' + column + '");');
   });
 
+  businessIndexes.forEach(([indexName, table, expression]) => {
+    out.push('CREATE INDEX IF NOT EXISTS "' + indexName + '" ON "' + table + '" (' + expression + ');');
+  });
+
   // Index nghiệp vụ không thể suy ra chỉ từ FK: tra embed theo owner/field và
   // tra nguồn submission theo placement.
   out.push('CREATE INDEX IF NOT EXISTS "idx_cic_content_embeds_owner" ON "cic_content_embeds" ("workspace", "owner_type", "owner_id", "field_key");');
@@ -9589,6 +9632,11 @@ function buildNewSQL(){
   out.push('CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_user_roles_active" ON "cic_user_roles" ("user_id", "role_id") WHERE "status" = \'active\';');
   out.push('CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_branches_head_office" ON "cic_branches" ("workspace") WHERE "is_head_office" = true AND "published" = true;');
   out.push('CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_trash_items_trashed_entity" ON "cic_trash_items" ("workspace", "entity_type", "entity_id") WHERE "status" = \'trashed\';');
+
+  out.push('');
+  out.push('-- SECURITY NOTE: RLS/policies/grants cho audit logs khong duoc tu suy tu UI/schema note.');
+  out.push('-- Can ap dung bang migration security rieng sau khi permission registry, writer role');
+  out.push('-- va quyen retention/purge duoc phe duyet; exporter khong tao policy gia.');
 
   // Thêm TRIGGER/FUNCTION cho auto-update edited_time/updated_time
   out.push('');

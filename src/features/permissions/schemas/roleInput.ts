@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const permissionActionSchema = z.enum(['view', 'create', 'edit', 'delete', 'publish', 'export', 'configure']);
+export const permissionActionSchema = z.enum(['view', 'view_sensitive', 'create', 'edit', 'delete', 'publish', 'export', 'configure']);
 export const roleInputSchema = z.object({
   name: z.string().trim().min(2).max(255),
   description: z.string().trim().max(5000).default(''),

@@ -33367,7 +33367,7 @@
       },
       {
         "col": "redacted_fields",
-        "pg_type": "text",
+        "pg_type": "text[]",
         "synthetic": true,
         "sources": []
       }

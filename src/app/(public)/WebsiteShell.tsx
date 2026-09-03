@@ -1,10 +1,16 @@
 'use client';
 import { useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { Header } from '@/web/components/Header';
 import { Footer } from '@/web/components/Footer';
 type View = 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
 export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
-  const [currentView, setCurrentView] = useState<View>('home');
+  const pathname = usePathname();
+  const segment = pathname.split('/').filter(Boolean)[0];
+  const currentView: View = segment && ['products', 'about', 'services', 'projects', 'news', 'events', 'contact', 'privacy', 'terms', 'search'].includes(segment)
+    ? segment as View
+    : 'home';
+  const setCurrentView: (view: View) => void = () => undefined;
   const [activeLink, setActiveLink] = useState('');
   const noop = () => undefined;
   const setFooterView = (view: View | 'cms') => { if (view !== 'cms') setCurrentView(view); };

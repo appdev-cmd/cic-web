@@ -149,13 +149,13 @@ export const FormList: React.FC<FormListProps> = ({
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-slate-800 dark:text-slate-200">
-                          {formatNumber(form.stats.submissions)}
+                          {formatNumber(form.stats?.submissions ?? 0)}
                         </span>
                         <span className="text-[10px] text-slate-400">lượt gửi</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-slate-800 dark:text-slate-200">
-                          {form.stats.conversionRate}%
+                          {form.stats?.conversionRate ?? 0}%
                         </span>
                         <span className="text-[10px] text-slate-400">tỷ lệ</span>
                       </div>

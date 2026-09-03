@@ -11,7 +11,7 @@ import {
   policyIssuesMock,
   roleAssignmentsMock,
 } from '../modules/permission_management/mockData';
-import { initialAuditLogsMock, initialExportJobsMock, initialTrashedItemsMock } from '../modules/activity_logs_trash/mockData';
+import { initialTrashedItemsMock } from '../modules/activity_logs_trash/mockData';
 
 export const demoGovernanceDataSource: GovernanceDataSource = {
   users: {
@@ -36,8 +36,9 @@ export const demoGovernanceDataSource: GovernanceDataSource = {
     agencies: agenciesMock,
   },
   audit: {
-    auditLogs: initialAuditLogsMock,
-    exportJobs: initialExportJobsMock,
+    auditLogs: [],
+    auditTotal: 0,
+    exportJobs: [],
   },
   trash: initialTrashedItemsMock,
 };

@@ -15,7 +15,7 @@ import { resolveCmsModule } from '../routing';
 import { demoCmsDataSource } from '../data/demoCmsDataSource';
 import type { CmsDashboardData, CmsLocale } from '../data/CmsDataSource';
 import type { CmsSearchRecord } from '@/features/cms-search/types';
-import type { PermissionsGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
+import type { AuditGovernanceData, PermissionsGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
 import type { SystemConfigurationData } from '../data/ConfigurationDataSource';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
@@ -42,10 +42,7 @@ const SystemConfiguration = lazy(async () => {
   return { default: module.SystemConfiguration };
 });
 const FunctionSeoManager = lazy(() => import('../modules/function_seo/FunctionSeoManager').then((module) => ({ default: module.FunctionSeoManager })));
-const ActivityLogsManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/ActivityLogsManager'), import('../data/demoGovernanceDataSource')]);
-  return { default: () => <module.ActivityLogsManager data={dataModule.demoGovernanceDataSource.audit} /> };
-});
+const ActivityLogsManager = lazy(() => import('../modules/activity_logs_trash/ActivityLogsManager').then((module) => ({ default: module.ActivityLogsManager })));
 const TrashManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/TrashManager'), import('../data/demoGovernanceDataSource')]);
   return { default: () => <module.TrashManager data={dataModule.demoGovernanceDataSource.trash} /> };
@@ -185,8 +182,10 @@ const CmsGlobalSearchPage = lazy(async () => {
   return { default: module.CmsGlobalSearchPage };
 });
 
-interface CmsDashboardProps {
+export interface CmsDashboardProps {
   onSwitchToWebsite?: () => void;
+  onLogout?: () => void;
+  currentUser?: CmsUser;
   dashboardData?: CmsDashboardData;
   searchRecords?: CmsSearchRecord[];
   userRole?: string;
@@ -197,9 +196,11 @@ interface CmsDashboardProps {
   settingsData?: SystemConfigurationData | null;
   settingsCapabilities?: { edit: boolean };
   functionSeoData?: FunctionSeoRecord[];
+  activityData?: AuditGovernanceData | null;
+  auditCapabilities?: { export: boolean };
 }
 
-export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false }, permissionsData = null, permissionCapabilities = { create: false, edit: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [] }) => {
+export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, onLogout, currentUser: authenticatedUser, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false }, permissionsData = null, permissionCapabilities = { create: false, edit: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false } }) => {
   // Theme & Layout States (Persisted & Synced)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -232,10 +233,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, d
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [activePath, setActivePath] = useState(() => {
-    const p = window.location.pathname;
-    return p && p.startsWith('/cms') && p !== '/cms' ? p : '/cms/dashboard';
-  });
+  const [activePath, setActivePath] = useState('/cms/dashboard');
   const [currentPageTitle, setCurrentPageTitle] = useState('Tổng quan CMS');
 
   // Command Palette & Right Drawer
@@ -243,7 +241,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, d
   const [drawerItem, setDrawerItem] = useState<DrawerItem | null>(null);
 
   // Filter & Data States
-  const [currentUser, setCurrentUser] = useState<CmsUser>(demoCmsDataSource.currentUser);
+  const [currentUser, setCurrentUser] = useState<CmsUser>(authenticatedUser ?? demoCmsDataSource.currentUser);
   const [isMyAccountOpen, setIsMyAccountOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [trafficRange, setTrafficRange] = useState<'7' | '30'>('7');
@@ -257,7 +255,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, d
   const activeModule = resolveCmsModule(activePath);
 
   useEffect(() => {
-    const handlePopState = () => setActivePath(window.location.pathname || '/cms/dashboard');
+    const handlePopState = () => setActivePath(`${window.location.pathname}${window.location.search}` || '/cms/dashboard');
+    handlePopState();
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -287,7 +286,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, d
 
   const navigateToCmsPath = (path: string, title: string) => {
     window.history.pushState({}, '', path);
-    setActivePath(new URL(path, window.location.origin).pathname);
+    const target = new URL(path, window.location.origin);
+    setActivePath(`${target.pathname}${target.search}`);
     setCurrentPageTitle(title);
   };
 
@@ -340,7 +340,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, d
         onLogout={() => {
           setToastMessage('Đã đăng xuất thành công khỏi hệ thống quản trị!');
           setTimeout(() => {
-            if (onSwitchToWebsite) onSwitchToWebsite();
+            if (onLogout) onLogout();
           }, 800);
         }}
       />
@@ -414,7 +414,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, d
           ) : activeModule === 'function_seo' ? (
             <FunctionSeoManager key={workspaceLocale} workspaceLocale={workspaceLocale} data={functionSeoData} />
           ) : activeModule === 'activity_logs' ? (
-            <ActivityLogsManager />
+            activityData ? <ActivityLogsManager data={activityData} capabilities={auditCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem Nhật ký hoạt động.</div>
           ) : activeModule === 'trash' ? (
             <TrashManager />
           ) : activeModule === 'static_pages' ? (

@@ -1,8 +1,19 @@
 # Target Architecture
 
+> **Migration lock — audit 2026-08-31:** Đây là kiến trúc đích, không phải xác nhận implementation hiện tại đúng hoặc hoàn tất. Trạng thái module chỉ lấy từ `MODULE_MAP.md`; không bắt đầu module nếu hard dependency chưa tồn tại thật.
+
 ## 1. Phạm vi và nguyên tắc
 
-Tài liệu này định nghĩa kiến trúc đích cho một project **Next.js App Router fullstack** duy nhất, deploy trên Vercel và dùng PostgreSQL/Supabase. Đây là thiết kế cho migration; chưa tạo Next.js, chưa chuyển module, chưa tạo API/schema và không thay UI.
+Tài liệu này định nghĩa kiến trúc đích cho một project **Next.js App Router fullstack** duy nhất, deploy trên Vercel và dùng PostgreSQL/Supabase. Repository hiện đã có Next.js foundation và một số implementation slice, nhưng tất cả phải được audit theo source of truth và completion gate; không mặc định code hiện tại đúng.
+
+Thứ tự nguồn sự thật:
+
+1. React legacy authoritative cho UI/layout/content hiển thị/icon/interaction/responsive/UX/state.
+2. `database.html`, `POSTGRES_SCHEMA_DELTA` và schema decision authoritative cho persistence/table/column/key/relation/type.
+3. `DE_XUAT_CHUC_NANG_CMS.md` authoritative cho capability/workflow/quyền/hành vi quản trị.
+4. Next.js hiện tại chỉ là implementation cần kiểm chứng.
+
+Không suy schema từ mock/static React. Khi shape khác nhau, luôn đi theo `DB → query → mapper → domain/view model → UI`; không sửa DB chỉ để giống mock.
 
 Các quyết định hiện có trong `docs/system-audit/` và `docs/system-audit/database/` tiếp tục có hiệu lực:
 
@@ -351,6 +362,24 @@ client code ─X→ server/* or features/*/server
 - Cross-domain mutation được orchestrate bởi use-case sở hữu workflow hoặc explicit application service; không gọi repository feature khác tùy tiện.
 - Cross-domain read dùng projection/contract nhỏ, batch được; không expose raw table/query builder.
 
+### Hard và soft dependency
+
+- **Hard dependency:** thiếu dependency thì module không thể đúng. Module phải chờ implementation thật; cấm mock/fake repository/fake data/fake component, empty dataset hoặc bypass authorization để vượt gate.
+- **Soft/integration dependency:** core vẫn đúng khi đứng độc lập nhưng integration liên module còn pending. Chỉ dùng `[I]` sau khi core thật đạt `[C]`.
+- Integration được React reference hoặc CMS functional docs yêu cầu là gate bắt buộc để lên `[x]`.
+- Interface, type, placeholder route, build pass hoặc query riêng lẻ không chứng minh dependency đã hoàn tất.
+
+### Foundation order trước business module
+
+1. server-only environment/DB/Supabase/transaction foundation;
+2. auth, identity bridge, RBAC/permission enforcement;
+3. domain type/query/mapper/ViewModel và validation/error convention;
+4. locale/workspace, media/storage/reference và publish/preview/cache contracts;
+5. audit/trash/rich-HTML/route-registry cross-module contracts theo nhu cầu thật;
+6. visual/behavior regression baseline từ React legacy.
+
+Foundation được triển khai theo lát cắt thực tế, không tạo generic abstraction trước nhu cầu.
+
 ## 13. Mapping toàn bộ module hiện tại
 
 Tất cả module trong `MODULE_MAP.md` có chỗ trong kiến trúc đích. Các điểm cần xử lý cẩn thận, không được bỏ qua:
@@ -370,18 +399,20 @@ Tất cả module trong `MODULE_MAP.md` có chỗ trong kiến trúc đích. Cá
 
 ## 14. Rollout/gates
 
-1. Prompt 2 chỉ dựng foundation, aliases, layouts và infrastructure tối thiểu; không tự migrate domain.
-2. Mỗi module: đọc audit → mapping → schema decision → contract → implementation hiện tại.
+1. Đọc audit/source of truth và xác nhận hard dependency trước khi mở module.
+2. Mỗi module: mapping cần thiết → schema decision → domain/view-model contract → implementation thật.
 3. Thay data function mock bằng server implementation sau khi DB gate pass.
 4. Kiểm tra public/CMS data parity, permission, relations, media, SEO, rich text, locale/workspace.
 5. Chạy typecheck/lint/build, functional test và responsive visual regression.
 6. Gỡ mock riêng module khi parity + rollback đều đạt; không xóa mock toàn cục.
 
-## 15. Out of scope của Prompt 1
+Trạng thái duy nhất: `[ ]` Not started, `[A]` Audited, `[C]` Core complete, `[I]` Integration pending, `[x]` Complete. Route/build/typecheck/query riêng lẻ không đủ để đánh dấu `[C]` hoặc `[x]`.
 
-- Không khởi tạo Next.js/package/dependency.
-- Không tạo Supabase project/client/schema/migration/API.
-- Không implement auth/RBAC/caching.
-- Không chuyển route/component/module.
+## 15. Out of scope của đợt audit 2026-08-31
+
+- Không sửa source hoặc dependency.
+- Không tạo/sửa schema, migration, API hay persistence.
+- Không implement/refactor auth, RBAC, cache hoặc feature.
+- Không chuyển route/component/module và không xóa legacy/mock.
 - Không refactor/redesign UI.
 

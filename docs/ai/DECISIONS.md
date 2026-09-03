@@ -109,3 +109,23 @@ Tài liệu này ghi quyết định kiến trúc cấp project. Quyết định
 **Decision:** Next dùng `@tailwindcss/postcss`; `globals.css` đặt Tailwind `source(none)` rồi allowlist `src/app`, `src/shared/components` và `src/shared/ui`.  
 **Reason:** Giữ nguyên utility classes của React source of truth mà không kéo toàn bộ legacy module CSS/client surface vào bundle Next trước khi migrate.  
 **Consequence:** Mỗi prompt migrate feature/shell phải thêm source path tương ứng có chủ đích. Legacy `src/index.css` vẫn là baseline; chỉ base styles và CMS list/table/pagination contracts cần cho shared primitives được chuyển ở Prompt 3.
+
+## D-019 — Supabase server-first; chưa tạo browser data client
+
+**Decision:** Request-aware Supabase server client là boundary mặc định; proxy chỉ refresh session. Admin client và direct SQL luôn server-only. Chưa tạo browser Supabase client cho đến khi có realtime/direct Storage use case được duyệt.
+**Reason:** Public/CMS reads và mutations hiện xử lý được ở server; browser client lúc này chỉ mở thêm security/data-access surface không cần thiết.
+**Consequence:** Publishable key có thể public nhưng browser không trực tiếp query business tables. Mọi module dùng feature-local query/action + mapper; RLS vẫn phải được thiết kế riêng trước khi cho browser access.
+
+## D-020 — Không tự phát minh generated database contract
+
+**Decision:** `database.types.ts` chỉ giữ generation boundary; type table toàn cục phải được generate từ authoritative linked Supabase schema, không viết tay từ mock/docs rút gọn.
+**Reason:** Một global type sơ sài dễ biến thành persistence contract sai và che nullable/relation/locale thực tế.
+**Consequence:** Trước generation, feature server query dùng persistence-row type nhỏ cạnh mapper. UI chỉ dùng domain/ViewModel; mapping chi tiết thực hiện theo từng module.
+
+## D-021 — CMS authorization resolve principal ở server và fail closed
+
+**Decision:** Mỗi request CMS resolve một `CmsPrincipal` từ Supabase Auth identity, active `cic_users` profile, active role assignments và allowed module/action. `can()` chỉ tạo capability UX; `requirePermission()` enforce sensitive server operations. Khi permission contract/provider chưa tồn tại hoặc không cấp quyền, hệ thống không giả lập quyền.
+
+**Reason:** Live database ngày 2026-09-01 có 0 Auth users, role/assignment rỗng và thiếu `cic_role_permissions`; numeric semantics của direct legacy permissions chưa đủ bằng chứng để code foundation tự diễn giải an toàn.
+
+**Consequence:** Guest bị chặn, active profile không tự động có module permission, handler trả đúng 401/403. Việc provision/link Auth identity và apply/approve RBAC schema/parity là dependency riêng; không seed user/role hoặc đổi schema trong auth foundation.

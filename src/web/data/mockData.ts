@@ -139,21 +139,21 @@ export const partners: Partner[] = [
 export const navLinks: NavLink[] = [
   { 
     name: 'Giới thiệu', 
-    href: '#about', 
+    href: '/about',
     active: true,
     dropdown: [
-      { name: 'Giới thiệu', href: '#about' },
-      { name: 'Cơ cấu tổ chức', href: '#about' },
-      { name: 'Năng lực và Kinh nghiệm', href: '#about' }
+      { name: 'Giới thiệu', href: '/about' },
+      { name: 'Cơ cấu tổ chức', href: '/about?tab=structure' },
+      { name: 'Năng lực và Kinh nghiệm', href: '/about?tab=experience' }
     ]
   },
   { 
     name: 'Sản phẩm', 
-    href: '#solutions'
+    href: '/products'
   },
   { 
     name: 'Dịch vụ', 
-    href: '#services',
+    href: '/services',
     dropdown: [
       { name: 'Tư vấn lập đơn giá, chỉ số giá', href: 'tu-van-lap-don-gia-chi-so-gia' },
       { name: 'Đánh giá sản lượng điện gió đạt chuẩn bankable', href: 'danh-gia-san-luong-dien-gio' },
@@ -167,27 +167,27 @@ export const navLinks: NavLink[] = [
   },
   { 
     name: 'Dự án', 
-    href: '#projects'
+    href: '/projects'
   },
   { 
     name: 'Tin tức', 
-    href: '#news',
+    href: '/news',
     dropdown: [
-      { name: 'Tin công ty', href: '#news' },
-      { name: 'Tin chuyên ngành', href: '#news' },
-      { name: 'Hợp tác quốc tế', href: '#news' },
-      { name: 'Tin tuyển dụng', href: '#news' },
-      { name: 'Tin khuyến mại', href: '#news' },
-      { name: 'Quan hệ cổ đông', href: '#news' }
+      { name: 'Tin công ty', href: '/news?category=company' },
+      { name: 'Tin chuyên ngành', href: '/news?category=specialty' },
+      { name: 'Hợp tác quốc tế', href: '/news?category=international' },
+      { name: 'Tin tuyển dụng', href: '/news?category=recruitment' },
+      { name: 'Tin khuyến mại', href: '/news?category=promotion' },
+      { name: 'Quan hệ cổ đông', href: '/news?category=shareholder' }
     ]
   },
   { 
     name: 'Sự kiện', 
-    href: '#events'
+    href: '/events'
   },
   { 
     name: 'Liên hệ', 
-    href: '#contact' 
+    href: '/contact'
   }
 ];
 

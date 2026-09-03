@@ -18,6 +18,7 @@ Các quy tắc dưới đây là bắt buộc cho mọi AI/dev trong migration N
 4. Data truyền qua RSC boundary phải serializable, tối thiểu và là ViewModel/DTO an toàn.
 5. Không fetch lại ở client dữ liệu mà server page đã có, trừ khi interaction/realtime thực sự yêu cầu.
 6. Query độc lập chạy song song; tránh sequential waterfall. Heavy browser library load theo island/dynamic boundary.
+7. Request-scoped server reads dùng `cache()` khi cùng request có nhiều consumer thực sự; không cache global dữ liệu CMS/PII.
 
 ## 3. Domain boundaries
 
@@ -27,6 +28,7 @@ Các quy tắc dưới đây là bắt buộc cho mọi AI/dev trong migration N
 4. Feature không import private repository/query của feature khác. Dùng public contract/projection hoặc application use-case được chốt.
 5. Không tạo shared abstraction vì hai file trông giống nhau. Chỉ shared khi responsibility và contract thực sự chung.
 6. Không tạo repository/service/interface hình thức. Read CRUD đơn giản dùng typed server query + mapper; thêm layer khi có rule, transaction, compatibility, nhiều nguồn hoặc test seam có giá trị.
+7. Chạy `npm run check:boundaries` sau khi đổi foundation/import; checker phải pass và không có circular dependency trong `app`, `server`, `shared`, `features`.
 
 ## 4. TypeScript và naming
 
@@ -56,6 +58,10 @@ Các quy tắc dưới đây là bắt buộc cho mọi AI/dev trong migration N
 6. Transaction phải ngắn; tránh network/external call giữ DB transaction mở. Có idempotency khi webhook/submission có thể retry.
 7. List query phải paginate; relation batch để tránh N+1; chỉ select cột cần thiết.
 8. Không xóa mock cho đến khi module đạt parity/rollback gate.
+9. Feature query/mutation đặt gần domain và đặt tên theo use case (`getProducts`, `getProductBySlug`, `createProduct`); không dựng generic repository framework.
+10. Query trả `null` cho no-result được dự kiến; database/provider failure phải throw `DataAccessError` với message an toàn. `DataResult` chỉ dùng tại action/HTTP boundary cần typed result.
+11. Persistence row type nằm trong feature server boundary cạnh mapper; domain/ViewModel và mutation input là type riêng khi responsibility khác.
+12. Write path: validate → authenticate/authorize → feature mutation/transaction → audit nếu bắt buộc → revalidate/cache sau commit.
 
 ## 7. Supabase/PostgreSQL security
 
@@ -67,6 +73,10 @@ Các quy tắc dưới đây là bắt buộc cho mọi AI/dev trong migration N
 6. Không thêm field/table vì mock/UI. Chỉ dùng schema decision được duyệt.
 7. Index dựa trên query/FK/filter/order thực tế; không tạo index/partition “để dành”.
 8. Migration production phải có rehearsal, validation, backup và rollback/forward-fix plan.
+9. `createSupabaseServerClient` là request/cookie-aware client mặc định; `createSupabaseAdminClient` chỉ cho allowlisted server operation cần Auth Admin.
+10. Session refresh thuộc `src/proxy.ts`; không đặt business query vào proxy.
+11. Không tạo browser Supabase client trước use case realtime/direct Storage đã duyệt. Publishable key an toàn để public nhưng không thay thế RLS/authorization.
+12. Direct SQL dùng pooled URL, connection limit/timeout và transaction ngắn; production credential phải là least-privileged role, không phải owner/bypass-RLS role.
 
 ## 8. Validation, errors và security
 
@@ -79,6 +89,26 @@ Các quy tắc dưới đây là bắt buộc cho mọi AI/dev trong migration N
 7. Upload kiểm MIME, size, extension/storage key, permission và malware policy khi được yêu cầu.
 8. Public submission/integration có origin/CSRF strategy phù hợp, rate limit, anti-spam và idempotency.
 
+### Application states
+
+- Root/CMS route có loading/error/not-found boundary riêng; unauthorized và forbidden là hai trạng thái khác nhau.
+- `ApplicationState`/`ApplicationLoadingState` chỉ là shell server-compatible cho trường hợp đơn giản. Feature được giữ UI state riêng khi layout/copy/action khác.
+- Empty state thuộc feature/list owner; không biến mọi empty/error/loading thành một component đa năng.
+- Page guard có thể điều hướng authentication failure sang state route; Server Action và Route Handler vẫn dùng typed error phù hợp.
+
+### Types, validation và mapper
+
+- Generated DB types chỉ ở data/server boundary; UI không import DB Row type.
+- Domain type diễn tả nghiệp vụ; input schema diễn tả dữ liệu không tin cậy; ViewModel là output serializable tối thiểu cho UI.
+- Mapper đặt trong feature khi DB shape khác domain/UI; không tạo mapper/base repository generic cho phép đổi tên đơn giản.
+- Luồng chuẩn: `DB → query → mapper (nếu cần) → domain/view model → UI`.
+
+### Locale và routing
+
+- Locale application dùng `AppLocale` từ `src/shared/i18n/config.ts`; hiện chỉ gồm `vi`, `en`, mặc định `vi`.
+- Route locale và table/workspace locale map tường minh theo schema; không tự dịch hoặc fallback VI/EN trong persistence layer.
+- `app` sở hữu route/layout; feature sở hữu domain/data/presentation; shared không sở hữu routing nghiệp vụ.
+
 ## 9. Auth và permissions
 
 1. Ẩn menu/button không phải authorization.
@@ -86,6 +116,15 @@ Các quy tắc dưới đây là bắt buộc cho mọi AI/dev trong migration N
 3. Trong giai đoạn chuyển tiếp, RBAC additive và direct legacy permission tiếp tục authoritative cho đến khi parity được duyệt.
 4. Draft/Preview/Publish, user/permission, settings secret, audit/trash và PII có permission/scope riêng.
 5. Audit append-only và redact; không ghi password, hash, token, OTP, secret hoặc raw request header.
+
+### CMS auth foundation
+
+- `getCurrentCmsPrincipal()` là nguồn duy nhất cho Auth user, active `cic_users` profile, role codes và effective permission trong một request.
+- `can(principal, module, action)` chỉ dựng UX/capability. Sensitive query, Server Action và Route Handler bắt buộc gọi `requirePermission(module, action)` ở server.
+- CMS identity bridge dùng email đã normalize giữa Supabase Auth và `cic_users`; profile thiếu, disabled hoặc unpublished trả forbidden. Không nhận role/user ID từ browser làm bằng chứng.
+- Permission mặc định fail closed. Không suy numeric legacy permission, không tự seed admin và không bỏ qua lỗi permission provider.
+- Page boundary được phép chuyển unauthenticated/forbidden sang route state; HTTP boundary phải trả lần lượt 401/403, không gom thành 500 hoặc redirect login.
+- `returnTo` login chỉ nhận internal `/cms...`; logout phải gọi Supabase sign-out thật và xóa session cookie qua server action.
 
 ## 10. Caching
 

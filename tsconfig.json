@@ -50,6 +50,7 @@
     "src/shared/ui/**/*.ts",
     "src/shared/ui/**/*.tsx",
     "src/instrumentation.ts",
+    "src/proxy.ts",
     "scripts/check-foundation-env.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

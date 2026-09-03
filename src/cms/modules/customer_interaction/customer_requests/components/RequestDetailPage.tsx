@@ -376,7 +376,7 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
                     {field.valueText && (
                       <button
                         type="button"
-                        onClick={() => handleCopy(field.valueText, field.fieldKey)}
+                        onClick={() => field.valueText && handleCopy(field.valueText, field.fieldKey)}
                         className="text-slate-400 hover:text-orange-600 transition-colors p-0.5"
                         title="Sao chép"
                       >

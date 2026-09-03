@@ -1,5 +1,21 @@
 # Database Mapping Rules
 
+> **Authority lock — audit 2026-08-31:** `db_migrate/database.html`, `docs/database/POSTGRES_SCHEMA_DELTA.md`, PostgreSQL schema SQL và schema decisions đã duyệt authoritative cho table/column/PK/FK/relation/type/persistence. Các mapping implementation ghi bên dưới phải được kiểm lại theo các nguồn này; chúng không được trở thành schema chỉ vì đã có code.
+
+React mock/static data không phải database contract. Không suy field/relation/schema từ object UI và không sửa DB chỉ để giống mock. Data flow bắt buộc là `DB → query → mapper → domain/view model → UI`.
+
+### Activity Logs
+
+Activity Logs là shared governance domain, không phải dữ liệu website public. Live `cic_activity_logs` và `cic_audit_export_jobs` đã tồn tại; không map từ `cic_history`, timestamp của entity hoặc mock timeline. Event chỉ do `src/server/audit/writer.ts` ghi sau server auth, append-only và redaction trước INSERT. `actor_id` là FK tùy chọn tới `cic_users`; target dùng typed registry, không tạo FK giả. Raw tables deny browser roles; permission-aware DAL dùng explicit projection. Migration `20260903_activity_audit_foundation.sql` bootstrap `audit` catalog, indexes, RLS deny-by-default, least grants, append-only trigger và private export bucket/policies. CSV export là synchronous, giới hạn 50.000 dòng, artifact private một giờ và signed URL 60 giây.
+
+## Data-access foundation lock — 2026-09-01
+
+- `database.types.ts` không tự dựng table contract. Generated Supabase types chỉ được tạo từ linked authoritative project/schema qua workflow được duyệt.
+- Trước khi generated types tồn tại, persistence row type phải ở feature server boundary và chỉ mô tả các cột query thực sự select; không export sang UI.
+- No result dự kiến dùng `null`; database failure không được đổi thành empty dataset và không expose raw provider detail.
+- Mapper chỉ thêm theo từng module khi DB shape khác domain/ViewModel; không có global mapping sơ sài trong foundation.
+- Mutation convention không thay schema: validate → authorize → feature-owned transaction/mutation → audit/revalidate sau commit.
+
 ## Cấu hình hệ thống (7.x-R)
 
 Workspace configuration maps to `cic_config` (VI), `cic_config_en` (EN), and the approved legacy Enjicad table `cic_config_enjicad`; keys map from `name`, values from `value`, and UI control types derive only from the persisted `data_type`. Configuration identifiers retain table identity at the feature boundary (`scope:id`) so updates cannot cross workspaces. Branch/contact settings map to `cic_branches` by `workspace`, preserving code, address, contact, map, publication, head-office and ordering fields. Standard and reviewed values are both validated server-side and persisted in a PostgreSQL transaction; secret values are never returned to the client.

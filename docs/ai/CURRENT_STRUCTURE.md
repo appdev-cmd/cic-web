@@ -1,163 +1,126 @@
 # Current Structure
 
-## Cấu trúc kiến trúc có ý nghĩa
+## Tổng quan
+
+Repository hiện chứa hai implementation cùng tồn tại:
 
 ```text
-index.html
-src/
-  main.tsx                 React bootstrap + global CSS
-  App.tsx                  public shell, view coordinator, CMS switch
-  index.css                Tailwind import, fonts, global/public/CMS/editor CSS
-  web/
-    components/            public views và public shared widgets
-    data/                  public fixtures/business content
-    features/              typed adapters theo domain
-    services/              customer-interaction submission boundary
-  cms/
-    components/            CMS app shell và shared chrome/control
-    components/ui/         shared list primitives
-    data/                  data-source interfaces + demo implementations
-    modules/               20 domain folders; customer_interaction có 3 module con
-    services/              global search index/service
-    routing.ts             route registry/resolver tự viết
-    types/                 CMS shell/dashboard types
-  shared/
-    components/            Typography, Counter, shared icons
-    tokens/                color/spacing/radius/shadow/typography tokens
-    types/                 public domain types
-    page-content/          page models, legacy adapters, resolvers
-    visual-editing/        binding, geometry, inline editing, sortable contracts
-    configuration/         public website configuration adapter
-    customerInteractionContract.ts
-public/                    logos, hero images, world/partner JSON và partner logos
+React/Vite legacy reference       Next.js current implementation
+  index.html                        src/app/**
+  src/main.tsx                      src/features/**
+  src/App.tsx                       src/server/**
+  src/web/**                        src/shared/**
+  src/cms/**
+  src/index.css
+
+Persistence/docs
+  db_migrate/database.html và schema/report
+  docs/database/POSTGRES_SCHEMA_DELTA.md
+  docs/system-audit/database/** và compatibility plans
 ```
 
-`src/data/worldMapPaths.ts` tồn tại song song với `src/web/data/worldMapPaths.ts`; public component dùng bản trong `src/web/data`.
+`package.json` dùng Next.js làm `dev/build/start` mặc định và giữ `dev:legacy`, `build:legacy`, `preview:legacy` cho React/Vite reference.
 
-## Entry points và build
+## React/Vite legacy reference
 
-- `index.html` cung cấp `#root` và load `/src/main.tsx`.
-- `main.tsx` dùng `createRoot(...).render(<StrictMode><App /></StrictMode>)` và import `index.css`.
-- Vite aliases map `@web`, `@cms`, `@shared` (xem `vite.config.ts`/`tsconfig.json`).
-- Vite build/preview; `vercel.json` phục vụ SPA rewrite. Không có server code trong `src`.
+`src/App.tsx` điều phối public view bằng local state. Header/Footer đổi view qua callback; list/detail và nhiều subflow không có deep-link riêng. UI public nằm trong `src/web/components/**`, fixture trong `src/web/data/**` và typed adapter trong `src/web/features/**`.
 
-## Routing
+`src/cms/components/CmsDashboard.tsx` là client shell lớn, lazy-load module theo `src/cms/routing.ts`. UI module nằm dưới `src/cms/modules/**`; data-source interface ở `src/cms/data/**` nhưng phần lớn implementation vẫn là `demo*DataSource` lấy dữ liệu từ fixture/module mock.
 
-### Public
+Nhóm code đặc biệt:
 
-Không có route registry/package. `WebsiteView` trong `App.tsx` gồm `home`, `products`, `about`, `services`, `projects`, `news`, `events`, `contact`, `privacy`, `terms`, `search`, `not-found`, `cms`.
+- `activity_logs_trash`: hai module độc lập là Activity Logs và Trash;
+- `customer_interaction`: ba module độc lập là CTA, Forms và Customer Requests;
+- static pages/page builder: CKEditor, visual canvas, inline editing, iframe/DOM integration;
+- shell/search/navigation: History API và client state tự quản.
 
-- `/` khởi tạo `home`.
-- `/cms` hoặc `/cms/*` khởi tạo CMS.
-- Path khác khởi tạo 404.
-- Sau khi click navigation public, view đổi bằng state nhưng URL được giữ/đưa về `/`.
-- Detail sản phẩm/dịch vụ/dự án/tin/sự kiện và about subtab không có URL riêng.
+Legacy là authority presentation nhưng không phải kiến trúc, persistence hay backend contract.
 
-### CMS
+## Next.js hiện tại
 
-Canonical routes: `/cms/dashboard`, `/cms/search`, `/cms/users`, `/cms/permissions`, `/cms/settings`, `/cms/function-seo`, `/cms/activity-logs`, `/cms/trash`, `/cms/static-pages`, `/cms/news`, `/cms/events`, `/cms/projects`, `/cms/email-templates`, `/cms/product-settings`, `/cms/products`, `/cms/services`, `/cms/frontend-menus`, `/cms/media`, `/cms/contact-requests`, `/cms/translation-strings`, `/cms/cta`, `/cms/forms`, `/cms/customer-requests`.
+### App Router
 
-`CMS_ROUTES` còn giữ aliases như `/cms`, `/cms/pages`, `/cms/articles`, `/cms/catalog`, `/cms/menu`, `/cms/media-library`, `/cms/contacts`, `/cms/localization`, `/cms/requests`; nested prefix mở form/detail/category. Product settings còn chọn taxonomy bằng alias/path/query `tab`.
+- `src/app/(public)/**`: home, products, services, projects, news, events, about, contact, search, privacy, terms.
+- `src/app/cms/**`: login, auth-protected shell, catch-all và error/loading boundaries.
+- `src/app/api/**`: health check và CMS projects endpoint.
+- Root: layout, loading, error và not-found.
 
-## Layouts
+Các public routes không đồng đều: có route dùng PostgreSQL query, route tái sử dụng legacy view/client wrapper và route chỉ render composition mỏng. Route tồn tại không đồng nghĩa UI/data/integration parity.
 
-### Public shell
+### Feature/server boundaries
 
-- `App.tsx`: page canvas, floating utility/contact bar và global modal/widget.
-- `Header.tsx`: desktop/mobile nav, mega/sub menus, search và consultation CTA.
-- `Footer.tsx`: navigation, company/contact/social/legal links.
-- `LegalArticleLayout.tsx`: layout dùng chung cho Privacy/Terms.
-- View tự chứa hero, breadcrumb, list/detail, filter và pagination của domain.
+`src/features/**` có server query/action/repository/schema ở các mức khác nhau cho users, permissions, system settings, function SEO, projects, products, news, events, services, static pages, menu, media, contacts/forms/customer requests, CTA, email templates, localization, activity logs, trash, dashboard và search.
 
-### CMS shell
+`src/server/**` cung cấp environment validation, Supabase server/admin client, PostgreSQL client/transaction helper, auth guard, pagination, error và logging foundation.
 
-- `CmsDashboard.tsx`: lazy outlet và shell state.
-- `CmsHeader.tsx`, `CmsSidebar.tsx`, `CmsBreadcrumb.tsx`, `CmsFooter.tsx`.
-- `CmsCommandPalette.tsx`, `CmsRightDrawer.tsx`, account/password modals.
-- CSS shell dùng biến `--cms-header-height`, sidebar widths, sticky action/aside và dark-mode selectors.
+Foundation chuẩn hóa thêm:
 
-## Shared code
+- `src/server/auth/page-guards.ts`: chuyển lỗi unauthenticated/forbidden của CMS page thành route state rõ, không đổi semantics action/handler;
+- `src/shared/ui/application/**`: shell server-compatible tối thiểu cho loading/error/auth states;
+- `src/shared/i18n/config.ts`: locale contract `vi/en` dùng chung, không thay schema đa ngôn ngữ;
+- `scripts/check-foundation-boundaries.mjs`: kiểm import direction và circular dependency trong `app/server/shared/features`;
+- DB/auth reads được memoize request-scoped để tránh lặp trong cùng render request.
 
-### Thực sự shared xuyên public/CMS
+Auth foundation hiện tại:
 
-- `src/shared/tokens/*`: primitive + semantic color, spacing, radius, shadow, typography; `designTokens` và CSS variable generator.
-- `src/shared/components/Typography.tsx`, `Counter.tsx`, `Icons.tsx`.
-- `src/shared/types/index.ts`: Product, Project, NewsItem, Partner, HeroSlide, NavLink, Event types.
-- `src/shared/page-content/*`: model/resolver/legacy fallback cho home/about/contact và reference entity.
-- `src/shared/visual-editing/*`: binding registry, editable contract, DOM geometry, inline text, sortable collection, target resolver.
-- `customerInteractionContract.ts`: system form/CTA IDs và submission contract.
+- `src/server/auth/guards.ts` resolve request-scoped `CmsPrincipal` từ Supabase Auth → active `cic_users` profile → active role assignments → allowed module/action;
+- `can()` phục vụ server composition/UI capability; `requirePermission()` là enforcement bắt buộc cho action/handler nhạy cảm;
+- `/cms` và catch-all dùng page guard; login/unauthorized/forbidden là public auth-state routes; public website không đi qua CMS guard;
+- login dùng password auth, safe internal `returnTo`; CMS header gọi server logout thật; Route Handler phân biệt 401/403/500;
+- current CMS header identity lấy từ authenticated profile, không còn mặc định dùng demo identity trong Next composition.
 
-### Shared trong public
+Live DB chưa có `auth.users`, role assignment hoặc `cic_role_permissions`, nên authenticated production E2E chưa thể chạy và permission provider được giữ fail closed. Các bảng direct legacy không được diễn giải tạm khi numeric semantics/parity chưa được authoritative sign-off.
 
-Header, Footer, ConsultationModal, ChatbotWidget, legal article layout, backgrounds, partner map/network, awards slider, ecosystem section. `src/web/features/*` cung cấp typed read adapters cho navigation/home/products/services/projects/news/events.
+Data-access foundation bổ sung:
 
-### Shared trong CMS
+- `src/proxy.ts` + `src/server/supabase/proxy.ts`: refresh Supabase session cookie ở request boundary;
+- `src/server/db/errors.ts`: typed/safe mapping từ PostgREST error sang `DataAccessError`;
+- `src/server/db/result.ts`: discriminated result chỉ dành cho action/HTTP boundary;
+- direct PostgreSQL singleton có connection/idle/lifetime timeout và tiếp tục `prepare:false` cho transaction pooler;
+- `check:data-foundation` kiểm privileged client import và secret leak trong browser bundle;
+- `audit:db-security` audit read-only connection, RLS, policy, role và grant; không mutate schema.
 
-- Chrome: header/sidebar/breadcrumb/footer/command palette/drawers.
-- `components/ui`: `CmsButton`, `CmsTabs`, `CmsSelectionCheckbox`, `CmsPagination`, `CmsPageHeader`, `CmsListToolbar`, `CmsBulkActionBar`.
-- `SearchableSelect`, responsive/public preview frames, content quality panel.
-- Shared customer-interaction constants/types/validation helpers.
-- Data-source interfaces tách catalog, editorial, governance, configuration, media, contacts, presentation và customer interaction.
+Không có browser Supabase client vì chưa có realtime/direct Storage use case được duyệt. Feature server query/action hiện hữu tiếp tục ở gần domain; không có global repository framework.
 
-### Duplicate đáng lưu ý
+Đây là implementation đã có để audit, không phải bằng chứng tự động rằng workflow, permission, schema mapping, UI parity hoặc integration đã hoàn tất.
 
-- Public fixtures có cả `src/web/data/*` và adapter `src/web/features/*`; `mockData.ts` vẫn chứa products/projects/news/nav/home data lớn trong khi domain files khác cũng có bản chi tiết.
-- `src/data/worldMapPaths.ts` và `src/web/data/worldMapPaths.ts` trùng vai trò.
-- CMS có nhiều `DeleteConfirmModal`, preview modal, column setting modal, activity/version drawer theo module.
-- List screens lặp local search/filter/sort/pagination/bulk selection dù đã có `components/ui`.
-- Rich content CSS lặp giữa `.service-cms-content`, `.event-rich-content`, `.article-rich-content`; sanitation helper được viết riêng theo view.
-- Public list/detail views lặp breadcrumb, share, scroll-to-top, auto-slide interval và filter/pagination logic.
+### Shared code và coupling
 
-## State và data flow
+`src/shared/**` chứa tokens, typography/icons/counter, CMS UI primitives, page-content/visual-editing contracts, configuration và customer-interaction contract.
 
-### UI-only state
+Rủi ro coupling quan sát được:
 
-- `App.tsx`: current view, active nav/subtab/detail ID, reset keys, search query, modal/chatbot/FAB state.
-- CMS shell: theme, locale workspace, sidebar/mobile state, active path/title, command palette, drawers/modals, toast và traffic range.
-- Module/view: active tab, search/filter/sort, selected row/card, pagination, list/grid mode, preview, modal/drawer, carousel index, hover/focus/drag state.
-- Không có React Context, Redux/Zustand hoặc shared external store; state đi bằng props/callbacks và local hooks.
+- một số server feature import type từ `src/cms/modules/**` thay vì domain-owned type;
+- `CmsShellClient` nhận props kiểu `any` và đưa phần lớn CMS legacy vào một client boundary;
+- `WebsiteShell` giữ local navigation state/no-op callback trong khi App Router sở hữu URL;
+- fixture legacy và PostgreSQL data cùng tồn tại trong CMS/public composition.
 
-### Mock business data
+## Data flow hiện tại
 
-- Public: `src/web/data/mockData.ts`, `aboutData.ts`, `servicesData.ts`, `projectsData.ts`, `newsData.ts`, `eventsData.ts`, `homeData.ts`, map/partner data; feature adapters expose các collection này.
-- CMS: module `mockData.ts`/data files, `mockCmsData.ts`, `staticPagesData.ts`, page-builder JSON/data; `demo*DataSource` gom và clone fixture.
-- Một số constant/list option được hard-code ngay trong component/data-source, ví dụ product options bổ sung trong `demoCatalogDataSource`, floating contact items trong `App.tsx`.
+```text
+Legacy fixture → legacy adapter/data source → React UI
+PostgreSQL/Supabase → feature server query/action → Next route/CMS props
+Legacy content adapter → Next client wrapper → legacy presentation
+```
 
-### Dữ liệu cần backend/database sau này
+Luồng thứ hai là hướng đích. Hai luồng còn lại chỉ là reference/transition và không được dùng để tuyên bố persistence complete.
 
-Products và taxonomy; services; projects; news/categories; events/registrations; static pages/page-builder versions; menu; media/albums/files; CTAs/forms/email templates/submissions/customer requests; contacts/PII/assignment/notes; users/roles/permissions/reviews; configuration/secrets/version/audit; SEO function records; localization strings/progress; audit logs/trash/export jobs; dashboard aggregates.
+## Domain inventory cấp cao
 
-### Persistence browser hiện có
+- Public/content: home, about/company/partners, products và taxonomy, services, projects, news/categories, events, static/legal pages, menu/navigation, media, public search.
+- Customer interaction: contact/CRM inbox, CTA, forms/submissions, customer requests, email templates, consultation/product/event registration.
+- Governance/system: dashboard, users/identity, roles/permissions, system configuration, function SEO/URL, localization, activity logs, trash, CMS global search.
+- Cross-module: publish/draft/preview, media/reference resolution, SEO/URL, locale/workspace, audit/trash, auth/authorization, validation/errors, caching/revalidation, notification và search projections.
 
-- `localStorage`: CMS theme; chatbot webhook URL và auto-fallback setting.
-- `sessionStorage`: draft note theo contact.
-- Không thấy client data-fetching/cache library; data được import đồng bộ từ source.
+## Rủi ro kiến trúc hiện tại
 
-## Dependencies thực sự xuất hiện trong code
-
-| Nhóm | Dependency | Vị trí/vai trò |
-|---|---|---|
-| Runtime | React, React DOM | toàn app, lazy/Suspense, hooks, root render |
-| Styling | Tailwind CSS 4, `@tailwindcss/vite` | utility class + `src/index.css` |
-| Routing | Không có library | History API + local state + `src/cms/routing.ts` |
-| Animation | `motion` (`motion/react`) | public transitions, modal, carousel, hover/tap |
-| Icon | `lucide-react` | public và toàn CMS |
-| Chart | `recharts` | `DashboardOverview.tsx` |
-| Rich text/editor | `ckeditor5`, `@ckeditor/ckeditor5-react` | `RichTextEditor.tsx`, static page builder |
-| Drag/drop | Native pointer/HTML5 drag | partner-map edit mode, product file drop, page builder; không có DnD library |
-| Form/validation/table/date/upload | Không có library chuyên dụng | native controls/local state/helpers; table/upload/date formatting tự viết |
-
-`dotenv` có trong package nhưng không thấy import runtime trong `src`. Playwright là dev dependency; không phải UI runtime.
-
-## Migration Risks
-
-- Root `App.tsx` là client coordinator lớn; toàn bộ public navigation/state cần được map mà không làm mất UI behavior.
-- `window`/`document` xuất hiện rộng: history, scroll, resize, keyboard, clipboard, confirm/prompt, download, DOM query/edit.
-- Canvas (`Constellation`, `TechAboutBackground`) chạy animation loop và global mouse/resize listeners.
-- CKEditor, direct `contentEditable`, draggable DOM và iframe preview là browser-only; page builder có direct DOM mutation dày đặc.
-- `dangerouslySetInnerHTML` ở product/service/project/news/event/page preview; sanitizer không có một contract chung.
-- Component lớn: `NewsView` ~2,029 dòng, `PageBuilderEditor` ~1,773, `ProductsView` ~1,427, `EventsView` ~1,340, `PageBuilderVisualCanvas` ~1,317, `HomeView` ~1,250; UI và behavior/business rules trộn nhau.
-- CMS dùng lazy import tốt cho bundle hiện tại, nhưng CKEditor/Recharts/public view boundaries phải được đánh giá lại theo client bundle của Next.js.
-- Không có form schema/validation library; validation nằm rải rác và nhiều submit chỉ mô phỏng.
-- Dữ liệu locale, ID/reference và mock duplicate cần kiểm kê trước khi coi là dữ liệu database canonical.
-
+1. Next và legacy cùng nằm dưới `src`; import chéo có thể kéo presentation type hoặc browser-only code vào server/domain boundary.
+2. CMS shell là Client Component lớn và nhiều module vẫn nạp demo source; server data chỉ phủ một số module.
+3. Public shell dùng App Router nhưng vẫn giữ state navigation kiểu legacy và callback no-op; semantics UI/URL có thể lệch reference.
+4. Một số route list/detail là markup Next tối giản thay vì composition đầy đủ của reference.
+5. Query/action/repository phân bố không đồng đều; module có thể read-only, write một phần, mock hoặc mixed-source.
+6. Mọi assumption table/relation trong code phải đối chiếu `database.html` + `POSTGRES_SCHEMA_DELTA`.
+7. Browser-only surfaces dày: History API, storage, canvas, observers, CKEditor, iframe, DOM editing, clipboard, drag/drop, animation.
+8. Rich HTML sanitation chưa có một contract server thống nhất cho mọi consumer.
+9. Auth/RBAC có foundation và một số enforcement nhưng chưa đủ bằng chứng cho mọi CMS query/mutation/capability/scope.
+10. Claim lịch sử trong `MIGRATION_STATUS.md` không thay thế status gate mới trong `MODULE_MAP.md`.

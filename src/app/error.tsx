@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { ApplicationState } from '@/shared/ui/application';
 
 export default function RootError({
   error,
@@ -15,13 +16,14 @@ export default function RootError({
 
   return (
     <main className="foundation-shell">
-      <section className="foundation-content" role="alert">
-        <h1>Không thể tải trang</h1>
-        <p>Đã xảy ra lỗi ngoài dự kiến.</p>
-        <button type="button" onClick={reset}>
-          Thử lại
-        </button>
-      </section>
+      <div className="foundation-content" role="alert">
+        <ApplicationState
+          title="Không thể tải trang"
+          description="Đã xảy ra lỗi ngoài dự kiến."
+          tone="danger"
+          action={<button type="button" onClick={reset} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Thử lại</button>}
+        />
+      </div>
     </main>
   );
 }

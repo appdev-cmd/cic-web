@@ -7,7 +7,14 @@ export function getPostgresClient(): Sql {
   if (client) return client;
   const url = getServerEnv().DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is required for PostgreSQL transactions.');
-  client = postgres(url, { max: 5, prepare: false, ssl: 'require' });
+  client = postgres(url, {
+    max: 5,
+    prepare: false,
+    ssl: 'require',
+    connect_timeout: 10,
+    idle_timeout: 20,
+    max_lifetime: 60 * 30,
+  });
   return client;
 }
 

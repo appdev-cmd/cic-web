@@ -521,7 +521,7 @@ export function NewsView({
 
     if (item.category === 'shareholder') {
       const sItem = item as ShareholderNewsItem;
-      if (shareholderYear !== 'Tất cả' && sItem.year.toString() !== shareholderYear) return false;
+      if (shareholderYear !== 'Tất cả' && sItem.year?.toString() !== shareholderYear) return false;
       if (shareholderDocType !== 'Tất cả' && sItem.docType !== shareholderDocType) return false;
     }
 
@@ -893,7 +893,7 @@ export function NewsView({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700">
                         <p><span className="font-bold text-slate-900">Chương trình:</span> {(selectedItem as PromotionNewsItem).programName}</p>
                         <p><span className="font-bold text-slate-900">Thời gian áp dụng:</span> <span className="font-bold text-orange-700 bg-orange-50 px-1.5 py-0.5 border border-orange-200/80">{(selectedItem as PromotionNewsItem).timeFrame}</span></p>
-                        <p className="md:col-span-2"><span className="font-bold text-slate-900">Đối tượng áp dụng:</span> {(selectedItem as PromotionNewsItem).appliedTargets.join(', ')}</p>
+                        <p className="md:col-span-2"><span className="font-bold text-slate-900">Đối tượng áp dụng:</span> {(selectedItem as PromotionNewsItem).appliedTargets?.join(', ') ?? ''}</p>
                       </div>
 
                       <div className="pt-2 text-[11px] text-slate-500 italic flex items-center gap-1.5 border-t border-orange-100">

@@ -2,13 +2,12 @@
 
 import { CmsDashboard } from '@/cms/components/CmsDashboard';
 import { useRouter } from 'next/navigation';
-import type { CmsDashboardData } from '@/cms/data/CmsDataSource';
-import type { CmsSearchRecord } from '@/features/cms-search/types';
-import type { PermissionsGovernanceData, UsersGovernanceData } from '@/cms/data/GovernanceDataSource';
-import type { SystemConfigurationData } from '@/cms/data/ConfigurationDataSource';
+import type { CmsDashboardProps } from '@/cms/components/CmsDashboard';
+import { logoutAction } from './login/actions';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function CmsShellClient({ dashboardData, searchRecords, userRole, usersData, userCapabilities, permissionsData, permissionCapabilities, settingsData, settingsCapabilities, functionSeoData }: any) {
+type CmsShellClientProps = Omit<CmsDashboardProps, 'onSwitchToWebsite'>;
+
+export function CmsShellClient(props: Readonly<CmsShellClientProps>) {
   const router = useRouter();
-  return <CmsDashboard onSwitchToWebsite={() => router.push('/')} dashboardData={dashboardData} searchRecords={searchRecords} userRole={userRole} usersData={usersData} userCapabilities={userCapabilities} permissionsData={permissionsData} permissionCapabilities={permissionCapabilities} settingsData={settingsData} settingsCapabilities={settingsCapabilities} functionSeoData={functionSeoData} />;
+  return <CmsDashboard {...props} onSwitchToWebsite={() => router.push('/')} onLogout={() => { void logoutAction(); }} />;
 }

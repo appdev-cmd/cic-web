@@ -46,17 +46,19 @@ export const Footer = ({
   };
 
   const handleNavigation = (event: React.MouseEvent<HTMLAnchorElement>, item: FooterNavigationItem) => {
-    if (item.preventDefault !== false) event.preventDefault();
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
     setCurrentView(item.view);
     setActiveLink(item.activeLabel);
     if (item.reset) resetByView[item.view]?.();
     if (item.scrollToTop !== false) window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.location.assign(item.href);
   };
 
   return (
     <footer id="contact" className="bg-slate-950 text-slate-400 py-8 border-t border-white/5 relative z-10">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 mb-8">
           {/* Company Info */}
           <div className="lg:col-span-4">
             <div className="mb-8">
@@ -66,28 +68,28 @@ export const Footer = ({
                 className="h-26 sm:h-30 w-auto mb-4 rounded-[10px]"
               />
             </div>
-            <p className={`${typeH4} text-white mb-4 leading-tight whitespace-nowrap`}>
+            <p className={`${typeH4} text-white mb-4 leading-tight`}>
               Công ty cổ phần Công nghệ và Tư vấn CIC
             </p>
             <div className="mb-8">
               <h4 className={`${typeCaption} text-white/60 mb-4`}>Đăng ký để nhận bản tin công nghệ mới nhất từ CIC</h4>
-              <form className="relative flex gap-2" onSubmit={(e) => e.preventDefault()}>
+              <form className="relative flex flex-col sm:flex-row gap-2" onSubmit={(e) => e.preventDefault()}>
                 <input 
                   type="email" 
                   placeholder="Nhập email liên hệ" 
-                  className="flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
+                  className="min-w-0 flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
                 />
                 <button className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction`}>Đăng ký</button>
               </form>
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
-              <a href="https://www.facebook.com/cic.com.vn" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
+              <a href="https://www.facebook.com/CICTechnologyandConsultancyVN/" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
                 <Facebook size={20} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#0077b5] hover:border-[#0077b5] text-white transition-all shadow-lg group">
+              <span aria-label="LinkedIn chưa được cấu hình" aria-disabled="true" title="LinkedIn chưa được cấu hình" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center text-white/50 shadow-lg group cursor-not-allowed">
                 <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="#" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
+              </span>
+              <a href="https://www.youtube.com/channel/UCVrD2Lw1V96ggdwQNs87qEQ" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
                 <Youtube size={20} className="group-hover:scale-110 transition-transform" />
               </a>
               <a href="https://zalo.me/02439761381" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 text-white transition-all shadow-lg group">
@@ -172,26 +174,30 @@ export const Footer = ({
 
         <div className={`pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 ${typeMeta}`}>
           <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
-          <div className="flex items-center gap-6 sm:gap-10">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-10">
             <a 
-              href="#privacy" 
+              href="/privacy"
               onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 setCurrentView('privacy');
                 setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.location.assign('/privacy');
               }} 
               className="hover:text-white transition-all cursor-pointer"
             >
               CHÍNH SÁCH BẢO MẬT
             </a>
             <a 
-              href="#terms" 
+              href="/terms"
               onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 setCurrentView('terms');
                 setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.location.assign('/terms');
               }}
               className="hover:text-white transition-all cursor-pointer"
             >

@@ -1,35 +1,52 @@
 import 'server-only';
+import { cache } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { getDatabaseClient } from '@/server/db/foundation';
+import { getPostgresClient } from '@/server/db/postgres';
 import { AppError } from '@/server/errors';
 
-export async function requireAuthenticatedUser() {
+export type CmsPermission = Readonly<{ module: string; action: string }>;
+export type CmsPrincipal = Readonly<{ authUser: User; legacyUserId: number; email: string; username: string; fullName: string; roleCodes: readonly string[]; permissions: readonly CmsPermission[]; isAdministrator: boolean }>;
+const normalize = (value: string) => value.trim().toLowerCase();
+
+export const requireAuthenticatedUser = cache(async function requireAuthenticatedUser() {
   const client = await getDatabaseClient();
   const { data, error } = await client.auth.getUser();
-  if (error || !data.user) throw new AppError('Authentication required.', 'UNAUTHENTICATED');
+  if (error || !data.user) throw new AppError('Authentication required.', 'UNAUTHENTICATED', error);
   return data.user;
-}
+});
 
-/** Minimal guard until role/permission tables are migrated; all CMS writes require an authenticated session. */
-export async function requireCmsAccess() {
+/** Resolves the request session to the active CMS profile and effective RBAC projection. */
+export const getCurrentCmsPrincipal = cache(async function getCurrentCmsPrincipal(): Promise<CmsPrincipal> {
   const authUser = await requireAuthenticatedUser();
-  const client = await getDatabaseClient();
-  const { data, error } = await client.from('cic_users').select('id,account_status,published').eq('email', authUser.email ?? '').maybeSingle();
-  if (error || !data || data.account_status !== 'active' || data.published === false) throw new AppError('CMS access denied.', 'FORBIDDEN');
-  return { authUser, legacyUserId: data.id as number };
-}
+  const email = normalize(authUser.email ?? '');
+  // Profile and RBAC projections are trusted server reads so legacy table RLS
+  // cannot prevent resolving an already authenticated identity.
+  const sql = getPostgresClient();
+  const [profile] = await sql`SELECT id,email,username,full_name,account_status,published FROM cic_users WHERE lower(email)=${email} LIMIT 1`;
+  if (!profile || profile.account_status !== 'active' || profile.published === false) throw new AppError('CMS access denied.', 'FORBIDDEN');
 
-export async function requirePermission(module: string, action: string) {
-  const user = await requireCmsAccess();
-  const client = await getDatabaseClient();
-  const { data: assignments, error } = await client.from('cic_user_roles').select('role_id,cic_roles!inner(code,status)').eq('user_id', user.legacyUserId).eq('status', 'active');
-  if (error || !assignments?.length) throw new AppError('Permission denied.', 'FORBIDDEN');
-  const isAdministrator = assignments.some((assignment) => {
-    const role = assignment.cic_roles as unknown as { code?: string; status?: string } | null;
-    return role?.status === 'active' && (role.code === 'admin' || role.code === 'superadmin');
-  });
-  if (isAdministrator) return user;
-  const roleIds = assignments.map((item) => item.role_id);
-  const { data: permissions, error: permissionError } = await client.from('cic_role_permissions').select('role_id,action,allowed,cic_permission_tasks!inner(module)').in('role_id', roleIds).eq('action', action).eq('allowed', true);
-  if (permissionError || !permissions?.some((item) => (item.cic_permission_tasks as { module?: string } | null)?.module?.toLowerCase() === module.toLowerCase())) throw new AppError('Permission denied.', 'FORBIDDEN');
-  return user;
+  const activeAssignments = await sql`SELECT ur.role_id,r.code FROM cic_user_roles ur JOIN cic_roles r ON r.id=ur.role_id WHERE ur.user_id=${profile.id} AND ur.status='active' AND r.status='active'`;
+  const roleCodes = activeAssignments.map((assignment) => normalize(String(assignment.code)));
+  const isAdministrator = roleCodes.some((code) => code === 'admin' || code === 'superadmin');
+  const roleIds = activeAssignments.map((assignment) => Number(assignment.role_id));
+  let permissions: CmsPermission[] = [];
+  if (!isAdministrator && roleIds.length > 0) {
+    const rows = await sql`SELECT rp.action,pt.module FROM cic_role_permissions rp JOIN cic_permission_tasks pt ON pt.id=rp.permission_task_id WHERE rp.role_id IN ${sql(roleIds)} AND rp.allowed=true`;
+    permissions = rows.map((row) => ({ module: normalize(String(row.module)), action: normalize(String(row.action)) }));
+  }
+  return { authUser, legacyUserId: Number(profile.id), email: String(profile.email ?? authUser.email ?? ''), username: String(profile.username ?? ''), fullName: String(profile.full_name ?? profile.username ?? authUser.email ?? ''), roleCodes, permissions, isAdministrator };
+});
+
+export const requireCmsAccess = getCurrentCmsPrincipal;
+export function can(principal: CmsPrincipal, module: string, action: string): boolean {
+  if (principal.isAdministrator) return true;
+  const expectedModule = normalize(module);
+  const expectedAction = normalize(action);
+  return principal.permissions.some((permission) => permission.module === expectedModule && permission.action === expectedAction);
+}
+export async function requirePermission(module: string, action: string): Promise<CmsPrincipal> {
+  const principal = await getCurrentCmsPrincipal();
+  if (!can(principal, module, action)) throw new AppError('Permission denied.', 'FORBIDDEN');
+  return principal;
 }

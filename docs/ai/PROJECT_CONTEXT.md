@@ -1,70 +1,71 @@
 # Project Context
 
-## Project hiện tại
+## Mục tiêu hệ thống
 
-Đây là frontend mockup/demo cho website **CIC Technology**, gồm hai bề mặt trong cùng một ứng dụng React:
+Hệ thống đích là **một Next.js App Router full-stack duy nhất** gồm website public, CMS, backend/domain/data layer và PostgreSQL/Supabase cho persistence.
 
-- website public giới thiệu công ty, sản phẩm, dịch vụ, dự án, nội dung và các kênh liên hệ;
-- CMS quản trị nội dung, catalog, media, tương tác khách hàng, phân quyền và cấu hình.
+Đợt audit ngày 2026-08-31 chỉ khóa bối cảnh, nguồn sự thật, module, dependency và nguyên tắc migration. Đợt này **không sửa source, không refactor, không migrate module và không thiết kế lại UI**.
 
-Ứng dụng hiện chưa có backend hay database thật trong repository. Các thao tác tạo/sửa/xóa chủ yếu thay đổi state trong bộ nhớ; refresh sẽ trả dữ liệu về fixture ban đầu, ngoại trừ một số preference/draft lưu bằng Web Storage.
+## Hiện trạng repository
 
-## Công nghệ hiện tại
+Repository đang ở trạng thái chuyển tiếp, không còn là frontend React thuần:
 
-- React 19, React DOM 19, TypeScript 5.8.
-- Vite 6; entry HTML là `index.html`, entry React là `src/main.tsx`, root application là `src/App.tsx`.
-- Tailwind CSS 4 qua `@tailwindcss/vite`, kết hợp CSS toàn cục lớn trong `src/index.css`.
-- `motion/react` cho animation và transition.
-- `lucide-react` cho icon.
-- Recharts cho chart dashboard CMS.
-- CKEditor 5 cho rich-text trong CMS static page/page builder.
-- Không có React Router, state manager, form library hoặc validation library bên thứ ba.
+- **React/Vite legacy** vẫn tồn tại nguyên vẹn qua `index.html`, `src/main.tsx`, `src/App.tsx`, `src/web/**`, `src/cms/**`, `src/index.css`; đây là reference implementation cho giao diện và hành vi.
+- **Next.js hiện tại** đã là build mặc định qua `src/app/**`, có public routes, CMS shell/login, server foundation và một số query/action theo feature trong `src/features/**`.
+- **Backend/data foundation hiện tại** có Supabase server client, PostgreSQL transaction client, auth guard, validation và server queries/actions. Sự tồn tại của boundary này không chứng minh module đã hoàn tất.
+- Nhiều CMS module vẫn dùng `demo*DataSource`, `mockData.ts` hoặc dữ liệu ghép từ fixture. Một số public route vẫn dùng legacy content adapter hoặc chỉ render lát cắt Next mỏng.
+- Database artifacts và tài liệu schema nằm ở `db_migrate/**`, `docs/database/**`, `docs/system-audit/database/**`; đây là nguồn persistence, không phải fixture React.
 
-## Tổ chức website và CMS
+Không được mặc định code Next hiện tại đúng chỉ vì đã tồn tại, build được hoặc có kết nối PostgreSQL.
 
-### Website public
+## Source of truth đã khóa
 
-`App.tsx` giữ `currentView` và render view bằng chuỗi điều kiện. Header/Footer nhận callback để đổi view; các màn hình list/detail dùng local state và các reset key. URL public không biểu diễn module/detail: ngoài `/`, `/cms...` và đường dẫn không hợp lệ, mọi chuyển trang public được đưa về `/` bằng `history.replaceState`.
+### React legacy authoritative cho presentation
 
-Layout public gồm Header, vùng `<main>`, Footer, background canvas theo màn hình, floating contact speed-dial, consultation modal, chatbot và design-token modal. Dữ liệu đến từ `src/web/data`, các adapter trong `src/web/features`, và resolver/fallback trong `src/shared/page-content`.
+React legacy là nguồn sự thật cho giao diện, layout, text/content hiển thị, icon/asset, interaction, UX flow, responsive behavior và mọi trạng thái hiển thị.
 
-### CMS
+Nguồn đối chiếu chính: `src/App.tsx`, `src/web/**`, `src/cms/**`, `src/shared/**`, `src/index.css`, `public/**` và bản render legacy. React legacy **không authoritative cho kiến trúc đích, schema, relation hoặc persistence**.
 
-`CmsDashboard.tsx` là app shell: header, sidebar, breadcrumb, content outlet tự chọn theo route, footer, command palette, right drawer và account modals. CMS lazy-load từng module. `src/cms/routing.ts` map pathname/alias/nested prefix sang module; navigation dùng `window.history.pushState` và `popstate`, không dùng router package.
+### Database docs/schema authoritative cho persistence
 
-CMS đã có ranh giới data-source bằng interface trong `src/cms/data`, nhưng implementation hiện tại vẫn là `demo*DataSource` ghép từ `mockData.ts`, data module và JSON fixture. Chưa có authentication/authorization thực thi phía server.
+`db_migrate/database.html`, `docs/database/POSTGRES_SCHEMA_DELTA.md`, schema SQL và các schema decision liên quan là nguồn sự thật cho table, column, PK/FK, relationship, kiểu dữ liệu, constraint/index đã chốt, persistence, dữ liệu nghiệp vụ đang tồn tại và delta/gate migration database.
 
-## Trạng thái dữ liệu mock
+`database.html` là baseline inventory/schema; `POSTGRES_SCHEMA_DELTA.md` và quyết định schema đã duyệt là lớp delta/clarification. Khi tài liệu có điểm chưa thống nhất, phải ghi unresolved và chốt schema decision trước khi code; không tự chọn theo mock UI.
 
-- Public business content nằm chủ yếu trong `src/web/data/*.ts`; một phần được expose qua `src/web/features/*`.
-- CMS fixture nằm theo module (`src/cms/modules/*/mockData.ts`) và được gom bởi các `demo*DataSource`.
-- Dashboard CMS dùng `src/cms/data/mockCmsData.ts`.
-- Static page/page builder dùng `staticPagesData.ts`, `pageBuilderData.ts`, `pageBuilderMockData.json` và shared page-content models/resolvers.
-- Form submit public đi qua `customerInteractionSubmission.ts`, nhưng gateway hiện là ranh giới frontend, không phải persistence backend trong project.
+### CMS functional docs authoritative cho nghiệp vụ quản trị
 
-## Mục tiêu migration đã xác nhận
+`DE_XUAT_CHUC_NANG_CMS.md` là nguồn sự thật cho capability, workflow, trạng thái nghiệp vụ, quyền thao tác, hành vi quản trị và phạm vi module CMS. Các compatibility/data plan trong `docs/**` bổ sung constraint và rủi ro triển khai nhưng không được âm thầm thay đổi capability đã chốt.
 
-Sau này migrate sang **một project Next.js fullstack duy nhất** chứa public website, CMS và backend/data layer; PostgreSQL đặt trên Supabase, deploy Vercel. Audit này không thiết kế kiến trúc Next.js, schema, API hoặc chuyển component.
+### Next.js hiện tại là implementation cần audit
 
-## Nguyên tắc bắt buộc cho AI ở các bước sau
+Next.js hiện tại chỉ là bằng chứng implementation. Nó không tự động authoritative cho UI, database contract hay CMS capability. Mọi phần đã có phải được kiểm tra lại theo ba nguồn sự thật ở trên trước khi được công nhận trạng thái cao hơn `[A]`.
 
-1. React UI/UX hiện tại là **source of truth**; giữ gần như nguyên trạng layout, nội dung, responsive behavior và interaction.
-2. Không dùng migration như lý do để redesign, đổi brand, đổi navigation hoặc cleanup UI ngoài phạm vi được yêu cầu.
-3. Giữ logo CIC, palette cam + slate/navy, Roboto, nội dung business và quan hệ giữa sản phẩm/dịch vụ/dự án/tin tức/sự kiện.
-4. Phân biệt UI-only state với business data cần persistence; không đưa modal state, tab state hoặc hover state vào database.
-5. Bảo toàn route alias/nested flow CMS khi thay router; đồng thời ghi nhận public app hiện chưa có deep-link thực.
-6. Browser-only code phải được cô lập đúng client boundary khi sang Next.js; không gọi `window`, `document`, storage, canvas hoặc CKEditor trong server render.
-7. Data-source interfaces hiện tại là bằng chứng hữu ích về ranh giới module, nhưng không phải backend hoàn chỉnh hay schema chuẩn cuối cùng.
-8. Không coi dữ liệu mock trùng lặp là hai nguồn business độc lập; phải xác minh nguồn canonical trước khi nhập database.
+## Quy tắc data shape bắt buộc
 
-## Migration Risks
+Không suy tên field DB, PK/FK, relation, enum hoặc schema từ mock/static data React.
 
-- `App.tsx` đọc `window.location` trong initializer và điều phối toàn bộ public site bằng local state; không tương thích trực tiếp với SSR/deep linking.
-- CMS router, nested view state và global search đều tự thao tác History API; cần giữ semantics khi đổi sang routing của Next.js.
-- Nhiều browser-only integration: canvas/requestAnimationFrame, ResizeObserver, direct DOM editing, iframe preview, clipboard, Web Storage, media/download link và global event listeners.
-- Các file view/manager rất lớn trộn UI, filter, pagination, detail và business action; ranh giới server/client sẽ cần xác định cẩn thận.
-- Mock content bị lặp giữa public data, feature adapter và CMS fixtures; ID/relationship có thể không đồng nhất.
-- HTML rich content được render bằng `dangerouslySetInnerHTML`; sanitation hiện không nhất quán giữa view.
-- CMS demo có locale `vi/en` trong type nhưng nhiều data-source chỉ có `vi`; workspace `en` có thể trả empty data.
-- Không có auth/backend authorization thật; permission UI hiện không chứng minh enforcement.
+```text
+PostgreSQL/Supabase → server query → mapper → domain/view model → public/CMS UI
+```
 
+- UI không consume raw database row.
+- Mapper chịu trách nhiệm đổi naming, project relation, fallback hợp lệ và redaction.
+- Không sửa database chỉ để giống object mock.
+- Mock chỉ có giá trị làm fixture/reference cho presentation; không phải database contract và không được dùng để giả lập hard dependency.
+
+## Ranh giới migration bắt buộc
+
+- Không copy kiến trúc hoặc component tree React sang Next.js như kiến trúc mới.
+- Không sửa, cleanup hoặc xóa React legacy cho đến khi parity gate tương ứng được duyệt.
+- Website và CMS tách presentation nhưng dùng chung domain/data logic khi cùng nghiệp vụ.
+- Tổ chức code theo feature/domain; `app` chỉ compose route/layout.
+- Query và mutation tách rõ; mutation phải authenticate, authorize, validate, thực hiện transaction/service khi cần, audit và revalidate.
+- Server Component là mặc định; Client Component chỉ ở interaction/browser boundary thực sự.
+- Không duplicate business rule giữa website và CMS.
+- Chỉ tạo mapper/service/repository/shared abstraction khi có nhu cầu thực tế; không dựng generic layer để “đủ kiến trúc”.
+
+## Gate đọc tài liệu trước khi migrate module
+
+Agent sau phải đọc tối thiểu `PROJECT_CONTEXT.md`, `CURRENT_STRUCTURE.md`, `MODULE_MAP.md`, `ARCHITECTURE.md`, `DATABASE_MAPPING_RULES.md`, `UI_PRESERVATION.md`, tài liệu schema của module và phần tương ứng trong `DE_XUAT_CHUC_NANG_CMS.md`.
+
+Chỉ bắt đầu khi hard dependencies trong `MODULE_MAP.md` đã tồn tại thật. Không dùng fake component/data/repository để vượt gate.

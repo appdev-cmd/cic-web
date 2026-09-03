@@ -143,7 +143,7 @@
 
 -- ============================================================
 -- Schema MỚI đề xuất (PostgreSQL) — cic14005_cic_fs
--- Xuất tự động từ tài liệu tham chiếu — 2026-08-28
+-- Xuất tự động từ tài liệu tham chiếu — 2026-09-03
 -- ============================================================
 
 -- Danh sách địa chỉ / chi nhánh / văn phòng của công ty (tên, điện thoại, địa chỉ, tọa độ bản đồ).
@@ -4252,12 +4252,25 @@ CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_entity_id" ON "cic_trash_items" 
 CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_deleted_by" ON "cic_trash_items" ("deleted_by");
 CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_restored_by" ON "cic_trash_items" ("restored_by");
 CREATE INDEX IF NOT EXISTS "idx_cic_trash_items_purged_by" ON "cic_trash_items" ("purged_by");
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_occurred_at" ON "cic_activity_logs" ("occurred_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_actor_occurred_at" ON "cic_activity_logs" ("actor_id", "occurred_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_action_occurred_at" ON "cic_activity_logs" ("action_code", "occurred_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_entity_occurred_at" ON "cic_activity_logs" ("entity_type", "entity_id", "occurred_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_category_result_occurred_at" ON "cic_activity_logs" ("category", "result", "occurred_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_cic_activity_logs_correlation_id" ON "cic_activity_logs" ("correlation_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_audit_export_jobs_requester_requested_at" ON "cic_audit_export_jobs" ("requested_by", "requested_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_cic_audit_export_jobs_status_requested_at" ON "cic_audit_export_jobs" ("status", "requested_at");
+CREATE INDEX IF NOT EXISTS "idx_cic_audit_export_jobs_expires_at" ON "cic_audit_export_jobs" ("expires_at");
 CREATE INDEX IF NOT EXISTS "idx_cic_content_embeds_owner" ON "cic_content_embeds" ("workspace", "owner_type", "owner_id", "field_key");
 CREATE INDEX IF NOT EXISTS "idx_cic_form_submissions_placement_key" ON "cic_form_submissions" ("placement_key");
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_roles_code_norm" ON "cic_roles" (lower(trim("code")));
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_user_roles_active" ON "cic_user_roles" ("user_id", "role_id") WHERE "status" = 'active';
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_branches_head_office" ON "cic_branches" ("workspace") WHERE "is_head_office" = true AND "published" = true;
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_cic_trash_items_trashed_entity" ON "cic_trash_items" ("workspace", "entity_type", "entity_id") WHERE "status" = 'trashed';
+
+-- SECURITY NOTE: RLS/policies/grants cho audit logs khong duoc tu suy tu UI/schema note.
+-- Can ap dung bang migration security rieng sau khi permission registry, writer role
+-- va quyen retention/purge duoc phe duyet; exporter khong tao policy gia.
 
 -- ============================================================
 -- TRIGGER auto-update cho cac cot edited_time/updated_time

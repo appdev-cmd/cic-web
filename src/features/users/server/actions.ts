@@ -1,6 +1,7 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import type { User } from '@supabase/supabase-js';
 import { requirePermission } from '@/server/auth/guards';
 import { createSupabaseAdminClient } from '@/server/supabase/admin';
 import { accountStatusSchema, userInputSchema } from '../schemas/userInput';
@@ -13,7 +14,8 @@ async function findAuthUserByEmail(email: string) {
   for (let page = 1; page <= 10; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 100 });
     if (error) throw new Error('Không thể đồng bộ tài khoản xác thực.');
-    const found = data.users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
+    const users = data.users as User[];
+    const found = users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
     if (found) return { admin, user: found };
     if (data.users.length < 100) break;
   }
