@@ -11,7 +11,7 @@ export interface PermissionTask {
 export interface PermissionFunction {
   id: string;
   taskId: string;
-  code: string;
+  code?: string;
   name: string;
 }
 
@@ -58,6 +58,7 @@ export type CellPermissionState = 'denied' | 'allowed' | 'conditional';
 
 // Module Resource -> Action -> Permission State
 export type ModulePermissionMatrix = Record<string, Partial<Record<MatrixAction, CellPermissionState>>>;
+export type TaskPermissionMatrix = ModulePermissionMatrix;
 
 export interface RoleVersion {
   versionNumber: number;
@@ -70,24 +71,27 @@ export interface RoleVersion {
 
 export interface CmsRole {
   id: string;
+  code?: string;
   name: string;
-  category: RoleCategory;
-  riskLevel: RoleRiskLevel;
   status: RoleStatus;
-  purpose: string;
   description: string;
-  owner: string;
-  reviewer: string;
-  activeVersion: number;
-  draftVersion?: number;
-  versions: RoleVersion[];
+  isProtected?: boolean;
   matrix: ModulePermissionMatrix;
   assignedUsersCount: number;
-  assignedGroupCount: number;
-  reviewDueDays?: number;
-  conflictIssuesCount: number;
   updatedTime: string;
-  updatedBy: string;
+  updatedById?: number | null;
+  category?: RoleCategory;
+  riskLevel?: RoleRiskLevel;
+  purpose?: string;
+  owner?: string;
+  reviewer?: string;
+  activeVersion?: number;
+  draftVersion?: number;
+  versions?: RoleVersion[];
+  assignedGroupCount?: number;
+  reviewDueDays?: number;
+  conflictIssuesCount?: number;
+  updatedBy?: string;
 }
 
 export interface RoleAssignment {

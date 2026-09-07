@@ -245,6 +245,11 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               </div>
 
               <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
+                {notifications.length === 0 && (
+                  <p className="px-4 py-8 text-center text-[11px] text-slate-500 dark:text-slate-400">
+                    Chưa có thông báo.
+                  </p>
+                )}
                 {notifications.map((item) => (
                   <div
                     key={item.id}

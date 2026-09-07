@@ -9,5 +9,8 @@ type CmsShellClientProps = Omit<CmsDashboardProps, 'onSwitchToWebsite'>;
 
 export function CmsShellClient(props: Readonly<CmsShellClientProps>) {
   const router = useRouter();
-  return <CmsDashboard {...props} onSwitchToWebsite={() => router.push('/')} onLogout={() => { void logoutAction(); }} />;
+  if (!props.currentUser?.id || !props.currentUser.email) {
+    throw new Error('Authenticated CMS user context is missing or invalid.');
+  }
+  return <CmsDashboard {...props} onNavigate={(path) => router.push(path)} onSwitchToWebsite={() => router.push('/')} onLogout={() => { void logoutAction(); }} />;
 }

@@ -6,6 +6,7 @@ import { LoginSubmitButton } from './LoginSubmitButton';
 export const metadata = { title: 'Đăng nhập CMS', robots: { index: false, follow: false } };
 const messages: Record<string, string> = {
   invalid: 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra và thử lại.',
+  unavailable: 'Không thể kết nối dịch vụ đăng nhập. Vui lòng kiểm tra mạng và thử lại sau.',
   validation: 'Vui lòng nhập email và mật khẩu hợp lệ.',
   expired: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.',
   logout: 'Không thể kết thúc phiên đăng nhập. Vui lòng thử lại.',

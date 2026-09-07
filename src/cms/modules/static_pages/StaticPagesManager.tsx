@@ -62,7 +62,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
 
   if (editingPage) return <>
     {toast && <Toast message={toast} />}
-    <PageBuilderEditor key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`} page={editingPage} entityOptions={data.entityOptions} mediaImages={data.mediaImages} onBack={() => setEditingId(null)} onSaveDraft={(nextPage) => {
+    <PageBuilderEditor key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`} workspaceLocale={workspaceLocale} page={editingPage} entityOptions={data.entityOptions} mediaImages={data.mediaImages} onBack={() => setEditingId(null)} onSaveDraft={(nextPage) => {
       const saved = { ...nextPage, draft: { ...nextPage.draft, version: nextPage.draft.version + 1, status: 'draft' as const, updatedAt: new Date().toISOString() } };
       setPages((current) => current.map((page) => page.id === saved.id ? saved : page)); showToast('Đã lưu bản nháp. Website chưa thay đổi.');
     }} onPreview={setPreviewPage} onPublish={(nextPage) => {

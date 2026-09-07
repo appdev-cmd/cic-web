@@ -19,11 +19,10 @@ export const requireAuthenticatedUser = cache(async function requireAuthenticate
 /** Resolves the request session to the active CMS profile and effective RBAC projection. */
 export const getCurrentCmsPrincipal = cache(async function getCurrentCmsPrincipal(): Promise<CmsPrincipal> {
   const authUser = await requireAuthenticatedUser();
-  const email = normalize(authUser.email ?? '');
   // Profile and RBAC projections are trusted server reads so legacy table RLS
   // cannot prevent resolving an already authenticated identity.
   const sql = getPostgresClient();
-  const [profile] = await sql`SELECT id,email,username,full_name,account_status,published FROM cic_users WHERE lower(email)=${email} LIMIT 1`;
+  const [profile] = await sql`SELECT id,email,username,full_name,account_status,published FROM cic_users WHERE auth_user_id=${authUser.id}::uuid LIMIT 1`;
   if (!profile || profile.account_status !== 'active' || profile.published === false) throw new AppError('CMS access denied.', 'FORBIDDEN');
 
   const activeAssignments = await sql`SELECT ur.role_id,r.code FROM cic_user_roles ur JOIN cic_roles r ON r.id=ur.role_id WHERE ur.user_id=${profile.id} AND ur.status='active' AND r.status='active'`;

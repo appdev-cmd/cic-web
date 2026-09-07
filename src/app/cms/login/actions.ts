@@ -11,7 +11,7 @@ export async function loginAction(formData: FormData) {
   const client = await createSupabaseServerClient();
   const { email, password, returnTo } = parsed.data;
   const { error } = await client.auth.signInWithPassword({ email, password });
-  if (error) redirect('/cms/login?error=invalid');
+  if (error) redirect(`/cms/login?error=${error.code === 'invalid_credentials' ? 'invalid' : 'unavailable'}`);
   redirect(safeCmsReturnTo(returnTo));
 }
 

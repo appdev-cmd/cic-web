@@ -1,105 +1,107 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState, useTransition } from 'react';
+import { AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
+import type { TrashItemViewModel, TrashListPage, TrashListQuery, TrashRestoreMode } from '@/features/trash/types';
 import {
-  Trash2,
-  RotateCcw,
-  CheckCircle2,
-} from 'lucide-react';
-
-import {
-  TrashedItem,
-} from './types';
-
-
+  bulkPurgeTrashItemsAction,
+  bulkRestoreTrashItemsAction,
+  getTrashDetailAction,
+  getTrashPageAction,
+  purgeTrashItemAction,
+  restoreTrashItemAction,
+} from '@/features/trash/server/actions';
 import { TrashTab } from './TrashTab';
 import { TrashItemDetailDrawer } from './TrashItemDetailDrawer';
 import { RestoreConflictModal } from './RestoreConflictModal';
 import { PermanentDeleteModal } from './PermanentDeleteModal';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 
-export const TrashManager: React.FC<{ data: TrashedItem[] }> = ({ data }) => {
-  // State lists
-  const [trashedItems, setTrashedItems] = useState<TrashedItem[]>(data);
+type Toast = { text: string; tone: 'success' | 'error' };
 
-  // Drawer / Modal states
-  const [selectedTrashItem, setSelectedTrashItem] = useState<TrashedItem | null>(null);
+export const TrashManager: React.FC<{
+  data: TrashListPage;
+  capabilities: { restore: boolean; purge: boolean };
+}> = ({ data, capabilities }) => {
+  const [pageData, setPageData] = useState(data);
+  const [query, setQuery] = useState<TrashListQuery>(data.query);
+  const [selectedTrashItem, setSelectedTrashItem] = useState<TrashItemViewModel | null>(null);
   const [trashDetailOpen, setTrashDetailOpen] = useState(false);
+  const [conflictItem, setConflictItem] = useState<TrashItemViewModel | null>(null);
+  const [permDeleteItem, setPermDeleteItem] = useState<TrashItemViewModel | null>(null);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [isLoading, startLoading] = useTransition();
+  const [isMutating, startMutation] = useTransition();
+  const requestSequence = useRef(0);
 
-  const [conflictModalOpen, setConflictModalOpen] = useState(false);
-  const [conflictItem, setConflictItem] = useState<TrashedItem | null>(null);
+  const showToast = useCallback((text: string, tone: Toast['tone']) => {
+    setToast({ text, tone });
+    window.setTimeout(() => setToast(null), 5000);
+  }, []);
 
-  const [permDeleteModalOpen, setPermDeleteModalOpen] = useState(false);
-  const [permDeleteItem, setPermDeleteItem] = useState<TrashedItem | null>(null);
+  const loadPage = useCallback((nextQuery: TrashListQuery) => {
+    setQuery(nextQuery);
+    const sequence = ++requestSequence.current;
+    startLoading(async () => {
+      try {
+        const nextPage = await getTrashPageAction(nextQuery);
+        if (sequence === requestSequence.current) setPageData(nextPage);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : 'Không thể tải danh sách Thùng rác.', 'error');
+      }
+    });
+  }, [showToast]);
 
-  // Toast message with optional Undo callback
-  const [toast, setToast] = useState<{
-    text: string;
-    undoItem?: TrashedItem;
-  } | null>(null);
+  const reloadCurrentPage = useCallback(async () => {
+    const nextPage = await getTrashPageAction(query);
+    setPageData(nextPage);
+  }, [query]);
 
-  const showToast = (
-    text: string,
-    undoItem?: TrashedItem
-  ) => {
-    setToast({ text, undoItem });
-    setTimeout(() => {
-      setToast(null);
-    }, 5000);
+  const openDetail = (item: TrashItemViewModel) => {
+    setSelectedTrashItem(item);
+    setTrashDetailOpen(true);
+    startLoading(async () => {
+      try { setSelectedTrashItem(await getTrashDetailAction(item.id)); }
+      catch (error) { setTrashDetailOpen(false); showToast(error instanceof Error ? error.message : 'Không thể tải chi tiết mục đã xóa.', 'error'); }
+    });
   };
 
-  // Restore logic
-  const handleRestoreItem = (item: TrashedItem, mode?: string) => {
-    // If conflict and mode not provided, open conflict modal
+  const restoreItem = (item: TrashItemViewModel, mode?: TrashRestoreMode) => {
     if (item.dependencyStatus !== 'clear' && !mode) {
       setConflictItem(item);
-      setConflictModalOpen(true);
       return;
     }
-
-    // Perform restore
-    setTrashedItems((prev) => prev.filter((i) => i.id !== item.id));
-
-    showToast(`Đã phục hồi thành công "${item.title}" về Bản nháp (Draft)!`);
+    startMutation(async () => {
+      try {
+        const result = await restoreTrashItemAction({ id: item.id, mode: mode ?? 'as_draft' });
+        if (!result.ok) { showToast(result.message, 'error'); return; }
+        setConflictItem(null); setTrashDetailOpen(false); showToast(result.message, 'success'); await reloadCurrentPage();
+      } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể phục hồi mục đã chọn.', 'error'); }
+    });
   };
 
-  // Permanent delete logic
-  const handlePermanentDelete = (item: TrashedItem, reason: string) => {
-    setTrashedItems((prev) => prev.filter((i) => i.id !== item.id));
-    showToast(`Đã tiêu hủy vĩnh viễn "${item.title}". (Đã ghi vết nhật ký audit log)`);
+  const purgeItem = (item: TrashItemViewModel, reason: string) => {
+    startMutation(async () => {
+      try {
+        const result = await purgeTrashItemAction({ id: item.id, reason });
+        if (!result.ok) { showToast(result.message, 'error'); return; }
+        setPermDeleteItem(null); setTrashDetailOpen(false); showToast(result.message, 'success'); await reloadCurrentPage();
+      } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể xóa vĩnh viễn mục đã chọn.', 'error'); }
+    });
   };
 
-  const handleBulkRestore = (selectedIds: string[]) => {
-    const toRestore = trashedItems.filter((i) => selectedIds.includes(i.id));
-    setTrashedItems((prev) => prev.filter((i) => !selectedIds.includes(i.id)));
-    showToast(`Đã khôi phục ${toRestore.length} mục về trạng thái Draft/Inactive.`);
-  };
-
-  const handleBulkDelete = (selectedIds: string[]) => {
-    const toDelete = trashedItems.filter((i) => selectedIds.includes(i.id) && !i.isLegalHold);
-    setTrashedItems((prev) => prev.filter((i) => !selectedIds.includes(i.id) || i.isLegalHold));
-    showToast(`Đã tiêu hủy vĩnh viễn ${toDelete.length} mục đã chọn!`);
+  const summarizeBulk = (results: Awaited<ReturnType<typeof bulkRestoreTrashItemsAction>>, action: string) => {
+    const succeeded = results.filter((result) => result.ok).length;
+    const failed = results.length - succeeded;
+    showToast(`${action}: ${succeeded} thành công${failed ? `, ${failed} thất bại` : ''}.`, failed ? 'error' : 'success');
   };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
-      {/* TOAST WITH UNDO OPTION */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
-          <div className="px-4 py-3 bg-slate-900 text-white border border-slate-800 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3">
-            <CheckCircle2 className="w-4 h-4 text-orange-400 shrink-0" />
-            <span>{toast.text}</span>
-
-            {toast.undoItem && (
-              <button
-                onClick={() => {
-                  handleRestoreItem(toast.undoItem!);
-                  setToast(null);
-                }}
-                className="ml-2 px-2.5 py-1 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-lg cursor-pointer flex items-center gap-1"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Hoàn tác (Undo)</span>
-              </button>
-            )}
+        <div className="fixed inset-x-3 bottom-4 z-[70] flex justify-end sm:inset-x-auto sm:right-6 sm:bottom-6" role="status" aria-live="polite">
+          <div className="flex max-w-lg items-start gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl">
+            {toast.tone === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" /> : <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />}
+            <span className="min-w-0 break-words">{toast.text}</span>
+            <button type="button" onClick={() => setToast(null)} className="ml-auto min-h-8 shrink-0 rounded-lg px-2 text-slate-300 hover:bg-slate-800 hover:text-white">Ẩn</button>
           </div>
         </div>
       )}
@@ -108,58 +110,44 @@ export const TrashManager: React.FC<{ data: TrashedItem[] }> = ({ data }) => {
         icon={<Trash2 />}
         title="Thùng rác"
         description="Khôi phục nội dung đã xóa hoặc xóa vĩnh viễn sau thời hạn lưu giữ."
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{trashedItems.length} mục</span>}
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{pageData.total} mục</span>}
       />
 
-      {/* TRASH TAB VIEW */}
       <TrashTab
-        items={trashedItems}
-        onOpenItemDetail={(item) => {
-          setSelectedTrashItem(item);
-          setTrashDetailOpen(true);
-        }}
-        onQuickRestore={(item) => handleRestoreItem(item)}
-        onOpenPermanentDelete={(item) => {
-          setPermDeleteItem(item);
-          setPermDeleteModalOpen(true);
-        }}
-        onBulkRestore={handleBulkRestore}
-        onBulkDelete={handleBulkDelete}
+        page={pageData}
+        query={query}
+        isLoading={isLoading || isMutating}
+        capabilities={capabilities}
+        onQueryChange={loadPage}
+        onOpenItemDetail={openDetail}
+        onQuickRestore={restoreItem}
+        onOpenPermanentDelete={setPermDeleteItem}
+        onBulkRestore={(ids) => startMutation(async () => { try { const results = await bulkRestoreTrashItemsAction(ids); summarizeBulk(results, 'Phục hồi hàng loạt'); await reloadCurrentPage(); } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể phục hồi hàng loạt.', 'error'); } })}
+        onBulkDelete={(ids) => startMutation(async () => { try { const results = await bulkPurgeTrashItemsAction({ ids, reason: 'Xóa vĩnh viễn hàng loạt từ CMS' }); summarizeBulk(results, 'Xóa vĩnh viễn hàng loạt'); await reloadCurrentPage(); } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể xóa vĩnh viễn hàng loạt.', 'error'); } })}
       />
 
-      {/* MODALS & DRAWERS */}
       <TrashItemDetailDrawer
         isOpen={trashDetailOpen}
         onClose={() => setTrashDetailOpen(false)}
         item={selectedTrashItem}
-        onRestore={(item) => {
-          setTrashDetailOpen(false);
-          handleRestoreItem(item);
-        }}
-        onPermanentDelete={(item) => {
-          setTrashDetailOpen(false);
-          setPermDeleteItem(item);
-          setPermDeleteModalOpen(true);
-        }}
+        onRestore={(item) => restoreItem(item)}
+        onPermanentDelete={(item) => { setTrashDetailOpen(false); setPermDeleteItem(item); }}
+        canRestore={capabilities.restore}
+        canPurge={capabilities.purge && Boolean(selectedTrashItem?.supportsPurge)}
       />
-
       <RestoreConflictModal
-        isOpen={conflictModalOpen}
-        onClose={() => setConflictModalOpen(false)}
+        key={conflictItem?.id ?? 'closed-conflict'}
+        isOpen={Boolean(conflictItem)}
+        onClose={() => setConflictItem(null)}
         item={conflictItem}
-        onConfirmRestore={(item, mode) => {
-          setConflictModalOpen(false);
-          handleRestoreItem(item, mode);
-        }}
+        onConfirmRestore={(item, mode) => restoreItem(item, mode)}
       />
-
       <PermanentDeleteModal
-        isOpen={permDeleteModalOpen}
-        onClose={() => setPermDeleteModalOpen(false)}
+        key={permDeleteItem?.id ?? 'closed-purge'}
+        isOpen={Boolean(permDeleteItem)}
+        onClose={() => setPermDeleteItem(null)}
         item={permDeleteItem}
-        onConfirmDelete={(item, reason) => {
-          handlePermanentDelete(item, reason);
-        }}
+        onConfirmDelete={purgeItem}
       />
     </div>
   );

@@ -137,6 +137,36 @@ export function resolveCmsModule(path: string): CmsModuleKey {
   return match?.module ?? 'not_found';
 }
 
+const normalizeCmsPath = (path: string) =>
+  path.split(/[?#]/, 1)[0].replace(/\/$/, '') || '/';
+
+export function isProductCategoryCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/product-categories' ||
+    normalizedPath === '/cms/products/categories' ||
+    normalizedPath === '/cms/product-settings/categories' ||
+    normalizedPath.startsWith('/cms/product-settings/categories/');
+}
+
+export function isProductBrandCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/manufacturers' ||
+    normalizedPath === '/cms/products/brands' ||
+    normalizedPath === '/cms/product-settings/brands' ||
+    normalizedPath.startsWith('/cms/product-settings/brands/');
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
+}
+
+const CMS_PERMISSION_MODULE_OVERRIDES: Partial<Record<CmsModuleKey, readonly string[]>> = {
+  permissions: ['roles', 'permissions'],
+  settings: ['settings', 'config'],
+  activity_logs: ['audit'],
+};
+
+export function getCmsPermissionModuleKeys(module: CmsModuleKey): readonly string[] {
+  if (module === 'dashboard') return [];
+  return CMS_PERMISSION_MODULE_OVERRIDES[module] ?? [module];
 }

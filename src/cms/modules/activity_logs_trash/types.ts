@@ -1,102 +1,24 @@
-export type AuditSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type AuditResult = 'success' | 'failed' | 'partial' | 'denied';
-export type SensitivityLevel = 'normal' | 'sensitive' | 'top_secret';
+export type {
+  AuditCategory,
+  AuditEvent,
+  AuditListPage,
+  AuditListQuery,
+  AuditResult,
+  AuditSeverity,
+  ExportJob,
+  SensitivityLevel,
+} from '@/features/activity-logs/types';
 
-export type AuditCategory = 
-  | 'all' 
-  | 'sensitive' 
-  | 'permissions_users' 
-  | 'config_publish' 
-  | 'export_jobs';
-
-export interface AuditEvent {
-  id: string;
-  timestamp: string;
-  actor: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    avatarUrl?: string;
-    ipAddress: string;
-    userAgent: string;
-  };
-  action: {
-    code: string;
-    label: string;
-    category: AuditCategory;
-    severity: AuditSeverity;
-    isSensitive: boolean;
-  };
-  target: {
-    type: string;
-    id: string;
-    title: string;
-    url?: string;
-    module: string;
-  };
-  scope: {
-    siteId: string;
-    siteName: string;
-    locale?: string;
-  };
-  result: AuditResult;
-  resultMessage?: string;
-  context: {
-    sessionId: string;
-    correlationId: string;
-    sourceApp: string;
-    environment: 'production' | 'staging';
-  };
-  changes?: {
-    field: string;
-    oldValue: unknown;
-    newValue: unknown;
-    isRedacted?: boolean;
-    redactionReason?: string;
-  }[];
-  technicalRef?: {
-    httpMethod?: string;
-    endpoint?: string;
-    executionTimeMs?: number;
-  };
-}
-
-export interface AuditListQuery {
-  page: number;
-  pageSize: number;
-  search: string;
-  date: 'today' | '7days' | '30days' | 'all';
-  severity: AuditSeverity | 'all';
-  result: AuditResult | 'all';
-  category: AuditCategory;
-}
-
-export interface AuditListPage {
-  items: AuditEvent[];
-  total: number;
-}
-
-export type TrashCategory = 
-  | 'all' 
-  | 'expiring_soon';
-
+export type TrashCategory = 'all' | 'expiring_soon';
 export type DependencyStatus = 'clear' | 'conflict' | 'parent_trashed' | 'schema_mismatch';
 
 export interface TrashedItem {
   id: string;
   title: string;
-  itemType: string; // e.g., 'Bài viết', 'Sản phẩm', 'Media Banner', 'Trang tĩnh'
+  itemType: string;
   moduleName: string;
-  scope: {
-    siteId: string;
-    siteName: string;
-  };
-  deletedBy: {
-    id: string;
-    name: string;
-    role: string;
-  };
+  scope: { siteId: string; siteName: string };
+  deletedBy: { id: string; name: string; role: string };
   deletedAt: string;
   expiresAt: string;
   daysRemaining: number;
@@ -104,21 +26,7 @@ export interface TrashedItem {
   legalHoldReason?: string;
   dependencyStatus: DependencyStatus;
   dependencyDetails?: string;
-  snapshotData: Record<string, any>;
+  snapshotData: Record<string, unknown>;
   originalUrl?: string;
   targetRestoreState: 'draft' | 'inactive';
-}
-
-export interface ExportJob {
-  id: string;
-  requestedAt: string;
-  requestedBy: string;
-  scopeName: string;
-  dateRange: string;
-  filterSummary: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed' | 'expired';
-  totalRecords?: number;
-  fileSizeMb?: number;
-  downloadUrl?: string;
-  expiresAt?: string;
 }

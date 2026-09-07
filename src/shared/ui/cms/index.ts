@@ -1,5 +1,7 @@
 export * from './CmsBulkActionBar';
 export * from './CmsButton';
+export * from './CmsDataGridFrame';
+export * from './CmsTrashConfirmDialog';
 export * from './CmsListToolbar';
 export * from './CmsPageHeader';
 export * from './CmsPagination';

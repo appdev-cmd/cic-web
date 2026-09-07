@@ -1,4 +1,4 @@
-import { CicUser, AgencyOption, CategoryOption, RoleOption } from './types';
+import { AgencyOption, CategoryOption, RoleOption } from './types';
 
 export const rolesMock: RoleOption[] = [
   {
@@ -62,7 +62,7 @@ export const newsCategoriesMock: CategoryOption[] = [
   { id: 'cat_n5', name: 'Dự án & Khách hàng Tiêu biểu' },
 ];
 
-export const cicUsersMock: CicUser[] = [
+export const cicUsersMock = [
   {
     id: 'usr_001',
     username: 'admin_cic',

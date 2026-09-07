@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
+import type { CmsLocale } from '../../data/CmsDataSource';
 import { entityTypeLabels, sectionDefinitions } from './pageBuilderRegistry';
 import { PageEntityPickerModal } from './PageEntityPickerModal';
 import { findPageBuilderImage, PageMediaPickerModal } from './PageMediaPickerModal';
@@ -58,6 +59,7 @@ interface PageBuilderEditorProps {
   onPublish: (page: PageBuilderPage) => void;
   entityOptions: PageBuilderEntityOption[];
   mediaImages: CmsMediaPickerItem[];
+  workspaceLocale: CmsLocale;
 }
 
 const fieldLabels: Record<string, string> = {
@@ -1421,7 +1423,7 @@ function validate(page: PageBuilderPage, entityOptions: PageBuilderEntityOption[
   return issues;
 }
 
-export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBack, onSaveDraft, onPreview, onPublish, entityOptions, mediaImages }) => {
+export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBack, onSaveDraft, onPreview, onPublish, entityOptions, mediaImages, workspaceLocale }) => {
   const [workingPage, setWorkingPage] = useState(() => deepClone(page));
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -1767,7 +1769,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
         }
       }} />}
       {videoPopover && <div data-video-popover className="fixed z-[75] w-[min(420px,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-2xl dark:border-slate-700 dark:bg-slate-900" style={{ left: Math.min(videoPopover.anchor.left, window.innerWidth - 436), top: Math.min(videoPopover.anchor.top, window.innerHeight - 210) }} onPointerDown={(event) => event.stopPropagation()}><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Thay video</h3><button type="button" onClick={() => setVideoPopover(null)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng chỉnh sửa video"><X className="h-4 w-4" /></button></div><label className="mt-3 block space-y-1.5"><span className="text-xs font-semibold">Đường dẫn YouTube hoặc video</span><input autoFocus value={videoPopover.url} onChange={(event) => setVideoPopover((current) => current ? { ...current, url: event.target.value } : current)} onKeyDown={(event) => { if (event.key === 'Enter') { updateSectionConfig(videoPopover.sectionId, videoPopover.path, videoPopover.url); setVideoPopover(null); } }} placeholder="https://www.youtube.com/watch?v=..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><div className="mt-3 flex justify-end gap-2"><button type="button" onClick={() => setVideoPopover(null)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">Hủy</button><button type="button" onClick={() => { updateSectionConfig(videoPopover.sectionId, videoPopover.path, videoPopover.url); setVideoPopover(null); }} className="rounded-lg bg-orange-600 px-3 py-2 text-xs font-bold text-white hover:bg-orange-500">Áp dụng</button></div></div>}
-      {mediaPicker && <PageMediaPickerModal currentId={mediaPicker.currentId} images={mediaImages} onClose={() => setMediaPicker(null)} onConfirm={(mediaId) => updateSectionConfig(mediaPicker.sectionId, mediaPicker.path, mediaId)} />}
+      {mediaPicker && <PageMediaPickerModal locale={workspaceLocale} currentId={mediaPicker.currentId} images={mediaImages} onClose={() => setMediaPicker(null)} onConfirm={(mediaId) => updateSectionConfig(mediaPicker.sectionId, mediaPicker.path, mediaId)} />}
     </div>
   );
 };

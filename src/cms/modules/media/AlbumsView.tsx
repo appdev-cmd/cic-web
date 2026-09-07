@@ -14,19 +14,25 @@ import {
   ArrowUpDown,
   Image as ImageIcon,
   GripVertical,
+  ChevronUp,
+  ChevronDown,
   X,
   Check,
 } from 'lucide-react';
 import { MediaAlbum, MediaAsset } from './types';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
 
 interface AlbumsViewProps {
   albums: MediaAlbum[];
   assets: MediaAsset[];
   onUpdateAlbum: (album: MediaAlbum) => void;
-  onCreateAlbum: () => void;
+  onCreateAlbum: (album: MediaAlbum) => void;
   onDeleteAlbum: (id: string) => void;
   onOpenPreviewAsset: (asset: MediaAsset) => void;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
 }
 
 export const AlbumsView: React.FC<AlbumsViewProps> = ({
@@ -36,12 +42,16 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
   onCreateAlbum,
   onDeleteAlbum,
   onOpenPreviewAsset,
+  canCreate,
+  canEdit,
+  canDelete,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingAlbum, setEditingAlbum] = useState<MediaAlbum | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const editorRef=useDialogA11y(isEditorOpen,()=>setIsEditorOpen(false));
 
   const filteredAlbums = albums.filter((alb) => {
     if (!searchQuery.trim()) return true;
@@ -62,10 +72,15 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
     setEditingAlbum({ ...alb });
     setIsEditorOpen(true);
   };
+  const handleCreate = () => {
+    const now=new Date().toISOString();
+    setEditingAlbum({id:'',title:'',code_alias:'',description:'',asset_ids:[],item_count:0,display_order:albums.length+1,workflow_status:'draft',owner_name:'',created_at:now,updated_at:now});
+    setIsEditorOpen(true);
+  };
 
   const handleSaveEditor = () => {
     if (editingAlbum) {
-      onUpdateAlbum(editingAlbum);
+      if(editingAlbum.id) onUpdateAlbum(editingAlbum); else onCreateAlbum(editingAlbum);
     }
     setIsEditorOpen(false);
   };
@@ -79,6 +94,14 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
       item_count: updatedIds.length,
     });
   };
+  const handleMoveMedia = (index: number, direction: -1 | 1) => {
+    if (!editingAlbum) return;
+    const target = index + direction;
+    if (target < 0 || target >= editingAlbum.asset_ids.length) return;
+    const assetIds = [...editingAlbum.asset_ids];
+    [assetIds[index], assetIds[target]] = [assetIds[target], assetIds[index]];
+    setEditingAlbum({ ...editingAlbum, asset_ids: assetIds });
+  };
 
   return (
     <div className="space-y-6">
@@ -90,17 +113,18 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
           </div>
           <input
             type="text"
-            placeholder="Tìm kiếm 14 Album khảo sát theo tên, alias..."
+            placeholder={`Tìm kiếm ${albums.length} Album theo tên, alias...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
+            className="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:ring-2 focus:ring-orange-500 focus:outline-none sm:text-xs"
           />
         </div>
 
         <button
           type="button"
-          onClick={onCreateAlbum}
-          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-1.5"
+          onClick={handleCreate}
+          disabled={!canCreate}
+          className="min-h-11 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-1.5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus className="w-4 h-4" /> + Tạo Album Mới
         </button>
@@ -163,7 +187,8 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleEdit(alb)}
-                      className="p-1.5 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition-colors"
+                      disabled={!canEdit}
+                      className="flex min-h-11 min-w-11 items-center justify-center text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/40 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       title="Chỉnh sửa album & Sắp xếp media"
                     >
                       <Edit3 className="w-4 h-4" />
@@ -171,7 +196,8 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onDeleteAlbum(alb.id)}
-                      className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+                      disabled={!canDelete}
+                      className="flex min-h-11 min-w-11 items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       title="Xóa album"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -183,31 +209,39 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
           );
         })}
       </div>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"><CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredAlbums.length} itemLabel="album" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} /></div>
+      {filteredAlbums.length === 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center dark:border-slate-800 dark:bg-slate-900">
+          <FolderKanban className="mx-auto size-10 text-slate-300 dark:text-slate-600" />
+          <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">Không tìm thấy Album nào</h3>
+          <p className="mx-auto mt-1 max-w-md text-xs text-slate-500">Thử đổi từ khóa tìm kiếm hoặc tạo Album mới để nhóm các tệp Media.</p>
+        </div>
+      )}
+      {filteredAlbums.length > 0 && <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"><CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredAlbums.length} itemLabel="album" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} /></div>}
 
       {/* ALBUM EDITOR DRAWER */}
       {isEditorOpen && editingAlbum && (
         <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
-          <div className="w-full max-w-3xl bg-white dark:bg-slate-900 h-full flex flex-col shadow-2xl border-l border-slate-200 dark:border-slate-800">
+          <div ref={editorRef} role="dialog" aria-modal="true" aria-label="Biên tập Album Media" tabIndex={-1} className="w-full max-w-3xl bg-white dark:bg-slate-900 h-dvh flex flex-col shadow-2xl border-l border-slate-200 dark:border-slate-800">
             {/* Header */}
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-850">
               <div className="flex items-center gap-2">
                 <FolderKanban className="w-5 h-5 text-orange-600" />
                 <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  Chỉnh sửa Album: {editingAlbum.title}
+                  {editingAlbum.id ? `Chỉnh sửa Album: ${editingAlbum.title}` : 'Tạo Album mới'}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setIsEditorOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl"
+                className="flex min-h-11 min-w-11 items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl"
+                aria-label="Đóng trình biên tập Album"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Form & Media Order List */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 scrollbar-thin">
               {/* Basic Album Info */}
               <div className="space-y-4">
                 <div>
@@ -218,11 +252,11 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     type="text"
                     value={editingAlbum.title}
                     onChange={(e) => setEditingAlbum({ ...editingAlbum, title: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    className="min-h-11 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base font-bold focus:ring-2 focus:ring-orange-500 focus:outline-none sm:text-xs"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                       Mã Alias (URL Code)
@@ -231,7 +265,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                       type="text"
                       value={editingAlbum.code_alias}
                       onChange={(e) => setEditingAlbum({ ...editingAlbum, code_alias: e.target.value })}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="min-h-11 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base font-mono focus:ring-2 focus:ring-orange-500 focus:outline-none sm:text-xs"
                     />
                   </div>
 
@@ -242,7 +276,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     <select
                       value={editingAlbum.workflow_status}
                       onChange={(e) => setEditingAlbum({ ...editingAlbum, workflow_status: e.target.value as any })}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                      className="min-h-11 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:ring-2 focus:ring-orange-500 focus:outline-none sm:text-xs"
                     >
                       <option value="draft">Bản thảo (Draft)</option>
                       <option value="published">Đã xuất bản (Published)</option>
@@ -259,7 +293,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     rows={2}
                     value={editingAlbum.description}
                     onChange={(e) => setEditingAlbum({ ...editingAlbum, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                    className="min-h-11 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:ring-2 focus:ring-orange-500 focus:outline-none sm:text-xs"
                   />
                 </div>
               </div>
@@ -271,7 +305,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     <ImageIcon className="w-4 h-4 text-orange-500" /> Các tệp thuộc Album ({editingAlbum.asset_ids.length})
                   </h3>
                   <span className="text-[11px] text-slate-400">
-                    Kéo thả hoặc xóa khỏi album (Không làm mất file gốc)
+                    Dùng nút lên/xuống để sắp xếp; xóa khỏi Album không làm mất file gốc
                   </span>
                 </div>
 
@@ -283,7 +317,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                     return (
                       <div
                         key={assetId}
-                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                        className="flex flex-col items-stretch justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl text-xs sm:flex-row sm:items-center"
                       >
                         <div className="flex items-center gap-3">
                           <GripVertical className="w-4 h-4 text-slate-400 cursor-grab" />
@@ -300,6 +334,8 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                         </div>
 
                         <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => handleMoveMedia(index, -1)} disabled={index === 0} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800" aria-label={`Đưa ${matchedAsset.title} lên`}><ChevronUp className="size-4" /></button>
+                          <button type="button" onClick={() => handleMoveMedia(index, 1)} disabled={index === editingAlbum.asset_ids.length - 1} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800" aria-label={`Đưa ${matchedAsset.title} xuống`}><ChevronDown className="size-4" /></button>
                           {editingAlbum.cover_asset_id === assetId ? (
                             <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-bold rounded-md">
                               Ảnh bìa (Cover)
@@ -314,7 +350,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                                   cover_asset_url: matchedAsset.url,
                                 })
                               }
-                              className="text-[11px] text-slate-500 hover:text-orange-600 font-medium"
+                              className="min-h-11 px-2 text-[11px] text-slate-500 hover:text-orange-600 font-medium"
                             >
                               Đặt làm ảnh bìa
                             </button>
@@ -323,7 +359,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveMediaFromAlbum(assetId)}
-                            className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+                            className="flex min-h-11 min-w-11 items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
                             title="Xóa khỏi album"
                           >
                             <X className="w-4 h-4" />
@@ -337,18 +373,18 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-end gap-2">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-end gap-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
                 type="button"
                 onClick={() => setIsEditorOpen(false)}
-                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors"
+                className="min-h-11 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors"
               >
                 Hủy
               </button>
               <button
                 type="button"
                 onClick={handleSaveEditor}
-                className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5"
+                className="min-h-11 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5"
               >
                 <Check className="w-4 h-4" /> Lưu Album
               </button>

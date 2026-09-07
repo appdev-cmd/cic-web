@@ -3,6 +3,10 @@ import 'server-only';
 import type { Sql } from 'postgres';
 import { withTransaction } from '@/server/db/postgres';
 import type { ProjectInput } from '../schemas/projectInput';
+import type { CmsPrincipal } from '@/server/auth/guards';
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
+import { writeAuditEvent } from '@/server/audit/writer';
+import { moveProjectToTrash } from '@/features/trash/server/adapters/project';
 
 export type ProjectRelations = { productIds: number[]; serviceIds: number[] };
 
@@ -54,10 +58,37 @@ export async function updateProject(id: number, input: ProjectInput, relations: 
   });
 }
 
-export async function deleteProject(id: number) {
+export async function deleteProject(id: number, actor: CmsPrincipal) {
   return withTransaction(async (sql) => {
-    const rows = await sql`DELETE FROM cic_projects WHERE id = ${id} RETURNING id`;
-    if (!rows.length) throw new Error('Project not found.');
+    const moved = await moveProjectToTrash(sql, id, actor.legacyUserId);
+    await writeAuditEvent(actor, {
+      action: AUDIT_ACTIONS.PROJECT_TRASHED,
+      entityType: AUDIT_ENTITY_TYPES.PROJECT,
+      entityId: String(id),
+      entityTitle: moved.title,
+      module: 'projects',
+      workspace: 'vi',
+      result: 'success',
+      before: { publishedSourceRemoved: true },
+      after: { trashId: moved.trashId, state: 'trashed' },
+    }, sql);
+    return moved;
+  });
+}
+
+export async function deleteProjects(ids: number[], actor: CmsPrincipal) {
+  return withTransaction(async (sql) => {
+    const results: Array<{ trashId: string; title: string }> = [];
+    for (const id of ids) {
+      const moved = await moveProjectToTrash(sql, id, actor.legacyUserId);
+      await writeAuditEvent(actor, {
+        action: AUDIT_ACTIONS.PROJECT_TRASHED, entityType: AUDIT_ENTITY_TYPES.PROJECT,
+        entityId: String(id), entityTitle: moved.title, module: 'projects', workspace: 'vi', result: 'success',
+        before: { publishedSourceRemoved: true }, after: { trashId: moved.trashId, state: 'trashed' },
+      }, sql);
+      results.push(moved);
+    }
+    return results;
   });
 }
 

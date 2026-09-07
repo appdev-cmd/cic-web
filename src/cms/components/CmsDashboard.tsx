@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CheckCircle2, RotateCcw } from 'lucide-react';
 
 import { CmsHeader } from './CmsHeader';
@@ -10,15 +10,16 @@ import { CmsRightDrawer, DrawerItem } from './CmsRightDrawer';
 import { MyAccountModal } from './MyAccountModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
 
-import { ContactMessage, ProductRegistration, PendingContent, CmsUser } from '../types';
+import { ContactMessage, ProductRegistration, PendingContent, CmsUser, type CmsMenuGroup } from '../types';
 import { resolveCmsModule } from '../routing';
-import { demoCmsDataSource } from '../data/demoCmsDataSource';
 import type { CmsDashboardData, CmsLocale } from '../data/CmsDataSource';
 import type { CmsSearchRecord } from '@/features/cms-search/types';
-import type { AuditGovernanceData, PermissionsGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
+import { getCmsSearchRecordsAction } from '@/features/cms-search/server/actions';
+import type { AuditGovernanceData, PermissionsGovernanceData, TrashGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
 import type { SystemConfigurationData } from '../data/ConfigurationDataSource';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
+import { CmsWorkspaceLocaleProvider } from '../context/CmsWorkspaceLocaleContext';
 
 const getProductSettingsDataType = (path: string): MasterDataType => {
   const cleanPath = path.split('?')[0];
@@ -43,10 +44,7 @@ const SystemConfiguration = lazy(async () => {
 });
 const FunctionSeoManager = lazy(() => import('../modules/function_seo/FunctionSeoManager').then((module) => ({ default: module.FunctionSeoManager })));
 const ActivityLogsManager = lazy(() => import('../modules/activity_logs_trash/ActivityLogsManager').then((module) => ({ default: module.ActivityLogsManager })));
-const TrashManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/activity_logs_trash/TrashManager'), import('../data/demoGovernanceDataSource')]);
-  return { default: () => <module.TrashManager data={dataModule.demoGovernanceDataSource.trash} /> };
-});
+const TrashManager = lazy(() => import('../modules/activity_logs_trash/TrashManager').then((module) => ({ default: module.TrashManager })));
 const StaticPagesManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([
     import('../modules/static_pages/StaticPagesManager'),
@@ -133,10 +131,8 @@ const MenuManager = lazy(async () => {
   ) };
 });
 const MediaManager = lazy(async () => {
-  const [module, dataModule] = await Promise.all([import('../modules/media/MediaManager'), import('../data/demoMediaDataSource')]);
-  return { default: ({ workspaceLocale }: { workspaceLocale: CmsLocale }) => (
-    <module.MediaManager data={dataModule.getDemoMediaModuleData(workspaceLocale)} />
-  ) };
+  const module = await import('../modules/media/MediaManager');
+  return { default: module.MediaManager };
 });
 const ContactsManager = lazy(async () => {
   const [module, dataModule] = await Promise.all([import('../modules/contacts/ContactsManager'), import('../data/demoContactsDataSource')]);
@@ -183,24 +179,32 @@ const CmsGlobalSearchPage = lazy(async () => {
 });
 
 export interface CmsDashboardProps {
+  initialPath?: string;
   onSwitchToWebsite?: () => void;
   onLogout?: () => void;
-  currentUser?: CmsUser;
+  onNavigate?: (path: string) => void;
+  currentUser: CmsUser;
+  menuGroups: CmsMenuGroup[];
   dashboardData?: CmsDashboardData;
   searchRecords?: CmsSearchRecord[];
   userRole?: string;
   usersData?: UsersGovernanceData | null;
-  userCapabilities?: { create: boolean; edit: boolean };
+  userCapabilities?: { create: boolean; edit: boolean; delete: boolean; currentUserId: string };
   permissionsData?: PermissionsGovernanceData | null;
-  permissionCapabilities?: { create: boolean; edit: boolean };
+  permissionCapabilities?: { create: boolean; edit: boolean; delete: boolean };
   settingsData?: SystemConfigurationData | null;
   settingsCapabilities?: { edit: boolean };
   functionSeoData?: FunctionSeoRecord[];
   activityData?: AuditGovernanceData | null;
   auditCapabilities?: { export: boolean };
+  trashData?: TrashGovernanceData | null;
+  trashCapabilities?: { restore: boolean; purge: boolean };
+  mediaData?: import('../data/MediaDataSource').MediaModuleData | null;
+  mediaCapabilities?: { create: boolean; edit: boolean; delete: boolean; replace: boolean };
+  moduleContent?: ReactNode;
 }
 
-export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, onLogout, currentUser: authenticatedUser, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false }, permissionsData = null, permissionCapabilities = { create: false, edit: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false } }) => {
+export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent }) => {
   // Theme & Layout States (Persisted & Synced)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -233,15 +237,20 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [activePath, setActivePath] = useState('/cms/dashboard');
-  const [currentPageTitle, setCurrentPageTitle] = useState('Tổng quan CMS');
+  const initialPageTitle = initialPath.includes('/brands') || initialPath.includes('/manufacturers')
+    ? 'Hãng sản xuất'
+    : 'Tổng quan CMS';
+  const [activePath, setActivePath] = useState(initialPath);
+  const [currentPageTitle, setCurrentPageTitle] = useState(initialPageTitle);
 
   // Command Palette & Right Drawer
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [paletteRecords, setPaletteRecords] = useState(searchRecords);
+  const paletteLoadAttempted = useRef(searchRecords.length > 0);
   const [drawerItem, setDrawerItem] = useState<DrawerItem | null>(null);
 
   // Filter & Data States
-  const [currentUser, setCurrentUser] = useState<CmsUser>(authenticatedUser ?? demoCmsDataSource.currentUser);
+  const [currentUser, setCurrentUser] = useState<CmsUser>(authenticatedUser);
   const [isMyAccountOpen, setIsMyAccountOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [trafficRange, setTrafficRange] = useState<'7' | '30'>('7');
@@ -260,6 +269,13 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    setActivePath(initialPath);
+    if (initialPath.includes('/brands') || initialPath.includes('/manufacturers')) {
+      setCurrentPageTitle('Hãng sản xuất');
+    }
+  }, [initialPath]);
 
   // Global Keyboard Shortcuts (Ctrl+K / Cmd+K and '/' key)
   useEffect(() => {
@@ -284,8 +300,16 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
     return () => window.removeEventListener('keydown', handleGlobalShortcuts);
   }, [isCommandPaletteOpen]);
 
+  useEffect(() => {
+    if (!isCommandPaletteOpen || paletteLoadAttempted.current) return;
+    paletteLoadAttempted.current = true;
+    void getCmsSearchRecordsAction().then(setPaletteRecords).catch(() => {
+      paletteLoadAttempted.current = false;
+    });
+  }, [isCommandPaletteOpen]);
+
   const navigateToCmsPath = (path: string, title: string) => {
-    window.history.pushState({}, '', path);
+    onNavigate?.(path);
     const target = new URL(path, window.location.origin);
     setActivePath(`${target.pathname}${target.search}`);
     setCurrentPageTitle(title);
@@ -309,11 +333,12 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
   };
 
   return (
+    <CmsWorkspaceLocaleProvider locale={workspaceLocale}>
     <div className={`cms-shell min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* 1. HEADER */}
       <CmsHeader
         user={currentUser}
-        initialNotifications={demoCmsDataSource.notifications}
+        initialNotifications={[]}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
         workspaceLocale={workspaceLocale}
@@ -348,7 +373,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
       {/* 2. SIDEBAR */}
       <CmsSidebar
         isCollapsed={isSidebarCollapsed}
-        menuGroups={demoCmsDataSource.menuGroups}
+        menuGroups={menuGroups}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         activePath={activePath}
         onSelectMenu={(path, title) => {
@@ -395,7 +420,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
               </div>
             )}
           >
-          {activeModule === 'search' ? (
+          {moduleContent ? (
+            moduleContent
+          ) : activeModule === 'search' ? (
             <CmsGlobalSearchPage
               key={`${workspaceLocale}:${activePath}`}
               workspaceLocale={workspaceLocale}
@@ -416,7 +443,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
           ) : activeModule === 'activity_logs' ? (
             activityData ? <ActivityLogsManager data={activityData} capabilities={auditCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem Nhật ký hoạt động.</div>
           ) : activeModule === 'trash' ? (
-            <TrashManager />
+            trashData ? <TrashManager data={trashData} capabilities={trashCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem Thùng rác.</div>
           ) : activeModule === 'static_pages' ? (
             <StaticPagesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'news' ? (
@@ -436,7 +463,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
           ) : activeModule === 'menu' ? (
             <MenuManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'media' ? (
-            <MediaManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
+            mediaData ? <MediaManager key={workspaceLocale} data={mediaData} workspaceLocale={workspaceLocale} capabilities={mediaCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800">Bạn không có quyền xem Thư viện Media.</div>
           ) : activeModule === 'contacts' ? (
             <ContactsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'localization' ? (
@@ -486,7 +513,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
         onClose={() => setIsCommandPaletteOpen(false)}
         userRole={userRole}
         workspaceLocale={workspaceLocale}
-        records={searchRecords}
+        records={paletteRecords}
         onSelectAction={(path, label) => {
           navigateToCmsPath(path, label);
           setToastMessage(`Đã chuyển sang: ${label}`);
@@ -527,5 +554,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ onSwitchToWebsite, o
         }}
       />
     </div>
+    </CmsWorkspaceLocaleProvider>
   );
 };

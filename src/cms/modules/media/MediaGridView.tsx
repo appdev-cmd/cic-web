@@ -25,6 +25,8 @@ interface MediaGridViewProps {
   onOpenDetail: (asset: MediaAsset) => void;
   onOpenPreview: (asset: MediaAsset) => void;
   onDeleteAsset: (id: string) => void;
+  canEdit: boolean;
+  canDelete: boolean;
   cardSize?: 'sm' | 'md' | 'lg';
 }
 
@@ -36,6 +38,8 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
   onOpenDetail,
   onOpenPreview,
   onDeleteAsset,
+  canEdit,
+  canDelete,
   cardSize = 'md',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -121,7 +125,7 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
               {/* Checkbox Overlay */}
               <div
                 className={`absolute top-2 left-2 z-10 transition-opacity ${
-                  isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  isSelected ? 'opacity-100' : 'opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100'
                 }`}
               >
                 <CmsSelectionCheckbox
@@ -152,7 +156,7 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
                 {asset.metadata_status === 'incomplete' && (
                   <span
                     className="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-xs"
-                    title="Thiếu thông tin Alt Text tiếng Nhật/Mô tả"
+                    title="Thiếu nội dung thay thế hoặc metadata"
                   >
                     <AlertTriangle className="w-3 h-3" /> Thiếu meta
                   </span>
@@ -160,11 +164,11 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
               </div>
 
               {/* Hover Quick Action Toolbar Overlay */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-2.5 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-2.5 flex items-center justify-center gap-2 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
                 <button
                   type="button"
                   onClick={() => onOpenPreview(asset)}
-                  className="p-1.5 bg-white/90 hover:bg-white text-slate-800 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                  className="flex min-h-11 min-w-11 items-center justify-center bg-white/90 hover:bg-white text-slate-800 rounded-lg text-xs font-semibold shadow-xs transition-colors"
                   title="Xem trước media"
                 >
                   <Eye className="w-3.5 h-3.5" />
@@ -172,7 +176,8 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenDetail(asset)}
-                  className="p-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                  disabled={!canEdit}
+                  className="flex min-h-11 min-w-11 items-center justify-center bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   title="Chỉnh sửa chi tiết & Variant"
                 >
                   <Edit className="w-3.5 h-3.5" />
@@ -180,7 +185,8 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
                 <button
                   type="button"
                   onClick={() => onDeleteAsset(asset.id)}
-                  className="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                  disabled={!canDelete}
+                  className="flex min-h-11 min-w-11 items-center justify-center bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   title="Xóa vào Thùng rác"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

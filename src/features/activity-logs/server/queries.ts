@@ -1,9 +1,7 @@
 import 'server-only';
 import { can, requirePermission } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
-import type { AuditGovernanceData } from '@/cms/data/GovernanceDataSource';
-import type { AuditEvent, ExportJob } from '@/cms/modules/activity_logs_trash/types';
-import type { AuditListPage, AuditListQuery } from '@/cms/modules/activity_logs_trash/types';
+import type { AuditEvent, AuditGovernanceData, AuditListPage, AuditListQuery, ExportJob } from '../types';
 import { z } from 'zod';
 
 const LIST_FIELDS = 'id,occurred_at,actor_id,actor_label,action_code,category,severity,is_sensitive,entity_type,entity_id,entity_title,module,workspace,locale,result,result_message,session_id,correlation_id,source_app,environment,ip_address,user_agent,http_method,endpoint,execution_time_ms,before_data,after_data,redacted_fields';

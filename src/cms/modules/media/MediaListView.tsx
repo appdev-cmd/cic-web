@@ -26,6 +26,8 @@ interface MediaListViewProps {
   onOpenDetail: (asset: MediaAsset) => void;
   onOpenPreview: (asset: MediaAsset) => void;
   onDeleteAsset: (id: string) => void;
+  canEdit: boolean;
+  canDelete: boolean;
 }
 
 export const MediaListView: React.FC<MediaListViewProps> = ({
@@ -36,6 +38,8 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
   onOpenDetail,
   onOpenPreview,
   onDeleteAsset,
+  canEdit,
+  canDelete,
 }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);
@@ -228,20 +232,25 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
                         onClick={() => onOpenPreview(asset)}
                         icon={<Eye />}
                         size="sm"
+                        className="min-h-11 min-w-11"
                         aria-label="Xem chi tiết tệp"
                         title="Xem chi tiết"
                       />
                       <CmsIconButton
                         onClick={() => onOpenDetail(asset)}
+                        disabled={!canEdit}
                         icon={<Edit />}
                         size="sm"
+                        className="min-h-11 min-w-11"
                         aria-label="Chỉnh sửa thông tin tệp"
                         title="Chỉnh sửa thông tin"
                       />
                       <CmsIconButton
                         onClick={() => onDeleteAsset(asset.id)}
+                        disabled={!canDelete}
                         icon={<Trash2 />}
                         size="sm"
+                        className="min-h-11 min-w-11"
                         variant="danger"
                         aria-label="Xóa tệp"
                         title="Xóa tệp"

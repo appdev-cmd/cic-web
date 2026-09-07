@@ -1,33 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
 import {
   UploadCloud,
-  Plus,
-  Search,
-  Grid,
-  List,
-  Folder,
-  FolderPlus,
-  ShieldAlert,
   Trash2,
   CheckCircle2,
-  Clock,
-  Filter,
-  Eye,
   X,
-  SlidersHorizontal,
   FolderKanban,
-  FileText,
   Image as ImageIcon,
-  Video,
-  Globe,
-  Tag,
-  Download,
-  Check,
-  Sparkles,
-  HelpCircle,
-  FileCode,
-  Layers,
-  AlertTriangle,
 } from 'lucide-react';
 import {
   MediaAsset,
@@ -49,13 +27,22 @@ import { UploadQueueDrawer } from './UploadQueueDrawer';
 import { ReplaceArchiveModal } from './ReplaceArchiveModal';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
-import { CmsTabs } from '../../components/ui/CmsTabs';
+import { createMediaFolderAction, deleteMediaAlbumAction, refreshMediaAction, replaceMediaAssetAction, saveMediaAlbumAction, trashMediaAssetsAction, updateMediaMetadataAction, uploadMediaAction } from '@/features/media/server/actions';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
+import { filterMediaAssets } from './mediaFilters';
+import { MediaNavigation } from './MediaNavigation';
+import { MediaFolderPanel } from './MediaFolderPanel';
+import { MediaFilterToolbar } from './MediaFilterToolbar';
+import { MediaFolderDialog, MediaPreviewDialog } from './MediaDialogs';
 
 interface MediaManagerProps {
   data?: MediaModuleData;
+  workspaceLocale: CmsLocale;
+  capabilities: { create:boolean;edit:boolean;delete:boolean;replace:boolean };
 }
 
-export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
+export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocale, capabilities }) => {
   // Main State
   const [assets, setAssets] = useState<MediaAsset[]>(data?.assets ?? []);
   const [albums, setAlbums] = useState<MediaAlbum[]>(data?.albums ?? []);
@@ -64,7 +51,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
 
   const [activeTab, setActiveTab] = useState<MainTabType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [cardSize, setCardSize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [cardSize] = useState<'sm' | 'md' | 'lg'>('md');
   const [savedFilter, setSavedFilter] = useState<SavedFilterView>('all');
   const [selectedFolderId, setSelectedFolderId] = useState<string>('f_all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,145 +70,99 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
 
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [replaceAssetItem, setReplaceAssetItem] = useState<MediaAsset | null>(null);
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [folderName, setFolderName] = useState('');
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [, startTransition] = useTransition();
+  const previewDialogRef = useDialogA11y(isPreviewOpen, () => setIsPreviewOpen(false));
+  const folderDialogRef = useDialogA11y(isFolderModalOpen, () => setIsFolderModalOpen(false));
+  const applyData = (next: MediaModuleData) => {
+    setAssets(next.assets);
+    setAlbums(next.albums);
+    setFolders(next.folders);
+    setIssues(next.issues);
+    setSelectedAssetIds([]);
+  };
+  const reload = async () => applyData(await refreshMediaAction(workspaceLocale));
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Filter Assets Logic
-  const filteredAssets = assets.filter((ast) => {
-    if (ast.deleted_at) return false;
-
-    // Type Tabs
-    if (activeTab === 'images' && ast.type !== 'image') return false;
-    if (activeTab === 'videos' && ast.type !== 'video') return false;
-    if (activeTab === 'documents' && ast.type !== 'document') return false;
-    if (activeTab === 'incomplete_metadata' && ast.metadata_status !== 'incomplete') return false;
-    if (activeTab === 'issues') {
-      const hasIssue = issues.some((i) => i.asset_id === ast.id);
-      if (!hasIssue) return false;
+  // The data prop is the VI server snapshot; other workspaces intentionally reload on demand.
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (workspaceLocale === 'vi') {
+      if (data) applyData(data);
+      return;
     }
+    void reload().catch(() => showToast('Không thể tải dữ liệu Media cho workspace này.'));
+  }, [workspaceLocale]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
-    // Saved View Pills
-    if (savedFilter === 'missing_alt' && ast.alt_text.trim()) return false;
-    if (savedFilter === 'unused' && ast.used_by_count > 0) return false;
-    if (savedFilter === 'issues' && !issues.some((i) => i.asset_id === ast.id)) return false;
-
-    // Folder Filter
-    if (selectedFolderId !== 'f_all' && ast.folder_id !== selectedFolderId) return false;
-
-    // Search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = ast.title.toLowerCase().includes(q);
-      const matchFile = ast.filename.toLowerCase().includes(q);
-      const matchTag = ast.tags.some((t) => t.toLowerCase().includes(q));
-      const matchOwner = ast.owner_name.toLowerCase().includes(q);
-      if (!matchTitle && !matchFile && !matchTag && !matchOwner) return false;
-    }
-
-    return true;
+  const filteredAssets = filterMediaAssets(assets, issues, {
+    activeTab,
+    savedFilter,
+    selectedFolderId,
+    searchQuery,
   });
 
   // Handlers
   const handleOpenUpload = () => {
-    const newItems: UploadFileItem[] = [
-      {
-        id: `upl_${Date.now()}_1`,
-        file_name: 'anh-cong-trinh-thi-cong-thuc-te-2025.jpg',
-        file_size_kb: 2400,
-        mime_type: 'image/jpeg',
-        progress: 100,
-        status: 'completed',
-        title: 'Ảnh công trình thi công thực tế 2025',
-      },
-      {
-        id: `upl_${Date.now()}_2`,
-        file_name: 'catalog-giai-phap-chong-tham-cic.pdf',
-        file_size_kb: 5800,
-        mime_type: 'application/pdf',
-        progress: 75,
-        status: 'uploading',
-        title: 'Catalog Giải pháp Chống thấm CIC',
-      },
-    ];
-    setUploadQueue(newItems);
-    setIsUploadQueueOpen(true);
+    uploadInputRef.current?.click();
   };
 
-  const handleCompleteUploadQueue = (items: UploadFileItem[]) => {
-    const created: MediaAsset[] = items.map((item, idx) => ({
-      id: `ast_uploaded_${Date.now()}_${idx}`,
-      filename: item.file_name,
-      title: item.title || item.file_name,
-      type: item.mime_type.startsWith('video') ? 'video' : item.mime_type.includes('pdf') ? 'document' : 'image',
-      mime_type: item.mime_type,
-      url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?w=1200&auto=format&fit=crop&q=80',
-      thumbnail_url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?w=400&auto=format&fit=crop&q=80',
-      file_size_kb: item.file_size_kb,
-      width: 1920,
-      height: 1080,
-      alt_text: item.title || item.file_name,
-      folder_id: 'f_products',
-      folder_name: 'Sản phẩm & Vật liệu',
-      album_ids: [],
-      tags: ['Tải lên mới', 'Media 2025'],
-      used_by_count: 0,
-      used_by_refs: [],
-      workflow_status: 'ready',
-      metadata_status: 'incomplete',
-      variants: [],
-      versions: [],
-      owner_name: 'Nguyễn Văn Minh',
-      owner_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+  const handleFiles = async (files: FileList | null) => {
+    if (!files?.length) return;
+    const selected = [...files];
+    const items: UploadFileItem[] = selected.map((file, index) => ({
+      id: `upload_${Date.now()}_${index}`,
+      file_name: file.name,
+      file_size_kb: Math.round(file.size / 1024),
+      mime_type: file.type,
+      progress: 5,
+      status: 'uploading',
+      title: file.name,
     }));
-
-    setAssets((prev) => [...created, ...prev]);
-    setIsUploadQueueOpen(false);
-    showToast(`Đã tải lên và bổ sung ${created.length} tệp media mới!`);
+    setUploadQueue(items);
+    setIsUploadQueueOpen(true);
+    for (const [index, file] of selected.entries()) {
+      const item = items[index];
+      try {
+        const form = new FormData();
+        form.set('file', file);
+        form.set('locale', workspaceLocale);
+        form.set('title', file.name);
+        await uploadMediaAction(form);
+        setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'completed' } : row));
+      } catch (error) {
+        setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'error', error_message: error instanceof Error ? error.message : 'Tải lên thất bại' } : row));
+      }
+    }
+    await reload();
+    showToast('Đã xử lý hàng chờ tải lên.');
+    if (uploadInputRef.current) uploadInputRef.current.value = '';
   };
 
   const handleSaveAssetDetail = (updatedAsset: MediaAsset) => {
-    setAssets((prev) => prev.map((a) => (a.id === updatedAsset.id ? updatedAsset : a)));
-    showToast(`Đã cập nhật thông tin metadata của "${updatedAsset.title}"!`);
+    startTransition(async () => {
+      try {
+        await updateMediaMetadataAction(updatedAsset.id, { locale: workspaceLocale, title: updatedAsset.title, description: updatedAsset.description ?? null, altText: updatedAsset.alt_text, caption: updatedAsset.caption ?? null, creditAuthor: updatedAsset.credit_author ?? null, licenseType: updatedAsset.license_type ?? null, licenseExpiry: updatedAsset.license_expiry ?? null, tags: updatedAsset.tags, folderId: updatedAsset.folder_id || null });
+        await reload();
+        showToast(`Đã cập nhật metadata của "${updatedAsset.title}".`);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : 'Không thể cập nhật Media.');
+      }
+    });
   };
 
   const handleDeleteAsset = (id: string) => {
-    setAssets((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, deleted_at: new Date().toISOString() } : a))
-    );
-    if (detailAsset?.id === id) setIsDetailOpen(false);
-    showToast(`Đã chuyển tệp media vào Thùng Rác`);
+    startTransition(async()=>{try{await trashMediaAssetsAction([id]);await reload();if(detailAsset?.id===id)setIsDetailOpen(false);showToast('Đã chuyển tệp Media vào Thùng rác.');}catch(error){showToast(error instanceof Error?error.message:'Không thể xóa Media.');}});
   };
 
-  const handleConfirmReplaceFile = (ast: MediaAsset, note: string) => {
-    const nextVersionNum = (ast.versions.length + 1).toFixed(1);
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === ast.id
-          ? {
-              ...a,
-              versions: [
-                {
-                  version_number: parseFloat(nextVersionNum),
-                  filename: `replaced-v${nextVersionNum}-${a.filename}`,
-                  file_size_kb: a.file_size_kb,
-                  replaced_by: 'Nguyễn Văn Minh',
-                  replaced_at: new Date().toISOString(),
-                  note: note || 'Cập nhật thay thế tệp gốc',
-                  url: a.url,
-                },
-                ...a.versions,
-              ],
-              updated_at: new Date().toISOString(),
-            }
-          : a
-      )
-    );
-    showToast(`Đã thay thế tệp gốc toàn cục và giữ nguyên ${ast.used_by_count} tham chiếu!`);
+  const handleConfirmReplaceFile = (ast: MediaAsset, note: string, file: File) => {
+    startTransition(async()=>{try{const form=new FormData();form.set('file',file);form.set('locale',workspaceLocale);form.set('note',note);await replaceMediaAssetAction(ast.id,form);await reload();showToast('Đã thay thế tệp và lưu phiên bản cũ.');}catch(error){showToast(error instanceof Error?error.message:'Không thể thay thế tệp.');}});
   };
 
   const handleToggleSelectAll = () => {
@@ -241,22 +182,16 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
   };
 
   const handleBulkDelete = () => {
-    setAssets((prev) =>
-      prev.map((a) =>
-        selectedAssetIds.includes(a.id)
-          ? { ...a, deleted_at: new Date().toISOString() }
-          : a
-      )
-    );
-    setSelectedAssetIds([]);
-    showToast(`Đã chuyển ${selectedAssetIds.length} tệp media vào Thùng Rác`);
+    startTransition(async()=>{try{const count=selectedAssetIds.length;await trashMediaAssetsAction(selectedAssetIds);await reload();showToast(`Đã chuyển ${count} tệp Media vào Thùng rác.`);}catch(error){showToast(error instanceof Error?error.message:'Không thể xóa các tệp đã chọn.');}});
   };
+  const handleSubmitFolder=()=>{const name=folderName.trim();if(!name)return;const alias=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');startTransition(async()=>{try{await createMediaFolderAction({workspace:workspaceLocale,name,alias});await reload();setFolderName('');setIsFolderModalOpen(false);showToast(`Đã tạo thư mục "${name}".`);}catch(error){showToast(error instanceof Error?error.message:'Không thể tạo thư mục.');}});};
 
   return (
     <div className="space-y-6">
+      <input ref={uploadInputRef} type="file" multiple className="sr-only" onChange={(event)=>void handleFiles(event.target.files)} accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml,video/mp4,video/webm,application/pdf,.doc,.docx,.xls,.xlsx" />
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div role="status" className="fixed inset-x-4 top-20 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200 sm:left-auto sm:right-6 sm:max-w-md">
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           <span className="text-sm font-medium">{toastMessage}</span>
           <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white">
@@ -283,6 +218,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
 
           <CmsButton
             onClick={handleOpenUpload}
+            disabled={!capabilities.create}
             variant="primary"
             size="sm"
             leadingIcon={<UploadCloud />}
@@ -292,47 +228,15 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
         </>}
       />
 
-      {/* Main Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <CmsTabs
-          ariaLabel="Phân loại tệp media"
-          value={activeTab}
-          onChange={(tab) => setActiveTab(tab as any)}
-          items={[
-            { id: 'all', label: 'Tất cả media', count: assets.filter((a) => !a.deleted_at).length },
-            { id: 'images', label: 'Ảnh', count: assets.filter((a) => !a.deleted_at && a.type === 'image').length },
-            { id: 'videos', label: 'Video', count: assets.filter((a) => !a.deleted_at && a.type === 'video').length },
-            { id: 'documents', label: 'Tài liệu PDF', count: assets.filter((a) => !a.deleted_at && a.type === 'document').length },
-            { id: 'albums', label: 'Albums & Bộ sưu tập', count: albums.length },
-            { id: 'incomplete_metadata', label: 'Cần bổ sung Meta', count: assets.filter((a) => !a.deleted_at && a.metadata_status === 'incomplete').length },
-            { id: 'issues', label: 'Trùng / Vấn đề', count: issues.length },
-          ]}
-        />
-
-        {/* View Mode Switcher (Grid / List) */}
-        {activeTab !== 'albums' && (
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg text-xs font-medium transition-colors ${
-                viewMode === 'grid' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs' : 'text-slate-400'
-              }`}
-              title="Dạng lưới ảnh (Grid View)"
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-lg text-xs font-medium transition-colors ${
-                viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs' : 'text-slate-400'
-              }`}
-              title="Dạng danh sách bảng (List View)"
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
+      <MediaNavigation
+        activeTab={activeTab}
+        viewMode={viewMode}
+        assets={assets}
+        albums={albums}
+        issues={issues}
+        onTabChange={setActiveTab}
+        onViewModeChange={setViewMode}
+      />
 
       {/* Main Content Area (Layout with Left Folder Sidebar & Asset View) */}
       {activeTab === 'albums' ? (
@@ -340,130 +244,44 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
           albums={albums}
           assets={assets}
           onUpdateAlbum={(updatedAlb) => {
-            setAlbums((prev) => prev.map((a) => (a.id === updatedAlb.id ? updatedAlb : a)));
-            showToast(`Đã lưu thay đổi Album "${updatedAlb.title}"!`);
+            startTransition(async()=>{try{await saveMediaAlbumAction(updatedAlb.id,{workspace:workspaceLocale,title:updatedAlb.title,alias:updatedAlb.code_alias,description:updatedAlb.description||null,workflowStatus:updatedAlb.workflow_status,coverAssetId:updatedAlb.cover_asset_id||null,assetIds:updatedAlb.asset_ids});await reload();showToast(`Đã lưu Album "${updatedAlb.title}".`);}catch(error){showToast(error instanceof Error?error.message:'Không thể lưu Album.');}});
           }}
-          onCreateAlbum={() => {
-            const newAlb: MediaAlbum = {
-              id: `alb_${Date.now()}`,
-              title: 'Album Bộ Sưu Tập Mới 2025',
-              code_alias: 'new-album-2025',
-              description: 'Mô tả album mới tạo...',
-              asset_ids: [],
-              item_count: 0,
-              display_order: albums.length + 1,
-              workflow_status: 'draft',
-              owner_name: 'Nguyễn Văn Minh',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            };
-            setAlbums([newAlb, ...albums]);
-            showToast(`Đã tạo Album mới thành công!`);
+          onCreateAlbum={(album) => {
+            startTransition(async()=>{try{await saveMediaAlbumAction(null,{workspace:workspaceLocale,title:album.title,alias:album.code_alias,description:album.description||null,workflowStatus:album.workflow_status,coverAssetId:album.cover_asset_id||null,assetIds:album.asset_ids});await reload();showToast(`Đã tạo Album "${album.title}".`);}catch(error){showToast(error instanceof Error?error.message:'Không thể tạo Album.');}});
           }}
           onDeleteAlbum={(id) => {
-            setAlbums((prev) => prev.filter((a) => a.id !== id));
-            showToast(`Đã xóa Album!`);
+            startTransition(async()=>{try{await deleteMediaAlbumAction(id);await reload();showToast('Đã xóa Album.');}catch(error){showToast(error instanceof Error?error.message:'Không thể xóa Album.');}});
           }}
           onOpenPreviewAsset={(ast) => {
             setPreviewAsset(ast);
             setIsPreviewOpen(true);
           }}
+          canCreate={capabilities.create}
+          canEdit={capabilities.edit}
+          canDelete={capabilities.delete}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Folder Panel */}
-          <div className="lg:col-span-3 space-y-4">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Thư mục & Phân loại
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const fName = prompt('Nhập tên thư mục mới:');
-                    if (fName) {
-                      setFolders([
-                        ...folders,
-                        { id: `f_${Date.now()}`, name: fName, code_alias: 'custom', icon: 'Folder', count: 0 },
-                      ]);
-                      showToast(`Đã tạo thư mục "${fName}"`);
-                    }
-                  }}
-                  className="text-slate-400 hover:text-orange-600 p-1"
-                  title="Thêm thư mục mới"
-                >
-                  <FolderPlus className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="space-y-1">
-                {folders.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setSelectedFolderId(f.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                      selectedFolderId === f.id
-                        ? 'bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 font-bold border border-orange-200 dark:border-orange-900'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <Folder className="w-4 h-4 text-amber-500 shrink-0" />
-                      <span className="truncate">{f.name}</span>
-                    </div>
-                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full font-mono">
-                      {f.id === 'f_all'
-                        ? assets.filter((a) => !a.deleted_at).length
-                        : assets.filter((a) => !a.deleted_at && a.folder_id === f.id).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          <MediaFolderPanel
+            folders={folders}
+            assets={assets}
+            selectedFolderId={selectedFolderId}
+            canCreateFolder={capabilities.edit}
+            onSelectFolder={setSelectedFolderId}
+            onCreateFolder={() => setIsFolderModalOpen(true)}
+          />
 
           {/* Right Main Assets Grid/List */}
           <div className="lg:col-span-9 space-y-4">
-            {/* Filter Toolbar & Saved Views Pills */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-850 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-              <div className="relative flex items-center flex-1 max-w-md">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Search className="w-4 h-4 text-slate-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm theo tên file, alt text, tag hoặc tác giả..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
-                {[
-                  { id: 'all', label: 'Tất cả' },
-                  { id: 'missing_alt', label: 'Thiếu Alt' },
-                  { id: 'unused', label: 'Chưa dùng (Unused)' },
-                  { id: 'issues', label: 'Có xung đột' },
-                ].map((pill) => (
-                  <button
-                    key={pill.id}
-                    onClick={() => setSavedFilter(pill.id as any)}
-                    className={`px-3 py-1 rounded-lg text-[11px] font-medium transition-colors whitespace-nowrap ${
-                      savedFilter === pill.id
-                        ? 'bg-slate-800 text-white dark:bg-slate-700 font-bold'
-                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-slate-300'
-                    }`}
-                  >
-                    {pill.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <MediaFilterToolbar
+              searchQuery={searchQuery}
+              savedFilter={savedFilter}
+              onSearchChange={setSearchQuery}
+              onSavedFilterChange={setSavedFilter}
+            />
 
             {/* Bulk Actions */}
-            <CmsBulkActionBar selectedCount={selectedAssetIds.length} itemLabel="tệp media" onClear={() => setSelectedAssetIds([])} actions={[
+            <CmsBulkActionBar selectedCount={capabilities.delete ? selectedAssetIds.length : 0} itemLabel="tệp media" onClear={() => setSelectedAssetIds([])} actions={[
               { label: 'Chuyển vào thùng rác', onClick: handleBulkDelete, icon: Trash2, variant: 'danger' },
             ]} />
 
@@ -484,6 +302,8 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
                 }}
                 onDeleteAsset={handleDeleteAsset}
                 cardSize={cardSize}
+                canEdit={capabilities.edit}
+                canDelete={capabilities.delete}
               />
             ) : (
               <MediaListView
@@ -500,6 +320,8 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
                   setIsPreviewOpen(true);
                 }}
                 onDeleteAsset={handleDeleteAsset}
+                canEdit={capabilities.edit}
+                canDelete={capabilities.delete}
               />
             )}
           </div>
@@ -517,6 +339,10 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
           setIsReplaceModalOpen(true);
         }}
         onDeleteAsset={handleDeleteAsset}
+        folders={folders}
+        canEdit={capabilities.edit}
+        canDelete={capabilities.delete}
+        canReplace={capabilities.replace}
       />
 
       <UploadQueueDrawer
@@ -524,7 +350,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
         onClose={() => setIsUploadQueueOpen(false)}
         queue={uploadQueue}
         onRemoveFromQueue={(id) => setUploadQueue(uploadQueue.filter((q) => q.id !== id))}
-        onCompleteUpload={handleCompleteUploadQueue}
+        onCompleteUpload={() => setIsUploadQueueOpen(false)}
       />
 
       <ReplaceArchiveModal
@@ -534,39 +360,24 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data }) => {
         onConfirmReplace={handleConfirmReplaceFile}
       />
 
+      {isFolderModalOpen && (
+        <MediaFolderDialog
+          dialogRef={folderDialogRef}
+          locale={workspaceLocale}
+          folderName={folderName}
+          onFolderNameChange={setFolderName}
+          onClose={() => setIsFolderModalOpen(false)}
+          onSubmit={handleSubmitFolder}
+        />
+      )}
+
       {/* Lightbox Quick Preview Modal */}
       {isPreviewOpen && previewAsset && (
-        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200">
-          <button
-            type="button"
-            onClick={() => setIsPreviewOpen(false)}
-            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <div className="max-w-4xl max-h-[85vh] text-center space-y-3">
-            {previewAsset.type === 'document' ? (
-              <div className="p-12 bg-white rounded-2xl text-slate-900 max-w-md mx-auto">
-                <FileText className="w-16 h-16 text-rose-500 mx-auto mb-3" />
-                <h3 className="font-bold text-base mb-1">{previewAsset.title}</h3>
-                <p className="text-xs text-slate-500 font-mono mb-4">{previewAsset.filename}</p>
-                <a
-                  href={previewAsset.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-orange-600 text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5"
-                >
-                  <Download className="w-4 h-4" /> Tải tài liệu PDF
-                </a>
-              </div>
-            ) : previewAsset.type === 'video' ? (
-              <video src={previewAsset.url} controls autoPlay className="max-h-[75vh] mx-auto rounded-xl shadow-2xl" />
-            ) : (
-              <img src={previewAsset.url} alt="" className="max-h-[75vh] mx-auto rounded-xl object-contain shadow-2xl" />
-            )}
-            <p className="text-sm font-bold text-white">{previewAsset.title}</p>
-          </div>
-        </div>
+        <MediaPreviewDialog
+          dialogRef={previewDialogRef}
+          asset={previewAsset}
+          onClose={() => setIsPreviewOpen(false)}
+        />
       )}
     </div>
   );

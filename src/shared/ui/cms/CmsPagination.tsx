@@ -6,8 +6,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface CmsPaginationProps {
   currentPage: number;
   pageSize: number;
-  totalCount: number;
-  itemLabel: string;
+  totalCount?: number;
+  totalItems?: number;
+  itemLabel?: string;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   pageSizeOptions?: number[];
@@ -30,12 +31,14 @@ export const CmsListFooter: React.FC<CmsListFooterProps> = ({ visibleCount, tota
 export const CmsPagination: React.FC<CmsPaginationProps> = ({
   currentPage,
   pageSize,
-  totalCount,
-  itemLabel,
+  totalCount: totalCountProp,
+  totalItems,
+  itemLabel = 'mục',
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [10, 20, 50, 100],
 }) => {
+  const totalCount = totalCountProp ?? totalItems ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const firstItem = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const lastItem = Math.min(currentPage * pageSize, totalCount);

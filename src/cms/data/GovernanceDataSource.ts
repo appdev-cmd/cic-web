@@ -1,4 +1,4 @@
-import type { AgencyOption, CategoryOption, CicUser, RoleOption } from '../modules/cic_users/types';
+import type { AgencyOption, CicUser, RoleOption } from '../modules/cic_users/types';
 import type {
   AccessReview,
   CmsRole,
@@ -10,16 +10,16 @@ import type {
   RoleAssignment,
   UserPermissionState,
 } from '../modules/permission_management/types';
-import type { AuditEvent, ExportJob, TrashedItem } from '../modules/activity_logs_trash/types';
+import type { AuditGovernanceData } from '@/features/activity-logs/types';
+import type { TrashedItem } from '../modules/activity_logs_trash/types';
+import type { TrashListPage } from '@/features/trash/types';
 
 export interface UsersGovernanceData {
   users: CicUser[];
   agencies: AgencyOption[];
-  productCategories: CategoryOption[];
-  newsCategories: CategoryOption[];
   roles: RoleOption[];
   permissionTasks: PermissionTask[];
-  userPermissions: Record<string, UserPermissionState>;
+  rolePermissions: Record<string, Array<{ taskId: string; action: string }>>;
 }
 
 export interface PermissionsGovernanceData {
@@ -35,11 +35,9 @@ export interface PermissionsGovernanceData {
   agencies: AgencyOption[];
 }
 
-export interface AuditGovernanceData {
-  auditLogs: AuditEvent[];
-  auditTotal: number;
-  exportJobs: ExportJob[];
-}
+export type { AuditGovernanceData } from '@/features/activity-logs/types';
+
+export type TrashGovernanceData = TrashListPage;
 
 export interface GovernanceDataSource {
   users: UsersGovernanceData;

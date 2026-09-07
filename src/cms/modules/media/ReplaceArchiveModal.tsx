@@ -9,12 +9,13 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { MediaAsset } from './types';
+import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
 
 interface ReplaceArchiveModalProps {
   isOpen: boolean;
   onClose: () => void;
   asset: MediaAsset | null;
-  onConfirmReplace: (asset: MediaAsset, newFileNote: string) => void;
+  onConfirmReplace: (asset: MediaAsset, newFileNote: string, file: File) => void;
 }
 
 export const ReplaceArchiveModal: React.FC<ReplaceArchiveModalProps> = ({
@@ -24,12 +25,14 @@ export const ReplaceArchiveModal: React.FC<ReplaceArchiveModalProps> = ({
   onConfirmReplace,
 }) => {
   const [note, setNote] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const dialogRef=useDialogA11y(isOpen,onClose);
 
   if (!isOpen || !asset) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Thay thế tệp Media" tabIndex={-1} className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl">
         {/* Header */}
         <div className="p-5 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/60 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -43,7 +46,7 @@ export const ReplaceArchiveModal: React.FC<ReplaceArchiveModalProps> = ({
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 text-amber-700 hover:text-amber-950 dark:text-amber-400">
+          <button type="button" onClick={onClose} className="flex min-h-11 min-w-11 items-center justify-center text-amber-700 hover:text-amber-950 dark:text-amber-400" aria-label="Đóng hộp thoại thay thế tệp">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -62,15 +65,16 @@ export const ReplaceArchiveModal: React.FC<ReplaceArchiveModalProps> = ({
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Chọn tệp mới để thay thế
             </label>
-            <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 text-center hover:border-orange-500 transition-colors cursor-pointer">
+            <label className="block border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 text-center hover:border-orange-500 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-orange-500">
+              <input type="file" className="sr-only" onChange={(event)=>setFile(event.target.files?.[0]??null)} accept={asset.mime_type} />
               <UploadCloud className="w-8 h-8 text-orange-500 mx-auto mb-2" />
               <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
                 Kéo thả file mới vào đây hoặc bấm để chọn tệp
               </p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Giữ nguyên ID asset & tạo tự động phiên bản v{(asset.versions.length + 1.1).toFixed(1)}
+              <p className="text-[11px] text-slate-400 mt-1 break-all">
+                {file ? file.name : `Giữ nguyên ID asset & tạo tự động phiên bản v${asset.versions.length + 1}`}
               </p>
-            </div>
+            </label>
           </div>
 
           <div>
@@ -82,27 +86,29 @@ export const ReplaceArchiveModal: React.FC<ReplaceArchiveModalProps> = ({
               placeholder="VD: Cập nhật hình ảnh chất lượng cao hơn, đổi màu nhận diện..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
+              className="min-h-11 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:ring-2 focus:ring-orange-500 focus:outline-none sm:text-xs"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-end gap-2">
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-slate-800 dark:bg-slate-850 sm:flex-row sm:items-center sm:justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
+            className="min-h-11 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
           >
             Hủy
           </button>
           <button
             type="button"
             onClick={() => {
-              onConfirmReplace(asset, note);
+              if (!file || !note.trim()) return;
+              onConfirmReplace(asset, note, file);
               onClose();
             }}
-            className="px-5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5"
+            disabled={!file || !note.trim()}
+            className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check className="w-4 h-4" /> Tiến Hành Thay Thế Global
           </button>

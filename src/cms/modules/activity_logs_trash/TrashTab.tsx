@@ -1,320 +1,169 @@
-import React, { useMemo, useState } from 'react';
-import {
-  Trash2,
-  RotateCcw,
-  Clock,
-  Search,
-  Filter,
-  AlertTriangle,
-  CheckCircle2,
-  Lock,
-  Globe,
-  FileText,
-  Eye,
-  CheckSquare,
-  Square,
-  Sparkles,
-} from 'lucide-react';
-import { TrashedItem, TrashCategory } from './types';
+import React, { useEffect, useState } from 'react';
+import { Clock, Eye, Lock, RotateCcw, Search, Trash2 } from 'lucide-react';
+import type { TrashItemViewModel, TrashListPage, TrashListQuery } from '@/features/trash/types';
+import { CmsDataGridFrame } from '@/shared/ui/cms/CmsDataGridFrame';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 
-const CMS_TRASH_MODULES = [
-  'Tin tức',
-  'Danh mục tin tức',
-  'Trang nội dung',
-  'Sự kiện',
-  'Dự án',
-  'Sản phẩm',
-  'Danh mục sản phẩm',
-  'Hãng sản xuất',
-  'Lĩnh vực ứng dụng',
-  'Loại sản phẩm',
-  'Người phụ trách kinh doanh',
-  'Dịch vụ',
-  'Menu',
-  'Thư viện media',
-  'CTA',
-  'Biểu mẫu',
-  'Yêu cầu khách hàng',
-  'Mẫu email',
-  'Người dùng',
-  'Vai trò & quyền',
-  'Cấu hình hệ thống',
-  'Ngôn ngữ giao diện',
-  'SEO & URL',
-] as const;
-
 interface TrashTabProps {
-  items: TrashedItem[];
-  onOpenItemDetail: (item: TrashedItem) => void;
-  onQuickRestore: (item: TrashedItem) => void;
-  onOpenPermanentDelete: (item: TrashedItem) => void;
+  page: TrashListPage;
+  query: TrashListQuery;
+  isLoading: boolean;
+  capabilities: { restore: boolean; purge: boolean };
+  onQueryChange: (query: TrashListQuery) => void;
+  onOpenItemDetail: (item: TrashItemViewModel) => void;
+  onQuickRestore: (item: TrashItemViewModel) => void;
+  onOpenPermanentDelete: (item: TrashItemViewModel) => void;
   onBulkRestore: (selectedIds: string[]) => void;
   onBulkDelete: (selectedIds: string[]) => void;
 }
 
 export const TrashTab: React.FC<TrashTabProps> = ({
-  items,
-  onOpenItemDetail,
-  onQuickRestore,
-  onOpenPermanentDelete,
-  onBulkRestore,
-  onBulkDelete,
+  page, query, isLoading, capabilities, onQueryChange, onOpenItemDetail,
+  onQuickRestore, onOpenPermanentDelete, onBulkRestore, onBulkDelete,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<TrashCategory>('all');
-  const [activeModule, setActiveModule] = useState('all');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchDraft, setSearchDraft] = useState(query.search);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
 
-  const moduleOptions = useMemo(
-    () => Array.from(new Set([...CMS_TRASH_MODULES, ...items.map((item) => item.moduleName)])),
-    [items]
-  );
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (searchDraft !== query.search) {
+        setSelectedItemIds([]);
+        onQueryChange({ ...query, search: searchDraft, page: 1 });
+      }
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [onQueryChange, query, searchDraft]);
 
-  // Filter items
-  const filteredItems = items.filter((item) => {
-    if (activeModule !== 'all' && item.moduleName !== activeModule) return false;
-    if (activeCategory === 'expiring_soon' && item.daysRemaining > 7) {
-      return false;
-    }
-
-    // Keyword match
-    if (searchKeyword.trim() !== '') {
-      const kw = searchKeyword.toLowerCase();
-      const matchTitle = item.title.toLowerCase().includes(kw);
-      const matchType = item.itemType.toLowerCase().includes(kw);
-      const matchModule = item.moduleName.toLowerCase().includes(kw);
-      const matchDeletedBy = item.deletedBy.name.toLowerCase().includes(kw);
-      if (!matchTitle && !matchType && !matchModule && !matchDeletedBy) return false;
-    }
-
-    return true;
-  });
-  const paginatedItems = filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  const toggleSelectItem = (id: string) => {
-    setSelectedItemIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedItemIds.length === filteredItems.length) {
-      setSelectedItemIds([]);
-    } else {
-      setSelectedItemIds(filteredItems.map((i) => i.id));
-    }
-  };
+  const selectedOnPage = page.items.filter((item) => selectedItemIds.includes(item.id));
+  const toggleSelectItem = (id: string) => setSelectedItemIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const toggleSelectAll = () => setSelectedItemIds(selectedOnPage.length === page.items.length ? [] : page.items.map((item) => item.id));
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-300">
-      {/* HEADER BAR */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Trash2 className="w-5 h-5 text-red-500" />
-            <span>Thùng rác & Phục hồi Dữ liệu (Recycle Bin & Trash Manager)</span>
+    <div className="space-y-5">
+      <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 sm:p-5 md:flex-row md:items-center">
+        <div className="min-w-0">
+          <h3 className="flex items-start gap-2 text-base font-bold text-slate-900 dark:text-white sm:items-center">
+            <Trash2 className="mt-0.5 h-5 w-5 shrink-0 text-red-500 sm:mt-0" />
+            <span className="break-words">Thùng rác & Phục hồi Dữ liệu (Recycle Bin & Trash Manager)</span>
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Mọi đối tượng xóa mềm sẽ được tự động tiêu hủy vĩnh viễn sau 30 ngày trừ khi được giữu chân pháp lý (Legal Hold).
+          <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500 dark:text-slate-400">
+            Nội dung được giữ 30 ngày trước khi đủ điều kiện xóa vĩnh viễn. Mục đang Legal Hold luôn bị chặn purge ở phía máy chủ.
           </p>
         </div>
       </div>
 
-      {/* SEARCH & CATEGORY TABS */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3">
+      <div className="space-y-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_280px]">
-          <div className="relative flex items-center text-xs">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="w-4 h-4 text-slate-400" />
-            </div>
+          <label className="relative block">
+            <span className="sr-only">Tìm trong Thùng rác</span>
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
-              type="text"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              placeholder="Tìm theo tên, loại, module hoặc người xóa..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-orange-500"
+              type="search"
+              value={searchDraft}
+              onChange={(event) => setSearchDraft(event.target.value)}
+              placeholder="Tìm theo tên, ID, module hoặc người xóa..."
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-base focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 dark:border-slate-700 dark:bg-slate-800 sm:text-sm"
             />
-          </div>
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+          </label>
+          <label className="flex min-h-11 items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
             <span className="shrink-0">Module</span>
             <select
-              value={activeModule}
-              onChange={(event) => setActiveModule(event.target.value)}
-              className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-orange-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              value={query.module}
+              onChange={(event) => {
+                setSelectedItemIds([]);
+                onQueryChange({ ...query, module: event.target.value, page: 1 });
+              }}
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-base font-medium text-slate-800 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 sm:text-sm"
             >
-              <option value="all">Tất cả module</option>
-              {moduleOptions.map((moduleName) => (
-                <option key={moduleName} value={moduleName}>{moduleName}</option>
-              ))}
+              <option value="all">Tất cả module đã hỗ trợ</option>
+              {page.moduleOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
         </div>
-
-        {/* SUB-TABS */}
         <CmsTabs
-          ariaLabel="Phân loại mục đã xóa trong thùng rác"
-          value={activeCategory}
-          onChange={(cat) => setActiveCategory(cat as TrashCategory)}
+          ariaLabel="Phân loại mục đã xóa trong Thùng rác"
+          value={query.category}
+          onChange={(category) => {
+            setSelectedItemIds([]);
+            onQueryChange({ ...query, category: category as TrashListQuery['category'], page: 1 });
+          }}
           items={[
-            { id: 'all', label: 'Tất cả mục đã xóa', count: activeModule === 'all' ? items.length : items.filter((item) => item.moduleName === activeModule).length },
-            { id: 'expiring_soon', label: 'Sắp hết hạn lưu giữ (< 7 ngày)', count: items.filter((i) => i.daysRemaining <= 7).length, icon: Clock },
+            { id: 'all', label: 'Tất cả mục đã xóa', count: query.category === 'all' ? page.total : undefined },
+            { id: 'expiring_soon', label: 'Sắp hết hạn lưu giữ (< 7 ngày)', count: page.expiringSoonTotal, icon: Clock },
           ]}
         />
       </div>
 
-      {/* BULK SELECTION BAR */}
-      <CmsBulkActionBar selectedCount={selectedItemIds.length} itemLabel="mục đã xóa" onClear={() => setSelectedItemIds([])} actions={[
-        { label: 'Phục hồi', icon: RotateCcw, variant: 'primary', onClick: () => {
-                onBulkRestore(selectedItemIds);
-                setSelectedItemIds([]);
-              } },
-        { label: 'Xóa vĩnh viễn', icon: Trash2, variant: 'danger', onClick: () => {
-                onBulkDelete(selectedItemIds);
-                setSelectedItemIds([]);
-              } },
-      ]} />
+      <CmsBulkActionBar
+        selectedCount={selectedOnPage.length}
+        itemLabel="mục đã xóa"
+        onClear={() => setSelectedItemIds([])}
+        actions={[
+          ...(capabilities.restore ? [{ label: 'Phục hồi', icon: RotateCcw, variant: 'primary' as const, onClick: () => onBulkRestore(selectedOnPage.map((item) => item.id)) }] : []),
+          ...(capabilities.purge && selectedOnPage.some((item) => item.supportsPurge) ? [{ label: 'Xóa vĩnh viễn mục hỗ trợ', icon: Trash2, variant: 'danger' as const, onClick: () => onBulkDelete(selectedOnPage.filter((item) => item.supportsPurge).map((item) => item.id)) }] : []),
+        ]}
+      />
 
-      {/* ITEMS DATA TABLE */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="cms-data-table text-left">
-            <thead>
-              <tr className="bg-slate-100/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
-                <th className="py-3 px-4 w-10 text-center">
-                  <CmsSelectionCheckbox
-                    checked={selectedItemIds.length === filteredItems.length && filteredItems.length > 0}
-                    indeterminate={selectedItemIds.length > 0 && selectedItemIds.length < filteredItems.length}
-                    onChange={toggleSelectAll}
-                    label="Chọn tất cả mục trong thùng rác"
-                  />
+      <div className="relative" aria-busy={isLoading}>
+        {isLoading && <div className="pointer-events-none absolute inset-0 z-30 rounded-2xl bg-white/55 backdrop-blur-[1px] dark:bg-slate-950/45"><span className="sr-only">Đang tải dữ liệu</span></div>}
+        <CmsDataGridFrame
+          ariaLabel="Danh sách mục trong Thùng rác"
+          refreshKey={`${query.page}:${query.pageSize}:${page.total}`}
+          footer={<CmsPagination currentPage={query.page} pageSize={query.pageSize} totalCount={page.total} itemLabel="mục đã xóa" onPageChange={(next) => { setSelectedItemIds([]); onQueryChange({ ...query, page: next }); }} onPageSizeChange={(size) => { setSelectedItemIds([]); onQueryChange({ ...query, pageSize: size, page: 1 }); }} />}
+        >
+          <table className="cms-data-table min-w-[1040px] text-left">
+            <thead className="sticky top-0 z-20">
+              <tr className="border-b border-slate-200 bg-slate-100/95 text-[11px] font-bold uppercase tracking-wider text-slate-500 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-800/95 dark:text-slate-400">
+                <th className="w-12 bg-inherit px-4 py-3 text-center lg:sticky lg:left-0 lg:z-30">
+                  <CmsSelectionCheckbox checked={page.items.length > 0 && selectedOnPage.length === page.items.length} indeterminate={selectedOnPage.length > 0 && selectedOnPage.length < page.items.length} onChange={toggleSelectAll} label="Chọn tất cả mục trên trang" />
                 </th>
-                <th className="py-3 px-4">Tên Đối tượng</th>
-                <th className="py-3 px-4">Loại & Scope</th>
-                <th className="py-3 px-4">Người xóa & Thời gian</th>
-                <th className="py-3 px-4">Hạn lưu giữ</th>
-                <th className="py-3 px-4">Kiểm tra Xung đột</th>
-                <th className="py-3 px-4 text-right">Thao tác</th>
+                <th className="min-w-64 bg-inherit px-4 py-3 lg:sticky lg:left-12 lg:z-30 lg:shadow-[6px_0_10px_-10px_rgba(15,23,42,0.5)]">Tên Đối tượng</th>
+                <th className="px-4 py-3">Loại & Scope</th>
+                <th className="px-4 py-3">Người xóa & Thời gian</th>
+                <th className="px-4 py-3">Hạn lưu giữ</th>
+                <th className="px-4 py-3">Kiểm tra Xung đột</th>
+                <th className="min-w-40 bg-inherit px-4 py-3 text-right lg:sticky lg:right-0 lg:z-30 lg:shadow-[-6px_0_10px_-10px_rgba(15,23,42,0.5)]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredItems.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
-                    Thùng rác trống hoặc không tìm thấy mục đã xóa phù hợp.
-                  </td>
-                </tr>
-              ) : (
-                paginatedItems.map((item) => {
-                  const isSelected = selectedItemIds.includes(item.id);
-
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      <td className="py-3.5 px-4 text-center">
-                        <CmsSelectionCheckbox
-                          checked={isSelected}
-                          onChange={() => toggleSelectItem(item.id)}
-                          label={`Chọn mục ${item.title}`}
-                        />
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                          <span>{item.title}</span>
-                          {item.isLegalHold && (
-                            <span
-                              className="p-1 rounded bg-purple-500/10 text-purple-600 border border-purple-500/20"
-                              title="Legal Hold: Khóa tiêu hủy vĩnh viễn"
-                            >
-                              <Lock className="w-3 h-3" />
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-mono">Module: {item.moduleName}</span>
-                      </td>
-
-                      <td className="py-3.5 px-4 font-medium text-slate-700 dark:text-slate-300">
-                        <div>{item.itemType}</div>
-                        <span className="font-bold text-orange-600 dark:text-orange-400 text-[10px]">
-                          {item.scope.siteName}
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
-                        <div>{item.deletedBy.name}</div>
-                        <span className="font-mono text-[10px] text-slate-400">{item.deletedAt}</span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-md font-mono text-[10px] font-bold ${
-                            item.daysRemaining <= 7
-                              ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                          }`}
-                        >
-                          Còn {item.daysRemaining} ngày
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                            item.dependencyStatus === 'clear'
-                              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
-                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                          }`}
-                        >
-                          {item.dependencyStatus}
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <CmsIconButton
-                            onClick={() => onOpenItemDetail(item)}
-                            icon={<Eye />}
-                            size="sm"
-                            aria-label="Xem chi tiết mục đã xóa"
-                            title="Xem chi tiết mục đã xóa"
-                          />
-
-                          <CmsIconButton
-                            onClick={() => onQuickRestore(item)}
-                            icon={<RotateCcw />}
-                            size="sm"
-                            aria-label="Khôi phục mục"
-                            title="Khôi phục mục"
-                          />
-
-                          <CmsIconButton
-                            onClick={() => onOpenPermanentDelete(item)}
-                            disabled={item.isLegalHold}
-                            icon={<Trash2 />}
-                            size="sm"
-                            variant="danger"
-                            aria-label="Xóa vĩnh viễn"
-                            title="Xóa vĩnh viễn"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+              {page.items.length === 0 ? (
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400">Thùng rác trống hoặc không tìm thấy mục phù hợp.</td></tr>
+              ) : page.items.map((item) => {
+                const selected = selectedItemIds.includes(item.id);
+                const retentionClass = item.daysRemaining <= 7
+                  ? 'border-amber-500/20 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200'
+                  : 'border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300';
+                return (
+                  <tr key={item.id} className="group bg-white transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800/40">
+                    <td className="bg-inherit px-4 py-3.5 text-center lg:sticky lg:left-0 lg:z-10"><CmsSelectionCheckbox checked={selected} onChange={() => toggleSelectItem(item.id)} label={`Chọn mục ${item.title}`} /></td>
+                    <td className="max-w-80 whitespace-normal bg-inherit px-4 py-3.5 lg:sticky lg:left-12 lg:z-10 lg:shadow-[6px_0_10px_-10px_rgba(15,23,42,0.5)]">
+                      <div className="flex min-w-0 items-center gap-2 font-bold text-slate-900 dark:text-white">
+                        <span className="break-words">{item.title}</span>
+                        {item.isLegalHold && <span className="shrink-0 rounded border border-purple-500/20 bg-purple-500/10 p-1 text-purple-600" aria-label="Đang Legal Hold"><Lock className="h-3 w-3" /></span>}
+                      </div>
+                      <span className="block max-w-80 break-all whitespace-normal text-[10px] text-slate-400">Module: {item.moduleName} · ID: {item.entityId}</span>
+                    </td>
+                    <td className="px-4 py-3.5 font-medium text-slate-700 dark:text-slate-300"><div className="max-w-48 whitespace-normal break-words">{item.itemType}</div><span className="block max-w-48 whitespace-normal break-words text-[10px] font-bold text-orange-600 dark:text-orange-400">{item.scope.siteName}</span></td>
+                    <td className="px-4 py-3.5 text-slate-600 dark:text-slate-300"><div className="max-w-48 whitespace-normal break-words">{item.deletedBy.name}</div><span className="text-[10px] text-slate-400">{item.deletedAt}</span></td>
+                    <td className="px-4 py-3.5"><span className={`rounded-md border px-2.5 py-1 text-[10px] font-bold tabular-nums ${retentionClass}`}>{item.daysRemaining === 9999 ? 'Không tự động' : `Còn ${item.daysRemaining} ngày`}</span></td>
+                    <td className="px-4 py-3.5"><span className={`rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase ${item.dependencyStatus === 'clear' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300'}`}>{item.dependencyStatus}</span></td>
+                    <td className="bg-inherit px-4 py-3.5 text-right lg:sticky lg:right-0 lg:z-10 lg:shadow-[-6px_0_10px_-10px_rgba(15,23,42,0.5)]">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <CmsIconButton onClick={() => onOpenItemDetail(item)} icon={<Eye />} size="sm" className="size-11 lg:size-8" aria-label="Xem chi tiết mục đã xóa" title="Xem chi tiết" />
+                        {capabilities.restore && <CmsIconButton onClick={() => onQuickRestore(item)} icon={<RotateCcw />} size="sm" className="size-11 lg:size-8" aria-label="Khôi phục mục" title="Khôi phục" />}
+                        {capabilities.purge && item.supportsPurge && <CmsIconButton onClick={() => onOpenPermanentDelete(item)} disabled={item.isLegalHold} icon={<Trash2 />} size="sm" className="size-11 lg:size-8" variant="danger" aria-label="Xóa vĩnh viễn" title="Xóa vĩnh viễn" />}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-        </div>
-        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredItems.length} itemLabel="mục đã xóa" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
+        </CmsDataGridFrame>
       </div>
     </div>
   );

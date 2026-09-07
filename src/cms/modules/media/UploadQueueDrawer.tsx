@@ -36,7 +36,7 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
   const isAllDone = completedCount === queue.length;
 
   return (
-    <div className="fixed bottom-4 right-6 z-50 w-full max-w-lg bg-slate-900 text-white border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 duration-200">
+    <div className="fixed inset-x-4 bottom-4 z-50 w-auto max-w-lg bg-slate-900 text-white border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 duration-200 sm:left-auto sm:right-6 sm:w-full">
       {/* Header Bar */}
       <div className="px-4 py-3 bg-slate-800 border-b border-slate-700 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -55,14 +55,16 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
           <button
             type="button"
             onClick={() => setIsMinimized(!isMinimized)}
-            className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
+            className="flex min-h-11 min-w-11 items-center justify-center text-slate-400 hover:text-white rounded-lg transition-colors"
+            aria-label={isMinimized ? 'Mở rộng hàng chờ tải lên' : 'Thu gọn hàng chờ tải lên'}
           >
             {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors"
+            className="flex min-h-11 min-w-11 items-center justify-center text-slate-400 hover:text-white rounded-lg transition-colors"
+            aria-label="Đóng hàng chờ tải lên"
           >
             <X className="w-4 h-4" />
           </button>
@@ -102,6 +104,8 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
                   </span>
                 ) : item.status === 'uploading' ? (
                   <span className="text-orange-400">Đang tải lên... {item.progress}%</span>
+                ) : item.status === 'error' ? (
+                  <span className="text-rose-300" role="alert">{item.error_message || 'Tải lên thất bại'}</span>
                 ) : (
                   <span className="text-amber-400">Đang xử lý preflight check...</span>
                 )}
@@ -109,7 +113,7 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => onRemoveFromQueue(item.id)}
-                  className="text-slate-500 hover:text-rose-400"
+                  className="min-h-11 px-2 text-slate-400 hover:text-rose-300"
                 >
                   Xóa
                 </button>
@@ -121,7 +125,7 @@ export const UploadQueueDrawer: React.FC<UploadQueueDrawerProps> = ({
             <button
               type="button"
               onClick={() => onCompleteUpload(queue)}
-              className="w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+              className="min-h-11 w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
             >
               Hoàn tất & Chèn vào Thư viện
             </button>

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { requirePermission } from '@/server/auth/guards';
 import { projectInputSchema } from '../schemas/projectInput';
-import { createProject, deleteProject, updateProject, updateProjects } from './repository';
+import { createProject, deleteProject, deleteProjects, updateProject, updateProjects } from './repository';
 
 const relationsSchema = z.object({ products_related: z.array(z.coerce.number().int().positive()).default([]), services_related: z.array(z.coerce.number().int().positive()).default([]) });
 const idSchema = z.coerce.number().int().positive();
@@ -38,8 +38,8 @@ export async function updateProjectAction(id: string, payload: unknown) {
 }
 
 export async function deleteProjectAction(id: string) {
-  await requirePermission('projects', 'delete');
-  await deleteProject(idSchema.parse(id));
+  const user = await requirePermission('projects', 'delete');
+  await deleteProject(idSchema.parse(id), user);
   refreshProjects();
 }
 
@@ -52,8 +52,8 @@ export async function bulkUpdateProjectsAction(ids: string[], patch: { published
 }
 
 export async function bulkDeleteProjectsAction(ids: string[]) {
-  await requirePermission('projects', 'delete');
+  const user = await requirePermission('projects', 'delete');
   const parsedIds = z.array(idSchema).min(1).max(100).parse(ids);
-  await Promise.all(parsedIds.map((id) => deleteProject(id)));
+  await deleteProjects([...new Set(parsedIds)], user);
   refreshProjects();
 }

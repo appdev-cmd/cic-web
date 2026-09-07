@@ -1,5 +1,6 @@
 import type { GovernanceDataSource } from './GovernanceDataSource';
-import { agenciesMock, cicUsersMock, newsCategoriesMock, productCategoriesMock, rolesMock } from '../modules/cic_users/mockData';
+import type { CicUser } from '../modules/cic_users/types';
+import { agenciesMock, cicUsersMock, rolesMock } from '../modules/cic_users/mockData';
 import {
   accessReviewsMock,
   cmsRolesMock,
@@ -15,13 +16,11 @@ import { initialTrashedItemsMock } from '../modules/activity_logs_trash/mockData
 
 export const demoGovernanceDataSource: GovernanceDataSource = {
   users: {
-    users: cicUsersMock,
+    users: cicUsersMock.map(({ country: _country, ordering: _ordering, products_categories: _productScopes, news_categories: _newsScopes, two_factor_enabled: _twoFactor, failed_login_attempts: _failedLogins, ...user }) => user) as CicUser[],
     agencies: agenciesMock,
-    productCategories: productCategoriesMock,
-    newsCategories: newsCategoriesMock,
     roles: rolesMock,
     permissionTasks: initialPermissionTasksMock,
-    userPermissions: initialUserPermissionsMock,
+    rolePermissions: {},
   },
   permissions: {
     users: permissionUsersMock,

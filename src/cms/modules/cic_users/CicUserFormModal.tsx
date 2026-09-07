@@ -1,42 +1,31 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable @next/next/no-img-element -- the form previews operator-provided avatar URLs */
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Save,
   User,
-  Mail,
-  Lock,
-  Phone,
-  Globe,
-  MapPin,
-  FileText,
   Eye,
   EyeOff,
-  Building,
-  CheckCircle2,
   AlertCircle,
   KeyRound,
   Shield,
   History,
   ShieldCheck,
-  Smartphone,
-  UserCheck,
-  UserX,
-  Clock,
-  Sparkles,
 } from 'lucide-react';
-import { AgencyOption, CicUser, RoleOption, UserAccountStatus, UserStatusHistory } from './types';
-import type { PermissionTask, UserPermissionState } from '../permission_management/types';
+import { AgencyOption, CicUser, RoleOption, UserAccountStatus } from './types';
+import type { PermissionTask } from '../permission_management/types';
+import { UserEffectiveAccessSection, UserRolesAndScopesSection, UserSecuritySection } from './CicUserFormSections';
 
 interface CicUserFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: CicUser, password?: string) => void | Promise<void>;
+  onSave: (user: CicUser, password?: string, statusReason?: string) => void | Promise<void>;
   userToEdit: CicUser | null;
   existingUsers: CicUser[];
   agencies: AgencyOption[];
   roles: RoleOption[];
   permissionTasks: PermissionTask[];
-  userPermissions: Record<string, UserPermissionState>;
+  rolePermissions: Record<string, Array<{ taskId: string; action: string }>>;
   isSaving?: boolean;
 }
 
@@ -49,10 +38,11 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   agencies,
   roles,
   permissionTasks,
-  userPermissions,
+  rolePermissions,
   isSaving = false,
 }) => {
   const isEditMode = !!userToEdit;
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Active Modal Tab
   const [activeTab, setActiveTab] = useState<'profile' | 'roles_scopes' | 'effective_access' | 'security'>('profile');
@@ -75,9 +65,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   const [avatar, setAvatar] = useState('');
   const [status, setStatus] = useState<UserAccountStatus>('active');
   const [roleId, setRoleId] = useState('role_editor');
-  const [ordering, setOrdering] = useState(0);
   const [selectedAgencies, setSelectedAgencies] = useState<string[]>(['agency_hn']);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   // Status Change Reason modal / input
   const [statusReason, setStatusReason] = useState('');
@@ -86,7 +74,9 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Populate form on open
+  /* eslint-disable react-hooks/set-state-in-effect -- dialog lifecycle intentionally rehydrates one controlled form controller */
   useEffect(() => {
+    // Reset the controlled form whenever the selected user or create dialog changes.
     if (userToEdit) {
       setUsername(userToEdit.username);
       setEmail(userToEdit.email);
@@ -104,9 +94,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       setAvatar(userToEdit.avatar || '');
       setStatus(userToEdit.status);
       setRoleId(userToEdit.primaryRoleId || 'role_editor');
-      setOrdering(userToEdit.ordering || 0);
       setSelectedAgencies(userToEdit.agencies || ['agency_hn']);
-      setTwoFactorEnabled(userToEdit.two_factor_enabled || false);
     } else {
       setUsername('');
       setEmail('');
@@ -124,14 +112,32 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       setAvatar('');
       setStatus('active');
       setRoleId(roles[0]?.id ?? '');
-      setOrdering(existingUsers.length + 1);
       setSelectedAgencies(agencies[0] ? [agencies[0].id] : []);
-      setTwoFactorEnabled(false);
     }
     setErrors({});
     setActiveTab('profile');
     setStatusReason('');
   }, [userToEdit, isOpen, existingUsers.length, roles, agencies]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const dialog = dialogRef.current;
+    const focusable = () => [...(dialog?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])];
+    focusable()[0]?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isSaving) onClose();
+      if (event.key !== 'Tab') return;
+      const items = focusable(); if (!items.length) return;
+      const first = items[0]; const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', onKeyDown); };
+  }, [isOpen, isSaving, onClose]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -186,22 +192,6 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
 
     const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-    // Prepare status history if status changed
-    let updatedHistory: UserStatusHistory[] = userToEdit?.status_history || [];
-    if (userToEdit && userToEdit.status !== status) {
-      updatedHistory = [
-        {
-          id: `sth_${Date.now()}`,
-          timestamp: nowStr,
-          previous_status: userToEdit.status,
-          new_status: status,
-          changed_by: 'admin_cic',
-          reason: statusReason.trim() || `Cập nhật trạng thái từ ${userToEdit.status} sang ${status}`,
-        },
-        ...updatedHistory,
-      ];
-    }
-
     const finalUser: CicUser = {
       id: userToEdit ? userToEdit.id : `usr_${Date.now()}`,
       username: username.trim(),
@@ -210,21 +200,15 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       lname: lname.trim(),
       full_name: `${lname} ${fname}`.trim() || userToEdit?.full_name || username,
       phone: phone.trim(),
-      country: userToEdit?.country || 'Việt Nam',
       address: address.trim(),
       summary: summary.trim(),
       avatar: avatar.trim(),
       status,
       primaryRoleId: roleId,
-      ordering: Number(ordering) || 0,
       agencies: selectedAgencies,
-      products_categories: userToEdit?.products_categories || [],
-      news_categories: userToEdit?.news_categories || [],
-      two_factor_enabled: twoFactorEnabled,
       passwordChangedAt: isChangingPassword ? nowStr : userToEdit?.passwordChangedAt,
-      failed_login_attempts: userToEdit?.failed_login_attempts || 0,
       security_logs: userToEdit?.security_logs || [],
-      status_history: updatedHistory,
+      status_history: userToEdit?.status_history || [],
       isOnline: userToEdit ? userToEdit.isOnline : false,
       created_time: userToEdit ? userToEdit.created_time : nowStr,
       updated_time: nowStr,
@@ -232,13 +216,13 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
       nums_visit: userToEdit?.nums_visit || 0,
     };
 
-    void onSave(finalUser, isChangingPassword ? password : undefined);
+    void onSave(finalUser, isChangingPassword ? password : undefined, statusReason.trim());
   };
 
   if (!isOpen) return null;
 
   const currentRole = roles.find((r) => r.id === roleId);
-  const grantedTaskIds = new Set(userToEdit ? userPermissions[userToEdit.id]?.grantedTaskIds ?? [] : []);
+  const selectedRolePermissions = rolePermissions[roleId] ?? [];
   const moduleLabels: Record<string, string> = {
     PRODUCTS: 'Sản phẩm & Giải pháp',
     NEWS: 'Tin tức & Bài viết',
@@ -247,29 +231,29 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
     BANNERS: 'Banner & Trình bày website',
   };
   const effectiveAccessRows = [...new Set(permissionTasks.map((task) => task.module))].map((module) => {
-    const allowedTasks = permissionTasks.filter((task) => task.module === module && grantedTaskIds.has(task.id));
-    const hasTask = (suffix: string) => allowedTasks.some((task) => task.id.endsWith(suffix));
+    const taskIds = new Set(permissionTasks.filter((task) => task.module === module).map((task) => task.id));
+    const hasAction = (action: string) => selectedRolePermissions.some((permission) => taskIds.has(permission.taskId) && permission.action === action);
     return {
       module: moduleLabels[module] ?? module,
-      view: hasTask('_list') || hasTask('_view'),
-      create: hasTask('_add'),
-      edit: hasTask('_edit'),
-      delete: hasTask('_del'),
+      view: hasAction('view'),
+      create: hasAction('create'),
+      edit: hasAction('edit'),
+      delete: hasAction('delete'),
     };
   });
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200 motion-reduce:animate-none">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="cms-user-dialog-title" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[92dvh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
-          <div className="flex items-center gap-3">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
               <User className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>{isEditMode ? `Tài khoản: ${userToEdit.username}` : 'Thêm mới Tài khoản Quản trị CMS'}</span>
+            <div className="min-w-0">
+              <h2 id="cms-user-dialog-title" className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
+                <span className="break-words">{isEditMode ? `Tài khoản: ${userToEdit.username}` : 'Thêm mới Tài khoản Quản trị CMS'}</span>
                 {isEditMode && (
                   <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${
                     status === 'active'
@@ -282,27 +266,29 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   </span>
                 )}
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 break-words">
                 Quản lý hồ sơ cá nhân, phân quyền role & phạm vi công việc chi tiết
               </p>
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Đóng biểu mẫu người dùng"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="min-h-11 min-w-11 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div role="tablist" aria-label="Các phần thông tin người dùng" className="flex items-center gap-1 px-6 pt-3 bg-slate-100/70 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 overflow-x-auto text-xs font-bold">
+        <div role="tablist" aria-label="Các phần thông tin người dùng" className="flex items-center gap-1 px-3 sm:px-6 pt-2 sm:pt-3 bg-slate-100/70 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 overflow-x-auto text-xs font-bold">
           <button
             type="button"
             role="tab"
             aria-selected={activeTab === 'profile'}
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`min-h-11 px-3 sm:px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'profile'
                 ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-white dark:bg-slate-900 rounded-t-xl'
                 : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -317,7 +303,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             role="tab"
             aria-selected={activeTab === 'roles_scopes'}
             onClick={() => setActiveTab('roles_scopes')}
-            className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`min-h-11 px-3 sm:px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'roles_scopes'
                 ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-white dark:bg-slate-900 rounded-t-xl'
                 : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -332,7 +318,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             role="tab"
             aria-selected={activeTab === 'effective_access'}
             onClick={() => setActiveTab('effective_access')}
-            className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`min-h-11 px-3 sm:px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'effective_access'
                 ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-white dark:bg-slate-900 rounded-t-xl'
                 : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -348,7 +334,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
               role="tab"
               aria-selected={activeTab === 'security'}
               onClick={() => setActiveTab('security')}
-              className={`px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+              className={`min-h-11 px-3 sm:px-4 py-2.5 border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'security'
                   ? 'border-orange-600 text-orange-600 dark:text-orange-400 bg-white dark:bg-slate-900 rounded-t-xl'
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -361,7 +347,7 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+        <form id="cms-user-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* TAB 1: PROFILE & LOGIN */}
           {activeTab === 'profile' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-150">
@@ -674,265 +660,28 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
             </div>
           )}
 
-          {/* TAB 2: ROLES & SCOPES */}
           {activeTab === 'roles_scopes' && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              {/* Role Selection */}
-              <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-orange-600 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
-                  <Shield className="w-4 h-4" />
-                  <span>Chọn Vai trò Quản trị (Role Assignment)</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {roles.map((r) => {
-                    const isSelected = roleId === r.id;
-                    return (
-                      <div
-                        key={r.id}
-                        onClick={() => setRoleId(r.id)}
-                        className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-white dark:bg-slate-900 border-2 border-orange-500 shadow-md shadow-orange-500/10'
-                            : 'bg-white/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${r.badge_color}`}>
-                              {r.name}
-                            </span>
-                            {isSelected && <CheckCircle2 className="w-4 h-4 text-orange-600 shrink-0" />}
-                          </div>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                            {r.description}
-                          </p>
-                        </div>
-                        <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 flex items-center justify-between font-mono">
-                          <span>Permissions count</span>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">{r.permissions_count} quyền</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Agencies Scope */}
-              <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800 text-orange-600 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
-                  <Building className="w-4 h-4" />
-                  <span>Phạm vi Đơn vị / Chi nhánh (Agencies Scope)</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {agencies.map((ag) => {
-                    const isChecked = selectedAgencies.includes(ag.id);
-                    return (
-                      <label
-                        key={ag.id}
-                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
-                          isChecked
-                            ? 'bg-white dark:bg-slate-900 border-orange-500 shadow-xs'
-                            : 'bg-white/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => {
-                              if (isChecked) setSelectedAgencies(selectedAgencies.filter((a) => a !== ag.id));
-                              else setSelectedAgencies([...selectedAgencies, ag.id]);
-                            }}
-                            className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500 cursor-pointer"
-                          />
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{ag.name}</span>
-                        </div>
-                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono text-[10px] font-bold rounded">
-                          {ag.code}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-            </div>
+            <UserRolesAndScopesSection roles={roles} roleId={roleId} onRoleChange={setRoleId} agencies={agencies} selectedAgencies={selectedAgencies} onAgenciesChange={setSelectedAgencies} />
           )}
 
-          {/* TAB 3: EFFECTIVE ACCESS SUMMARY */}
           {activeTab === 'effective_access' && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
-                <div className="text-xs space-y-1">
-                  <div className="font-bold text-orange-900 dark:text-orange-300">
-                    Tóm tắt Quyền hạn Hiệu lực (Effective Access)
-                  </div>
-                  <p className="text-orange-700 dark:text-orange-400">
-                    Bảng tóm tắt quyền được suy ra từ vai trò <strong>{currentRole?.name}</strong> và phạm vi phụ trách. Quyền trực tiếp legacy không còn được chỉnh sửa tại giao diện.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">Vai trò chính</div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-orange-600" />
-                    <span>{currentRole?.name}</span>
-                  </div>
-                  <p className="text-xs text-slate-500">{currentRole?.description}</p>
-                </div>
-
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">Số đơn vị quản lý</div>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Building className="w-4 h-4 text-blue-600" />
-                    <span>{selectedAgencies.length} Chi nhánh / HQ</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedAgencies.map((aid) => {
-                      const ag = agencies.find((a) => a.id === aid);
-                      return (
-                        <span key={aid} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold rounded">
-                          {ag?.code || aid}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Matrix List of Modules */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Ma trận phân quyền chi tiết theo module CMS
-                </div>
-                <div className="p-4 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                  {effectiveAccessRows.map((row) => (
-                    <div key={row.module} className="py-2.5 flex items-center justify-between">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{row.module}</span>
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.view ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>Xem</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.create ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>Thêm</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.edit ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>Sửa</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.delete ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>Xóa</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <UserEffectiveAccessSection currentRole={currentRole} selectedAgencies={selectedAgencies} agencies={agencies} rows={effectiveAccessRows} />
           )}
 
-          {/* TAB 4: SECURITY & ACTIVITY LOG */}
-          {activeTab === 'security' && isEditMode && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">Xác thực 2 yếu tố (2FA)</div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className={`text-xs font-bold ${twoFactorEnabled ? 'text-emerald-600' : 'text-slate-500'}`}>
-                      {twoFactorEnabled ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
-                      className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-[11px] font-bold cursor-pointer"
-                    >
-                      {twoFactorEnabled ? 'Tắt 2FA' : 'Bật 2FA'}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">Đổi mật khẩu lần cuối</div>
-                  <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-                    {userToEdit?.passwordChangedAt || 'Chưa cập nhật'}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-                  <div className="text-[11px] font-bold uppercase text-slate-400">Số lượt đăng nhập thành công</div>
-                  <div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-                    {userToEdit?.nums_visit || 0} lần
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Change Audit Trail */}
-              {userToEdit?.status_history && userToEdit.status_history.length > 0 && (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3">
-                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-amber-500" />
-                    <span>Lịch sử thay đổi trạng thái tài khoản (Status Audit Trail)</span>
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    {userToEdit.status_history.map((sth) => (
-                      <div key={sth.id} className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4">
-                        <div className="space-y-1">
-                          <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                            <span>{sth.previous_status}</span>
-                            <span>→</span>
-                            <span className="text-orange-600">{sth.new_status}</span>
-                          </div>
-                          <p className="text-[11px] text-slate-500">Lý do: {sth.reason}</p>
-                        </div>
-                        <div className="text-right text-[10px] text-slate-400 font-mono shrink-0">
-                          <div>{sth.timestamp}</div>
-                          <div>Bởi: {sth.changed_by}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Security Activity Log */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <History className="w-4 h-4 text-blue-500" />
-                  <span>Nhật ký bảo mật gần đây (Security Log)</span>
-                </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                  {userToEdit?.security_logs && userToEdit.security_logs.length > 0 ? (
-                    userToEdit.security_logs.map((log) => (
-                      <div key={log.id} className="p-3 flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${log.status === 'success' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                            <span>{log.action}</span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-mono">
-                            IP: {log.ip_address} | {log.user_agent || 'N/A'}
-                          </div>
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-mono">{log.timestamp}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-slate-400">Chưa có nhật ký hoạt động.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'security' && userToEdit && <UserSecuritySection user={userToEdit} />}
         </form>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50 dark:bg-slate-800/50">
           <button
             type="button"
             onClick={onClose}
             disabled={isSaving}
-            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
+            className="min-h-11 w-full sm:w-auto px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
           >
             Hủy bỏ
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full sm:w-auto items-center gap-2 [&>button]:min-h-11">
             {activeTab !== 'profile' && (
               <button
                 type="button"
@@ -941,17 +690,17 @@ export const CicUserFormModal: React.FC<CicUserFormModalProps> = ({
                   else if (activeTab === 'effective_access') setActiveTab('roles_scopes');
                   else if (activeTab === 'security') setActiveTab('effective_access');
                 }}
-                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
               >
                 Quay lại
               </button>
             )}
             <button
-              type="button"
-              onClick={handleSubmit}
               disabled={isSaving}
               aria-busy={isSaving}
-              className="flex items-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 cursor-pointer transition-all"
+              className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 cursor-pointer transition-all"
+              type="submit"
+              form="cms-user-form"
             >
               <Save className="w-4 h-4" />
               <span>{isEditMode ? 'Lưu thay đổi' : 'Tạo tài khoản'}</span>

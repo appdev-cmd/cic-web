@@ -27,20 +27,14 @@ export interface CicUser {
   lname: string;
   full_name: string;
   phone: string;
-  country: string;
   address: string;
   summary: string;
   avatar: string;
   status: UserAccountStatus;
   primaryRoleId: string; // Projection from the active user-role relation; not a cic_users column.
-  ordering: number;
   agencies: string[];
-  products_categories: string[];
-  news_categories: string[];
   // Security & Audit
-  two_factor_enabled?: boolean;
   passwordChangedAt?: string;
-  failed_login_attempts?: number;
   security_logs?: UserSecurityLog[];
   status_history?: UserStatusHistory[];
   // System managed fields

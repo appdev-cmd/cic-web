@@ -4,18 +4,13 @@ import {
   Trash2,
   RotateCcw,
   Clock,
-  ShieldAlert,
   AlertTriangle,
   CheckCircle2,
-  Globe,
-  FileText,
-  User,
   Info,
-  Calendar,
   Lock,
-  ArrowRight,
 } from 'lucide-react';
-import { TrashedItem } from './types';
+import type { TrashItemViewModel as TrashedItem } from '@/features/trash/types';
+import { useDialogA11y } from './useDialogA11y';
 
 interface TrashItemDetailDrawerProps {
   isOpen: boolean;
@@ -23,6 +18,8 @@ interface TrashItemDetailDrawerProps {
   item: TrashedItem | null;
   onRestore: (item: TrashedItem, targetState: 'draft' | 'inactive') => void;
   onPermanentDelete: (item: TrashedItem) => void;
+  canRestore?: boolean;
+  canPurge?: boolean;
 }
 
 export const TrashItemDetailDrawer: React.FC<TrashItemDetailDrawerProps> = ({
@@ -31,23 +28,26 @@ export const TrashItemDetailDrawer: React.FC<TrashItemDetailDrawerProps> = ({
   item,
   onRestore,
   onPermanentDelete,
+  canRestore = true,
+  canPurge = true,
 }) => {
+  const dialogRef = useDialogA11y(isOpen, onClose);
   if (!isOpen || !item) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
-      <div className="w-full max-w-xl bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-50 flex justify-end overflow-hidden bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="trash-detail-title" tabIndex={-1} className="flex h-[100dvh] w-full max-w-xl flex-col border-l border-slate-200 bg-white shadow-2xl outline-none animate-in slide-in-from-right duration-300 dark:border-slate-800 dark:bg-slate-900">
         {/* DRAWER HEADER */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/80 sm:p-5">
+          <div className="flex min-w-0 items-start gap-3">
             <div className="p-2.5 rounded-xl bg-red-500/10 text-red-600 border border-red-500/20 shrink-0">
               <Trash2 className="w-5 h-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 THÔNG TIN CHI TIẾT ĐỐI TƯỢNG XÓA MỀM
               </span>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
+              <h2 id="trash-detail-title" className="break-words text-base font-bold text-slate-900 dark:text-white">
                 {item.title}
               </h2>
             </div>
@@ -55,33 +55,34 @@ export const TrashItemDetailDrawer: React.FC<TrashItemDetailDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-all cursor-pointer"
+            aria-label="Đóng chi tiết Thùng rác"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:hover:bg-slate-800 dark:hover:text-slate-200 sm:size-9"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* RETENTION COUNTDOWN BAR */}
-        <div className="bg-amber-500/10 border-b border-amber-500/20 px-5 py-3 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
-          <div className="flex items-center gap-2">
+        <div className="flex shrink-0 flex-col items-start gap-2 border-b border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs text-amber-800 dark:text-amber-300 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex min-w-0 items-start gap-2 sm:items-center">
             <Clock className="w-4 h-4 text-amber-600 shrink-0" />
             <span>
               Hạn tự động tiêu hủy vĩnh viễn: <strong>{item.expiresAt}</strong>
             </span>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-200">
+          <span className="shrink-0 rounded-full bg-amber-500/20 px-2.5 py-0.5 font-mono text-[10px] font-bold text-amber-700 dark:text-amber-200">
             Còn {item.daysRemaining} ngày
           </span>
         </div>
 
         {/* DRAWER BODY */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5 text-xs">
+        <div className="flex-1 space-y-5 overflow-y-auto p-4 text-xs sm:p-5">
           {/* LEGAL HOLD WARNING IF ANY */}
           {item.isLegalHold && (
             <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl space-y-2 text-purple-900 dark:text-purple-200">
-              <div className="flex items-center gap-2 font-bold text-purple-700 dark:text-purple-300">
-                <Lock className="w-4 h-4 text-purple-600" />
-                <span>CẢNH BÁO: ĐANG TRONG DIỆN GIỮ CHÂN PHÁP LÝ (LEGAL HOLD)</span>
+              <div className="flex items-start gap-2 font-bold text-purple-700 dark:text-purple-300">
+                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
+                <span className="min-w-0 break-words">CẢNH BÁO: ĐANG TRONG DIỆN GIỮ CHÂN PHÁP LÝ (LEGAL HOLD)</span>
               </div>
               <p className="text-[11px] leading-relaxed">
                 {item.legalHoldReason || 'Đối tượng này đang bị khóa thao tác Xóa vĩnh viễn theo chỉ thị thanh tra / lưu trữ bắt buộc.'}
@@ -97,35 +98,35 @@ export const TrashItemDetailDrawer: React.FC<TrashItemDetailDrawerProps> = ({
             </h4>
 
             <div className="space-y-2 text-slate-600 dark:text-slate-300">
-              <div className="flex justify-between">
+              <div className="grid gap-0.5 sm:grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] sm:gap-4">
                 <span className="text-slate-400">Loại đối tượng:</span>
-                <span className="font-bold text-slate-900 dark:text-white">{item.itemType}</span>
+                <span className="break-words font-bold text-slate-900 sm:text-right dark:text-white">{item.itemType}</span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="grid gap-0.5 sm:grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] sm:gap-4">
                 <span className="text-slate-400">Module nguồn:</span>
-                <span className="font-medium">{item.moduleName}</span>
+                <span className="break-words font-medium sm:text-right">{item.moduleName}</span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="grid gap-0.5 sm:grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] sm:gap-4">
                 <span className="text-slate-400">Scope Site:</span>
-                <span className="font-bold text-orange-600 dark:text-orange-400">{item.scope.siteName}</span>
+                <span className="break-words font-bold text-orange-600 sm:text-right dark:text-orange-400">{item.scope.siteName}</span>
               </div>
 
-              <div className="flex justify-between">
+              <div className="grid gap-0.5 sm:grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] sm:gap-4">
                 <span className="text-slate-400">Người thực hiện xóa:</span>
-                <strong className="text-slate-900 dark:text-white">{item.deletedBy.name} ({item.deletedBy.role})</strong>
+                <strong className="break-words text-slate-900 sm:text-right dark:text-white">{item.deletedBy.name} ({item.deletedBy.role})</strong>
               </div>
 
-              <div className="flex justify-between">
+              <div className="grid gap-0.5 sm:grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] sm:gap-4">
                 <span className="text-slate-400">Thời gian xóa:</span>
-                <span className="font-mono">{item.deletedAt}</span>
+                <span className="break-words font-mono sm:text-right">{item.deletedAt}</span>
               </div>
 
               {item.originalUrl && (
-                <div className="flex justify-between">
+                <div className="grid gap-0.5 sm:grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] sm:gap-4">
                   <span className="text-slate-400">Đường dẫn gốc:</span>
-                  <span className="font-mono text-blue-500 truncate max-w-[200px]">{item.originalUrl}</span>
+                  <span className="break-all font-mono text-blue-500 sm:text-right">{item.originalUrl}</span>
                 </div>
               )}
             </div>
@@ -139,15 +140,15 @@ export const TrashItemDetailDrawer: React.FC<TrashItemDetailDrawerProps> = ({
                 : 'bg-amber-500/5 border-amber-500/20 text-amber-800 dark:text-amber-300'
             }`}
           >
-            <div className="flex items-center gap-2 font-bold">
+            <div className="flex items-start gap-2 font-bold">
               {item.dependencyStatus === 'clear' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
               ) : (
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
               )}
-              <span>Kiểm tra Liên kết Phụ thuộc (Dependency Check): {item.dependencyStatus.toUpperCase()}</span>
+              <span className="min-w-0 break-words">Kiểm tra Liên kết Phụ thuộc (Dependency Check): {item.dependencyStatus.toUpperCase()}</span>
             </div>
-            <p className="opacity-90">{item.dependencyDetails}</p>
+            <p className="break-words opacity-90">{item.dependencyDetails}</p>
           </div>
 
           {/* SNAPSHOT DATA */}
@@ -156,31 +157,32 @@ export const TrashItemDetailDrawer: React.FC<TrashItemDetailDrawerProps> = ({
               Dữ liệu Ảnh chụp thời điểm Xóa (Snapshot Data)
             </h4>
 
-            <pre className="p-3 bg-slate-900 text-slate-100 rounded-xl font-mono text-[11px] overflow-x-auto whitespace-pre-wrap">
+            <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-xl bg-slate-900 p-3 font-mono text-[11px] text-slate-100">
               {JSON.stringify(item.snapshotData, null, 2)}
             </pre>
           </div>
+          {!item.supportsPurge && item.purgeBlockedReason && <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300"><strong className="block text-slate-900 dark:text-white">Không thể xóa vĩnh viễn</strong>{item.purgeBlockedReason}</div>}
         </div>
 
         {/* DRAWER FOOTER WITH ACTIONS */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <button
+        <div className="flex shrink-0 flex-col items-stretch justify-between gap-3 border-t border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/90 sm:flex-row sm:items-center">
+          {canPurge && <button
             onClick={() => onPermanentDelete(item)}
             disabled={item.isLegalHold}
-            className="w-full sm:w-auto px-4 py-2 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl border border-red-200 dark:border-red-900/50 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/50 dark:bg-red-950/40 sm:w-auto"
           >
             <Trash2 className="w-4 h-4" />
             <span>Xóa Vĩnh viễn (Permanent Delete)</span>
-          </button>
+          </button>}
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <button
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+            {canRestore && <button
               onClick={() => onRestore(item, 'draft')}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer transition-all"
+              className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-600/20 transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:w-auto"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Phục hồi về Bản nháp (Draft)</span>
-            </button>
+            </button>}
           </div>
         </div>
       </div>
