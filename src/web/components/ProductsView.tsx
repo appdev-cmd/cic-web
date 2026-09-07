@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -96,6 +98,7 @@ const PROVINCES = [
 interface ProductsViewProps {
   key?: string | number;
   previewProduct?: Product;
+  products?: Product[];
 }
 
 const PRODUCT_TYPES = ['Phần mềm', 'Thiết bị', 'Giải pháp tích hợp', 'Khác'];
@@ -115,11 +118,11 @@ const getProductType = (product: Product): string => {
   return 'Khác';
 };
 
-export function ProductsView({ previewProduct }: ProductsViewProps = {}) {
+export function ProductsView({ previewProduct, products }: ProductsViewProps = {}) {
   const productsData = useMemo(() => {
-    const products = getProductsData().products;
-    return previewProduct ? [previewProduct, ...products.filter((item) => item.id !== previewProduct.id)] : products;
-  }, [previewProduct]);
+    const source = products ?? getProductsData().products;
+    return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
+  }, [previewProduct, products]);
   const [search, setSearch] = useState('');
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -181,15 +184,15 @@ export function ProductsView({ previewProduct }: ProductsViewProps = {}) {
   // Dynamic filter values generated from data
   const fields = useMemo(() => {
     return Array.from(new Set(productsData.map(p => p.field)));
-  }, []);
+  }, [productsData]);
 
   const brands = useMemo(() => {
     return Array.from(new Set(productsData.map(p => p.brand)));
-  }, []);
+  }, [productsData]);
 
   const apps = useMemo(() => {
     return Array.from(new Set(productsData.map(p => p.app)));
-  }, []);
+  }, [productsData]);
 
   // Filter subsets for Show More / Show Less
   const displayedFields = useMemo(() => {
@@ -755,7 +758,7 @@ export function ProductsView({ previewProduct }: ProductsViewProps = {}) {
   }
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pt-24 pb-20 relative overflow-hidden">
+    <div className="bg-slate-50/50 min-h-screen pt-16 pb-20 relative overflow-hidden">
       {/* Visual background accents to match main landing page */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-10 w-[600px] h-[600px] bg-orange-600/5 blur-[120px] rounded-none"></div>

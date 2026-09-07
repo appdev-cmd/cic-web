@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element, @next/next/no-location-assign-relative-destination -- legacy fallback only; WebsiteShell injects router.push */
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -18,8 +19,9 @@ import { typeH4, typeButton, typeCaption, typeLabel, typeMeta } from '@shared/co
 import { getNavigationData, type FooterNavigationItem, type PublicNavigationView } from '../features/navigation/navigationData';
 
 interface FooterProps {
-  setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'cms') => void;
-  setActiveLink: (link: string) => void;
+  onNavigate?: (href: string) => void;
+  setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'cms') => void;
+  setActiveLink?: (link: string) => void;
   onResetProducts?: () => void;
   onResetServices?: () => void;
   onResetProjects?: () => void;
@@ -28,8 +30,9 @@ interface FooterProps {
 }
 
 export const Footer = ({ 
-  setCurrentView, 
-  setActiveLink,
+  onNavigate,
+  setCurrentView: setLegacyCurrentView,
+  setActiveLink: setLegacyActiveLink,
   onResetProducts,
   onResetServices,
   onResetProjects,
@@ -48,11 +51,12 @@ export const Footer = ({
   const handleNavigation = (event: React.MouseEvent<HTMLAnchorElement>, item: FooterNavigationItem) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    setCurrentView(item.view);
-    setActiveLink(item.activeLabel);
+    setLegacyCurrentView?.(item.view);
+    setLegacyActiveLink?.(item.activeLabel);
     if (item.reset) resetByView[item.view]?.();
     if (item.scrollToTop !== false) window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.location.assign(item.href);
+    if (onNavigate) onNavigate(item.href);
+    else window.location.assign(item.href);
   };
 
   return (
@@ -180,10 +184,11 @@ export const Footer = ({
               onClick={(e) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
-                setCurrentView('privacy');
-                setActiveLink('');
+                setLegacyCurrentView?.('privacy');
+                setLegacyActiveLink?.('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                window.location.assign('/privacy');
+                if (onNavigate) onNavigate('/privacy');
+                else window.location.assign('/privacy');
               }} 
               className="hover:text-white transition-all cursor-pointer"
             >
@@ -194,10 +199,11 @@ export const Footer = ({
               onClick={(e) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
-                setCurrentView('terms');
-                setActiveLink('');
+                setLegacyCurrentView?.('terms');
+                setLegacyActiveLink?.('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                window.location.assign('/terms');
+                if (onNavigate) onNavigate('/terms');
+                else window.location.assign('/terms');
               }}
               className="hover:text-white transition-all cursor-pointer"
             >

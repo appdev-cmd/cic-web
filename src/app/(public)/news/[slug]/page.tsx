@@ -44,8 +44,8 @@ export default async function NewsArticle({ params }: { params: Promise<{ slug: 
   const related = <T extends RelatedEntity>(values: T[], ids: string[] = []) => values.filter((value) => ids.includes(String(value.id)) || ids.includes(String(value.slug)) || ids.includes(String(value.alias)));
   const relationIds = item as typeof item & NewsRelationIds;
   return (
-    <main className="relative bg-slate-50/50 pb-20 pt-28">
-      <div className="fixed left-0 top-[72px] z-[45] h-1 w-full bg-slate-200/80"><div className="h-full w-2/3 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700" /></div>
+    <main className="relative bg-slate-50/50 pb-20 pt-10">
+      <div className="fixed left-0 top-[var(--public-header-height)] z-[45] h-1 w-full bg-slate-200/80"><div className="h-full w-2/3 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700" /></div>
       <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
         <section className="relative overflow-hidden border border-slate-200/80 bg-slate-100/90 p-6 shadow-sm sm:p-10">
           <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#131b2e 1px, transparent 1px)', backgroundSize: '24px 24px' }} />

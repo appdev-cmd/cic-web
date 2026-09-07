@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-img-element -- dual-runtime legacy visual component; Next navigation is injected by WebsiteShell */
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -8,25 +9,22 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, 
   ChevronDown, 
-  ChevronLeft, 
   Menu, 
-  X, 
-  Facebook, 
-  Linkedin, 
-  Youtube, 
-  Globe 
+  X
 } from 'lucide-react';
-import { ZaloIcon } from '@shared/components/Icons';
-import { typeNav, typeButton, typeH4, typeCaption } from '@shared/components/Typography';
+import { typeNav } from '@shared/components/Typography';
 import { getNavigationData } from '../features/navigation/navigationData';
 
 interface HeaderProps {
   embedded?: boolean;
-  currentView: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
-  setCurrentView: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
-  activeLink: string;
-  setActiveLink: (link: string) => void;
-  setAboutSubTab: (tab: 'overview' | 'structure' | 'experience') => void;
+  variant?: 'overlay' | 'solid';
+  pathname?: string;
+  onNavigate?: (href: string) => void;
+  currentView?: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
+  setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
+  activeLink?: string;
+  setActiveLink?: (link: string) => void;
+  setAboutSubTab?: (tab: 'overview' | 'structure' | 'experience') => void;
   onSelectService?: (id: string | null) => void;
   onSelectProject?: (id: string | null) => void;
   onSelectNewsCategory?: (category: string | null) => void;
@@ -41,11 +39,14 @@ interface HeaderProps {
 
 export const Header = ({ 
   embedded = false,
-  currentView, 
-  setCurrentView, 
-  activeLink, 
-  setActiveLink, 
-  setAboutSubTab, 
+  variant,
+  pathname,
+  onNavigate,
+  currentView: legacyCurrentView,
+  setCurrentView: setLegacyCurrentView,
+  activeLink = '',
+  setActiveLink: setLegacyActiveLink,
+  setAboutSubTab: setLegacyAboutSubTab,
   onSelectService, 
   onSelectProject, 
   onSelectNewsCategory, 
@@ -59,6 +60,19 @@ export const Header = ({
 }: HeaderProps) => {
   const { headerLinks: navLinks } = getNavigationData();
   const resolvePublicHref = (href: string) => href.startsWith('/') ? href : `/services/${href.replace(/^\/+/, '')}`;
+  const routeSegment = pathname?.split('/').filter(Boolean)[0];
+  const currentView = legacyCurrentView ?? (
+    routeSegment && ['products', 'about', 'services', 'projects', 'news', 'events', 'contact', 'privacy', 'terms', 'search'].includes(routeSegment)
+      ? routeSegment as Exclude<NonNullable<HeaderProps['currentView']>, 'not-found'>
+      : 'home'
+  );
+  const navigateTo = (href: string) => {
+    if (onNavigate) onNavigate(href);
+    else window.location.assign(href);
+  };
+  const setCurrentView = (view: Parameters<NonNullable<HeaderProps['setCurrentView']>>[0]) => setLegacyCurrentView?.(view);
+  const setActiveLink = (link: string) => setLegacyActiveLink?.(link);
+  const setAboutSubTab = (tab: Parameters<NonNullable<HeaderProps['setAboutSubTab']>>[0]) => setLegacyAboutSubTab?.(tab);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
@@ -67,13 +81,11 @@ export const Header = ({
 
   const handleGlobalSearch = () => {
     if (localSearchQuery.trim()) {
-      if (onSearch) {
-        onSearch(localSearchQuery);
-      }
-      setCurrentView('search');
-      setActiveLink('');
+      onSearch?.(localSearchQuery);
+      setCurrentView?.('search');
+      setActiveLink?.('');
       setIsSearchOpen(false);
-      window.location.assign(`/search?q=${encodeURIComponent(localSearchQuery.trim())}`);
+      navigateTo(`/search?q=${encodeURIComponent(localSearchQuery.trim())}`);
     }
   };
 
@@ -104,14 +116,14 @@ export const Header = ({
     };
   }, [mobileMenuOpen, isSearchOpen]);
 
-  const isSolidView = currentView === 'products' || currentView === 'about' || currentView === 'services' || currentView === 'projects' || currentView === 'news' || currentView === 'events' || currentView === 'contact' || currentView === 'privacy' || currentView === 'terms' || currentView === 'search';
+  const isSolidView = variant === 'solid' || (variant === undefined && (currentView === 'products' || currentView === 'about' || currentView === 'services' || currentView === 'projects' || currentView === 'news' || currentView === 'events' || currentView === 'contact' || currentView === 'privacy' || currentView === 'terms' || currentView === 'search'));
   // Header should be styled as white/dark-text if we are in solid page views OR if we scrolled down on homepage
   const isHeaderWhite = isScrolled || isSolidView;
 
   return (
     <>
       <header 
-        className={`${embedded ? 'absolute' : 'fixed'} top-0 w-full z-50 h-18 transition-all duration-300 flex items-center ${
+        className={`${embedded ? 'absolute' : 'fixed'} top-0 w-full z-50 h-[var(--public-header-height)] transition-all duration-300 flex items-center ${
           isHeaderWhite 
             ? 'bg-white shadow-[0_4px_25px_rgba(0,0,0,0.06)] border-b border-slate-100' 
             : 'bg-transparent'
@@ -127,7 +139,7 @@ export const Header = ({
                 setCurrentView('home');
                 setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                window.location.assign('/');
+                navigateTo('/');
               }}
               className="flex items-center group h-full"
             >
@@ -156,7 +168,7 @@ export const Header = ({
                     href={resolvePublicHref(link.href)}
                     onClick={(e) => {
                       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                      window.location.assign(resolvePublicHref(link.href));
+                      navigateTo(resolvePublicHref(link.href));
                       if (link.name === 'Sản phẩm') {
                         e.preventDefault();
                         setCurrentView('products');
@@ -231,7 +243,7 @@ export const Header = ({
                             href={resolvePublicHref(subItem.href)}
                             onClick={(e) => {
                               if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                              window.location.assign(resolvePublicHref(subItem.href));
+                              navigateTo(resolvePublicHref(subItem.href));
                               if (link.name === 'Giới thiệu') {
                                 e.preventDefault();
                                 setCurrentView('about');
@@ -320,6 +332,7 @@ export const Header = ({
             <button 
               className="lg:hidden min-h-11 min-w-11 inline-flex items-center justify-center p-2 text-white rounded-[8px]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
             >
               {mobileMenuOpen ? (
                 <X size={24} className="text-slate-900" />
@@ -451,7 +464,7 @@ export const Header = ({
                           className="text-base font-semibold transition-colors flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded"
                           onClick={(e) => {
                             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                            window.location.assign(resolvePublicHref(link.href));
+                            navigateTo(resolvePublicHref(link.href));
                             setMobileMenuOpen(false);
                             if (link.name === 'Sản phẩm') {
                               e.preventDefault();
@@ -530,7 +543,7 @@ export const Header = ({
                               className="text-sm font-normal text-slate-300 hover:text-orange-400 transition-colors py-1.5 px-2 rounded hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-orange-500"
                               onClick={(e) => {
                                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                                window.location.assign(resolvePublicHref(subItem.href));
+                                navigateTo(resolvePublicHref(subItem.href));
                                 setMobileMenuOpen(false);
                                 if (link.name === 'Giới thiệu') {
                                   e.preventDefault();

@@ -1,18 +1,24 @@
 'use client';
+
 import { useState, type ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
-import { Header } from '@/web/components/Header';
+import { usePathname, useRouter } from 'next/navigation';
+import { ConsultationModal } from '@/web/components/ConsultationModal';
 import { Footer } from '@/web/components/Footer';
-type View = 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
+import { Header } from '@/web/components/Header';
+
 export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
-  const segment = pathname.split('/').filter(Boolean)[0];
-  const currentView: View = segment && ['products', 'about', 'services', 'projects', 'news', 'events', 'contact', 'privacy', 'terms', 'search'].includes(segment)
-    ? segment as View
-    : 'home';
-  const setCurrentView: (view: View) => void = () => undefined;
-  const [activeLink, setActiveLink] = useState('');
-  const noop = () => undefined;
-  const setFooterView = (view: View | 'cms') => { if (view !== 'cms') setCurrentView(view); };
-  return <div className="min-h-screen bg-white text-slate-900"><Header currentView={currentView} setCurrentView={setCurrentView} activeLink={activeLink} setActiveLink={setActiveLink} setAboutSubTab={noop} onSelectService={noop} onSelectProject={noop} onSelectNewsCategory={noop} onResetProducts={noop} onResetServices={noop} onResetProjects={noop} onResetNews={noop} onResetEvents={noop} onSearch={noop} onOpenConsultation={noop} /><main>{children}</main><Footer setCurrentView={setFooterView} setActiveLink={setActiveLink} onResetProducts={noop} onResetServices={noop} onResetProjects={noop} onResetNews={noop} onResetEvents={noop} /></div>;
+  const router = useRouter();
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
+  const navigate = (href: string) => router.push(href);
+  const headerVariant = pathname === '/' ? 'overlay' : 'solid';
+
+  return (
+    <div className="public-shell min-h-screen bg-white text-slate-900">
+      <Header variant={headerVariant} pathname={pathname} onNavigate={navigate} onOpenConsultation={() => setIsConsultationOpen(true)} />
+      <main className="public-shell-content" data-header-variant={headerVariant}>{children}</main>
+      <Footer onNavigate={navigate} />
+      <ConsultationModal isOpen={isConsultationOpen} onClose={() => setIsConsultationOpen(false)} />
+    </div>
+  );
 }

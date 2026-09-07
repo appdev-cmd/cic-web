@@ -686,7 +686,7 @@ export function NewsView({
       
       {/* Top Reading Progress Bar (Positioned under Header at top-[72px]) */}
       {selectedItem && (
-        <div className="fixed top-[72px] left-0 w-full h-1 bg-slate-200/80 z-[45]">
+        <div className="fixed top-[var(--public-header-height)] left-0 w-full h-1 bg-slate-200/80 z-[45]">
           <div
             className="h-full bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 transition-all duration-150"
             style={{ width: `${readingProgress}%` }}
