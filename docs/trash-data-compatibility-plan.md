@@ -1,6 +1,6 @@
 # Kế hoạch dữ liệu tương thích — Thùng rác
 
-> Trạng thái: Thiết kế để review, chưa phải migration hoặc SQL triển khai  
+> Trạng thái: Core đã triển khai và kiểm chứng; `[I] Integration pending`
 > Phạm vi: Module **Thùng rác** của CMS mới  
 > Nguồn đối chiếu: giao diện CMS mới, code xóa của CMS cũ trong `httpdocs/cms` và schema PostgreSQL trong `db_migrate`
 
@@ -418,3 +418,177 @@ Chưa cần ngay:
 Để khôi phục thật, bảng này phải được dùng cùng snapshot có version, transaction theo từng module và chính sách giữ file. Dữ liệu đã bị CMS cũ hard-delete không thể tái tạo đáng tin cậy; Thùng rác bắt đầu có hiệu lực từ thời điểm backend mới được triển khai.
 
 Hướng này giữ được giao diện CMS mới, tương thích tốt hơn với PostgreSQL có foreign key và hạn chế breaking change đối với dữ liệu legacy.
+
+---
+
+## Audit implementation readiness — 2026-09-03
+
+Phần này ghi nhận source và database thật tại ngày audit; khi khác với đề xuất thiết kế ở trên, hiện trạng dưới đây quyết định readiness. Audit không sửa source nghiệp vụ.
+
+### A. Scope Thùng rác
+
+- CMS-only: route chính `/cms/trash`, alias `/cms/recycle-bin`, navigation trong CMS.
+- Bao gồm list/search/filter/tab/pagination dự kiến, selection và bulk action, detail drawer, restore conflict, permanent purge, retention/dependency/legal-hold state và audit integration.
+- Không có Website public, public card/detail, SEO, CTA, gallery/media picker, create/edit form hoặc publish UI riêng. Website chỉ chịu quy tắc gián tiếp: entity đã trash không được public query trả về.
+- Không coi Activity Logs là cùng module: Thùng rác phải gọi Audit Writer dùng chung, không tự insert hoặc triển khai lại audit infrastructure.
+
+### B. UI Reference Map
+
+| Surface | Reference và hierarchy | Data/state/interaction | Responsive audit |
+|---|---|---|---|
+| CMS shell/header | `CmsPageHeader`, icon Trash, “Thùng rác”, mô tả, badge tổng số; card giới thiệu “Thùng rác & Phục hồi Dữ liệu” | Count từ list/query; route/sidebar active | **KEEP** hierarchy; **ADAPT** title/meta wrap và toolbar stack ở màn hẹp |
+| Search/filter/tabs | Search; select module; tab tất cả và sắp hết hạn 7 ngày | Search/filter phải chạy server-side cùng pagination; tab suy từ `purge_after` | **KEEP** concept; **REFACTOR** module options từ registry/live support, không catalogue mock |
+| Trash table | Chọn; tiêu đề + module; type/scope; người/thời gian xóa; retention; dependency/conflict; actions | Select row/all; detail, restore, purge; loading/empty/error/partial bulk | **ADAPT/FIX** cuộn ngang truy cập được, sticky identity/action phù hợp, text dài wrap, touch/keyboard; không đổi thành card |
+| Bulk action bar | Phục hồi và xóa vĩnh viễn các mục chọn | Server validate từng item và trả partial result; legal hold/dependency có thể chặn từng item | **KEEP** placement/concept; **DO_NOT_COPY** báo success toàn bộ hoặc chỉ xóa local state |
+| Detail drawer | Metadata, legal hold, dependency, snapshot preview, restore/purge | Detail query riêng; snapshot allowlist/redact theo entity và permission | **ADAPT/FIX** bounded `dvh`, internal scroll, focus trap, Escape, scroll lock; không render raw JSON |
+| Restore conflict modal | Restore as draft/inactive; auto-rename hoặc parent-first khi adapter hỗ trợ | Backend quyết định mode hợp lệ, check unique/parent/relation trong transaction | **KEEP** interaction concept; **DO_NOT_COPY** mode/suffix hard-code không được registry hỗ trợ |
+| Permanent-delete modal | Cảnh báo, dependency/legal-hold context, lý do/xác nhận | Permission riêng, server enforce policy, reason vào audit metadata | **KEEP** confirmation; **FIX** mobile height/wrap/focus; client confirmation không phải security control |
+| States | Empty state, disabled/legal-hold, conflict badge, toast | Cần loading/error/not-found/stale item/partial bulk thật | **DO_NOT_COPY** toast “đã ghi Audit” trước khi mutation và Audit Writer cùng thành công |
+
+Không có image/video/aspect-ratio requirement. Icon, màu trạng thái, spacing và compact table direction tiếp tục bám React reference/CMS tokens hiện có. Responsive cần kiểm chứng ở 360/390/768/1024/1280/1440 trong bước `MODULE_RESPONSIVE`; audit này chưa tuyên bố visual gate pass.
+
+### C. CMS capability/form/list map
+
+- List columns: selection, title/module, entity type/workspace, deleted actor/time, purge deadline/remaining time, dependency/restore state, legal hold và actions.
+- Search/filter/sort/pagination: search title/entity ID; module/entity type/actor/date/status/dependency/legal hold; sort deleted time và purge deadline; server pagination. Hiện Next chỉ filter client trên tối đa 200 item.
+- Actions: detail, restore, purge, bulk restore/purge; mỗi mutation phải có per-item result và server authorization.
+- Không có create/edit form, preview public, draft/publish editor, relation picker, media picker hoặc SEO. “Restore as draft/inactive” là lifecycle result do adapter kiểm soát, không phải publish form.
+- Legal hold setting/unsetting chỉ được thêm khi policy, permission và backend enforcement được duyệt; hiện chỉ có trạng thái DB/UI, không đủ chứng minh capability quản trị.
+- History/audit: dùng server-only Audit Writer và action/entity registry chuẩn sau business outcome; actor từ server auth context; không insert `cic_audit_events` trực tiếp.
+
+### D. DB tables + relation map
+
+Live PostgreSQL `cic_trash_items` có 20 cột: `id`, `workspace`, `entity_type`, `entity_id`, `module`, `title_snapshot`, `payload_snapshot`, `original_url`, `status`, `deleted_by`, `deleted_at`, `purge_after`, `restore_state`, `restored_by`, `restored_at`, `purged_by`, `purged_at`, `purge_reason`, `is_legal_hold`, `legal_hold_reason`.
+
+- Live data: 0 row; chưa có source module nào tạo item; vì vậy mock không thể dùng để suy ra schema/data support.
+- Actor relations: `deleted_by`, `restored_by`, `purged_by` liên hệ `cic_users`; UI cần projection tên/avatar phù hợp quyền thay vì copy identity vào input.
+- Source relation là polymorphic qua `(workspace, entity_type, entity_id)` và bắt buộc resolve bằng typed registry; không có FK chung tới mọi bảng nguồn.
+- Có PK, các index đơn actor/entity và unique partial cho một item `trashed` trên `(workspace, entity_type, entity_id)`. Còn thiếu index vận hành `(status, deleted_at desc)`, `(status, purge_after)`, `(deleted_by, deleted_at desc)` và retention partial cho trashed không legal hold.
+- RLS hiện tắt (`relrowsecurity=false`, `relforcerowsecurity=false`); grant quan sát chỉ có `postgres`. Đây chưa phải browser/CMS security boundary hoàn chỉnh.
+- Không có live `cic_trash_dependencies`; dependency phải do entity adapter/registry tính hoặc chỉ bổ sung persistence khi có use case thật.
+
+### E. Field Usage Map
+
+| Field | Usage | Quy tắc projection/mutation |
+|---|---|---|
+| `id` | SYSTEM_MANAGED / identity | Server tạo; list/detail/action key |
+| `workspace` | RELATION + CMS_OPERATIONAL | Bắt buộc scope query/mutation theo auth context |
+| `entity_type`, `entity_id`, `module` | RELATION + CMS_OPERATIONAL | Registry-owned; client không tự khai báo arbitrary type |
+| `title_snapshot` | SYSTEM_MANAGED + CMS_OPERATIONAL | Adapter tạo từ allowlist; dùng list, không phải form field |
+| `payload_snapshot` | SYSTEM_MANAGED / sensitive | Không có trong CMS list; detail chỉ trả view model allowlist/redacted |
+| `original_url` | CMS_OPERATIONAL | Chỉ reference/navigation an toàn, không chứng minh source còn tồn tại |
+| `status` | SYSTEM_MANAGED + CMS_OPERATIONAL | State machine backend; không PATCH tùy ý |
+| `deleted_by`, `restored_by`, `purged_by` | RELATION + AUDIT | Lấy từ server actor; không tin client |
+| `deleted_at`, `restored_at`, `purged_at` | AUDIT + SYSTEM_MANAGED | Timestamp server |
+| `purge_after` | SYSTEM_MANAGED + CMS_OPERATIONAL | Retention source; `daysRemaining` chỉ là derived ViewModel |
+| `restore_state` | SYSTEM_MANAGED + CMS_OPERATIONAL | Kết quả adapter, mặc định safe state nếu domain hỗ trợ |
+| `purge_reason` | AUDIT | CMS nhập reason nhưng server sở hữu persistence/validation |
+| `is_legal_hold`, `legal_hold_reason` | SYSTEM_MANAGED + CMS_OPERATIONAL | Không expose arbitrary edit khi hold policy chưa được duyệt |
+
+Không có `PUBLIC_READ` projection và không có CMS create/edit projection. CMS list tuyệt đối không lấy `payload_snapshot`; CMS detail lấy metadata + snapshot đã redact; relation lookup lấy registry/actor/source metadata tối thiểu. Không có cột nào được chứng minh `LEGACY_UNUSED`; payload key/entity type chưa đăng ký là `UNKNOWN` và không được đưa vào UI/validation/default/cleanup.
+
+### F. Website ↔ CMS shared-domain map
+
+```text
+Source-module delete action
+→ auth/RBAC → typed lifecycle adapter → transaction
+→ allowlisted snapshot + remove/hide active source → cic_trash_items
+→ Audit Writer
+
+CMS list/detail/action
+→ server guard + workspace scope → explicit query projection
+→ mapper/domain ViewModel → Trash UI
+
+Restore/purge
+→ server guard → lock/state validation → typed adapter transaction
+→ source DB/public visibility + trash lifecycle → Audit Writer
+→ revalidation/refresh
+```
+
+Share entity keys, state machine, permission constants, snapshot-version/adapter contract, conflict result, validation, mapper and audit registry. Không share Website/CMS UI và không tạo data/mobile logic riêng. Public modules chỉ share lifecycle/visibility rule; Thùng rác không có public query.
+
+### G. Hard dependencies
+
+| Dependency | Use case/chiều | Hiện trạng | Block |
+|---|---|---|---|
+| CMS auth/RBAC + `trash.view/restore/purge` | CMS → auth/permission catalogue | Auth foundation có; live catalogue không có task/view Trash | Có |
+| Secured Trash schema | Trash → PostgreSQL/RLS/grants/indexes/constraints | Table có nhưng 0 row, RLS tắt, thiếu operational indexes | Có |
+| PostgreSQL transaction/DAL | Adapter → source aggregate + trash item + audit outcome | Chưa có mutation/repository; query hiện dùng browser-style client | Có |
+| Typed entity lifecycle registry | Trash → source module snapshot/conflict/restore/purge | Chưa tồn tại | Có |
+| Ít nhất một source adapter hoàn chỉnh | Source delete → Trash → source restore/purge | Không module nào chứng minh roundtrip; nhiều nơi hard-delete/mock/local flag | Có |
+| Actor relation | Trash → `cic_users` | Identity source tồn tại; cần scoped projection | Không nếu dùng đúng foundation |
+| Shared Audit Writer/registry | Trash mutation → Activity Logs | Activity Logs/Audit Writer đã complete; phải reuse, không implement lại | Không |
+
+### H. Soft/integration dependencies
+
+- Mỗi source module bổ sung sau adapter đầu tiên: entity-specific snapshot/version/conflict/relation/visibility contract.
+- Media/storage cleanup và reference counting cho entity có file.
+- Retention worker/purge scheduler; cần để complete auto-retention nhưng không giả lập trong request UI.
+- Dependency graph phức tạp/parent-first và legal-hold administration policy khi có nghiệp vụ thật.
+- Các dependency này không được biểu diễn bằng hard-coded option hoặc mock record trước khi integration nguồn tồn tại.
+
+### I. Next KEEP / REFACTOR / REPLACE / REMOVE
+
+- **KEEP:** CMS route/shell/header; search/filter/tab/table hierarchy; selection/bulk action placement; detail drawer; conflict/purge modal concept; empty/legal-hold/dependency states.
+- **REFACTOR:** exact DB/domain types; explicit list/detail projections; trusted server query with auth/workspace scope/search/filter/sort/pagination; mapper; responsive/a11y; module options từ typed registry; derived retention; redacted detail.
+- **REPLACE:** runtime mock and local-state restore/purge/bulk handlers bằng repository/server workflow; fake dependency/conflict results bằng adapter; fake success/audit toast bằng mutation result.
+- **REMOVE:** `initialTrashedItemsMock` khỏi runtime; `select('*')`; raw `Record<string, any>` snapshot rendering; unsupported module/mode/options và compliance claim chưa có backend.
+
+### J. Implementation order bên trong module
+
+1. Hoàn tất hard dependencies: permission catalogue, RLS/grants/indexes, server transaction boundary và typed lifecycle registry.
+2. Chọn và hoàn tất một source-module adapter thực với snapshot allowlist/version, delete/hide, restore safe state và purge.
+3. Tạo exact domain types, state machine, projections, mapper và server list/detail query.
+4. Tạo restore/purge/bulk mutations với permission, lock, per-item validation, transaction và Audit Writer.
+5. Wire CMS UI, bỏ mock/local-state/fake toast; chỉ render capability registry thật.
+6. Test delete → trash → list/detail → restore/purge → source/public visibility → audit; sau đó nối thêm adapter module khác.
+7. Responsive/accessibility/visual regression và quality gate.
+
+### K. Acceptance checklist
+
+- [ ] Không còn mock/fallback/local-state mutation hoặc `select('*')` trong Trash runtime.
+- [ ] List/detail/search/filter/sort/pagination dùng projection thật, auth + workspace scope.
+- [ ] Ít nhất một entity đi trọn vòng delete/add, change/conflict, restore/remove, purge và visibility.
+- [ ] Snapshot có version, allowlist/redaction, không chứa secret/raw PII ngoài quyền.
+- [ ] Restore về draft/inactive hoặc safe state đúng domain; không tự publish.
+- [ ] Legal hold, retention, relation/media conflict được server enforce theo capability thật.
+- [ ] Bulk trả success/failure theo từng ID; stale/concurrent action an toàn.
+- [ ] Mọi mutation dùng server actor và Audit Writer registry sau business outcome.
+- [ ] Public/source query không lộ entity đang trash; restore/purge revalidate đúng.
+- [ ] Loading/empty/error/not-found/disabled/partial states và keyboard/touch/modal behavior pass.
+- [ ] Responsive/visual regression pass ở 360/390/768/1024/1280/1440; desktop không lệch reference.
+- [ ] Build, typecheck, lint, tests và authenticated DB/browser roundtrip pass.
+
+### Q. Ngôn ngữ VI/EN
+
+Thùng rác không quản lý content đa ngôn ngữ độc lập và không cần schema translation riêng. UI chrome/error/action text vẫn cần i18n VI/EN theo locale CMS dùng chung; title snapshot giữ nguyên ngôn ngữ của entity nguồn và không được machine-translate trong Trash. Nếu CMS locale foundation chưa phủ các key này, lập kế hoạch dictionary VI/EN ở bước implement, không thêm `locale` tùy ý vào live table.
+
+**Kết luận audit ban đầu:** `BLOCKED_BY: typed delete/restore/purge adapter contract for at least one source module`
+
+## Implementation report — 2026-09-03
+
+Audit blocker đã được đóng bằng typed lifecycle registry và adapter `project`/`projects` cho workspace VI. Đây là source adapter thật đầu tiên, không phải fake dependency.
+
+- Data layer: list/detail projection tách biệt; server search/filter/tab/pagination; snapshot detail allowlist; không `select *`.
+- Mutation: project delete/bulk delete snapshot bản ghi và product/service relations trước khi xóa nguồn; restore khóa trash row, validate snapshot/dependency/slug, insert lại cùng ID và quan hệ với `published=false`; purge scrub `payload_snapshot` và giữ tombstone/audit metadata.
+- Security: `trash.view`, `trash.restore`, `trash.purge`; server guard trên mọi read/action; `cic_trash_items` bật RLS, không cấp raw browser access; constraint/index migration idempotent.
+- Audit: `project.trashed`, `trash.restored`, `trash.purged` dùng shared registry/Writer; success nằm cùng transaction, failure được ghi sau rollback mà không che business error.
+- CMS: mock/local-state/hard-coded catalogue được thay bằng server data + registry capability; table/drawer/conflict/purge layout giữ reference và được harden responsive/keyboard.
+- Live roundtrip: project published → trash snapshot → source/public removal → restore draft + relations → trash lần hai → purge snapshot → Audit; dữ liệu verification đã được dọn và `cic_trash_items` trở lại 0 row.
+- Quality: migration verify, roundtrip, typecheck, lint, foundation boundaries, data-foundation, production build và Impeccable detector đều pass.
+
+Pending integration không block core đã triển khai: typed adapter cho các source module ngoài Projects VI; media cleanup/reference count khi entity có file; retention worker; authenticated browser screenshot regression. Trạng thái module: `[I] Integration pending`, chưa đủ `[x] Complete`.
+
+### Re-audit implementation gate — 2026-09-03
+
+Năm blocker của audit ban đầu đã được kiểm tra lại trên source và database thật:
+
+- Typed entity lifecycle registry và adapter Projects VI đã tồn tại, có snapshot version và transaction delete/restore/purge.
+- Permission `trash.view`, `trash.restore`, `trash.purge` đã có trong catalogue và mọi read/mutation đều kiểm tra phía server.
+- `cic_trash_items` đã bật RLS, revoke raw browser access, có operational indexes và validated constraints.
+- Next Trash runtime đã dùng server query/mutation thật; không còn mock hoặc local-state mutation.
+- Live roundtrip và Audit integration đã pass, dữ liệu kiểm thử đã được dọn đúng phạm vi.
+
+**Kết luận re-audit:** `READY_TO_IMPLEMENT`
+
+Kết luận này xác nhận gate cho phần core đã triển khai, không đồng nghĩa `[x] Complete`. Trạng thái tiếp tục là `[I] Integration pending`: **PENDING: Trash → các module ngoài Projects VI → typed entity adapter**; media cleanup/reference count, retention worker và authenticated browser visual regression được theo dõi theo dependency tương ứng.

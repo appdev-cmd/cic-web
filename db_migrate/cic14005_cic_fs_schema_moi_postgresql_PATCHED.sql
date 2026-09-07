@@ -143,7 +143,7 @@
 
 -- ============================================================
 -- Schema MỚI đề xuất (PostgreSQL) — cic14005_cic_fs
--- Xuất tự động từ tài liệu tham chiếu — 2026-09-03
+-- Xuất tự động từ tài liệu tham chiếu — 2026-09-07
 -- ============================================================
 
 -- Danh sách địa chỉ / chi nhánh / văn phòng của công ty (tên, điện thoại, địa chỉ, tọa độ bản đồ).
@@ -2192,9 +2192,7 @@ CREATE TABLE "cic_manufactories" (
   "seo_title" varchar(255), -- ← fs_manufactories.seo_title + fs_manufactories_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_manufactories.seo_keyword + fs_manufactories_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_description" varchar(255), -- ← fs_manufactories.seo_description + fs_manufactories_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "content" text, -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "country" varchar(255) NULL DEFAULT NULL, -- ← — (cột mới) | [MỚI] Quốc gia sản xuất — form Hãng sản xuất đang có field này nhưng DB chưa có. Nullable, không tự sinh dữ liệu cho bản ghi legacy.
-  "website" varchar(2048) NULL DEFAULT NULL -- ← — (cột mới) | [MỚI] Website chính thức của Hãng. Nullable; URL được validate/render ở tầng ứng dụng.
+  "content" text -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
 );
 
 -- Nhà sản xuất / nhà máy / thương hiệu sản phẩm.
@@ -2221,9 +2219,45 @@ CREATE TABLE "cic_manufactories_en" (
   "seo_title" varchar(255), -- ← fs_manufactories.seo_title + fs_manufactories_en.seo_title | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_keyword" varchar(255), -- ← fs_manufactories.seo_keyword + fs_manufactories_en.seo_keyword | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
   "seo_description" varchar(255), -- ← fs_manufactories.seo_description + fs_manufactories_en.seo_description | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "content" text, -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
-  "country" varchar(255) NULL DEFAULT NULL, -- ← — (cột mới) | [MỚI] Quốc gia sản xuất — workspace EN, giữ đúng contract tương ứng với bảng VI.
-  "website" varchar(2048) NULL DEFAULT NULL -- ← — (cột mới) | [MỚI] Website chính thức của Hãng — workspace EN. Không backfill nội dung không tồn tại.
+  "content" text -- ← fs_manufactories.content + fs_manufactories_en.content | Nội dung theo ngôn ngữ — nằm trực tiếp trong bảng độc lập (không tách bảng dịch riêng, theo quyết định tách VI/EN độc lập).
+);
+
+-- Bảng trung gian N-N Product ↔ Lĩnh vực ứng dụng; chuẩn hóa CSV legacy, giữ thứ tự xuất hiện.
+DROP TABLE IF EXISTS "cic_products_applications_rel" CASCADE;
+CREATE TABLE "cic_products_applications_rel" (
+  "product_id" integer NOT NULL REFERENCES cic_products(id) ON DELETE CASCADE, -- ← — (bảng mới) | Product nguồn
+  "application_id" integer NOT NULL, -- ← — (bảng mới) | Đích quan hệ
+  "ordering" integer NOT NULL DEFAULT 0, -- ← — (bảng mới) | Thứ tự trong CSV
+  CONSTRAINT "pk_cic_products_applications_rel" PRIMARY KEY ("product_id", "application_id")
+);
+
+-- Bảng trung gian N-N Product EN ↔ Lĩnh vực ứng dụng EN; chuẩn hóa CSV legacy, giữ thứ tự xuất hiện.
+DROP TABLE IF EXISTS "cic_products_applications_rel_en" CASCADE;
+CREATE TABLE "cic_products_applications_rel_en" (
+  "product_id" integer NOT NULL REFERENCES cic_products_en(id) ON DELETE CASCADE, -- ← — (bảng mới) | Product nguồn
+  "application_id" integer NOT NULL, -- ← — (bảng mới) | Đích quan hệ
+  "ordering" integer NOT NULL DEFAULT 0, -- ← — (bảng mới) | Thứ tự trong CSV
+  CONSTRAINT "pk_cic_products_applications_rel_en" PRIMARY KEY ("product_id", "application_id")
+);
+
+-- Bảng trung gian N-N Product ↔ Product liên quan; chuẩn hóa CSV legacy, giữ thứ tự xuất hiện.
+DROP TABLE IF EXISTS "cic_products_related_rel" CASCADE;
+CREATE TABLE "cic_products_related_rel" (
+  "product_id" integer NOT NULL REFERENCES cic_products(id) ON DELETE CASCADE, -- ← — (bảng mới) | Product nguồn
+  "related_product_id" integer NOT NULL REFERENCES cic_products(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Đích quan hệ
+  "ordering" integer NOT NULL DEFAULT 0, -- ← — (bảng mới) | Thứ tự trong CSV
+  CONSTRAINT "pk_cic_products_related_rel" PRIMARY KEY ("product_id", "related_product_id"),
+  CONSTRAINT "ck_cic_products_related_rel_no_self_relation" CHECK ("product_id" <> "related_product_id")
+);
+
+-- Bảng trung gian N-N Product EN ↔ Product EN liên quan; chuẩn hóa CSV legacy, giữ thứ tự xuất hiện.
+DROP TABLE IF EXISTS "cic_products_related_rel_en" CASCADE;
+CREATE TABLE "cic_products_related_rel_en" (
+  "product_id" integer NOT NULL REFERENCES cic_products_en(id) ON DELETE CASCADE, -- ← — (bảng mới) | Product nguồn
+  "related_product_id" integer NOT NULL REFERENCES cic_products_en(id) ON DELETE RESTRICT, -- ← — (bảng mới) | Đích quan hệ
+  "ordering" integer NOT NULL DEFAULT 0, -- ← — (bảng mới) | Thứ tự trong CSV
+  CONSTRAINT "pk_cic_products_related_rel_en" PRIMARY KEY ("product_id", "related_product_id"),
+  CONSTRAINT "ck_cic_products_related_rel_en_no_self_relation" CHECK ("product_id" <> "related_product_id")
 );
 
 -- Đơn hàng của khách.
@@ -3996,7 +4030,7 @@ CREATE TABLE "cic_trash_items" (
 
 -- ============================================================
 -- FK hoãn lại (bảng đích được tạo SAU trong file này) — gắn sau
--- khi toàn bộ 144 bảng đã CREATE TABLE xong
+-- khi toàn bộ 148 bảng đã CREATE TABLE xong
 -- ============================================================
 ALTER TABLE "cic_users_permission" ADD CONSTRAINT "fk_cic_users_permission_task_id" FOREIGN KEY ("task_id") REFERENCES "cic_permission_tasks"(id);
 ALTER TABLE "cic_users_permission_field" ADD CONSTRAINT "fk_cic_users_permission_field_task_id" FOREIGN KEY ("task_id") REFERENCES "cic_permission_tasks"(id);
@@ -4007,6 +4041,8 @@ ALTER TABLE "cic_news" ADD CONSTRAINT "fk_cic_news_category_id" FOREIGN KEY ("ca
 ALTER TABLE "cic_news_en" ADD CONSTRAINT "fk_cic_news_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_news_categories_en"(id);
 ALTER TABLE "cic_products" ADD CONSTRAINT "fk_cic_products_types_id" FOREIGN KEY ("types_id") REFERENCES "cic_products_types"(id);
 ALTER TABLE "cic_products_en" ADD CONSTRAINT "fk_cic_products_en_types_id" FOREIGN KEY ("types_id") REFERENCES "cic_products_types_en"(id);
+ALTER TABLE "cic_products_applications_rel" ADD CONSTRAINT "fk_cic_products_applications_rel_application_id" FOREIGN KEY ("application_id") REFERENCES "cic_application"(id) ON DELETE RESTRICT;
+ALTER TABLE "cic_products_applications_rel_en" ADD CONSTRAINT "fk_cic_products_applications_rel_en_application_id" FOREIGN KEY ("application_id") REFERENCES "cic_application_en"(id) ON DELETE RESTRICT;
 ALTER TABLE "cic_banners" ADD CONSTRAINT "fk_cic_banners_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_banners_categories"(id);
 ALTER TABLE "cic_banners_en" ADD CONSTRAINT "fk_cic_banners_en_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_banners_categories_en"(id);
 ALTER TABLE "cic_slideshow" ADD CONSTRAINT "fk_cic_slideshow_category_id" FOREIGN KEY ("category_id") REFERENCES "cic_slideshow_categories"(id);
@@ -4129,6 +4165,14 @@ CREATE INDEX IF NOT EXISTS "idx_cic_products_types_en_alias" ON "cic_products_ty
 CREATE INDEX IF NOT EXISTS "idx_cic_product_contact_products_id" ON "cic_product_contact" ("products_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_manufactories_alias" ON "cic_manufactories" ("alias");
 CREATE INDEX IF NOT EXISTS "idx_cic_manufactories_en_alias" ON "cic_manufactories_en" ("alias");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_applications_rel_product_id" ON "cic_products_applications_rel" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_applications_rel_application_id" ON "cic_products_applications_rel" ("application_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_applications_rel_en_product_id" ON "cic_products_applications_rel_en" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_applications_rel_en_application_id" ON "cic_products_applications_rel_en" ("application_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_related_rel_product_id" ON "cic_products_related_rel" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_related_rel_related_product_id" ON "cic_products_related_rel" ("related_product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_related_rel_en_product_id" ON "cic_products_related_rel_en" ("product_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_products_related_rel_en_related_product_id" ON "cic_products_related_rel_en" ("related_product_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_order_items_order_id" ON "cic_order_items" ("order_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_order_items_product_id" ON "cic_order_items" ("product_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_banners_category_id" ON "cic_banners" ("category_id");

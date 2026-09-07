@@ -18619,18 +18619,6 @@
             "col": "content"
           }
         ]
-      },
-      {
-        "col": "country",
-        "pg_type": "varchar",
-        "synthetic": true,
-        "sources": []
-      },
-      {
-        "col": "website",
-        "pg_type": "varchar",
-        "synthetic": true,
-        "sources": []
       }
     ],
     "depends_on": [],
@@ -18920,23 +18908,133 @@
             "col": "content"
           }
         ]
-      },
-      {
-        "col": "country",
-        "pg_type": "varchar",
-        "synthetic": true,
-        "sources": []
-      },
-      {
-        "col": "website",
-        "pg_type": "varchar",
-        "synthetic": true,
-        "sources": []
       }
     ],
     "depends_on": [],
     "self_ref_cols": [],
     "no_pk": false
+  },
+  "cic_products_applications_rel": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "application_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_application",
+      "cic_products"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_products_applications_rel_en": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "application_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_application_en",
+      "cic_products_en"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_products_related_rel": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "related_product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_products"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
+  },
+  "cic_products_related_rel_en": {
+    "is_translation": false,
+    "source_table": null,
+    "source_table_en": null,
+    "columns": [
+      {
+        "col": "product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "related_product_id",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      },
+      {
+        "col": "ordering",
+        "pg_type": "integer",
+        "synthetic": true,
+        "sources": []
+      }
+    ],
+    "depends_on": [
+      "cic_products_en"
+    ],
+    "self_ref_cols": [],
+    "no_pk": true
   },
   "cic_order": {
     "is_translation": false,
@@ -30526,7 +30624,7 @@
       },
       {
         "col": "tags",
-        "pg_type": "text",
+        "pg_type": "text[]",
         "synthetic": true,
         "sources": []
       },
@@ -31917,7 +32015,7 @@
       },
       {
         "col": "technologies",
-        "pg_type": "text",
+        "pg_type": "text[]",
         "synthetic": true,
         "sources": []
       },
@@ -32079,7 +32177,7 @@
       },
       {
         "col": "technologies",
-        "pg_type": "text",
+        "pg_type": "text[]",
         "synthetic": true,
         "sources": []
       },
@@ -32591,7 +32689,7 @@
       },
       {
         "col": "admin_emails",
-        "pg_type": "text",
+        "pg_type": "text[]",
         "synthetic": true,
         "sources": []
       },
@@ -32925,7 +33023,7 @@
       },
       {
         "col": "tags",
-        "pg_type": "text",
+        "pg_type": "text[]",
         "synthetic": true,
         "sources": []
       },

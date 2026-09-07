@@ -81,15 +81,6 @@
     "coverage": 100.0
   },
   {
-    "table": "cic_blocks_en",
-    "column": "module_id",
-    "ref_table": "cic_config_modules_en",
-    "total": 7,
-    "matched": 7,
-    "stub": 0,
-    "coverage": 100.0
-  },
-  {
     "table": "cic_contents",
     "column": "category_id",
     "ref_table": "cic_contents_categories",

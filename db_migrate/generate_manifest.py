@@ -210,14 +210,17 @@ def generate_manifest():
 
         if source_tables:
             # Kiểm tra bảng source có tồn tại trong MySQL không
-            valid_sources = []
-            for src in source_tables:
-                try:
-                    mysql_cur.execute(f"SHOW TABLES LIKE '{src}'")
-                    if mysql_cur.fetchone():
-                        valid_sources.append(src)
-                except:
-                    pass
+            # Preserve explicit schema-comment mappings when MySQL is offline;
+            # otherwise an offline manifest refresh would erase all sources.
+            valid_sources = list(source_tables) if mysql_cur is None else []
+            if mysql_cur is not None:
+                for src in source_tables:
+                    try:
+                        mysql_cur.execute(f"SHOW TABLES LIKE '{src}'")
+                        if mysql_cur.fetchone():
+                            valid_sources.append(src)
+                    except:
+                        pass
             
             if valid_sources:
                 if is_trans:

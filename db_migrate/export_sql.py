@@ -789,6 +789,50 @@ def export_products_categories_rel(sql_file, valid_product_ids, valid_category_i
     return len(sql_rows)
 
 
+def export_product_csv_rel(sql_file, *, mysql_table, pg_table, csv_column,
+                           target_table, target_column, valid_ids, manifest,
+                           self_relation=False):
+    """Normalize an ordered numeric CSV relation and preserve orphan targets as stubs."""
+    product_table = "cic_products_en" if mysql_table.endswith("_en") else "cic_products"
+    product_ids = valid_ids.get(product_table, set())
+    target_ids = valid_ids.get(target_table, set())
+    my_cnx = mysql_connect(mysql_table)
+    my_cur = my_cnx.cursor()
+    my_cur.execute(f"SELECT id, `{csv_column}` FROM `{mysql_table}` WHERE `{csv_column}` IS NOT NULL")
+    parsed = []
+    missing = set()
+    for product_id, raw in my_cur:
+        if product_id not in product_ids or not raw:
+            continue
+        seen = set()
+        for position, part in enumerate(str(raw).split(','), start=1):
+            token = part.strip()
+            if not token or not token.isdigit():
+                if token:
+                    log.warning("Bo token phi so %r trong %s.%s product=%s", token, mysql_table, csv_column, product_id)
+                continue
+            target_id = int(token)
+            if target_id in seen or (self_relation and target_id == product_id):
+                continue
+            seen.add(target_id)
+            if target_id not in target_ids:
+                missing.add(target_id)
+            parsed.append((product_id, target_id, position))
+    my_cur.close()
+    my_cnx.close()
+
+    if missing:
+        generate_stub_rows(sql_file, target_table, missing, manifest, valid_ids)
+        target_ids = valid_ids.get(target_table, set())
+    rows = [(left, right, ordering) for left, right, ordering in parsed if right in target_ids]
+    if rows:
+        sql_file.write(f"-- Table: {pg_table} (N-N normalized from {mysql_table}.{csv_column})\n")
+        sql_file.write(f'INSERT INTO "{pg_table}" (product_id, {target_column}, ordering) VALUES\n')
+        sql_file.write(",\n".join(f"  ({left}, {right}, {ordering})" for left, right, ordering in rows))
+        sql_file.write("\nON CONFLICT DO NOTHING;\n\n")
+    return len(rows)
+
+
 def export_translation_table(sql_file, table_name, info, valid_ids, manifest):
     """Export a translation table to SQL INSERT statements."""
     source_table = info["source_table"]
@@ -936,6 +980,19 @@ def main():
 
     base_tables_raw = [t for t, i in manifest.items() if not i["is_translation"]]
     translation_tables = [t for t, i in manifest.items() if i["is_translation"]]
+
+    # [FIX] cic_blocks_en: da duoc xuat rieng, tuong minh, bang
+    # export_blocks_en_table() (goi o duoi, sau vong lap base_tables chinh).
+    # Neu manifest cung khai bao no nhu MOT base table binh thuong (co "id",
+    # khong phai translation) thi no se BI EXPORT 2 LAN: 1 lan ngam trong
+    # vong lap base_tables o duoi, 1 lan tuong minh qua export_blocks_en_table().
+    # Loai no khoi base_tables_raw o day de chi con DUY NHAT 1 nguon xuat.
+    if "cic_blocks_en" in base_tables_raw:
+        base_tables_raw.remove("cic_blocks_en")
+        log.info(
+            "Bo qua cic_blocks_en trong base_tables_raw (manifest) - da xuat "
+            "rieng qua export_blocks_en_table() de tranh export trung 2 lan."
+        )
 
     # cic_blocks_translations: KHONG con dung duong nay nua. Bang nay khong
     # ton tai trong schema hien tai, va du lieu no tao ra (neu manifest van
@@ -1106,6 +1163,37 @@ def main():
                 except Exception:
                     log.exception("LOI khi export bang %s", pg_table)
                     report[pg_table] = "ERROR"
+
+        csv_rel_variants = [
+            dict(pg_table="cic_products_applications_rel", mysql_table="fs_products", csv_column="application", target_table="cic_application", target_column="application_id"),
+            dict(pg_table="cic_products_applications_rel_en", mysql_table="fs_products_en", csv_column="application", target_table="cic_application_en", target_column="application_id"),
+            dict(pg_table="cic_products_related_rel", mysql_table="fs_products", csv_column="products_relates", target_table="cic_products", target_column="related_product_id", self_relation=True),
+            dict(pg_table="cic_products_related_rel_en", mysql_table="fs_products_en", csv_column="products_relates", target_table="cic_products_en", target_column="related_product_id", self_relation=True),
+        ]
+        for spec in csv_rel_variants:
+            try:
+                n = export_product_csv_rel(sql_file, valid_ids=valid_ids, manifest=manifest, **spec)
+                report[spec["pg_table"]] = n
+                log.info("OK  %-35s %6d dong", spec["pg_table"], n)
+                if spec["pg_table"] in no_pk_tables:
+                    no_pk_tables.remove(spec["pg_table"])
+            except Exception:
+                log.exception("LOI khi export bang %s", spec["pg_table"])
+                report[spec["pg_table"]] = "ERROR"
+
+        # Cac relation CSV co the tao stub bang OVERRIDING SYSTEM VALUE.
+        # Dong bo sequence cua bon master locale-doc-lap de lan CREATE tiep
+        # theo khong va cham voi ID legacy/stub vua import.
+        for master_table in (
+            "cic_products", "cic_products_en",
+            "cic_application", "cic_application_en",
+        ):
+            sql_file.write(
+                "SELECT setval(pg_get_serial_sequence('" + master_table + "', 'id'), "
+                "COALESCE((SELECT MAX(id) FROM \"" + master_table + "\"), 1), "
+                "EXISTS(SELECT 1 FROM \"" + master_table + "\"));\n"
+            )
+        sql_file.write("\n")
 
         # Export translation tables
         for table_name in translation_tables:

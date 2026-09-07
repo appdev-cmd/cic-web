@@ -7,13 +7,14 @@
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3000",
-    "lint": "eslint src/app src/server src/shared/components src/shared/i18n src/shared/tokens src/shared/ui src/instrumentation.ts src/proxy.ts scripts/check-foundation-env.ts scripts/check-foundation-boundaries.mjs scripts/check-data-foundation.mjs next.config.ts postcss.config.mjs --max-warnings=0",
+    "lint": "eslint src/app src/server src/shared/components src/shared/i18n src/shared/tokens src/shared/ui src/instrumentation.ts src/proxy.ts scripts/check-foundation-env.ts scripts/check-foundation-boundaries.mjs scripts/check-data-foundation.mjs scripts/check-repository-security.mjs next.config.ts postcss.config.mjs --max-warnings=0",
     "typecheck": "npm run typecheck:foundation && npm run typecheck:legacy",
     "typecheck:foundation": "tsc --noEmit -p tsconfig.json",
     "typecheck:legacy": "tsc --noEmit -p tsconfig.legacy.json",
     "check:env": "node --experimental-strip-types scripts/check-foundation-env.ts",
     "check:boundaries": "node scripts/check-foundation-boundaries.mjs",
     "check:data-foundation": "node scripts/check-data-foundation.mjs",
+    "check:repository-security": "node scripts/check-repository-security.mjs",
     "audit:db-security": "node scripts/audit-database-security.mjs",
     "audit:auth-foundation": "node scripts/audit-auth-foundation.mjs",
     "dev:legacy": "vite --port=3001 --host=0.0.0.0",
@@ -21,8 +22,21 @@
     "preview:legacy": "vite preview",
     "check:cms-production": "node scripts/check-cms-production.mjs",
     "db:apply-audit-foundation": "node scripts/apply-activity-audit-foundation.mjs",
+    "db:apply-users-identity": "node scripts/apply-users-identity-hardening.mjs",
     "bootstrap:cms-admin": "node scripts/bootstrap-cms-admin.mjs",
-    "verify:audit-foundation": "node scripts/verify-activity-audit-foundation.mjs && node --experimental-strip-types --conditions=react-server scripts/verify-audit-redaction.mjs"
+    "verify:audit-foundation": "node scripts/verify-activity-audit-foundation.mjs && node --experimental-strip-types --conditions=react-server scripts/verify-audit-redaction.mjs",
+    "verify:users-identity": "node scripts/verify-users-identity.mjs",
+    "db:apply-trash-foundation": "node scripts/apply-trash-foundation.mjs",
+    "verify:trash-foundation": "node scripts/verify-trash-foundation.mjs",
+    "verify:trash-roundtrip": "node --import tsx --conditions=react-server scripts/verify-trash-roundtrip.ts",
+    "verify:user-role-trash-roundtrip": "node --import tsx --conditions=react-server scripts/verify-user-role-trash-roundtrip.ts",
+    "db:apply-media-foundation": "node scripts/apply-media-foundation.mjs",
+    "verify:media-foundation": "node scripts/verify-media-foundation.mjs",
+    "verify:media-roundtrip": "node --import tsx --conditions=react-server scripts/verify-media-roundtrip.ts"
+    ,"verify:product-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-category-roundtrip.ts"
+    ,"db:apply-product-categories": "node --env-file=.env.local scripts/apply-product-categories-hardening.mjs"
+    ,"verify:product-brand-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-brand-roundtrip.ts"
+    ,"db:apply-product-brands": "node --env-file=.env.local scripts/apply-product-brands-hardening.mjs"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.2.0",

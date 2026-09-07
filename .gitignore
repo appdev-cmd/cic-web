@@ -9,3 +9,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Generated local ETL artifacts can contain production-like data and credentials.
+db_migrate/cic14005_cic_fs.sql
+db_migrate/export_data.sql
+db_migrate/__pycache__/

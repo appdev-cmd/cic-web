@@ -1,30 +1,43 @@
-# Sua lai thong tin ket noi that cua ban o day truoc khi chay migrate.py
-# KHONG commit file nay len git sau khi dien mat khau that
-# (nen doc tu bien moi truong trong thuc te, day chi la ban mau don gian).
+"""Local ETL connection settings loaded from environment variables only."""
+
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(ROOT_DIR / ".env.local")
+
+
+def required(name: str) -> str:
+    value = os.getenv(name, "").strip()
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
+def port(name: str, default: int) -> int:
+    raw = os.getenv(name, str(default)).strip()
+    try:
+        return int(raw)
+    except ValueError as error:
+        raise RuntimeError(f"Environment variable {name} must be an integer") from error
+
 
 MYSQL = {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "123456",
-    "database": "cic14005_cic_fs",
+    "host": required("DB_MIGRATE_MYSQL_HOST"),
+    "port": port("DB_MIGRATE_MYSQL_PORT", 3306),
+    "user": required("DB_MIGRATE_MYSQL_USER"),
+    "password": required("DB_MIGRATE_MYSQL_PASSWORD"),
+    "database": required("DB_MIGRATE_MYSQL_DATABASE"),
 }
 
-# POSTGRES = {
-#     "host": "aws-1-ap-northeast-2.pooler.supabase.com",
-#     "port": 5432,
-#     "user": "postgres.iuaiwpvlfjnmskwyaley",
-#     "password": "7zw65CWYB8epgiZv",
-#     "dbname": "postgres",
-# }
-
-# PostgreSQL Supabase
 POSTGRES = {
-    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
-    "port": 5432,
-    "user": "postgres.tjkytlstopieiqqiiisy",
-    "password": "HpnzwRsl1J45Xpkn",
-    "dbname": "postgres",
+    "host": required("DB_MIGRATE_POSTGRES_HOST"),
+    "port": port("DB_MIGRATE_POSTGRES_PORT", 5432),
+    "user": required("DB_MIGRATE_POSTGRES_USER"),
+    "password": required("DB_MIGRATE_POSTGRES_PASSWORD"),
+    "dbname": required("DB_MIGRATE_POSTGRES_DATABASE"),
 }
 
-MANIFEST_PATH = "manifest.json"
+MANIFEST_PATH = os.getenv("DB_MIGRATE_MANIFEST_PATH", "manifest.json")

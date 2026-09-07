@@ -19,7 +19,10 @@ Không có field nghiệp vụ mới cần thêm. `cic_news` và `cic_news_en` �
 
 ### Bảng mới cần tạo
 
-Không có.
+- `cic_products_applications_rel`: Product VI ↔ Lĩnh vực ứng dụng VI.
+- `cic_products_applications_rel_en`: Product EN ↔ Lĩnh vực ứng dụng EN.
+- `cic_products_related_rel`: quan hệ có hướng Product VI → Product VI liên quan.
+- `cic_products_related_rel_en`: quan hệ có hướng Product EN → Product EN liên quan.
 
 ### Mapping / lưu ý
 
@@ -97,17 +100,14 @@ Không có.
 - `usage_count`/`count` được tính từ relation; có thể dùng `total_products` legacy như cache sau khi xác minh. Không tạo count column mới.
 - `site_scope` tồn tại trong state/payload mock nhưng không có control chỉnh sửa và website chưa đọc; chưa đủ cơ sở đưa vào PostgreSQL.
 - Cần sửa `parent_id` và `root_id` của `cic_products_categories_en` đang trỏ bảng VI thành self-reference tới bảng EN sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle. Đây là sửa constraint, không phải ADD field/table.
+- Xác minh live 2026-09-04: hai FK EN đã self-reference đúng bảng EN; VI/EN có 14/9 category, 535/255 relation, PK kép đầy đủ và 0 orphan. Việc sửa FK không còn là blocker trên DB hiện tại. Alias không rỗng/trùng trong dữ liệu live nhưng vẫn chưa có unique index chuẩn hóa; chỉ thêm sau migration/profile gate đã nêu.
+- Migration idempotent `20260904_product_categories_hardening.sql` đã áp dụng sau profiling: thêm permission catalog `product_settings` (`view/create/edit/delete`) và unique normalized alias index cho từng bảng VI/EN. Không thêm/đổi field nghiệp vụ.
 
 ## Hãng sản xuất
 
 ### Bảng hiện có cần mở rộng
 
-| Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
-| ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
-| `cic_manufactories` | `country` | `varchar(255)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất: Quốc gia sản xuất | Nullable, mặc định `NULL`; legacy nhận `NULL`, không tự sinh dữ liệu. |
-| `cic_manufactories` | `website` | `varchar(2048)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất: Website chính thức Hãng | Nullable, mặc định `NULL`; URL được validate/render độc lập. |
-| `cic_manufactories_en` | `country` | `varchar(255)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất workspace EN | Nullable, mặc định `NULL`; giữ contract tương ứng với VI. |
-| `cic_manufactories_en` | `website` | `varchar(2048)` | — | — | **BẮT BUỘC** | Form Hãng sản xuất workspace EN | Nullable, mặc định `NULL`; không backfill nội dung không tồn tại. |
+Không có field nghiệp vụ mới cần thêm. Form React reference chỉ quản lý `name`, alias tự sinh/read-only, `published` và `ordering`; các field này đã có ở cả hai bảng VI/EN.
 
 ### Bảng mới cần tạo
 
@@ -117,9 +117,10 @@ Không có.
 
 - “Tiêu đề dữ liệu” dùng `name`; “Tên hiệu” dùng trực tiếp `alias` và được application tự sinh. Không thêm field định danh khác.
 - `description` legacy vẫn được giữ nhưng CMS mới không hiển thị/chỉnh sửa trong form hoặc list Hãng.
-- `logo → image`, `status → published`, `is_featured → show_in_homepage`.
-- `country` và `website` là hai dữ liệu form đang chỉnh sửa nhưng PostgreSQL chưa có field tương đương; không nhét website vào Rich Text.
-- Checkbox “Trang chủ & Footer” hiện dùng một policy qua `show_in_homepage`; chưa thêm cờ footer riêng khi CMS không quản trị hai vị trí độc lập.
+- `status → published`; không thêm field định danh hoặc presentation khác.
+- `image`, `country`, `website`, `show_in_homepage` tồn tại trong schema legacy nhưng không có control trong form React reference. Chúng không thuộc payload/projection UI của module Hãng, không được default/NULL/ghi đè; giữ nguyên cho audit database sau.
+- Xác minh live 2026-09-04: VI 86 row/83 published, EN 49/48, alias đầy đủ. Migration implementation đồng bộ sequence ID legacy tới `max(id)` và thêm unique index trên `lower(btrim(alias))` cho từng workspace; không thêm hoặc đổi field nghiệp vụ.
+- `cic_products.manufactory` là varchar legacy chứa một ID số: 283/374 Product VI có giá trị, 73 ID phân biệt, 0 phi số và 0 orphan. Không đổi schema relation trong nhiệm vụ Hãng; mutation/delete phải kiểm tra usage bằng cast an toàn và không ghi lặp `manufactory_name` làm authority.
 
 ## Lĩnh vực ứng dụng
 
@@ -137,7 +138,13 @@ Không có.
 - `description` legacy vẫn được giữ nhưng CMS mới không hiển thị/chỉnh sửa trong form hoặc list Lĩnh vực.
 - `icon → image`, `color_badge → color_code`, `status → published`; các field nội dung, ordering và timestamps đã có.
 - `sector_group` mới chỉ là state/default trong mock payload, chưa có control chỉnh sửa và chưa được frontend đọc độc lập; không thêm field.
-- Danh sách application của sản phẩm tiếp tục dùng `cic_products.application` trong giai đoạn compatibility; chưa tạo relation table chỉ để chuẩn hóa.
+- Giữ `cic_products*.application` để compatibility, đồng thời chuẩn hóa authority sang `cic_products_applications_rel`/`_en`; exporter parse CSV, dedupe, giữ `ordering` và tạo stub unpublished cho numeric orphan trước khi insert relation.
+- Form React hiện chỉ sở hữu `name`, alias tự sinh/read-only, `published` và `ordering`. Dù tài liệu chức năng có nhắc icon/màu, `image`, `color_code` và các field type/mock `icon`, `color_badge` không được đưa vào payload DB cho tới khi có form reference mới được duyệt.
+- Xác minh live 2026-09-05: VI 12 row (12 published), EN 9 row (9 published), không alias rỗng/trùng chuẩn hóa; cả hai bảng mới có alias index không unique. `image`, `color_code`, `description`, `content`, `code` đều chưa có giá trị sử dụng trong dataset hiện tại.
+- Relation compatibility chứa toàn token số nhưng có orphan đang được Product published sử dụng: VI Application ID `8` (7 Product, 6 published), EN IDs `13` và `14` (mỗi ID một Product published). Đây là blocker dữ liệu; phải khôi phục identity hoặc sửa relation bằng nguồn có thẩm quyền trước khi triển khai Application. Không dùng `application_name`/fallback/mock để che orphan.
+- Re-audit live 2026-09-05 xác nhận chưa có stub tại `cic_application.id=8` hoặc `cic_application_en.id IN (13,14)`. Full scan vẫn có đúng ba orphan này và không có token CSV phi số/orphan khác; do record đích chưa tồn tại nên đây vẫn là relation-integrity blocker, chưa thể hạ thành data-quality follow-up.
+- Migration hardening đồng bộ sequence và unique index `lower(btrim(alias))` độc lập cho VI/EN; không thêm field nghiệp vụ. CSV legacy được giữ để compatibility, còn exporter chuẩn hóa relation sang junction table.
+- Product liên quan được chuẩn hóa tương tự từ `products_relates` sang `cic_products_related_rel`/`_en`; quan hệ có hướng, cấm self-link và giữ thứ tự CSV. Các cột CSV legacy chưa bị xóa trong giai đoạn compatibility.
 
 ## Loại sản phẩm
 
@@ -1234,7 +1241,7 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 
 - Mở rộng bảng hiện có: **19 field bắt buộc trên 11 bảng vật lý**.
 - Field có điều kiện: **1 field** bảo mật tài khoản, chỉ triển khai cùng authentication/lockout thật.
-- Bảng mới bắt buộc: **37 bảng**.
+- Bảng mới bắt buộc: **41 bảng** (đã gồm 4 bảng nối Product ↔ Application và Product liên quan cho VI/EN).
 - Bảng mới có điều kiện: **3 bảng**, không tạo cho đến khi chức năng backend tương ứng được duyệt: `cic_media_variants`, `cic_security_events`, `cic_audit_export_jobs`.
 - Không thêm field trùng nghĩa chỉ để khớp tên DTO/ViewModel.
 - Không xóa hoặc rename field legacy.

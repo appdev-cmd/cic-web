@@ -30,6 +30,19 @@ Không có.
 
 ## Thư viện media
 
+### Trạng thái live audit 2026-09-04
+
+- Tám bảng đề xuất bên dưới đã tồn tại trên PostgreSQL: assets, translations, folders/folder-assets, albums/album-assets, versions và variants; tất cả đang 0 row. Vì vậy phần “bảng mới cần tạo” bên dưới được giữ làm target contract lịch sử, không còn có nghĩa là chưa deploy.
+- Trạng thái tại thời điểm audit ban đầu: chỉ `cic_media_assets` bật RLS/read policy, permission catalog chưa có Media task và Storage chưa có bucket Media. Các blocker foundation này đã được đóng bởi mục “Foundation readiness 2026-09-04” bên dưới.
+- Index operational theo target còn thiếu trên assets (type/status/deleted, updated, tags) và một số composite ordering; chỉ xem xét bổ sung theo query plan khi implementation nối dữ liệu thật.
+- Legacy vẫn có `cic_image`/`_en` 22/13 row và `cic_image_images`/`_en` 208/75 row. Không coi chúng là asset dùng chung và không cleanup/rewrite trước inventory file + backfill manifest.
+
+### Foundation readiness 2026-09-04
+
+- Migration `20260904_media_foundation_hardening.sql` đã apply và verify live. Permission Media, RLS/policies cho 8 bảng, 8 operational index và private Storage bucket `cms-media` với 4 object policy đều pass.
+- Database/browser boundary: role `authenticated` chỉ được SELECT các bảng Media khi có `media.view`; insert/update/delete bảng vẫn server-DAL only. Storage policy cho phép object operation theo `media.create/replace/delete`, nhưng application vẫn phải validate nội dung file và ghi DB/Audit trong service flow.
+- Đây là foundation để bắt đầu implementation, không phải bằng chứng Media core đã hoạt động; bảng còn 0 row và chưa chạy legacy backfill.
+
 ### Đối chiếu
 
 - Legacy `fs_image*`, gallery, banner, slideshow, video và các path file theo từng module là các nguồn media phân mảnh; `fs_image` còn mang nghĩa bài/thư viện ảnh public, không phải asset dùng chung.

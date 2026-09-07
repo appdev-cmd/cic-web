@@ -5,7 +5,7 @@ if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
 const sql=postgres(process.env.DATABASE_URL,{max:1,prepare:false,ssl:'require'});
 try {
   const result=await sql.begin(async tx=>{
-    const [identity]=await tx`SELECT id,email FROM cic_users WHERE account_status='active' AND published IS DISTINCT FROM false AND email IS NOT NULL ORDER BY (lower(email)='admin@cic.com.vn') DESC,id LIMIT 1`;
+    const [identity]=await tx`SELECT id,email,auth_user_id FROM cic_users WHERE account_status='active' AND published IS DISTINCT FROM false AND auth_user_id IS NOT NULL ORDER BY (lower(email)='admin@cic.com.vn') DESC,id LIMIT 1`;
     if(!identity) throw new Error('No active CMS profile is available for transaction-local permission verification.');
     await tx`SELECT setval(pg_get_serial_sequence('public.cic_roles','id'),coalesce((SELECT max(id) FROM cic_roles),1),EXISTS(SELECT 1 FROM cic_roles))`;
     await tx`SELECT setval(pg_get_serial_sequence('public.cic_user_roles','id'),coalesce((SELECT max(id) FROM cic_user_roles),1),EXISTS(SELECT 1 FROM cic_user_roles))`;
@@ -16,11 +16,11 @@ try {
     let appendOnly=false;
     try { await tx.savepoint(async sp=>{await sp`UPDATE cic_activity_logs SET result='failed' WHERE id=${event.id}`;}); } catch(error) { appendOnly=String(error.message).includes('append-only'); }
     if(!appendOnly) throw new Error('Append-only trigger did not reject UPDATE.');
-    await tx`SET LOCAL ROLE authenticated`; await tx`SELECT set_config('request.jwt.claims',${JSON.stringify({email:identity.email,role:'authenticated'})},true)`;
+    await tx`SET LOCAL ROLE authenticated`; await tx`SELECT set_config('request.jwt.claims',${JSON.stringify({sub:identity.auth_user_id,email:identity.email,role:'authenticated'})},true)`;
     const [view]=await tx`SELECT public.cic_cms_has_permission('audit','view') AS allowed`; const [sensitive]=await tx`SELECT public.cic_cms_has_permission('audit','view_sensitive') AS allowed`;
     const [{count:authorizedCmsRows}]=await tx`SELECT count(*)::int AS count FROM public.cic_users`;
     let rawTableDenied=false; try { await tx.savepoint(async sp=>{await sp`SELECT id FROM public.cic_activity_logs WHERE id=${event.id}`;}); } catch(error) { rawTableDenied=String(error.code)==='42501'; }
-    await tx`SELECT set_config('request.jwt.claims',${JSON.stringify({email:'nobody@example.invalid',role:'authenticated'})},true)`; const [unauthorized]=await tx`SELECT public.cic_cms_has_permission('audit','view') AS allowed`; const [{count:unauthorizedCmsRows}]=await tx`SELECT count(*)::int AS count FROM public.cic_users`; await tx`RESET ROLE`;
+    await tx`SELECT set_config('request.jwt.claims',${JSON.stringify({sub:crypto.randomUUID(),email:'nobody@example.invalid',role:'authenticated'})},true)`; const [unauthorized]=await tx`SELECT public.cic_cms_has_permission('audit','view') AS allowed`; const [{count:unauthorizedCmsRows}]=await tx`SELECT count(*)::int AS count FROM public.cic_users`; await tx`RESET ROLE`;
     if(!view.allowed || !sensitive.allowed || unauthorized.allowed || !rawTableDenied || Number(authorizedCmsRows) <= 0 || Number(unauthorizedCmsRows) !== 0) throw new Error('RLS, raw-table isolation or permission verification failed.');
     const [bucket]=await tx`SELECT public FROM storage.buckets WHERE id='audit-exports'`; const [{count:storagePolicies}]=await tx`SELECT count(*)::int AS count FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND policyname LIKE 'audit_exports_%'`;
     if(!bucket || bucket.public || Number(storagePolicies)!==3) throw new Error('Private export storage enforcement is incomplete.');

@@ -55,6 +55,59 @@
 | UI metrics/audit/working draft | score, usedBy, version... | Không có | Không có | Không có | Trình bày demo | C | Không | Tính tại UI hoặc bỏ nếu không có backend thật |
 | SEO/published/order/timestamps | cùng nghĩa | có | field legacy | field tương ứng | Quản trị | A | Không | Hai trạng thái Draft/Published |
 
+### Field Usage Audit — Danh mục sản phẩm (2026-09-04)
+
+| Nhóm field | PostgreSQL | Phân loại | Contract/projection |
+|---|---|---|---|
+| `id` | `cic_products_categories*.id` | SYSTEM_MANAGED; RELATION | Identity read-only; create để DB sinh, không nhận từ form |
+| `name`, `alias`, `description` | hai bảng category VI/EN độc lập | CMS_EDITABLE; PUBLIC_READ | Form/nội dung danh mục; alias validate riêng từng workspace và dùng cho public URL/filter |
+| `parent_id` | self-FK đúng bảng locale | CMS_EDITABLE; RELATION | Chọn cha–con; chặn self/descendant/cycle; `NULL` là node gốc |
+| `ordering`, `published` | hai bảng category | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | List/sort/bật-tắt; public chỉ đọc `published=true` |
+| `image`, `icon`, `banner`, `published_image` | hai bảng category | UNKNOWN | DB có nhưng CMS functional doc/form category và public category surface chưa chứng minh ownership; không đưa vào input/projection mặc định |
+| `seo_title`, `seo_keyword`, `seo_description`, `link` | hai bảng category | UNKNOWN | DB có nhưng chưa có form/reference category detail được duyệt; `link` vẫn là field riêng, không suy thành canonical |
+| `show_in_homepage`, `show_in_footer` | hai bảng category | UNKNOWN | Chưa có control/consumer category được chứng minh; không tự ghi hoặc expose chỉ vì cột tồn tại |
+| `created_time`, `updated_time` | hai bảng category | AUDIT; SYSTEM_MANAGED | Server/trigger quản lý; read-only trong detail/history |
+| `level`, `root_id`, `root_alias`, `list_parents`, `alias_wrapper` | hai bảng category | SYSTEM_MANAGED | Derive/maintain từ cây trong transaction; không cho browser ghi tùy ý |
+| `total_products` | hai bảng category | LEGACY_UNUSED như authority | Usage count phải `COUNT` từ relation; chỉ giữ cache legacy nguyên trạng đến khi có reconciliation |
+| `product_id`, `category_id` | `cic_products_categories_rel*` | RELATION | Authority N-N Product↔Category; không parse/ghi lại CSV `cic_products*.category_id` trong contract mới |
+| `code` | hai bảng category | CMS_OPERATIONAL; UNKNOWN về write ownership | UI list hiển thị mã nhưng save mock lại ghi alias; cần chốt semantics trước mutation, không tự default/ghi đè |
+| `summary` | hai bảng category | UNKNOWN | Chưa có bằng chứng form/public surface; không đưa vào contract mặc định |
+| `vat`, `is_accessories`, `tablename`, `tags_group`, `promotion_main`, `hotline`, `promotion`, `price`, `type`, `sizes` | hai bảng category | LEGACY_UNUSED | Không đưa vào UI/input/validation, không NULL/default/cleanup |
+
+Projection tối thiểu: public filter/list `id,name,alias,parent_id,ordering` với `published=true`; CMS list `id,name,alias,code,parent_id,level,ordering,published,updated_time` + relation count; CMS form/detail chỉ `id,name,alias,description,parent_id,ordering,published` + audit metadata; relation lookup `id,name,alias,parent_id,published`. Các field UNKNOWN không nằm trong projection mặc định. Không dùng `select *`.
+
+### Field Usage Audit — Hãng sản xuất (2026-09-04)
+
+| Field | Phân loại | Contract |
+|---|---|---|
+| `id` | SYSTEM_MANAGED; RELATION | DB sinh; Product lưu ID legacy trong `manufactory`; không nhận ID từ form create |
+| `name`, `alias` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Tên và tên hiệu; alias sinh/validate theo workspace, unique chuẩn hóa |
+| `ordering`, `published` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Sort/trạng thái; public chỉ expose published |
+| `created_time`, `updated_time` | SYSTEM_MANAGED; AUDIT | Server/trigger quản lý; read-only |
+| `image`, `country`, `website`, `show_in_homepage` | LEGACY_UNUSED | Có trong schema/mock type nhưng không có control trong form React reference; không đưa vào input/projection/UI, không default/NULL/ghi đè |
+| `description`, `seo_*`, `content` | UNKNOWN | Schema có nhưng form/reference hãng đã duyệt chưa chứng minh ownership; không input/update/projection mặc định |
+| `code`, `tablenames`, `first_toll`, `prefix_name`, `old_id`, `color_code`, `is_retail`, `is_common` | LEGACY_UNUSED/UNKNOWN | Giữ nguyên, không default/NULL/cleanup |
+
+Projection: public filter `id,name,alias,ordering` + `published=true`; CMS list/form `id,name,alias,ordering,published,created_time,updated_time` + usage count; Product relation lookup `id,name,published`. Không `select *`. Trash lifecycle được phép snapshot đầy đủ row để khôi phục nguyên trạng nhưng không expose các cột legacy thành field form.
+
+### Field Usage Audit — Lĩnh vực ứng dụng (2026-09-05)
+
+| Field | Phân loại | Contract |
+|---|---|---|
+| `id` | SYSTEM_MANAGED; RELATION | DB sinh; Product lưu CSV ID trong `application`; không nhận ID từ form create |
+| `name`, `alias` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Tên và tên hiệu; alias application tự sinh/read-only trong UI, server validate unique theo từng workspace |
+| `ordering`, `published` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Sort/trạng thái; public chỉ expose published |
+| `created_time`, `updated_time` | SYSTEM_MANAGED; AUDIT | Server/trigger quản lý; chỉ đọc cho history/detail nếu cần |
+| `cic_products*.application` | RELATION | Compatibility CSV của ID số; parser trim/dedupe/validate; ownership ghi thuộc Product, Application chỉ đọc để usage/guard |
+| `image`, `color_code` | UNKNOWN | DB có nhưng form React không render icon/color control và live data đều rỗng; không đưa vào input/projection/default |
+| `sector_group`, `color_badge`, `icon` | LEGACY_UNUSED đối với persistence | Chỉ có trong type/mock payload, không phải cột/form-owned field; remove khỏi Application input contract |
+| `description`, `seo_title`, `seo_keyword`, `seo_description`, `content` | UNKNOWN | Không có control/consumer được chứng minh; không input/update/projection mặc định |
+| `code`, `tablenames`, `first_toll`, `show_in_homepage`, `prefix_name`, `old_id`, `is_retail`, `is_common` | LEGACY_UNUSED/UNKNOWN | Giữ nguyên; không expose, default, NULL, ghi đè hay cleanup trong module |
+
+Projection: public filter/lookup `id,name,alias,ordering` với `published=true`; CMS list/form `id,name,alias,ordering,published,created_time,updated_time` + usage count tính từ Product; relation lookup `id,name,alias,published`. Không `select *`. Trash có thể snapshot full row nội bộ để restore lossless nhưng không biến field legacy thành input. Live audit phát hiện orphan cứng: VI ID `8`; EN ID `13,14`; phải sửa integrity trước implement.
+
+Re-audit trực tiếp 2026-09-05: các target record VI `8`, EN `13`, `14` chưa tồn tại trong master tương ứng, vì vậy không thể phân loại là stub/placeholder. Quét toàn bộ 249 token VI và 89 token EN: 0 token phi số, orphan chỉ gồm VI `8` → Product `85,96,107,239,287,290,303`; EN `13` → Product `249`; EN `14` → Product `247`.
+
 ## Dịch vụ
 
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |
@@ -90,11 +143,38 @@
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |
 |---|---|---|---|---|---|---|---|---|
 | User profile | fullName/avatar/status | full_name/fname/lname/image/published | fs_users | cic_users | Người dùng | A | Không core | avatar → image; status map published trước |
+| User login identity | username/email/password input | username/email/password | fs_users | Supabase Auth + cic_users identity bridge | Tài khoản đăng nhập CMS | A/B | Không | Password/credential chỉ thuộc Supabase Auth; không đọc/trả `cic_users.password`, không ghi secret vào audit |
+| User lifecycle | status/reason | published | fs_users | cic_users.account_status + cic_user_status_history | active/suspended/deactivated/pending_invite và lịch sử | B | Không | `published` chỉ compatibility mirror; reason/history/actor do server quản lý |
+| User role | primaryRoleId/effective access | quyền trực tiếp legacy | fs_users_permission* | cic_user_roles → cic_roles → cic_role_permissions | Vai trò và quyền hiệu lực | B | Không | UI hiện chọn một role chính; không sửa quyền trực tiếp legacy trong Người dùng |
+| User agency/category scope | agencies/product/news categories | CSV IDs | fs_users | cic_users.agencies/products_categories/news_categories | Phạm vi phụ trách legacy | A | Không ở đợt này | Giữ PATCH-owned CSV để tương thích; không suy thành quan hệ chuẩn hoặc set rỗng ngoài form ownership |
+| User security summary | 2FA/password changed/failed login/security log | không đầy đủ | thiếu | auth provider + cic_users flags + cic_security_events | Bảo mật tài khoản | D có điều kiện | Không core | Chỉ hiển thị/cho thao tác khi có producer/provider thật; không dùng mock làm dữ liệu production |
+| User online/visits | online/last visit/count | status_online/last_visit_time/nums_visit | fs_users | cic_users fields | Presence và lịch sử truy cập | A/C | Không | Read-only; cần auth/session producer xác minh trước khi coi là realtime |
 | 2FA/lock/security status | mock security | Không đầy đủ | Không có | Không có | Bảo mật tài khoản | D nếu triển khai thật | Có column/table tối thiểu | Không hiển thị số liệu giả production |
-| Direct permissions | task/function/field | có | fs_permission*, fs_users_permission* | cic_permission*, cic_users_permission* | Quyền legacy | A | Không | Bảo toàn hiệu lực từng user |
-| Role/version/scope/review | mock role governance | nhóm/quyền cũ không tương đương đầy đủ | thiếu model role chuẩn | thiếu | RBAC mới | D một phần | Có bảng mới nếu giữ UI | Bỏ action review/approve nội dung; access review là nghiệp vụ security khác |
+| Direct permissions | task/function/field | có | fs_permission*, fs_users_permission* | cic_permission*, cic_users_permission* | Quyền trực tiếp legacy | C (legacy read-only) | Không | Theo cutover đã duyệt, không còn là authority của RBAC mới; giữ nguyên dữ liệu, không đưa vào form/mutation và chưa cleanup |
+| Role core | code/name/description/status/protected/permission/assignment | nhóm/quyền cũ không tương đương đầy đủ | fs_groups, fs_users_groups, fs_groups_permission | cic_roles, cic_role_permissions, cic_user_roles | RBAC mới | B | Không core | Live 2026-09-03: 1 role, 1 assignment, 76 task, 0 role-permission; Next chỉ nối list/editor |
+| Role version/scope | version/draft/active/workspace scope | không có bằng chứng tương đương | thiếu | không cần cho scope đã duyệt | Governance nâng cao | C | Không | Out of scope theo quyết định dùng UI đơn giản hiện tại; không tạo bảng |
+| SoD/access review | issue/severity/owner/reviewer/cycle/decision | không có bằng chứng tương đương | thiếu | không cần cho scope đã duyệt | Governance nâng cao | C | Không | Out of scope; loại runtime mock/disconnected UI khi implement, không tạo bảng |
 | System setting key/value | group/value | config | fs_config | cic_config | Cấu hình chung | A | Không core | Label/help/schema có thể khai báo trong code |
 | Function SEO | routeKey/path/title/description/indexable | config modules | fs_config_modules | cic_config_modules | SEO cấp route/module | A/B | Không | Cấp bậc compose từ route/module/view |
 | Translation key/value/locale | translation item | languages text/admin/content | fs_languages* | cic_languages* | Từ điển UI | A | Không core | reviewer/workflow mock không áp dụng |
 | Activity log | actor/action/entity/before/after/IP | Không có audit đúng nghĩa | fs_history khác nghiệp vụ | cic_history khác nghiệp vụ | Audit CMS | D | Có bảng mới | Không lưu secret; append-only |
-| Trash item/snapshot/source/deletedBy | trash mock | Không có soft-delete chung | Không có | Không có | Xóa/khôi phục | D | Có bảng mới | Bù cho entity không có `deleted_at`; không thay audit log |
+| Trash item/snapshot/source/deletedBy | Next runtime không còn mock | Không có soft-delete chung | Không có | `cic_trash_items` (20 cột, live 0 row sau khi dọn test) | Xóa/khôi phục | D + Projects adapter | Bảng trung tâm đã secured; adapter các module khác pending | `id/workspace/entity_type/entity_id/module/title_snapshot/original_url/status/purge_after/restore_state/is_legal_hold` phục vụ identity/operation; `payload_snapshot` server-only, list không select và detail chỉ allowlist. Actor/time/reason dùng Audit Writer. RLS bật, browser revoke, 4 operational indexes, 3 constraint validated; Projects VI roundtrip pass. |
+
+## Media field usage audit — 2026-09-04
+
+| Nhóm field | PostgreSQL thật | Phân loại | Projection / ghi chú |
+|---|---|---|---|
+| `id`, `filename`, `media_type`, `mime_type`, `storage_path`, `thumbnail_path`, `file_size_bytes`, dimensions/duration | `cic_media_assets` | SYSTEM_MANAGED; CMS_OPERATIONAL | List/detail/picker chỉ select field cần dùng; URL derive qua Storage resolver, không trả raw row hoặc `select *` |
+| `title`, `description`, `alt_text`, `caption`, `locale` | `cic_media_asset_translations` | CMS_EDITABLE; PUBLIC_READ | Một binary dùng metadata VI/EN riêng; public/picker join đúng locale, không fallback chéo workspace |
+| `credit_author`, `license_type`, `license_expiry`, `tags` | `cic_media_assets` | CMS_EDITABLE; CMS_OPERATIONAL | Validate allowlist/date/tags; không suy từ mock |
+| `workflow_status`, `deleted_at` | `cic_media_assets` | CMS_OPERATIONAL; SYSTEM_MANAGED | Filter/publishability/trash; mutation phải qua permission + service, không nhận tùy ý từ browser |
+| `created_by/at`, `updated_at`, translation `updated_by/at` | asset/translation | AUDIT | Actor từ server auth; owner name/avatar join `cic_users`, không snapshot |
+| folder `workspace/name/alias/icon/ordering` và junction ordering | folder tables | CMS_EDITABLE; RELATION | “Tất cả thư mục” là filter ảo; count/folder name derive |
+| album `workspace/title/alias/description/cover/status/ordering` và item position | album tables | CMS_EDITABLE; RELATION | Cover phải thuộc album; count/cover URL derive |
+| version fields | `cic_media_versions` | SYSTEM_MANAGED; AUDIT | Replace giữ asset ID; version history do server tạo, không cho sửa trực tiếp |
+| variant/focal/processing fields | `cic_media_variants` | SYSTEM_MANAGED | Chỉ processor/crop flow ghi; preset rows hard-code hiện tại không phải dữ liệu thật |
+| `legacy_source_table/id/path` | `cic_media_assets` | SYSTEM_MANAGED | Trace/backfill; không đưa vào form/public projection |
+| `used_by_count/refs`, `metadata_status`, issue rows, folder/owner names, absolute URLs | không phải column | RELATION / derived | Query relation/reference registry hoặc derive; không tạo snapshot/column chỉ để khớp mock |
+| toàn bộ field nghiệp vụ trong `cic_image*` ngoài trace/import | legacy tables | LEGACY_UNUSED hoặc UNKNOWN đối với Media Library mới | Không đưa vào UI/input, không default/null/cleanup; giữ nguyên để đối soát |
+
+Live implementation 2026-09-04: đủ 8 bảng `cic_media_*`, RLS + policy SELECT `media.view`, permission catalog `view/create/edit/delete/replace`, private bucket `cms-media` và bốn object policy. Runtime dùng explicit projection, signed URL, PATCH-owned mutations, locale translation, CTA/form used-by lookup, public-ready resolver và typed Trash snapshot/restore; không ghi vào các field legacy trace. Legacy backfill và chuyển consumer raw path sang Media ID vẫn là integration riêng của module sở hữu nội dung.

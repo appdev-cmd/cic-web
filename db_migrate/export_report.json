@@ -2,6 +2,10 @@
  "cic_role_permissions": "SKIPPED_NO_PK",
  "cic_products_categories_rel": 535,
  "cic_products_categories_rel_en": 255,
+ "cic_products_applications_rel": 249,
+ "cic_products_applications_rel_en": 89,
+ "cic_products_related_rel": 655,
+ "cic_products_related_rel_en": 152,
  "cic_services_products_rel": "SKIPPED_NO_PK",
  "cic_services_products_rel_en": "SKIPPED_NO_PK",
  "cic_media_folder_assets": "SKIPPED_NO_PK",
@@ -89,7 +93,6 @@
  "cic_menus_items_en": 58,
  "cic_branches": 0,
  "cic_blocks": 10,
- "cic_blocks_en": 10,
  "cic_extends_items": 0,
  "cic_contents": 12,
  "cic_contents_en": 9,
@@ -142,5 +145,6 @@
  "cic_form_submission_values": 0,
  "cic_email_templates": 0,
  "cic_email_template_versions": 0,
+ "cic_blocks_en": 10,
  "cic_media_asset_translations": 0
 }
