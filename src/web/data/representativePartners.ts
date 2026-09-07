@@ -1,4 +1,4 @@
-export type RepresentativePartnerLogo = { src: string; fit: 'contain'; visualWeight: 'compact' | 'standard' | 'wide'; preferredSurface: 'light' | 'dark'; contrastAid?: 'soft-light' | 'soft-light-strong' | 'maptek-green'; verification: 'official-site' | 'provided-source-reviewed' };
+export type RepresentativePartnerLogo = { src: string; fit: 'contain'; visualWeight: 'compact' | 'standard' | 'wide'; preferredSurface: 'light' | 'dark'; contrastAid?: 'soft-light' | 'soft-light-strong' | 'dark-surface'; verification: 'official-site' | 'provided-source-reviewed' };
 export type RepresentativePartner = { id: string; name: string; country: string; website?: string; logo: RepresentativePartnerLogo };
 export type RepresentativePartnerCountry = { id: string; name: string; partners: readonly RepresentativePartner[] };
 
@@ -24,8 +24,13 @@ export const representativePartnerCountries: readonly RepresentativePartnerCount
     partner('usa', 'autodesk', 'Autodesk', '11-autodesk.png', 'https://www.autodesk.com/', 'standard', 'light', 'soft-light'),
     partner('usa', 'ai-architecture', 'ARCHITEChTURES', '12-ai-architecture.svg', 'https://architechtures.com/en', 'wide'),
     partner('usa', 'cype', 'CYPE', '13-cype.webp', 'https://info.cype.com/en/', 'wide'),
+    partner('usa', 'sunrise-systems', 'Sunrise Systems', '45-sunrise-systems.png', undefined, 'wide'),
+    partner('usa', 'softinway', 'SoftInWay', '46-softinway.svg', 'https://www.softinway.com/', 'wide'),
   ] },
-  { id: 'canada', name: 'Canada', partners: [partner('canada', 'seequent', 'Seequent - Bentley System', '14-seequent-bentley-system.png', 'https://www.seequent.com/', 'wide', 'light', 'soft-light')] },
+  { id: 'canada', name: 'Canada', partners: [
+    partner('canada', 'seequent', 'Seequent - Bentley System', '14-seequent-bentley-system.png', 'https://www.seequent.com/', 'wide', 'light', 'soft-light'),
+    partner('canada', 'wingtra', 'Wingtra', '49-wingtra.png', 'https://wingtra.com/', 'wide'),
+  ] },
   { id: 'uk', name: 'Vương quốc Anh', partners: [
     partner('uk', 'metsims', 'Metsims', '15-metsims.png', 'https://metsims.com/', 'standard', 'light', 'soft-light'),
     partner('uk', 'zx-lidar', 'ZX Lidars', '16-zx-lidar.png', 'https://www.zxlidars.com/'),
@@ -37,13 +42,19 @@ export const representativePartnerCountries: readonly RepresentativePartnerCount
   { id: 'netherlands', name: 'Hà Lan', partners: [
     partner('netherlands', 'deltares', 'Deltares', '21-deltares.png', 'https://www.deltares.nl/en', 'wide', 'light', 'soft-light-strong'),
     partner('netherlands', 'pre-sustainability', 'PRé Sustainability', '22-pre-sustainability.png', 'https://pre-sustainability.com/', 'wide'),
+    partner('netherlands', 'marin', 'MARIN', '44-marin.jpg', 'https://www.marin.nl/', 'wide'),
+    partner('netherlands', 'ap-vandenberg', 'A.P. Vandenberg', '48-ap-vandenberg.png', undefined, 'wide'),
   ] },
   { id: 'germany', name: 'Đức', partners: [
     partner('germany', 'pytha', 'PYTHA', '23-pytha.png', 'https://www.pytha.com/', 'wide'),
     partner('germany', 'allplan', 'Allplan', '24-allplan.png', 'https://www.allplan.com/index.php?id=13001', 'standard', 'light', 'soft-light'),
     partner('germany', 'ptv', 'PTV', '25-ptv.png', 'https://www.ptvgroup.com/en'),
   ] },
-  { id: 'switzerland', name: 'Thụy Sĩ', partners: [partner('switzerland', 'geosig', 'GeoSIG', '26-geosig.png', 'https://www.geosig.com/')] },
+  { id: 'switzerland', name: 'Thụy Sĩ', partners: [
+    partner('switzerland', 'geosig', 'GeoSIG', '26-geosig.png', 'https://www.geosig.com/'),
+    partner('switzerland', 'flyability', 'Flyability', '43-flyability.svg', 'https://www.flyability.com/', 'wide', 'dark', 'dark-surface'),
+  ] },
+  { id: 'denmark', name: 'Đan Mạch', partners: [partner('denmark', 'dhi', 'DHI', '47-dhi.png', 'https://www.dhigroup.com/', 'wide')] },
   { id: 'italy', name: 'Italia', partners: [
     partner('italy', 'opera', 'Opera Software Company Inc', '27-opera-software-company-inc.png', 'https://www.operacompany.com/', 'wide'),
     partner('italy', 'emmegi', 'Emmegi', '28-emmegi.png', 'https://www.emmegi.com/en/home', 'wide', 'light', 'soft-light'),
@@ -60,7 +71,7 @@ export const representativePartnerCountries: readonly RepresentativePartnerCount
     partner('china', 'chc', 'CHCNAV', '38-chc.png', 'https://www.chcnav.com/', 'standard'),
   ] },
   { id: 'singapore', name: 'Singapore', partners: [partner('singapore', 'bimage', 'BIMAGE', '39-bimage.png', undefined, 'wide', 'light', 'soft-light')] },
-  { id: 'australia', name: 'Australia', partners: [partner('australia', 'maptek', 'Maptek', '40-maptek.svg', 'https://www.maptek.com/', 'wide', 'dark', 'maptek-green'), partner('australia', 'deswik', 'Deswik', '41-deswik.png', 'https://www.deswik.com/', 'wide'), partner('australia', 'metron', 'METRON', '42-metron.svg', 'https://www.metron.energy/', 'wide')] },
+  { id: 'australia', name: 'Australia', partners: [partner('australia', 'maptek', 'Maptek', '40-maptek-transparent.svg', 'https://www.maptek.com/', 'wide'), partner('australia', 'deswik', 'Deswik', '41-deswik.png', 'https://www.deswik.com/', 'wide'), partner('australia', 'metron', 'METRON', '42-metron.svg', 'https://www.metron.energy/', 'wide')] },
 ] as const;
 
 export const representativePartners = representativePartnerCountries.flatMap((country) => country.partners);
