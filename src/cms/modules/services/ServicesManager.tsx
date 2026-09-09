@@ -66,7 +66,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Edit / Form Mode
   const [editingService, setEditingService] = useState<ServiceItem | null>(null);

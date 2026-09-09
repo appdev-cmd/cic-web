@@ -22,7 +22,7 @@ export const MenuTableView: React.FC<MenuTableViewProps> = ({
   onToggleVisibility,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Flatten nested items tree into linear array for data table
   const flattenItems = (itemList: MenuItem[], result: MenuItem[] = []): MenuItem[] => {

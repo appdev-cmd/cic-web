@@ -42,7 +42,7 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
   canDelete,
 }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(20);
+  const [pageSize, setPageSize] = React.useState(10);
   const paginatedAssets = assets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const isAllSelected = assets.length > 0 && selectedAssetIds.length === assets.length;
 

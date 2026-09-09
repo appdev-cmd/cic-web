@@ -66,7 +66,7 @@ export function SalesOwnersManager({
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
   const [product, setProduct] = useState("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [selected, setSelected] = useState<string[]>([]);
   const [editing, setEditing] = useState<SalesOwnerItem | null | undefined>();
   const [deleting, setDeleting] = useState<SalesOwnerItem | null>(null);

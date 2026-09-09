@@ -7,13 +7,13 @@ import { getTrashEntityAdapter, getTrashModuleMetadata, listTrashModuleOptions }
 
 export const trashListQuerySchema = z.object({
   page: z.number().int().min(1).max(100000).default(1),
-  pageSize: z.number().int().min(10).max(100).default(20),
+  pageSize: z.number().int().min(10).max(100).default(10),
   search: z.string().trim().max(200).default(''),
   module: z.string().trim().max(100).default('all'),
   category: z.enum(['all', 'expiring_soon']).default('all'),
 });
 
-export const initialTrashQuery: TrashListQuery = { page: 1, pageSize: 20, search: '', module: 'all', category: 'all' };
+export const initialTrashQuery: TrashListQuery = { page: 1, pageSize: 10, search: '', module: 'all', category: 'all' };
 const text = (value: unknown) => value == null ? '' : String(value);
 const dateLabel = (value: unknown) => value == null ? 'Không tự động' : new Intl.DateTimeFormat('vi-VN', {
   timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short',

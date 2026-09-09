@@ -118,7 +118,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Current Active List Array based on activeDataType
   const currentActiveList: AnyMasterItem[] = useMemo(() => {

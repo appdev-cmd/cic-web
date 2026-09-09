@@ -61,7 +61,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({ workspaceLocale, data }
   const [selected, setSelected] = useState<string[]>([]);
   const [toast, setToast] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const getTemplateUsage = (templateId: string) => resolveTemplateUsage(templateId, data.forms, data.ctas);
   const getDirectCtaUsage = (templateId: string) => resolveDirectCtaUsage(templateId, data.ctas);
 

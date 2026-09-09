@@ -57,7 +57,7 @@ export function ProductTypesManager({
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [selected, setSelected] = useState<string[]>([]);
   const [editing, setEditing] = useState<ProductTypeItem | null | undefined>();
   const [deleting, setDeleting] = useState<ProductTypeItem | null>(null);

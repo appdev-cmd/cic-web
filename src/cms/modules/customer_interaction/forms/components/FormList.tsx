@@ -43,7 +43,7 @@ export const FormList: React.FC<FormListProps> = ({
 }) => {
   const isAllSelected = forms.length > 0 && selectedFormIds.length === forms.length;
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const paginatedForms = forms.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusColor = (status: string) => {

@@ -8,7 +8,7 @@ export function useCategoryListState(categories: readonly ProductCategoryItem[])
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<CategoryStatusFilter>('all');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const filteredCategories = useMemo(() => {

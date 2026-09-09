@@ -41,7 +41,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
   const [selectedSensitivity, setSelectedSensitivity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   const currentValues = valuesRecordMap[selectedScopeId] || {};
 

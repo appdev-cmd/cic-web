@@ -122,7 +122,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
       : 'all';
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Multi-Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

@@ -63,7 +63,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Selection for Batch Operations
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

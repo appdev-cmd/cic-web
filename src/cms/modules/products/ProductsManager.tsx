@@ -142,7 +142,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Helper lookups
   const getCategoryNames = (p: ProductItem): string[] => {

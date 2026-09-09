@@ -62,7 +62,7 @@ export const FunctionSeoManager: React.FC<Props> = ({ workspaceLocale, data }) =
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [toast, setToast] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [activeSection, setActiveSection] = useState<'overview' | 'templates' | 'redirects'>('overview');
   const [healthFilter, setHealthFilter] = useState<'all' | 'noindex' | 'missing-description' | 'missing-owner'>('all');
 

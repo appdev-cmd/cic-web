@@ -27,7 +27,7 @@ export const StaticPagesManager: React.FC<StaticPagesManagerProps> = ({ workspac
   const [createOpen, setCreateOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   const showToast = (message: string) => { setToast(message); window.setTimeout(() => setToast(null), 3000); };
   const filteredPages = useMemo(() => pages.filter((page) => {

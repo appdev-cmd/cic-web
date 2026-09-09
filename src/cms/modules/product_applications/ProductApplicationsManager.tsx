@@ -69,7 +69,7 @@ export function ProductApplicationsManager({
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [editingItem, setEditingItem] = useState<ProductApplicationItem | null | undefined>();
   const [deletingItem, setDeletingItem] = useState<ProductApplicationItem | null>(null);

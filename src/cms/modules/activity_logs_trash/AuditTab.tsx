@@ -45,7 +45,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
   const [severityFilter, setSeverityFilter] = useState<AuditSeverity | 'all'>('all');
   const [resultFilter, setResultFilter] = useState<AuditResult | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const hasMounted = useRef(false);
 
   useEffect(() => {

@@ -39,7 +39,7 @@ function mapJob(row: Record<string, unknown>): ExportJob {
 
 export const auditListQuerySchema = z.object({
   page: z.number().int().min(1).max(100000).default(1),
-  pageSize: z.number().int().min(10).max(100).default(20),
+  pageSize: z.number().int().min(10).max(100).default(10),
   search: z.string().trim().max(200).default(''),
   date: z.enum(['today', '7days', '30days', 'all']).default('30days'),
   severity: z.enum(['all', 'low', 'medium', 'high', 'critical']).default('all'),
@@ -47,7 +47,7 @@ export const auditListQuerySchema = z.object({
   category: z.enum(['all', 'sensitive', 'permissions_users', 'config_publish', 'export_jobs']).default('all'),
 });
 
-const initialQuery: AuditListQuery = { page: 1, pageSize: 20, search: '', date: '30days', severity: 'all', result: 'all', category: 'all' };
+const initialQuery: AuditListQuery = { page: 1, pageSize: 10, search: '', date: '30days', severity: 'all', result: 'all', category: 'all' };
 function startOfTodayInVietnam() {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit',

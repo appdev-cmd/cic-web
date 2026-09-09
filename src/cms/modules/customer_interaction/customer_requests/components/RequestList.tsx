@@ -48,7 +48,7 @@ export const RequestList: React.FC<RequestListProps> = ({
 }) => {
   const isAllSelected = requests.length > 0 && selectedRequestIds.length === requests.length;
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const paginatedRequests = requests.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusColor = (status: string) => {

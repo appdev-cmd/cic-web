@@ -50,7 +50,7 @@ export const AlbumsView: React.FC<AlbumsViewProps> = ({
   const [editingAlbum, setEditingAlbum] = useState<MediaAlbum | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const editorRef=useDialogA11y(isEditorOpen,()=>setIsEditorOpen(false));
 
   const filteredAlbums = albums.filter((alb) => {

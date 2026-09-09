@@ -43,7 +43,7 @@ export const CtaList: React.FC<CtaListProps> = ({
 }) => {
   const isAllSelected = ctas.length > 0 && selectedCtaIds.length === ctas.length;
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const paginatedCtas = ctas.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getTrendIcon = (trend?: 'up' | 'down' | 'flat') => {

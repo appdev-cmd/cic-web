@@ -39,7 +39,7 @@ export const LocalizationManager: React.FC<{ data: DictionaryEntry[] }> = ({ dat
   const [draft, setDraft] = useState('');
   const [toast, setToast] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const selected = items.find((item) => item.id === selectedId) ?? null;
   const errors = selected ? validate(selected, draft) : [];
   const namespaces = [...new Set(items.map((item) => `${item.application}.${item.namespace}`))];

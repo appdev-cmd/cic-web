@@ -59,7 +59,7 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const paginatedContacts = contacts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const isAllSelected = contacts.length > 0 && selectedIds.length === contacts.length;

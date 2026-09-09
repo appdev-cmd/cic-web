@@ -61,7 +61,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [agencyFilter, setAgencyFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // Form Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
