@@ -28,6 +28,7 @@ import {
 import { Product } from '@shared/types';
 import { getProductsData } from '../features/products/productsData';
 import { ProductDetailView } from './ProductDetailView';
+import type { PublicProductContactMap } from '@/features/sales-owners/types';
 
 const PROVINCES = [
   'Hà Nội',
@@ -102,13 +103,14 @@ interface ProductsViewProps {
   categoryOptions?: string[];
   applicationOptions?: string[];
   productTypeOptions?: string[];
+  contactsByProductId?: PublicProductContactMap;
 }
 
 const getProductType = (product: Product): string => {
   return product.productType ?? '';
 };
 
-export function ProductsView({ previewProduct, products, categoryOptions, applicationOptions, productTypeOptions }: ProductsViewProps = {}) {
+export function ProductsView({ previewProduct, products, categoryOptions, applicationOptions, productTypeOptions, contactsByProductId = {} }: ProductsViewProps = {}) {
   const productsData = useMemo(() => {
     const source = products ?? getProductsData().products;
     return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
@@ -740,6 +742,7 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
         <ProductDetailView 
           product={selectedProduct}
           products={productsData}
+          contacts={contactsByProductId[String(selectedProduct.id)]}
           onBack={() => setSelectedProduct(null)}
           onSelectProduct={(p) => {
             setSelectedProduct(p);

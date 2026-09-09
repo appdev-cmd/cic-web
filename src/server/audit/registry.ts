@@ -38,6 +38,10 @@ export const AUDIT_ACTIONS = {
   PRODUCT_TYPE_UPDATED: 'product_type.updated',
   PRODUCT_TYPE_STATUS_CHANGED: 'product_type.status_changed',
   PRODUCT_TYPE_TRASHED: 'product_type.trashed',
+  SALES_OWNER_CREATED: 'sales_owner.created',
+  SALES_OWNER_UPDATED: 'sales_owner.updated',
+  SALES_OWNER_STATUS_CHANGED: 'sales_owner.status_changed',
+  SALES_OWNER_TRASHED: 'sales_owner.trashed',
   TRASH_RESTORED: 'trash.restored',
   TRASH_PURGED: 'trash.purged',
 } as const;
@@ -56,6 +60,7 @@ export const AUDIT_ENTITY_TYPES = {
   PRODUCT_BRAND: 'product_brand',
   PRODUCT_APPLICATION: 'product_application',
   PRODUCT_TYPE: 'product_type',
+  SALES_OWNER: 'sales_owner',
   TRASH_ITEM: 'trash_item',
 } as const;
 
@@ -104,6 +109,10 @@ export const auditActionRegistry = {
   [AUDIT_ACTIONS.PRODUCT_TYPE_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
   [AUDIT_ACTIONS.PRODUCT_TYPE_STATUS_CHANGED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
   [AUDIT_ACTIONS.PRODUCT_TYPE_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
+  [AUDIT_ACTIONS.SALES_OWNER_CREATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.SALES_OWNER },
+  [AUDIT_ACTIONS.SALES_OWNER_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.SALES_OWNER },
+  [AUDIT_ACTIONS.SALES_OWNER_STATUS_CHANGED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.SALES_OWNER },
+  [AUDIT_ACTIONS.SALES_OWNER_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.SALES_OWNER },
   [AUDIT_ACTIONS.TRASH_RESTORED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
   [AUDIT_ACTIONS.TRASH_PURGED]: { category: 'config_publish', severity: 'critical', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
 } as const;

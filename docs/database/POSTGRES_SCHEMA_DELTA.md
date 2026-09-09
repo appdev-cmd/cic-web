@@ -185,6 +185,10 @@ Không có.
 - `name`, `code`, `alias`, `phone`, `Skype`, `Zalo`, media, trạng thái, ordering và timestamps đã có. Không dùng `cic_email` làm bảng nhân viên.
 - Giữ danh sách ID trong các field `lienhe*` để tương thích legacy; chưa tạo năm relation table khi chưa có nhu cầu FK/query/reorder độc lập.
 - `usage_count` là derived; `updated_by` thuộc audit/user context. Không thêm vào `cic_business*`.
+- Re-audit live 2026-09-09: `cic_business` có 25 row/23 published, `_en` có 18/14; name/alias/phone đều đầy đủ. Năm cột `lienhe*` chứa CSV Product ID và mọi token đều numeric, nhưng có 2 token orphan ở VI và 4 ở EN; phải preserve và cảnh báo, không cleanup/silent-drop trong mutation.
+- Hai bảng chỉ có PK và index alias thường; bước implementation cần đồng bộ sequence và unique partial index trên alias chuẩn hóa sau khi kiểm tra trùng. Không thêm relation table hoặc field nghiệp vụ.
+- `khuvuc`, `khuvuc_name`, `products` đang có dữ liệu legacy (8/8/7 row ở cả VI và EN) nhưng React form không có control tương ứng. Functional requirement về vai trò/khu vực hiện được thể hiện bởi năm bucket `lienhe*`; ba cột này không thuộc input contract khi chưa có quyết định mới.
+- Implementation 2026-09-09 đã áp dụng `20260909_sales_owners_hardening.sql`: sequence hai bảng được đồng bộ theo `max(id)` và unique partial index trên `lower(btrim(alias))` đã được tạo. Không thêm/xóa/đổi field nghiệp vụ hoặc relation table.
 
 ## Sự kiện
 

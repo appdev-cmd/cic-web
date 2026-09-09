@@ -42,6 +42,8 @@
     ,"verify:product-application-foundation": "node --env-file=.env.local scripts/verify-product-application-foundation.mjs"
     ,"db:apply-product-types": "node --env-file=.env.local scripts/apply-product-types-hardening.mjs"
     ,"verify:product-type-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-type-roundtrip.ts"
+    ,"db:apply-sales-owners": "node --env-file=.env.local scripts/apply-sales-owners-hardening.mjs"
+    ,"verify:sales-owner-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-sales-owner-roundtrip.ts"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.2.0",

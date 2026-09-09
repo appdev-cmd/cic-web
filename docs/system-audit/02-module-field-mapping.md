@@ -130,6 +130,27 @@ Live DB 2026-09-08: 4 row VI + 4 row EN, tất cả published; 0 alias/name rỗ
 
 Implementation 2026-09-08 giữ đúng projection/ownership trên: CMS chỉ PATCH `name/alias/ordering/published`; public Product join bằng `types_id`; Trash snapshot full row để bảo toàn `image/description/tablenames`. Migration unique alias đã áp dụng và roundtrip DB thật pass.
 
+### Field Usage Audit — Người phụ trách kinh doanh (2026-09-09)
+
+| Field | Phân loại | Contract |
+|---|---|---|
+| `id` | SYSTEM_MANAGED; RELATION | DB sinh; read-only; identity dùng cho audit/trash và lookup |
+| `name`, `alias` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Tên đầu mối và alias; alias có thể tạo từ tên nhưng form React cho phép chỉnh; validate unique theo workspace |
+| `phone`, `Skype`, `Zalo` | CMS_EDITABLE; PUBLIC_READ | Thông tin liên hệ; public chỉ trả cho đầu mối published đang gắn đúng Product |
+| `published`, `ordering` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Bật/tắt và sắp xếp; đầu mối inactive không vào lựa chọn mới/public nhưng assignment legacy vẫn được preserve |
+| `lienhe`, `lienhe_kd`, `lienhe_kt`, `lienhe_kdmb`, `lienhe_kdmn` | CMS_EDITABLE; RELATION; PUBLIC_READ | Năm bucket Product ID dạng CSV legacy; parse/serialize tập ID numeric có thứ tự, validate ID mới, PATCH theo ownership; preserve orphan hiện hữu nếu không bị người vận hành sửa khỏi bucket |
+| `created_time`, `updated_time` | SYSTEM_MANAGED; AUDIT; CMS_OPERATIONAL | Server/trigger quản lý; list/detail read-only |
+| `khuvuc`, `khuvuc_name`, `products` | UNKNOWN | Có dữ liệu legacy nhưng React không có control; functional role/khu vực đang được biểu diễn bằng bucket `lienhe*`; không expose/input/default/NULL |
+| `image`, `description`, `content`, `seo_*`, `show_in_homepage` | UNKNOWN/LEGACY_UNUSED | Không có surface/form được duyệt; image/description hiện trống; preserve khi PATCH/Trash restore |
+| `code`, `tablenames`, `first_toll`, `prefix_name`, `old_id`, `color_code`, `is_retail`, `is_common` | LEGACY_UNUSED/UNKNOWN | Không thuộc UI/input/validation mặc định; không cleanup hoặc ghi đè |
+| `usage_count`, `updated_by` | derived, không phải cột entity | Usage derive từ union năm bucket; actor lấy server auth và ghi qua Audit Writer |
+
+Projection tối thiểu: public Product contact `id,name,phone,Skype,Zalo,ordering` sau khi lọc `published=1` và resolve bucket theo Product; CMS list `id,name,phone,Skype,Zalo,published,ordering,created_time` + derived usage; CMS form/detail thêm `alias` và năm `lienhe*`; relation lookup Product chỉ `id,name,published`. Trash snapshot full row nội bộ để restore lossless. Không `select *` trong application query.
+
+Live DB 2026-09-09: VI 25 row/23 published, EN 18/14; 0 name/alias/phone rỗng. Năm bucket có 832 token VI và 423 token EN, toàn bộ numeric; orphan lần lượt 2 và 4 token. `khuvuc/khuvuc_name/products` có dữ liệu trên 8/8/7 row mỗi workspace và phải được giữ nguyên.
+
+Implementation 2026-09-09 dùng đúng projection trên. Mutation chỉ ghi `name/alias/phone/Skype/Zalo/ordering/published` và năm bucket `lienhe*`; boolean UI được map rõ sang `smallint` 0/1. Public Product contact chỉ đọc staff published và tên/số điện thoại cần render. Roundtrip DB thật xác nhận giữ nguyên orphan và các field legacy ngoài ownership; Trash snapshot full row và restore inactive.
+
 ## Dịch vụ
 
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |

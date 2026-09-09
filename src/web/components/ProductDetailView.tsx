@@ -30,6 +30,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import { Product } from '@shared/types';
+import type { PublicProductContacts, PublicSalesContact } from '@/features/sales-owners/types';
 
 interface ProductDetailViewProps {
   product: Product;
@@ -39,6 +40,7 @@ interface ProductDetailViewProps {
   onDownload: (product: Product) => void;
   onBuy: (product: Product) => void;
   onSelectProduct?: (product: Product) => void;
+  contacts?: PublicProductContacts;
 }
 
 const cleanProductHtml = (htmlString: string): string => {
@@ -136,6 +138,16 @@ function CollapsibleContent({
   );
 }
 
+function ContactGroup({ label, contacts, accent = false }: { label: string; contacts: readonly PublicSalesContact[]; accent?: boolean }) {
+  if (contacts.length === 0) return null;
+  return <div className="space-y-2.5">
+    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600"><span className="h-1.5 w-1.5 bg-orange-600" />{label}</div>
+    <div className="space-y-2 border border-slate-200/60 bg-slate-50 p-3 text-xs">
+      {contacts.map((contact, index) => <div key={contact.id} className={`flex min-w-0 flex-wrap items-center justify-between gap-2 ${index < contacts.length - 1 ? 'border-b border-slate-200/40 pb-1.5' : ''}`}><span className="min-w-0 break-words font-bold text-slate-700">{contact.name}</span>{contact.phone ? <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className={`font-bold hover:text-orange-700 hover:underline ${accent ? 'text-orange-600' : 'text-slate-900'}`}>{contact.phone}</a> : <span className="font-medium text-slate-400">Chưa có số điện thoại</span>}</div>)}
+    </div>
+  </div>;
+}
+
 export function ProductDetailView({ 
   product, 
   products,
@@ -143,7 +155,8 @@ export function ProductDetailView({
   onContact, 
   onDownload, 
   onBuy,
-  onSelectProduct
+  onSelectProduct,
+  contacts
 }: ProductDetailViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'video' | 'documents'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -512,85 +525,14 @@ export function ProductDetailView({
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-950">HỖ TRỢ TRỰC TUYẾN</h3>
               </div>
 
-              {/* Contact numbers detail requested by the user */}
               <div className="space-y-6 text-sm">
-                
-                {/* 1. Hotlines */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
-                    <span className="w-1.5 h-1.5 bg-orange-600"></span>
-                    Đại diện Kinh doanh
-                  </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-700">Đinh Trần Tuấn</span>
-                      <a href="tel:0859999698" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">085 999 9698</a>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-700">Miền Nam</span>
-                      <a href="tel:0913347960" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">0913 34 79 60</a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Technical Support Group */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
-                    <span className="w-1.5 h-1.5 bg-orange-600"></span>
-                    Hỗ trợ kỹ thuật
-                  </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 text-xs">
-                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700">Chí Chung</span>
-                      <a href="tel:0945285978" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0945 285 978</a>
-                    </div>
-                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700">Huỳnh Thái</span>
-                      <a href="tel:0939261463" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0939 261 463</a>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-slate-700">Trọng Tiến</span>
-                      <a href="tel:0329271885" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">032 927 1885</a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. Business North */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
-                    <span className="w-1.5 h-1.5 bg-orange-600"></span>
-                    Kinh doanh Miền Bắc
-                  </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 text-xs">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-700">Tổng đài MB</span>
-                      <a href="tel:0886462020" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">088 646 2020</a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. Business South */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600">
-                    <span className="w-1.5 h-1.5 bg-orange-600"></span>
-                    Kinh doanh Miền Nam
-                  </div>
-                  <div className="space-y-2 bg-slate-50 p-3 border border-slate-200/60 text-xs">
-                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700">Hoàng Yến</span>
-                      <a href="tel:0934045088" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0934 045 088</a>
-                    </div>
-                    <div className="flex justify-between items-center border-b border-slate-200/40 pb-1.5">
-                      <span className="font-bold text-slate-700">Thanh Ngân</span>
-                      <a href="tel:0938721256" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0938 721 256</a>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-700">Mỹ Khanh</span>
-                      <a href="tel:0907550037" className="font-bold text-slate-900 hover:text-orange-600 hover:underline">0907 550 037</a>
-                    </div>
-                  </div>
-                </div>
-
+                <ContactGroup label="Đại diện Kinh doanh" contacts={contacts?.sales.length ? contacts.sales : contacts?.contact ?? []} accent />
+                <ContactGroup label="Hỗ trợ kỹ thuật" contacts={contacts?.technical ?? []} />
+                <ContactGroup label="Kinh doanh Miền Bắc" contacts={contacts?.northSales ?? []} />
+                <ContactGroup label="Kinh doanh Miền Nam" contacts={contacts?.southSales ?? []} />
+                {!contacts || Object.values(contacts).every((group) => group.length === 0) ? (
+                  <p className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-500">Thông tin đầu mối đang được cập nhật. Vui lòng gửi yêu cầu để CIC liên hệ lại.</p>
+                ) : null}
               </div>
 
               {/* Extra Support Advice */}

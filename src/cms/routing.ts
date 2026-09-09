@@ -170,6 +170,13 @@ export function isProductTypeCmsPath(path: string): boolean {
     normalizedPath.startsWith('/cms/product-settings/product-types/');
 }
 
+export function isSalesOwnerCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/sales-staff' ||
+    normalizedPath === '/cms/product-settings/sales-staff' ||
+    normalizedPath.startsWith('/cms/product-settings/sales-staff/');
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }

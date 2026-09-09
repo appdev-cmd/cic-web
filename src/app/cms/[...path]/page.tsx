@@ -1,8 +1,9 @@
-import { isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, resolveCmsModule } from '@/cms/routing';
+import { isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, resolveCmsModule } from '@/cms/routing';
 import { ProductApplicationsRoute } from '@/cms/modules/product_applications/ProductApplicationsRoute';
 import { ProductBrandsRoute } from '@/cms/modules/product_brands/ProductBrandsRoute';
 import { ProductCategoriesRoute } from '@/cms/modules/product_categories/ProductCategoriesRoute';
 import { ProductTypesRoute } from '@/cms/modules/product_types/ProductTypesRoute';
+import { SalesOwnersRoute } from '@/cms/modules/sales_owners/SalesOwnersRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
@@ -16,6 +17,8 @@ export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...pa
         ? <ProductApplicationsRoute />
         : isProductTypeCmsPath(cmsPath)
           ? <ProductTypesRoute />
+        : isSalesOwnerCmsPath(cmsPath)
+          ? <SalesOwnersRoute />
         : undefined;
   return renderCmsFoundationRoute(resolveCmsModule(cmsPath), cmsPath, moduleContent);
 }
