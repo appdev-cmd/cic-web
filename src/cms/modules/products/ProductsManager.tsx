@@ -923,16 +923,29 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                       {/* Lĩnh vực */}
                       {columnVisibility.category && (
                         <td className="py-3 px-4">
-                          <div className="flex flex-wrap gap-1">
-                            {catNames.map((cat, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px] rounded-lg"
-                              >
-                                {cat}
-                              </span>
-                            ))}
-                          </div>
+                          {catNames.length > 0 ? (
+                            <div className="flex items-center gap-1">
+                              {catNames.slice(0, 2).map((cat, idx) => (
+                                <span
+                                  key={idx}
+                                  title={cat}
+                                  className="max-w-[110px] truncate px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px] rounded-lg"
+                                >
+                                  {cat}
+                                </span>
+                              ))}
+                              {catNames.length > 2 && (
+                                <span
+                                  title={catNames.slice(2).join(', ')}
+                                  className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[10px] rounded-md cursor-help shrink-0 shadow-2xs"
+                                >
+                                  +{catNames.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs">—</span>
+                          )}
                         </td>
                       )}
 
@@ -954,15 +967,24 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                       {columnVisibility.application && (
                         <td className="py-3 px-4">
                           {apps.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {apps.map((app, idx) => (
+                            <div className="flex items-center gap-1">
+                              {apps.slice(0, 2).map((app, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-[10px] font-medium rounded"
+                                  title={app}
+                                  className="max-w-[100px] truncate px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-[10px] font-medium rounded"
                                 >
                                   {app}
                                 </span>
                               ))}
+                              {apps.length > 2 && (
+                                <span
+                                  title={apps.slice(2).join(', ')}
+                                  className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[10px] font-bold rounded cursor-help shrink-0 shadow-2xs"
+                                >
+                                  +{apps.length - 2}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <span className="text-slate-400 text-xs">—</span>
