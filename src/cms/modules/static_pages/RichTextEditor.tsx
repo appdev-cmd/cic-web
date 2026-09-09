@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -71,7 +73,7 @@ class UploadAdapter {
     if (!file) throw new Error('Không tìm thấy ảnh cần tải lên.');
     const body = new FormData();
     body.append('upload', file);
-    const response = await fetch('/upload', {
+    const response = await fetch('/api/upload', {
       method: 'POST',
       body,
       credentials: 'same-origin',
@@ -80,7 +82,7 @@ class UploadAdapter {
     const payload = await response.json().catch(() => null) as { url?: string; default?: string; error?: { message?: string } } | null;
     if (!response.ok) throw new Error(payload?.error?.message || `Tải ảnh thất bại (${response.status}).`);
     const url = payload?.url || payload?.default;
-    if (!url) throw new Error('API /upload không trả về url của ảnh.');
+    if (!url) throw new Error('API /api/upload không trả về url của ảnh.');
     return { default: url };
   }
 
@@ -262,6 +264,8 @@ const editorPlugins: PluginConstructor<Editor>[] = [
 ];
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, onBlur, minHeight = '280px', allowedEmbeds = [] }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const editorRef = useRef<Editor | null>(null);
   const lastDataRef = useRef<string>(value || '');
   const [editorData, setEditorData] = useState<string>(value || '');
@@ -387,6 +391,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     setSelectedFormId('');
     setReferencePicker(null);
   };
+
+  if (!mounted) {
+    return (
+      <div className="cms-ckeditor flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900" style={{ minHeight }}>
+        <p className="text-xs font-medium text-slate-400 animate-pulse">Đang nạp trình soạn thảo…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="cms-ckeditor overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition focus-within:border-orange-400 focus-within:ring-4 focus-within:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900" style={{ '--cms-editor-min-height': minHeight } as React.CSSProperties}>

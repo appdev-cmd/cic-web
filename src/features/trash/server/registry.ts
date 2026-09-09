@@ -21,7 +21,15 @@ export function getTrashEntityAdapter(entityType: string): TrashEntityAdapter {
 }
 
 export function listTrashModuleOptions() {
-  return adapters.map((adapter) => ({ value: adapter.module, label: adapter.label }));
+  const seen = new Set<string>();
+  const options: Array<{ value: string; label: string }> = [];
+  for (const adapter of adapters) {
+    if (!seen.has(adapter.module)) {
+      seen.add(adapter.module);
+      options.push({ value: adapter.module, label: adapter.label });
+    }
+  }
+  return options;
 }
 
 export function getTrashModuleMetadata(entityType: string) {

@@ -32,13 +32,30 @@ const legacyMockImageAliases: Record<string, string> = {
 export const pageBuilderImages: CmsMediaPickerItem[] = [];
 
 export function findPageBuilderImage(id: string, images: CmsMediaPickerItem[] = pageBuilderImages) {
+  if (!id) return undefined;
   if (id.startsWith('data:image/')) return { id, filename: 'Ảnh tải từ máy', title: 'Ảnh tải từ máy', url: id };
+  if (id.startsWith('/api/media/')) {
+    const assetId = id.replace('/api/media/', '').split('?')[0];
+    const match = images.find((asset) => asset.id === assetId);
+    if (match) return { ...match, url: id };
+    return { id, filename: 'Ảnh Media', title: 'Ảnh Media', url: id };
+  }
   if (id.startsWith('/') || id.startsWith('http://') || id.startsWith('https://')) {
-    const filename = id.split('/').pop() || id;
+    const filename = id.split('/').pop()?.split('?')[0] || id;
     return { id, filename, title: filename, url: id };
   }
   const resolvedId = legacyMockImageAliases[id] ?? id;
   return images.find((asset) => asset.id === resolvedId || asset.url === resolvedId);
+}
+
+function getSelectedMediaValue(asset: CmsMediaPickerItem, returnValue: 'id' | 'url') {
+  if (returnValue === 'id' && !asset.id.startsWith('uploaded_')) {
+    return asset.id;
+  }
+  if (asset.id.startsWith('uploaded_') || asset.url.startsWith('data:')) {
+    return asset.url;
+  }
+  return `/api/media/${asset.id}`;
 }
 
 export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
@@ -108,7 +125,7 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
           })}
           {options.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-500">Không tìm thấy ảnh phù hợp.</p>}
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-slate-800 sm:flex-row sm:justify-end"><CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton><CmsButton disabled={!selectedAsset} onClick={() => { if (selectedAsset) onConfirm(returnValue === 'url' || selectedAsset.id.startsWith('uploaded_') ? selectedAsset.url : selectedAsset.id); onClose(); }}>Dùng ảnh đã chọn</CmsButton></div>
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-slate-800 sm:flex-row sm:justify-end"><CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton><CmsButton disabled={!selectedAsset} onClick={() => { if (selectedAsset) onConfirm(getSelectedMediaValue(selectedAsset, returnValue)); onClose(); }}>Dùng ảnh đã chọn</CmsButton></div>
       </div>
     </div>
   );

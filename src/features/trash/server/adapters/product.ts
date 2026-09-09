@@ -14,7 +14,7 @@ export async function moveProductToTrash(sql: Sql, locale: ProductLocale, id: nu
   if (!record) throw new Error('Không tìm thấy sản phẩm.');
   const dependencies = locale === 'en'
     ? [['cic_products_related_rel_en', 'related_product_id'], ['cic_projects_products_rel_en', 'product_id'], ['cic_services_products_rel_en', 'product_id']]
-    : [['cic_products_related_rel', 'related_product_id'], ['cic_projects_products_rel', 'product_id'], ['cic_services_products_rel', 'product_id'], ['cic_order_items', 'product_id'], ['cic_product_contact', 'products_id'], ['cic_products_incentives', 'product_id'], ['cic_products_price', 'record_id']];
+    : [['cic_products_related_rel', 'related_product_id'], ['cic_projects_products_rel', 'product_id'], ['cic_services_products_rel', 'product_id'], ['cic_order_items', 'product_id'], ['cic_products_incentives', 'product_id'], ['cic_products_price', 'record_id']];
   for (const [table, column] of dependencies) if ((await sql.unsafe(`SELECT 1 FROM ${table} WHERE ${column}=$1 LIMIT 1`, [id])).length) throw new Error(`Không thể đưa sản phẩm vào Thùng rác vì còn dữ liệu liên quan trong ${table}.`);
   const [categories, applications, related, images] = await Promise.all([
     sql.unsafe(`SELECT category_id FROM ${t.cr} WHERE product_id=$1 ORDER BY category_id`, [id]),
@@ -24,6 +24,9 @@ export async function moveProductToTrash(sql: Sql, locale: ProductLocale, id: nu
   ]);
   const snapshot = schema.parse({ version: 1, locale, record: record.record, categories: categories.map((value) => Number(value.category_id)), applications: applications.map((value) => ({ id: Number(value.application_id), ordering: Number(value.ordering ?? 0) })), related: related.map((value) => ({ id: Number(value.related_product_id), ordering: Number(value.ordering ?? 0) })), images: images.map((value) => value.record) });
   const [trash] = await sql`INSERT INTO cic_trash_items(workspace,entity_type,entity_id,module,title_snapshot,payload_snapshot,original_url,status,deleted_by,purge_after,restore_state) VALUES(${locale},${locale === 'en' ? 'product_en' : 'product'},${String(id)},'products',${String(snapshot.record.name ?? id)},${sql.json(snapshot as never)},${`/products/${snapshot.record.alias ?? id}`},'trashed',${actorId},now()+interval '30 days','draft') RETURNING id`;
+  if (locale === 'vi') {
+    await sql.unsafe(`UPDATE cic_product_contact SET products_id=NULL WHERE products_id=$1`, [id]);
+  }
   await sql.unsafe(`DELETE FROM ${t.im} WHERE record_id=$1`, [id]);
   await sql.unsafe(`DELETE FROM ${t.p} WHERE id=$1`, [id]);
   return { trashId: String(trash.id), title: String(snapshot.record.name ?? id) };
