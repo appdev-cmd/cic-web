@@ -326,22 +326,58 @@ def toposort_base_tables(manifest, base_tables):
     return result
 
 
-def mysql_connect(source_table):
-    """Open MySQL connection with correct charset."""
-    if source_table in LATIN1_MISLABELED_TABLES:
-        cnx = mysql.connector.connect(
-            charset="latin1", use_unicode=True, **config.MYSQL
-        )
-    else:
-        cnx = mysql.connector.connect(
-            charset="utf8mb4", use_unicode=True, **config.MYSQL
-        )
-    return cnx
+def mysql_connect(source_table=None):
+    """Open MySQL connection.
+
+    Luon dung utf8mb4: MySQL server tu convert dung tu charset THAT cua
+    tung cot (theo information_schema) sang utf8mb4 khi tra ve client -
+    conversion nay lossless voi moi cot, ke ca cot latin1 that (0-255
+    map thang vao unicode). Truoc day ham nay chon charset="latin1" cho
+    CA BANG neu bang nam trong LATIN1_MISLABELED_TABLES, nhung mot so
+    bang (vd fs_application) co cot override CHARACTER SET utf8mb3 rieng
+    (du lieu utf8mb3 that, khong bi mislabel) nam chung voi cot latin1
+    that su bi mislabel. Ep ca connection ve latin1 khien server phai
+    convert utf8mb3 that -> latin1, lam mat cac ky tu ngoai Latin-1
+    (vd e, a co dau) thanh '?' vinh vien, khong the phuc hoi lai duoc.
+    """
+    return mysql.connector.connect(
+        charset="utf8mb4", use_unicode=True, **config.MYSQL
+    )
 
 
-def fix_mislabeled_text(value, source_table):
-    """Fix latin1-mislabeled UTF-8 data."""
-    if value is None or source_table not in LATIN1_MISLABELED_TABLES:
+_LATIN1_COLUMN_CACHE = {}
+
+
+def get_latin1_columns(cursor, table):
+    """Tra ve tap cac cot cua `table` co charset THAT la latin1 (theo
+    information_schema.columns), khong phai charset khai bao mac dinh
+    cua ca bang. Ket qua duoc cache lai theo ten bang.
+
+    Chi nhung cot nay moi thuc su can fix_mislabeled_text - cac cot
+    override CHARACTER SET utf8mb3/utf8mb4 rieng trong cung bang la du
+    lieu UTF-8 dung, khong duoc dong vao chung.
+    """
+    if table in _LATIN1_COLUMN_CACHE:
+        return _LATIN1_COLUMN_CACHE[table]
+    cursor.execute(
+        "SELECT COLUMN_NAME FROM information_schema.columns "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s "
+        "AND CHARACTER_SET_NAME = 'latin1'",
+        (table,),
+    )
+    cols = {row[0] for row in cursor.fetchall()}
+    _LATIN1_COLUMN_CACHE[table] = cols
+    return cols
+
+
+def fix_mislabeled_text(value, column_name, mislabeled_columns):
+    """Fix latin1-mislabeled UTF-8 data cho DUNG cot bi mislabel.
+
+    `mislabeled_columns` la tap cot (lay tu get_latin1_columns) cua bang
+    nguon hien tai - chi ap dung fix cho cot nam trong tap nay, cac cot
+    khac (vd utf8mb3 override, da dung san) giu nguyen.
+    """
+    if value is None or column_name not in mislabeled_columns:
         return value
     if not isinstance(value, str):
         return value
@@ -518,7 +554,13 @@ def export_base_table(sql_file, table_name, info, self_ref_cols, depends_on, val
     
     my_col_names = valid_my_col_names
     data_cols = valid_data_cols
-    
+
+    mislabeled_cols = (
+        get_latin1_columns(my_cur, source_table)
+        if source_table in LATIN1_MISLABELED_TABLES
+        else set()
+    )
+
     col_list_sql = ", ".join(f"`{c}`" for c in ["id"] + my_col_names)
     my_cur.execute(f"SELECT {col_list_sql} FROM `{source_table}`")
 
@@ -547,8 +589,8 @@ def export_base_table(sql_file, table_name, info, self_ref_cols, depends_on, val
         row_id = row[0]
         row_dict = {"id": str(row_id)}
 
-        for val, col_def in zip(row[1:], data_cols):
-            val = fix_mislabeled_text(val, source_table)
+        for val, col_def, my_col in zip(row[1:], data_cols, my_col_names):
+            val = fix_mislabeled_text(val, my_col, mislabeled_cols)
             val = coerce_value(val, col_def["pg_type"], col_def["col"], table_name)
             if val == "NULL" and col_def["pg_type"] == "timestamptz":
                 val = "'1970-01-01 00:00:00'"
@@ -855,18 +897,23 @@ def export_translation_table(sql_file, table_name, info, valid_ids, manifest):
             c for c in data_cols if len(c["sources"]) > source_index
         ]
         if not cols_for_locale and data_cols:
-            return [], []
+            return [], [], set(), []
         while True:
             my_col_names = [c["sources"][source_index]["col"] for c in cols_for_locale]
             col_list_sql = ", ".join(f"`{c}`" for c in ["id"] + my_col_names)
             my_cnx = mysql_connect(src_table)
             my_cur = my_cnx.cursor()
             try:
+                mislabeled_cols = (
+                    get_latin1_columns(my_cur, src_table)
+                    if src_table in LATIN1_MISLABELED_TABLES
+                    else set()
+                )
                 my_cur.execute(f"SELECT {col_list_sql} FROM `{src_table}`")
                 rows = list(my_cur)
                 my_cur.close()
                 my_cnx.close()
-                return rows, cols_for_locale
+                return rows, cols_for_locale, mislabeled_cols, my_col_names
             except mysql.connector.Error as e:
                 my_cur.close()
                 my_cnx.close()
@@ -886,7 +933,7 @@ def export_translation_table(sql_file, table_name, info, valid_ids, manifest):
                     )
                     cols_for_locale = [c for c in cols_for_locale if c is not bad_col]
                     if not cols_for_locale:
-                        return [], []
+                        return [], [], set(), []
                     continue
                 raise
 
@@ -902,7 +949,7 @@ def export_translation_table(sql_file, table_name, info, valid_ids, manifest):
         if not src_table:
             continue
         try:
-            rows, cols_for_locale = fetch_locale_rows(src_table, idx)
+            rows, cols_for_locale, mislabeled_cols, my_col_names = fetch_locale_rows(src_table, idx)
         except mysql.connector.Error as e:
             log.warning("Bang %s (locale=%s) loi khi doc: %s", src_table, locale, e)
             continue
@@ -949,8 +996,8 @@ def export_translation_table(sql_file, table_name, info, valid_ids, manifest):
                             log.warning("Could not validate entity_id=%s against %s", entity_id, base_table)
                             missing_entity_ids.add(entity_id)
             values = [str(entity_id), f"'{locale}'"]
-            for val, col_def in zip(row[1:], cols_for_locale):
-                val = fix_mislabeled_text(val, src_table)
+            for val, col_def, my_col in zip(row[1:], cols_for_locale, my_col_names):
+                val = fix_mislabeled_text(val, my_col, mislabeled_cols)
                 val = coerce_value(val, col_def["pg_type"], col_def["col"], table_name)
                 values.append(val)
             sql_rows.append(f"  ({', '.join(values)})")
