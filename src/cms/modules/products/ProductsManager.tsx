@@ -30,10 +30,11 @@ import {
 import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ProductsModuleData } from '../../data/CatalogDataSource';
-import { ProductsFormView } from './ProductsFormView';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+
+const ProductsFormView = React.lazy(() => import('./ProductsFormView').then((m) => ({ default: m.ProductsFormView })));
 import { ProductPreviewModal } from './ProductPreviewModal';
 import { ProductActivityDrawer } from './ProductActivityDrawer';
 import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal';
@@ -537,7 +538,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   // If in Form View
   if (viewMode === 'form') {
     return (
-      <>
+      <React.Suspense
+        fallback={(
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900" aria-busy="true">
+            <div className="h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="mt-4 h-32 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+          </div>
+        )}
+      >
         <ProductsFormView
           locale={workspaceLocale}
           product={selectedProductForForm}
@@ -564,7 +572,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
           productTypes={productTypes}
           onClose={() => setProductToPreview(null)}
         />
-      </>
+      </React.Suspense>
     );
   }
 
