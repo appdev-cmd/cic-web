@@ -165,6 +165,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     return found ? found.name : typeId || '—';
   };
 
+  const getApplicationNames = (p: ProductItem): string[] => {
+    const appIds = (p.application || p.application_areas || []).map(String);
+    const matched = applications.filter((a) => appIds.includes(String(a.id)) || appIds.includes(a.name));
+    if (matched.length > 0) return matched.map((a) => a.name);
+    if (appIds.length > 0) return appIds;
+    return [];
+  };
+
   // Filter Logic
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -181,7 +189,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         const catNames = getCategoryNames(p).join(' ');
         const brandName = getBrandName(p);
         const typeName = getProductTypeName(p);
-        const appNames = (p.application || p.application_areas || []).join(' ');
+        const appNames = getApplicationNames(p).join(' ');
         const tagNames = (p.tags || []).join(' ');
 
         const searchableParts = [
@@ -872,7 +880,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                   const catNames = getCategoryNames(p);
                   const brandName = getBrandName(p);
                   const typeName = getProductTypeName(p);
-                  const apps = p.application || p.application_areas || [];
+                  const appNames = getApplicationNames(p);
 
                   return (
                     <tr
@@ -966,9 +974,9 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                       {/* Ứng dụng */}
                       {columnVisibility.application && (
                         <td className="py-3 px-4">
-                          {apps.length > 0 ? (
+                          {appNames.length > 0 ? (
                             <div className="flex items-center gap-1">
-                              {apps.slice(0, 2).map((app, idx) => (
+                              {appNames.slice(0, 2).map((app, idx) => (
                                 <span
                                   key={idx}
                                   title={app}
@@ -977,12 +985,12 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                                   {app}
                                 </span>
                               ))}
-                              {apps.length > 2 && (
+                              {appNames.length > 2 && (
                                 <span
-                                  title={apps.slice(2).join(', ')}
+                                  title={appNames.slice(2).join(', ')}
                                   className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[10px] font-bold rounded cursor-help shrink-0 shadow-2xs"
                                 >
-                                  +{apps.length - 2}
+                                  +{appNames.length - 2}
                                 </span>
                               )}
                             </div>
