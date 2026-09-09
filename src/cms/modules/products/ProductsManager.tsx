@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Package,
   Plus,
@@ -42,12 +43,14 @@ import { CmsTabs } from '../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { saveProductAction, setProductsFeaturedAction, setProductsPublishedAction, trashProductAction } from '@/features/products/server/actions';
 
 type SystemViewTab = 'all' | 'published' | 'draft' | 'is_hot';
 
 interface ProductsManagerProps {
   workspaceLocale: CmsLocale;
   data?: ProductsModuleData;
+  capabilities?: { create: boolean; edit: boolean; delete: boolean };
 }
 
 const removeVietnameseTones = (str: string = ''): string => {
@@ -59,7 +62,23 @@ const removeVietnameseTones = (str: string = ''): string => {
     .trim();
 };
 
-export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
+const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
+  name: product.name || product.title || '', alias: product.alias || '', code: product.code || product.sku || '', other_languages1: product.other_languages1 || '',
+  summary: product.summary || product.short_description || '', description: product.description || product.content_html || '', feature_details: product.feature_details || '', video: product.video || product.video_url || '', tawk_to: product.tawk_to || '',
+  image: product.image || '', icon: product.icon || '', price: product.price || product.price_old || '', tags: product.tags || [], landing_page: product.landing_page || '', seo_title: product.seo_title || product.meta_title || '', seo_keyword: product.seo_keyword || product.meta_keywords || '', seo_description: product.seo_description || product.meta_description || '',
+  file_catalogue: product.file_catalogue || '', file_price: product.file_price || '', link_catalogue: product.link_catalogue || '', file_driver_name: product.file_driver_name || '', file_driver: product.file_driver || '', link_driver: product.link_driver || '',
+  downloads: Array.from({ length: 6 }, (_, index) => ({ name: String(product[`file_name${index + 1}` as keyof ProductItem] || ''), file: String(product[`file_download${index + 1}` as keyof ProductItem] || ''), link: String(product[`link_download${index + 1}` as keyof ProductItem] || '') })),
+  categoryIds: (product.category_ids || (product.category_id ? [product.category_id] : [])).map(Number), applicationIds: (product.application || product.application_areas || []).map(Number), relatedProductIds: (product.products_relates || []).map(Number),
+  manufactoryId: Number(product.manufactory || product.brand_id) || null, typeId: Number(product.types || product.product_type) || null,
+  published, is_hot: Boolean(product.is_hot), teamview: Boolean(product.teamview), ordering: Number(product.ordering || 0),
+});
+
+export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspaceLocale, capabilities = { create: false, edit: false, delete: false } }) => {
+  const router = useRouter();
+  const persist = async (operation: Promise<unknown>) => {
+    try { await operation; return true; }
+    catch (error) { showToast(error instanceof Error ? error.message : 'Không thể cập nhật dữ liệu sản phẩm.'); return false; }
+  };
   // Main Products List State
   const [products, setProducts] = useState<ProductItem[]>(() =>
     (data?.products ?? []).map((item) => ({
@@ -291,7 +310,9 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
   };
 
   // Bulk Actions
-  const handleBatchChangeEditorialStatus = (status: EditorialStatus) => {
+  const handleBatchChangeEditorialStatus = async (status: EditorialStatus) => {
+    if (!capabilities.edit) return showToast('Bạn không có quyền cập nhật sản phẩm.');
+    if (!await persist(setProductsPublishedAction(workspaceLocale, selectedIds, status === 'published'))) return;
     setProducts((prev) =>
       prev.map((p) => (selectedIds.includes(p.id) ? { ...p, editorial_status: status, published: status === 'published' } : p))
     );
@@ -299,12 +320,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     setSelectedIds([]);
   };
 
-  const handleBatchToggleHot = (isHot: boolean) => {
+  const handleBatchToggleHot = async (isHot: boolean) => {
+    if (!capabilities.edit) return showToast('Bạn không có quyền cập nhật sản phẩm.');
     const featuredOutsideSelection = products.filter((product) => product.is_hot && !selectedIds.includes(product.id)).length;
     if (isHot && featuredOutsideSelection + selectedIds.length > FEATURED_CONTENT_LIMITS.product) {
       showToast(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật.`);
       return;
     }
+    if (!await persist(setProductsFeaturedAction(workspaceLocale, selectedIds, isHot))) return;
     setProducts((prev) =>
       prev.map((p) => (selectedIds.includes(p.id) ? { ...p, is_hot: isHot } : p))
     );
@@ -312,33 +335,39 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     setSelectedIds([]);
   };
 
-  const handleToggleFeatured = (id: string) => {
+  const handleToggleFeatured = async (id: string) => {
+    if (!capabilities.edit) return showToast('Bạn không có quyền cập nhật sản phẩm.');
     const target = products.find((product) => product.id === id);
     if (!target?.is_hot && products.filter((product) => product.is_hot).length >= FEATURED_CONTENT_LIMITS.product) {
       showToast(`Đã đủ ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật. Hãy bỏ chọn một sản phẩm khác trước.`);
       return;
     }
+    if (!await persist(setProductsFeaturedAction(workspaceLocale, [id], !target?.is_hot))) return;
     setProducts((current) => current.map((product) => product.id === id ? { ...product, is_hot: !product.is_hot } : product));
     showToast(target?.is_hot ? 'Đã bỏ Sản phẩm nổi bật.' : 'Đã chọn Sản phẩm nổi bật.');
   };
 
-  const handleBatchDelete = () => {
+  const handleBatchDelete = async () => {
+    if (!capabilities.delete) return showToast('Bạn không có quyền xóa sản phẩm.');
+    for (const id of selectedIds) if (!await persist(trashProductAction(workspaceLocale, id))) return;
     setProducts((prev) => prev.filter((p) => !selectedIds.includes(p.id)));
-    showToast(`Đã xóa vĩnh viễn ${selectedIds.length} sản phẩm khỏi hệ thống!`);
+    showToast(`Đã đưa ${selectedIds.length} sản phẩm vào Thùng rác.`);
     setSelectedIds([]);
   };
 
   // Form Save Handler
-  const handleSaveProductFromForm = (
+  const handleSaveProductFromForm = async (
     productData: Partial<ProductItem>,
     actionType: 'draft' | 'publish'
   ) => {
+    if (selectedProductForForm ? !capabilities.edit : !capabilities.create) return showToast('Bạn không có quyền lưu sản phẩm.');
     if (productData.is_hot && !selectedProductForForm?.is_hot && products.filter((product) => product.is_hot).length >= FEATURED_CONTENT_LIMITS.product) {
       showToast(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật.`);
       return;
     }
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const editorialStatus: EditorialStatus = actionType === 'publish' ? 'published' : 'draft';
+    if (!await persist(saveProductAction(workspaceLocale, selectedProductForForm?.id || null, toProductInput(productData, editorialStatus === 'published')))) return;
     const prodName = productData.name || productData.title || 'Sản phẩm mới';
 
     if (selectedProductForForm) {
@@ -448,11 +477,13 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     }
     setViewMode('list');
     setSelectedProductForForm(null);
+    router.refresh();
   };
 
   // Duplicate Confirmation Handler
-  const handleConfirmDuplicate = (config: DuplicateConfig) => {
+  const handleConfirmDuplicate = async (config: DuplicateConfig) => {
     if (!productToDuplicate) return;
+    if (!capabilities.create) return showToast('Bạn không có quyền tạo sản phẩm.');
 
     const sourceName = productToDuplicate.name || productToDuplicate.title;
     const newProd: ProductItem = {
@@ -469,9 +500,11 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
       updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
 
+    if (!await persist(saveProductAction(workspaceLocale, null, toProductInput(newProd, false)))) return;
     setProducts((prev) => [newProd, ...prev]);
     showToast(`Đã nhân bản sản phẩm mới thành công!`);
     setProductToDuplicate(null);
+    router.refresh();
   };
 
   const activeFiltersCount = [
@@ -498,6 +531,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
     return (
       <>
         <ProductsFormView
+          locale={workspaceLocale}
           product={selectedProductForForm}
           categories={categories}
           brands={brands}
@@ -517,6 +551,9 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
           isOpen={!!productToPreview}
           product={productToPreview}
           categories={categories}
+          brands={brands}
+          applications={applications}
+          productTypes={productTypes}
           onClose={() => setProductToPreview(null)}
         />
       </>
@@ -857,9 +894,9 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
                       {columnVisibility.product && (
                         <td className="py-3 px-4 sticky left-10 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
                           <div className="flex items-center gap-3">
-                            {p.image ? (
+                            {p.icon ? (
                               <img
-                                src={p.image}
+                                src={p.icon}
                                 alt=""
                                 className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 bg-slate-100 dark:bg-slate-800"
                               />
@@ -1104,11 +1141,14 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
       <DeleteConfirmModal
         isOpen={!!productToDelete}
         product={productToDelete}
-        onConfirmPermanentDelete={() => {
+        onConfirmPermanentDelete={async () => {
           if (productToDelete) {
+            if (!capabilities.delete) return showToast('Bạn không có quyền xóa sản phẩm.');
+            if (!await persist(trashProductAction(workspaceLocale, productToDelete.id))) return;
             setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
-            showToast(`Đã xóa vĩnh viễn sản phẩm "${productToDelete.name || productToDelete.title}".`);
+            showToast(`Đã đưa sản phẩm "${productToDelete.name || productToDelete.title}" vào Thùng rác.`);
             setProductToDelete(null);
+            router.refresh();
           }
         }}
         onClose={() => setProductToDelete(null)}
@@ -1118,6 +1158,9 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data }) => {
         isOpen={!!productToPreview}
         product={productToPreview}
         categories={categories}
+        brands={brands}
+        applications={applications}
+        productTypes={productTypes}
         onClose={() => setProductToPreview(null)}
       />
 

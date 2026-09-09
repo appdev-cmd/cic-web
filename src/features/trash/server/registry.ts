@@ -8,9 +8,10 @@ import {productBrandTrashAdapter,productBrandEnTrashAdapter} from './adapters/pr
 import { productApplicationTrashAdapter, productApplicationEnTrashAdapter } from './adapters/product-application';
 import { productTypeTrashAdapter, productTypeEnTrashAdapter } from './adapters/product-type';
 import { salesOwnerTrashAdapter, salesOwnerEnTrashAdapter } from './adapters/sales-owner';
+import { productTrashAdapter, productEnTrashAdapter } from './adapters/product';
 import type { TrashEntityAdapter } from './registry-types';
 
-const adapters = [projectTrashAdapter, userTrashAdapter, roleTrashAdapter, mediaTrashAdapter, productCategoryTrashAdapter, productCategoryEnTrashAdapter,productBrandTrashAdapter,productBrandEnTrashAdapter,productApplicationTrashAdapter,productApplicationEnTrashAdapter,productTypeTrashAdapter,productTypeEnTrashAdapter,salesOwnerTrashAdapter,salesOwnerEnTrashAdapter] as const satisfies readonly TrashEntityAdapter[];
+const adapters = [projectTrashAdapter, userTrashAdapter, roleTrashAdapter, mediaTrashAdapter, productCategoryTrashAdapter, productCategoryEnTrashAdapter,productBrandTrashAdapter,productBrandEnTrashAdapter,productApplicationTrashAdapter,productApplicationEnTrashAdapter,productTypeTrashAdapter,productTypeEnTrashAdapter,salesOwnerTrashAdapter,salesOwnerEnTrashAdapter,productTrashAdapter,productEnTrashAdapter] as const satisfies readonly TrashEntityAdapter[];
 const byEntityType = new Map(adapters.map((adapter) => [adapter.entityType, adapter]));
 
 export function getTrashEntityAdapter(entityType: string): TrashEntityAdapter {

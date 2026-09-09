@@ -76,7 +76,12 @@ Không có.
 - Gallery dùng `cic_products_images*`. Các file/link tải xuống đã có trong Product; loại và kích thước file là dữ liệu derived.
 - `highlights`, `tech_specs`, document metadata/version/access, `availability_signal`, `site_placement` và các field completeness/version/activity chỉ có trong mock/type hoặc chưa nằm trong save form; không thêm vào DB.
 - Hãng, ứng dụng, loại sản phẩm và người phụ trách sử dụng entity/relation legacy hiện có; DTO trả object hiển thị, không lưu lặp tên theo ViewModel.
-- Cần xác minh/sửa hai FK EN hiện có: `cic_products_en.types_id` đang trỏ bảng loại VI và `cic_products_images_en.record_id` đang trỏ Product VI. Đây là sửa constraint, không phải ADD field/table.
+- Live verification 2026-09-09 xác nhận các FK EN đã đúng workspace: `cic_products_en.types_id → cic_products_types_en`, `cic_products_images_en.record_id → cic_products_en`, category/application/related junction `_en` đều trỏ entity `_en`. Ghi chú blocker FK cũ không còn hiệu lực.
+- Live Product profile: VI 375 row/275 published/43 featured, EN 192/155/10; name đầy đủ, alias rỗng 92/32 và không có alias normalized trùng trong tập khác rỗng. Vì vậy chỉ áp partial unique index cho alias có giá trị; không tự điền/xóa alias legacy trong migration module.
+- Relation authority hiện sạch: category 535/255, application 249/89, related 655/152 row VI/EN và 0 orphan. Giữ các CSV/cache legacy để compatibility nhưng application query/mutation mới dùng junction/FK tương ứng.
+- Migration `20260909_products_hardening.sql` đã áp dụng ngày 2026-09-09: đồng bộ identity sequence và tạo partial unique index trên alias chuẩn hóa khác rỗng cho Product VI/EN; không sửa/xóa 92/32 alias legacy rỗng.
+- Product create chỉ cấp các giá trị system-managed bắt buộc (`hits`, `show_in_home`, `is_sell`, `rating_count`, `is_new`) khi insert; PATCH không sở hữu và không ghi đè các cột này. Trash giữ nguyên toàn bộ row + gallery + junction do Product sở hữu, restore về draft/non-featured; các quan hệ inbound Order/Contact/Project/Service/related và bảng price/incentive được guard thay vì tự xóa.
+- Không migration ảnh legacy vào `cic_media_assets`: giá trị Product trỏ `/images/**` hoặc origin CIC `/images/**` tiếp tục resolve tới cây file `images/` đã bàn giao. Chỉ media upload mới dùng Media foundation. Cột `video` có thể chứa HTML iframe legacy; mapper/read model tách URL embed, không sửa hàng loạt dữ liệu gốc.
 
 ## Danh mục sản phẩm
 

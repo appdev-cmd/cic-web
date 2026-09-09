@@ -44,6 +44,9 @@
     ,"verify:product-type-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-type-roundtrip.ts"
     ,"db:apply-sales-owners": "node --env-file=.env.local scripts/apply-sales-owners-hardening.mjs"
     ,"verify:sales-owner-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-sales-owner-roundtrip.ts"
+    ,"db:apply-products": "node --env-file=.env.local scripts/apply-products-hardening.mjs"
+    ,"verify:product-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-roundtrip.ts"
+    ,"verify:product-legacy-media": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-legacy-media.ts"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.2.0",

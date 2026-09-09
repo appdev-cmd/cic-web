@@ -14,8 +14,7 @@ import {
   Download, 
   Check, 
   Tag, 
-  Layers, 
-  Box, 
+  Layers,
   FileText, 
   Play, 
   Sparkles, 
@@ -187,13 +186,15 @@ export function ProductDetailView({
 
   // Filter 3 related products (same field or general)
   const relatedProducts = useMemo(() => {
+    const configuredIds = product.relatedProductIds ?? [];
     return products
-      .filter((p) => p.id !== product.id)
+      .filter((p) => configuredIds.length > 0 ? configuredIds.includes(p.id) : p.id !== product.id && p.field === product.field)
+      .sort((a, b) => configuredIds.indexOf(a.id) - configuredIds.indexOf(b.id))
       .slice(0, 3);
-  }, [product.id, products]);
+  }, [product.id, product.field, product.relatedProductIds, products]);
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-36 pb-24 relative overflow-hidden">
+    <div className="bg-slate-50 min-h-screen pt-8 pb-24 relative overflow-hidden">
       {/* Visual background decoration */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-10 w-[600px] h-[600px] bg-orange-600/5 blur-[120px] rounded-none"></div>
@@ -279,16 +280,6 @@ export function ProductDetailView({
           {/* Right Column: Key Details */}
           <div className="lg:col-span-6 space-y-6">
             
-            {/* Badges and Field */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="px-3 py-1 bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-lg">
-                {product.field}
-              </span>
-              <span className="text-orange-600 text-xs font-bold uppercase tracking-wider">
-                Hãng: {product.brand}
-              </span>
-            </div>
-
             {/* Name */}
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#333] uppercase tracking-tight leading-tight">
               {product.name}
@@ -312,24 +303,20 @@ export function ProductDetailView({
               {product.description}
             </p>
 
-            {/* Tags section */}
-            <div className="pt-4 border-t border-slate-200 space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">Thông tin phân loại:</span>
-              <div className="flex flex-wrap gap-2">
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
-                  <Layers size={12} className="text-orange-600" />
-                  {product.field}
-                </div>
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
-                  <Box size={12} className="text-orange-600" />
-                  {product.brand}
-                </div>
-                <div className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1 rounded-[8px]">
-                  <FileText size={12} className="text-orange-600" />
-                  {product.app}
+            {/* Product tags are the public classification authority. */}
+            {product.tags && product.tags.length > 0 && (
+              <div className="space-y-2 border-t border-slate-200 pt-4">
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-500">Thông tin phân loại:</span>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag) => (
+                    <span key={tag} className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                      <Tag size={12} className="text-orange-600" />
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* CTA buttons */}
             <div className={`grid grid-cols-1 ${isEquipment ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-4 pt-4`}>
@@ -574,7 +561,7 @@ export function ProductDetailView({
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
                       <img 
-                        src={rel.img || rel.icon} 
+                        src={rel.icon || rel.img}
                         alt={rel.name}
                         loading="lazy"
                         referrerPolicy="no-referrer"

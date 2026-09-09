@@ -14,6 +14,7 @@ export interface Product {
   brand: string;
   app: string;
   applications?: string[];
+  tags?: string[];
   img: string;
   icon?: string;
   productType?: string;
@@ -22,6 +23,9 @@ export interface Product {
   featuresHtml?: string;
   videoUrl?: string;
   documents?: { name: string; size?: string; url: string }[];
+  relatedProductIds?: number[];
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export interface Project {

@@ -4,12 +4,15 @@ import { ProductBrandsRoute } from '@/cms/modules/product_brands/ProductBrandsRo
 import { ProductCategoriesRoute } from '@/cms/modules/product_categories/ProductCategoriesRoute';
 import { ProductTypesRoute } from '@/cms/modules/product_types/ProductTypesRoute';
 import { SalesOwnersRoute } from '@/cms/modules/sales_owners/SalesOwnersRoute';
+import { ProductsRoute } from '@/cms/modules/products/ProductsRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
   const { path } = await params;
   const cmsPath = `/cms/${path.join('/')}`;
-  const moduleContent = isProductCategoryCmsPath(cmsPath)
+  const moduleContent = ['/cms/products', '/cms/products/catalog', '/cms/catalog'].includes(cmsPath)
+    ? <ProductsRoute />
+    : isProductCategoryCmsPath(cmsPath)
     ? <ProductCategoriesRoute />
     : isProductBrandCmsPath(cmsPath)
       ? <ProductBrandsRoute />

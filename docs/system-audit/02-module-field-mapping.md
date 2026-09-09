@@ -44,6 +44,31 @@
 
 ## Sản phẩm và Thiết lập sản phẩm
 
+### Field Usage Audit — Sản phẩm (2026-09-09)
+
+| Field/nhóm | Phân loại | Contract |
+|---|---|---|
+| `id` | SYSTEM_MANAGED; RELATION | DB identity; read-only; khóa cho junction, gallery, audit và trash |
+| `name`, `alias`, `code`, `summary` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Tên/URL/mã/tóm tắt; alias mới hoặc sửa phải unique, alias rỗng legacy không tự backfill |
+| `description`, `feature_details`, `video`, `link_video` | CMS_EDITABLE; PUBLIC_READ | Rich HTML/video cho detail; validate/sanitize server trước khi ghi/render |
+| `image`, `icon` | CMS_EDITABLE; PUBLIC_READ; RELATION_MEDIA | Media chính; tiếp nhận Media ID/path theo resolver chuẩn, không giả quan hệ |
+| `price`, `price_old`, `currency` | CMS_EDITABLE; PUBLIC_READ | Giá/presentation; không invent unit/origin/availability từ mock |
+| `published`, `is_hot`, `teamview`, `ordering`, `landing_page` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Publish/featured tối đa 6/order và behavior public; scheduled/version state không tự thêm |
+| `seo_title`, `seo_keyword`, `seo_description` | CMS_EDITABLE; PUBLIC_READ | Metadata riêng Product; Function SEO chỉ consume/report |
+| catalogue/driver + `file_name1..6`, `file_download1..6`, `link_download1..6` | CMS_EDITABLE; PUBLIC_READ; RELATION_MEDIA | File/link legacy đúng form; projection tường minh, type/size derive; preserve slot không thuộc PATCH |
+| `cic_products_categories_rel*` | RELATION | Authority N-N category; replace transactionally theo form ownership |
+| `cic_products_applications_rel*` | RELATION | Authority N-N application; không dùng `application_name` làm authority |
+| `cic_products_related_rel*` | RELATION | Quan hệ có hướng, cấm self/duplicate, preserve ordering |
+| `types_id`, `manufactory` | RELATION | Product type FK đúng locale; brand hiện là numeric ID trong varchar, validate bằng master thật |
+| `cic_products_images*` | RELATION; PUBLIC_READ | Gallery theo `record_id/ordering`; không lưu mock gallery array vào Product row |
+| `created_time`, `edited_time`, `user_id` | SYSTEM_MANAGED; AUDIT | Server/auth quản lý; không tin actor từ client |
+| `category_id`, `application`, `products_relates`, `*_name`, `*_alias` cache legacy | LEGACY_UNUSED như authority; UNKNOWN cleanup | Preserve compatibility; không select/write mặc định hoặc đồng bộ ngược tùy tiện |
+| commerce/location/mail/hit/style fields không có form/use case duyệt | LEGACY_UNUSED/UNKNOWN | Không expose, validate, default, NULL hoặc cleanup; Trash snapshot phải giữ nguyên |
+
+Projection riêng: public list chỉ card/filter/order fields + published relations; public detail thêm rich content/gallery/files/related/SEO/contact; CMS list chỉ columns/filter/status/derived completeness; CMS form/detail chỉ form-owned fields + relation IDs/metadata; relation lookup chỉ `id/name/published`; Trash snapshot full Product row và toàn bộ junction/gallery liên quan để restore lossless. Không `select *` trong application query.
+
+Implementation 2026-09-09 dùng explicit projection theo các contract trên. CMS PATCH ghi `price` và `tags` từ đúng control form, không ghi đè `price_old` hay cache/commerce/location legacy; create chỉ cấp các cột system-required không có default. Quan hệ inbound ngoài ownership Product được Trash guard, không tự xóa.
+
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |
 |---|---|---|---|---|---|---|---|---|
 | name/title, alias, summary, content | name/description/overviewHtml/featuresHtml | name/title/alias/summary/content | fs_products.* | cic_products.* | Nội dung sản phẩm | A | Không | Các HTML tab có thể map vào content/field legacy đang dùng; không nhân column theo UI |

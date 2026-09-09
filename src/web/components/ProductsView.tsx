@@ -26,9 +26,9 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import { Product } from '@shared/types';
-import { getProductsData } from '../features/products/productsData';
 import { ProductDetailView } from './ProductDetailView';
 import type { PublicProductContactMap } from '@/features/sales-owners/types';
+import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
 
 const PROVINCES = [
   'Hà Nội',
@@ -112,7 +112,7 @@ const getProductType = (product: Product): string => {
 
 export function ProductsView({ previewProduct, products, categoryOptions, applicationOptions, productTypeOptions, contactsByProductId = {} }: ProductsViewProps = {}) {
   const productsData = useMemo(() => {
-    const source = products ?? getProductsData().products;
+    const source = products ?? [];
     return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
   }, [previewProduct, products]);
   const [search, setSearch] = useState('');
@@ -158,6 +158,7 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(previewProduct || null);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [downloadFormSubmitted, setDownloadFormSubmitted] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
@@ -257,7 +258,7 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
     }
   };
 
-  // Simulated download handler showing download registration form first
+  // Download registration keeps the reference flow and persists the request server-side.
   const triggerDownload = (product: Product) => {
     setActiveProduct(product);
     setModalType('download');
@@ -320,23 +321,19 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
     }
   };
 
-  const handleDownloadFormSubmit = (e: React.FormEvent) => {
+  const handleDownloadFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    setDownloadFormSubmitted(true);
-    setDownloading(true);
-    setDownloadProgress(0);
-
-    const interval = setInterval(() => {
-      setDownloadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setDownloading(false);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 150);
+    if (!activeProduct) return;
+    setSubmitError('');
+    try {
+      await submitCustomerInteractionAction({ formId: 'product-download', formName: 'Yêu cầu tải sản phẩm', values: { ...formData, productId: activeProduct.id, productName: activeProduct.name, requestType: 'download', message: formData.notes }, source: { pageType: 'product', pageId: String(activeProduct.id), pageUrl: window.location.pathname, pageTitle: activeProduct.name, placementKey: 'product-download-modal' } });
+      setDownloadFormSubmitted(true);
+      setDownloading(false);
+      setDownloadProgress(100);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Không thể gửi yêu cầu tải. Vui lòng thử lại.');
+    }
   };
 
   const validateForm = () => {
@@ -361,24 +358,17 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
     return Object.keys(errors).length === 0;
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
-    setFormSubmitted(true);
-    setTimeout(() => {
-      setModalType(null);
-      setFormSubmitted(false);
-      setActiveProduct(null);
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        version: 'v2026-pro',
-        notes: '',
-      });
-      setFormErrors({});
-    }, 2000);
+    if (!modalType || !activeProduct) return;
+    setSubmitError('');
+    try {
+      await submitCustomerInteractionAction({ formId: `product-${modalType}`, formName: modalType === 'contact' ? 'Yêu cầu báo giá sản phẩm' : modalType === 'buy' ? 'Đăng ký mua sản phẩm' : 'Yêu cầu tải sản phẩm', values: { ...formData, productId: activeProduct.id, productName: activeProduct.name, requestType: modalType, message: formData.notes }, source: { pageType: 'product', pageId: String(activeProduct.id), pageUrl: window.location.pathname, pageTitle: activeProduct.name, placementKey: `product-${modalType}-modal` } });
+      setFormSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Không thể gửi yêu cầu. Vui lòng thử lại.');
+    }
   };
 
   const renderActionModal = () => {
@@ -566,6 +556,8 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
                       *Vui lòng điền đúng thông tin để chúng tôi liên hệ hỗ trợ bạn
                     </p>
 
+                    {submitError && <p role="alert" className="text-xs font-bold text-red-600">{submitError}</p>}
+
                     <button 
                       type="submit" 
                       className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px]"
@@ -595,13 +587,14 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100 rounded-[8px]">
+                        <p className="text-sm font-bold text-emerald-700">Đã ghi nhận yêu cầu tải. CIC sẽ kiểm tra và gửi bộ cài phù hợp tới bạn.</p>
+                        <div className="hidden inline-flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 border border-emerald-100 rounded-[8px]">
                           <Check size={16} /> Tải phần mềm thành công!
                         </div>
-                        <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                        <p className="hidden text-xs text-slate-500 font-medium leading-relaxed">
                           Bộ cài dùng thử (Trial), brochure kỹ thuật và hướng dẫn kích hoạt bản quyền của <b>{activeProduct.name}</b> đã được tải xuống thiết bị thành công.
                         </p>
-                        <p className="text-[11px] text-orange-600 font-bold leading-relaxed">
+                        <p className="hidden text-[11px] text-orange-600 font-bold leading-relaxed">
                           Chúng tôi cũng đã gửi mã Trial Key kích hoạt 30 ngày cùng tài liệu hướng dẫn chuyên sâu vào thông tin liên hệ của bạn.
                         </p>
                         <button 
@@ -759,7 +752,7 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
   }
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pt-16 pb-20 relative overflow-hidden">
+    <div className="bg-slate-50/50 min-h-screen pt-8 pb-20 relative overflow-hidden">
       {/* Visual background accents to match main landing page */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-10 w-[600px] h-[600px] bg-orange-600/5 blur-[120px] rounded-none"></div>
@@ -1283,7 +1276,7 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
                           <img 
-                            src={product.img || product.icon} 
+                            src={product.icon || product.img}
                             alt={product.name}
                             loading="lazy"
                             referrerPolicy="no-referrer"

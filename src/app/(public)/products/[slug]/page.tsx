@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: PageProps<'/products/[slug]'>) {
   const slug = (await params).slug;
   const product = (await listPublishedProductsForReference()).find((item) => item.slug === slug);
-  return product ? { title: `${product.name} | CIC`, description: product.description } : {};
+  return product ? { title: product.seoTitle || `${product.name} | CIC`, description: product.seoDescription || product.description } : {};
 }
 
 export default async function ProductPage({ params }: PageProps<'/products/[slug]'>) {
