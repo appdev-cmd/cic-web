@@ -140,10 +140,10 @@ Không có.
 - `sector_group` mới chỉ là state/default trong mock payload, chưa có control chỉnh sửa và chưa được frontend đọc độc lập; không thêm field.
 - Giữ `cic_products*.application` để compatibility, đồng thời chuẩn hóa authority sang `cic_products_applications_rel`/`_en`; exporter parse CSV, dedupe, giữ `ordering` và tạo stub unpublished cho numeric orphan trước khi insert relation.
 - Form React hiện chỉ sở hữu `name`, alias tự sinh/read-only, `published` và `ordering`. Dù tài liệu chức năng có nhắc icon/màu, `image`, `color_code` và các field type/mock `icon`, `color_badge` không được đưa vào payload DB cho tới khi có form reference mới được duyệt.
-- Xác minh live 2026-09-05: VI 12 row (12 published), EN 9 row (9 published), không alias rỗng/trùng chuẩn hóa; cả hai bảng mới có alias index không unique. `image`, `color_code`, `description`, `content`, `code` đều chưa có giá trị sử dụng trong dataset hiện tại.
-- Relation compatibility chứa toàn token số nhưng có orphan đang được Product published sử dụng: VI Application ID `8` (7 Product, 6 published), EN IDs `13` và `14` (mỗi ID một Product published). Đây là blocker dữ liệu; phải khôi phục identity hoặc sửa relation bằng nguồn có thẩm quyền trước khi triển khai Application. Không dùng `application_name`/fallback/mock để che orphan.
-- Re-audit live 2026-09-05 xác nhận chưa có stub tại `cic_application.id=8` hoặc `cic_application_en.id IN (13,14)`. Full scan vẫn có đúng ba orphan này và không có token CSV phi số/orphan khác; do record đích chưa tồn tại nên đây vẫn là relation-integrity blocker, chưa thể hạ thành data-quality follow-up.
-- Migration hardening đồng bộ sequence và unique index `lower(btrim(alias))` độc lập cho VI/EN; không thêm field nghiệp vụ. CSV legacy được giữ để compatibility, còn exporter chuẩn hóa relation sang junction table.
+- Xác minh live 2026-09-08: VI 13 row (12 published), EN 11 row (9 published); alias rỗng chỉ nằm ở ba stub unpublished. `image`, `color_code`, `description`, `content`, `code` đều chưa có dữ liệu sử dụng. Hai bảng hiện chỉ có index alias thường, chưa có unique index chuẩn hóa.
+- Junction authority đã được materialize đủ: `cic_products_applications_rel` 249 row, `_en` 89 row, không còn orphan. VI ID `8` và EN IDs `13`,`14` là stub unpublished giữ identity/relation của record legacy đã mất; không dùng `application_name`/fallback/mock để che nhãn chưa biết.
+- Phục hồi tên/alias thật của ba stub là data-quality follow-up cần nguồn có thẩm quyền, không block implementation core. Mọi update/Trash/restore phải preserve stub và relation; public/query selector phải loại unpublished. CSV legacy tiếp tục được giữ cho compatibility nhưng không phải relation authority.
+- Hardening 2026-09-08 đã đồng bộ sequence và áp dụng unique index partial `lower(btrim(alias))` độc lập cho VI/EN, loại alias NULL/rỗng để giữ ba stub; không thêm field nghiệp vụ.
 - Product liên quan được chuẩn hóa tương tự từ `products_relates` sang `cic_products_related_rel`/`_en`; quan hệ có hướng, cấm self-link và giữ thứ tự CSV. Các cột CSV legacy chưa bị xóa trong giai đoạn compatibility.
 
 ## Loại sản phẩm
@@ -161,9 +161,13 @@ Không có.
 
 ### Mapping / lưu ý
 
-- “Tiêu đề dữ liệu” dùng `name`; “Tên hiệu” dùng trực tiếp `alias` và được application tự sinh. `icon → image`, `status → published`.
+- “Tiêu đề dữ liệu” dùng `name`; “Tên hiệu” dùng trực tiếp `alias` và được application tự sinh; `status → published`. Form Loại sản phẩm dùng cấu trúc chung Product Settings và không có trường Biểu tượng.
 - `description` legacy vẫn được giữ nhưng CMS mới không hiển thị/chỉnh sửa trong form hoặc list Loại sản phẩm.
 - `requires_license_key` và `pricing_model_default` chỉ được gán từ default/mock, chưa có control chỉnh sửa hoặc logic frontend; không thêm field.
+- Re-audit live 2026-09-08: hai bảng VI/EN đều có 4 row published, `image/description/tablenames/updated_time` đều rỗng; `types_id` có FK đúng workspace và không orphan. Có 92 Product VI + 32 Product EN chưa gắn loại; đây là trạng thái dữ liệu hợp lệ cần render “chưa phân loại”, không tự default sang `Khác`.
+- `types_name` không phải authority: 148 Product EN lệch tên so với master EN. Mọi projection/mutation mới phải dùng `types_id` và join `cic_products_types`/`_en`; preserve cột cache legacy nhưng không fallback hoặc đồng bộ ngược trong module này.
+- Hai bảng mới chỉ có index alias thường; implementation cần hardening sequence và unique partial `lower(btrim(alias))` theo từng workspace, không thêm field nghiệp vụ. `image` hiện hữu là legacy/unknown, phải preserve nhưng không expose trong form.
+- Implementation 2026-09-08 đã áp dụng `20260908_product_types_hardening.sql`: sequence của hai bảng được đồng bộ theo `max(id)` và hai unique partial index alias chuẩn hóa đã tồn tại trên DB thật. Không thêm/xóa/đổi field nghiệp vụ.
 
 ## Người phụ trách kinh doanh
 

@@ -156,6 +156,20 @@ export function isProductBrandCmsPath(path: string): boolean {
     normalizedPath.startsWith('/cms/product-settings/brands/');
 }
 
+export function isProductApplicationCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/applications' ||
+    normalizedPath === '/cms/product-settings/applications' ||
+    normalizedPath.startsWith('/cms/product-settings/applications/');
+}
+
+export function isProductTypeCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/product-types' ||
+    normalizedPath === '/cms/product-settings/product-types' ||
+    normalizedPath.startsWith('/cms/product-settings/product-types/');
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }

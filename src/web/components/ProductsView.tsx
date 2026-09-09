@@ -99,26 +99,16 @@ interface ProductsViewProps {
   key?: string | number;
   previewProduct?: Product;
   products?: Product[];
+  categoryOptions?: string[];
+  applicationOptions?: string[];
+  productTypeOptions?: string[];
 }
 
-const PRODUCT_TYPES = ['Phần mềm', 'Thiết bị', 'Giải pháp tích hợp', 'Khác'];
-
 const getProductType = (product: Product): string => {
-  if (product.productType) return product.productType;
-  const name = product.name.toLowerCase();
-  if (name.includes('rô bốt') || name.includes('thiết bị') || name.includes('máy') || name.includes('cảm biến') || name.includes('chum') || name.includes('pet')) {
-    return 'Thiết bị';
-  }
-  if (name.includes('hệ thống') || name.includes('giải pháp') || name.includes('simulators') || name.includes('vr trainer')) {
-    return 'Giải pháp tích hợp';
-  }
-  if (name.includes('phần mềm') || name.includes('cad') || name.includes('bim') || name.includes('3d') || name.includes('autocad') || name.includes('revit')) {
-    return 'Phần mềm';
-  }
-  return 'Khác';
+  return product.productType ?? '';
 };
 
-export function ProductsView({ previewProduct, products }: ProductsViewProps = {}) {
+export function ProductsView({ previewProduct, products, categoryOptions, applicationOptions, productTypeOptions }: ProductsViewProps = {}) {
   const productsData = useMemo(() => {
     const source = products ?? getProductsData().products;
     return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
@@ -183,16 +173,22 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
 
   // Dynamic filter values generated from data
   const fields = useMemo(() => {
-    return Array.from(new Set(productsData.map(p => p.field)));
-  }, [productsData]);
+    const relatedCategories = productsData.flatMap((product) =>
+      product.categories?.length ? product.categories : product.field ? [product.field] : [],
+    );
+    return Array.from(new Set(categoryOptions ?? relatedCategories)).filter(Boolean);
+  }, [categoryOptions, productsData]);
 
   const brands = useMemo(() => {
     return Array.from(new Set(productsData.map(p => p.brand)));
   }, [productsData]);
 
   const apps = useMemo(() => {
-    return Array.from(new Set(productsData.map(p => p.app)));
-  }, [productsData]);
+    const relatedApplications = productsData.flatMap((product) =>
+      product.applications?.length ? product.applications : product.app ? [product.app] : [],
+    );
+    return Array.from(new Set(applicationOptions ?? relatedApplications)).filter(Boolean);
+  }, [applicationOptions, productsData]);
 
   // Filter subsets for Show More / Show Less
   const displayedFields = useMemo(() => {
@@ -215,9 +211,11 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
                             p.description.toLowerCase().includes(search.toLowerCase());
       const pType = getProductType(p);
       const matchesProductType = selectedProductTypes.length === 0 || selectedProductTypes.includes(pType);
-      const matchesField = selectedFields.length === 0 || selectedFields.includes(p.field);
+      const productApplications = p.applications?.length ? p.applications : p.app ? [p.app] : [];
+      const productCategories = p.categories?.length ? p.categories : p.field ? [p.field] : [];
+      const matchesField = selectedFields.length === 0 || selectedFields.some((field) => productCategories.includes(field));
       const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(p.brand);
-      const matchesApp = selectedApps.length === 0 || selectedApps.includes(p.app);
+      const matchesApp = selectedApps.length === 0 || selectedApps.some((app) => productApplications.includes(app));
 
       return matchesSearch && matchesProductType && matchesField && matchesBrand && matchesApp;
     });
@@ -227,7 +225,7 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
     }
 
     return result;
-  }, [search, selectedProductTypes, selectedFields, selectedBrands, selectedApps, sortBy]);
+  }, [productsData, search, selectedProductTypes, selectedFields, selectedBrands, selectedApps, sortBy]);
 
   // Reset all filters
   const handleResetFilters = () => {
@@ -891,7 +889,9 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
                 >
                   {displayedFields.map(field => {
                     const isSelected = selectedFields.includes(field);
-                    const count = productsData.filter(p => p.field === field).length;
+                    const count = productsData.filter((product) =>
+                      (product.categories?.length ? product.categories : product.field ? [product.field] : []).includes(field),
+                    ).length;
                     return (
                       <button
                         key={field}
@@ -1001,7 +1001,7 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
 
             {/* Accordion Filter 3: Application (Ứng dụng) */}
             <div className="border-b border-slate-100 pb-3 mb-3">
-              <div 
+              <div
                 onClick={() => setIsAppsOpen(!isAppsOpen)}
                 className="flex items-center justify-between cursor-pointer py-1.5 text-sm font-bold text-slate-900 uppercase tracking-wider hover:text-orange-600 transition-colors select-none"
               >
@@ -1016,8 +1016,8 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
                 </span>
                 <div className="flex items-center gap-1.5">
                   {selectedApps.length > 0 && (
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setSelectedApps([]); }} 
+                    <button
+                      onClick={(event) => { event.stopPropagation(); setSelectedApps([]); }}
                       className="text-xs font-medium text-slate-400 hover:text-orange-600 normal-case"
                       title="Xóa bộ lọc ứng dụng"
                     >
@@ -1029,22 +1029,24 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
               </div>
 
               {isAppsOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   className="mt-2 space-y-1"
                 >
-                  {displayedApps.map(app => {
+                  {displayedApps.map((app) => {
                     const isSelected = selectedApps.includes(app);
-                    const count = productsData.filter(p => p.app === app).length;
+                    const count = productsData.filter((product) =>
+                      (product.applications?.length ? product.applications : product.app ? [product.app] : []).includes(app),
+                    ).length;
                     return (
                       <button
                         key={app}
                         onClick={() => toggleFilterItem(selectedApps, setSelectedApps, app)}
                         className={`w-full flex items-center justify-between text-left px-2.5 py-1.5 text-sm transition-all border-l-2 ${
-                          isSelected 
-                            ? 'border-orange-600 bg-orange-50/80 text-orange-600 font-normal' 
+                          isSelected
+                            ? 'border-orange-600 bg-orange-50/80 text-orange-600 font-normal'
                             : 'border-transparent text-slate-600 font-normal hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
@@ -1108,7 +1110,7 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
                   exit={{ opacity: 0, height: 0 }}
                   className="mt-2 space-y-1"
                 >
-                  {PRODUCT_TYPES.map(type => {
+                  {(productTypeOptions ?? []).map(type => {
                     const isSelected = selectedProductTypes.includes(type);
                     const count = productsData.filter(p => getProductType(p) === type).length;
                     return (
@@ -1197,13 +1199,13 @@ export function ProductsView({ previewProduct, products }: ProductsViewProps = {
                   ))}
 
                   {/* Apps Chips */}
-                  {selectedApps.map(a => (
-                    <span key={`chip-a-${a}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
-                      <span className="text-orange-600 font-normal">Ứng dụng:</span> {a}
-                      <button 
-                        onClick={() => toggleFilterItem(selectedApps, setSelectedApps, a)}
+                  {selectedApps.map((application) => (
+                    <span key={`chip-a-${application}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-orange-300 text-xs font-bold text-slate-800 shadow-2xs rounded-[8px]">
+                      <span className="text-orange-600 font-normal">Ứng dụng:</span> {application}
+                      <button
+                        onClick={() => toggleFilterItem(selectedApps, setSelectedApps, application)}
                         className="text-slate-400 hover:text-red-600 transition-colors ml-0.5"
-                        title={`Bỏ chọn ${a}`}
+                        title={`Bỏ chọn ${application}`}
                       >
                         <X size={12} />
                       </button>

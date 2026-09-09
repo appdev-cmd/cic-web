@@ -90,7 +90,7 @@ Projection tối thiểu: public filter/list `id,name,alias,parent_id,ordering` 
 
 Projection: public filter `id,name,alias,ordering` + `published=true`; CMS list/form `id,name,alias,ordering,published,created_time,updated_time` + usage count; Product relation lookup `id,name,published`. Không `select *`. Trash lifecycle được phép snapshot đầy đủ row để khôi phục nguyên trạng nhưng không expose các cột legacy thành field form.
 
-### Field Usage Audit — Lĩnh vực ứng dụng (2026-09-05)
+### Field Usage Audit — Lĩnh vực ứng dụng (2026-09-08)
 
 | Field | Phân loại | Contract |
 |---|---|---|
@@ -98,15 +98,37 @@ Projection: public filter `id,name,alias,ordering` + `published=true`; CMS list/
 | `name`, `alias` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Tên và tên hiệu; alias application tự sinh/read-only trong UI, server validate unique theo từng workspace |
 | `ordering`, `published` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Sort/trạng thái; public chỉ expose published |
 | `created_time`, `updated_time` | SYSTEM_MANAGED; AUDIT | Server/trigger quản lý; chỉ đọc cho history/detail nếu cần |
-| `cic_products*.application` | RELATION | Compatibility CSV của ID số; parser trim/dedupe/validate; ownership ghi thuộc Product, Application chỉ đọc để usage/guard |
+| `cic_products*.application` | RELATION | Compatibility CSV của ID số; parser trim/dedupe/validate; ownership ghi thuộc Product, Application chỉ đọc để usage/guard; không còn là relation authority sau khi junction được materialize |
+| `cic_products_applications_rel*.(product_id,application_id,ordering)` | RELATION; SYSTEM_MANAGED | Authority quan hệ N-N hiện tại; composite identity, FK và ordering do repository/migration quản lý, không cho nhập trực tiếp như arbitrary form field |
 | `image`, `color_code` | UNKNOWN | DB có nhưng form React không render icon/color control và live data đều rỗng; không đưa vào input/projection/default |
 | `sector_group`, `color_badge`, `icon` | LEGACY_UNUSED đối với persistence | Chỉ có trong type/mock payload, không phải cột/form-owned field; remove khỏi Application input contract |
 | `description`, `seo_title`, `seo_keyword`, `seo_description`, `content` | UNKNOWN | Không có control/consumer được chứng minh; không input/update/projection mặc định |
 | `code`, `tablenames`, `first_toll`, `show_in_homepage`, `prefix_name`, `old_id`, `is_retail`, `is_common` | LEGACY_UNUSED/UNKNOWN | Giữ nguyên; không expose, default, NULL, ghi đè hay cleanup trong module |
 
-Projection: public filter/lookup `id,name,alias,ordering` với `published=true`; CMS list/form `id,name,alias,ordering,published,created_time,updated_time` + usage count tính từ Product; relation lookup `id,name,alias,published`. Không `select *`. Trash có thể snapshot full row nội bộ để restore lossless nhưng không biến field legacy thành input. Live audit phát hiện orphan cứng: VI ID `8`; EN ID `13,14`; phải sửa integrity trước implement.
+Projection: public filter/lookup `id,name,alias,ordering` với `published=true`; public Product list/detail đọc relation junction rồi map Application published; CMS list/form `id,name,alias,ordering,published,created_time,updated_time` + usage count từ junction; relation lookup `id,name,alias,published`. Không `select *`. Trash có thể snapshot full row và relation nội bộ để restore lossless nhưng không biến field legacy thành input.
 
-Re-audit trực tiếp 2026-09-05: các target record VI `8`, EN `13`, `14` chưa tồn tại trong master tương ứng, vì vậy không thể phân loại là stub/placeholder. Quét toàn bộ 249 token VI và 89 token EN: 0 token phi số, orphan chỉ gồm VI `8` → Product `85,96,107,239,287,290,303`; EN `13` → Product `249`; EN `14` → Product `247`.
+Re-audit trực tiếp 2026-09-08: master VI/EN có 13/11 row; junction có 249/89 relation và 0 orphan. VI `8`, EN `13`,`14` hiện là stub unpublished, alias rỗng, giữ lần lượt 7/1/1 relation. Preserve nguyên trạng và loại khỏi public/CMS selector mặc định; không tự sửa tên/alias cho tới khi có nguồn dữ liệu có thẩm quyền.
+
+### Field Usage Audit — Loại sản phẩm (2026-09-08)
+
+| Field | Phân loại | Contract |
+|---|---|---|
+| `id` | SYSTEM_MANAGED; RELATION | DB sinh; `cic_products*.types_id` tham chiếu FK; không nhận ID tùy ý khi create type |
+| `name`, `alias` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Tên/tên hiệu theo workspace; alias tự sinh/read-only ở UI và phải unique theo chuẩn hóa trong từng bảng |
+| `published`, `ordering` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Trạng thái/thứ tự; public/selector mới chỉ expose published; inactive vẫn resolve được cho Product cũ |
+| `image` | UNKNOWN / LEGACY_UNUSED | React Product Settings không có control Biểu tượng và form được duyệt phải giống các form master-data cùng nhóm; không đưa vào input/projection, không ghi đè, Trash vẫn bảo toàn |
+| `created_time`, `updated_time` | SYSTEM_MANAGED; AUDIT | Server/trigger quản lý, read-only; `updated_time` legacy hiện NULL và chỉ ghi khi mutation thật xảy ra |
+| `cic_products*.types_id` | RELATION | Authority quan hệ đơn Product→Type đúng locale; validation phải kiểm tra type tồn tại/active khi gắn mới |
+| `cic_products*.types_name` | LEGACY_UNUSED như authority; UNKNOWN về cleanup | Cache/chuỗi legacy, live EN có 148 mismatch; không dùng trong domain/public/CMS mapping, không NULL/xóa trong task module |
+| `description` | UNKNOWN | DB có nhưng React form/list và functional requirement không chứng minh ownership; không input/update/projection mặc định |
+| `tablenames` | LEGACY_UNUSED | Không có use case CMS/public/relation/audit; preserve nguyên trạng |
+| `type_code`, `requires_license_key`, `pricing_model_default` | LEGACY_UNUSED đối với persistence | Chỉ có trong type/mock/default, không có cột DB và không có control React; không tạo field/validation/default |
+
+Projection: public filter/lookup `id,name,alias,ordering` với `published=true`; public Product list/detail join `types_id` và chỉ trả identity/label cần dùng; CMS list `id,name,alias,published,ordering,created_time,updated_time` + usage count; CMS form/detail không thêm field ngoài form chung; relation lookup `id,name,alias,published`. Trash được snapshot full row nội bộ để restore lossless nhưng không expose `image/description/tablenames` thành input. Không `select *`.
+
+Live DB 2026-09-08: 4 row VI + 4 row EN, tất cả published; 0 alias/name rỗng, 0 FK orphan; 92/32 Product VI/EN có `types_id` NULL. Usage VI `1:211`, `2:72`, `5:0`, `6:0`; EN `1:143`, `2:17`, `5:0`, `6:0`. Hai bảng chỉ có PK và index alias thường, chưa có unique normalized index.
+
+Implementation 2026-09-08 giữ đúng projection/ownership trên: CMS chỉ PATCH `name/alias/ordering/published`; public Product join bằng `types_id`; Trash snapshot full row để bảo toàn `image/description/tablenames`. Migration unique alias đã áp dụng và roundtrip DB thật pass.
 
 ## Dịch vụ
 

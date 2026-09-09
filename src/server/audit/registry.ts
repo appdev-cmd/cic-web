@@ -30,6 +30,14 @@ export const AUDIT_ACTIONS = {
   PRODUCT_BRAND_UPDATED: 'product_brand.updated',
   PRODUCT_BRAND_STATUS_CHANGED: 'product_brand.status_changed',
   PRODUCT_BRAND_TRASHED: 'product_brand.trashed',
+  PRODUCT_APPLICATION_CREATED: 'product_application.created',
+  PRODUCT_APPLICATION_UPDATED: 'product_application.updated',
+  PRODUCT_APPLICATION_STATUS_CHANGED: 'product_application.status_changed',
+  PRODUCT_APPLICATION_TRASHED: 'product_application.trashed',
+  PRODUCT_TYPE_CREATED: 'product_type.created',
+  PRODUCT_TYPE_UPDATED: 'product_type.updated',
+  PRODUCT_TYPE_STATUS_CHANGED: 'product_type.status_changed',
+  PRODUCT_TYPE_TRASHED: 'product_type.trashed',
   TRASH_RESTORED: 'trash.restored',
   TRASH_PURGED: 'trash.purged',
 } as const;
@@ -46,6 +54,8 @@ export const AUDIT_ENTITY_TYPES = {
   MEDIA_FOLDER: 'media_folder',
   PRODUCT_CATEGORY: 'product_category',
   PRODUCT_BRAND: 'product_brand',
+  PRODUCT_APPLICATION: 'product_application',
+  PRODUCT_TYPE: 'product_type',
   TRASH_ITEM: 'trash_item',
 } as const;
 
@@ -86,6 +96,14 @@ export const auditActionRegistry = {
   [AUDIT_ACTIONS.PRODUCT_BRAND_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.PRODUCT_BRAND },
   [AUDIT_ACTIONS.PRODUCT_BRAND_STATUS_CHANGED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_BRAND },
   [AUDIT_ACTIONS.PRODUCT_BRAND_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_BRAND },
+  [AUDIT_ACTIONS.PRODUCT_APPLICATION_CREATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.PRODUCT_APPLICATION },
+  [AUDIT_ACTIONS.PRODUCT_APPLICATION_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.PRODUCT_APPLICATION },
+  [AUDIT_ACTIONS.PRODUCT_APPLICATION_STATUS_CHANGED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_APPLICATION },
+  [AUDIT_ACTIONS.PRODUCT_APPLICATION_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_APPLICATION },
+  [AUDIT_ACTIONS.PRODUCT_TYPE_CREATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
+  [AUDIT_ACTIONS.PRODUCT_TYPE_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
+  [AUDIT_ACTIONS.PRODUCT_TYPE_STATUS_CHANGED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
+  [AUDIT_ACTIONS.PRODUCT_TYPE_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.PRODUCT_TYPE },
   [AUDIT_ACTIONS.TRASH_RESTORED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
   [AUDIT_ACTIONS.TRASH_PURGED]: { category: 'config_publish', severity: 'critical', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
 } as const;

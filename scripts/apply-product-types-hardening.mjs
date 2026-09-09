@@ -1,0 +1,11 @@
+import postgres from 'postgres';
+import { readFile } from 'node:fs/promises';
+
+const url=process.env.DATABASE_URL;
+if(!url) throw new Error('DATABASE_URL is required. Load .env.local before applying the migration.');
+const sql=postgres(url,{max:1});
+try {
+  const migration=await readFile(new URL('../db_migrate/migrations/20260908_product_types_hardening.sql',import.meta.url),'utf8');
+  await sql.unsafe(migration);
+  console.log('Product types hardening migration applied.');
+} finally { await sql.end(); }

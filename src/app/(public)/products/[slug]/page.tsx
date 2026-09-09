@@ -1,7 +1,28 @@
-/* eslint-disable @next/next/no-img-element */
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { getPublishedProductBySlug } from '@/features/products/server/queries';
+
+import { listPublishedProductsForReference } from '@/features/products/server/queries';
+import { listPublishedProductApplications } from '@/features/product-applications/server/queries';
+import { listPublishedProductCategories } from '@/features/product-categories/server/queries';
+import { listPublishedProductTypes } from '@/features/product-types/server/queries';
+import { ProductsView } from '@/web/components/ProductsView';
+
 export const dynamic = 'force-dynamic';
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) { const product = await getPublishedProductBySlug((await params).slug); return product ? { title: `${product.title} | CIC`, description: product.summary ?? undefined } : {}; }
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) { const product = await getPublishedProductBySlug((await params).slug); if (!product) notFound(); return <article className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16"><nav className="text-sm text-slate-500" aria-label="Breadcrumb"><Link href="/products" className="hover:text-orange-600">Sản phẩm</Link><span className="mx-2">/</span><span>{product.title}</span></nav><div className="mt-8 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:items-start">{product.image && <img src={product.image} alt={product.title} className="aspect-[4/3] w-full rounded-2xl object-cover" />}<div><h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{product.title}</h1>{product.summary && <p className="mt-6 text-lg leading-8 text-slate-600">{product.summary}</p>}<Link href="/contact" className="mt-8 inline-flex rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white transition hover:bg-orange-700">Liên hệ tư vấn</Link></div></div></article>; }
+
+export async function generateMetadata({ params }: PageProps<'/products/[slug]'>) {
+  const slug = (await params).slug;
+  const product = (await listPublishedProductsForReference()).find((item) => item.slug === slug);
+  return product ? { title: `${product.name} | CIC`, description: product.description } : {};
+}
+
+export default async function ProductPage({ params }: PageProps<'/products/[slug]'>) {
+  const slug = (await params).slug;
+  const [products, categories, applications, productTypes] = await Promise.all([
+    listPublishedProductsForReference(),
+    listPublishedProductCategories('vi'),
+    listPublishedProductApplications('vi'),
+    listPublishedProductTypes('vi'),
+  ]);
+  const product = products.find((item) => item.slug === slug);
+  if (!product) notFound();
+  return <ProductsView products={products} previewProduct={product} categoryOptions={categories.map((item) => item.name)} applicationOptions={applications.map((item) => item.name)} productTypeOptions={productTypes.map((item) => item.name)} />;
+}

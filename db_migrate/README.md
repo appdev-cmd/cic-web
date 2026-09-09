@@ -1,5 +1,165 @@
 # ETL migrate `cic14005_cic_fs`: MySQL → PostgreSQL
 
+## Runbook nhanh: dựng database, chạy migration và khởi động dự án
+
+Các lệnh dưới đây dành cho **Windows PowerShell**. Chạy từ thư mục gốc của
+repository, trừ khi bước đó có `Set-Location db_migrate`.
+
+### Chọn đúng loại thao tác
+
+- **Dựng database mới từ đầu:** chạy schema + dữ liệu nền bằng
+  `import_to_postgres.py`, sau đó chạy toàn bộ migration incremental.
+- **Database đã có dữ liệu:** không chạy lại schema/data nền; chỉ chạy những
+  migration incremental chưa được áp dụng.
+
+> Cảnh báo: schema nền có các lệnh `DROP TABLE ... CASCADE`. Không chạy lại
+> `import_to_postgres.py` trên database đang sử dụng nếu chưa chủ động chấp nhận
+> xoá và dựng lại dữ liệu. Hãy sao lưu database trước mọi thao tác production.
+
+### 1. Chuẩn bị
+
+Từ thư mục gốc repository:
+
+```powershell
+npm.cmd install
+python -m venv db_migrate\venv
+db_migrate\venv\Scripts\Activate.ps1
+pip install mysql-connector-python python-dotenv
+psql --version
+```
+
+`.env.local` phải có cấu hình `DB_MIGRATE_MYSQL_*`,
+`DB_MIGRATE_POSTGRES_*` cho các script Python và `DATABASE_URL` cùng các biến
+Supabase/Next.js mà ứng dụng yêu cầu. Không commit credential thật.
+
+Kiểm tra cấu hình ứng dụng mà không in secret:
+
+```powershell
+npm.cmd run check:env
+```
+
+### 2. Dựng schema và dữ liệu nền (chỉ cho database mới/rỗng)
+
+```powershell
+Set-Location db_migrate
+python generate_manifest.py
+python export_sql.py
+python import_to_postgres.py --schema cic14005_cic_fs_schema_moi_postgresql_PATCHED.sql --data export_data.sql
+Set-Location ..
+```
+
+Trước khi import thật, có thể chỉ kiểm tra kết nối:
+
+```powershell
+Set-Location db_migrate
+python import_to_postgres.py --schema cic14005_cic_fs_schema_moi_postgresql_PATCHED.sql --check-only
+Set-Location ..
+```
+
+Sau `export_sql.py`, bắt buộc kiểm tra `export_report.json` và dữ liệu tiếng
+Việt trong `export_data.sql`. Không import nếu tên/nội dung đã xuất hiện ký tự
+`?` thay cho dấu tiếng Việt; khi đó lỗi đã nằm ở nguồn hoặc bước export.
+
+### 3. Chạy migration incremental
+
+Các migration cần chạy là những file SQL trong `db_migrate/migrations/`.
+`psql` không tự đọc `.env.local`, nhưng có thể nạp riêng `DATABASE_URL` từ file
+đó vào phiên PowerShell hiện tại (lệnh không in giá trị secret ra màn hình):
+
+> **Bắt buộc trước khi chạy các lệnh `psql` bên dưới:** mỗi lần mở một terminal
+> PowerShell mới, phải chạy khối nạp `DATABASE_URL` này đúng một lần. Nếu bỏ
+> qua, `$env:DATABASE_URL` sẽ rỗng và `psql` có thể chuyển sang PostgreSQL local,
+> sau đó hỏi `Password for user Admin`.
+
+```powershell
+$databaseUrlLine = Get-Content .env.local |
+  Where-Object { $_ -match '^\s*DATABASE_URL\s*=' } |
+  Select-Object -First 1
+
+if (-not $databaseUrlLine) { throw 'Không tìm thấy DATABASE_URL trong .env.local' }
+
+$env:DATABASE_URL = ($databaseUrlLine -replace '^\s*DATABASE_URL\s*=\s*', '').Trim().Trim('"').Trim("'")
+if (-not $env:DATABASE_URL) { throw 'DATABASE_URL trong .env.local đang rỗng' }
+
+# Phải trả về True trước khi chạy migration
+$env:DATABASE_URL -like 'postgres*'
+```
+
+Biến này chỉ tồn tại trong terminal hiện tại. Mở terminal mới thì chạy lại đoạn
+trên. Nếu kết quả kiểm tra là `False`, không chạy migration. Không in
+`$env:DATABASE_URL` ra console và không commit credential thật.
+
+Chạy trực tiếp từng file theo thứ tự timestamp. `ON_ERROR_STOP=1` bảo đảm
+`psql` trả lỗi ngay thay vì âm thầm chạy tiếp:
+
+```powershell
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260903_activity_audit_foundation.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260903_trash_foundation.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260903_users_identity_hardening.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260904_media_foundation_hardening.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260904_product_brands_hardening.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260904_product_categories_hardening.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260908_product_applications_hardening.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260908_product_types_hardening.sql
+```
+
+Nếu đang dựng một database mới và chắc chắn chưa file nào được áp dụng, có thể
+chạy toàn bộ thư mục theo thứ tự tên file:
+
+```powershell
+Get-ChildItem db_migrate/migrations/*.sql |
+  Sort-Object Name |
+  ForEach-Object {
+    Write-Host "Applying $($_.Name)..."
+    psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f $_.FullName
+    if ($LASTEXITCODE -ne 0) { throw "Migration failed: $($_.Name)" }
+  }
+```
+
+Với database đã tồn tại, chỉ chạy file chưa áp dụng; không dùng vòng lặp trên
+một cách máy móc. Các wrapper `scripts/apply-*.mjs` vẫn có thể dùng khi cần,
+nhưng không phải luồng chính của mục hướng dẫn này.
+
+### 4. Xác minh sau migration
+
+```powershell
+node --env-file=.env.local scripts/verify-activity-audit-foundation.mjs
+node --env-file=.env.local scripts/verify-trash-foundation.mjs
+node --env-file=.env.local scripts/verify-users-identity.mjs
+node --env-file=.env.local scripts/verify-media-foundation.mjs
+npm.cmd run verify:product-brand-roundtrip
+npm.cmd run verify:product-category-roundtrip
+npm.cmd run verify:product-application-foundation
+npm.cmd run verify:product-application-roundtrip
+```
+
+Các kiểm thử `roundtrip` có tạo dữ liệu kiểm thử tạm thời rồi dọn dẹp. Chỉ chạy
+trên môi trường đã cấu hình đúng và có tài khoản/quyền CMS phục vụ kiểm thử.
+
+### 5. Khởi động dự án
+
+```powershell
+npm.cmd run check:env
+npm.cmd run typecheck
+npm.cmd run dev
+```
+
+Mở `http://localhost:3000`. Khi kiểm tra bản production:
+
+```powershell
+npm.cmd run build
+npm.cmd run start
+```
+
+### Khi thêm migration mới
+
+1. Tạo file SQL có timestamp trong `db_migrate/migrations/`.
+2. Tạo/cập nhật script `scripts/apply-*.mjs` và script verify phù hợp.
+3. Thêm lệnh vào runbook này theo đúng thứ tự phụ thuộc.
+4. Chạy apply một lần, chạy verify, rồi chạy `typecheck`/`build` liên quan.
+
+---
+
 Quy trình này dùng **MySQL local làm nguồn dữ liệu cũ**, sinh `manifest.json` từ **schema PostgreSQL mới**, export dữ liệu MySQL thành SQL PostgreSQL, sau đó import **schema + data** vào PostgreSQL.
 
 > **Thứ tự cần nhớ:**

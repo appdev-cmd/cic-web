@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ReactNode } from 'react';
-
 export interface Product {
   id: number;
   name: string;
@@ -12,8 +10,10 @@ export interface Product {
   description: string;
   desc?: string;
   field: string;
+  categories?: string[];
   brand: string;
   app: string;
+  applications?: string[];
   img: string;
   icon?: string;
   productType?: string;

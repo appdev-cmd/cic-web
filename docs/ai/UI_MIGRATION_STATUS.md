@@ -1,6 +1,25 @@
 # UI Migration Status
 
-## UI Reference Map — Lĩnh vực ứng dụng (audit 2026-09-05)
+## UI Reference Map — Loại sản phẩm (audit 2026-09-08)
+
+| Surface | Reference/structure | Data & interaction | Responsive disposition |
+|---|---|---|---|
+| CMS list `/cms/product-settings/product-types` (`/cms/product-types`) | CMS shell; `CmsPageHeader`/FolderTree; tiêu đề “Loại sản phẩm”; CTA “Thêm loại sản phẩm”; toolbar; compact sticky table; pagination | Search tên/alias; status/reset; checkbox + bulk deactivate; cột Tên+alias, Thứ tự, Trạng thái, Thao tác; edit/delete | **KEEP** hierarchy/table direction; **ADAPT** toolbar stack/local table scroll; **FIX** long name wrap và touch target; không đưa mock-only field thành cột |
+| CMS create/edit | `MasterDataFormDrawer`, drawer phải, sticky header/footer | Dùng đúng form chung của Product Settings: tiêu đề dữ liệu, alias tự sinh/read-only, trạng thái hoạt động, thứ tự ưu tiên. Không có control cho `image/type_code/requires_license_key/pricing_model_default` | **KEEP** nguyên common form hierarchy; **DO_NOT_COPY** field DB/mock không xuất hiện trong form reference |
+| CMS usage/delete/history | `DeleteConfirmModal`; `UsageImpactDrawer` là concept liên quan nhưng chưa được nối từ list | Usage từ `cic_products*.types_id`; dữ liệu đang dùng không được hard delete; deactivate giữ relation; Trash/restore/Audit theo shared foundation | **FIX** bounded modal/drawer, focus/Escape/scroll/action wrap; **DO_NOT_COPY** local/permanent delete dựa mock `usage_count` |
+| Product CMS consumer | `ProductsFormView` có `SearchableSelect` “Loại sản phẩm”; `ProductsManager` có filter/cột Loại sản phẩm | Selector là quan hệ đơn qua `types_id`, chỉ chọn type active; list/filter resolve master identity đúng locale | **KEEP** placement/select visual; **REPLACE** object/string dual matching và demo dataset bằng ID relation thật |
+| Public Product listing/detail | `ProductsView` accordion “Loại sản phẩm” + Tag, selected count/clear/check/count/active chip; detail nhận `productType` | Option/count/matching và label phải resolve `types_id → cic_products_types*`; public chỉ dùng published. Không dùng mảng `PRODUCT_TYPES`, `types_name` hoặc heuristic tên | **KEEP** accordion/chip/detail visual; **ADAPT** mobile filter/touch/long label; **DO_NOT_COPY** hard-code/inference |
+| States/stress | Loading, empty, error, permission; tên dài; type không usage; Product chưa gắn type; inactive type vẫn được dữ liệu cũ tham chiếu | Server/network error khác empty; Product chưa gắn type không được tự gán “Khác”; selector không hiện inactive cho quan hệ mới nhưng readback cũ vẫn giữ identity | Chuyển regression 360/390/768/1024/1280/1440 sang MODULE_RESPONSIVE; audit này chưa sửa UI |
+
+Không có CMS detail/preview/SEO riêng hoặc public Product Type route được chứng minh. `ProductSettingsManager` (491 dòng), `MasterDataFormDrawer` (539 dòng) và `ProductsView` (1335 dòng) trộn nhiều module/state/behavior: giữ làm visual reference nhưng phân loại **EXTRACT_AND_REBUILD/REFERENCE_ONLY**, không import nguyên khối vào production domain/server. `DeleteConfirmModal` và primitives CMS có thể **REUSE_PRESENTATION** sau khi bỏ local mutation contract.
+
+Live browser/DB audit xác nhận public filter hiện có đúng hierarchy nhưng data authority sai: `PRODUCT_TYPES` hard-code và heuristic; live DB có 4 identity VI/EN, 0 orphan, nhưng 148 `types_name` EN sai locale. Implementation phải dùng FK/master projection, không fallback silent.
+
+**Implementation 2026-09-08:** CMS list/form/delete flow đã chuyển sang route-specific DB-backed UI; form thêm/sửa giữ đúng cấu trúc chung của React Product Settings và không render trường Biểu tượng. Drawer/modal bounded theo viewport và touch target tối thiểu 44px. Public Product filter/detail dùng master type published theo `types_id`, không còn hard-code/heuristic. Browser regression đã kiểm tra CMS desktop và mobile 390px, gồm list/table scroll và create drawer. Product CMS selector còn integration pending theo owner module Products.
+
+---
+
+## UI Reference Map — Lĩnh vực ứng dụng (audit 2026-09-08)
 
 | Surface | Reference/structure | Data & interaction | Responsive disposition |
 |---|---|---|---|
@@ -13,7 +32,13 @@
 
 Không có CMS detail/preview/media selector/tab riêng hoặc public Application listing/detail/hero/gallery/CTA được chứng minh trong React reference. Responsive: **KEEP** shell/accordion/badge; **ADAPT** toolbar, drawer và mobile filters; **FIX** clipping/touch/wrapping; **DO_NOT_COPY** local mutation, hover-only action, mock usage và field không được form render.
 
-Relation integrity re-audit 2026-09-05 không thay đổi UI map: master VI chưa có ID `8`, master EN chưa có IDs `13,14`; full CSV scan vẫn còn đúng ba orphan này. Không có stub để chuyển thành data-quality follow-up, vì record đích thực tế chưa tồn tại.
+Relation integrity re-audit trực tiếp 2026-09-08 không thay đổi UI map: junction VI/EN đã có đủ 249/89 relation, không còn orphan; IDs VI `8`, EN `13`,`14` là stub unpublished để bảo toàn identity đã mất. UI không hiển thị stub như option/nhãn giả; phục hồi tên thật là data-quality follow-up, không block implementation core. Public detail Next hiện tại không bám `ProductDetailView`, vì vậy consumer này là **REPLACE**, không phải UI Application đã hoàn tất.
+
+### Implementation Lĩnh vực ứng dụng — 2026-09-08
+
+- CMS Application đã tách thành Server route + client manager chuyên biệt, dùng PostgreSQL VI/EN thật và permission capabilities; list/search/status/pagination, bulk deactivate, create/edit drawer, usage guard và Trash dialog giữ hierarchy reference với table scroll, touch target 44px, bounded drawer/modal và long-text wrapping.
+- Public Product list/detail lấy Application published từ junction; detail route dùng lại `ProductsView`/`ProductDetailView`, không còn article tối giản và không còn `application_name` fallback.
+- Public desktop/mobile route HTTP 200; mobile filter drawer mở và heading Application hiển thị. Authenticated CMS visual regression chưa có session. Product reference type chỉ có một chuỗi `app`, nên multi-relation đang hiển thị nhãn ghép thay vì facet độc lập; trạng thái module `[I]`, chưa `[x]`.
 
 ## UI Reference Map — Hãng sản xuất (audit 2026-09-04)
 
