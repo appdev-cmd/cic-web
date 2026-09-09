@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
 import {
   Package,
   Plus,
-  Search,
   SlidersHorizontal,
   Trash2,
   CheckCircle2,
@@ -18,7 +17,6 @@ import {
   Layers,
   Edit,
   ExternalLink,
-  X,
 } from 'lucide-react';
 import {
   ProductItem,
@@ -33,6 +31,7 @@ import type { ProductsModuleData } from '../../data/CatalogDataSource';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { ProductsToolbar } from './ProductsToolbar';
 
 const ProductsFormView = React.lazy(() => import('./ProductsFormView').then((m) => ({ default: m.ProductsFormView })));
 import { ProductPreviewModal } from './ProductPreviewModal';
@@ -46,22 +45,13 @@ import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { saveProductAction, setProductsFeaturedAction, setProductsPublishedAction, trashProductAction } from '@/features/products/server/actions';
 
-type SystemViewTab = 'all' | 'published' | 'draft' | 'is_hot';
+import { useProductFilters, type SystemViewTab } from './useProductFilters';
 
 interface ProductsManagerProps {
   workspaceLocale: CmsLocale;
   data?: ProductsModuleData;
   capabilities?: { create: boolean; edit: boolean; delete: boolean };
 }
-
-const removeVietnameseTones = (str: string = ''): string => {
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[đĐ]/g, 'd')
-    .toLowerCase()
-    .trim();
-};
 
 const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
   name: product.name || product.title || '', alias: product.alias || '', code: product.code || product.sku || '', other_languages1: product.other_languages1 || '',
@@ -112,13 +102,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   // System Views Tab
   const [activeTab, setActiveTab] = useState<SystemViewTab>('all');
 
-  // Search & Filters State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedBrand, setSelectedBrand] = useState<string>('all');
-  const [selectedProductType, setSelectedProductType] = useState<string>('all');
-  const [selectedApplication, setSelectedApplication] = useState<string>('all');
-
   // Table Density & Column Visibility
   const [density, setDensity] = useState<'normal' | 'compact'>('normal');
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(defaultColumnVisibility);
@@ -145,157 +128,39 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Helper lookups
-  const getCategoryNames = (p: ProductItem): string[] => {
-    const ids = p.category_ids && p.category_ids.length > 0 ? p.category_ids : p.category_id ? [p.category_id] : [];
-    const matched = categories.filter((c) => ids.includes(c.id) || ids.includes(c.name));
-    if (matched.length > 0) return matched.map((c) => c.name);
-    if (ids.length > 0) return ids;
-    return ['Chưa phân loại'];
-  };
-
-  const getBrandName = (p: ProductItem): string => {
-    const brandId = p.manufactory || p.brand_id;
-    const found = brands.find((b) => b.id === brandId || b.name === brandId || b.name === p.brand_name);
-    return found ? found.name : p.brand_name || brandId || '—';
-  };
-
-  const getProductTypeName = (p: ProductItem): string => {
-    const typeId = p.types || p.product_type;
-    const found = productTypes.find((t) => t.id === typeId || t.name === typeId);
-    return found ? found.name : typeId || '—';
-  };
-
-  const getApplicationNames = (p: ProductItem): string[] => {
-    const appIds = (p.application || p.application_areas || []).map(String);
-    const matched = applications.filter((a) => appIds.includes(String(a.id)) || appIds.includes(a.name));
-    if (matched.length > 0) return matched.map((a) => a.name);
-    if (appIds.length > 0) return appIds;
-    return [];
-  };
-
-  // Filter Logic
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      // 1. System View Tab
-      if (activeTab === 'published' && p.editorial_status !== 'published') return false;
-      if (activeTab === 'draft' && p.editorial_status !== 'draft') return false;
-      if (activeTab === 'is_hot' && !p.is_hot) return false;
-
-      // 2. Search Query (supports accented and unaccented search across all fields)
-      if (searchQuery.trim()) {
-        const rawQ = searchQuery.toLowerCase().trim();
-        const normQ = removeVietnameseTones(searchQuery);
-
-        const catNames = getCategoryNames(p).join(' ');
-        const brandName = getBrandName(p);
-        const typeName = getProductTypeName(p);
-        const appNames = getApplicationNames(p).join(' ');
-        const tagNames = (p.tags || []).join(' ');
-
-        const searchableParts = [
-          p.name,
-          p.title,
-          p.code,
-          p.sku,
-          p.alias,
-          p.summary,
-          p.short_description,
-          p.description,
-          p.price,
-          p.price_old,
-          brandName,
-          typeName,
-          catNames,
-          appNames,
-          tagNames,
-        ];
-
-        const rawText = searchableParts.filter(Boolean).join(' ').toLowerCase();
-        const normText = removeVietnameseTones(rawText);
-
-        if (!rawText.includes(rawQ) && !normText.includes(normQ)) {
-          return false;
-        }
-      }
-
-      // 3. Category Filter
-      if (selectedCategory !== 'all') {
-        const pCatIds = [
-          ...(p.category_ids || []),
-          p.category_id,
-        ].filter(Boolean) as string[];
-
-        const targetCat = categories.find((c) => c.id === selectedCategory);
-        const targetCatNameNorm = targetCat ? removeVietnameseTones(targetCat.name) : '';
-
-        const hasCatMatch = pCatIds.some((catIdOrName) => {
-          if (catIdOrName === selectedCategory) return true;
-          if (targetCatNameNorm && removeVietnameseTones(catIdOrName).includes(targetCatNameNorm)) return true;
-          return false;
-        });
-
-        if (!hasCatMatch) return false;
-      }
-
-      // 4. Brand Filter
-      if (selectedBrand !== 'all') {
-        const targetBrand = brands.find((b) => b.id === selectedBrand);
-        const targetBrandNameNorm = targetBrand ? removeVietnameseTones(targetBrand.name) : '';
-
-        const pBrandId = p.manufactory || p.brand_id || '';
-        const pBrandNameNorm = removeVietnameseTones(p.brand_name || getBrandName(p));
-
-        const isBrandMatch =
-          pBrandId === selectedBrand ||
-          (targetBrandNameNorm && (pBrandNameNorm.includes(targetBrandNameNorm) || targetBrandNameNorm.includes(pBrandNameNorm)));
-
-        if (!isBrandMatch) return false;
-      }
-
-      // 5. Product Type Filter
-      if (selectedProductType !== 'all') {
-        const targetType = productTypes.find((t) => t.id === selectedProductType);
-        const targetTypeNameNorm = targetType ? removeVietnameseTones(targetType.name) : '';
-        const pTypeVal = p.types || p.product_type || '';
-        const pTypeValNorm = removeVietnameseTones(pTypeVal);
-
-        const isTypeMatch =
-          pTypeVal === selectedProductType ||
-          (targetType && pTypeVal === targetType.name) ||
-          (targetTypeNameNorm && pTypeValNorm && (pTypeValNorm.includes(targetTypeNameNorm) || targetTypeNameNorm.includes(pTypeValNorm)));
-
-        if (!isTypeMatch) return false;
-      }
-
-      // 6. Application Filter
-      if (selectedApplication !== 'all') {
-        const targetApp = applications.find((a) => a.id === selectedApplication);
-        const targetAppNameNorm = targetApp ? removeVietnameseTones(targetApp.name) : '';
-        const pAppsNorm = (p.application || p.application_areas || []).map((a) => removeVietnameseTones(a));
-
-        const isAppMatch =
-          (p.application || p.application_areas || []).includes(selectedApplication) ||
-          (targetAppNameNorm && pAppsNorm.some((a) => a.includes(targetAppNameNorm) || targetAppNameNorm.includes(a)));
-
-        if (!isAppMatch) return false;
-      }
-
-      return true;
-    });
-  }, [
-    products,
-    activeTab,
+  // Product Filters & Lookups Hook
+  const {
     searchQuery,
+    setSearchQuery,
     selectedCategory,
+    setSelectedCategory,
     selectedBrand,
+    setSelectedBrand,
     selectedProductType,
+    setSelectedProductType,
     selectedApplication,
+    setSelectedApplication,
+    handleSearchChange,
+    handleCategoryChange,
+    handleBrandChange,
+    handleProductTypeChange,
+    handleApplicationChange,
+    handleResetFilters,
+    isFilterActive,
+    filteredProducts,
+    getCategoryNames,
+    getBrandName,
+    getProductTypeName,
+    getApplicationNames,
+  } = useProductFilters({
+    products,
     categories,
     brands,
     productTypes,
     applications,
-  ]);
+    activeTab,
+    onFilterChange: () => setCurrentPage(1),
+  });
 
   // Paginated Products
   const paginatedProducts = useMemo(() => {
@@ -516,25 +381,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     router.refresh();
   };
 
-  const activeFiltersCount = [
-    searchQuery.trim() !== '',
-    selectedCategory !== 'all',
-    selectedBrand !== 'all',
-    selectedProductType !== 'all',
-    selectedApplication !== 'all',
-  ].filter(Boolean).length;
-
-  const isFilterActive = activeFiltersCount > 0;
-
-  const handleResetFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('all');
-    setSelectedBrand('all');
-    setSelectedProductType('all');
-    setSelectedApplication('all');
-    setCurrentPage(1);
-  };
-
   // If in Form View
   if (viewMode === 'form') {
     return (
@@ -644,142 +490,24 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
       />
 
       {/* 3. TOOLBAR & FILTERS */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Ô Tìm kiếm (Search Box) */}
-          <div className="relative flex items-center w-full sm:w-56 lg:w-64 shrink-0">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              <Search className="w-4 h-4" />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Tìm theo Tên, SKU, Hãng..."
-              className="w-full h-9.5 pl-9 pr-8 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setCurrentPage(1);
-                }}
-                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                title="Xóa tìm kiếm"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Filter 1: Lĩnh vực */}
-          <div className="min-w-[130px] flex-1 max-w-[180px]">
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
-              title="Lọc theo Lĩnh vực"
-            >
-              <option value="all">Tất cả Lĩnh vực</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filter 2: Hãng sản xuất */}
-          <div className="min-w-[140px] flex-1 max-w-[200px]">
-            <select
-              value={selectedBrand}
-              onChange={(e) => {
-                setSelectedBrand(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
-              title="Lọc theo Hãng sản xuất"
-            >
-              <option value="all">Tất cả Hãng sản xuất</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filter 3: Loại sản phẩm */}
-          <div className="min-w-[140px] flex-1 max-w-[200px]">
-            <select
-              value={selectedProductType}
-              onChange={(e) => {
-                setSelectedProductType(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
-              title="Lọc theo Loại sản phẩm"
-            >
-              <option value="all">Tất cả Loại sản phẩm</option>
-              {productTypes
-                .filter((t) => t.status === 'active')
-                .map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          {/* Filter 4: Ứng dụng */}
-          <div className="min-w-[140px] flex-1 max-w-[200px]">
-            <select
-              value={selectedApplication}
-              onChange={(e) => {
-                setSelectedApplication(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
-              title="Lọc theo Ứng dụng"
-            >
-              <option value="all">Tất cả Ứng dụng</option>
-              {applications
-                .filter((a) => a.status === 'active')
-                .map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          {/* Cụm nút thao tác bên phải: Đặt lại */}
-          <div className="flex items-center gap-2 ml-auto shrink-0">
-            {/* Nút Đặt lại */}
-            <button
-              type="button"
-              disabled={!isFilterActive}
-              onClick={handleResetFilters}
-              className={`flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                isFilterActive
-                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 hover:bg-orange-100 dark:hover:bg-orange-900/80 shadow-xs'
-                  : 'text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 disabled:cursor-not-allowed disabled:opacity-50'
-              }`}
-              title="Đặt lại tất cả bộ lọc và tìm kiếm"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Đặt lại</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <ProductsToolbar
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        selectedBrand={selectedBrand}
+        onBrandChange={handleBrandChange}
+        selectedProductType={selectedProductType}
+        onProductTypeChange={handleProductTypeChange}
+        selectedApplication={selectedApplication}
+        onApplicationChange={handleApplicationChange}
+        categories={categories}
+        brands={brands}
+        productTypes={productTypes}
+        applications={applications}
+        isFilterActive={isFilterActive}
+        onResetFilters={handleResetFilters}
+      />
 
       {/* BULK ACTIONS BAR (Visible when checkboxes are checked) */}
       <CmsBulkActionBar
