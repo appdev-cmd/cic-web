@@ -251,6 +251,13 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
     return filteredProducts.slice(start, start + pageSize);
   }, [filteredProducts, currentPage, pageSize]);
 
+  const paginationItems = useMemo<(number | 'ellipsis')[]>(() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (currentPage <= 4) return [1, 2, 3, 4, 5, 'ellipsis', totalPages];
+    if (currentPage >= totalPages - 3) return [1, 'ellipsis', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages];
+  }, [currentPage, totalPages]);
+
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -1391,19 +1398,28 @@ export function ProductsView({ previewProduct, products, categoryOptions, applic
                   <ChevronLeft size={16} />
                 </button>
 
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const pNum = i + 1;
+                {paginationItems.map((item, idx) => {
+                  if (item === 'ellipsis') {
+                    return (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="w-10 h-10 flex items-center justify-center text-xs font-bold text-slate-400 select-none"
+                      >
+                        …
+                      </span>
+                    );
+                  }
                   return (
                     <button
-                      key={pNum}
-                      onClick={() => handlePageChange(pNum)}
+                      key={item}
+                      onClick={() => handlePageChange(item)}
                       className={`w-10 h-10 border flex items-center justify-center text-xs font-black transition-all rounded-[8px] ${
-                        currentPage === pNum
+                        currentPage === item
                           ? 'bg-orange-600 border-orange-600 text-white shadow-sm'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-orange-600 hover:text-orange-600'
                       }`}
                     >
-                      {pNum}
+                      {item}
                     </button>
                   );
                 })}

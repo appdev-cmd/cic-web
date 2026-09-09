@@ -893,35 +893,22 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                       {/* Product Identity (Tên & Ảnh & Hot) */}
                       {columnVisibility.product && (
                         <td className="py-3 px-4 sticky left-10 z-10 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
-                          <div className="flex items-center gap-3">
-                            {p.icon ? (
-                              <img
-                                src={p.icon}
-                                alt=""
-                                className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 bg-slate-100 dark:bg-slate-800"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/60 flex items-center justify-center shrink-0">
-                                <Package className="w-5 h-5" />
-                              </div>
+                          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedProductForForm(p);
+                                setViewMode('form');
+                              }}
+                              className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer text-left line-clamp-1"
+                            >
+                              {prodName}
+                            </button>
+                            {p.is_hot && (
+                              <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black rounded border border-amber-500/20 shrink-0">
+                                HOT
+                              </span>
                             )}
-                            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedProductForForm(p);
-                                  setViewMode('form');
-                                }}
-                                className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer text-left line-clamp-1"
-                              >
-                                {prodName}
-                              </button>
-                              {p.is_hot && (
-                                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black rounded border border-amber-500/20 shrink-0">
-                                  HOT
-                                </span>
-                              )}
-                            </div>
                           </div>
                         </td>
                       )}
