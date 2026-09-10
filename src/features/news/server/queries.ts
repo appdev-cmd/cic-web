@@ -76,7 +76,7 @@ export async function listPublishedNews(
   const where = `n.published=true AND c.published=true AND ($1::text IS NULL OR lower(btrim(c.alias))=lower(btrim($1))) AND ($2::text IS NULL OR n.title ILIKE '%'||$2||'%' OR coalesce(n.summary,'') ILIKE '%'||$2||'%')`;
   const [rows, count] = await Promise.all([
     sql.unsafe(
-      `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE ${where} ORDER BY n.ordering,n.start_time DESC,n.id DESC LIMIT $3 OFFSET $4`,
+      `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE ${where} ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC LIMIT $3 OFFSET $4`,
       [category, query, pageSize, offset]
     ),
     sql.unsafe(
@@ -97,7 +97,7 @@ export async function listPublishedNewsPlacement(locale: NewsLocale, placement: 
     column = placement === 'hot' ? 'is_hot' : 'show_in_homepage',
     sql = getPostgresClient();
   const rows = await sql.unsafe(
-    `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND n.${column}=true ORDER BY n.ordering,n.start_time DESC,n.id DESC LIMIT 4`
+    `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND n.${column}=true ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC LIMIT 4`
   );
   return rows.map((row) => map(row as Row));
 }
@@ -118,7 +118,7 @@ export async function listLatestPublishedNews(locale: NewsLocale, excludeId: str
   const t = table(locale),
     sql = getPostgresClient();
   const rows = await sql.unsafe(
-    `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND n.id<>$1 ORDER BY n.start_time DESC,n.id DESC LIMIT $2`,
+    `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND n.id<>$1 ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC LIMIT $2`,
     [Number(excludeId), limit]
   );
   return rows.map((row) => map(row as Row));
@@ -130,7 +130,7 @@ export async function listPublishedNewsByIds(locale: NewsLocale, ids: string[]) 
   const t = table(locale),
     sql = getPostgresClient();
   const rows = await sql.unsafe(
-    `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND n.id=ANY($1::bigint[]) ORDER BY n.ordering,n.start_time DESC,n.id DESC`,
+    `SELECT ${listProjection} FROM ${t.news} n JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true AND c.published=true AND n.id=ANY($1::bigint[]) ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC`,
     [normalized]
   );
   return rows.map((row) => map(row as Row));

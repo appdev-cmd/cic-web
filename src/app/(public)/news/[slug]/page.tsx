@@ -15,12 +15,11 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   const slug = (await params).slug;
   const item = await getPublishedNewsBySlug(slug);
   if (!item) notFound();
-  const [news, hotNews, products] = await Promise.all([
+  const [news, products] = await Promise.all([
     listPublishedNews({ page: 1, pageSize: 30 }),
-    listPublishedNewsPlacement('vi', 'hot'),
     listPublishedProductsForReference().catch(() => []),
   ]);
-  const merged = [...hotNews, ...news.items].filter((entry, index, values) => values.findIndex((candidate) => candidate.id === entry.id) === index);
+  const merged = news.items;
   const items = merged.some((entry) => entry.id === item.id) ? merged : [item, ...merged];
   return <NewsRuntimeView items={items} products={products} initialSlug={slug} />;
 }
