@@ -57,7 +57,7 @@ import {
   X
 } from 'lucide-react';
 import { getNewsData } from '../features/news/newsData';
-import type { DetailedNewsItem, CompanyNewsItem, SpecialtyNewsItem, RecruitmentNewsItem, PromotionNewsItem, ShareholderNewsItem } from '../features/news/types';
+import type { DetailedNewsItem, CompanyNewsItem, SpecialtyNewsItem, RecruitmentNewsItem, PromotionNewsItem, ShareholderNewsItem, PublicNewsDataSet } from '../features/news/types';
 
 interface NewsViewProps {
   key?: string | number;
@@ -70,6 +70,10 @@ interface NewsViewProps {
   onNavigateToPrivacy?: () => void;
   onOpenConsultation?: () => void;
   previewNews?: DetailedNewsItem;
+  data?: PublicNewsDataSet;
+  initialNewsId?: string | null;
+  onNavigateToNews?: (id: string) => void;
+  onBackToNews?: () => void;
 }
 
 const renderFormattedText = (text: string) => {
