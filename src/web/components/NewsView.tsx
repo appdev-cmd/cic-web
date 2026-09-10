@@ -114,18 +114,22 @@ export function NewsView({
   onNavigateToPrivacy,
   onOpenConsultation,
   previewNews,
+  data,
+  initialNewsId,
+  onNavigateToNews,
+  onBackToNews,
 }: NewsViewProps) {
   const {
     items: sourceNewsData,
     relatedProducts: productsData,
     relatedProjects: projectsData,
     relatedEvents: eventsData,
-  } = React.useMemo(getNewsData, []);
+  } = React.useMemo(() => data ?? getNewsData(), [data]);
   const newsData = React.useMemo(() => previewNews ? [previewNews, ...sourceNewsData.filter((item) => item.id !== previewNews.id)] : sourceNewsData, [previewNews, sourceNewsData]);
   
   // Navigation states
   const [activeCategory, setActiveCategory] = useState<'all' | 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder'>('all');
-  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(previewNews?.id || null);
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(previewNews?.id || initialNewsId || null);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -438,11 +442,13 @@ export function NewsView({
     setCopiedLink(false);
     setPdfDownloadedId(null);
     setDownloadProgress(0);
+    onNavigateToNews?.(id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToList = () => {
     setSelectedNewsId(null);
+    onBackToNews?.();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -533,6 +539,7 @@ export function NewsView({
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedNews = filteredNews.slice(startIndex, startIndex + itemsPerPage);
+  const highlightedNews = activeCategory === 'all' && !searchQuery && breakingNewsList.length > 0 ? breakingNewsList : filteredNews;
 
   const selectedItem = newsData.find(item => item.id === selectedNewsId);
 
@@ -1414,17 +1421,17 @@ export function NewsView({
             {renderNewsTicker()}
 
             {/* HERO NEWSROOM SECTION (Top Highlight Story + Vertical Side Features) */}
-            {activeCategory === 'all' && !searchQuery && filteredNews.length >= 4 && (
+            {activeCategory === 'all' && !searchQuery && highlightedNews.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch pt-2">
                 
                 {/* HERO MAIN ARTICLE (7 cols) */}
                 <div 
-                  onClick={() => handleSelectNews(filteredNews[0].id)}
+                  onClick={() => handleSelectNews(highlightedNews[0].id)}
                   className="lg:col-span-7 group cursor-pointer relative overflow-hidden bg-slate-950 min-h-[460px] lg:min-h-[520px] flex flex-col justify-end rounded-[12px]"
                 >
                   <img 
-                    src={filteredNews[0].img} 
-                    alt={filteredNews[0].title} 
+                    src={highlightedNews[0].img}
+                    alt={highlightedNews[0].title}
                     className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-[1.05] transition-all duration-500 ease-out"
                     referrerPolicy="no-referrer"
                   />
@@ -1436,16 +1443,16 @@ export function NewsView({
                         Tin Nổi Bật
                       </span>
                       <span className="text-xs text-slate-300 font-semibold flex items-center gap-1">
-                        <Clock size={13} className="text-[#FC5115]" /> {filteredNews[0].date}
+                        <Clock size={13} className="text-[#FC5115]" /> {highlightedNews[0].date}
                       </span>
                     </div>
 
                     <h2 className="text-xl lg:text-3xl font-black text-white uppercase leading-tight group-hover:text-orange-400 transition-colors line-clamp-2">
-                      {filteredNews[0].title}
+                      {highlightedNews[0].title}
                     </h2>
 
                     <p className="text-sm lg:text-base text-slate-300 line-clamp-3 leading-relaxed font-medium max-w-3xl">
-                      {filteredNews[0].shortDesc}
+                      {highlightedNews[0].shortDesc}
                     </p>
 
                     <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115] pr-2">
@@ -1462,7 +1469,7 @@ export function NewsView({
                     <TrendingUp size={16} className="text-[#FC5115]" />
                   </div>
 
-                  {filteredNews.slice(1, 4).map((sideItem) => (
+                  {highlightedNews.slice(1, 4).map((sideItem) => (
                     <div 
                       key={sideItem.id}
                       onClick={() => handleSelectNews(sideItem.id)}
