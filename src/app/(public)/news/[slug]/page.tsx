@@ -20,6 +20,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     listPublishedProductsForReference().catch(() => []),
   ]);
   const merged = news.items;
-  const items = merged.some((entry) => entry.id === item.id) ? merged : [item, ...merged];
+  // Replace item in merged list with detail item (which contains full content), or prepend it
+  const items = [item, ...merged.filter((entry) => entry.id !== item.id)];
   return <NewsRuntimeView items={items} products={products} initialSlug={slug} />;
 }

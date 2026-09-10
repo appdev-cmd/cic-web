@@ -40,10 +40,16 @@ export function NewsListView({
     return items.filter((item) => item.category !== 'shareholder').slice(0, 6);
   }, [items]);
 
-  // Hero section items
+  // Hero section items: Ưu tiên tối đa 4 bài được đánh dấu nổi bật (isHot) mới nhất, fallback bài mới nhất
   const highlightedNews = useMemo(() => {
-    return filters.filteredNews;
-  }, [filters.filteredNews]);
+    const hotArticles = items.filter((item) => item.isHot && item.category !== 'shareholder');
+    if (hotArticles.length >= 4) {
+      return hotArticles.slice(0, 4);
+    }
+    const hotIds = new Set(hotArticles.map((item) => item.id));
+    const nonHotArticles = items.filter((item) => !hotIds.has(item.id) && item.category !== 'shareholder');
+    return [...hotArticles, ...nonHotArticles].slice(0, 4);
+  }, [items]);
 
   const handleDownloadAttachment = (e: React.MouseEvent, item: PublicNewsItem) => {
     e.stopPropagation();

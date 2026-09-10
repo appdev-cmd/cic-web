@@ -95,7 +95,12 @@ export function NewsRuntimeView({
   const mappedItems = items.map(mapItem);
 
   if (initialSlug) {
-    const activeItem = mappedItems.find((_, idx) => items[idx]?.slug === initialSlug) || mappedItems[0];
+    const targetSlug = decodeURIComponent(initialSlug).trim().toLowerCase();
+    const activeItem =
+      mappedItems.find((_, idx) => {
+        const itemSlug = decodeURIComponent(items[idx]?.slug || '').trim().toLowerCase();
+        return itemSlug === targetSlug || items[idx]?.id === initialSlug;
+      }) || mappedItems[0];
     if (activeItem) {
       return (
         <NewsDetailView
