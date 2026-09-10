@@ -15,6 +15,15 @@
 @source "../web/components/AwardsSlider.tsx";
 @source "../web/components/ProductsView.tsx";
 @source "../web/components/ProductDetailView.tsx";
+@source "../web/components/NewsView.tsx";
+@source "../web/components/NewsRuntimeView.tsx";
+@source "../web/components/NewsTicker.tsx";
+@source "../web/components/NewsToc.tsx";
+@source "../web/components/NewsConsultationForm.tsx";
+@source "../web/components/NewsDetailActions.tsx";
+@source "../web/components/NewsRelatedSections.tsx";
+@source "../web/features/news/newsData.ts";
+@source "../app/(public)/news";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -263,4 +272,18 @@ html.dark, body.dark, .dark { color-scheme: dark; }
 @media (max-width: 767px) {
   .public-shell main { min-width: 0; }
 }
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ── News / marquee ticker ── */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+/* ── News / fade-in toast ── */
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade-in { animation: fade-in 0.2s ease-out both; }
+
+/* ── Scrollbar hide utility (used in News category tabs) ── */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }

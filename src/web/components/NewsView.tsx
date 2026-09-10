@@ -1473,7 +1473,7 @@ export function NewsView({
                         <img 
                           src={sideItem.img} 
                           alt={sideItem.title} 
-                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-500"
                           referrerPolicy="no-referrer"
                         />
                       </div>
