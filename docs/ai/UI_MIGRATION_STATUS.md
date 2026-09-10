@@ -1,5 +1,40 @@
 # UI Migration Status
 
+## UI Reference Map — Tin tức (audit 2026-09-10)
+
+| Surface | Reference/structure | Data & interaction | Responsive disposition |
+|---|---|---|---|
+| CMS list `/cms/news` | `NewsManager`: page header, count + CTA, search, category/status filters, reset, bulk bar, column/density settings, table, pagination mặc định 10 | Checkbox; title/warnings; category; author; Hot News; Trang chủ; status; publish/schedule; updated time; preview/edit/history/activity/delete | **KEEP** hierarchy; **ADAPT** toolbar/actions/table local scroll; **FIX** long title, sticky action column, touch target, pagination wrap |
+| CMS create/edit | `NewsFormView`: sticky action bar trong content shell; form 2 cột, main content + right sidebar | Title/alias/other-language URL/category/order/summary, rich text, related news/products, image/file/tags, two placement flags, publish time, SEO/Tawk.to, quality panel; preview/save draft/publish | **KEEP** field/section hierarchy; **ADAPT** 1-column tablet/mobile; **FIX** visible labels/errors, bounded media/preview, focus/Escape and header/sidebar preservation |
+| CMS preview/history/activity/delete | `ArticlePreviewModal`, `VersionHistoryDrawer`, `ActivityLogDrawer`, `DeleteConfirmModal` | Functional doc requires preview, real version/history, Trash/restore/purge; current React data is fixture/local state | **REFERENCE_ONLY** until backed by server data; **DO_NOT_COPY** fake versions/logs, `window.confirm`, optimistic success before server response |
+| Public `/news` list | `NewsView`: Hot News hero + side list, category icon tabs, subtype/year filters for shareholder content, search/filter strip, grid or document list, pagination, newsletter CTA and bell subscription modal | Published articles/categories, image, title, summary, category/type/date/views/file state; category/search/filter/page local interaction | **KEEP** complete hierarchy/icons/content placement; **REPLACE** current simplified Next card grid; **FIX** horizontal tab affordance, long text and modal keyboard/touch behavior |
+| Public `/news/[slug]` | `NewsView` detail: progress, hero/breadcrumb/meta/actions, one ticker, 8/4 article/sidebar grid, lead/image/rich content, category-specific blocks, conditional TOC, consultation, attachments/related entities, latest + related news | Article by unique alias; published category; author/date/views/tags/files; related news/products (projects/events only when persisted evidence exists); share/copy/print and real contact action | **KEEP** section order/visual identity; **REPLACE** incomplete composition; **FIX** duplicate consultation block, misplaced relation section, static progress, TOC ID consistency and unbounded whole-list queries |
+| Home/Header/Search consumers | `HomeView`, Header submenu, global search | Home uses independently selected max 4; Hot News independently max 4; public/global search only published projection | **ADAPT** through shared News read model; no mock fallback or client-side full dataset |
+| States/stress | Loading, empty, error, not-found, permission; duplicate/long alias; missing image/file; rich HTML; 1,553 VI rows | Server error must differ from empty; legacy assets remain readable; draft/private metadata never reaches public | Carry to MODULE_RESPONSIVE and roundtrip; audit does not modify UI |
+
+Current Next is mixed: public reads PostgreSQL but `/news` omits major reference sections and reads the full result set; detail has duplicated consultation, incomplete relations and ambiguous alias lookup. CMS `/cms/news` still uses VI mock/local mutation and EN empty data. Detector findings around `border-l-4` match intentional legacy visual accents; several `gray-on-color` findings are real contrast-review candidates, while the one-line Next list findings are mostly cross-element false positives. No UI was changed in this audit.
+
+Hard-data blocker resolved 2026-09-10: VI/EN normalized alias đã unique, lookup không còn dựa vào `LIMIT 1`, và Hot/Home đã về tối đa 4 cho từng locale. Core UI/data flow sau đó đã được triển khai; trạng thái authoritative hiện là `[I]` tại `MODULE_MAP.md`.
+
+Implementation 2026-09-10: CMS News route dùng DB VI/EN thật và giữ shell/list/full-page form/preview reference. Public `/news` và `/news/[slug]` render lại chính `NewsView` của `main`; adapter client chỉ chuyển read-model PostgreSQL sang presentation props và đồng bộ URL, không thay hierarchy/layout/animation của reference. Dữ liệu public vẫn chỉ lấy bài published, detail lookup unique alias và không fallback mock. HTTP `/news` trả 200, build/typecheck/lint pass; chưa có authenticated screenshot artifact đủ desktop/tablet/mobile nên visual gate vẫn pending và module là `[I]`.
+
+---
+
+## UI Reference Map — Danh mục tin tức (audit 2026-09-10)
+
+| Surface | Reference/structure | Data & interaction | Responsive disposition |
+|---|---|---|---|
+| CMS list `/cms/news/categories` | CMS shell; `CmsPageHeader`/FolderTree; count badge; CTA “Thêm danh mục”; search; table cây | Tên/title, `/tin-tuc/{alias}`, usage count, ordering, homepage, publish, edit/delete; indent 20px/cấp + ký hiệu `└`; empty state | **KEEP** hierarchy/table intent; **ADAPT** toolbar và local table scroll; **FIX** long text, touch target và loading/error |
+| CMS create/edit drawer | Overlay + drawer phải `max-w-2xl`, header/body/footer; các section Thông tin, Hiển thị, SEO | Tên, title, alias tự sinh/sửa, cha, thứ tự, tóm tắt, Media image, publish/home, SEO counters + Google preview; loại self/descendant khỏi parent selector | **ADAPT** drawer `dvh`/safe area; **FIX** focus trap, Escape, scroll lock, mobile footer; giữ nguyên hierarchy/field set |
+| Delete/usage/history | Guard số bài và danh mục con; confirm delete; Audit/Trash là foundation chung | Usage derive từ `cic_news*.category_id`; delete chỉ khi không còn bài/con; restore phải giữ full legacy row; history đọc Audit chung | **DO_NOT_COPY** `window.confirm`, local delete/fake toast hoặc tin `count` mock; modal phải usable bằng keyboard/touch |
+| Public News list/category | `NewsView` category tabs có icon; Quan hệ cổ đông có document-type/year subfilters; cards/labels | Category hiện hard-code bằng English IDs và mock; target resolve published tree/identity đúng locale từ DB, không map theo tên | **KEEP** tabs/icons/subfilter hierarchy; **ADAPT** scroll affordance/wrapping; **DO_NOT_COPY** hard-code/mapping chuỗi tên |
+| Header + Home News section | Header news submenu desktop/mobile; Home category pills, category badge/card và CTA sang News | Cùng category identity/alias với public News; `show_in_homepage` là placement field nhưng Page Builder/menu integration là consumer riêng | **KEEP** vị trí/icon/card language; **ADAPT** mobile menu/pills; không silent fallback sang fixture |
+| States/stress | Search no-result; loading/error/permission; category name/alias dài; nhiều cấp; unpublished parent; orphan/cycle/conflict | Server error khác empty; tree phải cycle-safe; không lộ unpublished node; alias conflict báo tại field; mutation chỉ báo thành công sau server response | Chuyển kiểm tra 360/390/768/1024/1280/1440 sang MODULE_RESPONSIVE; audit này chưa sửa hoặc visual-pass UI |
+
+Không có bằng chứng CMS bulk action, revision/preview riêng, pagination riêng hoặc public category-detail route đã hoàn thiện. `NewsCategoryManager` và `NewsCategoryFormDrawer` là **EXTRACT_AND_REBUILD**; primitives CMS là **REUSE_PRESENTATION**; `NewsManager`, `NewsModulePage`, `newsData.ts`, fixtures và SPA callbacks là **REFERENCE_ONLY** cho production architecture. Next hiện vẫn dùng demo/local state cho CMS category và hard-code/cached category string ở public; module chưa implement. Impeccable detector báo bốn cảnh báo `gray-on-color` cùng dòng table; kiểm tra context cho thấy đây là false positive do nhiều nhánh class/element bị gộp trên một dòng, không phải bằng chứng contrast thực tế.
+
+---
+
 ## UI Reference Map — Loại sản phẩm (audit 2026-09-08)
 
 | Surface | Reference/structure | Data & interaction | Responsive disposition |

@@ -1,35 +1,21 @@
 import React, { useState } from 'react';
-import { Monitor, Smartphone, Tablet, X } from 'lucide-react';
-import { NewsView } from '../../../../web/components/NewsView';
-import type { DetailedNewsItem, PublicNewsCategory } from '../../../../web/features/news/types';
+import { CalendarDays, Download, Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { PublicSitePreviewFooter, PublicSitePreviewHeader } from '../../../components/PublicSitePreviewChrome';
 import { ResponsiveWebsitePreviewFrame } from '../../../components/ResponsiveWebsitePreviewFrame';
 import type { NewsArticle } from '../types';
 
 interface Props { isOpen: boolean; article: NewsArticle | null; onClose: () => void }
 
-const getCategory = (categoryId: string): PublicNewsCategory => {
-  const value = categoryId.toLowerCase();
-  if (value.includes('special')) return 'specialty';
-  if (value.includes('international')) return 'international';
-  if (value.includes('recruit')) return 'recruitment';
-  if (value.includes('promotion')) return 'promotion';
-  if (value.includes('shareholder')) return 'shareholder';
-  return 'company';
+const displayDate = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf()) ? value : new Intl.DateTimeFormat('vi-VN').format(date);
 };
 
 export const ArticlePreviewModal: React.FC<Props> = ({ isOpen, article, onClose }) => {
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   if (!isOpen || !article) return null;
-  const previewNews: DetailedNewsItem = {
-    id: `cms-preview-${article.id}`, category: getCategory(article.category_id), title: article.title,
-    date: article.start_time || article.created_time, shortDesc: article.summary, img: article.image,
-    author: article.author?.name, tags: article.tags, contentMarkdown: article.content,
-    gallery: article.image ? [article.image] : [],
-    attachments: article.file_upload ? [{ title: 'Tài liệu đính kèm', size: '', url: article.file_upload }] : [],
-    relatedArticleIds: article.news_related, relatedProductIds: article.products_related.map((id) => Number(id)).filter(Number.isFinite),
-    seoTitle: article.seo_title, seoDesc: article.seo_description, seoKeywords: article.seo_keyword ? article.seo_keyword.split(',').map((item) => item.trim()) : [],
-  };
+
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-slate-950/85" role="dialog" aria-modal="true" aria-label="Xem trước bài viết">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-900 px-5 text-white">
@@ -42,7 +28,18 @@ export const ArticlePreviewModal: React.FC<Props> = ({ isOpen, article, onClose 
       <div className="min-h-0 flex-1 overflow-auto overscroll-contain bg-slate-800 p-5">
         <ResponsiveWebsitePreviewFrame device={device}>
           <PublicSitePreviewHeader view="news" />
-          <NewsView previewNews={previewNews} onNavigateHome={() => undefined} />
+          <main className="bg-white px-5 py-10 text-slate-900 sm:px-8 lg:px-12">
+            <article className="mx-auto max-w-4xl">
+              <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-orange-600"><CalendarDays className="size-4" />{displayDate(article.start_time || article.created_time)}</p>
+              <h1 className="text-3xl font-black leading-tight sm:text-4xl">{article.title}</h1>
+              {article.summary && <p className="mt-5 border-l-4 border-orange-500 pl-4 text-base leading-7 text-slate-600">{article.summary}</p>}
+              {article.image && <img src={article.image} alt={article.title} className="mt-7 aspect-video w-full rounded-2xl object-cover" />}
+              <div className="ck-content mt-8 leading-7" dangerouslySetInnerHTML={{ __html: article.content }} />
+              {article.video && <div className="mt-8 aspect-video overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full" dangerouslySetInnerHTML={{ __html: article.video }} />}
+              {article.file_upload && <a href={article.file_upload} className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm font-bold text-white"><Download className="size-4" />Tải tài liệu đính kèm</a>}
+              {article.tags?.length > 0 && <div className="mt-8 flex flex-wrap gap-2">{article.tags.map((tag) => <span key={tag} className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">#{tag}</span>)}</div>}
+            </article>
+          </main>
           <PublicSitePreviewFooter />
         </ResponsiveWebsitePreviewFrame>
       </div>

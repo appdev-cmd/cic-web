@@ -177,6 +177,11 @@ export function isSalesOwnerCmsPath(path: string): boolean {
     normalizedPath.startsWith('/cms/product-settings/sales-staff/');
 }
 
+export function isNewsCategoryCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/news/categories' || normalizedPath.startsWith('/cms/news/categories/');
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }

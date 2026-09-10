@@ -1,0 +1,80 @@
+ locale | total | published | hot | home | blank | duplicate_groups | published_duplicate_groups 
+--------+-------+-----------+-----+------+-------+------------------+----------------------------
+ en     |   300 |       300 |   4 |    4 |     0 |                0 |                          0
+ vi     |  1553 |      1521 |   4 |    4 |     0 |                0 |                          0
+(2 rows)
+
+ schemaname |  tablename  |         indexname         |                                                                                     indexdef                                                                                     
+------------+-------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ public     | cic_news    | ux_cic_news_alias_norm    | CREATE UNIQUE INDEX ux_cic_news_alias_norm ON public.cic_news USING btree (lower(btrim((alias)::text))) WHERE ((alias IS NOT NULL) AND (btrim((alias)::text) <> ''::text))
+ public     | cic_news_en | ux_cic_news_en_alias_norm | CREATE UNIQUE INDEX ux_cic_news_en_alias_norm ON public.cic_news_en USING btree (lower(btrim((alias)::text))) WHERE ((alias IS NOT NULL) AND (btrim((alias)::text) <> ''::text))
+(2 rows)
+
+ table_name  |            conname            | convalidated |                              definition                              
+-------------+-------------------------------+--------------+----------------------------------------------------------------------
+ cic_news    | ck_cic_news_alias_nonblank    | t            | CHECK (((alias IS NOT NULL) AND (btrim((alias)::text) <> ''::text)))
+ cic_news_en | ck_cic_news_en_alias_nonblank | t            | CHECK (((alias IS NOT NULL) AND (btrim((alias)::text) <> ''::text)))
+(2 rows)
+
+ event_object_table |          trigger_name           | action_timing | event_manipulation 
+--------------------+---------------------------------+---------------+--------------------
+ cic_news           | trg_cic_news_placement_limit    | BEFORE        | INSERT
+ cic_news           | trg_cic_news_placement_limit    | BEFORE        | UPDATE
+ cic_news_en        | trg_cic_news_en_placement_limit | BEFORE        | INSERT
+ cic_news_en        | trg_cic_news_en_placement_limit | BEFORE        | UPDATE
+(4 rows)
+
+ locale |  id  |                                                                                  title                                                                                  |                                                 alias                                                  
+--------+------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------
+ vi     |   82 | Ký hợp đồng cung cấp thiết bị đo chấn động và sóng không khí Blastmate III (hãng Instantel) với Trung tâm Bồi dưỡng và Tư vấn nổ mìn thuộc Hội kỹ thuật nổ mìn Việt Nam | ky-hop-dong-cung-cap-thiet-bi-do-chan-dong-va-song-khong-khi-82
+ vi     |  150 | Tờ trình mức cổ tức, trích lập các quỹ và mức thù lao HĐQT, BKS 2015                                                                                                    | to-trinh-muc-co-tuc-trich-lap-cac-quy-va-muc-thu-lao-hdqt-bks-2015-150
+ vi     |  178 | Nghị quyết ĐHCĐ thường niên 2017                                                                                                                                        | nghi-quyet-dhcd-thuong-nien-2017-178
+ vi     |  190 | Tờ trình mức cổ tức, trích lập các quỹ và mức thù lao HĐQT, BKS 2018                                                                                                    | to-trinh-muc-co-tuc-trich-lap-cac-quy-va-muc-thu-lao-hdqt-bks-2018-190
+ vi     |  222 | Chuẩn đoán nhiệt trong nhà máy điện mặt trời - Ứng dụng công nghệ nhiệt trong vận hành, kiểm tra, bảo dưỡng nhà máy điện mặt trời                                       | chuan-doan-nhiet-trong-nha-may-dien-mat-troi-222
+ vi     |  314 | Định mức dự toán Phần Thí nghiệm vật liệu, cấu kiện, kết cấu và công trình xây dựng theo 1169/QĐ-BXD                                                                    | dinh-muc-du-toan-phan-thi-nghiem-vat-lieu-cau-kien-ket-cau-va-cong-trinh-xay-dung-theo-1169-qd-bxd-314
+ vi     | 1132 | Thông báo mời họp Đại hội cổ đông năm 2024 và Giấy ủy quyền                                                                                                             | thong-bao-moi-hop-dai-hoi-co-dong-nam-2024-va-giay-uy-quyen-1132
+ vi     | 1141 | Tờ trình tại Đại hội cổ đông năm 2024                                                                                                                                   | to-trinh-tai-dai-hoi-co-dong-nam-2024-1141
+ vi     | 1142 | Tờ trình tại Đại hội cổ đông năm 2024                                                                                                                                   | to-trinh-tai-dai-hoi-co-dong-nam-2024-1142
+ vi     | 1144 | Quy chế bầu bổ sung thành viên Ban Kiểm soát nhiệm kỳ 2022-2027                                                                                                         | quy-che-bau-bo-sung-thanh-vien-ban-kiem-soat-nhiem-ky-2022-2027-1144
+(10 rows)
+
+ locale | id  |                                                                                  title                                                                                  |                                 alias                                  
+--------+-----+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------
+ en     |  82 | Ký hợp đồng cung cấp thiết bị đo chấn động và sóng không khí Blastmate III (hãng Instantel) với Trung tâm Bồi dưỡng và Tư vấn nổ mìn thuộc Hội kỹ thuật nổ mìn Việt Nam | ky-hop-dong-cung-cap-thiet-bi-do-chan-dong-va-song-khong-khi-82
+ en     | 150 | Tờ trình mức cổ tức, trích lập các quỹ và mức thù lao HĐQT, BKS 2015                                                                                                    | to-trinh-muc-co-tuc-trich-lap-cac-quy-va-muc-thu-lao-hdqt-bks-2015-150
+ en     | 178 | Nghị quyết ĐHCĐ thường niên 2017                                                                                                                                        | nghi-quyet-dhcd-thuong-nien-2017-178
+ en     | 190 | Tờ trình mức cổ tức, trích lập các quỹ và mức thù lao HĐQT, BKS 2018                                                                                                    | to-trinh-muc-co-tuc-trich-lap-cac-quy-va-muc-thu-lao-hdqt-bks-2018-190
+(4 rows)
+
+ locale | placement |  id  |                                               title                                               | ordering |       start_time       
+--------+-----------+------+---------------------------------------------------------------------------------------------------+----------+------------------------
+ vi     | hot       | 1097 | PIPENET Spray/Sprinkler – free training webinar                                                   |        0 | 2024-01-31 13:53:44+00
+ vi     | hot       | 1089 | Một số Tip sử dụng khoanh vùng đám mây bằng Revision cloud                                        |        0 | 2024-01-22 15:57:03+00
+ vi     | hot       |  991 | Hướng dẫn sử dụng các công cụ Modify trong CAD                                                    |        0 | 2023-08-22 09:48:09+00
+ vi     | hot       |   15 | CIC và DNV GL kết hợp tổ chức Hội thảo "Những điểm mới trong Phân tích dữ liệu và Quản lý Rủi ro" |        1 | 2019-08-19 16:25:50+00
+(4 rows)
+
+ locale | placement |  id  |                                               title                                               | ordering |       start_time       
+--------+-----------+------+---------------------------------------------------------------------------------------------------+----------+------------------------
+ vi     | home      | 1097 | PIPENET Spray/Sprinkler – free training webinar                                                   |        0 | 2024-01-31 13:53:44+00
+ vi     | home      | 1089 | Một số Tip sử dụng khoanh vùng đám mây bằng Revision cloud                                        |        0 | 2024-01-22 15:57:03+00
+ vi     | home      |  991 | Hướng dẫn sử dụng các công cụ Modify trong CAD                                                    |        0 | 2023-08-22 09:48:09+00
+ vi     | home      |   15 | CIC và DNV GL kết hợp tổ chức Hội thảo "Những điểm mới trong Phân tích dữ liệu và Quản lý Rủi ro" |        1 | 2019-08-19 16:25:50+00
+(4 rows)
+
+ locale | placement | id  |                                      title                                       | ordering |       start_time       
+--------+-----------+-----+----------------------------------------------------------------------------------+----------+------------------------
+ en     | hot       | 346 | SAFE v23.3.0 – Official 2026 Update Released by CIC                              |        0 | 2026-07-31 11:17:08+00
+ en     | hot       | 262 | Interior trends are on the rise in 2024                                          |        0 | 2024-02-20 11:21:55+00
+ en     | hot       | 250 | Leaders of wind measurement equipment company ZXLidars visited and worked at CIC |        0 | 2024-01-02 10:50:55+00
+ en     | hot       | 246 | CIC and Hexagon : Successfully opened a series of webinar in Vietnam             |        0 | 2023-12-19 09:01:16+00
+(4 rows)
+
+ locale | placement | id  |                                      title                                       | ordering |       start_time       
+--------+-----------+-----+----------------------------------------------------------------------------------+----------+------------------------
+ en     | home      | 346 | SAFE v23.3.0 – Official 2026 Update Released by CIC                              |        0 | 2026-07-31 11:17:08+00
+ en     | home      | 262 | Interior trends are on the rise in 2024                                          |        0 | 2024-02-20 11:21:55+00
+ en     | home      | 250 | Leaders of wind measurement equipment company ZXLidars visited and worked at CIC |        0 | 2024-01-02 10:50:55+00
+ en     | home      | 246 | CIC and Hexagon : Successfully opened a series of webinar in Vietnam             |        0 | 2023-12-19 09:01:16+00
+(4 rows)
+

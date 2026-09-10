@@ -17,6 +17,27 @@
 | recruitment/promotion fields | position, salary, deadline, programName... | Không có form tương ứng | Không có nguồn chắc chắn | Không có | Mock theo loại tin | C/D chưa chứng minh | Không | Giữ trong rich text hoặc bỏ UI trước khi đòi schema |
 | SEO | seoTitle/seoDesc/seoKeywords | seo_* | fs_news.seo_* | cic_news.seo_* | SEO detail | A | Không | Đổi array keyword thành chuỗi contract ổn định |
 
+### Field Usage Map — audit Tin tức 2026-09-10
+
+- `CMS_EDITABLE`: `title,alias,category_id,summary,content,image,video,file_upload,tags,news_related,products_related,ordering,published,is_hot,show_in_homepage,start_time,end_time,seo_title,seo_keyword,seo_description`; `other_languages1,tawk_to` chỉ editable nếu giữ đúng form đã duyệt, không dùng làm i18n fallback hoặc script tùy ý.
+- `CMS_OPERATIONAL`: `id,published,is_hot,show_in_homepage,ordering,category_id,created_time,updated_time,author_id,author_last_id`; category/user names là joined read model.
+- `PUBLIC_READ`: `id,title,alias,summary,content,image,video,file_upload,tags,category_id,published,is_hot,show_in_homepage,ordering,created_time,hits,news_related,products_related,seo_title,seo_description`; chỉ qua published/category-visible projection.
+- `SYSTEM_MANAGED`: `id,hits,created_time,updated_time,author_id,author_last_id`; `creator/editor/author/author_last` là legacy snapshot, không nhận identity từ client.
+- `RELATION`: `category_id → cic_news_categories*.id`, `author_id/author_last_id → cic_users.id`; `news_related/products_related` là ordered legacy text contract cần parse, validate tồn tại, bỏ trùng/tự tham chiếu và không tự tạo junction table.
+- `AUDIT`: shared Audit Writer/history; không dùng `action_id/action_name/action_time/action_username` làm audit authority mới.
+- `LEGACY_UNUSED`: `category_alias,category_id_wrapper,category_alias_wrapper,category_published,is_slide,is_new_video,is_video,display_title,display_column,tags_group,rating_count,rating_sum,comments_*,source_news,source_website,icon,optimal_seo,actflg,ctdusr,ctdwks,ctddtm,mdfusr,mdfwks,lstmdf,cdtpgm,mdfpgm` khi không có use case đã duyệt.
+- `UNKNOWN`: semantics hiện tại của `action_id` và mức còn sử dụng thật của `is_new`; preserve nguyên giá trị, không expose input/default/cleanup.
+
+Projection bắt buộc: public list; public detail; CMS list; CMS form/detail; category/user/news/product lookup; full-row Trash snapshot. Không `select *` trong application query và update phải có PATCH ownership.
+
+### Invariant dữ liệu Tin tức — áp dụng 2026-09-10
+
+- Trong cùng một locale, `lower(btrim(alias))` phải unique và alias không được NULL/rỗng; VI/EN là hai dataset độc lập.
+- Canonical duplicate: published trước, `start_time` (fallback `created_time/updated_time`) mới hơn, rồi ID lớn hơn. Non-canonical giữ bài và published, đổi alias thành `normalized-old-alias-id`.
+- URL legacy trùng vốn ambiguous: canonical giữ URL cũ; các bài còn lại có URL mới, không tạo nhiều redirect từ cùng source URL.
+- Mỗi locale tối đa 4 Hot và 4 Home, hai vùng độc lập. `ordering ASC` là ưu tiên hiện hành, sau đó date DESC và ID DESC; overflow chỉ tắt đúng placement flag.
+- Mutation bật placement phải gọi khóa–đếm trong cùng PostgreSQL transaction trước write; client validation không phải enforcement.
+
 ## Trang nội dung
 
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |
@@ -79,6 +100,26 @@ Implementation 2026-09-09 dùng explicit projection theo các contract trên. CM
 | sales owner | select sản phẩm/phạm vi | business/email legacy | fs_business, fs_email, fs_types_email | cic_business, cic_email, cic_types_email | Người phụ trách | A | Không | Không trộn với cấu hình mẫu email |
 | UI metrics/audit/working draft | score, usedBy, version... | Không có | Không có | Không có | Trình bày demo | C | Không | Tính tại UI hoặc bỏ nếu không có backend thật |
 | SEO/published/order/timestamps | cùng nghĩa | có | field legacy | field tương ứng | Quản trị | A | Không | Hai trạng thái Draft/Published |
+
+### Field Usage Audit — Danh mục tin tức (2026-09-10)
+
+| Field | Phân loại | Contract |
+|---|---|---|
+| `id` | SYSTEM_MANAGED; RELATION | Identity số, DB/server quản lý; không nhận ID tùy ý từ form create |
+| `name`, `title`, `alias`, `summary` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Nội dung form và URL/nhãn danh mục; alias bắt buộc, chuẩn hóa và unique độc lập theo VI/EN |
+| `parent_id` | CMS_EDITABLE; RELATION; PUBLIC_READ | Self-FK đúng bảng locale; chặn self/descendant/cycle; `NULL` là node gốc |
+| `ordering`, `published`, `show_in_homepage` | CMS_EDITABLE; CMS_OPERATIONAL; PUBLIC_READ | Sắp xếp, trạng thái và placement đúng functional requirement; public chỉ đọc node published |
+| `image` | CMS_EDITABLE; PUBLIC_READ; RELATION | Form reference có Media selector; giữ raw legacy path để đọc, upload mới dùng Media foundation |
+| `seo_title`, `seo_keyword`, `seo_description` | CMS_EDITABLE; PUBLIC_READ | Form reference và functional requirement xác nhận SEO/search metadata |
+| `level`, `list_parents`, `alias_wrapper` | SYSTEM_MANAGED; RELATION | Derive lại từ cây trong transaction khi tạo/chuyển cha; không cho browser ghi tùy ý |
+| `created_time`, `updated_time`, `ctdusr`, `ctdwks`, `ctddtm`, `mdfusr`, `mdfwks`, `lstmdf`, `cdtpgm`, `mdfpgm` | AUDIT; SYSTEM_MANAGED | Timestamp/legacy provenance do server giữ; không thành arbitrary form input |
+| `display_title`, `display_tags`, `display_related`, `display_created_time`, `display_category`, `display_comment`, `display_sharing` | SYSTEM_MANAGED cho create; UNKNOWN về ownership UI | Live schema bắt buộc và toàn bộ row hiện là `true`; backend create phải dùng compatibility policy đã chứng minh, PATCH thường không ghi đè |
+| `icon`, `icon_font`, `name_display`, `is_comment`, `display_summary`, `products_related`, `estore_id`, `category_id`, `actflg` | UNKNOWN/LEGACY_UNUSED | Không có capability/form/consumer Next được duyệt; không expose, validate, default, NULL hoặc cleanup; Trash snapshot phải preserve |
+| `cic_news*.category_id` | RELATION | FK authority bài viết→danh mục cùng locale; dùng để đếm usage và guard delete |
+
+Projection: public category/navigation `id,name,title,alias,parent_id,ordering,image,summary,seo_*` với `published=true`; CMS list `id,name,title,alias,parent_id,level,ordering,published,show_in_homepage,updated_time` + `COUNT(cic_news*.id)`; CMS form/detail chỉ field form-owned + hierarchy/audit metadata; relation lookup `id,name,alias,parent_id,published`; Trash snapshot full row để restore lossless. Không `select *` trong application query.
+
+Live audit 2026-09-10: VI 10 category (9 published), EN 9 (9 published); 4 node con mỗi locale; không alias rỗng/trùng chuẩn hóa, không orphan/cycle. `cic_news` có 1.553 row dùng đủ 10 category VI; `cic_news_en` có 300 row dùng đủ 9 category EN. FK bài viết và self-tree đều đúng workspace.
 
 ### Field Usage Audit — Danh mục sản phẩm (2026-09-04)
 

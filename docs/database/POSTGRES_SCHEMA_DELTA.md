@@ -31,7 +31,10 @@ Không có field nghiệp vụ mới cần thêm. `cic_news` và `cic_news_en` �
 - `news_related` và `products_related` hiện đủ cho compatibility với dữ liệu cũ. Chưa tạo bảng relation chỉ để chuẩn hóa schema; chỉ audit lại nếu backend phát sinh nhu cầu query, sắp thứ tự hoặc bảo đảm toàn vẹn quan hệ độc lập.
 - Không thêm `image_alt`, `image_caption`, `timezone`, các field version, activity hoặc trash vào bảng News. Đây là mock/UI concern hoặc thuộc shared entity nếu chức năng dùng chung được duyệt.
 - Không thêm các field subtype fixture như `salary`, `deadline`, `programName`, `pdfSize`. Chưa có CMS write contract; nội dung thông thường tiếp tục dùng Rich Text hoặc metadata/file hiện có.
-- Cần sửa FK hiện có `cic_news_en.category_id` từ `cic_news_categories(id)` sang `cic_news_categories_en(id)` sau khi kiểm tra orphan. Đây là sửa constraint sai workspace, không phải ADD field/table.
+- Live audit 2026-09-10 xác nhận FK `cic_news_en.category_id → cic_news_categories_en(id)` đã đúng workspace và không có orphan; ghi chú sửa FK trước đây đã lỗi thời.
+- Live profiling trước migration 2026-09-10: VI 1.553 row/1.521 published, EN 300/300; duplicate normalized alias là 9 VI/4 EN; placement VI Hot/Home 1.178/1.035 và EN 145/144.
+- Migration `20260910_news_hard_data_resolution.sql` đã áp dụng: 14 non-canonical đổi theo `normalized-old-alias-id`, không delete/unpublish; duplicate và blank alias sau migration đều 0. Index `ux_cic_news_alias_norm`, `ux_cic_news_en_alias_norm` cùng check nonblank đã validate; lookup slug không còn dùng `LIMIT 1` làm integrity mechanism.
+- Hot/Home độc lập đã về 4/4 cho mỗi locale theo `published DESC, ordering ASC, start_time/article date DESC, id DESC`; overflow chỉ bị tắt placement flag. Trigger DB chặn mục thứ 5, và mutation tương lai bắt buộc dùng khóa–đếm–ghi trong cùng transaction qua contract server-only.
 
 ## Danh mục tin tức
 
@@ -41,8 +44,8 @@ Không có field nghiệp vụ mới cần thêm. `cic_news_categories` và `cic
 
 | Table | Field thêm | Type | FK | Index | Mức độ | CMS mới sử dụng | Ghi chú |
 | ----- | ---------- | ---- | -- | ----- | ------ | --------------- | ------- |
-| `cic_news_categories` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu danh mục VI | Chỉ tạo sau khi xử lý NULL/rỗng/trùng và ngoại lệ legacy. |
-| `cic_news_categories_en` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu danh mục EN | Profiling độc lập dataset EN trước khi áp dụng. |
+| `cic_news_categories` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu danh mục VI | Live audit 2026-09-10: 10/10 alias có giá trị, không trùng sau chuẩn hóa; có thể tạo index trong implementation. |
+| `cic_news_categories_en` | Không thêm field | — | — | Unique index trên alias chuẩn hóa | **BẮT BUỘC** | Validation alias; website tra cứu danh mục EN | Live audit 2026-09-10: 9/9 alias có giá trị, không trùng sau chuẩn hóa; có thể tạo index trong implementation. |
 
 ### Bảng mới cần tạo
 
@@ -52,7 +55,7 @@ Không có.
 
 - `name`, `title`, `alias`, `summary`, `parent_id`, `ordering`, `image`, trạng thái hiển thị và SEO đã có; không tạo field trùng nghĩa theo tên của ViewModel mới.
 - Số bài trong danh mục được tính bằng `COUNT(cic_news.id)` theo `category_id`; không lưu column `count`.
-- Cần sửa FK hiện có `cic_news_categories_en.parent_id` từ `cic_news_categories(id)` thành self-reference `cic_news_categories_en(id)` sau khi kiểm tra orphan, sentinel `0`, self-reference và cycle. Đây là sửa constraint sai workspace, không phải ADD field/table.
+- Live audit 2026-09-10 xác nhận `cic_news_categories_en.parent_id → cic_news_categories_en(id)` đã là self-reference đúng workspace; cả hai cây VI/EN không có orphan hoặc cycle.
 
 ## Sản phẩm
 

@@ -1,6 +1,6 @@
 # Tương thích dữ liệu và backend — Tin tức
 
-> Trạng thái: Đã khảo sát và chốt hướng; chưa triển khai backend hoặc migration.  
+> Trạng thái: Core Tin tức và Danh mục đã implement trên PostgreSQL; còn integration được ghi rõ trong `MODULE_MAP.md`.
 > Phạm vi: Bài viết và Danh mục tin tức của CMS mới.
 
 ## Kết luận
@@ -154,7 +154,17 @@ Không tạo bảng duyệt riêng cho Tin tức. Các action chính cần audit
 
 ## Migration và kiểm tra
 
-`migration_report.json` cũ đang báo lỗi với news/category trong khi `export_report.json` có số lượng dữ liệu. Vì vậy phải chạy lại báo cáo migrate theo schema hiện hành trước khi triển khai backend.
+Live PostgreSQL đã được chuẩn hóa và hậu kiểm ngày 2026-09-10 bằng `20260910_news_hard_data_resolution.sql`.
+
+- Alias unique trong từng locale theo `lower(btrim(alias))`; VI/EN độc lập. Canonical chọn theo published, `start_time`/article date mới nhất, rồi ID lớn nhất. Non-canonical giữ nguyên bài và trạng thái, đổi sang `normalized-old-alias-id`.
+- Duplicate legacy URL vốn ambiguous không thể preserve 1:1: canonical giữ URL cũ, các bài khác nhận URL mới; không tạo redirect giả từ một source sang nhiều bài.
+- Mỗi locale tối đa 4 Hot News và 4 Home News, hai placement độc lập. Overflow giữ top 4 theo published, `ordering ASC`, date DESC, ID DESC; chỉ tắt cờ tương ứng, không delete/unpublish.
+- Unique index + check alias nonblank và trigger cap placement đã tồn tại. Mọi mutation bật placement vẫn phải khóa, đếm và ghi atomically trong cùng PostgreSQL transaction; UI chỉ là UX validation.
+- Sau migration: duplicate/blank alias 0; VI Hot/Home 4/4; EN 4/4; tổng bài và published không đổi.
+
+## Implementation core 2026-09-10
+
+CMS VI/EN và public VI cùng đọc/ghi PostgreSQL qua domain validation, projection và repository News. Mutation có permission server, Audit Writer, typed Trash snapshot/restore draft và atomic placement enforcement. Website có list/search/category/server pagination/Hot News và detail theo unique alias với media, file, SEO, CTA và related content. Không còn mock fallback trên `/cms/news`, `/news` hoặc `/news/[slug]`. Public EN locale routing, Home/Header binding và authenticated visual regression là integration pending; module đạt `[I]`, chưa `[x]`.
 
 Các lỗi FK/schema được ghi tại tài liệu dùng chung `postgresql-schema-issues.md` để xử lý độc lập.
 
