@@ -22,7 +22,7 @@
 @source "../web/components/NewsConsultationForm.tsx";
 @source "../web/components/NewsDetailActions.tsx";
 @source "../web/components/NewsRelatedSections.tsx";
-@source "../web/features/news/newsData.ts";
+@source "../web/features/news";
 @source "../app/(public)/news";
 
 @custom-variant dark (&:where(.dark, .dark *));

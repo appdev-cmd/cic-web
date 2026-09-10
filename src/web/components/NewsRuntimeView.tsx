@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/shared/types';
 import type { DetailedNewsItem, PublicNewsCategory } from '../features/news/types';
-import { NewsView } from './NewsView';
+import { NewsListView } from '../features/news/components/list/NewsListView';
+import { NewsDetailView } from '../features/news/components/detail/NewsDetailView';
 
 export interface DatabaseNewsItem {
   id: string;
@@ -77,17 +78,57 @@ const mapItem = (item: DatabaseNewsItem): DetailedNewsItem => {
 
 type RuntimeProduct = Product & { slug: string };
 
-export function NewsRuntimeView({ items, products, initialSlug, initialCategory }: { items: DatabaseNewsItem[]; products: RuntimeProduct[]; initialSlug?: string; initialCategory?: string | null }) {
+interface NewsRuntimeViewProps {
+  items: DatabaseNewsItem[];
+  products: RuntimeProduct[];
+  initialSlug?: string;
+  initialCategory?: string | null;
+}
+
+export function NewsRuntimeView({
+  items,
+  products,
+  initialSlug,
+  initialCategory,
+}: NewsRuntimeViewProps) {
   const router = useRouter();
-  const initial = initialSlug ? items.find((item) => item.slug === initialSlug) : undefined;
-  return <NewsView
-    initialCategory={initialCategory ? categoryFor(initialCategory) : null}
-    initialNewsId={initial?.id}
-    data={{ items: items.map(mapItem), relatedProducts: products, relatedProjects: [], relatedEvents: [] }}
-    onNavigateHome={() => router.push('/')}
-    onNavigateToNews={(id: string) => { const target=items.find((item)=>item.id===id); if(target)router.push(`/news/${target.slug}`); }}
-    onBackToNews={() => router.push('/news')}
-    onNavigateToProduct={(id) => router.push(`/products/${products.find((product) => product.id === id)?.slug ?? id}`)}
-    onNavigateToPrivacy={() => router.push('/privacy')}
-  />;
+  const mappedItems = items.map(mapItem);
+
+  if (initialSlug) {
+    const activeItem = mappedItems.find((_, idx) => items[idx]?.slug === initialSlug) || mappedItems[0];
+    if (activeItem) {
+      return (
+        <NewsDetailView
+          article={activeItem}
+          items={mappedItems}
+          relatedProducts={products}
+          relatedProjects={[]}
+          relatedEvents={[]}
+          onBackToList={() => router.push('/news')}
+          onSelectNews={(id: string) => {
+            const target = items.find((item) => item.id === id);
+            if (target) router.push(`/news/${target.slug}`);
+          }}
+          onNavigateHome={() => router.push('/')}
+          onNavigateToProduct={(id) => {
+            const target = products.find((product) => product.id === id);
+            router.push(`/products/${target?.slug ?? id}`);
+          }}
+          onOpenConsultation={() => router.push('/contact')}
+        />
+      );
+    }
+  }
+
+  return (
+    <NewsListView
+      items={mappedItems}
+      initialCategory={initialCategory ? categoryFor(initialCategory) : 'all'}
+      onSelectNews={(id: string) => {
+        const target = items.find((item) => item.id === id);
+        if (target) router.push(`/news/${target.slug}`);
+      }}
+      onOpenConsultation={() => router.push('/contact')}
+    />
+  );
 }

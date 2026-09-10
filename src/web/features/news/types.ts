@@ -40,6 +40,7 @@ export interface PublicNewsItem {
   seoTitle?: string;
   seoDesc?: string;
   seoKeywords?: string[];
+  isHot?: boolean;
 
   // Presentation-only metadata used by the current design when supplied.
   // It is not part of the PostgreSQL news schema and is optional for API data.
