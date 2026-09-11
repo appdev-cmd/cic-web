@@ -21,7 +21,7 @@ import { CmsPagination } from '../../components/ui/CmsPagination';
 interface MediaListViewProps {
   assets: MediaAsset[];
   selectedAssetIds: string[];
-  onToggleSelectAll: () => void;
+  onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectAsset: (id: string) => void;
   onOpenDetail: (asset: MediaAsset) => void;
   onOpenPreview: (asset: MediaAsset) => void;
@@ -44,7 +44,9 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const paginatedAssets = assets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const isAllSelected = assets.length > 0 && selectedAssetIds.length === assets.length;
+  const pageIds = paginatedAssets.map((a) => a.id);
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedAssetIds.includes(id));
+  const isIndeterminate = pageIds.some((id) => selectedAssetIds.includes(id)) && !isAllSelected;
 
   if (assets.length === 0) {
     return (
@@ -71,9 +73,9 @@ export const MediaListView: React.FC<MediaListViewProps> = ({
               <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-850 z-10">
                 <CmsSelectionCheckbox
                   checked={isAllSelected}
-                  indeterminate={selectedAssetIds.length > 0 && !isAllSelected}
-                  onChange={onToggleSelectAll}
-                  label="Chọn tất cả tệp media"
+                  indeterminate={isIndeterminate}
+                  onChange={() => onToggleSelectAll(pageIds)}
+                  label="Chọn tất cả tệp trên trang"
                 />
               </th>
               <th className="p-3 min-w-[220px]">Tệp Media & Tiêu đề</th>

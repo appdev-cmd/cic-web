@@ -425,11 +425,13 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
   };
 
   // Bulk Selection Controls
-  const handleToggleSelectAll = () => {
-    if (selectedIds.length === displayedContacts.length) {
-      setSelectedIds([]);
+  const handleToggleSelectAll = (pageIds?: string[]) => {
+    const targetIds = pageIds && pageIds.length > 0 ? pageIds : displayedContacts.map((c) => c.id);
+    const allPageSelected = targetIds.length > 0 && targetIds.every((id) => selectedIds.includes(id));
+    if (allPageSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !targetIds.includes(id)));
     } else {
-      setSelectedIds(displayedContacts.map((c) => c.id));
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...targetIds])));
     }
   };
 
@@ -471,7 +473,7 @@ export const ContactsManager: React.FC<ContactsManagerProps> = ({ data, staffMem
     <div className="space-y-6">
       {/* Toast Alert with Dismiss */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 text-xs font-semibold">
+        <div className="fixed bottom-6 right-6 z-[100] px-4 py-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 text-xs font-semibold">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{toast.message}</span>
           <button onClick={() => setToast(null)} className="ml-2 text-slate-400 hover:text-white">

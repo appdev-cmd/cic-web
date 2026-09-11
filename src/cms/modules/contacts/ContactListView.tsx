@@ -24,7 +24,7 @@ import { CmsPagination } from '../../components/ui/CmsPagination';
 interface ContactListViewProps {
   contacts: ContactRequest[];
   selectedIds: string[];
-  onToggleSelectAll: () => void;
+  onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectOne: (id: string) => void;
   onSelectContact: (contact: ContactRequest) => void;
   onClaim: (contactId: string) => void;
@@ -61,8 +61,10 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedContacts = contacts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedContacts.map((c) => c.id);
 
-  const isAllSelected = contacts.length > 0 && selectedIds.length === contacts.length;
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const isIndeterminate = pageIds.some((id) => selectedIds.includes(id)) && !isAllSelected;
 
   const rowPadding =
     density === 'compact' ? 'py-2 px-3 text-xs' : density === 'spacious' ? 'py-4 px-4 text-sm' : 'py-3 px-3.5 text-xs';
@@ -105,9 +107,9 @@ export const ContactListView: React.FC<ContactListViewProps> = ({
                 <th className="py-3 px-3 w-10 sticky left-0 z-10 bg-slate-50 dark:bg-slate-800">
                   <CmsSelectionCheckbox
                     checked={isAllSelected}
-                    indeterminate={selectedIds.length > 0 && !isAllSelected}
-                    onChange={onToggleSelectAll}
-                    label="Chọn tất cả yêu cầu"
+                    indeterminate={isIndeterminate}
+                    onChange={() => onToggleSelectAll(pageIds)}
+                    label="Chọn tất cả yêu cầu trên trang"
                   />
                 </th>
 

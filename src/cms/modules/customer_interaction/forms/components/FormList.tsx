@@ -19,7 +19,7 @@ import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionChec
 interface FormListProps {
   forms: FormItem[];
   selectedFormIds: string[];
-  onToggleSelectAll: () => void;
+  onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectForm: (id: string) => void;
   onEditForm: (form: FormItem) => void;
   onOpenPreview: (form: FormItem) => void;
@@ -41,10 +41,12 @@ export const FormList: React.FC<FormListProps> = ({
   onDeleteForm,
   onQuickStatusToggle,
 }) => {
-  const isAllSelected = forms.length > 0 && selectedFormIds.length === forms.length;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedForms = forms.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedForms.map((f) => f.id);
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedFormIds.includes(id));
+  const isIndeterminate = pageIds.some((id) => selectedFormIds.includes(id)) && !isAllSelected;
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -72,9 +74,9 @@ export const FormList: React.FC<FormListProps> = ({
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
                 <CmsSelectionCheckbox
                   checked={isAllSelected}
-                  onChange={onToggleSelectAll}
-                  indeterminate={selectedFormIds.length > 0 && !isAllSelected}
-                  label="Chọn tất cả biểu mẫu"
+                  onChange={() => onToggleSelectAll(pageIds)}
+                  indeterminate={isIndeterminate}
+                  label="Chọn tất cả biểu mẫu trên trang"
                 />
               </th>
               <th className="p-3 min-w-[200px]">Tên quản trị</th>

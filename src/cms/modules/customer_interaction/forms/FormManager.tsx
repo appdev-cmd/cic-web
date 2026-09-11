@@ -6,6 +6,7 @@ import {
   Calendar,
   X,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { FormItem, FormFilterState, FormFormData } from './types';
 import { FormList } from './components/FormList';
@@ -18,6 +19,7 @@ import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import type { CmsLocale } from '../../../data/CmsDataSource';
 import type { FormModuleData } from '../../../data/CustomerInteractionDataSource';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 
 interface FormManagerProps {
   workspaceLocale: CmsLocale;
@@ -35,6 +37,15 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
   const [editingForm, setEditingForm] = useState<FormItem | null>(null);
   const [previewForm, setPreviewForm] = useState<FormItem | null>(null);
   const [submissionsForm, setSubmissionsForm] = useState<FormItem | null>(null);
+
+  const [trashTargets, setTrashTargets] = useState<FormItem[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Filter & sort forms based on current filters
   const filteredForms = forms
@@ -110,7 +121,16 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
   };
 
   // Handlers
-  const handleToggleSelectAll = () => {
+  const handleToggleSelectAll = (pageIds?: string[]) => {
+    if (pageIds && pageIds.length > 0) {
+      const allSelected = pageIds.every((id) => selectedFormIds.includes(id));
+      if (allSelected) {
+        setSelectedFormIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+      } else {
+        setSelectedFormIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+      }
+      return;
+    }
     if (selectedFormIds.length === filteredForms.length) {
       setSelectedFormIds([]);
     } else {
@@ -160,8 +180,37 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
   };
 
   const handleDeleteForm = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa biểu mẫu này?')) {
-      setForms(forms.map((f) => (f.id === id ? { ...f, deletedAt: new Date().toISOString() } : f)));
+    const target = forms.find((f) => f.id === id);
+    if (target) {
+      setTrashTargets([target]);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const targets = forms.filter((f) => selectedFormIds.includes(f.id));
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((f) => f.id);
+      const now = new Date().toISOString();
+      setForms((prev) =>
+        prev.map((f) => (ids.includes(f.id) ? { ...f, deletedAt: now } : f))
+      );
+      setSelectedFormIds((prev) => prev.filter((id) => !ids.includes(id)));
+      showToast(
+        trashTargets.length === 1
+          ? `Đã chuyển biểu mẫu "${trashTargets[0].adminName}" vào Thùng rác!`
+          : `Đã chuyển ${trashTargets.length} biểu mẫu vào Thùng rác!`
+      );
+      setTrashTargets(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -248,6 +297,14 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
 
   return (
     <div className="space-y-6">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-5">
+          <Sparkles className="w-4 h-4 text-orange-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Header */}
       <CmsPageHeader
         icon={<FileCheck2 />}
@@ -372,7 +429,7 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
           {
             label: 'Xóa',
             variant: 'danger',
-            onClick: () => console.log('Delete'),
+            onClick: handleBulkDelete,
           },
         ]}
       />
@@ -402,6 +459,18 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
         isOpen={!!submissionsForm}
         form={submissionsForm}
         onClose={() => setSubmissionsForm(null)}
+      />
+
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length === 1
+            ? `biểu mẫu "${trashTargets[0].adminName}"`
+            : `${trashTargets?.length ?? 0} biểu mẫu đã chọn`
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

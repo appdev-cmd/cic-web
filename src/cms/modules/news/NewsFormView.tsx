@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Save, Search, Send, Star, X } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Save, Search, Send, Star, X, AlertCircle } from 'lucide-react';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
@@ -51,30 +51,59 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
   const [seoDescription, setSeoDescription] = useState(articleToEdit?.seo_description || '');
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [formError,setFormError]=useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
   const selectedImage = mediaImages.find((asset) => asset.id === image || asset.url === image);
 
-  const save = (nextPublished: boolean) => {
+  const save = async (nextPublished: boolean) => {
     setFormError('');
-    if (!title.trim() || !categoryId){setFormError('Vui lòng nhập tiêu đề và chọn danh mục.');return;}
-    if (isHot && placementCounts.featured >= NEWS_PLACEMENT_LIMITS.featured && !articleToEdit?.is_hot){setFormError(`Hot News chỉ được chọn tối đa ${NEWS_PLACEMENT_LIMITS.featured} tin.`);return;}
-    if (showInHomepage && placementCounts.homepage >= NEWS_PLACEMENT_LIMITS.homepage && !articleToEdit?.show_in_homepage){setFormError(`Trang chủ chỉ được chọn tối đa ${NEWS_PLACEMENT_LIMITS.homepage} tin.`);return;}
-    onSave({
-      title, alias: alias || slugify(title), other_languages1: otherLanguages1, category_id: categoryId,
-      ordering: Number(ordering) || 1, image, tawk_to: tawkTo, file_upload: fileUpload,
-      tags: tagsText.split(',').map((item) => item.trim()).filter(Boolean), content, video,
-      news_related: newsRelated, products_related: productsRelated, published: nextPublished, is_hot: isHot,
-      show_in_homepage: showInHomepage, start_time: createdTime, end_time: endTime, summary,
-      seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
-    });
+    if (!title.trim() || !categoryId) {
+      setFormError('Vui lòng nhập tiêu đề và chọn danh mục.');
+      return;
+    }
+    if (isHot && placementCounts.featured >= NEWS_PLACEMENT_LIMITS.featured && !articleToEdit?.is_hot) {
+      setFormError(`Hot News chỉ được chọn tối đa ${NEWS_PLACEMENT_LIMITS.featured} tin.`);
+      return;
+    }
+    if (showInHomepage && placementCounts.homepage >= NEWS_PLACEMENT_LIMITS.homepage && !articleToEdit?.show_in_homepage) {
+      setFormError(`Trang chủ chỉ được chọn tối đa ${NEWS_PLACEMENT_LIMITS.homepage} tin.`);
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      await onSave({
+        title, alias: alias || slugify(title), other_languages1: otherLanguages1, category_id: categoryId,
+        ordering: Number(ordering) || 1, image, tawk_to: tawkTo, file_upload: fileUpload,
+        tags: tagsText.split(',').map((item) => item.trim()).filter(Boolean), content, video,
+        news_related: newsRelated, products_related: productsRelated, published: nextPublished, is_hot: isHot,
+        show_in_homepage: showInHomepage, start_time: createdTime, end_time: endTime, summary,
+        seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
+      });
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Không thể lưu bài viết. Vui lòng kiểm tra lại thông tin.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return <div className="space-y-5 pb-16">
     <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-      <div className="flex items-center gap-3"><button type="button" onClick={onCancel} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800"><ArrowLeft className="h-5 w-5" /></button><div><p className="text-xs font-bold text-orange-600">TIN TỨC</p><h1 className="font-black dark:text-white">{articleToEdit ? 'Chỉnh sửa tin tức' : 'Thêm tin tức'}</h1></div></div>
-      <div className="flex flex-wrap gap-2"><button type="button" onClick={() => setPreviewOpen(true)} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900"><Eye className="h-4 w-4" />Xem trước</button><button type="button" onClick={() => save(false)} className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700"><Save className="h-4 w-4" />Lưu nháp</button><button type="button" onClick={() => save(true)} className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white"><Send className="h-4 w-4" />Xuất bản</button></div>
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800 disabled:opacity-50"><ArrowLeft className="h-5 w-5" /></button>
+        <div><p className="text-xs font-bold text-orange-600">TIN TỨC</p><h1 className="font-black dark:text-white">{articleToEdit ? 'Chỉnh sửa tin tức' : 'Thêm tin tức'}</h1></div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" disabled={isSubmitting} onClick={() => setPreviewOpen(true)} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 disabled:opacity-50"><Eye className="h-4 w-4" />Xem trước</button>
+        <button type="button" disabled={isSubmitting} onClick={() => void save(false)} className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700 disabled:opacity-50"><Save className="h-4 w-4" />{isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}</button>
+        <button type="button" disabled={isSubmitting} onClick={() => void save(true)} className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white disabled:opacity-50"><Send className="h-4 w-4" />{isSubmitting ? 'Đang lưu...' : 'Xuất bản'}</button>
+      </div>
     </header>
-    {formError&&<div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{formError}</div>}
+    {formError && (
+      <div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+        <AlertCircle className="mt-0.5 size-5 shrink-0" />
+        <div className="min-w-0 flex-1">{formError}</div>
+      </div>
+    )}
 
     <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
       <main className="space-y-5">

@@ -6,6 +6,7 @@ import {
   Calendar,
   X,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { CtaItem, CtaFilterState, CtaFormData } from './types';
 import { CtaList } from './components/CtaList';
@@ -19,6 +20,7 @@ import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import type { CmsLocale } from '../../../data/CmsDataSource';
 import type { CtaModuleData } from '../../../data/CustomerInteractionDataSource';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 
 interface CtaManagerProps {
   workspaceLocale: CmsLocale;
@@ -36,6 +38,15 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
   const [editingCta, setEditingCta] = useState<CtaItem | null>(null);
   const [previewCta, setPreviewCta] = useState<CtaItem | null>(null);
   const [usedByCta, setUsedByCta] = useState<CtaItem | null>(null);
+
+  const [trashTargets, setTrashTargets] = useState<CtaItem[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Filter & sort ctas based on current filters
   const filteredCtas = ctas
@@ -112,7 +123,16 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
   };
 
   // Handlers
-  const handleToggleSelectAll = () => {
+  const handleToggleSelectAll = (pageIds?: string[]) => {
+    if (pageIds && pageIds.length > 0) {
+      const allSelected = pageIds.every((id) => selectedCtaIds.includes(id));
+      if (allSelected) {
+        setSelectedCtaIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+      } else {
+        setSelectedCtaIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+      }
+      return;
+    }
     if (selectedCtaIds.length === filteredCtas.length) {
       setSelectedCtaIds([]);
     } else {
@@ -166,8 +186,37 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
   };
 
   const handleDeleteCta = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa CTA này?')) {
-      setCtas(ctas.map((c) => (c.id === id ? { ...c, deletedAt: new Date().toISOString() } : c)));
+    const target = ctas.find((c) => c.id === id);
+    if (target) {
+      setTrashTargets([target]);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const targets = ctas.filter((c) => selectedCtaIds.includes(c.id));
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((c) => c.id);
+      const now = new Date().toISOString();
+      setCtas((prev) =>
+        prev.map((c) => (ids.includes(c.id) ? { ...c, deletedAt: now } : c))
+      );
+      setSelectedCtaIds((prev) => prev.filter((id) => !ids.includes(id)));
+      showToast(
+        trashTargets.length === 1
+          ? `Đã chuyển CTA "${trashTargets[0].adminName}" vào Thùng rác!`
+          : `Đã chuyển ${trashTargets.length} CTA vào Thùng rác!`
+      );
+      setTrashTargets(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -233,31 +282,37 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
     setEditingCta(null);
   };
 
-  if (viewMode === 'form') {
-    return (
-      <CtaFormView
-        cta={editingCta}
-        workspaceLocale={workspaceLocale}
-        forms={data?.forms ?? []}
-        emailTemplates={data?.emailTemplates ?? []}
-        downloadFiles={data?.downloadFiles ?? []}
-        onSave={handleSaveCta}
-        onCancel={() => {
-          setViewMode('list');
-          setEditingCta(null);
-        }}
-      />
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <CmsPageHeader
-        icon={<MousePointer2 />}
-        title="Quản lý CTA"
-        description="Quản lý nút kêu gọi hành động trên toàn website"
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{ctas.filter((c) => !c.deletedAt).length} CTA</span>}
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-5">
+          <Sparkles className="w-4 h-4 text-orange-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {viewMode === 'form' ? (
+        <CtaFormView
+          cta={editingCta}
+          workspaceLocale={workspaceLocale}
+          forms={data?.forms ?? []}
+          emailTemplates={data?.emailTemplates ?? []}
+          downloadFiles={data?.downloadFiles ?? []}
+          onSave={handleSaveCta}
+          onCancel={() => {
+            setViewMode('list');
+            setEditingCta(null);
+          }}
+        />
+      ) : (
+        <>
+          {/* Header */}
+          <CmsPageHeader
+            icon={<MousePointer2 />}
+            title="Quản lý CTA"
+            description="Quản lý nút kêu gọi hành động trên toàn website"
+            meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{ctas.filter((c) => !c.deletedAt).length} CTA</span>}
         actions={
           <CmsButton variant="primary" size="sm" onClick={handleCreateNew} leadingIcon={<Plus />}>
             Tạo CTA mới
@@ -390,7 +445,7 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
           {
             label: 'Xóa',
             variant: 'danger',
-            onClick: () => console.log('Delete'),
+            onClick: handleBulkDelete,
           },
         ]}
       />
@@ -408,6 +463,8 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
         onDeleteCta={handleDeleteCta}
         onQuickStatusToggle={handleQuickStatusToggle}
       />
+        </>
+      )}
 
       {/* Modals */}
       <CtaPreviewModal
@@ -420,6 +477,18 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
         isOpen={!!usedByCta}
         cta={usedByCta}
         onClose={() => setUsedByCta(null)}
+      />
+
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length === 1
+            ? `CTA "${trashTargets[0].adminName}"`
+            : `${trashTargets?.length ?? 0} CTA đã chọn`
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle } from 'lucide-react';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
@@ -19,7 +19,7 @@ interface ProductsFormViewProps {
   relatedProducts: ProductItem[];
   owners: ProductOwnerOption[];
   featuredCount: number;
-  onSave: (productData: Partial<ProductItem>, actionType: 'draft' | 'publish') => void;
+  onSave: (productData: Partial<ProductItem>, actionType: 'draft' | 'publish') => Promise<void> | void;
   onCancel: () => void;
   onOpenPreview: (productData: ProductItem) => void;
 }
@@ -64,6 +64,8 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [linkDriver, setLinkDriver] = useState(product?.link_driver || '');
   const [downloads, setDownloads] = useState<LegacyDownload[]>(Array.from({ length: 6 }, (_, index) => ({ name: product?.[`file_name${index + 1}` as keyof ProductItem] as string || '', file: product?.[`file_download${index + 1}` as keyof ProductItem] as string || '', link: product?.[`link_download${index + 1}` as keyof ProductItem] as string || '' })));
   const [mediaTarget, setMediaTarget] = useState<'image' | 'icon' | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => { if (!manualAlias) setAlias(slugify(name)); }, [name, manualAlias]);
   const ids = (text: string) => text.split(',').map((item) => item.trim()).filter(Boolean);
@@ -81,12 +83,79 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     downloads.forEach((item, index) => { Object.assign(base, { [`file_name${index + 1}`]: item.name, [`file_download${index + 1}`]: item.file, [`link_download${index + 1}`]: item.link }); });
     return base;
   };
-  const save = (action: 'draft' | 'publish') => { if (!name.trim() || categoryIds.length === 0) return alert('Vui lòng nhập tên và chọn ít nhất một lĩnh vực.'); if (isHot && !product?.is_hot && featuredCount >= FEATURED_CONTENT_LIMITS.product) return alert(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật.`); onSave(payload(), action); };
+  const save = async (action: 'draft' | 'publish') => {
+    setFormError(null);
+    if (!name.trim() || categoryIds.length === 0) {
+      setFormError('Vui lòng nhập tên và chọn ít nhất một lĩnh vực.');
+      return;
+    }
+    if (isHot && !product?.is_hot && featuredCount >= FEATURED_CONTENT_LIMITS.product) {
+      setFormError(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.product} sản phẩm nổi bật.`);
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      await onSave(payload(), action);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Không thể lưu sản phẩm. Vui lòng kiểm tra lại thông tin.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const updateDownload = (index: number, field: keyof LegacyDownload, value: string) => setDownloads((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
 
-  return <div className="space-y-5 pb-16">
-    <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"><div className="flex items-center gap-3"><button type="button" onClick={onCancel} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800"><ArrowLeft className="h-5 w-5" /></button><div><p className="text-xs font-bold text-orange-600">SẢN PHẨM</p><h1 className="font-black dark:text-white">{product ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}</h1></div></div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => onOpenPreview({ ...(product || {}), ...payload() } as ProductItem)} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900"><Eye className="h-4 w-4" />Xem trước</button><button type="button" onClick={() => save('draft')} className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700"><Save className="h-4 w-4" />Lưu nháp</button><button type="button" onClick={() => save('publish')} className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white"><Send className="h-4 w-4" />Xuất bản</button></div></header>
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(310px,1fr)]"><main className="space-y-5">
+  return (
+    <div className="space-y-5 pb-16">
+      <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800 disabled:opacity-50">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <p className="text-xs font-bold text-orange-600">SẢN PHẨM</p>
+            <h1 className="font-black dark:text-white">{product ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}</h1>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => onOpenPreview({ ...(product || {}), ...payload() } as ProductItem)}
+            className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 disabled:opacity-50"
+          >
+            <Eye className="h-4 w-4" />
+            Xem trước
+          </button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => void save('draft')}
+            className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
+          </button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => void save('publish')}
+            className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+            {isSubmitting ? 'Đang lưu...' : 'Xuất bản'}
+          </button>
+        </div>
+      </header>
+
+      {formError && (
+        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300" role="alert">
+          <AlertCircle className="mt-0.5 size-5 shrink-0" />
+          <div className="min-w-0 flex-1 font-semibold">{formError}</div>
+        </div>
+      )}
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(310px,1fr)]">
+        <main className="space-y-5">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Package className="h-5 w-5 text-orange-600" />Thông tin sản phẩm</div><div className="grid gap-4 md:grid-cols-2"><div className="md:col-span-2"><label className={labelClass}>Tên sản phẩm *</label><input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} /></div><div><label className={labelClass}>Alias</label><input className={inputClass} value={alias} onChange={(e) => { setManualAlias(true); setAlias(e.target.value); }} /></div><div><label className={labelClass}>Biệt danh</label><input className={inputClass} value={code} onChange={(e) => setCode(e.target.value)} /></div><div><label className={labelClass}>URL ngôn ngữ khác</label><input className={inputClass} value={otherLanguages1} onChange={(e) => setOtherLanguages1(e.target.value)} /></div><div><label className={labelClass}>Hãng sản xuất</label><SearchableSelect options={brands.map((item) => ({ id: item.id, label: item.name }))} selectedId={manufactory} onChange={setManufactory} /></div><div><label className={labelClass}>Loại sản phẩm</label><SearchableSelect options={productTypes.filter((item) => item.status === 'active').map((item) => ({ id: item.id, label: item.name }))} selectedId={types} onChange={setTypes} /></div><div className="md:col-span-2"><label className={labelClass}>Lĩnh vực *</label><SearchableMultiSelect options={categories.map((item) => ({ id: item.id, label: item.name }))} selectedIds={categoryIds} onChange={setCategoryIds} /></div><div className="md:col-span-2"><label className={labelClass}>Ứng dụng</label><SearchableMultiSelect options={applicationOptions.filter((item) => item.status === 'active').map((item) => ({ id: item.id, label: item.name }))} selectedIds={applications} onChange={setApplications} /></div><div className="md:col-span-2"><label className={labelClass}>Sản phẩm liên quan</label><SearchableMultiSelect options={relatedProducts.filter((item) => item.id !== product?.id).map((item) => ({ id: item.id, label: item.name || item.title }))} selectedIds={productsRelates} onChange={setProductsRelates} /></div><div className="md:col-span-2"><label className={labelClass}>Tóm tắt</label><textarea rows={4} className={inputClass} value={summary} onChange={(e) => setSummary(e.target.value)} /></div></div></section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Tổng quan</div><RichTextEditor value={description} onChange={setDescription} minHeight="320px" allowedEmbeds={['cta', 'form']} /></section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Chi tiết tính năng</div><RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" allowedEmbeds={['cta', 'form']} /></section>
@@ -238,5 +307,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Search className="h-5 w-5 text-orange-600" />SEO</div><div className="space-y-4"><div><label className={labelClass}>SEO title</label><input className={inputClass} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} /></div><div><label className={labelClass}>SEO keyword</label><input className={inputClass} value={seoKeyword} onChange={(e) => setSeoKeyword(e.target.value)} /></div><div><label className={labelClass}>SEO description</label><textarea rows={4} className={inputClass} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} /></div><div><label className={labelClass}>Tawk.to</label><textarea rows={3} className={inputClass} value={tawkTo} onChange={(e) => setTawkTo(e.target.value)} /></div></div></section>
     </aside></div>
     {mediaTarget && <PageMediaPickerModal locale={locale} returnValue="url" currentId={mediaTarget === 'image' ? image : icon} onClose={() => setMediaTarget(null)} onConfirm={(mediaUrl) => mediaTarget === 'image' ? setImage(mediaUrl) : setIcon(mediaUrl)} />}
-  </div>;
+  </div>
+  );
 };

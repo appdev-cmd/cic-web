@@ -52,6 +52,8 @@ import {
   trashServiceAction,
   trashServicesAction,
 } from '@/features/services/server/actions';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 import { useRouter } from 'next/navigation';
 
 interface ServicesManagerProps {
@@ -97,6 +99,8 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
     service: ServiceItem;
   } | null>(null);
 
+  const [trashTargets, setTrashTargets] = useState<ServiceItem[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -104,13 +108,41 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const persist = async (operation: Promise<unknown>): Promise<boolean> => {
+  const persist = async (operation: Promise<unknown>, fallbackMsg = 'Thao tác không thành công.'): Promise<boolean> => {
     try {
       await operation;
       return true;
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Thao tác không thành công.');
-      return false;
+      const sanitized = sanitizeCmsErrorMessage(error, fallbackMsg);
+      showToast(sanitized);
+      throw new Error(sanitized);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    if (!capabilities.delete) {
+      showToast('Bạn không có quyền xóa dịch vụ.');
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((item) => item.id);
+      if (ids.length === 1) {
+        await persist(trashServiceAction(workspaceLocale, ids[0]), 'Không thể chuyển dịch vụ vào Thùng rác.');
+        showToast(`Đã chuyển dịch vụ "${trashTargets[0].title}" vào Thùng rác!`);
+      } else {
+        await persist(trashServicesAction(workspaceLocale, ids), 'Không thể chuyển các dịch vụ vào Thùng rác.');
+        showToast(`Đã di chuyển ${ids.length} dịch vụ vào Thùng rác!`);
+      }
+      setServices((prev) => prev.filter((item) => !ids.includes(item.id)));
+      setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
+      setTrashTargets(null);
+      router.refresh();
+    } catch {
+      // Handled and toasted in persist
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -146,13 +178,16 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
     const start = (currentPage - 1) * pageSize;
     return filteredServices.slice(start, start + pageSize);
   }, [filteredServices, currentPage, pageSize]);
+  const pageIds = paginatedServices.map((s) => s.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const hasSomePageSelected = pageIds.some((id) => selectedIds.includes(id)) && !allPageSelected;
 
   // Bulk selections
   const handleSelectAll = () => {
-    if (selectedIds.length === paginatedServices.length) {
-      setSelectedIds([]);
+    if (allPageSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
     } else {
-      setSelectedIds(paginatedServices.map((s) => s.id));
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
     }
   };
 
@@ -225,40 +260,38 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
     router.refresh();
   };
 
-  // If in Form View
-  if (editingService) {
-    return (
-      <>
-        <ServiceFormView
-          service={editingService}
-          locale={workspaceLocale}
-          canEdit={capabilities.edit}
-          canPublish={capabilities.edit}
-          onBack={() => setEditingService(null)}
-          onSave={(updated) => {
-            void handleSaveServiceFromForm(updated);
-          }}
-          productOptions={data?.productOptions ?? []}
-          onOpenPreview={(item) => setPreviewService(item)}
-        />
-        <ServicePreviewModal
-          isOpen={Boolean(previewService)}
-          onClose={() => setPreviewService(null)}
-          service={previewService}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="space-y-6 pb-12">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-5">
           <Sparkles className="w-4 h-4 text-orange-400" />
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {editingService ? (
+        <>
+          <ServiceFormView
+            service={editingService}
+            locale={workspaceLocale}
+            canEdit={capabilities.edit}
+            canPublish={capabilities.edit}
+            onBack={() => setEditingService(null)}
+            onSave={(updated) => {
+              void handleSaveServiceFromForm(updated);
+            }}
+            productOptions={data?.productOptions ?? []}
+            onOpenPreview={(item) => setPreviewService(item)}
+          />
+          <ServicePreviewModal
+            isOpen={Boolean(previewService)}
+            onClose={() => setPreviewService(null)}
+            service={previewService}
+          />
+        </>
+      ) : (
+        <>
 
       {/* Header & Main Actions */}
       <CmsPageHeader
@@ -388,16 +421,15 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             label: 'Xóa',
             icon: Trash2,
             variant: 'danger',
-            onClick: async () => {
+            onClick: () => {
               if (!capabilities.delete) {
                 showToast('Bạn không có quyền xóa dịch vụ.');
                 return;
               }
-              const ok = await persist(trashServicesAction(workspaceLocale, selectedIds));
-              if (!ok) return;
-              showToast(`Đã di chuyển ${selectedIds.length} dịch vụ vào Thùng rác!`);
-              setSelectedIds([]);
-              router.refresh();
+              const targets = services.filter((s) => selectedIds.includes(s.id));
+              if (targets.length > 0) {
+                setTrashTargets(targets);
+              }
             },
           },
         ]}
@@ -410,7 +442,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800 z-10">
-                  <CmsSelectionCheckbox checked={paginatedServices.length > 0 && selectedIds.length === paginatedServices.length} indeterminate={selectedIds.length > 0 && selectedIds.length < paginatedServices.length} onChange={handleSelectAll} label="Chọn tất cả dịch vụ trên trang" />
+                  <CmsSelectionCheckbox checked={allPageSelected} indeterminate={hasSomePageSelected} onChange={handleSelectAll} label="Chọn tất cả dịch vụ trên trang" />
                 </th>
                 <th className="p-3 min-w-[280px] sticky left-10 bg-slate-50 dark:bg-slate-800 z-10">
                   Dịch vụ
@@ -521,15 +553,12 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                           />
 
                           <CmsIconButton
-                            onClick={async () => {
+                            onClick={() => {
                               if (!capabilities.delete) {
                                 showToast('Bạn không có quyền xóa dịch vụ.');
                                 return;
                               }
-                              const ok = await persist(trashServiceAction(workspaceLocale, item.id));
-                              if (!ok) return;
-                              showToast(`Đã chuyển dịch vụ "${item.title}" vào Thùng rác!`);
-                              router.refresh();
+                              setTrashTargets([item]);
                             }}
                             disabled={!capabilities.delete}
                             icon={<Trash2 />}
@@ -551,6 +580,8 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
         {/* Table Footer & Pagination */}
         <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredServices.length} itemLabel="dịch vụ" pageSizeOptions={[10, 20, 50, 100]} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
+        </>
+      )}
 
       {/* Overlays & Drawers */}
       <ServicePreviewModal
@@ -598,6 +629,18 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
           )}
         </>
       )}
+
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length === 1
+            ? `dịch vụ "${trashTargets[0].title}"`
+            : `${trashTargets?.length ?? 0} dịch vụ đã chọn`
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

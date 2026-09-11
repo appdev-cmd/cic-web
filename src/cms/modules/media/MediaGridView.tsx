@@ -20,7 +20,7 @@ import { CmsPagination } from '../../components/ui/CmsPagination';
 interface MediaGridViewProps {
   assets: MediaAsset[];
   selectedAssetIds: string[];
-  onToggleSelectAll: () => void;
+  onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectAsset: (id: string) => void;
   onOpenDetail: (asset: MediaAsset) => void;
   onOpenPreview: (asset: MediaAsset) => void;
@@ -45,6 +45,10 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedAssets = assets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedAssets.map((a) => a.id);
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedAssetIds.includes(id));
+  const isIndeterminate = pageIds.some((id) => selectedAssetIds.includes(id)) && !isAllSelected;
+
   useEffect(() => {
     const lastPage = Math.max(1, Math.ceil(assets.length / pageSize));
     if (currentPage > lastPage) setCurrentPage(lastPage);
@@ -74,7 +78,22 @@ export const MediaGridView: React.FC<MediaGridViewProps> = ({
 
   return (
     <div className="space-y-4">
-    <div className={`grid ${gridColsClass} gap-4`}>
+      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center gap-2">
+          <CmsSelectionCheckbox
+            checked={isAllSelected}
+            indeterminate={isIndeterminate}
+            onChange={() => onToggleSelectAll(pageIds)}
+            label="Chọn tất cả tệp trên trang này"
+          />
+          <span>
+            {selectedAssetIds.length > 0
+              ? `Đã chọn ${selectedAssetIds.length} tệp`
+              : `Chọn tất cả ${paginatedAssets.length} tệp trên trang`}
+          </span>
+        </div>
+      </div>
+      <div className={`grid ${gridColsClass} gap-4`}>
       {paginatedAssets.map((asset) => {
         const isSelected = selectedAssetIds.includes(asset.id);
         const isDoc = asset.type === 'document';

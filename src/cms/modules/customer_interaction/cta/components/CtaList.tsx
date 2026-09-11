@@ -19,7 +19,7 @@ import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionChec
 interface CtaListProps {
   ctas: CtaItem[];
   selectedCtaIds: string[];
-  onToggleSelectAll: () => void;
+  onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectCta: (id: string) => void;
   onEditCta: (cta: CtaItem) => void;
   onOpenPreview: (cta: CtaItem) => void;
@@ -41,10 +41,12 @@ export const CtaList: React.FC<CtaListProps> = ({
   onDeleteCta,
   onQuickStatusToggle,
 }) => {
-  const isAllSelected = ctas.length > 0 && selectedCtaIds.length === ctas.length;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedCtas = ctas.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedCtas.map((c) => c.id);
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedCtaIds.includes(id));
+  const isIndeterminate = pageIds.some((id) => selectedCtaIds.includes(id)) && !isAllSelected;
 
   const getTrendIcon = (trend?: 'up' | 'down' | 'flat') => {
     switch (trend) {
@@ -83,9 +85,9 @@ export const CtaList: React.FC<CtaListProps> = ({
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
                 <CmsSelectionCheckbox
                   checked={isAllSelected}
-                  onChange={onToggleSelectAll}
-                  indeterminate={selectedCtaIds.length > 0 && !isAllSelected}
-                  label="Chọn tất cả CTA"
+                  onChange={() => onToggleSelectAll(pageIds)}
+                  indeterminate={isIndeterminate}
+                  label="Chọn tất cả CTA trên trang"
                 />
               </th>
               <th className="p-3 min-w-[200px]">Tên quản trị</th>

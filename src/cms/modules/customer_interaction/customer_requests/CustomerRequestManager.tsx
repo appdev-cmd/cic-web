@@ -18,6 +18,7 @@ import {
   Globe,
   UserCheck,
   MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 import { CustomerRequest, RequestFilterState } from './types';
 import type { CustomerRequestModuleData } from '../../../data/CustomerInteractionDataSource';
@@ -32,6 +33,7 @@ import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import { StaffMember } from '../../contacts/types';
 import { MOCK_STAFF_MEMBERS } from '../../contacts/mockData';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 
 interface CustomerRequestManagerProps {
   data: CustomerRequestModuleData;
@@ -63,6 +65,15 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     isOpen: false,
     request: null,
   });
+
+  const [trashTargets, setTrashTargets] = useState<CustomerRequest[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -292,7 +303,16 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   // Handlers
-  const handleToggleSelectAll = () => {
+  const handleToggleSelectAll = (pageIds?: string[]) => {
+    if (pageIds && pageIds.length > 0) {
+      const allSelected = pageIds.every((id) => selectedRequestIds.includes(id));
+      if (allSelected) {
+        setSelectedRequestIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+      } else {
+        setSelectedRequestIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+      }
+      return;
+    }
     if (selectedRequestIds.length === filteredRequests.length) {
       setSelectedRequestIds([]);
     } else {
@@ -315,8 +335,9 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   const handleDeleteRequest = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa yêu cầu này?')) {
-      setRequests(requests.filter((r) => r.id !== id));
+    const target = requests.find((r) => r.id === id);
+    if (target) {
+      setTrashTargets([target]);
     }
   };
 
@@ -434,9 +455,27 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   const handleBulkDelete = () => {
-    if (confirm(`Bạn có chắc chắn muốn xóa ${selectedRequestIds.length} yêu cầu đã chọn?`)) {
-      setRequests((prev) => prev.filter((r) => !selectedRequestIds.includes(r.id)));
-      setSelectedRequestIds([]);
+    const targets = requests.filter((r) => selectedRequestIds.includes(r.id));
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((r) => r.id);
+      setRequests((prev) => prev.filter((r) => !ids.includes(r.id)));
+      setSelectedRequestIds((prev) => prev.filter((id) => !ids.includes(id)));
+      showToast(
+        trashTargets.length === 1
+          ? 'Đã chuyển yêu cầu vào Thùng rác!'
+          : `Đã chuyển ${trashTargets.length} yêu cầu vào Thùng rác!`
+      );
+      setTrashTargets(null);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -531,6 +570,14 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
 
   return (
     <div className="space-y-6">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-5">
+          <Sparkles className="w-4 h-4 text-orange-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {viewMode === 'list' ? (
         <>
           {/* Header */}
@@ -773,6 +820,18 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
         request={notesModalData.request}
         onClose={() => setNotesModalData({ isOpen: false, request: null })}
         onAddNote={handleAddNote}
+      />
+
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length === 1
+            ? 'yêu cầu khách hàng này'
+            : `${trashTargets?.length ?? 0} yêu cầu đã chọn`
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

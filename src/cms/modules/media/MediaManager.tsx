@@ -35,6 +35,7 @@ import { MediaNavigation } from './MediaNavigation';
 import { MediaFolderPanel } from './MediaFolderPanel';
 import { MediaFilterToolbar } from './MediaFilterToolbar';
 import { MediaFolderDialog, MediaPreviewDialog } from './MediaDialogs';
+import { CmsTrashConfirmDialog, sanitizeCmsErrorMessage } from '@/shared/ui/cms';
 
 interface MediaManagerProps {
   data?: MediaModuleData;
@@ -57,6 +58,9 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const [trashTargets, setTrashTargets] = useState<MediaAsset[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Drawers & Modals State
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -137,7 +141,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
         await uploadMediaAction(form);
         setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'completed' } : row));
       } catch (error) {
-        setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'error', error_message: error instanceof Error ? error.message : 'Tải lên thất bại' } : row));
+        setUploadQueue((current) => current.map((row) => row.id === item.id ? { ...row, progress: 100, status: 'error', error_message: sanitizeCmsErrorMessage(error, 'Tải lên thất bại') } : row));
       }
     }
     await reload();
@@ -152,24 +156,52 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
         await reload();
         showToast(`Đã cập nhật metadata của "${updatedAsset.title}".`);
       } catch (error) {
-        showToast(error instanceof Error ? error.message : 'Không thể cập nhật Media.');
+        showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật Media.'));
       }
     });
   };
 
   const handleDeleteAsset = (id: string) => {
-    startTransition(async()=>{try{await trashMediaAssetsAction([id]);await reload();if(detailAsset?.id===id)setIsDetailOpen(false);showToast('Đã chuyển tệp Media vào Thùng rác.');}catch(error){showToast(error instanceof Error?error.message:'Không thể xóa Media.');}});
+    const target = assets.find((a) => a.id === id);
+    if (target) {
+      setTrashTargets([target]);
+    }
+  };
+
+  const handleConfirmTrash = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((item) => item.id);
+      await trashMediaAssetsAction(ids);
+      await reload();
+      if (detailAsset && ids.includes(detailAsset.id)) {
+        setIsDetailOpen(false);
+      }
+      showToast(
+        ids.length === 1
+          ? 'Đã chuyển tệp Media vào Thùng rác.'
+          : `Đã chuyển ${ids.length} tệp Media vào Thùng rác.`
+      );
+      setTrashTargets(null);
+    } catch (error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể chuyển tệp Media vào Thùng rác.'));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleConfirmReplaceFile = (ast: MediaAsset, note: string, file: File) => {
-    startTransition(async()=>{try{const form=new FormData();form.set('file',file);form.set('locale',workspaceLocale);form.set('note',note);await replaceMediaAssetAction(ast.id,form);await reload();showToast('Đã thay thế tệp và lưu phiên bản cũ.');}catch(error){showToast(error instanceof Error?error.message:'Không thể thay thế tệp.');}});
+    startTransition(async()=>{try{const form=new FormData();form.set('file',file);form.set('locale',workspaceLocale);form.set('note',note);await replaceMediaAssetAction(ast.id,form);await reload();showToast('Đã thay thế tệp và lưu phiên bản cũ.');}catch(error){showToast(sanitizeCmsErrorMessage(error, 'Không thể thay thế tệp.'));}});
   };
 
-  const handleToggleSelectAll = () => {
-    if (selectedAssetIds.length === filteredAssets.length) {
-      setSelectedAssetIds([]);
+  const handleToggleSelectAll = (pageIds?: string[]) => {
+    const targetIds = pageIds && pageIds.length > 0 ? pageIds : filteredAssets.map((a) => a.id);
+    const allPageSelected = targetIds.length > 0 && targetIds.every((id) => selectedAssetIds.includes(id));
+    if (allPageSelected) {
+      setSelectedAssetIds((prev) => prev.filter((id) => !targetIds.includes(id)));
     } else {
-      setSelectedAssetIds(filteredAssets.map((a) => a.id));
+      setSelectedAssetIds((prev) => Array.from(new Set([...prev, ...targetIds])));
     }
   };
 
@@ -182,16 +214,19 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
   };
 
   const handleBulkDelete = () => {
-    startTransition(async()=>{try{const count=selectedAssetIds.length;await trashMediaAssetsAction(selectedAssetIds);await reload();showToast(`Đã chuyển ${count} tệp Media vào Thùng rác.`);}catch(error){showToast(error instanceof Error?error.message:'Không thể xóa các tệp đã chọn.');}});
+    const targets = assets.filter((a) => selectedAssetIds.includes(a.id));
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
   };
-  const handleSubmitFolder=()=>{const name=folderName.trim();if(!name)return;const alias=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');startTransition(async()=>{try{await createMediaFolderAction({workspace:workspaceLocale,name,alias});await reload();setFolderName('');setIsFolderModalOpen(false);showToast(`Đã tạo thư mục "${name}".`);}catch(error){showToast(error instanceof Error?error.message:'Không thể tạo thư mục.');}});};
+  const handleSubmitFolder=()=>{const name=folderName.trim();if(!name)return;const alias=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');startTransition(async()=>{try{await createMediaFolderAction({workspace:workspaceLocale,name,alias});await reload();setFolderName('');setIsFolderModalOpen(false);showToast(`Đã tạo thư mục "${name}".`);}catch(error){showToast(sanitizeCmsErrorMessage(error, 'Không thể tạo thư mục.'));}});};
 
   return (
     <div className="space-y-6">
       <input ref={uploadInputRef} type="file" multiple className="sr-only" onChange={(event)=>void handleFiles(event.target.files)} accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml,video/mp4,video/webm,application/pdf,.doc,.docx,.xls,.xlsx" />
       {/* Toast Notification */}
       {toastMessage && (
-        <div role="status" className="fixed inset-x-4 top-20 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200 sm:left-auto sm:right-6 sm:max-w-md">
+        <div role="status" className="fixed inset-x-4 top-20 z-[100] bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200 sm:left-auto sm:right-6 sm:max-w-md">
           <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           <span className="text-sm font-medium">{toastMessage}</span>
           <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white">
@@ -379,6 +414,21 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
           onClose={() => setIsPreviewOpen(false)}
         />
       )}
+
+      {/* Shared Trash Confirm Dialog */}
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length > 1
+            ? `${trashTargets.length} tệp Media đã chọn`
+            : trashTargets?.[0]?.title || 'tệp Media'
+        }
+        busy={isDeleting}
+        onClose={() => {
+          if (!isDeleting) setTrashTargets(null);
+        }}
+        onConfirm={() => void handleConfirmTrash()}
+      />
     </div>
   );
 };

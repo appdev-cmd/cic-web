@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Calendar, Eye, FileText, Image as ImageIcon, Link2, Save, Search, Send, Star } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Calendar, Eye, FileText, Image as ImageIcon, Link2, Save, Search, Send, Star } from 'lucide-react';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
@@ -9,6 +9,7 @@ import type { NewsArticle } from '../news/types';
 import type { EventItem, RelatedProductItem } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
+import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 
 interface EventsFormViewProps {
   eventToEdit: EventItem | null;
@@ -18,7 +19,7 @@ interface EventsFormViewProps {
   relatedProducts: RelatedProductItem[];
   mediaImages: CmsMediaPickerItem[];
   featuredCount: number;
-  onSave: (data: Partial<EventItem>) => void;
+  onSave: (data: Partial<EventItem>) => Promise<void> | void;
   onOpenPreview: (data: EventItem) => void;
   onCancel: () => void;
 }
@@ -54,6 +55,8 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({ eventToEdit, loc
   const [seoKeyword, setSeoKeyword] = useState(eventToEdit?.seo_keyword || '');
   const [seoDescription, setSeoDescription] = useState(eventToEdit?.seo_description || '');
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => { if (!manualAlias) setAlias(slugify(title)); }, [title, manualAlias]);
 
@@ -67,15 +70,38 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({ eventToEdit, loc
     seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
   });
 
-  const save = (nextPublished: boolean) => {
-    if (!title.trim() || !timeEvent || !endTime || !content.trim()) return alert('Vui lòng nhập tiêu đề, thời gian bắt đầu, thời gian kết thúc và nội dung sự kiện.');
-    if (new Date(endTime).getTime() <= new Date(timeEvent).getTime()) return alert('Thời gian kết thúc phải sau thời gian bắt đầu.');
-    if (isHot && !eventToEdit?.is_hot && featuredCount >= FEATURED_CONTENT_LIMITS.event) return alert(`Chỉ được chọn ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn sự kiện hiện tại trước.`);
-    onSave(payload(nextPublished));
+  const save = async (nextPublished: boolean) => {
+    setSubmitError(null);
+    if (!title.trim() || !timeEvent || !endTime || !content.trim()) {
+      setSubmitError('Vui lòng nhập tiêu đề, thời gian bắt đầu, thời gian kết thúc và nội dung sự kiện.');
+      return;
+    }
+    if (new Date(endTime).getTime() <= new Date(timeEvent).getTime()) {
+      setSubmitError('Thời gian kết thúc phải sau thời gian bắt đầu.');
+      return;
+    }
+    if (isHot && !eventToEdit?.is_hot && featuredCount >= FEATURED_CONTENT_LIMITS.event) {
+      setSubmitError(`Chỉ được chọn ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn sự kiện hiện tại trước.`);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await onSave(payload(nextPublished));
+    } catch (err) {
+      setSubmitError(sanitizeCmsErrorMessage(err, 'Lưu sự kiện thất bại. Vui lòng thử lại.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return <div className="space-y-5 pb-16">
-    <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"><div className="flex items-center gap-3"><button type="button" onClick={onCancel} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800"><ArrowLeft className="h-5 w-5" /></button><div><p className="text-xs font-bold text-orange-600">SỰ KIỆN</p><h1 className="font-black dark:text-white">{eventToEdit ? 'Chỉnh sửa sự kiện' : 'Thêm sự kiện'}</h1></div></div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => onOpenPreview({ ...(eventToEdit || {}), ...payload() } as EventItem)} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900"><Eye className="h-4 w-4" />Xem trước</button><button type="button" onClick={() => save(false)} className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700"><Save className="h-4 w-4" />Lưu nháp</button><button type="button" onClick={() => save(true)} className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white"><Send className="h-4 w-4" />Xuất bản</button></div></header>
+    <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95"><div className="flex items-center gap-3"><button type="button" onClick={onCancel} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800"><ArrowLeft className="h-5 w-5" /></button><div><p className="text-xs font-bold text-orange-600">SỰ KIỆN</p><h1 className="font-black dark:text-white">{eventToEdit ? 'Chỉnh sửa sự kiện' : 'Thêm sự kiện'}</h1></div></div><div className="flex flex-wrap gap-2"><button type="button" disabled={isSubmitting} onClick={() => onOpenPreview({ ...(eventToEdit || {}), ...payload() } as EventItem)} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900"><Eye className="h-4 w-4" />Xem trước</button><button type="button" disabled={isSubmitting} onClick={() => void save(false)} className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700 disabled:opacity-50"><Save className="h-4 w-4" />{isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}</button><button type="button" disabled={isSubmitting} onClick={() => void save(true)} className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white disabled:opacity-50"><Send className="h-4 w-4" />{isSubmitting ? 'Đang lưu...' : 'Xuất bản'}</button></div></header>
+    {submitError && (
+      <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/50 dark:text-red-300">
+        <AlertCircle className="h-4 w-4 shrink-0" />
+        <span>{submitError}</span>
+      </div>
+    )}
     <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]"><main className="space-y-5">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Calendar className="h-5 w-5 text-orange-600" />Thông tin sự kiện</div><div className="grid gap-4 md:grid-cols-2"><div className="md:col-span-2"><label className={labelClass}>Tiêu đề sự kiện *</label><input className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} /></div><div><label className={labelClass}>Chủ đề</label><input className={inputClass} value={chuDe} onChange={(e) => setChuDe(e.target.value)} /></div><div><label className={labelClass}>Alias</label><input className={inputClass} value={alias} onChange={(e) => { setManualAlias(true); setAlias(e.target.value); }} /></div><div className="md:col-span-2"><label className={labelClass}>Địa điểm</label><input className={inputClass} value={place} onChange={(e) => setPlace(e.target.value)} /></div><div><label className={labelClass}>Thời gian bắt đầu *</label><input type="datetime-local" className={inputClass} value={timeEvent} onChange={(e) => setTimeEvent(e.target.value)} /></div><div><label className={labelClass}>Thời gian kết thúc *</label><input type="datetime-local" min={timeEvent} className={inputClass} value={endTime} onChange={(e) => setEndTime(e.target.value)} /></div><div><label className={labelClass}>Thời gian cụ thể</label><input className={inputClass} value={specificTime} onChange={(e) => setSpecificTime(e.target.value)} /></div><div><label className={labelClass}>Link đăng ký</label><input className={inputClass} value={linkDangky} onChange={(e) => setLinkDangky(e.target.value)} /></div><div className="md:col-span-2"><label className={labelClass}>Tóm tắt</label><textarea rows={4} className={inputClass} value={summary} onChange={(e) => setSummary(e.target.value)} /></div></div></section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Nội dung</div><RichTextEditor value={content} onChange={setContent} minHeight="340px" allowedEmbeds={['cta', 'form']} /></section>

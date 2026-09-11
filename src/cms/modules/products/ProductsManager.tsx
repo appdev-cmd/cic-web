@@ -30,7 +30,8 @@ import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ProductsModuleData } from '../../data/CatalogDataSource';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 import { ProductsToolbar } from './ProductsToolbar';
 
 const ProductsFormView = React.lazy(() => import('./ProductsFormView').then((m) => ({ default: m.ProductsFormView })));
@@ -66,10 +67,6 @@ const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
 
 export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspaceLocale, capabilities = { create: false, edit: false, delete: false } }) => {
   const router = useRouter();
-  const persist = async (operation: Promise<unknown>) => {
-    try { await operation; return true; }
-    catch (error) { showToast(error instanceof Error ? error.message : 'Không thể cập nhật dữ liệu sản phẩm.'); return false; }
-  };
   // Main Products List State
   const [products, setProducts] = useState<ProductItem[]>(() =>
     (data?.products ?? []).map((item) => ({
@@ -111,7 +108,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
   // Modals & Drawers State
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<ProductItem | null>(null);
+  const [trashTargets, setTrashTargets] = useState<ProductItem[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [productToPreview, setProductToPreview] = useState<ProductItem | null>(null);
   const [productForActivity, setProductForActivity] = useState<ProductItem | null>(null);
   const [productToDuplicate, setProductToDuplicate] = useState<ProductItem | null>(null);
@@ -122,6 +120,17 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const persist = async (operation: Promise<unknown>, fallbackMsg = 'Không thể cập nhật dữ liệu sản phẩm.') => {
+    try {
+      await operation;
+      return true;
+    } catch (error) {
+      const sanitized = sanitizeCmsErrorMessage(error, fallbackMsg);
+      showToast(sanitized);
+      throw new Error(sanitized);
+    }
   };
 
   // Pagination State
@@ -221,12 +230,37 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     showToast(target?.is_hot ? 'Đã bỏ Sản phẩm nổi bật.' : 'Đã chọn Sản phẩm nổi bật.');
   };
 
-  const handleBatchDelete = async () => {
+  const handleBatchDelete = () => {
     if (!capabilities.delete) return showToast('Bạn không có quyền xóa sản phẩm.');
-    for (const id of selectedIds) if (!await persist(trashProductAction(workspaceLocale, id))) return;
-    setProducts((prev) => prev.filter((p) => !selectedIds.includes(p.id)));
-    showToast(`Đã đưa ${selectedIds.length} sản phẩm vào Thùng rác.`);
-    setSelectedIds([]);
+    const targets = products.filter((p) => selectedIds.includes(p.id));
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    if (!capabilities.delete) return showToast('Bạn không có quyền xóa sản phẩm.');
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((item) => item.id);
+      for (const id of ids) {
+        await persist(trashProductAction(workspaceLocale, id), 'Không thể chuyển sản phẩm vào Thùng rác.');
+      }
+      setProducts((prev) => prev.filter((p) => !ids.includes(p.id)));
+      setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
+      showToast(
+        ids.length === 1
+          ? `Đã đưa sản phẩm "${trashTargets[0].name || trashTargets[0].title}" vào Thùng rác.`
+          : `Đã đưa ${ids.length} sản phẩm vào Thùng rác.`
+      );
+      setTrashTargets(null);
+      router.refresh();
+    } catch {
+      // Handled and toasted in persist
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Form Save Handler
@@ -381,56 +415,54 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     router.refresh();
   };
 
-  // If in Form View
-  if (viewMode === 'form') {
-    return (
-      <React.Suspense
-        fallback={(
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900" aria-busy="true">
-            <div className="h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
-            <div className="mt-4 h-32 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
-          </div>
-        )}
-      >
-        <ProductsFormView
-          locale={workspaceLocale}
-          product={selectedProductForForm}
-          categories={categories}
-          brands={brands}
-          applications={applications}
-          productTypes={productTypes}
-          relatedProducts={products}
-          owners={owners}
-          featuredCount={products.filter((product) => product.id !== selectedProductForForm?.id && product.is_hot).length}
-          onSave={handleSaveProductFromForm}
-          onCancel={() => {
-            setViewMode('list');
-            setSelectedProductForForm(null);
-          }}
-          onOpenPreview={(prod) => setProductToPreview(prod)}
-        />
-        <ProductPreviewModal
-          isOpen={!!productToPreview}
-          product={productToPreview}
-          categories={categories}
-          brands={brands}
-          applications={applications}
-          productTypes={productTypes}
-          onClose={() => setProductToPreview(null)}
-        />
-      </React.Suspense>
-    );
-  }
-
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-200">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 right-6 z-[100] px-4 py-3 bg-slate-900 text-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-4">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {viewMode === 'form' ? (
+        <React.Suspense
+          fallback={(
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900" aria-busy="true">
+              <div className="h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+              <div className="mt-4 h-32 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+            </div>
+          )}
+        >
+          <ProductsFormView
+            locale={workspaceLocale}
+            product={selectedProductForForm}
+            categories={categories}
+            brands={brands}
+            applications={applications}
+            productTypes={productTypes}
+            relatedProducts={products}
+            owners={owners}
+            featuredCount={products.filter((product) => product.id !== selectedProductForForm?.id && product.is_hot).length}
+            onSave={handleSaveProductFromForm}
+            onCancel={() => {
+              setViewMode('list');
+              setSelectedProductForForm(null);
+            }}
+            onOpenPreview={(prod) => setProductToPreview(prod)}
+          />
+          <ProductPreviewModal
+            isOpen={!!productToPreview}
+            product={productToPreview}
+            categories={categories}
+            brands={brands}
+            applications={applications}
+            productTypes={productTypes}
+            onClose={() => setProductToPreview(null)}
+          />
+        </React.Suspense>
+      ) : (
+        <>
 
       {/* 1. TOP MODULE HEADER CARD */}
       <CmsPageHeader
@@ -841,7 +873,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
                           {/* Delete */}
                           <CmsIconButton
-                            onClick={() => setProductToDelete(p)}
+                            onClick={() => setTrashTargets([p])}
                             icon={<Trash2 />}
                             size="sm"
                             variant="danger"
@@ -891,22 +923,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         onClose={() => setIsColumnModalOpen(false)}
       />
 
-      <DeleteConfirmModal
-        isOpen={!!productToDelete}
-        product={productToDelete}
-        onConfirmPermanentDelete={async () => {
-          if (productToDelete) {
-            if (!capabilities.delete) return showToast('Bạn không có quyền xóa sản phẩm.');
-            if (!await persist(trashProductAction(workspaceLocale, productToDelete.id))) return;
-            setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
-            showToast(`Đã đưa sản phẩm "${productToDelete.name || productToDelete.title}" vào Thùng rác.`);
-            setProductToDelete(null);
-            router.refresh();
-          }
-        }}
-        onClose={() => setProductToDelete(null)}
-      />
-
       <ProductPreviewModal
         isOpen={!!productToPreview}
         product={productToPreview}
@@ -929,6 +945,20 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         product={productToDuplicate}
         onConfirmDuplicate={handleConfirmDuplicate}
         onClose={() => setProductToDuplicate(null)}
+      />
+        </>
+      )}
+
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length > 1
+            ? `${trashTargets.length} sản phẩm đã chọn`
+            : trashTargets?.[0]?.name || trashTargets?.[0]?.title || 'sản phẩm'
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

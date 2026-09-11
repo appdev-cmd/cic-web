@@ -6,15 +6,23 @@ import { CmsButton, CmsIconButton } from './CmsButton';
 
 interface CmsTrashConfirmDialogProps {
   open: boolean;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   itemName: string;
   busy?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-export function CmsTrashConfirmDialog({ open, title, description, itemName, busy = false, onClose, onConfirm }: CmsTrashConfirmDialogProps) {
+export function CmsTrashConfirmDialog({
+  open,
+  title = 'Chuyển vào Thùng rác',
+  description = 'Bạn có chắc chắn muốn chuyển mục này vào Thùng rác không?',
+  itemName,
+  busy = false,
+  onClose,
+  onConfirm,
+}: CmsTrashConfirmDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;

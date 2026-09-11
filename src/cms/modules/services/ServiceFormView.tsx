@@ -12,6 +12,7 @@ import {
   Search,
   Clock,
   AlertTriangle,
+  AlertCircle,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -30,7 +31,7 @@ interface ServiceFormViewProps {
   canEdit?: boolean;
   canPublish?: boolean;
   onBack: () => void;
-  onSave: (updated: ServiceItem) => void;
+  onSave: (updated: ServiceItem) => Promise<void> | void;
   onOpenPreview: (item: ServiceItem) => void;
   productOptions?: Array<{ id: string; label: string; image?: string; published?: boolean }>;
 }
@@ -50,6 +51,8 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     setFormData({ ...service });
@@ -61,27 +64,51 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     setIsDirty(true);
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
+    setFormError(null);
+    if (!formData.title.trim()) {
+      setFormError('Vui lòng nhập tên dịch vụ.');
+      return;
+    }
     const updated: ServiceItem = {
       ...formData,
       editorial_status: formData.editorial_status === 'published' ? 'published' : 'draft',
       updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
-    onSave(updated);
-    setIsDirty(false);
-    setLastAutosaved(new Date().toLocaleTimeString('vi-VN'));
-    showToast('Đã lưu bản nháp dịch vụ thành công!');
+    try {
+      setIsSubmitting(true);
+      await onSave(updated);
+      setIsDirty(false);
+      setLastAutosaved(new Date().toLocaleTimeString('vi-VN'));
+      showToast('Đã lưu bản nháp dịch vụ thành công!');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Không thể lưu dịch vụ. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
+    setFormError(null);
+    if (!formData.title.trim()) {
+      setFormError('Vui lòng nhập tên dịch vụ.');
+      return;
+    }
     const updated: ServiceItem = {
       ...formData,
       editorial_status: 'published',
       updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
-    onSave(updated);
-    setIsDirty(false);
-    showToast('Đã xuất bản dịch vụ trên website!');
+    try {
+      setIsSubmitting(true);
+      await onSave(updated);
+      setIsDirty(false);
+      showToast('Đã xuất bản dịch vụ trên website!');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Không thể xuất bản dịch vụ. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const showToast = (msg: string) => {
@@ -147,33 +174,41 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
 
           <button
             type="button"
+            disabled={isSubmitting}
             onClick={() => onOpenPreview(formData)}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 cursor-pointer"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 cursor-pointer"
           >
             <Eye className="w-3.5 h-3.5" /> Xem trước
           </button>
 
           <button
             type="button"
-            disabled={!canEdit}
+            disabled={!canEdit || isSubmitting}
             onClick={handleSaveDraft}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none dark:bg-slate-700 cursor-pointer"
             title={canEdit ? 'Lưu bản nháp dịch vụ' : 'Bạn không có quyền chỉnh sửa dịch vụ'}
           >
-            <Save className="w-3.5 h-3.5" /> Lưu nháp
+            <Save className="w-3.5 h-3.5" /> {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
           </button>
 
           <button
             type="button"
-            disabled={!canPublish}
+            disabled={!canPublish || isSubmitting}
             onClick={handlePublish}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none cursor-pointer"
             title={canPublish ? 'Xuất bản dịch vụ' : 'Bạn không có quyền xuất bản dịch vụ'}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" /> Xuất bản
+            <CheckCircle2 className="w-3.5 h-3.5" /> {isSubmitting ? 'Đang lưu...' : 'Xuất bản'}
           </button>
         </div>
       </div>
+
+      {formError && (
+        <div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+          <AlertCircle className="mt-0.5 size-5 shrink-0" />
+          <div className="min-w-0 flex-1">{formError}</div>
+        </div>
+      )}
 
       {/* Main two-column layout, aligned with the Product form */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

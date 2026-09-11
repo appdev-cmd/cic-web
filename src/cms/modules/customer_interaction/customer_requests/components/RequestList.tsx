@@ -26,7 +26,7 @@ import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionChec
 interface RequestListProps {
   requests: CustomerRequest[];
   selectedRequestIds: string[];
-  onToggleSelectAll: () => void;
+  onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectRequest: (id: string) => void;
   onViewRequest: (request: CustomerRequest) => void;
   onDeleteRequest: (id: string) => void;
@@ -46,10 +46,12 @@ export const RequestList: React.FC<RequestListProps> = ({
   onReassignRequest,
   onOpenNotesModal,
 }) => {
-  const isAllSelected = requests.length > 0 && selectedRequestIds.length === requests.length;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedRequests = requests.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedRequests.map((r) => r.id);
+  const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedRequestIds.includes(id));
+  const isIndeterminate = pageIds.some((id) => selectedRequestIds.includes(id)) && !isAllSelected;
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -123,9 +125,9 @@ export const RequestList: React.FC<RequestListProps> = ({
               <th className="p-3 w-10 sticky left-0 bg-slate-50/90 dark:bg-slate-850 z-10">
                 <CmsSelectionCheckbox
                   checked={isAllSelected}
-                  onChange={onToggleSelectAll}
-                  indeterminate={selectedRequestIds.length > 0 && !isAllSelected}
-                  label="Chọn tất cả yêu cầu khách hàng"
+                  onChange={() => onToggleSelectAll(pageIds)}
+                  indeterminate={isIndeterminate}
+                  label="Chọn tất cả yêu cầu trên trang"
                 />
               </th>
               <th className="p-3 min-w-[170px]">Khách hàng</th>

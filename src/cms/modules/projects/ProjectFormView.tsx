@@ -13,7 +13,7 @@ interface Props {
   productOptions: ProjectRelationOption[];
   serviceOptions: ProjectRelationOption[];
   featuredCount: number;
-  onSave: (project: CmsProject) => void;
+  onSave: (project: CmsProject) => Promise<void> | void;
   onPreview: (project: CmsProject) => void;
   onCancel: () => void;
 }
@@ -31,21 +31,30 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
   const [technologyInput, setTechnologyInput] = useState(initial.technologies.join('\n'));
   const [manualAlias, setManualAlias] = useState(Boolean(project));
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const set = <K extends keyof CmsProject>(key: K, value: CmsProject[K]) => setForm((current) => ({ ...current, [key]: value }));
 
-  const submit = () => {
+  const submit = async () => {
     if (!form.title.trim()) return setError('Vui lòng nhập tên dự án.');
     if (!form.alias.trim()) return setError('Vui lòng nhập đường dẫn dự án.');
     if (form.start_year && form.end_year && form.end_year < form.start_year) return setError('Năm kết thúc không được nhỏ hơn năm bắt đầu.');
     if (form.is_featured && !project?.is_featured && featuredCount >= FEATURED_CONTENT_LIMITS.project) return setError(`Chỉ được chọn tối đa ${FEATURED_CONTENT_LIMITS.project} dự án nổi bật. Hãy bỏ chọn một dự án khác trước.`);
     setError('');
-    onSave({ ...form, title: form.title.trim(), alias: slugify(form.alias), technologies: splitLines(technologyInput), end_year: form.is_ongoing ? null : form.end_year, updated_time: new Date().toISOString() });
+    try {
+      setIsSubmitting(true);
+      await onSave({ ...form, title: form.title.trim(), alias: slugify(form.alias), technologies: splitLines(technologyInput), end_year: form.is_ongoing ? null : form.end_year, updated_time: new Date().toISOString() });
+    } catch (err: any) {
+      setError(err?.message || 'Không thể lưu dự án. Vui lòng kiểm tra lại thông tin.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return <div className="space-y-6 pb-16">
-    <CmsPageHeader icon={<BriefcaseBusiness />} title={project ? 'Chỉnh sửa dự án' : 'Thêm dự án'} description="Nội dung bài viết dùng Rich Text; các trường filter được quản lý độc lập." actions={<><CmsButton size="sm" variant="secondary" leadingIcon={<ArrowLeft />} onClick={onCancel}>Quay lại</CmsButton><CmsButton size="sm" variant="secondary" leadingIcon={<Eye />} onClick={() => onPreview({ ...form, technologies: splitLines(technologyInput) })}>Xem trước</CmsButton><CmsButton size="sm" variant="primary" leadingIcon={<Save />} onClick={submit}>Lưu dự án</CmsButton></>} />
-    {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
+    <CmsPageHeader icon={<BriefcaseBusiness />} title={project ? 'Chỉnh sửa dự án' : 'Thêm dự án'} description="Nội dung bài viết dùng Rich Text; các trường filter được quản lý độc lập." actions={<><CmsButton size="sm" variant="secondary" leadingIcon={<ArrowLeft />} disabled={isSubmitting} onClick={onCancel}>Quay lại</CmsButton><CmsButton size="sm" variant="secondary" leadingIcon={<Eye />} disabled={isSubmitting} onClick={() => onPreview({ ...form, technologies: splitLines(technologyInput) })}>Xem trước</CmsButton><CmsButton size="sm" variant="primary" leadingIcon={<Save />} disabled={isSubmitting} onClick={() => void submit()}>{isSubmitting ? 'Đang lưu...' : 'Lưu dự án'}</CmsButton></>} />
+    {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700 shadow-sm animate-in fade-in">{error}</div>}
     <div className="grid gap-6 xl:grid-cols-3">
       <div className="space-y-6 xl:col-span-2">
         <Section icon={<FileText />} title="Thông tin nội dung"><div className="grid gap-4 md:grid-cols-2">

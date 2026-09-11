@@ -28,7 +28,8 @@ import { EventItem, EditorialStatus } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { EventsModuleData } from '../../data/EditorialContentDataSource';
 import { EventsFormView } from './EventsFormView';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 import { EventPreviewModal } from './EventPreviewModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
@@ -144,9 +145,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
   // Multi-Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Delete Modal State
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<EventItem[]>([]);
+  // Delete State
+  const [trashTargets, setTrashTargets] = useState<EventItem[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Toast Notification State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -156,13 +157,14 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const persist = async (operation: Promise<unknown>): Promise<boolean> => {
+  const persist = async (operation: Promise<unknown>, fallbackMsg = 'Thao tác không thành công.'): Promise<boolean> => {
     try {
       await operation;
       return true;
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Thao tác không thành công.');
-      return false;
+      const sanitized = sanitizeCmsErrorMessage(error, fallbackMsg);
+      showToast(sanitized);
+      throw new Error(sanitized);
     }
   };
 
@@ -180,6 +182,18 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
     return matchesTitle && matchesEditorial && matchesEventStatus;
   });
   const paginatedEvents = filteredEvents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedEvents.map((ev) => ev.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const hasSomePageSelected = pageIds.some((id) => selectedIds.includes(id)) && !allPageSelected;
+
+  // Selection Checkbox Logic
+  const handleSelectAll = () => {
+    if (allPageSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
 
   // Toggle Single Row Editorial Status directly from table
   const handleTogglePublished = async (id: string) => {
@@ -240,15 +254,6 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
     router.refresh();
   };
 
-  // Selection Checkbox Logic
-  const handleSelectAll = () => {
-    if (selectedIds.length === filteredEvents.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredEvents.map((item) => item.id));
-    }
-  };
-
   const handleSelectOne = (id: string) => {
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((i) => i !== id));
@@ -278,8 +283,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
       return;
     }
     const targets = events.filter((e) => selectedIds.includes(e.id));
-    setItemsToDelete(targets);
-    setIsDeleteModalOpen(true);
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
   };
 
   const handleOpenSingleDelete = (ev: EventItem) => {
@@ -287,22 +293,33 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
       showToast('Bạn không có quyền xóa sự kiện.');
       return;
     }
-    setItemsToDelete([ev]);
-    setIsDeleteModalOpen(true);
+    setTrashTargets([ev]);
   };
 
   const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
     if (!capabilities.delete) {
       showToast('Bạn không có quyền xóa sự kiện.');
       return;
     }
-    const ids = itemsToDelete.map((item) => Number(item.id));
-    const ok = await persist(trashEventsAction(workspaceLocale, ids));
-    if (!ok) return;
-    setIsDeleteModalOpen(false);
-    setSelectedIds((prev) => prev.filter((id) => !ids.includes(Number(id))));
-    showToast(`Đã chuyển ${itemsToDelete.length} sự kiện vào Thùng rác!`);
-    router.refresh();
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((item) => Number(item.id));
+      await persist(trashEventsAction(workspaceLocale, ids), 'Không thể chuyển sự kiện vào Thùng rác.');
+      showToast(
+        trashTargets.length === 1
+          ? `Đã chuyển sự kiện "${trashTargets[0].title}" vào Thùng rác!`
+          : `Đã chuyển ${trashTargets.length} sự kiện vào Thùng rác!`
+      );
+      setEvents((prev) => prev.filter((item) => !ids.includes(Number(item.id))));
+      setSelectedIds((prev) => prev.filter((id) => !ids.includes(Number(id))));
+      setTrashTargets(null);
+      router.refresh();
+    } catch {
+      // Toast notification already shown in persist
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Open Edit / Create Form
@@ -329,9 +346,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
     const isEdit = Boolean(eventToEdit?.id);
     if (isEdit ? !capabilities.edit : !capabilities.create) {
       showToast('Bạn không có quyền lưu sự kiện.');
-      return;
+      throw new Error('Bạn không có quyền lưu sự kiện.');
     }
-    const ok = await persist(
+    await persist(
       saveEventAction(workspaceLocale, isEdit ? Number(eventToEdit?.id) : null, {
         title: formData.title || '',
         alias: formData.alias || '',
@@ -356,9 +373,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
         productsRelated: formData.products_related || [],
         newsRelated: formData.news_related || [],
         eventRelated: formData.event_related || [],
-      })
+      }),
+      'Không thể lưu sự kiện.'
     );
-    if (!ok) return;
     showToast(isEdit ? `Đã cập nhật sự kiện "${formData.title}"!` : 'Đã tạo sự kiện mới thành công!');
     setIsFormOpen(false);
     setEventToEdit(null);
@@ -387,60 +404,49 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
     }
   };
 
-  // Render Form View if opened
-  if (isFormOpen) {
-    return (
-      <>
-        <EventsFormView
-          eventToEdit={eventToEdit}
-          locale={workspaceLocale}
-          relatedEvents={data?.events ?? []}
-          relatedArticles={data?.relatedArticles ?? []}
-          relatedProducts={data?.relatedProducts ?? []}
-          mediaImages={data?.mediaImages ?? []}
-          featuredCount={events.filter((item) => item.id !== eventToEdit?.id && item.is_hot).length}
-          onSave={handleSaveEvent}
-          onOpenPreview={setPreviewEvent}
-          onCancel={() => {
-            setIsFormOpen(false);
-            setEventToEdit(null);
-          }}
-        />
-        <EventPreviewModal
-          isOpen={!!previewEvent}
-          event={previewEvent}
-          onClose={() => setPreviewEvent(null)}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="space-y-5">
       {/* TOAST NOTIFICATION */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-5">
           <Sparkles className="w-4 h-4 text-orange-400 dark:text-orange-600" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* MODAL CONFIRM DELETE */}
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        itemsToDelete={itemsToDelete}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-      />
+      {isFormOpen ? (
+        <>
+          <EventsFormView
+            eventToEdit={eventToEdit}
+            locale={workspaceLocale}
+            relatedEvents={data?.events ?? []}
+            relatedArticles={data?.relatedArticles ?? []}
+            relatedProducts={data?.relatedProducts ?? []}
+            mediaImages={data?.mediaImages ?? []}
+            featuredCount={events.filter((item) => item.id !== eventToEdit?.id && item.is_hot).length}
+            onSave={handleSaveEvent}
+            onOpenPreview={setPreviewEvent}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEventToEdit(null);
+            }}
+          />
+          <EventPreviewModal
+            isOpen={!!previewEvent}
+            event={previewEvent}
+            onClose={() => setPreviewEvent(null)}
+          />
+        </>
+      ) : (
+        <>
+          {/* MODAL PREVIEW */}
+          <EventPreviewModal
+            isOpen={!!previewEvent}
+            event={previewEvent}
+            onClose={() => setPreviewEvent(null)}
+          />
 
-      {/* MODAL PREVIEW */}
-      <EventPreviewModal
-        isOpen={!!previewEvent}
-        event={previewEvent}
-        onClose={() => setPreviewEvent(null)}
-      />
-
-      {/* HEADER CARD */}
+          {/* HEADER CARD */}
       <CmsPageHeader
         icon={<CalendarDays />}
         title="Sự kiện và hội thảo"
@@ -518,7 +524,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
             <thead>
               <tr className="bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 <th className="py-3 px-4 w-10 text-center">
-                  <CmsSelectionCheckbox checked={filteredEvents.length > 0 && selectedIds.length === filteredEvents.length} indeterminate={selectedIds.length > 0 && selectedIds.length < filteredEvents.length} onChange={handleSelectAll} label="Chọn tất cả sự kiện" />
+                  <CmsSelectionCheckbox checked={allPageSelected} indeterminate={hasSomePageSelected} onChange={handleSelectAll} label="Chọn tất cả sự kiện trên trang" />
                 </th>
                 {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">Tiêu đề sự kiện</th>}
                 {columnVisibility.time_event && <th className="py-3 px-4 w-40">Thời gian sự kiện</th>}
@@ -666,6 +672,21 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
 
         <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredEvents.length} itemLabel="sự kiện" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
       </div>
+        </>
+      )}
+
+      {/* CmsTrashConfirmDialog */}
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length === 1
+            ? `sự kiện "${trashTargets[0].title}"`
+            : `${trashTargets?.length ?? 0} sự kiện đã chọn`
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

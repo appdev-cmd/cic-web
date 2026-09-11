@@ -30,6 +30,8 @@ import { NewsCategoryManager } from './NewsCategoryManager';
 import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { saveNewsAction, setNewsPlacementAction, setNewsPublishedAction, trashNewsAction } from '@/features/news/server/actions';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 
 interface NewsManagerProps {
   data?: NewsModuleData;
@@ -121,13 +123,18 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
     });
   }, [scopeFilteredArticles, searchQuery, selectedCategory, statusFilter]);
   const paginatedArticles = filteredArticles.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageIds = paginatedArticles.map((a) => a.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
 
-  // Handle Select All
+  const [trashTargets, setTrashTargets] = useState<NewsArticle[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Handle Select All on current page
   const handleToggleSelectAll = () => {
-    if (selectedIds.length === filteredArticles.length && filteredArticles.length > 0) {
-      setSelectedIds([]);
+    if (allPageSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
     } else {
-      setSelectedIds(filteredArticles.map((a) => a.id));
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
     }
   };
 
@@ -146,7 +153,14 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
       showToast(`Hot News đã đủ ${NEWS_PLACEMENT_LIMITS.featured} tin. Hãy bỏ Nổi bật một tin khác trước.`);
       return;
     }
-    if(!target||!capabilities.edit)return;try{await setNewsPlacementAction(workspaceLocale,id,'hot',!target.is_hot);showToast(!target.is_hot?'Đã gắn cờ Nổi bật cho bài viết!':'Đã bỏ cờ Nổi bật bài viết!');router.refresh();}catch(error){showToast(error instanceof Error?error.message:'Không thể cập nhật Hot News.');}
+    if(!target||!capabilities.edit)return;
+    try {
+      await setNewsPlacementAction(workspaceLocale,id,'hot',!target.is_hot);
+      showToast(!target.is_hot?'Đã gắn cờ Nổi bật cho bài viết!':'Đã bỏ cờ Nổi bật bài viết!');
+      router.refresh();
+    } catch(error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật Hot News.'));
+    }
   };
 
   const handleToggleHomepage = async (id: string) => {
@@ -155,12 +169,53 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
       showToast(`Trang chủ đã đủ ${NEWS_PLACEMENT_LIMITS.homepage} tin. Hãy ẩn một tin khác khỏi Trang chủ trước.`);
       return;
     }
-    if(!target||!capabilities.edit)return;try{await setNewsPlacementAction(workspaceLocale,id,'home',!target.show_in_homepage);showToast(!target.show_in_homepage?'Đã cho phép hiển thị bài viết trên Trang chủ!':'Đã ẩn bài viết khỏi Trang chủ!');router.refresh();}catch(error){showToast(error instanceof Error?error.message:'Không thể cập nhật Trang chủ.');}
+    if(!target||!capabilities.edit)return;
+    try {
+      await setNewsPlacementAction(workspaceLocale,id,'home',!target.show_in_homepage);
+      showToast(!target.show_in_homepage?'Đã cho phép hiển thị bài viết trên Trang chủ!':'Đã ẩn bài viết khỏi Trang chủ!');
+      router.refresh();
+    } catch(error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật Trang chủ.'));
+    }
   };
 
   // Move to Trash or Permanent Delete
-  const handleMoveToTrash = async (article: NewsArticle) => {
-    if(!capabilities.delete)return;try{await trashNewsAction(workspaceLocale,article.id);showToast(`Đã chuyển bài viết "${article.title}" vào thùng rác.`);router.refresh();}catch(error){showToast(error instanceof Error?error.message:'Không thể chuyển bài viết vào Thùng rác.');}
+  const handleMoveToTrash = (article: NewsArticle) => {
+    if(!capabilities.delete) return showToast('Bạn không có quyền xóa bài viết.');
+    setTrashTargets([article]);
+  };
+
+  const handleBatchDelete = () => {
+    if (!capabilities.delete) return showToast('Bạn không có quyền xóa bài viết.');
+    const targets = articles.filter((a) => selectedIds.includes(a.id));
+    if (targets.length > 0) {
+      setTrashTargets(targets);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!trashTargets || trashTargets.length === 0) return;
+    if (!capabilities.delete) return showToast('Bạn không có quyền xóa bài viết.');
+    setIsDeleting(true);
+    try {
+      const ids = trashTargets.map((item) => item.id);
+      for (const id of ids) {
+        await trashNewsAction(workspaceLocale, id);
+      }
+      setArticles((prev) => prev.filter((a) => !ids.includes(a.id)));
+      setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
+      showToast(
+        ids.length === 1
+          ? `Đã chuyển bài viết "${trashTargets[0].title}" vào Thùng rác.`
+          : `Đã chuyển ${ids.length} bài viết vào Thùng rác.`
+      );
+      setTrashTargets(null);
+      router.refresh();
+    } catch (error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể chuyển bài viết vào Thùng rác.'));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleRestoreFromTrash = (article: NewsArticle) => {
@@ -172,7 +227,15 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
 
   const handleBatchUpdatePublished = async (published: boolean) => {
     if (selectedIds.length === 0) return;
-    if(!capabilities.edit)return;try{await setNewsPublishedAction(workspaceLocale,selectedIds,published);showToast(`Đã chuyển ${selectedIds.length} bài viết sang ${published?'Đã xuất bản':'Bản nháp'}!`);setSelectedIds([]);router.refresh();}catch(error){showToast(error instanceof Error?error.message:'Không thể cập nhật trạng thái bài viết.');}
+    if(!capabilities.edit) return showToast('Bạn không có quyền cập nhật bài viết.');
+    try {
+      await setNewsPublishedAction(workspaceLocale,selectedIds,published);
+      showToast(`Đã chuyển ${selectedIds.length} bài viết sang ${published?'Đã xuất bản':'Bản nháp'}!`);
+      setSelectedIds([]);
+      router.refresh();
+    } catch(error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật trạng thái bài viết.'));
+    }
   };
 
   // Form Handlers
@@ -187,7 +250,40 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
   };
 
   const handleSaveArticleFromForm = async (formData: Partial<NewsArticle>) => {
-    try{await saveNewsAction(workspaceLocale,editingArticle?.id??null,{title:formData.title??'',alias:formData.alias??'',other_languages1:formData.other_languages1??'',categoryId:formData.category_id,summary:formData.summary??'',content:formData.content??'',image:formData.image??'',video:formData.video??'',fileUpload:formData.file_upload??'',tags:formData.tags??[],relatedNewsIds:(formData.news_related??[]).map(Number),relatedProductIds:(formData.products_related??[]).map(Number),startTime:formData.start_time??new Date().toISOString(),endTime:formData.end_time??'',published:formData.published??false,isHot:formData.is_hot??false,showInHomepage:formData.show_in_homepage??false,ordering:formData.ordering??0,seoTitle:formData.seo_title??'',seoKeyword:formData.seo_keyword??'',seoDescription:formData.seo_description??'',tawkTo:formData.tawk_to??''});showToast(editingArticle?'Đã cập nhật bài viết thành công!':'Đã thêm bài viết mới thành công!');setViewMode('list');setEditingArticle(null);router.refresh();}catch(error){showToast(error instanceof Error?error.message:'Không thể lưu bài viết.');}
+    try {
+      await saveNewsAction(workspaceLocale, editingArticle?.id ?? null, {
+        title: formData.title ?? '',
+        alias: formData.alias ?? '',
+        other_languages1: formData.other_languages1 ?? '',
+        categoryId: formData.category_id,
+        summary: formData.summary ?? '',
+        content: formData.content ?? '',
+        image: formData.image ?? '',
+        video: formData.video ?? '',
+        fileUpload: formData.file_upload ?? '',
+        tags: formData.tags ?? [],
+        relatedNewsIds: (formData.news_related ?? []).map(Number),
+        relatedProductIds: (formData.products_related ?? []).map(Number),
+        startTime: formData.start_time ?? new Date().toISOString(),
+        endTime: formData.end_time ?? '',
+        published: formData.published ?? false,
+        isHot: formData.is_hot ?? false,
+        showInHomepage: formData.show_in_homepage ?? false,
+        ordering: formData.ordering ?? 0,
+        seoTitle: formData.seo_title ?? '',
+        seoKeyword: formData.seo_keyword ?? '',
+        seoDescription: formData.seo_description ?? '',
+        tawkTo: formData.tawk_to ?? '',
+      });
+      showToast(editingArticle ? 'Đã cập nhật bài viết thành công!' : 'Đã thêm bài viết mới thành công!');
+      setViewMode('list');
+      setEditingArticle(null);
+      router.refresh();
+    } catch(error) {
+      const sanitized = sanitizeCmsErrorMessage(error, 'Không thể lưu bài viết. Vui lòng kiểm tra lại thông tin.');
+      showToast(sanitized);
+      throw new Error(sanitized);
+    }
   };
 
   const getCategoryName = (catId: string) => {
@@ -205,7 +301,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
     <div className="space-y-6 relative">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
           <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
@@ -297,6 +393,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
               actions={[
                 { label: 'Xuất bản', onClick: () => handleBatchUpdatePublished(true), icon: Check, variant: 'primary' },
                 { label: 'Chuyển về nháp', onClick: () => handleBatchUpdatePublished(false), icon: Edit },
+                { label: 'Xóa', onClick: handleBatchDelete, icon: Trash2, variant: 'danger' },
               ]}
             />
           </div>
@@ -561,6 +658,17 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
         onClose={() => setActivityDrawerArticle(null)}
       />
 
+      <CmsTrashConfirmDialog
+        open={Boolean(trashTargets && trashTargets.length > 0)}
+        itemName={
+          trashTargets && trashTargets.length > 1
+            ? `${trashTargets.length} bài viết đã chọn`
+            : trashTargets?.[0]?.title || 'bài viết'
+        }
+        busy={isDeleting}
+        onClose={() => setTrashTargets(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

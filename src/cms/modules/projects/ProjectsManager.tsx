@@ -16,6 +16,8 @@ import {
   bulkUpdateProjectsAction,
   bulkDeleteProjectsAction,
 } from '@/features/projects/server/actions';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 
 import { useRouter } from 'next/navigation';
 
@@ -118,6 +120,9 @@ export const ProjectsManager: React.FC<Props> = ({
     setCurrentPage(1);
   };
 
+  const [deleteTargets, setDeleteTargets] = useState<CmsProject[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const notify = (message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(''), 3000);
@@ -141,7 +146,9 @@ export const ProjectsManager: React.FC<Props> = ({
       setEditing(undefined);
       notify(isNew ? 'Đã thêm dự án mới.' : 'Đã cập nhật dự án.');
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'Không thể lưu dự án.');
+      const sanitized = sanitizeCmsErrorMessage(error, 'Không thể lưu dự án. Vui lòng kiểm tra lại thông tin.');
+      notify(sanitized);
+      throw new Error(sanitized);
     }
   };
 
@@ -161,29 +168,31 @@ export const ProjectsManager: React.FC<Props> = ({
       await fetchProjects();
       notify(target.is_featured ? 'Đã bỏ dự án khỏi nhóm Nổi bật.' : 'Đã thêm dự án vào nhóm Nổi bật.');
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'Không thể cập nhật dự án.');
+      notify(sanitizeCmsErrorMessage(error, 'Không thể cập nhật dự án.'));
     }
   };
 
-  const removeProject = async (id: string) => {
+  const handleConfirmDelete = async () => {
+    if (!deleteTargets || deleteTargets.length === 0) return;
+    setIsDeleting(true);
     try {
-      await deleteProjectAction(id);
-      setSelectedIds((curr) => curr.filter((item) => item !== id));
+      if (deleteTargets.length === 1) {
+        const id = deleteTargets[0].id;
+        await deleteProjectAction(id);
+        setSelectedIds((curr) => curr.filter((item) => item !== id));
+        notify('Đã chuyển dự án vào Thùng rác.');
+      } else {
+        const ids = deleteTargets.map((item) => item.id);
+        await bulkDeleteProjectsAction(ids);
+        setSelectedIds((curr) => curr.filter((id) => !ids.includes(id)));
+        notify(`Đã chuyển ${ids.length} dự án vào Thùng rác.`);
+      }
+      setDeleteTargets(null);
       await fetchProjects();
-      notify('Đã chuyển dự án vào Thùng rác.');
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'Không thể xóa dự án.');
-    }
-  };
-
-  const removeSelectedProjects = async () => {
-    try {
-      await bulkDeleteProjectsAction(selectedIds);
-      setSelectedIds([]);
-      await fetchProjects();
-      notify('Đã chuyển các dự án đã chọn vào Thùng rác.');
-    } catch (error) {
-      notify(error instanceof Error ? error.message : 'Không thể xóa các dự án đã chọn.');
+      notify(sanitizeCmsErrorMessage(error, 'Không thể chuyển dự án vào Thùng rác.'));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -194,37 +203,35 @@ export const ProjectsManager: React.FC<Props> = ({
       await fetchProjects();
       notify(message);
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'Không thể cập nhật các dự án.');
+      notify(sanitizeCmsErrorMessage(error, 'Không thể cập nhật các dự án.'));
     }
   };
-
-  if (editing !== undefined) {
-    return (
-      <>
-        <ProjectFormView
-          project={editing}
-          productOptions={productOptions}
-          serviceOptions={serviceOptions}
-          featuredCount={projects.filter((item) => item.id !== editing?.id && item.is_featured).length}
-          onSave={save}
-          onPreview={setPreviewProject}
-          onCancel={() => setEditing(undefined)}
-        />
-        <ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} />
-      </>
-    );
-  }
 
   return (
     <div className="relative space-y-6 pb-16">
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl">
+        <div className="fixed bottom-6 right-6 z-[100] flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl">
           <CheckCircle2 className="size-4 text-emerald-400" />
           {toast}
         </div>
       )}
 
-      <CmsPageHeader
+      {editing !== undefined ? (
+        <>
+          <ProjectFormView
+            project={editing}
+            productOptions={productOptions}
+            serviceOptions={serviceOptions}
+            featuredCount={projects.filter((item) => item.id !== editing?.id && item.is_featured).length}
+            onSave={save}
+            onPreview={setPreviewProject}
+            onCancel={() => setEditing(undefined)}
+          />
+          <ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} />
+        </>
+      ) : (
+        <>
+          <CmsPageHeader
         icon={<BriefcaseBusiness />}
         title="Dự án"
         description="Quản lý dự án hiển thị trên website, nội dung chi tiết và dữ liệu phân loại."
@@ -362,8 +369,9 @@ export const ProjectsManager: React.FC<Props> = ({
             icon: Trash2,
             variant: 'danger',
             onClick: () => {
-              if (window.confirm(`Xóa ${selectedIds.length} dự án đã chọn vào Thùng rác?`)) {
-                void removeSelectedProjects();
+              const selectedProjects = projects.filter((p) => selectedIds.includes(p.id));
+              if (selectedProjects.length > 0) {
+                setDeleteTargets(selectedProjects);
               }
             },
           },
@@ -485,11 +493,7 @@ export const ProjectsManager: React.FC<Props> = ({
                         aria-label={`Xóa ${project.title}`}
                         icon={<Trash2 />}
                         variant="danger"
-                        onClick={() => {
-                          if (window.confirm(`Chuyển dự án “${project.title}” vào Thùng rác?`)) {
-                            void removeProject(project.id);
-                          }
-                        }}
+                        onClick={() => setDeleteTargets([project])}
                       />
                     </div>
                   </td>
@@ -520,6 +524,20 @@ export const ProjectsManager: React.FC<Props> = ({
       </section>
 
       <ProjectPreviewModal project={previewProject} onClose={() => setPreviewProject(null)} />
+        </>
+      )}
+
+      <CmsTrashConfirmDialog
+        open={Boolean(deleteTargets && deleteTargets.length > 0)}
+        itemName={
+          deleteTargets && deleteTargets.length > 1
+            ? `${deleteTargets.length} dự án đã chọn`
+            : deleteTargets?.[0]?.title || 'dự án'
+        }
+        busy={isDeleting}
+        onClose={() => setDeleteTargets(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };
