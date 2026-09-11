@@ -13,9 +13,10 @@ import { newsCategoryTrashAdapter, newsCategoryEnTrashAdapter } from './adapters
 import { newsTrashAdapter, newsEnTrashAdapter } from './adapters/news';
 import { serviceTrashAdapter, serviceEnTrashAdapter } from './adapters/service';
 import { eventTrashAdapter, eventEnTrashAdapter } from './adapters/event';
+import { emailTemplateTrashAdapter, emailTemplateEnTrashAdapter } from './adapters/email-template';
 import type { TrashEntityAdapter } from './registry-types';
 
-const adapters = [projectTrashAdapter, userTrashAdapter, roleTrashAdapter, mediaTrashAdapter, productCategoryTrashAdapter, productCategoryEnTrashAdapter,productBrandTrashAdapter,productBrandEnTrashAdapter,productApplicationTrashAdapter,productApplicationEnTrashAdapter,productTypeTrashAdapter,productTypeEnTrashAdapter,salesOwnerTrashAdapter,salesOwnerEnTrashAdapter,productTrashAdapter,productEnTrashAdapter,newsCategoryTrashAdapter,newsCategoryEnTrashAdapter,newsTrashAdapter,newsEnTrashAdapter,serviceTrashAdapter,serviceEnTrashAdapter,eventTrashAdapter,eventEnTrashAdapter] as const satisfies readonly TrashEntityAdapter[];
+const adapters = [projectTrashAdapter, userTrashAdapter, roleTrashAdapter, mediaTrashAdapter, productCategoryTrashAdapter, productCategoryEnTrashAdapter,productBrandTrashAdapter,productBrandEnTrashAdapter,productApplicationTrashAdapter,productApplicationEnTrashAdapter,productTypeTrashAdapter,productTypeEnTrashAdapter,salesOwnerTrashAdapter,salesOwnerEnTrashAdapter,productTrashAdapter,productEnTrashAdapter,newsCategoryTrashAdapter,newsCategoryEnTrashAdapter,newsTrashAdapter,newsEnTrashAdapter,serviceTrashAdapter,serviceEnTrashAdapter,eventTrashAdapter,eventEnTrashAdapter,emailTemplateTrashAdapter,emailTemplateEnTrashAdapter] as const satisfies readonly TrashEntityAdapter[];
 const byEntityType = new Map(adapters.map((adapter) => [adapter.entityType, adapter]));
 
 export function getTrashEntityAdapter(entityType: string): TrashEntityAdapter {

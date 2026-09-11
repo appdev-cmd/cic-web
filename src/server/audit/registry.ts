@@ -76,6 +76,10 @@ export const AUDIT_ACTIONS = {
   FORM_UPDATED: 'form.updated',
   FORM_TRASHED: 'form.trashed',
   CUSTOMER_REQUEST_STATUS_CHANGED: 'customer_request.status_changed',
+  EMAIL_TEMPLATE_CREATED: 'email_template.created',
+  EMAIL_TEMPLATE_UPDATED: 'email_template.updated',
+  EMAIL_TEMPLATE_PUBLISHED: 'email_template.published',
+  EMAIL_TEMPLATE_TRASHED: 'email_template.trashed',
   TRASH_RESTORED: 'trash.restored',
   TRASH_PURGED: 'trash.purged',
 } as const;
@@ -104,6 +108,7 @@ export const AUDIT_ENTITY_TYPES = {
   MENU: 'menu',
   FORM: 'form',
   CUSTOMER_REQUEST: 'customer_request',
+  EMAIL_TEMPLATE: 'email_template',
   TRASH_ITEM: 'trash_item',
 } as const;
 
@@ -190,6 +195,10 @@ export const auditActionRegistry = {
   [AUDIT_ACTIONS.FORM_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.FORM },
   [AUDIT_ACTIONS.FORM_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.FORM },
   [AUDIT_ACTIONS.CUSTOMER_REQUEST_STATUS_CHANGED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.CUSTOMER_REQUEST },
+  [AUDIT_ACTIONS.EMAIL_TEMPLATE_CREATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE },
+  [AUDIT_ACTIONS.EMAIL_TEMPLATE_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE },
+  [AUDIT_ACTIONS.EMAIL_TEMPLATE_PUBLISHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE },
+  [AUDIT_ACTIONS.EMAIL_TEMPLATE_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE },
   [AUDIT_ACTIONS.TRASH_RESTORED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
   [AUDIT_ACTIONS.TRASH_PURGED]: { category: 'config_publish', severity: 'critical', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
 } as const;

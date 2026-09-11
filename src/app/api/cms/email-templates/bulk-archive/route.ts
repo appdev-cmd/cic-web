@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { normalizeServerError } from '@/server/errors';
-import { archiveEmailTemplates } from '@/features/email-templates/server/mutations';
+import { trashEmailTemplates } from '@/features/email-templates/server/mutations';
 
 function errorResponse(error: unknown) {
   const normalized = normalizeServerError(error);
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No IDs provided' }, { status: 400 });
     }
 
-    const result = await archiveEmailTemplates(ids, principal.legacyUserId);
+    const result = await trashEmailTemplates(ids, principal);
     return NextResponse.json({ success: true, ...result });
   } catch (err) {
     return errorResponse(err);

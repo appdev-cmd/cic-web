@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         status: body.status || 'draft',
         publishNow: Boolean(body.publishNow),
       },
-      principal.legacyUserId
+      principal
     );
 
     return NextResponse.json({ success: true, ...result }, { status: 201 });

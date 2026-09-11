@@ -30,7 +30,7 @@ export async function POST(
       // no body passed
     }
 
-    const result = await publishEmailTemplate(id, versionId, principal.legacyUserId);
+    const result = await publishEmailTemplate(id, versionId ? Number(versionId) : undefined, principal);
     return NextResponse.json({ success: true, ...result });
   } catch (err) {
     return errorResponse(err);

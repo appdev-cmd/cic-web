@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { normalizeServerError } from '@/server/errors';
 import { getEmailTemplateDetail } from '@/features/email-templates/server/queries';
-import { updateEmailTemplate, archiveEmailTemplates, deleteEmailTemplates } from '@/features/email-templates/server/mutations';
+import { updateEmailTemplate, trashEmailTemplates } from '@/features/email-templates/server/mutations';
 
 function errorResponse(error: unknown) {
   const normalized = normalizeServerError(error);
@@ -58,7 +58,7 @@ export async function PUT(
         status: body.status,
         publishNow: Boolean(body.publishNow),
       },
-      principal.legacyUserId
+      principal
     );
 
     return NextResponse.json({ success: true, ...result });
@@ -78,7 +78,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const result = await deleteEmailTemplates([id]);
+    const result = await trashEmailTemplates([id], principal);
 
     return NextResponse.json({ success: true, ...result });
   } catch (err) {

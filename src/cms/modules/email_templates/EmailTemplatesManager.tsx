@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Archive, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
+import { Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
+import { CmsDeleteConfirmModal } from '../../components/ui/CmsDeleteConfirmModal';
 import { EmailTemplatesFormView } from './EmailTemplatesFormView';
 import {
   EmailAudience,
@@ -48,6 +49,8 @@ export const EmailTemplatesManager: React.FC<Props> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ isOpen: boolean; items: EmailTemplate[] }>({ isOpen: false, items: [] });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (initialTemplates) {
@@ -168,78 +171,34 @@ export const EmailTemplatesManager: React.FC<Props> = ({
     }
   };
 
-  const archiveSelected = async () => {
-    if (!selected.length) return;
+  const handleConfirmTrash = async () => {
+    if (!deleteTarget.items.length) return;
     try {
-      setActionLoading(true);
-      const res = await fetch('/api/cms/email-templates/bulk-archive', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selected }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Lỗi lưu trữ');
-      }
-      setSelected([]);
-      notify('Đã lưu trữ các mẫu email đã chọn.');
-      onRefresh?.();
-    } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Lưu trữ thất bại'}`);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const deleteItem = async (item: EmailTemplate) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa mẫu email "${item.name}" không? Thao tác này sẽ xóa vĩnh viễn và không thể hoàn tác.`)) {
-      return;
-    }
-    try {
-      setActionLoading(true);
-      const res = await fetch(`/api/cms/email-templates/${item.id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Lỗi xóa mẫu email');
-      }
-      setTemplates((prev) => prev.filter((t) => t.id !== item.id));
-      setSelected((prev) => prev.filter((id) => id !== item.id));
-      notify(`Đã xóa mẫu email "${item.name}" thành công.`);
-      onRefresh?.();
-    } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Xóa mẫu email thất bại'}`);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const deleteSelected = async () => {
-    if (!selected.length) return;
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selected.length} mẫu email đã chọn không? Thao tác này sẽ xóa vĩnh viễn và không thể hoàn tác.`)) {
-      return;
-    }
-    try {
-      setActionLoading(true);
+      setIsDeleting(true);
+      const ids = deleteTarget.items.map((i) => i.id);
       const res = await fetch('/api/cms/email-templates/bulk-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selected }),
+        body: JSON.stringify({ ids }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Lỗi xóa mẫu email');
+        throw new Error(err.error || 'Lỗi chuyển mẫu email vào Thùng rác');
       }
-      const count = selected.length;
-      setTemplates((prev) => prev.filter((t) => !selected.includes(t.id)));
-      setSelected([]);
-      notify(`Đã xóa thành công ${count} mẫu email đã chọn.`);
+      const count = ids.length;
+      setTemplates((prev) => prev.filter((t) => !ids.includes(t.id)));
+      setSelected((prev) => prev.filter((id) => !ids.includes(id)));
+      setDeleteTarget({ isOpen: false, items: [] });
+      notify(
+        count === 1
+          ? `Đã chuyển mẫu email "${deleteTarget.items[0].name}" vào Thùng rác.`
+          : `Đã chuyển ${count} mẫu email vào Thùng rác.`
+      );
       onRefresh?.();
     } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Xóa mẫu email thất bại'}`);
+      notify(`Lỗi: ${err?.message || 'Thao tác thất bại'}`);
     } finally {
-      setActionLoading(false);
+      setIsDeleting(false);
     }
   };
 
@@ -334,11 +293,8 @@ export const EmailTemplatesManager: React.FC<Props> = ({
             className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 md:col-span-2"
           >
             <option value="all">Mọi trạng thái</option>
-            {Object.entries(TEMPLATE_STATUSES).map(([val, item]) => (
-              <option key={val} value={val}>
-                {item.label}
-              </option>
-            ))}
+            <option value="active">Đã xuất bản</option>
+            <option value="draft">Bản nháp</option>
           </select>
         </div>
 
@@ -347,25 +303,18 @@ export const EmailTemplatesManager: React.FC<Props> = ({
             <span>
               <strong>{selected.length}</strong> mẫu đã chọn
             </span>
-            <div className="flex items-center gap-2">
-              <CmsButton
-                size="sm"
-                onClick={archiveSelected}
-                disabled={actionLoading}
-                leadingIcon={<Archive />}
-              >
-                Lưu trữ
-              </CmsButton>
-              <CmsButton
-                size="sm"
-                variant="danger"
-                onClick={deleteSelected}
-                disabled={actionLoading}
-                leadingIcon={<Trash2 />}
-              >
-                Xóa ({selected.length})
-              </CmsButton>
-            </div>
+            <CmsButton
+              size="sm"
+              variant="danger"
+              onClick={() => {
+                const toDelete = templates.filter((t) => selected.includes(t.id));
+                setDeleteTarget({ isOpen: true, items: toDelete });
+              }}
+              disabled={actionLoading || isDeleting}
+              leadingIcon={<Trash2 />}
+            >
+              Chuyển vào thùng rác ({selected.length})
+            </CmsButton>
           </div>
         )}
       </section>
@@ -496,7 +445,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                             aria-label="Xóa"
                             title="Xóa mẫu email"
                             icon={<Trash2 />}
-                            onClick={() => deleteItem(item)}
+                            onClick={() => setDeleteTarget({ isOpen: true, items: [item] })}
                           />
                         </div>
                       </td>
@@ -608,6 +557,16 @@ export const EmailTemplatesManager: React.FC<Props> = ({
           </div>
         </div>
       )}
+
+      {/* Modal Xác nhận chuyển vào Thùng rác dùng chung */}
+      <CmsDeleteConfirmModal
+        isOpen={deleteTarget.isOpen}
+        itemName={deleteTarget.items.length === 1 ? deleteTarget.items[0].name : undefined}
+        items={deleteTarget.items.map((i) => ({ id: i.id, label: `${i.name} (${i.subject})` }))}
+        isPending={isDeleting}
+        onClose={() => setDeleteTarget({ isOpen: false, items: [] })}
+        onConfirm={handleConfirmTrash}
+      />
     </div>
   );
 };
