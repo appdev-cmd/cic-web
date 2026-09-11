@@ -215,3 +215,30 @@ export async function archiveEmailTemplates(ids: string[], actorId: number | nul
 
   return { updatedCount: res.count };
 }
+
+export async function deleteEmailTemplates(ids: string[]) {
+  const sql = getPostgresClient();
+  if (!ids.length) return { deletedCount: 0 };
+
+  // 1. Disconnect versions from templates
+  await sql`
+    UPDATE cic_email_templates
+    SET draft_version_id = NULL, active_version_id = NULL
+    WHERE id = ANY(${ids})
+  `;
+
+  // 2. Delete version rows
+  await sql`
+    DELETE FROM cic_email_template_versions
+    WHERE template_id = ANY(${ids})
+  `;
+
+  // 3. Delete template rows
+  const res = await sql`
+    DELETE FROM cic_email_templates
+    WHERE id = ANY(${ids})
+  `;
+
+  return { deletedCount: res.count };
+}
+

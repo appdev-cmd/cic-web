@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Archive, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, X } from 'lucide-react';
+import { Archive, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
@@ -191,6 +191,58 @@ export const EmailTemplatesManager: React.FC<Props> = ({
     }
   };
 
+  const deleteItem = async (item: EmailTemplate) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa mẫu email "${item.name}" không? Thao tác này sẽ xóa vĩnh viễn và không thể hoàn tác.`)) {
+      return;
+    }
+    try {
+      setActionLoading(true);
+      const res = await fetch(`/api/cms/email-templates/${item.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Lỗi xóa mẫu email');
+      }
+      setTemplates((prev) => prev.filter((t) => t.id !== item.id));
+      setSelected((prev) => prev.filter((id) => id !== item.id));
+      notify(`Đã xóa mẫu email "${item.name}" thành công.`);
+      onRefresh?.();
+    } catch (err: any) {
+      notify(`Lỗi: ${err?.message || 'Xóa mẫu email thất bại'}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const deleteSelected = async () => {
+    if (!selected.length) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selected.length} mẫu email đã chọn không? Thao tác này sẽ xóa vĩnh viễn và không thể hoàn tác.`)) {
+      return;
+    }
+    try {
+      setActionLoading(true);
+      const res = await fetch('/api/cms/email-templates/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selected }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Lỗi xóa mẫu email');
+      }
+      const count = selected.length;
+      setTemplates((prev) => prev.filter((t) => !selected.includes(t.id)));
+      setSelected([]);
+      notify(`Đã xóa thành công ${count} mẫu email đã chọn.`);
+      onRefresh?.();
+    } catch (err: any) {
+      notify(`Lỗi: ${err?.message || 'Xóa mẫu email thất bại'}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const allSelected = rows.length > 0 && rows.every((item) => selected.includes(item.id));
 
   if (view === 'form') {
@@ -295,14 +347,25 @@ export const EmailTemplatesManager: React.FC<Props> = ({
             <span>
               <strong>{selected.length}</strong> mẫu đã chọn
             </span>
-            <CmsButton
-              size="sm"
-              onClick={archiveSelected}
-              disabled={actionLoading}
-              leadingIcon={<Archive />}
-            >
-              Lưu trữ
-            </CmsButton>
+            <div className="flex items-center gap-2">
+              <CmsButton
+                size="sm"
+                onClick={archiveSelected}
+                disabled={actionLoading}
+                leadingIcon={<Archive />}
+              >
+                Lưu trữ
+              </CmsButton>
+              <CmsButton
+                size="sm"
+                variant="danger"
+                onClick={deleteSelected}
+                disabled={actionLoading}
+                leadingIcon={<Trash2 />}
+              >
+                Xóa ({selected.length})
+              </CmsButton>
+            </div>
           </div>
         )}
       </section>
@@ -427,6 +490,14 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                               onClick={() => publishItem(item)}
                             />
                           )}
+                          <CmsIconButton
+                            size="sm"
+                            variant="danger"
+                            aria-label="Xóa"
+                            title="Xóa mẫu email"
+                            icon={<Trash2 />}
+                            onClick={() => deleteItem(item)}
+                          />
                         </div>
                       </td>
                     </tr>
