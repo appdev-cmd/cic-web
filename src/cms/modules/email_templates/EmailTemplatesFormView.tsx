@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft, Eye, Save } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Eye, Save, Send, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import {
@@ -14,18 +14,31 @@ import {
   VARIABLE_GROUPS,
 } from './types';
 
-interface Props { templateToEdit: EmailTemplate | null; workspaceLocale: 'vi' | 'en'; onSave: (data: Partial<EmailTemplate>) => void; onCancel: () => void; }
+interface Props {
+  templateToEdit: EmailTemplate | null;
+  workspaceLocale: 'vi' | 'en';
+  onSave: (data: Partial<EmailTemplate> & { publishNow?: boolean }) => void;
+  onCancel: () => void;
+}
 
-const renderSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce((text, [token, sample]) => text.split(token).join(sample), value);
+const renderSample = (value: string) =>
+  Object.entries(SAMPLE_VALUES).reduce((text, [token, sample]) => text.split(token).join(sample), value);
 
-export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, workspaceLocale, onSave, onCancel }) => {
+export const EmailTemplatesFormView: React.FC<Props> = ({
+  templateToEdit,
+  workspaceLocale,
+  onSave,
+  onCancel,
+}) => {
   const [name, setName] = useState(templateToEdit?.name ?? '');
   const [event, setEvent] = useState<EmailEvent | string>(templateToEdit?.event ?? 'product_contact');
   const [audience, setAudience] = useState<EmailAudience>(templateToEdit?.audience ?? 'customer');
   const [subject, setSubject] = useState(templateToEdit?.subject ?? '');
   const [content, setContent] = useState(templateToEdit?.content ?? '');
-  const [status, setStatus] = useState<EmailTemplateStatus>(templateToEdit?.status ?? 'draft');
-  const [preview, setPreview] = useState(false);
+  const [status, setStatus] = useState<EmailTemplateStatus>(
+    templateToEdit?.status === 'active' ? 'active' : 'draft'
+  );
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   const tokens = useMemo(() => {
@@ -45,54 +58,197 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
     });
   };
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const validate = (): boolean => {
     const nextErrors: string[] = [];
-    if (!name.trim()) nextErrors.push('Nhập tên mẫu email.');
-    if (!subject.trim()) nextErrors.push('Nhập tiêu đề email.');
-    if (!content.trim()) nextErrors.push('Nhập nội dung email.');
+    if (!name.trim()) nextErrors.push('Vui lòng nhập tên mẫu email.');
+    if (!subject.trim()) nextErrors.push('Vui lòng nhập tiêu đề email.');
+    if (!content.trim()) nextErrors.push('Vui lòng nhập nội dung email.');
+
     const rawTokens = `${subject} ${content}`.match(/\{\{[^}]+\}\}/g) ?? [];
     const invalid = rawTokens.filter((token) => !tokens.includes(token));
-    if (invalid.length) nextErrors.push(`Biến không hợp lệ: ${[...new Set(invalid)].join(', ')}.`);
-    if (status === 'active') nextErrors.push('Không thể xuất bản trực tiếp trong form. Hãy lưu bản nháp, xem trước rồi xuất bản từ danh sách.');
+    if (invalid.length) {
+      nextErrors.push(`Biến không hợp lệ: ${[...new Set(invalid)].join(', ')}.`);
+    }
+
     setErrors(nextErrors);
-    if (nextErrors.length) return window.scrollTo({ top: 0, behavior: 'smooth' });
-    onSave({ name: name.trim(), event, audience, subject: subject.trim(), content: content.trim(), status, workspace: workspaceLocale });
+    if (nextErrors.length) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSaveDraft = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validate()) return;
+    onSave({
+      name: name.trim(),
+      event,
+      audience,
+      subject: subject.trim(),
+      content: content.trim(),
+      status: 'draft',
+      publishNow: false,
+      workspace: workspaceLocale,
+    });
+  };
+
+  const handlePublish = () => {
+    if (!validate()) return;
+    onSave({
+      name: name.trim(),
+      event,
+      audience,
+      subject: subject.trim(),
+      content: content.trim(),
+      status: 'active',
+      publishNow: true,
+      workspace: workspaceLocale,
+    });
   };
 
   return (
-    <form onSubmit={submit} className="space-y-5">
-      <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 xl:flex-row xl:items-center xl:justify-between">
+    <div className="space-y-5 pb-16">
+      {/* 1. STICKY HEADER ACTION BAR */}
+      <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
         <div className="flex items-center gap-3">
-          <CmsButton variant="ghost" size="sm" onClick={onCancel} leadingIcon={<ArrowLeft />}>Danh sách</CmsButton>
-          <div><h1 className="text-xl font-bold text-slate-900 dark:text-white">{templateToEdit ? 'Chỉnh sửa mẫu email' : 'Thêm mẫu email'}</h1><p className="text-xs text-slate-500">Workspace {workspaceLocale.toUpperCase()} · Lưu bản nháp và xem trước trước khi xuất bản.</p></div>
-        </div>
-        <div className="flex flex-wrap gap-2"><CmsButton size="sm" onClick={() => setPreview(!preview)} leadingIcon={<Eye />}>Xem trước</CmsButton><CmsButton type="submit" size="sm" variant="primary" leadingIcon={<Save />}>Lưu bản nháp</CmsButton></div>
-      </div>
-
-      {errors.length > 0 && <div role="alert" className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"><AlertCircle className="size-4 shrink-0"/><ul className="list-disc pl-4">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Tên mẫu <span className="text-red-500">*</span><input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" /></label>
-            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Trạng thái<select value={status} onChange={(e) => setStatus(e.target.value as EmailTemplateStatus)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800"><option value="draft">Bản nháp</option><option value="inactive">Ngừng sử dụng</option>{templateToEdit?.status === 'archived' && <option value="archived">Đã lưu trữ</option>}</select></label>
-            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Sự kiện<select value={event} onChange={(e) => setEvent(e.target.value as EmailEvent)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">{EMAIL_EVENTS.map((item) => <option key={item.value} value={item.value}>{workspaceLocale === 'vi' ? item.label : item.labelEn}</option>)}</select></label>
-            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Đối tượng nhận<select value={audience} onChange={(e) => setAudience(e.target.value as EmailAudience)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800"><option value="customer">Khách hàng</option><option value="internal">Nội bộ</option></select></label>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+            title="Quay lại danh sách"
+            aria-label="Quay lại danh sách"
+          >
+            <ArrowLeft className="size-5" />
+          </button>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Mẫu Email</p>
+            <h1 className="text-base font-black text-slate-900 dark:text-white">
+              {templateToEdit ? 'Chỉnh sửa mẫu email' : 'Thêm mới mẫu email'}
+            </h1>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <CmsButton
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => setPreviewOpen(true)}
+            leadingIcon={<Eye />}
+          >
+            Xem trước
+          </CmsButton>
+          <CmsButton
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => handleSaveDraft()}
+            leadingIcon={<Save />}
+          >
+            Lưu nháp
+          </CmsButton>
+          <CmsButton
+            type="button"
+            size="sm"
+            variant="primary"
+            onClick={handlePublish}
+            leadingIcon={<Send />}
+          >
+            Xuất bản
+          </CmsButton>
+        </div>
+      </header>
+
+      {/* Errors Alert */}
+      {errors.length > 0 && (
+        <div
+          role="alert"
+          className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"
+        >
+          <AlertCircle className="size-4 shrink-0" />
+          <ul className="list-disc pl-4 space-y-1">
+            {errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 2. FORM BODY */}
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Main Content Area */}
+        <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Tên mẫu email <span className="text-red-500">*</span>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="VD: Xác nhận đơn hàng, Báo giá sản phẩm..."
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </label>
+
+            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Trạng thái
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as EmailTemplateStatus)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="draft">Bản nháp</option>
+                <option value="active">Đã xuất bản</option>
+              </select>
+            </label>
+
+            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Sự kiện kích hoạt
+              <select
+                value={event}
+                onChange={(e) => setEvent(e.target.value as EmailEvent)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                {EMAIL_EVENTS.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {workspaceLocale === 'vi' ? item.label : item.labelEn}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Đối tượng nhận email
+              <select
+                value={audience}
+                onChange={(e) => setAudience(e.target.value as EmailAudience)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="customer">Khách hàng</option>
+                <option value="internal">Nội bộ (Nhân viên/Admin)</option>
+              </select>
+            </label>
+          </div>
+
           <label className="block space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
-            Tiêu đề email <span className="text-red-500">*</span>
+            Tiêu đề email (Subject) <span className="text-red-500">*</span>
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              placeholder="VD: [CIC] Xác nhận đơn hàng #{{order.code}} thành công"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
           </label>
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Nội dung email <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Nội dung email <span className="text-red-500">*</span>
+              </label>
+              <span className="text-[11px] text-slate-400">
+                Hỗ trợ RichText và nút <strong>Source</strong> để biên tập HTML trực tiếp
+              </span>
+            </div>
 
             <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
               <RichTextEditor
@@ -102,19 +258,86 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
               />
             </div>
           </div>
-
-          <p className="text-xs text-slate-500">
-            Mẫu email quản lý nội dung gửi tự động. Bạn có thể định dạng văn bản, chèn bảng, font chữ, màu sắc trực quan, hoặc bấm nút <strong>&quot;Source&quot;</strong> trên thanh công cụ CKEditor để xem và sửa trực tiếp mã HTML.
-          </p>
         </section>
 
-        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 xl:sticky xl:top-20">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white">Chèn biến</h2><p className="mt-1 text-xs text-slate-500">Chỉ hiển thị biến hợp lệ với sự kiện và đối tượng nhận.</p>
-          <div className="mt-4 flex max-h-[460px] flex-wrap gap-2 overflow-y-auto">{tokens.map((token) => <button key={token} type="button" onClick={() => insertToken(token)} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 font-mono text-[11px] text-slate-700 hover:border-orange-300 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">{token}</button>)}</div>
+        {/* Sidebar: Variable Token Palette */}
+        <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 xl:sticky xl:top-20">
+          <div className="border-b border-slate-100 pb-3 dark:border-slate-800">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Danh sách biến nội dung</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Bấm vào biến để chèn vào vị trí cuối văn bản:
+            </p>
+          </div>
+
+          <div className="mt-4 flex max-h-[500px] flex-wrap gap-2 overflow-y-auto pr-1">
+            {tokens.map((token) => (
+              <button
+                key={token}
+                type="button"
+                onClick={() => insertToken(token)}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-[11px] font-semibold text-slate-700 transition-colors hover:border-orange-400 hover:bg-orange-50 hover:text-orange-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-orange-500 dark:hover:bg-orange-950/30"
+                title={`Chèn biến ${token}`}
+              >
+                {token}
+              </button>
+            ))}
+          </div>
         </aside>
       </div>
 
-      {preview && <section className="rounded-xl border border-orange-200 bg-white p-5 shadow-xs dark:border-orange-900 dark:bg-slate-900"><div className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800"><p className="text-[11px] font-bold uppercase text-slate-400">Xem trước bằng dữ liệu mẫu</p><h2 className="mt-1 text-base font-bold text-slate-900 dark:text-white">{renderSample(subject)}</h2></div><div className="whitespace-pre-wrap text-sm leading-7 text-slate-700 dark:text-slate-300">{renderSample(content)}</div></section>}
-    </form>
+      {/* 3. MODAL XEM TRƯỚC VĂN BẢN VỚI DỮ LIỆU MẪU */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="email-preview-modal-title"
+        >
+          <div className="max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <header className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white/95 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-orange-600">
+                  Xem trước nội dung gửi
+                </p>
+                <h2 id="email-preview-modal-title" className="mt-1 text-base font-bold text-slate-900 dark:text-white">
+                  {renderSample(subject) || 'Chưa có tiêu đề'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white"
+                aria-label="Đóng xem trước"
+              >
+                <X className="size-5" />
+              </button>
+            </header>
+
+            <div className="p-6">
+              {/<[a-z][\s\S]*>/i.test(content) ? (
+                <div
+                  className="prose prose-sm max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: renderSample(content) }}
+                />
+              ) : (
+                <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+                  {renderSample(content) || 'Chưa có nội dung'}
+                </div>
+              )}
+            </div>
+
+            <footer className="flex justify-end border-t border-slate-100 p-4 dark:border-slate-800">
+              <CmsButton
+                size="sm"
+                variant="secondary"
+                onClick={() => setPreviewOpen(false)}
+              >
+                Đóng
+              </CmsButton>
+            </footer>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };

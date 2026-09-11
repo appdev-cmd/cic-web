@@ -1,6 +1,6 @@
 export type EmailWorkspace = 'vi' | 'en';
 export type EmailAudience = 'customer' | 'internal';
-export type EmailTemplateStatus = 'draft' | 'active' | 'inactive' | 'archived';
+export type EmailTemplateStatus = 'draft' | 'active';
 
 export type EmailEvent =
   | 'product_contact'

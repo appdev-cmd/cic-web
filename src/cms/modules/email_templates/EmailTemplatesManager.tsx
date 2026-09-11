@@ -96,9 +96,10 @@ export const EmailTemplatesManager: React.FC<Props> = ({
     }
   }, [usageTemplate]);
 
-  const save = async (formData: Partial<EmailTemplate>) => {
+  const save = async (formData: Partial<EmailTemplate> & { publishNow?: boolean }) => {
     try {
       setActionLoading(true);
+      const isPublished = Boolean(formData.publishNow || formData.status === 'active');
       if (editing) {
         const res = await fetch(`/api/cms/email-templates/${editing.id}`, {
           method: 'PUT',
@@ -109,7 +110,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error || 'Lỗi lưu mẫu email');
         }
-        notify('Đã lưu phiên bản mới của mẫu email.');
+        notify(isPublished ? 'Đã lưu và xuất bản mẫu email thành công.' : 'Đã lưu bản nháp mẫu email.');
       } else {
         const res = await fetch('/api/cms/email-templates', {
           method: 'POST',
@@ -120,7 +121,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error || 'Lỗi tạo mẫu email');
         }
-        notify('Đã tạo mẫu email thành công.');
+        notify(isPublished ? 'Đã tạo và xuất bản mẫu email thành công.' : 'Đã tạo bản nháp mẫu email.');
       }
       setEditing(null);
       setView('list');
