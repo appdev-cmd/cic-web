@@ -32,25 +32,26 @@
     "verify:user-role-trash-roundtrip": "node --import tsx --conditions=react-server scripts/verify-user-role-trash-roundtrip.ts",
     "db:apply-media-foundation": "node scripts/apply-media-foundation.mjs",
     "verify:media-foundation": "node scripts/verify-media-foundation.mjs",
-    "verify:media-roundtrip": "node --import tsx --conditions=react-server scripts/verify-media-roundtrip.ts"
-    ,"verify:product-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-category-roundtrip.ts"
-    ,"db:apply-product-categories": "node --env-file=.env.local scripts/apply-product-categories-hardening.mjs"
-    ,"verify:product-brand-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-brand-roundtrip.ts"
-    ,"db:apply-product-brands": "node --env-file=.env.local scripts/apply-product-brands-hardening.mjs"
-    ,"db:apply-product-applications": "node --env-file=.env.local scripts/apply-product-applications-hardening.mjs"
-    ,"verify:product-application-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-application-roundtrip.ts"
-    ,"verify:product-application-foundation": "node --env-file=.env.local scripts/verify-product-application-foundation.mjs"
-    ,"db:apply-product-types": "node --env-file=.env.local scripts/apply-product-types-hardening.mjs"
-    ,"verify:product-type-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-type-roundtrip.ts"
-    ,"db:apply-sales-owners": "node --env-file=.env.local scripts/apply-sales-owners-hardening.mjs"
-    ,"verify:sales-owner-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-sales-owner-roundtrip.ts"
-    ,"db:apply-products": "node --env-file=.env.local scripts/apply-products-hardening.mjs"
-    ,"verify:product-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-roundtrip.ts"
-    ,"verify:product-legacy-media": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-legacy-media.ts"
-    ,"verify:news-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-category-roundtrip.ts"
-    ,"verify:news-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-roundtrip.ts"
-    ,"db:apply-news": "node --env-file=.env.local scripts/apply-news-hardening.mjs"
-    ,"verify:news-hardening": "node --env-file=.env.local scripts/verify-news-hardening.mjs"
+    "verify:media-roundtrip": "node --import tsx --conditions=react-server scripts/verify-media-roundtrip.ts",
+    "verify:product-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-category-roundtrip.ts",
+    "db:apply-product-categories": "node --env-file=.env.local scripts/apply-product-categories-hardening.mjs",
+    "verify:product-brand-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-brand-roundtrip.ts",
+    "db:apply-product-brands": "node --env-file=.env.local scripts/apply-product-brands-hardening.mjs",
+    "db:apply-product-applications": "node --env-file=.env.local scripts/apply-product-applications-hardening.mjs",
+    "verify:product-application-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-application-roundtrip.ts",
+    "verify:product-application-foundation": "node --env-file=.env.local scripts/verify-product-application-foundation.mjs",
+    "db:apply-product-types": "node --env-file=.env.local scripts/apply-product-types-hardening.mjs",
+    "verify:product-type-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-type-roundtrip.ts",
+    "db:apply-sales-owners": "node --env-file=.env.local scripts/apply-sales-owners-hardening.mjs",
+    "verify:sales-owner-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-sales-owner-roundtrip.ts",
+    "db:apply-products": "node --env-file=.env.local scripts/apply-products-hardening.mjs",
+    "verify:product-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-roundtrip.ts",
+    "verify:product-legacy-media": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-legacy-media.ts",
+    "verify:news-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-category-roundtrip.ts",
+    "verify:news-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-roundtrip.ts",
+    "db:apply-news": "node --env-file=.env.local scripts/apply-news-hardening.mjs",
+    "verify:news-hardening": "node --env-file=.env.local scripts/verify-news-hardening.mjs",
+    "verify:email-templates": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-email-templates.ts"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.2.0",
@@ -63,6 +64,7 @@
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "next": "^16.3.3",
+    "nodemailer": "^10.0.3",
     "postgres": "^3.4.7",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
@@ -74,6 +76,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.14.0",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "autoprefixer": "^10.4.21",

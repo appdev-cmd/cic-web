@@ -182,6 +182,16 @@ export function isNewsCategoryCmsPath(path: string): boolean {
   return normalizedPath === '/cms/news/categories' || normalizedPath.startsWith('/cms/news/categories/');
 }
 
+export function isEmailTemplatesCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return (
+    normalizedPath === '/cms/email-templates' ||
+    normalizedPath === '/cms/email_templates' ||
+    normalizedPath.startsWith('/cms/email-templates/') ||
+    normalizedPath.startsWith('/cms/email_templates/')
+  );
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }

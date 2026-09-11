@@ -19,7 +19,7 @@ const renderSample = (value: string) => Object.entries(SAMPLE_VALUES).reduce((te
 
 export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, workspaceLocale, onSave, onCancel }) => {
   const [name, setName] = useState(templateToEdit?.name ?? '');
-  const [event, setEvent] = useState<EmailEvent>(templateToEdit?.event ?? 'product_contact');
+  const [event, setEvent] = useState<EmailEvent | string>(templateToEdit?.event ?? 'product_contact');
   const [audience, setAudience] = useState<EmailAudience>(templateToEdit?.audience ?? 'customer');
   const [subject, setSubject] = useState(templateToEdit?.subject ?? '');
   const [content, setContent] = useState(templateToEdit?.content ?? '');

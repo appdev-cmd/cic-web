@@ -1,4 +1,4 @@
-import { isNewsCategoryCmsPath, isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, resolveCmsModule } from '@/cms/routing';
+import { isEmailTemplatesCmsPath, isNewsCategoryCmsPath, isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, resolveCmsModule } from '@/cms/routing';
 import { NewsCategoriesRoute } from '@/cms/modules/news_categories/NewsCategoriesRoute';
 import { ProductApplicationsRoute } from '@/cms/modules/product_applications/ProductApplicationsRoute';
 import { ProductBrandsRoute } from '@/cms/modules/product_brands/ProductBrandsRoute';
@@ -10,6 +10,7 @@ import { NewsRoute } from '@/cms/modules/news/NewsRoute';
 import { ServicesRoute } from '@/cms/modules/services/ServicesRoute';
 import { EventsRoute } from '@/cms/modules/events/EventsRoute';
 import { ProjectsRoute } from '@/cms/modules/projects/ProjectsRoute';
+import { EmailTemplatesRoute } from '@/cms/modules/email_templates/EmailTemplatesRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
@@ -27,6 +28,8 @@ export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...pa
     ? <EventsRoute />
     : (cmsPath === '/cms/projects' || cmsPath.startsWith('/cms/projects/'))
     ? <ProjectsRoute />
+    : isEmailTemplatesCmsPath(cmsPath)
+    ? <EmailTemplatesRoute />
     : isProductCategoryCmsPath(cmsPath)
     ? <ProductCategoriesRoute />
     : isProductBrandCmsPath(cmsPath)

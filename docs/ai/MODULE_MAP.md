@@ -54,7 +54,7 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 | `[A]` | CTA | CTA lifecycle, placement, used-by | auth/RBAC; CTA schema; reference registry | Forms, Static Pages, Media, audit | Query boundary có; CMS còn demo source |
 | `[A]` | Forms/Submissions | form builder, validation, submissions | auth/RBAC; form/field schema; validation; submission persistence | CTA, Customer Requests, Email, audit | Query boundary có; builder/submission integrations chưa đóng |
 | `[A]` | Customer Requests | lifecycle, notes, assignment, history | auth/RBAC; request/state/note/event schema; Contacts/Forms source | email templates/delivery, audit, SLA | Query boundary có; CMS flow vẫn demo source |
-| `[A]` | Email Templates | versioned template/activation/preview | auth/RBAC; approved template/version schema | forms/requests/events, delivery provider, audit | Query boundary có; CMS vẫn demo source |
+| `[I]` | Email Templates | versioned template/activation/preview | auth/RBAC; approved template/version schema | forms/requests/events, delivery provider, audit | Core DB-backed: seed 58 templates từ legacy `cic_email` & `cic_email_en` + bộ chuẩn, CMS kết nối API thật, CRUD/versioning/publish/duplicate/archive, preview sample data, usage lookup; Nodemailer transporter & token dispatcher (`lib/mail.ts`). Pending: Trigger tự động khi Form/CTA submit DB thật và SMTP production credentials. |
 
 ### Audit Danh mục tin tức — 2026-09-10
 
@@ -104,6 +104,25 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 - **Responsive:** `KEEP` reference hierarchy, desktop grids and image ratios; `ADAPT` toolbar/table, list/sidebar and detail/related grids; `FIX` long text, local table overflow, sticky overlap, modal/drawer `dvh`/focus/Escape, touch targets and mobile form stacking; `DO_NOT_COPY` hover-only actions, full-screen CMS overlays outside the content shell and simulated submit/progress behavior.
 - **i18n:** `BILINGUAL_CONTENT`; VI/EN tables and Product junctions are independent. No translation table or automatic fallback is justified.
 - **Conclusion:** module remains `[A]`; audit only, no implementation status claimed. Draft/Published policy and hard-data prerequisites are now defined. `READY_TO_IMPLEMENT`.
+
+### Audit & Implementation Mẫu email — 2026-09-11
+
+- **Scope & Bề mặt:** CMS surface tại `/cms/email-templates` (và alias `/cms/email_templates`), không có public surface trực tiếp (là transactional & messaging backend capability phục vụ Form/CTA/Auth/Orders). Quản lý danh sách theo workspace (`vi`/`en`), tìm kiếm, bộ lọc Sự kiện/Đối tượng nhận/Trạng thái, tạo mới, chỉnh sửa nội dung, chèn biến động (tokens), lưu bản nháp tạo version mới, xuất bản (publish), nhân bản (duplicate), lưu trữ (archive đơn/hàng loạt), xem trước dữ liệu mẫu (preview modal) và tra cứu nơi sử dụng (usage modal).
+- **Database & Data Seeding:**
+  - Production authority: Bảng PostgreSQL `cic_email_templates` và `cic_email_template_versions`.
+  - Giữ nguyên các bảng legacy `cic_email` và `cic_email_en` (13 templates tiếng Việt, 13 templates tiếng Anh).
+  - Đã seed thành công 58 templates vào database: Nạp toàn bộ template thực tế từ `cic_email` và `cic_email_en`, tự động chuẩn hóa các token cũ `{name}`, `{name1}`, `{link1}` sang `{{customer.full_name}}`, `{{product.name}}`, `{{document.download_url}}`, kèm theo 20 template chuẩn cho cả 5 sự kiện sản phẩm (`product_contact`, `product_download`, `product_purchase`, `product_quote`, `product_hardlock`), xác thực kích hoạt tài khoản (`auth_activate`), khôi phục OTP (`auth_forgot_password`), xác nhận đơn hàng (`order_confirmation`), thanh toán thành công (`order_payment_success`) cho cả khách hàng và nội bộ trên 2 workspace `vi` và `en`.
+- **Hạ tầng Mail & Token Engine:**
+  - Token engine: `src/lib/email/tokens.ts` giải mã cả định dạng mới `{{variable.field}}` và định dạng cũ `{field}`.
+  - Transporter: `src/lib/email/transporter.ts` (kèm alias `src/lib/mail.ts`) sử dụng Nodemailer, hỗ trợ SMTP an toàn hoặc simulated transport (tránh crash khi dev/local chưa có cấu hình SMTP).
+  - Dispatcher: `src/lib/email/dispatcher.ts` tra cứu template active theo `(workspace, eventKey, audience)` từ DB, render tokens và gửi mail.
+- **CMS API & UI:**
+  - API Routes: `/api/cms/email-templates` (GET list, POST create), `.../[id]` (GET detail, PUT update version, DELETE archive), `.../[id]/publish` (POST publish), `.../[id]/duplicate` (POST duplicate), `.../[id]/usage` (GET lookup), `.../bulk-archive` (POST bulk archive).
+  - Route CMS: `EmailTemplatesRoute` gắn vào `/cms/email-templates` trong `src/app/cms/[...path]/page.tsx`, hỗ trợ chuyển nhanh Workspace VI/EN, kết nối trực tiếp API thật.
+- **Kiểm thử & Roundtrip:**
+  - Verification test `npm run verify:email-templates` pass 100%: CRUD, tạo version, update tăng version number, publish active version, nhân bản, token interpolation và simulated send email.
+  - TypeScript build pass 100% (`typecheck:foundation` & `typecheck:legacy`).
+- **Kết luận:** Module đạt trạng thái `[I]` (Core DB-backed hoàn thành đầy đủ; Pending integration: kích hoạt tự động gửi mail khi form/CTA submit trên production database và cấu hình SMTP credentials môi trường production).
 
 ### Audit & Implementation Dự án — 2026-09-11
 
