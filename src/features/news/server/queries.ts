@@ -92,6 +92,15 @@ export async function listPublishedNews(
   };
 }
 
+export async function listAllPublishedNews(locale: NewsLocale = 'vi') {
+  const t = table(locale),
+    sql = getPostgresClient();
+  const rows = await sql.unsafe(
+    `SELECT ${listProjection} FROM ${t.news} n LEFT JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC`
+  );
+  return rows.map((row) => map(row as Row));
+}
+
 export async function listPublishedNewsPlacement(locale: NewsLocale, placement: 'hot' | 'home') {
   const t = table(locale),
     column = placement === 'hot' ? 'is_hot' : 'show_in_homepage',

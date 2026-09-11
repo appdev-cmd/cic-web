@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/shared/types';
-import type { DetailedNewsItem, PublicNewsCategory } from '../features/news/types';
+import type { DetailedNewsItem, PublicNewsCategoryItem } from '../features/news/types';
 import { NewsListView } from '../features/news/components/list/NewsListView';
 import { NewsDetailView } from '../features/news/components/detail/NewsDetailView';
 
@@ -17,6 +17,7 @@ export interface DatabaseNewsItem {
   fileUpload: string | null;
   date: string;
   views: number;
+  categoryId?: string | null;
   category: string;
   categoryName: string;
   tags: string[];
@@ -26,16 +27,20 @@ export interface DatabaseNewsItem {
   seoDescription: string | null;
   seoKeyword: string | null;
   isHot: boolean;
+  showInHomepage?: boolean;
 }
 
-const categoryFor = (alias: string): PublicNewsCategory => {
-  const value = alias.toLowerCase();
-  if (value.includes('co-dong') || value.includes('bao-cao') || value.includes('dieu-le')) return 'shareholder';
-  if (value.includes('tuyen-dung')) return 'recruitment';
-  if (value.includes('khuyen-mai')) return 'promotion';
-  if (value.includes('quoc-te')) return 'international';
-  if (value.includes('chuyen-nganh') || value.includes('phan-mem')) return 'specialty';
-  return 'company';
+const isShareholderCategory = (alias: string, name?: string) => {
+  const a = (alias || '').toLowerCase();
+  const n = (name || '').toLowerCase();
+  return (
+    a.includes('co-dong') ||
+    a.includes('bao-cao') ||
+    a.includes('dieu-le') ||
+    n.includes('cổ đông') ||
+    n.includes('báo cáo') ||
+    n.includes('điều lệ')
+  );
 };
 
 const videoFor = (html: string | null) => {
@@ -50,10 +55,12 @@ const shortDate = (value: string) => {
 };
 
 const mapItem = (item: DatabaseNewsItem): DetailedNewsItem => {
-  const category = categoryFor(item.category);
+  const isShareholder = isShareholderCategory(item.category, item.categoryName);
   return {
     id: item.id,
-    category,
+    category: item.category || 'tin-cong-ty',
+    categoryName: item.categoryName || 'Tin tức',
+    categoryId: item.categoryId ?? undefined,
     title: item.title,
     date: shortDate(item.date),
     shortDesc: item.summary ?? '',
@@ -70,16 +77,17 @@ const mapItem = (item: DatabaseNewsItem): DetailedNewsItem => {
     seoDesc: item.seoDescription ?? undefined,
     seoKeywords: item.seoKeyword?.split(',').map((value) => value.trim()).filter(Boolean),
     isHot: item.isHot,
-    docType: category === 'shareholder' ? item.categoryName : undefined,
-    year: category === 'shareholder' && item.date ? new Date(item.date).getFullYear() : undefined,
-    pdfUrl: category === 'shareholder' ? item.fileUpload ?? undefined : undefined,
+    docType: isShareholder ? item.categoryName : undefined,
+    year: isShareholder && item.date ? new Date(item.date).getFullYear() : undefined,
+    pdfUrl: isShareholder ? item.fileUpload ?? undefined : undefined,
   };
 };
 
 type RuntimeProduct = Product & { slug: string };
 
-interface NewsRuntimeViewProps {
+export interface NewsRuntimeViewProps {
   items: DatabaseNewsItem[];
+  categories?: PublicNewsCategoryItem[];
   products: RuntimeProduct[];
   initialSlug?: string;
   initialCategory?: string | null;
@@ -87,6 +95,7 @@ interface NewsRuntimeViewProps {
 
 export function NewsRuntimeView({
   items,
+  categories = [],
   products,
   initialSlug,
   initialCategory,
@@ -128,7 +137,8 @@ export function NewsRuntimeView({
   return (
     <NewsListView
       items={mappedItems}
-      initialCategory={initialCategory ? categoryFor(initialCategory) : 'all'}
+      categories={categories}
+      initialCategory={initialCategory || 'all'}
       onSelectNews={(id: string) => {
         const target = items.find((item) => item.id === id);
         if (target) router.push(`/news/${target.slug}`);

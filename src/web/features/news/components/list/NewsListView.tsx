@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import type { PublicNewsItem } from '../../types';
+import type { PublicNewsCategoryItem, PublicNewsItem } from '../../types';
 import { useNewsFilters } from '../../hooks/useNewsFilters';
 import { NewsTicker } from './NewsTicker';
 import { NewsHeroSection } from './NewsHeroSection';
@@ -14,6 +14,7 @@ import { NewsCtaSection } from '../shared/NewsCtaSection';
 
 export interface NewsListViewProps {
   items: PublicNewsItem[];
+  categories?: PublicNewsCategoryItem[];
   initialCategory?: NewsCategoryTabId | null;
   onSelectNews: (id: string) => void;
   onOpenConsultation?: () => void;
@@ -21,6 +22,7 @@ export interface NewsListViewProps {
 
 export function NewsListView({
   items,
+  categories = [],
   initialCategory = 'all',
   onSelectNews,
   onOpenConsultation,
@@ -30,24 +32,31 @@ export function NewsListView({
 
   const filters = useNewsFilters({
     items,
+    categories,
     initialCategory: initialCategory || 'all',
   });
 
+  const isNotShareholder = (item: PublicNewsItem) =>
+    item.category !== 'shareholder' &&
+    item.category !== 'quan-he-co-dong' &&
+    item.categoryId !== '11' &&
+    item.parentCategoryId !== '11';
+
   // Hot news ticker list
   const breakingNewsList = useMemo(() => {
-    const hot = items.filter((item) => item.isHot && item.category !== 'shareholder');
+    const hot = items.filter((item) => item.isHot && isNotShareholder(item));
     if (hot.length > 0) return hot.slice(0, 6);
-    return items.filter((item) => item.category !== 'shareholder').slice(0, 6);
+    return items.filter(isNotShareholder).slice(0, 6);
   }, [items]);
 
   // Hero section items: Ưu tiên tối đa 4 bài được đánh dấu nổi bật (isHot) mới nhất, fallback bài mới nhất
   const highlightedNews = useMemo(() => {
-    const hotArticles = items.filter((item) => item.isHot && item.category !== 'shareholder');
+    const hotArticles = items.filter((item) => item.isHot && isNotShareholder(item));
     if (hotArticles.length >= 4) {
       return hotArticles.slice(0, 4);
     }
     const hotIds = new Set(hotArticles.map((item) => item.id));
-    const nonHotArticles = items.filter((item) => !hotIds.has(item.id) && item.category !== 'shareholder');
+    const nonHotArticles = items.filter((item) => !hotIds.has(item.id) && isNotShareholder(item));
     return [...hotArticles, ...nonHotArticles].slice(0, 4);
   }, [items]);
 
@@ -69,12 +78,13 @@ export function NewsListView({
   };
 
   const getTypeSimpleText = (item: PublicNewsItem): string => {
-    if (item.category === 'company') return item.subType || 'Tin CIC';
-    if (item.category === 'specialty') return item.subType || 'Tin chuyên ngành';
+    if (item.categoryName) return item.categoryName;
+    if (item.category === 'company' || item.category === 'tin-cong-ty') return item.subType || 'Tin công ty';
+    if (item.category === 'specialty' || item.category === 'tin-chuyen-nganh') return item.subType || 'Tin chuyên ngành';
     if (item.category === 'international') return item.subType || 'Hợp tác quốc tế';
-    if (item.category === 'recruitment') return item.department || 'Tuyển dụng';
-    if (item.category === 'promotion') return 'Khuyến mại';
-    if (item.category === 'shareholder') return item.docType || 'Quan hệ cổ đông';
+    if (item.category === 'recruitment' || item.category === 'tin-tuyen-dung') return item.department || 'Tuyển dụng';
+    if (item.category === 'promotion' || item.category === 'tin-khuyen-mai') return 'Khuyến mại';
+    if (item.category === 'shareholder' || item.category === 'quan-he-co-dong') return item.docType || 'Quan hệ cổ đông';
     return 'Tin tức';
   };
 
@@ -109,6 +119,7 @@ export function NewsListView({
 
           {/* CATEGORY SELECTOR PILL TABS */}
           <NewsCategoryTabs
+            categories={categories}
             activeCategory={filters.activeCategory}
             onSelectCategory={filters.setActiveCategory}
             shareholderDocType={filters.shareholderDocType}
@@ -143,7 +154,7 @@ export function NewsListView({
 
           {/* MAIN NEWS CONTENT CONTAINER */}
           <div className="pt-2">
-            {filters.activeCategory === 'shareholder' ? (
+            {filters.isShareholderActive ? (
               <ShareholderDocumentList
                 items={filters.paginatedNews}
                 onSelectNews={onSelectNews}

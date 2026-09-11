@@ -1,16 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { PublicNewsItem } from '../types';
-import type { NewsCategoryTabId } from '../components/list/NewsCategoryTabs';
+import type { PublicNewsCategoryItem, PublicNewsItem } from '../types';
 
 interface UseNewsFiltersOptions {
   items: PublicNewsItem[];
-  initialCategory?: NewsCategoryTabId;
+  categories?: PublicNewsCategoryItem[];
+  initialCategory?: string;
 }
 
-export function useNewsFilters({ items, initialCategory = 'all' }: UseNewsFiltersOptions) {
-  const [activeCategory, setActiveCategory] = useState<NewsCategoryTabId>(initialCategory);
+export function useNewsFilters({ items, categories = [], initialCategory = 'all' }: UseNewsFiltersOptions) {
+  const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Category-specific sub-filters
@@ -68,34 +68,72 @@ export function useNewsFilters({ items, initialCategory = 'all' }: UseNewsFilter
     setCurrentPage(1);
   };
 
-  const handleSelectCategory = (cat: NewsCategoryTabId) => {
+  const handleSelectCategory = (cat: string) => {
     setActiveCategory(cat);
+    setShareholderDocType('Tất cả tài liệu');
     setCurrentPage(1);
   };
+
+  const isShareholderActive = useMemo(() => {
+    const act = (activeCategory || '').toLowerCase();
+    return (
+      act === 'shareholder' ||
+      act === 'quan-he-co-dong' ||
+      act === '11' ||
+      act.includes('co-dong')
+    );
+  }, [activeCategory]);
 
   const filteredNews = useMemo(() => {
     return items.filter((item) => {
       // Category filter
-      if (activeCategory !== 'all' && item.category !== activeCategory) {
-        return false;
+      if (activeCategory !== 'all') {
+        const selectedCat = categories.find(
+          (c) => c.alias === activeCategory || c.id === activeCategory
+        );
+        const childCats = categories.filter(
+          (c) => selectedCat && c.parentId === selectedCat.id
+        );
+        const childIds = childCats.map((c) => c.id);
+        const childAliases = childCats.map((c) => c.alias);
+
+        const isDirectMatch =
+          item.category === activeCategory ||
+          item.categoryId === activeCategory ||
+          (selectedCat && (item.category === selectedCat.alias || item.categoryId === selectedCat.id));
+
+        const isChildMatch =
+          childIds.includes(item.categoryId ?? '') ||
+          childAliases.includes(item.category);
+
+        const isLegacyMatch =
+          (activeCategory === 'company' && (item.category === 'tin-cong-ty' || item.categoryId === '7')) ||
+          (activeCategory === 'specialty' && (item.category === 'tin-chuyen-nganh' || item.categoryId === '8')) ||
+          (activeCategory === 'promotion' && (item.category === 'tin-khuyen-mai' || item.categoryId === '9')) ||
+          (activeCategory === 'recruitment' && (item.category === 'tin-tuyen-dung' || item.categoryId === '10')) ||
+          (activeCategory === 'shareholder' && (item.category === 'quan-he-co-dong' || item.categoryId === '11' || isChildMatch));
+
+        if (!isDirectMatch && !isChildMatch && !isLegacyMatch) {
+          return false;
+        }
       }
 
       // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchTitle = item.title.toLowerCase().includes(q);
-        const matchDesc = item.shortDesc.toLowerCase().includes(q);
+        const matchDesc = (item.shortDesc || '').toLowerCase().includes(q);
         const matchTags = item.tags?.some((t) => t.toLowerCase().includes(q));
         if (!matchTitle && !matchDesc && !matchTags) return false;
       }
 
       // Company Sub-filter
-      if (activeCategory === 'company' && companySubType !== 'Tất cả') {
+      if ((activeCategory === 'company' || activeCategory === 'tin-cong-ty') && companySubType !== 'Tất cả') {
         if (item.subType !== companySubType) return false;
       }
 
       // Specialty Sub-filter
-      if (activeCategory === 'specialty' && specialtySubType !== 'Tất cả') {
+      if ((activeCategory === 'specialty' || activeCategory === 'tin-chuyen-nganh') && specialtySubType !== 'Tất cả') {
         if (item.subType !== specialtySubType) return false;
       }
 
@@ -105,23 +143,28 @@ export function useNewsFilters({ items, initialCategory = 'all' }: UseNewsFilter
       }
 
       // Recruitment Sub-filters
-      if (activeCategory === 'recruitment') {
+      if (activeCategory === 'recruitment' || activeCategory === 'tin-tuyen-dung') {
         if (recruitmentDept !== 'Tất cả' && item.department !== recruitmentDept) return false;
         if (recruitmentLoc !== 'Tất cả' && item.location !== recruitmentLoc) return false;
         if (recruitmentStatus !== 'Tất cả' && item.status !== recruitmentStatus) return false;
       }
 
       // Promotion Sub-filter
-      if (activeCategory === 'promotion' && promotionStatus !== 'Tất cả') {
-        if (item.status !== promotionStatus) return false;
+      if (activeCategory === 'promotion' || activeCategory === 'tin-khuyen-mai') {
+        if (promotionStatus !== 'Tất cả' && item.status !== promotionStatus) return false;
       }
 
       // Shareholder Sub-filters
-      if (activeCategory === 'shareholder') {
+      if (isShareholderActive) {
         if (shareholderYear !== 0 && item.year !== shareholderYear) return false;
-        if (shareholderDocType !== 'Tất cả tài liệu' && item.docType !== shareholderDocType) {
-          if (shareholderDocType === 'Tài chính' && !item.docType?.includes('tài chính')) return false;
-          if (shareholderDocType !== 'Tài chính' && item.docType !== shareholderDocType) return false;
+        if (shareholderDocType !== 'Tất cả tài liệu' && shareholderDocType !== 'all') {
+          const docTypeLower = shareholderDocType.toLowerCase();
+          const matchDocType =
+            (item.docType && item.docType.toLowerCase().includes(docTypeLower)) ||
+            (item.categoryName && item.categoryName.toLowerCase().includes(docTypeLower)) ||
+            (item.category && item.category.toLowerCase() === docTypeLower);
+
+          if (!matchDocType) return false;
         }
       }
 
@@ -129,7 +172,9 @@ export function useNewsFilters({ items, initialCategory = 'all' }: UseNewsFilter
     });
   }, [
     items,
+    categories,
     activeCategory,
+    isShareholderActive,
     searchQuery,
     companySubType,
     specialtySubType,
@@ -142,7 +187,7 @@ export function useNewsFilters({ items, initialCategory = 'all' }: UseNewsFilter
     shareholderDocType,
   ]);
 
-  const itemsPerPage = activeCategory === 'shareholder' ? 10 : 9;
+  const itemsPerPage = isShareholderActive ? 10 : 9;
   const totalItems = filteredNews.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -151,6 +196,7 @@ export function useNewsFilters({ items, initialCategory = 'all' }: UseNewsFilter
   return {
     activeCategory,
     setActiveCategory: handleSelectCategory,
+    isShareholderActive,
     searchQuery,
     setSearchQuery: (q: string) => { setSearchQuery(q); setCurrentPage(1); },
     companySubType,

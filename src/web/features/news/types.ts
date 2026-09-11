@@ -17,11 +17,24 @@ export interface NewsRelatedProject {
   results?: string[];
 }
 
-export type PublicNewsCategory = 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder';
+export type PublicNewsCategory = 'company' | 'specialty' | 'international' | 'recruitment' | 'promotion' | 'shareholder' | string;
+
+export interface PublicNewsCategoryItem {
+  id: string;
+  name: string;
+  alias: string;
+  parentId?: string | null;
+  ordering?: number;
+  summary?: string | null;
+  image?: string | null;
+}
 
 export interface PublicNewsItem {
   id: string;
   category: PublicNewsCategory;
+  categoryName?: string;
+  categoryId?: string;
+  parentCategoryId?: string | null;
   title: string;
   date: string;
   shortDesc: string;
