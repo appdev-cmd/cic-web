@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
-import { CmsDeleteConfirmModal } from '../../components/ui/CmsDeleteConfirmModal';
+import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 import { EmailTemplatesFormView } from './EmailTemplatesFormView';
 import {
   EmailAudience,
@@ -45,11 +45,11 @@ export const EmailTemplatesManager: React.FC<Props> = ({
   const [audience, setAudience] = useState<'all' | EmailAudience>('all');
   const [status, setStatus] = useState<'all' | EmailTemplateStatus>('all');
   const [selected, setSelected] = useState<string[]>([]);
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [actionLoading, setActionLoading] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ isOpen: boolean; items: EmailTemplate[] }>({ isOpen: false, items: [] });
+  const [deleteTargets, setDeleteTargets] = useState<EmailTemplate[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -58,9 +58,32 @@ export const EmailTemplatesManager: React.FC<Props> = ({
     }
   }, [initialTemplates]);
 
-  const notify = (message: string) => {
-    setToast(message);
-    window.setTimeout(() => setToast(''), 3000);
+  const notify = (message: string, tone: 'success' | 'error' = 'success') => {
+    setToast({ message, tone });
+    window.setTimeout(() => setToast(null), 3500);
+  };
+
+  const sanitizeErrorMessage = (error: unknown, fallback: string): string => {
+    if (!error) return fallback;
+    const msg = typeof error === 'string' ? error : (error as any)?.message || '';
+    if (!msg) return fallback;
+    const lower = msg.toLowerCase();
+    if (lower.includes('unique') || lower.includes('duplicate') || lower.includes('already exists') || lower.includes('tồn tại')) {
+      return 'Mẫu email cho sự kiện và đối tượng này đã tồn tại trong workspace.';
+    }
+    if (lower.includes('missing') || lower.includes('bắt buộc') || lower.includes('required')) {
+      return 'Vui lòng điền đầy đủ các thông tin bắt buộc.';
+    }
+    if (lower.includes('permission') || lower.includes('quyền') || lower.includes('forbidden') || lower.includes('unauthorized')) {
+      return 'Bạn không có quyền thực hiện thao tác này.';
+    }
+    if (lower.includes('postgres') || lower.includes('syntax') || lower.includes('relation') || lower.includes('internal server error')) {
+      return 'Hệ thống gặp sự cố khi lưu dữ liệu. Vui lòng thử lại sau.';
+    }
+    if (msg.length < 90 && !msg.includes(';') && !msg.includes('{') && !msg.includes('at ')) {
+      return msg;
+    }
+    return fallback;
   };
 
   const rows = useMemo(
@@ -108,7 +131,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          throw new Error(err.error || 'Lỗi lưu mẫu email');
+          throw new Error(sanitizeErrorMessage(err.error, 'Lỗi lưu mẫu email'));
         }
         notify(isPublished ? 'Đã lưu và xuất bản mẫu email thành công.' : 'Đã lưu bản nháp mẫu email.');
       } else {
@@ -119,7 +142,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          throw new Error(err.error || 'Lỗi tạo mẫu email');
+          throw new Error(sanitizeErrorMessage(err.error, 'Lỗi tạo mẫu email'));
         }
         notify(isPublished ? 'Đã tạo và xuất bản mẫu email thành công.' : 'Đã tạo bản nháp mẫu email.');
       }
@@ -127,7 +150,9 @@ export const EmailTemplatesManager: React.FC<Props> = ({
       setView('list');
       onRefresh?.();
     } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Thao tác thất bại'}`);
+      const friendlyMessage = sanitizeErrorMessage(err?.message, 'Không thể lưu mẫu email. Vui lòng thử lại.');
+      notify(`Lỗi: ${friendlyMessage}`, 'error');
+      throw new Error(friendlyMessage);
     } finally {
       setActionLoading(false);
     }
@@ -142,12 +167,13 @@ export const EmailTemplatesManager: React.FC<Props> = ({
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Lỗi xuất bản mẫu email');
+        throw new Error(sanitizeErrorMessage(err.error, 'Lỗi xuất bản mẫu email'));
       }
-      notify('Đã xuất bản mẫu email.');
+      notify('Đã xuất bản mẫu email thành công.');
       onRefresh?.();
     } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Xuất bản thất bại'}`);
+      const friendly = sanitizeErrorMessage(err?.message, 'Xuất bản thất bại.');
+      notify(`Lỗi: ${friendly}`, 'error');
     } finally {
       setActionLoading(false);
     }
@@ -161,22 +187,23 @@ export const EmailTemplatesManager: React.FC<Props> = ({
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Lỗi nhân bản');
+        throw new Error(sanitizeErrorMessage(err.error, 'Lỗi nhân bản mẫu email'));
       }
       notify('Đã nhân bản mẫu email thành công.');
       onRefresh?.();
     } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Nhân bản thất bại'}`);
+      const friendly = sanitizeErrorMessage(err?.message, 'Nhân bản thất bại.');
+      notify(`Lỗi: ${friendly}`, 'error');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleConfirmTrash = async () => {
-    if (!deleteTarget.items.length) return;
+    if (!deleteTargets.length) return;
     try {
       setIsDeleting(true);
-      const ids = deleteTarget.items.map((i) => i.id);
+      const ids = deleteTargets.map((i) => i.id);
       const res = await fetch('/api/cms/email-templates/bulk-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -184,52 +211,69 @@ export const EmailTemplatesManager: React.FC<Props> = ({
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Lỗi chuyển mẫu email vào Thùng rác');
+        throw new Error(sanitizeErrorMessage(err.error, 'Lỗi chuyển mẫu email vào Thùng rác'));
       }
       const count = ids.length;
       setTemplates((prev) => prev.filter((t) => !ids.includes(t.id)));
       setSelected((prev) => prev.filter((id) => !ids.includes(id)));
-      setDeleteTarget({ isOpen: false, items: [] });
+      setDeleteTargets([]);
       notify(
         count === 1
-          ? `Đã chuyển mẫu email "${deleteTarget.items[0].name}" vào Thùng rác.`
+          ? `Đã chuyển mẫu email "${deleteTargets[0].name}" vào Thùng rác.`
           : `Đã chuyển ${count} mẫu email vào Thùng rác.`
       );
       onRefresh?.();
     } catch (err: any) {
-      notify(`Lỗi: ${err?.message || 'Thao tác thất bại'}`);
+      const friendly = sanitizeErrorMessage(err?.message, 'Không thể chuyển vào Thùng rác. Vui lòng thử lại.');
+      notify(`Lỗi: ${friendly}`, 'error');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const allSelected = rows.length > 0 && rows.every((item) => selected.includes(item.id));
+  const pageIds = useMemo(() => paginatedRows.map((item) => item.id), [paginatedRows]);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
+  const isPageIndeterminate = pageIds.some((id) => selected.includes(id)) && !allPageSelected;
 
-  if (view === 'form') {
-    return (
-      <EmailTemplatesFormView
-        templateToEdit={editing}
-        workspaceLocale={workspaceLocale}
-        onSave={save}
-        onCancel={() => {
-          setEditing(null);
-          setView('list');
-        }}
-      />
-    );
-  }
+  const handleToggleSelectAllPage = () => {
+    if (allPageSelected) {
+      setSelected((prev) => prev.filter((id) => !pageIds.includes(id)));
+    } else {
+      setSelected((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
 
   return (
     <div className="space-y-5">
+      {/* Global Toast with high z-index, never obscured by form or dialogs */}
       {toast && (
         <div
           role="status"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-2xl dark:bg-slate-100 dark:text-slate-900"
+          className={`fixed bottom-6 right-6 z-[100] flex items-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-3 ${
+            toast.tone === 'error' ? 'bg-red-600 dark:bg-red-700' : 'bg-slate-900 dark:bg-slate-100 dark:text-slate-900'
+          }`}
         >
-          <Check className="size-4 text-emerald-400" />
-          {toast}
+          {toast.tone === 'error' ? (
+            <AlertCircle className="size-4 text-white shrink-0" />
+          ) : (
+            <Check className="size-4 text-emerald-400 shrink-0" />
+          )}
+          <span>{toast.message}</span>
         </div>
       )}
+
+      {view === 'form' ? (
+        <EmailTemplatesFormView
+          templateToEdit={editing}
+          workspaceLocale={workspaceLocale}
+          onSave={save}
+          onCancel={() => {
+            setEditing(null);
+            setView('list');
+          }}
+        />
+      ) : (
+        <>
 
       <CmsPageHeader
         icon={<MailCheck />}
@@ -309,7 +353,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
               variant="danger"
               onClick={() => {
                 const toDelete = templates.filter((t) => selected.includes(t.id));
-                setDeleteTarget({ isOpen: true, items: toDelete });
+                setDeleteTargets(toDelete);
               }}
               disabled={actionLoading || isDeleting}
               leadingIcon={<Trash2 />}
@@ -327,10 +371,10 @@ export const EmailTemplatesManager: React.FC<Props> = ({
               <tr>
                 <th className="w-10 p-3 text-center">
                   <CmsSelectionCheckbox
-                    checked={allSelected}
-                    indeterminate={selected.length > 0 && !allSelected}
-                    onChange={() => setSelected(allSelected ? [] : rows.map((item) => item.id))}
-                    label="Chọn tất cả"
+                    checked={allPageSelected}
+                    indeterminate={isPageIndeterminate}
+                    onChange={handleToggleSelectAllPage}
+                    label="Chọn tất cả trong trang"
                   />
                 </th>
                 <th className="min-w-[300px] p-3">Tên mẫu</th>
@@ -446,7 +490,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                             aria-label="Xóa"
                             title="Xóa mẫu email"
                             icon={<Trash2 />}
-                            onClick={() => setDeleteTarget({ isOpen: true, items: [item] })}
+                            onClick={() => setDeleteTargets([item])}
                           />
                         </div>
                       </td>
@@ -560,14 +604,21 @@ export const EmailTemplatesManager: React.FC<Props> = ({
       )}
 
       {/* Modal Xác nhận chuyển vào Thùng rác dùng chung */}
-      <CmsDeleteConfirmModal
-        isOpen={deleteTarget.isOpen}
-        itemName={deleteTarget.items.length === 1 ? deleteTarget.items[0].name : undefined}
-        items={deleteTarget.items.map((i) => ({ id: i.id, label: `${i.name} (${i.subject})` }))}
-        isPending={isDeleting}
-        onClose={() => setDeleteTarget({ isOpen: false, items: [] })}
-        onConfirm={handleConfirmTrash}
+      <CmsTrashConfirmDialog
+        open={deleteTargets.length > 0}
+        title={deleteTargets.length > 1 ? `Chuyển ${deleteTargets.length} mẫu email vào Thùng rác` : 'Chuyển mẫu email vào Thùng rác'}
+        description="Mẫu email sẽ được chuyển vào Thùng rác và có thể khôi phục lại khi cần thiết."
+        itemName={
+          deleteTargets.length > 1
+            ? `${deleteTargets.length} mẫu email đã chọn (${deleteTargets.slice(0, 2).map((i) => i.name).join(', ')}${deleteTargets.length > 2 ? '...' : ''})`
+            : (deleteTargets[0]?.name ?? '')
+        }
+        busy={isDeleting}
+        onClose={() => setDeleteTargets([])}
+        onConfirm={() => void handleConfirmTrash()}
       />
+        </>
+      )}
     </div>
   );
 };

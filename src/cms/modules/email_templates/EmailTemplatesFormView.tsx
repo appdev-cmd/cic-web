@@ -17,7 +17,7 @@ import {
 interface Props {
   templateToEdit: EmailTemplate | null;
   workspaceLocale: 'vi' | 'en';
-  onSave: (data: Partial<EmailTemplate> & { publishNow?: boolean }) => void;
+  onSave: (data: Partial<EmailTemplate> & { publishNow?: boolean }) => Promise<boolean | void> | void;
   onCancel: () => void;
 }
 
@@ -40,6 +40,8 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
   );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const tokens = useMemo(() => {
     const base = VARIABLE_GROUPS.flatMap((group) => group.tokens);
@@ -78,33 +80,51 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
     return true;
   };
 
-  const handleSaveDraft = (e?: React.FormEvent) => {
+  const handleSaveDraft = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validate()) return;
-    onSave({
-      name: name.trim(),
-      event,
-      audience,
-      subject: subject.trim(),
-      content: content.trim(),
-      status: 'draft',
-      publishNow: false,
-      workspace: workspaceLocale,
-    });
+    setSubmitError(null);
+    try {
+      setIsSubmitting(true);
+      await onSave({
+        name: name.trim(),
+        event,
+        audience,
+        subject: subject.trim(),
+        content: content.trim(),
+        status: 'draft',
+        publishNow: false,
+        workspace: workspaceLocale,
+      });
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Không thể lưu bản nháp. Vui lòng thử lại.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!validate()) return;
-    onSave({
-      name: name.trim(),
-      event,
-      audience,
-      subject: subject.trim(),
-      content: content.trim(),
-      status: 'active',
-      publishNow: true,
-      workspace: workspaceLocale,
-    });
+    setSubmitError(null);
+    try {
+      setIsSubmitting(true);
+      await onSave({
+        name: name.trim(),
+        event,
+        audience,
+        subject: subject.trim(),
+        content: content.trim(),
+        status: 'active',
+        publishNow: true,
+        workspace: workspaceLocale,
+      });
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Không thể xuất bản mẫu email. Vui lòng thử lại.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,7 +135,8 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+            disabled={isSubmitting}
+            className="flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 hover:text-slate-900 disabled:opacity-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
             title="Quay lại danh sách"
             aria-label="Quay lại danh sách"
           >
@@ -135,6 +156,7 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
             size="sm"
             variant="secondary"
             onClick={() => setPreviewOpen(true)}
+            disabled={isSubmitting}
             leadingIcon={<Eye />}
           >
             Xem trước
@@ -143,35 +165,42 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
             type="button"
             size="sm"
             variant="secondary"
-            onClick={() => handleSaveDraft()}
+            onClick={() => void handleSaveDraft()}
+            disabled={isSubmitting}
             leadingIcon={<Save />}
           >
-            Lưu nháp
+            {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
           </CmsButton>
           <CmsButton
             type="button"
             size="sm"
             variant="primary"
-            onClick={handlePublish}
+            onClick={() => void handlePublish()}
+            disabled={isSubmitting}
             leadingIcon={<Send />}
           >
-            Xuất bản
+            {isSubmitting ? 'Đang xử lý...' : 'Xuất bản'}
           </CmsButton>
         </div>
       </header>
 
       {/* Errors Alert */}
-      {errors.length > 0 && (
+      {(errors.length > 0 || submitError) && (
         <div
           role="alert"
-          className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"
+          className="flex gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700 shadow-sm dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 animate-in fade-in slide-in-from-top-2"
         >
-          <AlertCircle className="size-4 shrink-0" />
-          <ul className="list-disc pl-4 space-y-1">
-            {errors.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
+          <AlertCircle className="size-4.5 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+          <div className="space-y-1">
+            {submitError && <p className="font-bold text-red-800 dark:text-red-200">{submitError}</p>}
+            {errors.length > 0 && (
+              <ul className="list-disc pl-4 space-y-0.5 font-medium">
+                {errors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
 
