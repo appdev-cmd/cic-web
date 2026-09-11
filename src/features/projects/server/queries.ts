@@ -95,8 +95,8 @@ export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDe
       SELECT p.id, p.name as label, p.image, m.name as brand, a.name as application
       FROM cic_projects_products_rel r
       JOIN cic_products p ON p.id = r.product_id
-      LEFT JOIN cic_manufactories m ON m.id = p.manufactory
-      LEFT JOIN cic_products_applications_rel par ON par.products_id = p.id
+      LEFT JOIN cic_manufactories m ON m.id::text = p.manufactory
+      LEFT JOIN cic_products_applications_rel par ON par.product_id = p.id
       LEFT JOIN cic_application a ON a.id = par.application_id
       WHERE r.project_id = ${projectId} AND p.published = true
       ORDER BY r.ordering ASC, p.id ASC
@@ -105,7 +105,7 @@ export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDe
       SELECT s.id, s.title as label, s.alias, s.image, s.summary
       FROM cic_projects_services_rel r
       JOIN cic_services s ON s.id = r.service_id
-      WHERE r.project_id = ${projectId} AND s.published = true
+      WHERE r.project_id = ${projectId} AND s.published::text IN ('1', 'true')
       ORDER BY r.ordering ASC, s.id ASC
     `,
     sql<ProjectRow[]>`
