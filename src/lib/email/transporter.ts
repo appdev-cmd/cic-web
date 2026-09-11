@@ -31,7 +31,27 @@ export interface SendMailResult {
   success: boolean;
   messageId?: string;
   simulated?: boolean;
+  previewUrl?: string | false;
   error?: string;
+}
+
+export function getMailTransporter() {
+  const isConfigured = Boolean(
+    process.env.SMTP_HOST &&
+    process.env.SMTP_USER &&
+    process.env.SMTP_PASS
+  );
+  if (!isConfigured) return null;
+
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 }
 
 export async function sendEmail({ to, subject, html, text, bcc, replyTo }: SendMailOptions): Promise<SendMailResult> {
@@ -39,8 +59,10 @@ export async function sendEmail({ to, subject, html, text, bcc, replyTo }: SendM
   const fromAddress = process.env.MAIL_FROM_ADDRESS || 'noreply@cic.com.vn';
   const adminBcc = process.env.ADMIN_NOTIFICATION_EMAIL;
 
-  // If SMTP is not configured (e.g. local dev without credentials), simulate safely
-  if (!mailTransporter) {
+  const transporter = getMailTransporter();
+
+  // If SMTP is not configured, simulate safely
+  if (!transporter) {
     console.info(
       `[Email Transporter (Simulated)]\nTo: ${Array.isArray(to) ? to.join(', ') : to}\nSubject: ${subject}\nBCC: ${bcc || adminBcc || 'none'}\nLength: ${(html || text || '').length} chars`
     );
@@ -52,7 +74,7 @@ export async function sendEmail({ to, subject, html, text, bcc, replyTo }: SendM
   }
 
   try {
-    const info = await mailTransporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"${fromName}" <${fromAddress}>`,
       to,
       subject,
@@ -62,10 +84,13 @@ export async function sendEmail({ to, subject, html, text, bcc, replyTo }: SendM
       replyTo: replyTo || fromAddress,
     });
 
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+
     return {
       success: true,
       simulated: false,
       messageId: info.messageId,
+      previewUrl,
     };
   } catch (error: any) {
     console.error('[Email Transporter Error]', error);
