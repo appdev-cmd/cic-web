@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Newspaper,
   Plus,
@@ -38,13 +38,24 @@ interface NewsManagerProps {
 }
 
 export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale, capabilities = { create:false,edit:false,delete:false } }) => {
-  const router=useRouter();
+  const router = useRouter();
+  const pathname = usePathname();
+
   // Articles State
   const [articles, setArticles] = useState<NewsArticle[]>(data?.articles ?? []);
   const [categories, setCategories] = useState<NewsCategory[]>(data?.categories ?? []);
 
   // View Mode: 'list' or 'form'
-  const [viewMode, setViewMode] = useState<'list' | 'form' | 'categories'>(() => window.location.pathname.startsWith('/cms/news/categories') ? 'categories' : 'list');
+  const [viewMode, setViewMode] = useState<'list' | 'form' | 'categories'>(() =>
+    pathname?.startsWith('/cms/news/categories') ? 'categories' : 'list'
+  );
+
+  useEffect(() => {
+    if (pathname?.startsWith('/cms/news/categories')) {
+      setViewMode('categories');
+    }
+  }, [pathname]);
+
   const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(null);
 
   // Search & Filters

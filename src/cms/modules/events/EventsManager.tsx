@@ -116,6 +116,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   const [searchTitle, setSearchTitle] = useState('');
   const [editorialFilter, setEditorialFilter] = useState<string>('all');
   const [eventStatusFilter, setEventStatusFilter] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'all';
     const requestedFilter = new URLSearchParams(window.location.search).get('progress');
     return requestedFilter === 'upcoming' || requestedFilter === 'ongoing' || requestedFilter === 'ended'
       ? requestedFilter
