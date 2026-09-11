@@ -267,8 +267,10 @@ Không có.
 - `slug → alias`, `description/htmlContent → content`, `thumbnail_url → image`, `summary/tagline → summary`, `display_order → ordering`, `meta_* → seo_*`, `editorial_status → published`.
 - `benefits_process`, `supplementary_content`, scope, quy trình và lợi ích trong fixture website tiếp tục compose vào Rich Text `content`; không tạo column theo từng section.
 - CMS đã bỏ `code`, `service_status`, `group_id`, owner, placement, CTA, `publish_at` và các field fixture không có nguồn DB. `editorial_status` map trực tiếp vào `published`; không thêm column trạng thái khác.
-- Version, activity log, used-by, trash và yêu cầu khách hàng thuộc shared module/relation, không thêm vào `cic_services*`.
+- Activity log, used-by, trash và yêu cầu khách hàng thuộc shared module/relation. Version là blocker riêng: functional reference yêu cầu working Draft không ghi đè Published, nhưng live schema 2026-09-11 chỉ có một row + `published` và chưa có Service revision store/pointer hay generic adapter đã chứng minh. Không tự thêm revision columns/tables trước khi persistence contract được duyệt.
 - `migration_report.json` còn báo `cic_services: ERROR`; xử lý tại migration/validation, không mở rộng schema để che lỗi migrate.
+
+Live verification 2026-09-11: VI 9/9 published, EN 6/6; 0 alias blank/trùng normalized nhưng chưa có unique normalized index; hai junction Product đã tồn tại đúng constraint nhưng đều 0 row; 15/15 Service chưa có `image`. `category_*` tiếp tục là legacy không có category master. `BLOCKED_BY: Service Draft/Published revision persistence contract`.
 
 ## Trang nội dung
 

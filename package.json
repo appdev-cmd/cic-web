@@ -49,6 +49,8 @@
     ,"verify:product-legacy-media": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-legacy-media.ts"
     ,"verify:news-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-category-roundtrip.ts"
     ,"verify:news-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-roundtrip.ts"
+    ,"db:apply-news": "node --env-file=.env.local scripts/apply-news-hardening.mjs"
+    ,"verify:news-hardening": "node --env-file=.env.local scripts/verify-news-hardening.mjs"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.2.0",

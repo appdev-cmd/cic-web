@@ -228,6 +228,17 @@ Implementation 2026-09-09 dùng đúng projection trên. Mutation chỉ ghi `nam
 | whyNeed/process/benefits/collaboration/media blocks | object mock | Không có form tương ứng | Không có | Không có | Các khối nội dung | C | Không | Giữ trong content rich text để bảo toàn thiết kế |
 | contact form/support text | formData/hard-code | contact/product contact/config | bảng request/config | bảng tương ứng | Tương tác/cấu hình chung | B | Không trên service | Form/setting cung cấp, không nhân vào dịch vụ |
 
+### Audit field usage Dịch vụ — 2026-09-11
+
+- `CMS_EDITABLE`: `title`, `alias`, `summary`, `tags`, `content`, `image`, `seo_title`, `seo_keyword`, `seo_description`, `published`, `ordering`; ordered Product IDs are written only through `cic_services_products_rel*`.
+- `CMS_OPERATIONAL`: `id`, `title`, `summary`, `published`, `ordering`, `updated_time`; list search/status/sort/pagination must use an explicit projection.
+- `PUBLIC_READ`: list uses `id,title,alias,summary,image,ordering`; detail adds `content,tags,seo_*` and published related Product projection. Public must resolve the immutable Published snapshot once the revision contract exists.
+- `SYSTEM_MANAGED/AUDIT`: `created_time`, `updated_time`, `creator`, `editor`; actor comes from server auth, not form payload.
+- `RELATION`: `cic_services_products_rel` and `_en` are the authority for ordered related Products. `category_id/category_*` are legacy denormalized values without a valid category master and must not become a selector/filter.
+- `LEGACY_UNUSED`: `source_website`, `hits`, `show_in_homepage`, `title_display`, `display_title`, `display_column`, `tags_group`, `rating_count`, `rating_sum`, `keywords`, `source`, `show_map`, `author`, `author_last`, `tawk_to` and technical `actflg/ctd*/mdf*/lstmdf`; preserve on PATCH/Trash restore.
+- Runtime verification: VI 9 rows and EN 6 rows, all published; 0 blank/duplicate normalized aliases; 0 image values; both Product junctions contain 0 rows. Existing alias indexes are not unique.
+- `UNKNOWN`: exact persisted representation of simultaneous working Draft + current Published Service. Functional docs require it, but no Service revision store/pointer or proven generic shared adapter exists; this blocks implementation until the persistence contract is approved.
+
 ## Menu và Media
 
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |

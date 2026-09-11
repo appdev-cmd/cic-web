@@ -122,7 +122,7 @@ Không có CMS category detail/preview độc lập, gallery, tab hoặc public 
 |---|---|---|
 | `/` | `HomeView`, public shell/widgets | Route có; dùng legacy presentation/content adapter; chưa có full parity gate |
 | `/products`, `/products/[slug]` | `ProductsView`, `ProductDetailView` | Published data boundary có; composition/interaction/integration chưa đủ bằng chứng |
-| `/services`, `/services/[slug]` | `ServicesView` | Route/query có; parity và relation chưa đóng |
+| `/services`, `/services/[slug]` | `ServicesView` | Route/query tối giản đang REPLACE hierarchy reference; relation DB có nhưng rỗng; blocked bởi Service Draft/Published revision contract |
 | `/projects`, `/projects/[slug]` | `ProjectsView` | Route/query/action có; CMS/relations/parity chưa đóng |
 | `/news`, `/news/[slug]` | `NewsView` và news detail components | Route/query có; rich content/related content/parity chưa đóng |
 | `/events`, `/events/[slug]` | `EventsView` | Route/query có; registration/integration/parity chưa đóng |

@@ -77,11 +77,20 @@ Không có.
 - `banner_url`, `video_url`, `media_alt` và `og_image` chưa có control ghi dữ liệu trong form hiện tại. Ảnh chính dùng `image`; chưa thêm các field media chỉ vì type/mock còn khai báo.
 - `group_id`/`group_name` chưa được form hiện tại quản trị. Dữ liệu legacy `category_id` không có bảng danh mục dịch vụ hợp lệ và mọi record khảo sát cùng một giá trị; chưa tạo bảng nhóm dịch vụ.
 - Contract CMS đã bỏ `code`, `service_status`, owner, placement, CTA, publish scheduling và các field fixture không có nguồn DB. Trạng thái `editorial_status` map trực tiếp vào `published`.
-- Version, activity log, used-by, trash và yêu cầu khách hàng thuộc shared modules/relation, không thêm vào `cic_services*`.
+- Activity log, used-by, trash và yêu cầu khách hàng thuộc shared modules/relation, không thêm trực tiếp vào `cic_services*`. Riêng version không thể tiếp tục mặc định là shared: functional reference yêu cầu working Draft tách khỏi Published đang live, nhưng audit 2026-09-11 không tìm thấy Service revision store/pointer hoặc generic adapter đã chứng minh. Cần chốt persistence contract trước implementation.
 - `migration_report.json` hiện báo `cic_services: ERROR`; xử lý trong migration/validation, không mở rộng schema để che lỗi migrate.
+
+### Live verification 2026-09-11
+
+- `cic_services`: 9 rows, 9 published; `cic_services_en`: 6 rows, 6 published.
+- Mỗi locale có 0 alias blank và 0 nhóm trùng `lower(btrim(alias))`; tuy vậy chỉ có index alias thường, chưa có unique normalized protection.
+- `cic_services_products_rel` và `_en` đã tồn tại đúng PK/FK/index nhưng đều 0 row; đây là dữ liệu chưa được gán, không phải lý do tạo mock relation.
+- Cả 15 row đều chưa có `image`; Media là dependency cho nội dung mới, còn UI phải có empty-image behavior đúng reference.
+- `category_id/category_*` không có category master đáng tin cậy, nên giữ legacy và không tạo filter/selector nghiệp vụ.
+- **BLOCKED_BY:** Service Draft/Published revision persistence contract.
 
 ## Kết luận delta
 
 - Sự kiện: **0 column mới, 0 bảng mới**; thêm constraint/index sau profiling và cleanup `end_time`.
-- Dịch vụ: **4 column mới trên hai bảng ngôn ngữ**, **2 bảng relation N–N** và unique index alias sau profiling.
+- Dịch vụ: hai bảng relation N–N đã tồn tại; unique normalized alias vẫn cần hardening. Số “4 column mới” trước đây không khớp schema/live DB và bị loại khỏi kết luận. Thay đổi version/revision chưa được tự thiết kế trong audit này.
 - Không đề xuất structured content columns cho Event hoặc Service.
