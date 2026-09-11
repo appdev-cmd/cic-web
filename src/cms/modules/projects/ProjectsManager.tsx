@@ -17,39 +17,56 @@ import {
   bulkDeleteProjectsAction,
 } from '@/features/projects/server/actions';
 
+import { useRouter } from 'next/navigation';
+
 interface Props {
-  data: ProjectsModuleData;
+  workspaceLocale?: 'vi' | 'en';
+  data?: ProjectsModuleData;
+  capabilities?: { create: boolean; edit: boolean; delete: boolean };
 }
 type StatusFilter = 'all' | 'published' | 'draft';
 
-export const ProjectsManager: React.FC<Props> = ({ data }) => {
-  const [projects, setProjects] = useState<CmsProject[]>(data.projects || []);
-  const [productOptions, setProductOptions] = useState<ProjectRelationOption[]>(data.productOptions || []);
-  const [serviceOptions, setServiceOptions] = useState<ProjectRelationOption[]>(data.serviceOptions || []);
-  const [loading, setLoading] = useState(true);
+export const ProjectsManager: React.FC<Props> = ({
+  data,
+  capabilities = { create: true, edit: true, delete: true },
+}) => {
+  const router = useRouter();
+  const [projects, setProjects] = useState<CmsProject[]>(() => data?.projects || []);
+  const [productOptions, setProductOptions] = useState<ProjectRelationOption[]>(() => data?.productOptions || []);
+  const [serviceOptions, setServiceOptions] = useState<ProjectRelationOption[]>(() => data?.serviceOptions || []);
+  const [loading, setLoading] = useState(() => !data?.projects?.length);
 
   const fetchProjects = async () => {
     try {
+      router.refresh();
       const response = await fetch('/api/cms/projects');
-      if (!response.ok) throw new Error('Không thể tải danh sách dự án.');
-      const body = (await response.json()) as {
-        projects?: CmsProject[];
-        productOptions?: ProjectRelationOption[];
-        serviceOptions?: ProjectRelationOption[];
-      };
-      if (body.projects) setProjects(body.projects);
-      if (body.productOptions) setProductOptions(body.productOptions);
-      if (body.serviceOptions) setServiceOptions(body.serviceOptions);
-    } catch (err) {
-      console.error(err);
+      if (response.ok) {
+        const body = (await response.json()) as {
+          projects?: CmsProject[];
+          productOptions?: ProjectRelationOption[];
+          serviceOptions?: ProjectRelationOption[];
+        };
+        if (body.projects) setProjects(body.projects);
+        if (body.productOptions) setProductOptions(body.productOptions);
+        if (body.serviceOptions) setServiceOptions(body.serviceOptions);
+      }
+    } catch {
+      // Ignored: router.refresh() handles server component re-rendering
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void fetchProjects();
-  }, []);
+    if (data?.projects?.length) {
+      setProjects(data.projects);
+      if (data.productOptions) setProductOptions(data.productOptions);
+      if (data.serviceOptions) setServiceOptions(data.serviceOptions);
+      setLoading(false);
+    } else {
+      void fetchProjects();
+    }
+  }, [data]);
 
   const [editing, setEditing] = useState<CmsProject | null | undefined>(undefined);
   const [previewProject, setPreviewProject] = useState<CmsProject | null>(null);

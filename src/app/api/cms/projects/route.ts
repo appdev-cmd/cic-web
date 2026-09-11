@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requirePermission } from '@/server/auth/guards';
+import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
 import { AppError, normalizeServerError } from '@/server/errors';
 
@@ -12,7 +12,10 @@ function errorResponse(error: unknown) {
 
 export async function GET() {
   try {
-    await requirePermission('projects', 'view');
+    const principal = await getCurrentCmsPrincipal();
+    if (!can(principal, 'projects', 'view') && !can(principal, 'contents', 'view') && !principal.isAdministrator) {
+      return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
+    }
     const sql = getPostgresClient();
 
     const [projects, productRels, serviceRels, productOptions, serviceOptions] = await Promise.all([
@@ -29,8 +32,8 @@ export async function GET() {
       sql`
         SELECT p.id, p.name as label, p.image, m.name as brand, a.name as application
         FROM cic_products p
-        LEFT JOIN cic_manufactories m ON m.id = p.manufactory
-        LEFT JOIN cic_products_applications_rel par ON par.products_id = p.id
+        LEFT JOIN cic_manufactories m ON m.id::text = p.manufactory
+        LEFT JOIN cic_products_applications_rel par ON par.product_id = p.id
         LEFT JOIN cic_application a ON a.id = par.application_id
         WHERE p.published = true
         ORDER BY p.ordering ASC, p.id ASC
@@ -38,7 +41,7 @@ export async function GET() {
       sql`
         SELECT id, title as label, image, category_name as category
         FROM cic_services
-        WHERE published = true
+        WHERE published::text IN ('1', 'true')
         ORDER BY ordering ASC, id ASC
       `,
     ]);

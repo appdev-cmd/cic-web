@@ -9,6 +9,7 @@ import { ProductsRoute } from '@/cms/modules/products/ProductsRoute';
 import { NewsRoute } from '@/cms/modules/news/NewsRoute';
 import { ServicesRoute } from '@/cms/modules/services/ServicesRoute';
 import { EventsRoute } from '@/cms/modules/events/EventsRoute';
+import { ProjectsRoute } from '@/cms/modules/projects/ProjectsRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
@@ -24,6 +25,8 @@ export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...pa
     ? <ServicesRoute />
     : (cmsPath === '/cms/events' || cmsPath.startsWith('/cms/events/'))
     ? <EventsRoute />
+    : (cmsPath === '/cms/projects' || cmsPath.startsWith('/cms/projects/'))
+    ? <ProjectsRoute />
     : isProductCategoryCmsPath(cmsPath)
     ? <ProductCategoriesRoute />
     : isProductBrandCmsPath(cmsPath)
