@@ -27,6 +27,7 @@ import {
   GitCommit,
   History,
   X,
+  Image as ImageIcon,
 } from 'lucide-react';
 import {
   ServiceItem,
@@ -444,11 +445,17 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                       {/* Title */}
                       <td className="p-3 sticky left-10 bg-white dark:bg-slate-900 z-10">
                         <div className="flex items-start gap-3">
-                          <img
-                            src={item.thumbnail_url}
-                            alt={item.title}
-                            className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-800 shadow-2xs"
-                          />
+                          {item.thumbnail_url ? (
+                            <img
+                              src={item.thumbnail_url}
+                              alt={item.title}
+                              className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-800 shadow-2xs"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-400">
+                              <ImageIcon className="w-5 h-5" />
+                            </div>
+                          )}
                           <div className="space-y-0.5 max-w-xs">
                             <h4
                               onClick={() => {
