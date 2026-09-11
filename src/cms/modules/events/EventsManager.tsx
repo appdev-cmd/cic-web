@@ -36,6 +36,13 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
+import { useRouter } from 'next/navigation';
+import {
+  saveEventAction,
+  setEventsPublishedAction,
+  trashEventAction,
+  trashEventsAction,
+} from '@/features/events/server/actions';
 
 interface ColumnVisibility {
   title: boolean;
@@ -65,7 +72,11 @@ function formatEventDateTime(dateStr: string): string {
   }
 }
 
-interface EventsManagerProps { workspaceLocale: CmsLocale; data?: EventsModuleData; }
+interface EventsManagerProps {
+  workspaceLocale: CmsLocale;
+  data?: EventsModuleData;
+  capabilities?: { create: boolean; edit: boolean; delete: boolean };
+}
 
 type EventProgressStatus = 'upcoming' | 'ongoing' | 'ended';
 
@@ -78,7 +89,12 @@ function getEventProgressStatus(event: EventItem): EventProgressStatus {
   return 'ended';
 }
 
-export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, data }) => {
+export const EventsManager: React.FC<EventsManagerProps> = ({
+  workspaceLocale,
+  data,
+  capabilities = { create: true, edit: true, delete: true },
+}) => {
+  const router = useRouter();
   // Main Data States
   const [events, setEvents] = useState<EventItem[]>(() =>
     (data?.events ?? []).map((item) => ({
@@ -140,6 +156,16 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const persist = async (operation: Promise<unknown>): Promise<boolean> => {
+    try {
+      await operation;
+      return true;
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Thao tác không thành công.');
+      return false;
+    }
+  };
+
   // Filtered Events
   const filteredEvents = events.filter((ev) => {
     const matchesTitle = ev.title.toLowerCase().includes(searchTitle.toLowerCase().trim());
@@ -156,28 +182,58 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   const paginatedEvents = filteredEvents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Toggle Single Row Editorial Status directly from table
-  const handleTogglePublished = (id: string) => {
-    setEvents((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const nextPublished = !item.published;
-          const nextEditorial: EditorialStatus = nextPublished ? 'published' : 'draft';
-          showToast(`Đã ${nextPublished ? 'xuất bản' : 'chuyển sang bản nháp'} sự kiện "${item.title}"`);
-          return { ...item, published: nextPublished, editorial_status: nextEditorial };
-        }
-        return item;
-      })
-    );
-  };
-
-  const handleToggleFeatured = (id: string) => {
-    const target = events.find((item) => item.id === id);
-    if (!target?.is_hot && events.filter((item) => item.is_hot).length >= FEATURED_CONTENT_LIMITS.event) {
-      showToast(`Đã có ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn sự kiện hiện tại trước.`);
+  const handleTogglePublished = async (id: string) => {
+    if (!capabilities.edit) {
+      showToast('Bạn không có quyền chỉnh sửa sự kiện.');
       return;
     }
-    setEvents((current) => current.map((item) => item.id === id ? { ...item, is_hot: !item.is_hot } : item));
-    showToast(target?.is_hot ? 'Đã bỏ Sự kiện nổi bật.' : 'Đã chọn Sự kiện nổi bật.');
+    const target = events.find((item) => item.id === id);
+    if (!target) return;
+    const nextPublished = !target.published;
+    const ok = await persist(setEventsPublishedAction(workspaceLocale, [Number(id)], nextPublished));
+    if (!ok) return;
+    showToast(`Đã ${nextPublished ? 'xuất bản' : 'chuyển sang bản nháp'} sự kiện "${target.title}"`);
+    router.refresh();
+  };
+
+  const handleToggleFeatured = async (id: string) => {
+    if (!capabilities.edit) {
+      showToast('Bạn không có quyền chỉnh sửa sự kiện.');
+      return;
+    }
+    const target = events.find((item) => item.id === id);
+    if (!target) return;
+    const nextHot = !target.is_hot;
+    const ok = await persist(
+      saveEventAction(workspaceLocale, Number(id), {
+        title: target.title,
+        alias: target.alias,
+        chuDe: target.chu_de ?? '',
+        place: target.place ?? '',
+        timeEvent: target.time_event,
+        endTime: target.end_time,
+        specificTime: target.specific_time ?? '',
+        linkDangky: target.link_dangky ?? '',
+        summary: target.summary ?? '',
+        content: target.content ?? '',
+        image: target.image ?? '',
+        tags: Array.isArray(target.tags) ? target.tags : [],
+        published: target.published,
+        isHot: nextHot,
+        showInHomepage: target.show_in_home ?? nextHot,
+        ordering: target.ordering ?? 1,
+        seoTitle: target.seo_title ?? '',
+        seoKeyword: target.seo_keyword ?? '',
+        seoDescription: target.seo_description ?? '',
+        tawkTo: target.tawk_to ?? '',
+        productsRelated: target.products_related ?? [],
+        newsRelated: target.news_related ?? [],
+        eventRelated: target.event_related ?? [],
+      })
+    );
+    if (!ok) return;
+    showToast(nextHot ? 'Đã chọn Sự kiện nổi bật.' : 'Đã bỏ Sự kiện nổi bật.');
+    router.refresh();
   };
 
   // Selection Checkbox Logic
@@ -198,108 +254,111 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
   };
 
   // Batch Operations
-  const handleBatchChangeEditorialStatus = (status: EditorialStatus) => {
+  const handleBatchChangeEditorialStatus = async (status: EditorialStatus) => {
     if (selectedIds.length === 0) return;
-    setEvents((prev) =>
-      prev.map((item) => {
-        if (selectedIds.includes(item.id)) {
-          return {
-            ...item,
-            editorial_status: status,
-            published: status === 'published',
-          };
-        }
-        return item;
-      })
-    );
-    showToast(`Đã đổi trạng thái nội dung ${selectedIds.length} sự kiện sang "${status}"`);
+    if (!capabilities.edit) {
+      showToast('Bạn không có quyền cập nhật trạng thái sự kiện.');
+      return;
+    }
+    const ids = selectedIds.map(Number);
+    const ok = await persist(setEventsPublishedAction(workspaceLocale, ids, status === 'published'));
+    if (!ok) return;
+    showToast(`Đã đổi trạng thái nội dung ${selectedIds.length} sự kiện sang "${status === 'published' ? 'Xuất bản' : 'Bản nháp'}"`);
+    setSelectedIds([]);
+    router.refresh();
   };
 
   const handleOpenBatchDelete = () => {
+    if (!capabilities.delete) {
+      showToast('Bạn không có quyền xóa sự kiện.');
+      return;
+    }
     const targets = events.filter((e) => selectedIds.includes(e.id));
     setItemsToDelete(targets);
     setIsDeleteModalOpen(true);
   };
 
   const handleOpenSingleDelete = (ev: EventItem) => {
+    if (!capabilities.delete) {
+      showToast('Bạn không có quyền xóa sự kiện.');
+      return;
+    }
     setItemsToDelete([ev]);
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    const idsToRemove = itemsToDelete.map((i) => i.id);
-    setEvents((prev) => prev.filter((item) => !idsToRemove.includes(item.id)));
-    setSelectedIds((prev) => prev.filter((id) => !idsToRemove.includes(id)));
+  const handleConfirmDelete = async () => {
+    if (!capabilities.delete) {
+      showToast('Bạn không có quyền xóa sự kiện.');
+      return;
+    }
+    const ids = itemsToDelete.map((item) => Number(item.id));
+    const ok = await persist(trashEventsAction(workspaceLocale, ids));
+    if (!ok) return;
     setIsDeleteModalOpen(false);
-    showToast(`Đã xóa ${itemsToDelete.length} sự kiện thành công!`);
+    setSelectedIds((prev) => prev.filter((id) => !ids.includes(Number(id))));
+    showToast(`Đã chuyển ${itemsToDelete.length} sự kiện vào Thùng rác!`);
+    router.refresh();
   };
 
   // Open Edit / Create Form
   const handleCreateNew = () => {
+    if (!capabilities.create) {
+      showToast('Bạn không có quyền tạo sự kiện.');
+      return;
+    }
     setEventToEdit(null);
     setIsFormOpen(true);
   };
 
   const handleEdit = (ev: EventItem) => {
+    if (!capabilities.edit) {
+      showToast('Bạn không có quyền chỉnh sửa sự kiện.');
+      return;
+    }
     setEventToEdit(ev);
     setIsFormOpen(true);
   };
 
   // Save Form Handler
-  const handleSaveEvent = (data: Partial<EventItem>) => {
-    if (data.is_hot && !eventToEdit?.is_hot && events.filter((item) => item.is_hot).length >= FEATURED_CONTENT_LIMITS.event) {
-      showToast(`Chỉ được chọn ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn sự kiện hiện tại trước.`);
+  const handleSaveEvent = async (formData: Partial<EventItem>) => {
+    const isEdit = Boolean(eventToEdit?.id);
+    if (isEdit ? !capabilities.edit : !capabilities.create) {
+      showToast('Bạn không có quyền lưu sự kiện.');
       return;
     }
-    if (eventToEdit) {
-      // Edit existing
-      setEvents((prev) =>
-        prev.map((item) =>
-          item.id === eventToEdit.id
-            ? ({
-                ...item,
-                ...data,
-                editorial_status: data.published ? 'published' : 'draft',
-                updated_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-              } as EventItem)
-            : item
-        )
-      );
-      showToast(`Đã cập nhật sự kiện "${data.title}"!`);
-    } else {
-      // Add new
-      const newItem: EventItem = {
-        id: `ev_${Date.now()}`,
-        title: data.title || '',
-        alias: data.alias || '',
-        summary: data.summary || '',
-        content: data.content || '',
-        image: data.image || '',
-        time_event: data.time_event || '',
-        end_time: data.end_time || '',
-        place: data.place || '',
-        specific_time: data.specific_time || '',
-        chu_de: data.chu_de || '',
-        link_dangky: data.link_dangky || '',
-        editorial_status: data.published ? 'published' : 'draft',
-        event_related: data.event_related || [],
-        news_related: data.news_related || [],
-        products_related: data.products_related || [],
-        is_hot: data.is_hot ?? false,
-        show_in_home: data.show_in_home ?? true,
-        published: data.published ?? false,
-        ordering: data.ordering || 1,
-        seo_title: data.seo_title || '',
-        seo_keyword: data.seo_keyword || '',
-        seo_description: data.seo_description || '',
-        created_time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      };
-      setEvents((current) => [newItem, ...current]);
-      showToast(`Đã tạo sự kiện mới thành công!`);
-    }
-
+    const ok = await persist(
+      saveEventAction(workspaceLocale, isEdit ? Number(eventToEdit?.id) : null, {
+        title: formData.title || '',
+        alias: formData.alias || '',
+        chuDe: formData.chu_de || '',
+        place: formData.place || '',
+        timeEvent: formData.time_event || '',
+        endTime: formData.end_time || '',
+        specificTime: formData.specific_time || '',
+        linkDangky: formData.link_dangky || '',
+        summary: formData.summary || '',
+        content: formData.content || '',
+        image: formData.image || '',
+        tags: Array.isArray(formData.tags) ? formData.tags : [],
+        published: formData.published ?? false,
+        isHot: formData.is_hot ?? false,
+        showInHomepage: formData.show_in_home ?? false,
+        ordering: formData.ordering ?? 1,
+        seoTitle: formData.seo_title || '',
+        seoKeyword: formData.seo_keyword || '',
+        seoDescription: formData.seo_description || '',
+        tawkTo: formData.tawk_to || '',
+        productsRelated: formData.products_related || [],
+        newsRelated: formData.news_related || [],
+        eventRelated: formData.event_related || [],
+      })
+    );
+    if (!ok) return;
+    showToast(isEdit ? `Đã cập nhật sự kiện "${formData.title}"!` : 'Đã tạo sự kiện mới thành công!');
     setIsFormOpen(false);
     setEventToEdit(null);
+    router.refresh();
   };
 
   // Editorial status badge helper
@@ -330,6 +389,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
       <>
         <EventsFormView
           eventToEdit={eventToEdit}
+          locale={workspaceLocale}
           relatedEvents={data?.events ?? []}
           relatedArticles={data?.relatedArticles ?? []}
           relatedProducts={data?.relatedProducts ?? []}
@@ -385,6 +445,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ workspaceLocale, d
         actions={<>
           <CmsButton
             onClick={handleCreateNew}
+            disabled={!capabilities.create}
             variant="primary"
             size="sm"
             leadingIcon={<Plus />}

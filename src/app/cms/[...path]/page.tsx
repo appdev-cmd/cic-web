@@ -8,6 +8,7 @@ import { SalesOwnersRoute } from '@/cms/modules/sales_owners/SalesOwnersRoute';
 import { ProductsRoute } from '@/cms/modules/products/ProductsRoute';
 import { NewsRoute } from '@/cms/modules/news/NewsRoute';
 import { ServicesRoute } from '@/cms/modules/services/ServicesRoute';
+import { EventsRoute } from '@/cms/modules/events/EventsRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
@@ -21,6 +22,8 @@ export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...pa
     ? <ProductsRoute />
     : cmsPath === '/cms/services'
     ? <ServicesRoute />
+    : (cmsPath === '/cms/events' || cmsPath.startsWith('/cms/events/'))
+    ? <EventsRoute />
     : isProductCategoryCmsPath(cmsPath)
     ? <ProductCategoriesRoute />
     : isProductBrandCmsPath(cmsPath)
