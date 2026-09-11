@@ -21,18 +21,29 @@ import {
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { findPageBuilderImage, pageBuilderImages, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 
+import { SearchableMultiSelect } from '../../components/SearchableSelect';
+import type { CmsLocale } from '../../data/CmsDataSource';
+
 interface ServiceFormViewProps {
   service: ServiceItem;
+  locale?: CmsLocale;
+  canEdit?: boolean;
+  canPublish?: boolean;
   onBack: () => void;
   onSave: (updated: ServiceItem) => void;
   onOpenPreview: (item: ServiceItem) => void;
+  productOptions?: Array<{ id: string; label: string; image?: string; published?: boolean }>;
 }
 
 export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
   service,
+  locale = 'vi',
+  canEdit = true,
+  canPublish = true,
   onBack,
   onSave,
   onOpenPreview,
+  productOptions = [],
 }) => {
   const [formData, setFormData] = useState<ServiceItem>({ ...service });
   const [lastAutosaved, setLastAutosaved] = useState<string>('vừa xong');
@@ -135,22 +146,29 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
           </span>
 
           <button
+            type="button"
             onClick={() => onOpenPreview(formData)}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 cursor-pointer"
           >
             <Eye className="w-3.5 h-3.5" /> Xem trước
           </button>
 
           <button
+            type="button"
+            disabled={!canEdit}
             onClick={handleSaveDraft}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white transition-colors sm:flex-none dark:bg-slate-700"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none dark:bg-slate-700 cursor-pointer"
+            title={canEdit ? 'Lưu bản nháp dịch vụ' : 'Bạn không có quyền chỉnh sửa dịch vụ'}
           >
             <Save className="w-3.5 h-3.5" /> Lưu nháp
           </button>
 
           <button
+            type="button"
+            disabled={!canPublish}
             onClick={handlePublish}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-orange-700 sm:flex-none"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none cursor-pointer"
+            title={canPublish ? 'Xuất bản dịch vụ' : 'Bạn không có quyền xuất bản dịch vụ'}
           >
             <CheckCircle2 className="w-3.5 h-3.5" /> Xuất bản
           </button>
@@ -237,6 +255,15 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
                   onChange={(e) => handleChange('tags', e.target.value)}
                   placeholder="Ví dụ: BIM, tư vấn, chuyển đổi số"
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sản phẩm liên quan</label>
+                <SearchableMultiSelect
+                  options={productOptions}
+                  selectedIds={formData.related_product_ids ?? []}
+                  onChange={(ids) => handleChange('related_product_ids', ids)}
+                  placeholder="Chọn sản phẩm liên quan..."
                 />
               </div>
             </div>
@@ -420,11 +447,12 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
 
       {isMediaPickerOpen && (
         <PageMediaPickerModal
-          currentId={pageBuilderImages.find((asset) => asset.url === formData.thumbnail_url || asset.thumbnail_url === formData.thumbnail_url)?.id || ''}
+          currentId={formData.thumbnail_url || ''}
+          returnValue="url"
+          locale={locale}
           onClose={() => setIsMediaPickerOpen(false)}
-          onConfirm={(mediaId) => {
-            const asset = findPageBuilderImage(mediaId);
-            if (asset) handleChange('thumbnail_url', asset.url);
+          onConfirm={(mediaUrl) => {
+            if (mediaUrl) handleChange('thumbnail_url', mediaUrl);
           }}
         />
       )}

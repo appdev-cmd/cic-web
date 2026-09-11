@@ -45,10 +45,18 @@ import { ActivityLogDrawer } from './ActivityLogDrawer';
 import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { UsedByDrawer } from './UsedByDrawer';
 import { RelatedContactsDrawer } from './RelatedContactsDrawer';
+import {
+  saveServiceAction,
+  setServicesPublishedAction,
+  trashServiceAction,
+  trashServicesAction,
+} from '@/features/services/server/actions';
+import { useRouter } from 'next/navigation';
 
 interface ServicesManagerProps {
   workspaceLocale: CmsLocale;
   data?: ServicesModuleData;
+  capabilities?: { create: boolean; edit: boolean; delete: boolean };
 }
 
 const editorialStatusLabels: Record<EditorialStatus, string> = {
@@ -56,8 +64,18 @@ const editorialStatusLabels: Record<EditorialStatus, string> = {
   published: 'Đã xuất bản',
 };
 
-export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocale, data }) => {
-  const [services, setServices] = useState<ServiceItem[]>(() => (data?.services ?? []).map((item) => ({ ...item, editorial_status: item.editorial_status === 'published' ? 'published' : 'draft' })));
+export const ServicesManager: React.FC<ServicesManagerProps> = ({
+  workspaceLocale,
+  data,
+  capabilities = { create: true, edit: true, delete: true },
+}) => {
+  const router = useRouter();
+  const [services, setServices] = useState<ServiceItem[]>(() =>
+    (data?.services ?? []).map((item) => ({
+      ...item,
+      editorial_status: item.editorial_status === 'published' ? 'published' : 'draft',
+    }))
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Search & Filter state
@@ -82,8 +100,19 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
+
+  const persist = async (operation: Promise<unknown>): Promise<boolean> => {
+    try {
+      await operation;
+      return true;
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Thao tác không thành công.');
+      return false;
+    }
+  };
+
 
   // Filtered Services list
   const filteredServices = useMemo(() => {
@@ -144,8 +173,12 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
 
   // Action Handlers
   const handleCreateNew = () => {
+    if (!capabilities.create) {
+      showToast('Bạn không có quyền tạo dịch vụ.');
+      return;
+    }
     const newService: ServiceItem = {
-      id: `srv_${Date.now()}`,
+      id: '',
       title: '',
       slug: '',
       summary: '',
@@ -160,14 +193,35 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
 
-    setServices([newService, ...services]);
     setEditingService(newService);
   };
 
-  const handleSaveServiceFromForm = (updated: ServiceItem) => {
-    setServices((prev) =>
-      prev.map((item) => (item.id === updated.id ? updated : item))
+  const handleSaveServiceFromForm = async (updated: ServiceItem) => {
+    if (updated.id ? !capabilities.edit : !capabilities.create) {
+      showToast('Bạn không có quyền lưu dịch vụ.');
+      return;
+    }
+    const ok = await persist(
+      saveServiceAction(workspaceLocale, updated.id || null, {
+        title: updated.title,
+        alias: updated.slug,
+        summary: updated.summary,
+        content: updated.description,
+        tags: updated.tags ?? '',
+        image: updated.thumbnail_url,
+        seoTitle: updated.meta_title,
+        seoKeywords: updated.meta_keywords,
+        seoDescription: updated.meta_description,
+        published: updated.editorial_status === 'published',
+        ordering: updated.display_order,
+        relatedProductIds: updated.related_product_ids ?? [],
+      })
     );
+    if (!ok) return;
+
+    showToast(updated.editorial_status === 'published' ? 'Đã xuất bản dịch vụ.' : 'Đã lưu bản nháp.');
+    setEditingService(null);
+    router.refresh();
   };
 
   // If in Form View
@@ -176,11 +230,14 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
       <>
         <ServiceFormView
           service={editingService}
+          locale={workspaceLocale}
+          canEdit={capabilities.edit}
+          canPublish={capabilities.edit}
           onBack={() => setEditingService(null)}
           onSave={(updated) => {
-            handleSaveServiceFromForm(updated);
-            setEditingService(updated);
+            void handleSaveServiceFromForm(updated);
           }}
+          productOptions={data?.productOptions ?? []}
           onOpenPreview={(item) => setPreviewService(item)}
         />
         <ServicePreviewModal
@@ -210,6 +267,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
         meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{filteredServices.length} dịch vụ</span>}
         actions={<CmsButton
           onClick={handleCreateNew}
+          disabled={!capabilities.create}
           variant="primary"
           size="sm"
           leadingIcon={<Plus />}
@@ -298,35 +356,47 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
             label: 'Xuất bản',
             icon: FileCheck,
             variant: 'primary',
-            onClick: () => {
-              setServices((prev) =>
-                prev.map((s) => (selectedIds.includes(s.id) ? { ...s, editorial_status: 'published' } : s))
-              );
+            onClick: async () => {
+              if (!capabilities.edit) {
+                showToast('Bạn không có quyền cập nhật dịch vụ.');
+                return;
+              }
+              const ok = await persist(setServicesPublishedAction(workspaceLocale, selectedIds, true));
+              if (!ok) return;
               showToast(`Đã xuất bản ${selectedIds.length} dịch vụ!`);
               setSelectedIds([]);
+              router.refresh();
             },
           },
           {
             label: 'Chuyển bản nháp',
             icon: RotateCcw,
-            onClick: () => {
-              setServices((prev) =>
-                prev.map((s) => (selectedIds.includes(s.id) ? { ...s, editorial_status: 'draft' } : s))
-              );
+            onClick: async () => {
+              if (!capabilities.edit) {
+                showToast('Bạn không có quyền cập nhật dịch vụ.');
+                return;
+              }
+              const ok = await persist(setServicesPublishedAction(workspaceLocale, selectedIds, false));
+              if (!ok) return;
               showToast(`Đã chuyển ${selectedIds.length} dịch vụ về Bản nháp!`);
               setSelectedIds([]);
+              router.refresh();
             },
           },
           {
             label: 'Xóa',
             icon: Trash2,
             variant: 'danger',
-            onClick: () => {
-              setServices((prev) =>
-                prev.map((s) => (selectedIds.includes(s.id) ? { ...s, is_deleted: true } : s))
-              );
+            onClick: async () => {
+              if (!capabilities.delete) {
+                showToast('Bạn không có quyền xóa dịch vụ.');
+                return;
+              }
+              const ok = await persist(trashServicesAction(workspaceLocale, selectedIds));
+              if (!ok) return;
               showToast(`Đã di chuyển ${selectedIds.length} dịch vụ vào Thùng rác!`);
               setSelectedIds([]);
+              router.refresh();
             },
           },
         ]}
@@ -381,7 +451,13 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                           />
                           <div className="space-y-0.5 max-w-xs">
                             <h4
-                              onClick={() => setEditingService(item)}
+                              onClick={() => {
+                                if (!capabilities.edit) {
+                                  setPreviewService(item);
+                                  return;
+                                }
+                                setEditingService(item);
+                              }}
                               className="font-bold text-slate-900 dark:text-slate-100 hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer line-clamp-1"
                             >
                               {item.title}
@@ -423,7 +499,14 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                           />
 
                           <CmsIconButton
-                            onClick={() => setEditingService(item)}
+                            onClick={() => {
+                              if (!capabilities.edit) {
+                                showToast('Bạn không có quyền chỉnh sửa dịch vụ.');
+                                return;
+                              }
+                              setEditingService(item);
+                            }}
+                            disabled={!capabilities.edit}
                             icon={<Edit />}
                             size="sm"
                             aria-label="Chỉnh sửa dịch vụ"
@@ -431,7 +514,17 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({ workspaceLocal
                           />
 
                           <CmsIconButton
-                            onClick={() => setServices((prev) => prev.map((service) => service.id === item.id ? { ...service, is_deleted: true } : service))}
+                            onClick={async () => {
+                              if (!capabilities.delete) {
+                                showToast('Bạn không có quyền xóa dịch vụ.');
+                                return;
+                              }
+                              const ok = await persist(trashServiceAction(workspaceLocale, item.id));
+                              if (!ok) return;
+                              showToast(`Đã chuyển dịch vụ "${item.title}" vào Thùng rác!`);
+                              router.refresh();
+                            }}
+                            disabled={!capabilities.delete}
                             icon={<Trash2 />}
                             size="sm"
                             variant="danger"

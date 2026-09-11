@@ -1,5 +1,6 @@
 export interface ServiceDetail {
   id: string;
+  slug?: string;
   title: string;
   tagline?: string;
   shortDesc: string;

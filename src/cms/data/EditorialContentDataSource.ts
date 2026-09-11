@@ -18,7 +18,8 @@ export interface NewsModuleData {
 }
 
 export interface ServicesModuleData {
-  services: ServiceItem[];
+    services: ServiceItem[];
+    productOptions?: Array<{ id: string; label: string; image?: string; published?: boolean }>;
   activityLogs: ServiceActivityLog[];
   versions: ServiceVersion[];
   usedByReferences: ServiceUsedByReference[];

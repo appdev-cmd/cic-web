@@ -21,6 +21,7 @@ export interface ServiceItem {
   created_at: string;
   updated_at: string;
   is_deleted?: boolean;
+  related_product_ids?: string[];
 }
 
 export interface ServiceVersion {

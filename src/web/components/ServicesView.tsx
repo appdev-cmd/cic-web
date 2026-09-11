@@ -1,3 +1,4 @@
+'use client';
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -32,6 +33,8 @@ import { getServicesData } from '../features/services/servicesData';
 import type { ServiceDetail } from '../features/services/types';
 import { getProductsData } from '../features/products/productsData';
 import { Product } from '@shared/types';
+import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
+import { Loader2 } from 'lucide-react';
 
 interface ServicesViewProps {
   key?: string | number;
@@ -39,6 +42,10 @@ interface ServicesViewProps {
   onNavigateHome?: () => void;
   onOpenConsultation?: () => void;
   previewService?: ServiceDetail;
+  services?: ServiceDetail[];
+  products?: Product[];
+  onNavigateToService?: (id: string) => void;
+  onNavigateToList?: () => void;
 }
 
 const cleanCmsHtml = (htmlString: string): string => {
@@ -91,14 +98,17 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
   return service.tagline || service.title;
 };
 
-export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewService }: ServicesViewProps) => {
+export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewService, services, products, onNavigateToService, onNavigateToList }: ServicesViewProps) => {
   const servicesData = useMemo(() => {
-    const services = getServicesData().services;
-    return previewService ? [previewService, ...services.filter((item) => item.id !== previewService.id)] : services;
-  }, [previewService]);
-  const { products: productsData } = useMemo(getProductsData, []);
+    const source = services ?? getServicesData().services;
+    return previewService ? [previewService, ...source.filter((item) => item.id !== previewService.id)] : source;
+  }, [previewService, services]);
+  const staticProducts = useMemo(getProductsData, []);
+  const productsData = products ?? staticProducts.products;
   const [activeServiceId, setActiveServiceId] = useState<string | null>(initialServiceId);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullname: '',
     phone: '',
@@ -164,8 +174,8 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
     if (activeService.relatedProductIds && activeService.relatedProductIds.length > 0) {
       return productsData.filter(p => activeService.relatedProductIds!.includes(p.id));
     }
-    return productsData.slice(0, 4);
-  }, [activeService]);
+    return products ? [] : productsData.slice(0, 4);
+  }, [activeService, productsData, products]);
 
   const relatedServices = useMemo(() => {
     if (!activeService) return [];
@@ -174,21 +184,56 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
     return [...sameCategory, ...otherServices].slice(0, 3);
   }, [activeService, servicesData]);
 
-  const handleFormSubmit = (e: FormEvent) => {
+  const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullname || !formData.phone) {
-      alert("Vui lòng điền họ tên và số điện thoại liên hệ.");
+      setSubmitError("Vui lòng điền họ tên và số điện thoại liên hệ.");
       return;
     }
-    setFormSubmitted(true);
-    setTimeout(() => {
-      setFormSubmitted(false);
-      setFormData({ fullname: '', phone: '', email: '', service: 'Tư vấn BIM', notes: '' });
-    }, 5000);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const pageTitle = activeService ? activeService.title : 'Danh mục dịch vụ';
+      const pageId = activeService ? activeService.id : 'catalog';
+      const pageUrl = typeof window !== 'undefined' ? window.location.href : '/services';
+
+      await submitCustomerInteractionAction({
+        formId: 'services_consultation',
+        formName: activeService ? `Tư vấn Dịch vụ: ${activeService.title}` : 'Đăng ký Tư vấn & Demo Dịch vụ',
+        values: {
+          fullname: formData.fullname,
+          phone: formData.phone,
+          email: formData.email,
+          service: formData.service || (activeService ? activeService.title : 'Tư vấn chung'),
+          notes: formData.notes
+        },
+        source: {
+          pageType: activeService ? 'service_detail' : 'services_catalog',
+          pageId,
+          pageUrl,
+          pageTitle,
+          ctaId: 'services_form_submit',
+          ctaName: 'Gửi Yêu Cầu Tư Vấn'
+        }
+      });
+
+      setFormSubmitted(true);
+      setFormData({ fullname: '', phone: '', email: '', service: activeService?.title || 'Tư vấn BIM', notes: '' });
+      setTimeout(() => {
+        setFormSubmitted(false);
+      }, 6000);
+    } catch (err: any) {
+      console.error('[ServicesView] Submit error:', err);
+      setSubmitError(err?.message || 'Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleServiceSelect = (id: string) => {
     setActiveServiceId(id);
+    onNavigateToService?.(id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -379,6 +424,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
                         <div className="w-full h-[1px] bg-slate-100"></div>
 
+                        {submitError && (
+                          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
+                            {submitError}
+                          </div>
+                        )}
+
                         {formSubmitted ? (
                           <motion.div 
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -464,9 +515,18 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
                             <button 
                               type="submit"
-                              className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs shadow-md shadow-orange-600/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                              disabled={isSubmitting}
+                              className="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-[8px] font-bold uppercase tracking-wider text-xs shadow-md shadow-orange-600/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
                             >
-                              Gửi Yêu Cầu Tư Vấn <Send size={14} />
+                              {isSubmitting ? (
+                                <>
+                                  <Loader2 size={14} className="animate-spin" /> Đang gửi yêu cầu...
+                                </>
+                              ) : (
+                                <>
+                                  Gửi Yêu Cầu Tư Vấn <Send size={14} />
+                                </>
+                              )}
                             </button>
 
                           </form>
@@ -523,7 +583,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
               {/* Back Button & Breadcrumbs */}
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/90 pb-5">
                 <button
-                  onClick={() => setActiveServiceId(null)}
+                  onClick={() => { setActiveServiceId(null); onNavigateToList?.(); }}
                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-800 hover:text-orange-600 hover:border-orange-500 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer shadow-xs"
                 >
                   <ArrowLeft size={14} /> Trở về danh mục dịch vụ
@@ -532,7 +592,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                   <span className="hover:text-orange-600 cursor-pointer" onClick={() => onNavigateHome?.()}>Trang chủ</span>
                   <ChevronRight size={12} />
-                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => setActiveServiceId(null)}>Dịch vụ</span>
+                  <span className="hover:text-orange-600 cursor-pointer" onClick={() => { setActiveServiceId(null); onNavigateToList?.(); }}>Dịch vụ</span>
                   <ChevronRight size={12} />
                   <span className="text-slate-800 truncate max-w-[200px]">{activeService?.title}</span>
                 </div>
@@ -584,6 +644,12 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                       </div>
 
                       <div className="w-full h-[1px] bg-slate-100 my-3"></div>
+
+                      {submitError && (
+                        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
+                          {submitError}
+                        </div>
+                      )}
 
                       {formSubmitted ? (
                         <div className="bg-orange-600 p-5 text-center space-y-2 rounded-[10px]">
@@ -641,9 +707,18 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
 
                           <button 
                             type="submit"
-                            className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-orange-600/10"
+                            disabled={isSubmitting}
+                            className="w-full py-2.5 bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-[8px] font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-orange-600/10"
                           >
-                            Đăng Ký Tư Vấn <Send size={14} />
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 size={14} className="animate-spin" /> Đang gửi yêu cầu...
+                              </>
+                            ) : (
+                              <>
+                                Đăng Ký Tư Vấn <Send size={14} />
+                              </>
+                            )}
                           </button>
                         </form>
                       )}

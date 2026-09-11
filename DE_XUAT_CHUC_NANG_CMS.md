@@ -284,7 +284,7 @@ Trạng thái sắp diễn ra, đang diễn ra hoặc đã kết thúc được 
 - Quản lý mô tả, hình ảnh và thông tin hỗ trợ tìm kiếm.
 - Gắn sản phẩm liên quan; xem yêu cầu khách hàng và vị trí đang sử dụng dịch vụ.
 - Theo dõi phiên bản và hoạt động chỉnh sửa.
-- Khi sửa một dịch vụ đã công bố, hệ thống tạo bản nháp làm việc mới; phiên bản đang công khai vẫn được giữ cho đến lần công bố tiếp theo.
+- Dịch vụ dùng workflow Draft/Published đơn giản như Tin tức: mỗi locale lưu một bản ghi hiện hành; `published = false` là Bản nháp và `published = true` là Đã xuất bản. Khi lưu thay đổi trên bản ghi đang Published, Website nhận nội dung mới ngay; muốn chuẩn bị nội dung chưa công khai, người vận hành phải chuyển bản ghi về Draft trước khi sửa. Lịch sử thay đổi đọc từ Audit chung, không duy trì snapshot phiên bản riêng.
 - Tìm kiếm, lọc, lưu nháp, xem trước, công bố hoặc chuyển vào thùng rác.
 
 **Cách sử dụng:**

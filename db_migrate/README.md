@@ -104,6 +104,7 @@ psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260908_pr
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260909_sales_owners_hardening.sql
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260910_news_categories_hardening.sql
 psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260910_news_hard_data_resolution.sql
+psql "$env:DATABASE_URL" -v ON_ERROR_STOP=1 -f db_migrate/migrations/20260911_services_hardening.sql
 ```
 
 Nếu đang dựng một database mới và chắc chắn chưa file nào được áp dụng, có thể

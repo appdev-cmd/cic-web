@@ -1,6 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 import { notFound } from 'next/navigation';
-import { getPublishedServiceBySlug } from '@/features/services/server/queries';
-import { LegacyHtml } from '@/web/components/LegacyHtml';
-export const dynamic = 'force-dynamic';
-export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) { const service = await getPublishedServiceBySlug((await params).slug); if (!service) notFound(); return <article className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16"><h1 className="text-3xl font-extrabold sm:text-4xl">{service.title}</h1>{service.image && <img src={service.image} alt={service.title} className="mt-8 h-auto w-full rounded-xl object-cover" />}{service.summary && <p className="mt-6 text-lg text-slate-600">{service.summary}</p>}<LegacyHtml html={service.content} className="mt-8" /></article>; }
+import { getPublishedServiceBySlug,getPublishedServiceProducts,listPublishedServices } from '@/features/services/server/queries';
+import { ServicesRuntimeView } from '@/web/features/services/ServicesRuntimeView';
+export const dynamic='force-dynamic';
+const view=(service:NonNullable<Awaited<ReturnType<typeof getPublishedServiceBySlug>>>)=>({id:service.id,slug:service.slug,title:service.title,tagline:service.summary,shortDesc:service.summary,category:'Dịch vụ CIC',image:service.image,htmlContent:service.content,relatedProductIds:service.relatedProductIds});
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}){const service=await getPublishedServiceBySlug((await params).slug,'vi');return service?{title:service.seoTitle||service.title,description:service.seoDescription||service.summary,keywords:service.seoKeywords}:{};}
+export default async function ServicePage({params}:{params:Promise<{slug:string}>}){const service=await getPublishedServiceBySlug((await params).slug,'vi');if(!service)notFound();const all=await listPublishedServices('vi'),products=await getPublishedServiceProducts('vi',service.relatedProductIds);return <ServicesRuntimeView services={[view(service),...all.filter(item=>item.id!==service.id).map(view)]} products={products} initialServiceId={service.id}/>;}

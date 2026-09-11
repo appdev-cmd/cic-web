@@ -237,7 +237,8 @@ Implementation 2026-09-09 dùng đúng projection trên. Mutation chỉ ghi `nam
 - `RELATION`: `cic_services_products_rel` and `_en` are the authority for ordered related Products. `category_id/category_*` are legacy denormalized values without a valid category master and must not become a selector/filter.
 - `LEGACY_UNUSED`: `source_website`, `hits`, `show_in_homepage`, `title_display`, `display_title`, `display_column`, `tags_group`, `rating_count`, `rating_sum`, `keywords`, `source`, `show_map`, `author`, `author_last`, `tawk_to` and technical `actflg/ctd*/mdf*/lstmdf`; preserve on PATCH/Trash restore.
 - Runtime verification: VI 9 rows and EN 6 rows, all published; 0 blank/duplicate normalized aliases; 0 image values; both Product junctions contain 0 rows. Existing alias indexes are not unique.
-- `UNKNOWN`: exact persisted representation of simultaneous working Draft + current Published Service. Functional docs require it, but no Service revision store/pointer or proven generic shared adapter exists; this blocks implementation until the persistence contract is approved.
+- `SYSTEM_MANAGED` workflow decision 2026-09-11: Service dùng một row hiện hành như News; `published=false` là Draft, `published=true` là Published. Save trên row Published cập nhật public ngay; không có simultaneous working Draft, revision pointer hoặc version snapshot. Lịch sử dùng shared Audit.
+- Migration `20260911_services_hardening.sql` bảo vệ alias nonblank/unique normalized theo từng locale và đồng bộ identity sequence; không sửa content/status legacy.
 
 ## Menu và Media
 

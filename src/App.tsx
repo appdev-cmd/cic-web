@@ -17,6 +17,8 @@ import { ChatbotWidget } from '@web/components/ChatbotWidget';
 import { DesignTokensModal } from '@web/components/DesignTokensModal';
 
 import { CmsDashboard } from './cms/components/CmsDashboard';
+import { currentUserMock } from './cms/data/mockCmsData';
+import { cmsMenuGroups } from './cms/config/navigation';
 
 // View components
 import { HomeView } from '@web/components/HomeView';
@@ -108,10 +110,16 @@ export default function App() {
   };
 
   if (currentView === 'cms') {
-    return <CmsDashboard onSwitchToWebsite={() => {
-      window.history.pushState({}, '', '/');
-      setCurrentView('home');
-    }} />;
+    return (
+      <CmsDashboard
+        currentUser={currentUserMock}
+        menuGroups={cmsMenuGroups}
+        onSwitchToWebsite={() => {
+          window.history.pushState({}, '', '/');
+          setCurrentView('home');
+        }}
+      />
+    );
   }
 
   return (

@@ -1,13 +1,13 @@
 import 'server-only';
-import { getDatabaseClient } from '@/server/db/foundation';
+import { getPostgresClient } from '@/server/db/postgres';
 import { normalizeMediaUrl } from '@/shared/lib/content';
-const mapService = (row: Record<string, unknown>) => ({ id: String(row.id), title: String(row.title ?? row.name ?? ''), slug: String(row.alias ?? row.slug ?? row.id), summary: String(row.summary ?? row.description ?? ''), content: String(row.content ?? row.description ?? ''), image: normalizeMediaUrl(String(row.image ?? '')), category: String(row.category_name ?? row.category ?? '') });
-export async function listPublishedServices() { const rows = await getCmsServicesData(); return rows.filter((r) => r.published === true || r.status === 'published').map(mapService); }
-export async function getPublishedServiceBySlug(slug: string) { return (await listPublishedServices()).find((row) => row.slug === slug) ?? null; }
-export async function getCmsServicesData(locale: 'vi' | 'en' = 'vi') {
-  const db = await getDatabaseClient();
-  const table = locale === 'en' ? 'cic_services_en' : 'cic_services';
-  const { data, error } = await db.from(table).select('*').order('ordering', { ascending: true }).limit(200);
-  if (error) throw new Error('Unable to load services.');
-  return data ?? [];
-}
+import type { Product } from '@/shared/types';
+import type { ServiceLocale, ServiceViewModel } from '../types';
+
+const tables=(locale:ServiceLocale)=>locale==='en'?{service:'cic_services_en',relation:'cic_services_products_rel_en',product:'cic_products_en'}:{service:'cic_services',relation:'cic_services_products_rel',product:'cic_products'};
+const projection=(relation:string)=>`s.id,s.title,s.alias,s.summary,s.content,s.tags,s.image,s.published,s.ordering,s.seo_title,s.seo_keyword,s.seo_description,(SELECT array_agg(product_id ORDER BY ordering,product_id) FROM ${relation} WHERE service_id=s.id) related_product_ids`;
+const mapService=(row:Record<string,unknown>):ServiceViewModel=>({id:String(row.id),title:String(row.title??''),slug:String(row.alias??''),summary:String(row.summary??''),content:String(row.content??''),tags:String(row.tags??'').split(',').map(tag=>tag.trim()).filter(Boolean),image:normalizeMediaUrl(String(row.image??'')),published:row.published===true||Number(row.published)===1,ordering:Number(row.ordering??0),seoTitle:String(row.seo_title??''),seoKeywords:String(row.seo_keyword??''),seoDescription:String(row.seo_description??''),relatedProductIds:Array.isArray(row.related_product_ids)?row.related_product_ids.map(Number):[]});
+
+export async function listPublishedServices(locale:ServiceLocale='vi'){const sql=getPostgresClient(),t=tables(locale);const rows=await sql.unsafe(`SELECT ${projection(t.relation)} FROM ${t.service} s WHERE s.published=1 ORDER BY s.ordering,s.id`);return rows.map(mapService);}
+export async function getPublishedServiceBySlug(slug:string,locale:ServiceLocale='vi'){const sql=getPostgresClient(),t=tables(locale);const rows=await sql.unsafe(`SELECT ${projection(t.relation)} FROM ${t.service} s WHERE s.published=1 AND lower(btrim(s.alias))=lower(btrim($1))`,[slug]);if(rows.length>1)throw new Error('Alias Dịch vụ không còn duy nhất.');return rows[0]?mapService(rows[0]):null;}
+export async function getPublishedServiceProducts(locale:ServiceLocale,ids:number[]):Promise<Product[]>{if(!ids.length)return[];const sql=getPostgresClient(),t=tables(locale);const rows=await sql.unsafe(`SELECT id,name,summary,description,tags,image,icon,price,manufactory FROM ${t.product} WHERE id=ANY($1::int[]) AND published=true ORDER BY array_position($1::int[],id)`,[ids]);return rows.map(row=>({id:Number(row.id),name:String(row.name??''),price:String(row.price??''),description:String(row.description??''),desc:String(row.summary??''),field:'',brand:String(row.manufactory??''),app:'',tags:String(row.tags??'').split(',').map(tag=>tag.trim()).filter(Boolean),img:normalizeMediaUrl(String(row.image??'')),icon:normalizeMediaUrl(String(row.icon??''))}));}
