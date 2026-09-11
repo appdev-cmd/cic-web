@@ -1,32 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 @import "tailwindcss" source(none);
 @source ".";
-@source "../shared/components";
-@source "../shared/ui";
+@source "../shared";
 @source "../cms";
-@source "../web/components/Header.tsx";
-@source "../web/components/Footer.tsx";
-@source "../web/components/PrivacyPolicyView.tsx";
-@source "../web/components/LegalArticleLayout.tsx";
-@source "../web/components/TermsOfUseView.tsx";
-@source "../web/components/NotFoundView.tsx";
-@source "../web/components/HomeView.tsx";
-@source "../web/components/HomeEcosystemSection.tsx";
-@source "../web/components/AwardsSlider.tsx";
-@source "../web/components/ProductsView.tsx";
-@source "../web/components/ProductDetailView.tsx";
-@source "../web/components/NewsView.tsx";
-@source "../web/components/NewsRuntimeView.tsx";
-@source "../web/components/NewsTicker.tsx";
-@source "../web/components/NewsToc.tsx";
-@source "../web/components/NewsConsultationForm.tsx";
-@source "../web/components/NewsDetailActions.tsx";
-@source "../web/components/NewsRelatedSections.tsx";
-@source "../web/features/news";
-@source "../app/(public)/news";
-@source "../web/components/EventsView.tsx";
-@source "../web/features/events";
-@source "../app/(public)/events";
+@source "../web";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -123,7 +100,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 p { overflow-wrap: anywhere; }
-a { color: inherit; }
 .prose-measure { max-width: var(--type-prose-measure); }
 
 ::selection {

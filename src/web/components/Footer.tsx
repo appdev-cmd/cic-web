@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useState } from 'react';
 import { 
   MapPin, 
   Phone, 
@@ -40,6 +41,18 @@ export const Footer = ({
   onResetEvents
 }: FooterProps) => {
   const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = getNavigationData();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim() || !newsletterEmail.includes('@')) return;
+    setNewsletterSubscribed(true);
+    setTimeout(() => {
+      setNewsletterSubscribed(false);
+      setNewsletterEmail('');
+    }, 4000);
+  };
   const resetByView: Partial<Record<PublicNavigationView, (() => void) | undefined>> = {
     products: onResetProducts,
     services: onResetServices,
@@ -77,14 +90,23 @@ export const Footer = ({
             </p>
             <div className="mb-8">
               <h4 className={`${typeCaption} text-white/60 mb-4`}>Đăng ký để nhận bản tin công nghệ mới nhất từ CIC</h4>
-              <form className="relative flex flex-col sm:flex-row gap-2" onSubmit={(e) => e.preventDefault()}>
-                <input 
-                  type="email" 
-                  placeholder="Nhập email liên hệ" 
-                  className="min-w-0 flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
-                />
-                <button className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction`}>Đăng ký</button>
-              </form>
+              {newsletterSubscribed ? (
+                <div className="bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 px-4 py-2.5 rounded-[8px] text-xs font-bold flex items-center gap-2">
+                  <span>✓</span> Đăng ký nhận bản tin thành công! Cảm ơn bạn.
+                </div>
+              ) : (
+                <form className="relative flex flex-col sm:flex-row gap-2" onSubmit={handleNewsletterSubmit}>
+                  <input 
+                    type="email" 
+                    required
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="Nhập email liên hệ" 
+                    className="min-w-0 flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
+                  />
+                  <button type="submit" className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction cursor-pointer`}>Đăng ký</button>
+                </form>
+              )}
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
               <a href="https://www.facebook.com/CICTechnologyandConsultancyVN/" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">

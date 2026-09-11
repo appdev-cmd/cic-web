@@ -82,7 +82,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 overflow-y-auto">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -97,13 +97,13 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-100 overflow-hidden z-10 rounded-[10px]"
+            className="relative w-full max-w-2xl bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-100 overflow-hidden z-10 rounded-[10px] my-auto flex flex-col max-h-[90vh]"
           >
             {/* Design accents */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-600 to-amber-500" />
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-600 to-amber-500 shrink-0" />
             
             {/* Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 bg-slate-50/50 shrink-0">
               <div>
                 <span className="text-[10px] font-black tracking-widest text-orange-600 uppercase">CIC - KẾT NỐI CHUYÊN GIA</span>
                 <h3 className="text-xl font-black text-slate-900 tracking-tight mt-0.5">
@@ -111,15 +111,16 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors rounded-[8px] focus:outline-none"
+                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors rounded-[8px] focus:outline-none cursor-pointer"
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Content Body */}
-            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto custom-scrollbar">
+            <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar flex-1">
               {!isSuccess ? (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <p className="text-xs text-slate-500 leading-relaxed">

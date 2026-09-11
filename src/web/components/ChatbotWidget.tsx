@@ -29,10 +29,12 @@ export function ChatbotWidget({ isOpen, onClose, onOpenConsultation, onNavigateV
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(() => 'session_' + Math.random().toString(36).substring(2, 9));
   const [webhookUrl, setWebhookUrl] = useState<string>(() => {
+    if (typeof window === 'undefined') return DEFAULT_WEBHOOK_URL;
     return localStorage.getItem('cic_chatbot_webhook_url') || DEFAULT_WEBHOOK_URL;
   });
   const [showSettings, setShowSettings] = useState(false);
   const [autoFallback, setAutoFallback] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
     const saved = localStorage.getItem('cic_chatbot_auto_fallback');
     return saved !== null ? saved === 'true' : true;
   });
