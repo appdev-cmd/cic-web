@@ -55,6 +55,27 @@
 
 * { box-sizing: border-box; }
 
+/* Interactive element cursors: Khôi phục con trỏ bàn tay (cursor: pointer) mặc định bị mất khi nâng cấp lên Tailwind CSS v4 */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="reset"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+select:not(:disabled),
+label[for],
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
 .public-shell-content[data-header-variant="solid"] {
   padding-top: var(--public-header-height);
 }

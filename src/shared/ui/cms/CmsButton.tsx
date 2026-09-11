@@ -39,7 +39,7 @@ export const CmsButton = React.forwardRef<HTMLButtonElement, CmsButtonProps>(fun
     <button
       ref={ref}
       type={type}
-      className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap border font-semibold leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`cursor-pointer inline-flex shrink-0 items-center justify-center whitespace-nowrap border font-semibold leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {leadingIcon && <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">{leadingIcon}</span>}
@@ -70,7 +70,7 @@ export const CmsIconButton = React.forwardRef<HTMLButtonElement, CmsIconButtonPr
       ref={ref}
       type={type}
       aria-label={props['aria-label'] ?? label}
-      className={`inline-flex shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4 ${size === 'sm' ? 'size-8' : 'size-9'} ${color} ${className}`}
+      className={`cursor-pointer inline-flex shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4 ${size === 'sm' ? 'size-8' : 'size-9'} ${color} ${className}`}
       {...props}
     >
       {icon ?? children}
