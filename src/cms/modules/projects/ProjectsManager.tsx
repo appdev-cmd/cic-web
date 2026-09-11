@@ -389,7 +389,7 @@ export const ProjectsManager: React.FC<Props> = ({
                     label="Chọn tất cả dự án trên trang"
                   />
                 </th>
-                <th className="min-w-[320px] px-4 py-3">Dự án</th>
+                <th className="min-w-[220px] max-w-[320px] px-4 py-3">Dự án</th>
                 <th className="min-w-[180px] px-4 py-3">Lĩnh vực / Giải pháp</th>
                 <th className="min-w-[180px] px-4 py-3">Khách hàng</th>
                 <th className="min-w-[130px] px-4 py-3">Thời gian</th>
@@ -413,24 +413,19 @@ export const ProjectsManager: React.FC<Props> = ({
                       label={`Chọn ${project.title}`}
                     />
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {project.image ? (
-                        <img src={project.image} alt="" className="h-12 w-20 rounded-lg object-cover" />
-                      ) : (
-                        <div className="h-12 w-20 rounded-lg bg-slate-100 dark:bg-slate-800" />
-                      )}
-                      <div className="min-w-0">
-                        <button
-                          onClick={() => setEditing(project)}
-                          className="line-clamp-2 text-left text-sm font-bold text-slate-900 hover:text-orange-600 dark:text-white cursor-pointer"
-                        >
-                          {project.title}
-                        </button>
-                        <p className="mt-1 truncate font-mono text-[10px] text-slate-400">
-                          /{project.alias}
-                        </p>
-                      </div>
+                  <td className="px-4 py-3 max-w-[320px]">
+                    <div className="min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => setEditing(project)}
+                        title={project.title}
+                        className="block w-full truncate text-left text-sm font-bold text-slate-900 hover:text-orange-600 dark:text-white cursor-pointer transition-colors"
+                      >
+                        {project.title}
+                      </button>
+                      <p className="mt-0.5 truncate font-mono text-[10px] text-slate-400" title={`/${project.alias}`}>
+                        /{project.alias}
+                      </p>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-xs">
