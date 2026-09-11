@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { AlertCircle, ArrowLeft, Eye, Save } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Code2, Eye, LayoutTemplate, Save } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
+import { RichTextEditor } from '../static_pages/RichTextEditor';
 import {
   DOWNLOAD_VARIABLES,
   EmailAudience,
@@ -24,6 +25,10 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
   const [subject, setSubject] = useState(templateToEdit?.subject ?? '');
   const [content, setContent] = useState(templateToEdit?.content ?? '');
   const [status, setStatus] = useState<EmailTemplateStatus>(templateToEdit?.status ?? 'draft');
+  const [editorMode, setEditorMode] = useState<'richtext' | 'raw'>(() => {
+    // If content contains full legacy html table structure, default to raw mode, otherwise richtext
+    return templateToEdit?.content?.includes('<table') ? 'raw' : 'richtext';
+  });
   const [preview, setPreview] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const contentRef = useRef<HTMLTextAreaElement>(null);
@@ -36,12 +41,23 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
   }, [audience, event]);
 
   const insertToken = (token: string) => {
-    const field = contentRef.current;
-    if (!field) return setContent((current) => `${current}${current ? ' ' : ''}${token}`);
-    const start = field.selectionStart;
-    const end = field.selectionEnd;
-    setContent(`${content.slice(0, start)}${token}${content.slice(end)}`);
-    requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + token.length, start + token.length); });
+    if (editorMode === 'raw') {
+      const field = contentRef.current;
+      if (!field) return setContent((current) => `${current}${current ? ' ' : ''}${token}`);
+      const start = field.selectionStart;
+      const end = field.selectionEnd;
+      setContent(`${content.slice(0, start)}${token}${content.slice(end)}`);
+      requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + token.length, start + token.length); });
+    } else {
+      // In RichText mode, append or insert token cleanly into HTML content
+      setContent((current) => {
+        if (!current.trim()) return `<p>${token}</p>`;
+        if (current.endsWith('</p>')) {
+          return current.replace(/<\/p>$/, ` ${token}</p>`);
+        }
+        return `${current} ${token}`;
+      });
+    }
   };
 
   const submit = (e: React.FormEvent) => {
@@ -79,9 +95,70 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
             <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Sự kiện<select value={event} onChange={(e) => setEvent(e.target.value as EmailEvent)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">{EMAIL_EVENTS.map((item) => <option key={item.value} value={item.value}>{workspaceLocale === 'vi' ? item.label : item.labelEn}</option>)}</select></label>
             <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Đối tượng nhận<select value={audience} onChange={(e) => setAudience(e.target.value as EmailAudience)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800"><option value="customer">Khách hàng</option><option value="internal">Nội bộ</option></select></label>
           </div>
-          <label className="block space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Tiêu đề email <span className="text-red-500">*</span><input value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" /></label>
-          <label className="block space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">Nội dung email <span className="text-red-500">*</span><textarea ref={contentRef} value={content} onChange={(e) => setContent(e.target.value)} rows={15} className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 font-mono text-xs leading-6 text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" /></label>
-          <p className="text-xs text-slate-500">Mẫu email chỉ quản lý nội dung. Biểu mẫu quyết định mẫu được dùng và địa chỉ nhận thông báo; cấu hình hệ thống quản lý danh tính gửi.</p>
+          <label className="block space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+            Tiêu đề email <span className="text-red-500">*</span>
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            />
+          </label>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Nội dung email <span className="text-red-500">*</span>
+              </span>
+              <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditorMode('richtext')}
+                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                    editorMode === 'richtext'
+                      ? 'bg-white text-orange-600 shadow-xs dark:bg-slate-700 dark:text-orange-400'
+                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  <LayoutTemplate className="size-3.5" />
+                  Soạn thảo Rich Text
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditorMode('raw')}
+                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                    editorMode === 'raw'
+                      ? 'bg-white text-orange-600 shadow-xs dark:bg-slate-700 dark:text-orange-400'
+                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  <Code2 className="size-3.5" />
+                  Mã HTML / Văn bản thô
+                </button>
+              </div>
+            </div>
+
+            {editorMode === 'richtext' ? (
+              <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                <RichTextEditor
+                  value={content}
+                  onChange={(val) => setContent(val)}
+                  minHeight="320px"
+                />
+              </div>
+            ) : (
+              <textarea
+                ref={contentRef}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={15}
+                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs leading-6 text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            )}
+          </div>
+
+          <p className="text-xs text-slate-500">
+            Mẫu email quản lý nội dung gửi tự động. Bạn có thể định dạng font chữ, màu sắc, bảng biểu bằng trình soạn thảo Rich Text hoặc chuyển sang chế độ Mã HTML.
+          </p>
         </section>
 
         <aside className="h-fit rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 xl:sticky xl:top-20">
