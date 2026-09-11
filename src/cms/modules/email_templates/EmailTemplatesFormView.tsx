@@ -1,5 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { AlertCircle, ArrowLeft, Code2, Eye, LayoutTemplate, Save } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { AlertCircle, ArrowLeft, Eye, Save } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import {
@@ -25,13 +25,8 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
   const [subject, setSubject] = useState(templateToEdit?.subject ?? '');
   const [content, setContent] = useState(templateToEdit?.content ?? '');
   const [status, setStatus] = useState<EmailTemplateStatus>(templateToEdit?.status ?? 'draft');
-  const [editorMode, setEditorMode] = useState<'richtext' | 'raw'>(() => {
-    // If content contains full legacy html table structure, default to raw mode, otherwise richtext
-    return templateToEdit?.content?.includes('<table') ? 'raw' : 'richtext';
-  });
   const [preview, setPreview] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   const tokens = useMemo(() => {
     const base = VARIABLE_GROUPS.flatMap((group) => group.tokens);
@@ -41,23 +36,13 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
   }, [audience, event]);
 
   const insertToken = (token: string) => {
-    if (editorMode === 'raw') {
-      const field = contentRef.current;
-      if (!field) return setContent((current) => `${current}${current ? ' ' : ''}${token}`);
-      const start = field.selectionStart;
-      const end = field.selectionEnd;
-      setContent(`${content.slice(0, start)}${token}${content.slice(end)}`);
-      requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + token.length, start + token.length); });
-    } else {
-      // In RichText mode, append or insert token cleanly into HTML content
-      setContent((current) => {
-        if (!current.trim()) return `<p>${token}</p>`;
-        if (current.endsWith('</p>')) {
-          return current.replace(/<\/p>$/, ` ${token}</p>`);
-        }
-        return `${current} ${token}`;
-      });
-    }
+    setContent((current) => {
+      if (!current || !current.trim()) return `<p>${token}</p>`;
+      if (current.endsWith('</p>')) {
+        return current.replace(/<\/p>$/, ` ${token}</p>`);
+      }
+      return `${current} ${token}`;
+    });
   };
 
   const submit = (e: React.FormEvent) => {
@@ -105,59 +90,21 @@ export const EmailTemplatesFormView: React.FC<Props> = ({ templateToEdit, worksp
           </label>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                Nội dung email <span className="text-red-500">*</span>
-              </span>
-              <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setEditorMode('richtext')}
-                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
-                    editorMode === 'richtext'
-                      ? 'bg-white text-orange-600 shadow-xs dark:bg-slate-700 dark:text-orange-400'
-                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                  }`}
-                >
-                  <LayoutTemplate className="size-3.5" />
-                  Soạn thảo Rich Text
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditorMode('raw')}
-                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
-                    editorMode === 'raw'
-                      ? 'bg-white text-orange-600 shadow-xs dark:bg-slate-700 dark:text-orange-400'
-                      : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                  }`}
-                >
-                  <Code2 className="size-3.5" />
-                  Mã HTML / Văn bản thô
-                </button>
-              </div>
-            </div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Nội dung email <span className="text-red-500">*</span>
+            </label>
 
-            {editorMode === 'richtext' ? (
-              <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                <RichTextEditor
-                  value={content}
-                  onChange={(val) => setContent(val)}
-                  minHeight="320px"
-                />
-              </div>
-            ) : (
-              <textarea
-                ref={contentRef}
+            <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={15}
-                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs leading-6 text-slate-900 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                onChange={(val) => setContent(val)}
+                minHeight="520px"
               />
-            )}
+            </div>
           </div>
 
           <p className="text-xs text-slate-500">
-            Mẫu email quản lý nội dung gửi tự động. Bạn có thể định dạng font chữ, màu sắc, bảng biểu bằng trình soạn thảo Rich Text hoặc chuyển sang chế độ Mã HTML.
+            Mẫu email quản lý nội dung gửi tự động. Bạn có thể định dạng văn bản, chèn bảng, font chữ, màu sắc trực quan, hoặc bấm nút <strong>&quot;Source&quot;</strong> trên thanh công cụ CKEditor để xem và sửa trực tiếp mã HTML.
           </p>
         </section>
 
