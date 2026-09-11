@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
@@ -8,9 +8,10 @@ import type { ProjectListItemViewModel } from '@/features/projects/types';
 
 interface ProjectsRuntimeViewProps {
   projects: ProjectListItemViewModel[];
+  onSelectProject?: (id: string) => void;
 }
 
-export function ProjectsRuntimeView({ projects }: ProjectsRuntimeViewProps) {
+export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRuntimeViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('Tất cả');
   const [selectedSolution, setSelectedSolution] = useState('Tất cả');
@@ -25,15 +26,15 @@ export function ProjectsRuntimeView({ projects }: ProjectsRuntimeViewProps) {
 
   // Extract unique filter items
   const sectors = useMemo(
-    () => ['Tất cả', ...Array.from(new Set(projects.map((p) => p.sector).filter(Boolean))) as string[]],
+    () => ['Tất cả', ...(Array.from(new Set(projects.map((p) => p.sector).filter(Boolean))) as string[])],
     [projects]
   );
   const solutions = useMemo(
-    () => ['Tất cả', ...Array.from(new Set(projects.map((p) => p.solution).filter(Boolean))) as string[]],
+    () => ['Tất cả', ...(Array.from(new Set(projects.map((p) => p.solution).filter(Boolean))) as string[])],
     [projects]
   );
   const customers = useMemo(
-    () => ['Tất cả', ...Array.from(new Set(projects.map((p) => p.customerName).filter(Boolean))) as string[]],
+    () => ['Tất cả', ...(Array.from(new Set(projects.map((p) => p.customerName).filter(Boolean))) as string[])],
     [projects]
   );
 
@@ -162,10 +163,7 @@ export function ProjectsRuntimeView({ projects }: ProjectsRuntimeViewProps) {
 
               {/* Reset Filters */}
               <div className="md:col-span-1 flex justify-end">
-                {(searchQuery ||
-                  selectedSector !== 'Tất cả' ||
-                  selectedSolution !== 'Tất cả' ||
-                  selectedCustomer !== 'Tất cả') && (
+                {(searchQuery || selectedSector !== 'Tất cả' || selectedSolution !== 'Tất cả' || selectedCustomer !== 'Tất cả') && (
                   <button
                     onClick={resetFilters}
                     className="px-3 py-2 bg-slate-200 hover:bg-[#FC5115] hover:text-white text-slate-700 text-[10px] font-bold uppercase transition-colors whitespace-nowrap rounded-[8px] cursor-pointer"
@@ -184,7 +182,7 @@ export function ProjectsRuntimeView({ projects }: ProjectsRuntimeViewProps) {
             </div>
           </div>
 
-          {/* FULL IMAGE SHOWCASE GRID (STUDIO PORTFOLIO - ASYMMETRIC RHYTHM & HOVER OVERLAY) */}
+          {/* FULL IMAGE SHOWCASE GRID */}
           {paginatedProjects.length === 0 ? (
             <div className="text-center py-20 border border-dashed border-slate-300 space-y-4 rounded-[10px]">
               <p className="text-slate-500 font-medium text-sm">
@@ -203,14 +201,90 @@ export function ProjectsRuntimeView({ projects }: ProjectsRuntimeViewProps) {
                 const mod = idx % 4;
                 let spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]';
                 if (mod === 0) {
-                  spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // Row 1: Big
+                  spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]';
                 } else if (mod === 1) {
-                  spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // Row 1: Small
+                  spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]';
                 } else if (mod === 2) {
-                  spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]'; // Row 2: Small
+                  spanClass = 'col-span-12 md:col-span-5 h-[380px] lg:h-[440px]';
                 } else if (mod === 3) {
-                  spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]'; // Row 2: Big
+                  spanClass = 'col-span-12 md:col-span-7 h-[380px] lg:h-[440px]';
                 }
+
+                const cardContent = (
+                  <>
+                    {/* 1. Full Image background */}
+                    {project.image ? (
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.08]"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-800" />
+                    )}
+
+                    {/* 2. Default subtle bottom gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent transition-opacity duration-500 group-hover:opacity-0" />
+
+                    {/* Default state title badge at bottom */}
+                    <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        {project.sector && (
+                          <span className="px-2.5 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider rounded-[8px]">
+                            {project.sector}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">
+                          {project.timeDisplay}
+                        </span>
+                      </div>
+                      <h3 className="text-base lg:text-lg font-bold text-white leading-snug line-clamp-1">
+                        {project.title}
+                      </h3>
+                    </div>
+
+                    {/* 3. Full Hover Overlay */}
+                    <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 lg:p-8 flex flex-col justify-end">
+                      <div className="transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-3">
+                        <div className="w-8 h-0.5 bg-[#FC5115] rounded-[8px]" />
+
+                        <h3 className="text-base lg:text-xl font-bold text-white leading-snug line-clamp-2">
+                          {project.title}
+                        </h3>
+
+                        {project.summary && (
+                          <p className="text-sm text-slate-200 line-clamp-2 font-medium leading-relaxed max-w-3xl">
+                            {project.summary}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {project.sector && (
+                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                              {project.sector}
+                            </span>
+                          )}
+                          {project.solution && (
+                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                              {project.solution}
+                            </span>
+                          )}
+                          {project.customerName && (
+                            <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
+                              {project.customerName}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115]">
+                          <span>Xem chi tiết dự án</span>
+                          <ArrowRight size={16} className="transform group-hover:translate-x-2 transition-transform duration-300" />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
 
                 return (
                   <motion.div
@@ -221,87 +295,18 @@ export function ProjectsRuntimeView({ projects }: ProjectsRuntimeViewProps) {
                     transition={{ delay: idx * 0.08, duration: 0.6 }}
                     className={`relative overflow-hidden cursor-pointer group rounded-[10px] bg-slate-900 transition-all duration-500 group-hover/grid:opacity-50 hover:!opacity-100 ${spanClass}`}
                   >
-                    <Link href={`/projects/${project.slug}`} className="block w-full h-full">
-                      {/* 1. Full Image background */}
-                      {project.image ? (
-                        <img
-                          src={project.image}
-                          alt={project.title}
-                          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.08]"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-slate-800" />
-                      )}
-
-                      {/* 2. Default subtle bottom gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent transition-opacity duration-500 group-hover:opacity-0" />
-
-                      {/* Default state title badge at bottom */}
-                      <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 group-hover:opacity-0 group-hover:translate-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          {project.sector && (
-                            <span className="px-2.5 py-0.5 bg-[#FC5115] text-white text-[9px] font-bold uppercase tracking-wider rounded-[8px]">
-                              {project.sector}
-                            </span>
-                          )}
-                          <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">
-                            {project.timeDisplay}
-                          </span>
-                        </div>
-                        <h3 className="text-base lg:text-lg font-bold text-white leading-snug line-clamp-1">
-                          {project.title}
-                        </h3>
+                    {onSelectProject ? (
+                      <div
+                        onClick={() => onSelectProject(project.id)}
+                        className="block w-full h-full"
+                      >
+                        {cardContent}
                       </div>
-
-                      {/* 3. Full Hover Overlay - Smooth slide-up with dark backdrop & orange accents */}
-                      <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 lg:p-8 flex flex-col justify-end">
-                        <div className="transform translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out space-y-3">
-                          {/* Accent orange horizontal line */}
-                          <div className="w-8 h-0.5 bg-[#FC5115] rounded-[8px]" />
-
-                          {/* Project Title */}
-                          <h3 className="text-base lg:text-xl font-bold text-white leading-snug line-clamp-2">
-                            {project.title}
-                          </h3>
-
-                          {/* 1-Line Description */}
-                          {project.summary && (
-                            <p className="text-sm text-slate-200 line-clamp-2 font-medium leading-relaxed max-w-3xl">
-                              {project.summary}
-                            </p>
-                          )}
-
-                          {/* Tag pills */}
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            {project.sector && (
-                              <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
-                                {project.sector}
-                              </span>
-                            )}
-                            {project.solution && (
-                              <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
-                                {project.solution}
-                              </span>
-                            )}
-                            {project.customerName && (
-                              <span className="px-3 py-1 bg-white/20 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-[8px]">
-                                {project.customerName}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Orange Accent CTA with arrow */}
-                          <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115]">
-                            <span>Xem chi tiết dự án</span>
-                            <ArrowRight
-                              size={16}
-                              className="transform group-hover:translate-x-2 transition-transform duration-300"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                    ) : (
+                      <Link href={`/projects/${project.slug}`} className="block w-full h-full">
+                        {cardContent}
+                      </Link>
+                    )}
                   </motion.div>
                 );
               })}
