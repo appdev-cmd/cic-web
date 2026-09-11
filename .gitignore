@@ -14,3 +14,6 @@ coverage/
 db_migrate/cic14005_cic_fs.sql
 db_migrate/export_data.sql
 db_migrate/__pycache__/
+
+# Local legacy media files
+images/
