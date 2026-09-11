@@ -24,6 +24,9 @@
 @source "../web/components/NewsRelatedSections.tsx";
 @source "../web/features/news";
 @source "../app/(public)/news";
+@source "../web/components/EventsView.tsx";
+@source "../web/features/events";
+@source "../app/(public)/events";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

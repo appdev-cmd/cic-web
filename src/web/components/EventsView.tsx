@@ -853,11 +853,11 @@ export const EventsView: React.FC<EventsViewProps> = ({
                 </div>
 
                 {/* RELATED EVENTS & PRODUCTS CONTAINER */}
-                <div className="lg:col-span-12 mt-1 pt-5 border-t border-slate-200 space-y-6">
+                <div className="lg:col-span-12 mt-8 pt-8 sm:mt-12 sm:pt-10 border-t border-slate-200 space-y-10 sm:space-y-12">
                   {/* SỰ KIỆN LIÊN QUAN */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 sm:space-y-5">
                     <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Sự kiện liên quan</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
                       {eventsData
                         .filter(e => e.id !== selectedEvent.id)
                         .slice(0, 4)
@@ -868,7 +868,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                               setSelectedEvent(item);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
-                            className="bg-white hover:bg-white rounded-xl border border-slate-200/80 p-2.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group space-y-2.5"
+                            className="bg-white hover:bg-white rounded-xl border border-slate-200/80 p-3 hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group space-y-2.5 flex flex-col justify-between"
                           >
                             <div className="aspect-[16/9] bg-slate-100 overflow-hidden rounded-lg">
                               <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" />
@@ -895,9 +895,9 @@ export const EventsView: React.FC<EventsViewProps> = ({
                   </div>
 
                   {/* SẢN PHẨM LIÊN QUAN */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 sm:space-y-5">
                     <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Sản phẩm liên quan</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
                       {productsData.slice(0, 4).map((prod) => (
                         <div
                           key={prod.id}
