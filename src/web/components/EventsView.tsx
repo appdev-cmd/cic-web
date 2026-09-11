@@ -124,25 +124,52 @@ export const EventsView: React.FC<EventsViewProps> = ({
   // Countdown timer for hero & detail view
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Identify Hero Event (featured or first upcoming)
-  const heroEvent = eventsData.find(e => e.isFeatured && e.status === 'upcoming') || 
-                    eventsData.find(e => e.status === 'upcoming') || 
-                    eventsData[0];
+  // Hero Events Slider list: Featured events first, then upcoming events, fallback to all events
+  const heroEvents = React.useMemo(() => {
+    const featured = eventsData.filter((e) => e.isFeatured);
+    const upcoming = eventsData.filter((e) => e.status === 'upcoming' && !e.isFeatured);
+    const combined = [...featured, ...upcoming];
+    if (combined.length > 0) return combined.slice(0, 5);
+    return eventsData.slice(0, 5);
+  }, [eventsData]);
+
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+  const [isHeroHovered, setIsHeroHovered] = useState(false);
+
+  // Active hero event based on current slide
+  const heroEvent = heroEvents[activeHeroIndex] || heroEvents[0] || eventsData[0];
+
+  // Hero slider auto-play
+  useEffect(() => {
+    if (isHeroHovered || heroEvents.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveHeroIndex((prev) => (prev + 1) % heroEvents.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isHeroHovered, heroEvents.length]);
 
   // Calculate days remaining helper
   const getDaysRemaining = (isoDateStr: string) => {
-    const diffMs = new Date(isoDateStr).getTime() - new Date().getTime();
+    if (!isoDateStr) return 0;
+    const date = new Date(isoDateStr).getTime();
+    if (isNaN(date)) return 0;
+    const diffMs = date - Date.now();
     const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     return days > 0 ? days : 0;
   };
 
-  // Update countdown timer for active event
+  // Update countdown timer for active event safely
   useEffect(() => {
     const targetEvent = selectedEvent || heroEvent;
-    if (!targetEvent) return;
+    if (!targetEvent || !targetEvent.startDate) return;
 
     const calculateTimeLeft = () => {
-      const difference = +new Date(targetEvent.startDate) - +new Date();
+      const targetTime = new Date(targetEvent.startDate).getTime();
+      if (isNaN(targetTime)) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+      const difference = Math.max(0, targetTime - Date.now());
       let left = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
       if (difference > 0) {
@@ -987,11 +1014,15 @@ export const EventsView: React.FC<EventsViewProps> = ({
               </div>
 
               {/* =========================================================
-                  TẦNG 1: HERO EVENT (SỰ KIỆN GẦN NHẤT / NỔI BẬT)
+                  TẦNG 1: HERO EVENT SLIDER (SỰ KIỆN NỔI BẬT & SẮP DIỄN RA)
                  ========================================================= */}
-              {heroEvent && statusFilter === 'all' && !searchTerm && (
-                <section className="bg-white border border-slate-200/80 rounded-[12px] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mb-8 group">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+              {heroEvents.length > 0 && statusFilter === 'all' && !searchTerm && (
+                <section 
+                  className="relative bg-white border border-slate-200/80 rounded-[12px] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mb-8 group"
+                  onMouseEnter={() => setIsHeroHovered(true)}
+                  onMouseLeave={() => setIsHeroHovered(false)}
+                >
+                  <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[360px] lg:min-h-[400px]">
                     
                     {/* Left: Image Hero Banner (65-70% width) */}
                     <div 
@@ -999,23 +1030,100 @@ export const EventsView: React.FC<EventsViewProps> = ({
                         setSelectedEvent(heroEvent);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="lg:col-span-8 relative bg-slate-100 min-h-[260px] sm:min-h-[320px] lg:min-h-[360px] overflow-hidden cursor-pointer flex items-center justify-center"
+                      className="lg:col-span-8 relative bg-slate-900 min-h-[260px] sm:min-h-[320px] lg:min-h-[400px] overflow-hidden cursor-pointer flex items-center justify-center select-none"
                     >
-                      <img 
-                        src={heroEvent.img} 
-                        alt={heroEvent.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                      />
+                      <AnimatePresence mode="wait">
+                        <motion.img 
+                          key={heroEvent.id || activeHeroIndex}
+                          src={heroEvent.img} 
+                          alt={heroEvent.title}
+                          initial={{ opacity: 0, scale: 1.05 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.4 }}
+                          className="w-full h-full object-cover"
+                        />
+                      </AnimatePresence>
+
+                      {/* Overlay gradient for contrast on mobile/tablet */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent lg:hidden pointer-events-none" />
+
+                      {/* Navigation arrows overlay on banner for desktop */}
+                      {heroEvents.length > 1 && (
+                        <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex items-center justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveHeroIndex((prev) => (prev === 0 ? heroEvents.length - 1 : prev - 1));
+                            }}
+                            className="pointer-events-auto w-10 h-10 rounded-full bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md active:scale-95 cursor-pointer"
+                            aria-label="Sự kiện trước"
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveHeroIndex((prev) => (prev + 1) % heroEvents.length);
+                            }}
+                            className="pointer-events-auto w-10 h-10 rounded-full bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md active:scale-95 cursor-pointer"
+                            aria-label="Sự kiện tiếp theo"
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Dots indicator at bottom of banner */}
+                      {heroEvents.length > 1 && (
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 bg-slate-950/50 backdrop-blur-xs px-3 py-1.5 rounded-full pointer-events-auto">
+                          {heroEvents.map((_, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveHeroIndex(idx);
+                              }}
+                              className={`h-2 transition-all rounded-full cursor-pointer ${
+                                activeHeroIndex === idx 
+                                  ? 'w-6 bg-orange-500' 
+                                  : 'w-2 bg-white/60 hover:bg-white'
+                              }`}
+                              aria-label={`Chuyển đến sự kiện ${idx + 1}`}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Right: Content Details & Action (30-35% width) */}
                     <div className="lg:col-span-4 p-6 sm:p-7 lg:p-8 bg-slate-50/70 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col justify-between space-y-5">
                       <div className="space-y-4">
-                        {/* Status Badge */}
-                        <div>
-                          <span className="inline-block px-3 py-1 bg-[#dc2626] text-white text-[11px] font-black uppercase tracking-wider rounded-[4px] shadow-2xs">
-                            SẮP DIỄN RA
-                          </span>
+                        {/* Status Badges & Slide count */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {heroEvent.isFeatured && (
+                              <span className="inline-block px-2.5 py-0.5 bg-orange-600 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-2xs">
+                                NỔI BẬT
+                              </span>
+                            )}
+                            <span className={`inline-block px-2.5 py-0.5 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px] shadow-2xs ${getStatusColor(heroEvent.status)}`}>
+                              {getStatusLabel(heroEvent.status)}
+                            </span>
+                            {heroEvent.isOpenRegistration && (
+                              <span className="inline-block px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-[4px]">
+                                MỞ ĐĂNG KÝ
+                              </span>
+                            )}
+                          </div>
+                          {heroEvents.length > 1 && (
+                            <span className="text-[11px] font-bold text-slate-400">
+                              {activeHeroIndex + 1} / {heroEvents.length}
+                            </span>
+                          )}
                         </div>
 
                         {/* Event Title */}
@@ -1024,28 +1132,56 @@ export const EventsView: React.FC<EventsViewProps> = ({
                             setSelectedEvent(heroEvent);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight hover:text-orange-600 cursor-pointer transition-colors"
+                          className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight hover:text-orange-600 cursor-pointer transition-colors line-clamp-3"
+                          title={heroEvent.title}
                         >
                           {heroEvent.title}
                         </h2>
 
                         {/* Date & Time */}
                         <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-700">
-                          <Calendar size={18} className="text-slate-700 shrink-0" />
+                          <Calendar size={18} className="text-orange-600 shrink-0" />
                           <span>{heroEvent.date}</span>
                         </div>
 
                         {/* Location */}
                         <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-700">
-                          <MapPin size={18} className="text-slate-700 shrink-0" />
-                          <span>{heroEvent.location}</span>
+                          <MapPin size={18} className="text-orange-600 shrink-0" />
+                          <span className="line-clamp-1">{heroEvent.location}</span>
                         </div>
+
+                        {/* Countdown Widget Mini if Upcoming */}
+                        {heroEvent.status === 'upcoming' && (
+                          <div className="pt-2 border-t border-slate-200/70">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5 flex items-center gap-1.5">
+                              <Timer size={13} className="text-orange-600" /> Thời gian còn lại
+                            </span>
+                            <div className="grid grid-cols-4 gap-1.5 text-center">
+                              {[
+                                { val: timeLeft.days, unit: 'Ngày' },
+                                { val: timeLeft.hours, unit: 'Giờ' },
+                                { val: timeLeft.minutes, unit: 'Phút' },
+                                { val: timeLeft.seconds, unit: 'Giây' }
+                              ].map((item, i) => (
+                                <div key={i} className="bg-white border border-slate-200 py-1.5 px-1 rounded-[6px] shadow-2xs">
+                                  <span className="text-base font-black text-slate-900 block leading-tight">
+                                    {String(item.val).padStart(2, '0')}
+                                  </span>
+                                  <span className="text-[9px] font-bold uppercase text-slate-400 block">
+                                    {item.unit}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* CTA Button */}
-                      <div className="pt-2">
+                      {/* CTA Button & Slide controls */}
+                      <div className="pt-2 space-y-3">
                         {heroEvent.isOpenRegistration ? (
                           <button
+                            type="button"
                             onClick={() => {
                               setRegisterEvent(heroEvent);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1056,6 +1192,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           </button>
                         ) : (
                           <button
+                            type="button"
                             onClick={() => {
                               setSelectedEvent(heroEvent);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1064,6 +1201,29 @@ export const EventsView: React.FC<EventsViewProps> = ({
                           >
                             XEM CHI TIẾT
                           </button>
+                        )}
+
+                        {/* Mobile & tablet arrow controls */}
+                        {heroEvents.length > 1 && (
+                          <div className="flex items-center justify-between pt-1 lg:hidden">
+                            <button
+                              type="button"
+                              onClick={() => setActiveHeroIndex((prev) => (prev === 0 ? heroEvents.length - 1 : prev - 1))}
+                              className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1 hover:border-orange-600 cursor-pointer"
+                            >
+                              <ChevronLeft size={14} /> Trước
+                            </button>
+                            <span className="text-xs font-bold text-slate-400">
+                              {activeHeroIndex + 1} / {heroEvents.length}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setActiveHeroIndex((prev) => (prev + 1) % heroEvents.length)}
+                              className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1 hover:border-orange-600 cursor-pointer"
+                            >
+                              Sau <ChevronRight size={14} />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
