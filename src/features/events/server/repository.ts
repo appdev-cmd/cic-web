@@ -62,17 +62,15 @@ export async function saveEvent(
 
     if (id && !before) throw new Error('Không tìm thấy sự kiện.');
 
-    // Nếu đặt sự kiện này là is_hot = true, tự động tắt is_hot của các sự kiện khác cùng locale (tối đa 1)
-    if (input.isHot) {
-      if (id) {
-        await sql.unsafe(
-          `UPDATE ${table} SET is_hot = false WHERE is_hot = true AND id <> $1`,
-          [id]
-        );
-      } else {
-        await sql.unsafe(
-          `UPDATE ${table} SET is_hot = false WHERE is_hot = true`
-        );
+    // Kiểm tra giới hạn sự kiện nổi bật (tối đa 4)
+    if (input.isHot && (!before || !before.is_hot)) {
+      const currentHotCountRows = await sql.unsafe(
+        `SELECT COUNT(*)::int as count FROM ${table} WHERE is_hot = true AND ($1::int IS NULL OR id <> $1)`,
+        [id]
+      );
+      const currentHotCount = Number(currentHotCountRows[0]?.count ?? 0);
+      if (currentHotCount >= 4) {
+        throw new Error('Chỉ được chọn tối đa 4 sự kiện nổi bật.');
       }
     }
 

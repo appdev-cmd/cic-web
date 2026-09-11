@@ -124,13 +124,14 @@ export const EventsView: React.FC<EventsViewProps> = ({
   // Countdown timer for hero & detail view
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Hero Events Slider list: Featured events first, then upcoming events, fallback to all events
+  // Hero Events Slider list: 4 sự kiện nổi bật (ưu tiên featured, sau đó là upcoming và sự kiện mới nhất)
   const heroEvents = React.useMemo(() => {
     const featured = eventsData.filter((e) => e.isFeatured);
-    const upcoming = eventsData.filter((e) => e.status === 'upcoming' && !e.isFeatured);
-    const combined = [...featured, ...upcoming];
-    if (combined.length > 0) return combined.slice(0, 5);
-    return eventsData.slice(0, 5);
+    const nonFeatured = eventsData.filter((e) => !e.isFeatured);
+    const nonFeaturedUpcoming = nonFeatured.filter((e) => e.status === 'upcoming');
+    const nonFeaturedOther = nonFeatured.filter((e) => e.status !== 'upcoming');
+    const combined = [...featured, ...nonFeaturedUpcoming, ...nonFeaturedOther];
+    return combined.slice(0, 4);
   }, [eventsData]);
 
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
@@ -1334,9 +1335,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
                                 <img 
                                   src={event.img} 
                                   alt={event.title} 
-                                  className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.04] ${
-                                    event.status === 'past' ? 'grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100' : ''
-                                  }`}
+                                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.04]"
                                 />
                                 
                                 {/* Status Indicator Badge in Top-Left */}

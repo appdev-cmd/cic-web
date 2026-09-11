@@ -1,6 +1,6 @@
 export const FEATURED_CONTENT_LIMITS = {
   news: 4,
-  event: 1,
+  event: 4,
   project: 3,
   product: 6,
 } as const;

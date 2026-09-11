@@ -204,6 +204,10 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
     const target = events.find((item) => item.id === id);
     if (!target) return;
     const nextHot = !target.is_hot;
+    if (nextHot && events.filter((e) => e.is_hot).length >= FEATURED_CONTENT_LIMITS.event) {
+      showToast(`Đã đủ ${FEATURED_CONTENT_LIMITS.event} sự kiện nổi bật. Hãy bỏ chọn một sự kiện khác trước.`);
+      return;
+    }
     const ok = await persist(
       saveEventAction(workspaceLocale, Number(id), {
         title: target.title,
