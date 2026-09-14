@@ -1,4 +1,4 @@
-import { isCustomerRequestsCmsPath, isEmailTemplatesCmsPath, isFormsCmsPath, isNewsCategoryCmsPath, isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, resolveCmsModule } from '@/cms/routing';
+import { isCtaCmsPath, isCustomerRequestsCmsPath, isEmailTemplatesCmsPath, isFormsCmsPath, isNewsCategoryCmsPath, isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, resolveCmsModule } from '@/cms/routing';
 import { NewsCategoriesRoute } from '@/cms/modules/news_categories/NewsCategoriesRoute';
 import { ProductApplicationsRoute } from '@/cms/modules/product_applications/ProductApplicationsRoute';
 import { ProductBrandsRoute } from '@/cms/modules/product_brands/ProductBrandsRoute';
@@ -13,6 +13,7 @@ import { ProjectsRoute } from '@/cms/modules/projects/ProjectsRoute';
 import { EmailTemplatesRoute } from '@/cms/modules/email_templates/EmailTemplatesRoute';
 import { CustomerRequestsRoute } from '@/cms/modules/customer_interaction/customer_requests/CustomerRequestsRoute';
 import { FormsRoute } from '@/cms/modules/customer_interaction/forms/FormsRoute';
+import { CtaRoute } from '@/cms/modules/customer_interaction/cta/CtaRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
@@ -36,6 +37,8 @@ export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...pa
     ? <CustomerRequestsRoute />
     : isFormsCmsPath(cmsPath)
     ? <FormsRoute />
+    : isCtaCmsPath(cmsPath)
+    ? <CtaRoute />
     : isProductCategoryCmsPath(cmsPath)
     ? <ProductCategoriesRoute />
     : isProductBrandCmsPath(cmsPath)

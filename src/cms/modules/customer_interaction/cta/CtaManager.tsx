@@ -25,9 +25,24 @@ import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 interface CtaManagerProps {
   workspaceLocale: CmsLocale;
   data?: CtaModuleData;
+  onRefresh?: () => void;
+  capabilities?: {
+    create?: boolean;
+    edit?: boolean;
+    delete?: boolean;
+  };
 }
 
-export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data }) => {
+export const CtaManager: React.FC<CtaManagerProps> = ({
+  workspaceLocale,
+  data,
+  onRefresh,
+  capabilities,
+}) => {
+  const canCreate = capabilities?.create ?? true;
+  const canEdit = capabilities?.edit ?? true;
+  const canDelete = capabilities?.delete ?? true;
+
   const [ctas, setCtas] = useState<CtaItem[]>(data?.ctas ?? []);
   const [selectedCtaIds, setSelectedCtaIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<CtaFilterState>({
@@ -166,36 +181,76 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
     setUsedByCta(cta);
   };
 
-  const handleDuplicateCta = (cta: CtaItem) => {
-    const newCta: CtaItem = {
-      ...cta,
-      id: `cta_${Date.now()}`,
-      adminName: `${cta.adminName} (Bản sao)`,
-      code: `${cta.code}_copy`,
-      usedByCount: 0,
-      usedByPages: [],
-      analytics: {
-        impressions: 0,
-        clicks: 0,
-        ctr: 0,
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setCtas([newCta, ...ctas]);
+  const handleDuplicateCta = async (cta: CtaItem) => {
+    const timestamp = Date.now().toString().slice(-4);
+    const duplicatedCode = `${cta.code}_copy_${timestamp}`;
+    const newAdminName = `${cta.adminName} (Bản sao)`;
+
+    try {
+      const res = await fetch('/api/cms/cta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspaceLocale,
+          code: duplicatedCode,
+          adminName: newAdminName,
+          displayText: cta.displayText,
+          description: cta.description,
+          icon: cta.icon,
+          styleVariant: cta.styleVariant || 'primary',
+          actionType: cta.actionConfig.type,
+          actionConfig: cta.actionConfig,
+          formId: cta.actionConfig.formId,
+          mediaAssetId: cta.actionConfig.fileId,
+          emailTemplateId: cta.actionConfig.emailTemplateId,
+          status: 'draft',
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể nhân bản: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      const json = await res.json();
+      const createdCta = json.cta;
+      setCtas((prev) => [
+        {
+          ...createdCta,
+          governance: { origin: 'custom', allowedPlacements: ['rich_text'] },
+          analytics: { impressions: 0, clicks: 0, ctr: 0 },
+          usedByCount: 0,
+          usedByPages: [],
+        },
+        ...prev,
+      ]);
+      showToast(`Đã nhân bản CTA "${newAdminName}" thành công!`);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   const handleDeleteCta = (id: string) => {
     const target = ctas.find((c) => c.id === id);
     if (target) {
+      if (target.governance?.origin === 'system') {
+        showToast('Không thể xóa CTA hệ thống (System CTA).');
+        return;
+      }
       setTrashTargets([target]);
     }
   };
 
   const handleBulkDelete = () => {
     const targets = ctas.filter((c) => selectedCtaIds.includes(c.id));
-    if (targets.length > 0) {
-      setTrashTargets(targets);
+    const nonSystemTargets = targets.filter((c) => c.governance?.origin !== 'system');
+    if (nonSystemTargets.length < targets.length) {
+      showToast('Một số CTA hệ thống đã được bỏ qua khỏi danh sách xóa.');
+    }
+    if (nonSystemTargets.length > 0) {
+      setTrashTargets(nonSystemTargets);
     }
   };
 
@@ -204,6 +259,18 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
     setIsDeleting(true);
     try {
       const ids = trashTargets.map((c) => c.id);
+      const res = await fetch('/api/cms/cta/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể xóa CTA: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
       const now = new Date().toISOString();
       setCtas((prev) =>
         prev.map((c) => (ids.includes(c.id) ? { ...c, deletedAt: now } : c))
@@ -215,24 +282,45 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
           : `Đã chuyển ${trashTargets.length} CTA vào Thùng rác!`
       );
       setTrashTargets(null);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleQuickStatusToggle = (id: string, currentStatus: string) => {
+  const handleQuickStatusToggle = async (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    setCtas(
-      ctas.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              status: nextStatus as any,
-              updatedAt: new Date().toISOString(),
-            }
-          : c
-      )
-    );
+    try {
+      const res = await fetch(`/api/cms/cta/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      setCtas((prev) =>
+        prev.map((c) =>
+          c.id === id
+            ? {
+                ...c,
+                status: nextStatus as any,
+                updatedAt: new Date().toISOString(),
+              }
+            : c
+        )
+      );
+      showToast(`Đã chuyển trạng thái sang "${nextStatus === 'active' ? 'Đang kích hoạt' : 'Ngưng hoạt động'}"`);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   const handleStatusFilterChange = (statusVal: string) => {
@@ -240,46 +328,102 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
     setFilter((prev) => ({ ...prev, status: newStatus }));
   };
 
-  const handleSaveCta = (ctaData: CtaFormData, action: 'draft' | 'publish') => {
-    const normalizedData: CtaFormData = {
-      ...ctaData,
-      status: action === 'publish' ? 'active' : 'draft',
-    };
-    if (editingCta) {
-      // Update existing CTA
-      setCtas(
-        ctas.map((c) =>
-          c.id === editingCta.id
-            ? {
-                ...c,
-                ...normalizedData,
-                updatedAt: new Date().toISOString(),
-              }
-            : c
-        )
-      );
-    } else {
-      // Create new CTA
-      const newCta: CtaItem = {
-        id: `cta_${Date.now()}`,
-        ...normalizedData,
-        usedByCount: 0,
-        usedByPages: [],
-        analytics: {
-          impressions: 0,
-          clicks: 0,
-          ctr: 0,
-        },
-        createdBy: 'Current User',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        governance: { origin: 'custom', allowedPlacements: ['rich_text'] },
-      };
-      setCtas([newCta, ...ctas]);
-    }
+  const handleSaveCta = async (ctaData: CtaFormData, action: 'draft' | 'publish') => {
+    const targetStatus = action === 'publish' ? 'active' : 'draft';
 
-    setViewMode('list');
-    setEditingCta(null);
+    try {
+      if (editingCta) {
+        const res = await fetch(`/api/cms/cta/${editingCta.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            adminName: ctaData.adminName,
+            displayText: ctaData.displayText,
+            description: ctaData.description,
+            icon: ctaData.icon,
+            styleVariant: ctaData.styleVariant,
+            actionType: ctaData.actionConfig.type,
+            actionConfig: ctaData.actionConfig,
+            formId: ctaData.actionConfig.formId,
+            mediaAssetId: ctaData.actionConfig.fileId,
+            emailTemplateId: ctaData.actionConfig.emailTemplateId,
+            status: targetStatus,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(`Lỗi lưu CTA: ${err.error || 'Lỗi hệ thống'}`);
+          return;
+        }
+
+        const json = await res.json();
+        const updatedCta = json.cta;
+
+        setCtas((prev) =>
+          prev.map((c) =>
+            c.id === editingCta.id
+              ? {
+                  ...c,
+                  ...updatedCta,
+                  governance: c.governance,
+                  analytics: c.analytics,
+                  usedByCount: c.usedByCount,
+                  usedByPages: c.usedByPages,
+                }
+              : c
+          )
+        );
+        showToast(`Đã lưu CTA "${ctaData.adminName}" thành công!`);
+      } else {
+        const res = await fetch('/api/cms/cta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspace: workspaceLocale,
+            code: ctaData.code,
+            adminName: ctaData.adminName,
+            displayText: ctaData.displayText,
+            description: ctaData.description,
+            icon: ctaData.icon,
+            styleVariant: ctaData.styleVariant,
+            actionType: ctaData.actionConfig.type,
+            actionConfig: ctaData.actionConfig,
+            formId: ctaData.actionConfig.formId,
+            mediaAssetId: ctaData.actionConfig.fileId,
+            emailTemplateId: ctaData.actionConfig.emailTemplateId,
+            status: targetStatus,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(`Lỗi tạo CTA: ${err.error || 'Lỗi hệ thống'}`);
+          return;
+        }
+
+        const json = await res.json();
+        const createdCta = json.cta;
+
+        setCtas((prev) => [
+          {
+            ...createdCta,
+            governance: { origin: 'custom', allowedPlacements: ['rich_text'] },
+            analytics: { impressions: 0, clicks: 0, ctr: 0 },
+            usedByCount: 0,
+            usedByPages: [],
+          },
+          ...prev,
+        ]);
+        showToast(`Đã tạo CTA mới "${ctaData.adminName}" thành công!`);
+      }
+
+      setViewMode('list');
+      setEditingCta(null);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   return (
@@ -314,9 +458,11 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
             description="Quản lý nút kêu gọi hành động trên toàn website"
             meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{ctas.filter((c) => !c.deletedAt).length} CTA</span>}
         actions={
-          <CmsButton variant="primary" size="sm" onClick={handleCreateNew} leadingIcon={<Plus />}>
-            Tạo CTA mới
-          </CmsButton>
+          canCreate ? (
+            <CmsButton variant="primary" size="sm" onClick={handleCreateNew} leadingIcon={<Plus />}>
+              Tạo CTA mới
+            </CmsButton>
+          ) : undefined
         }
       />
 
@@ -442,11 +588,15 @@ export const CtaManager: React.FC<CtaManagerProps> = ({ workspaceLocale, data })
             label: 'Lưu trữ',
             onClick: () => console.log('Archive'),
           },
-          {
-            label: 'Xóa',
-            variant: 'danger',
-            onClick: handleBulkDelete,
-          },
+          ...(canDelete
+            ? [
+                {
+                  label: 'Xóa',
+                  variant: 'danger' as const,
+                  onClick: handleBulkDelete,
+                },
+              ]
+            : []),
         ]}
       />
 
