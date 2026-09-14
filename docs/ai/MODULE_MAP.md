@@ -52,7 +52,7 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 | `[I]` | Media | assets, translations VI/EN, folders/albums, upload/replace/version/variant, used-by, archive/trash | auth/RBAC; private `cms-media` Storage; Media table RLS; Audit Registry/Writer; typed Trash snapshot contract | every content module, CMS search, CTA/forms, page builder | Core Media đã nối dữ liệu thật: explicit projections, signed private URLs, upload/metadata PATCH/folder/album/replace, permission server + UI, Audit, typed Trash adapter, live picker VI/EN và public resolver. Roundtrip create → update → public → trash → restore restricted pass. Integration còn lại: business modules chuyển raw legacy path sang Media ID; durable Storage purge/variant processor; authenticated browser visual regression. |
 | `[A]` | Contacts/CRM Inbox | contact requests, PII, assignment, spam/duplicate | auth/RBAC + PII scope; contact schema; submission persistence | users/staff, services, audit, email | Read boundary có; CMS flow vẫn demo source |
 | `[A]` | CTA | CTA lifecycle, placement, used-by | auth/RBAC; CTA schema; reference registry | Forms, Static Pages, Media, audit | Query boundary có; CMS còn demo source |
-| `[A]` | Forms/Submissions | form builder, validation, submissions | auth/RBAC; form/field schema; validation; submission persistence | CTA, Customer Requests, Email, audit | Query boundary có; builder/submission integrations chưa đóng |
+| `[I]` | Forms/Submissions | form builder, validation, submissions | auth/RBAC; form/field schema; validation; submission persistence | CTA, Customer Requests, Email, audit | Core DB-backed: Seed 8 forms hệ thống & mẫu (4 VI + 4 EN) với `cic_forms` và `cic_form_fields`; domain types & server queries (`listForms`, `getFormById`, `getFormSubmissions`), mutations transaction (`createForm`, `updateForm`, `updateFormStatus`, `deleteForms`) kèm Audit Writer (`form.created`, `form.updated`, `form.status_changed`, `form.trashed`); API routes CMS; FormManager nối API thật; FormSubmissionsModal tải submissions thật; mount FormsRoute trên CMS catch-all page `/cms/forms`. Soft pending: CTA runtime action embedding & public form submit trigger gửi email thông báo thật qua Nodemailer. |
 | `[I]` | Customer Requests | lifecycle, notes, assignment, history | auth/RBAC; request/state/note/event schema; Contacts/Forms source | email templates/delivery, audit, SLA | Core DB-backed: Unified read model (UNION ALL cic_contact, cic_product_contact, cic_order, cic_form_submissions, cic_contact_en) + overlay tables (cic_customer_request_states, cic_customer_request_notes, cic_customer_request_events), CMS VI/EN kết nối API/Route thật, phân trang, lọc đa điều kiện, chuyển trạng thái/độ ưu tiên/tags, ghi chú nội bộ, phân công nhân sự từ cic_users. Public submit sync overlay tự động. Soft pending: trigger email thông báo nhân sự khi phân công, SLA alert worker. |
 | `[I]` | Email Templates | versioned template/activation/preview | auth/RBAC; approved template/version schema | forms/requests/events, delivery provider, audit | Core DB-backed: seed 58 templates từ legacy `cic_email` & `cic_email_en` + bộ chuẩn, CMS kết nối API thật, CRUD/versioning/publish/duplicate/archive, preview sample data, usage lookup; Nodemailer transporter & token dispatcher (`lib/mail.ts`). Pending: Trigger tự động khi Form/CTA submit DB thật và SMTP production credentials. |
 
@@ -242,6 +242,38 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
     - Workspace `en`: tổng hợp `cic_contact_en` (132 rows) và các submission tiếng Anh.
   - Không gộp lẫn lộn giữa hai workspace; bộ lọc workspace CMS điều khiển phạm vi hiển thị.
 - **I. Kết luận audit:** Module hiện đang ở trạng thái `[A]`. Đã hiểu rõ toàn diện 4 nguồn: React reference, Next.js codebase, Database schema và tài liệu migration. Hard dependencies (schema overlay, DB nguồn, auth, transaction, audit) đã sẵn sàng. **READY_TO_IMPLEMENT**.
+
+### Audit Biểu mẫu (Forms & Submissions) — 2026-09-14
+
+- **A. Phạm vi & Bề mặt (Surfaces):**
+  - CMS Surface tại `/cms/forms`: Quản lý danh sách Biểu mẫu theo workspace (`vi`/`en`), tìm kiếm, lọc theo trạng thái (`active`, `draft`, `inactive`, `archived`), khoảng ngày tạo, sắp xếp theo tên/ngày/lượt gửi/tỷ lệ chuyển đổi.
+  - CMS Form Builder: Đã tách module thành các phần riêng biệt: Canvas dựng trường kéo thả, Field Palette (các loại trường: text, email, phone, textarea, select, checkbox, radio, date, file, consent), Field Inspector (cấu hình nhãn, placeholder, validate, roleType `customer_name`/`email`/`phone`), Tabs Cài đặt cơ bản (Tên quản trị, tiêu đề, mô tả, shortcode), Tab Cấu hình Xử lý sau gửi (lưu DB, tạo Yêu cầu khách hàng, gửi email thông báo Admin + template nội bộ, gửi email xác nhận cho Khách + template khách hàng, nhãn nút submit, thông báo thành công, URL điều hướng), Tab Thống kê (lượt gửi, chuyển đổi).
+  - CMS Modals: Xem trước biểu mẫu theo thiết bị (Desktop / Mobile), Xem danh sách lượt gửi ghi nhận (`FormSubmissionsModal`), Xem trước email template tương ứng.
+  - Public Surface: Render biểu mẫu động theo cấu hình trường trên các trang tĩnh (`StaticPages`), các section cố định (ví dụ Form tư vấn chân trang/hero), hoặc nhúng trong Rich Text (`cic_content_embeds`), hoặc mở qua CTA Action `open_form`.
+- **B. Đối chiếu Legacy (React Reference & PHP):**
+  - Hệ thống PHP legacy (`httpdocs`) không có form builder generic; các form liên hệ được hard-code theo từng module (`contact`, `product_contact`, `order`).
+  - React reference (`FormManager.tsx`, `FormBuilderView.tsx`, `mockData.ts` 483 dòng) là chuẩn về visual và tương tác nghiệp vụ.
+  - Hiện tại Next.js CMS route `/cms/forms` chưa được mount vào `CmsCatchAllPage` (đang fallback qua `CmsFoundationRoute` vào mock data `getDemoFormModuleData`).
+- **C. Database Schema & Data Authority:**
+  - Production authority gồm 4 bảng PostgreSQL đã được tạo sẵn trong database:
+    1. `cic_forms` (22 cột): `id`, `workspace`, `code`, `is_system`, `admin_name`, `title`, `description`, `status`, `current_version`, `create_customer_request`, `send_admin_email`, `admin_emails`, `admin_email_template_id`, `send_confirmation_email`, `confirmation_email_template_id`, `submit_button_text`, `success_message`, `redirect_url`, `created_by`, `created_at`, `updated_at`, `deleted_at`. (Hiện có 0 rows).
+    2. `cic_form_fields` (13 cột): `id`, `form_id`, `field_key`, `field_type`, `role_type`, `label`, `placeholder`, `help_text`, `is_required`, `is_locked`, `position`, `validation_config`, `options_config`. (Hiện có 0 rows).
+    3. `cic_form_submissions` (9 cột): `id`, `form_id`, `form_version`, `source_type`, `source_id`, `source_path`, `cta_id`, `placement_key`, `submitted_at`. (Hiện có 0 rows).
+    4. `cic_form_submission_values` (7 cột): `id`, `submission_id`, `field_id`, `field_key`, `value_text`, `value_json`, `media_asset_id`. (Hiện có 0 rows).
+  - Seed Data: Cần seed 4 biểu mẫu chuẩn ban đầu (tương ứng với MOCK_FORMS: Tư vấn ERP, Báo giá, Liên hệ chung, Đăng ký dùng thử) vào `cic_forms` và `cic_form_fields` cho cả 2 workspace `vi` và `en` với cờ `is_system` phù hợp.
+- **D. Quan hệ & Ràng buộc toàn vẹn (Integrity & Dependencies):**
+  - Ràng buộc Email Templates: `admin_email_template_id` và `confirmation_email_template_id` có FK tới `cic_email_templates(id)` ON DELETE RESTRICT. Khi form bật gửi mail, template phải tồn tại, active và đúng audience (`internal` cho admin, `customer` cho xác nhận).
+  - Ràng buộc Yêu cầu khách hàng: Khi `create_customer_request = true`, việc khách gửi biểu mẫu tại website public sẽ ghi đồng thời vào `cic_form_submissions` + `cic_form_submission_values` và được Unified Customer Request Service nhận diện là `source_type = 'form_submission'`.
+  - CTA Action `open_form`: Bảng `cic_ctas.form_id` trỏ FK tới `cic_forms(id)` ON DELETE RESTRICT.
+- **E. Quyền hạn (RBAC) & Audit:**
+  - Quyền hạn: Server guard áp dụng `can(principal, 'forms', action) || can(principal, 'contents', action) || principal.isAdministrator`.
+  - Audit Trail: Đăng ký đầy đủ các action hệ thống trong `src/server/audit/registry.ts` (`FORM_CREATED`, `FORM_UPDATED`, `FORM_STATUS_CHANGED`, `FORM_TRASHED`) và ghi nhận qua Audit Writer chung.
+- **F. Phân loại Next.js (KEEP / REFACTOR / REPLACE / REMOVE):**
+  - `KEEP`: Component `FormFieldPalette`, `FormFieldCanvas`, `FormFieldInspector`, `FormBasicSettingsTab`, `FormSubmitActionsTab`, `FormLivePreviewModal`, `FormEmailPreviewModal`.
+  - `REFACTOR`: `FormManager.tsx` nhận dữ liệu forms thật từ PostgreSQL qua API route `/api/cms/forms` hoặc Server Component; mount `FormsRoute` trực tiếp trong `CmsCatchAllPage`.
+  - `REPLACE`: `FormSubmissionsModal` mẫu tĩnh thay bằng component gọi API đọc submissions thật từ `cic_form_submissions` và `cic_form_submission_values`.
+  - `REMOVE`: `mockData.ts`, `MOCK_FORMS`, `sampleSubmissions` hard-code.
+- **G. Kết luận audit:** Module Biểu mẫu giữ trạng thái `[A]`. Đã hiểu rõ toàn bộ 4 nguồn tài liệu, cấu trúc DB thật, ràng buộc nghiệp vụ. **READY_TO_IMPLEMENT**.
 
 ## Foundation/cross-module
 

@@ -24,11 +24,28 @@ import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 interface FormManagerProps {
   workspaceLocale: CmsLocale;
   data?: FormModuleData;
+  onRefresh?: () => void;
+  capabilities?: {
+    create?: boolean;
+    edit?: boolean;
+    delete?: boolean;
+  };
 }
 
-export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data }) => {
+export const FormManager: React.FC<FormManagerProps> = ({
+  workspaceLocale,
+  data,
+  onRefresh,
+  capabilities = { create: true, edit: true, delete: true },
+}) => {
   const [forms, setForms] = useState<FormItem[]>(data?.forms ?? []);
   const [selectedFormIds, setSelectedFormIds] = useState<string[]>([]);
+
+  React.useEffect(() => {
+    if (data?.forms) {
+      setForms(data.forms);
+    }
+  }, [data?.forms]);
   const [pageMode, setPageMode] = useState<'list' | 'builder'>('list');
   const [filter, setFilter] = useState<FormFilterState>({
     searchQuery: '',
@@ -160,36 +177,73 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
     setPreviewForm(form);
   };
 
-  const handleDuplicateForm = (form: FormItem) => {
-    const newForm: FormItem = {
-      ...form,
-      id: `form_${Date.now()}`,
-      adminName: `${form.adminName} (Bản sao)`,
-      code: `${form.code}_copy`,
-      currentVersion: 1,
-      analytics: {
-        impressions: 0,
-        clicks: 0,
-        ctr: 0,
-      },
-      createdBy: 'Current User',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setForms([newForm, ...forms]);
+  const handleDuplicateForm = async (form: FormItem) => {
+    const timestamp = Date.now().toString().slice(-4);
+    const duplicatedCode = `${form.code}_copy_${timestamp}`;
+    const newAdminName = `${form.adminName} (Bản sao)`;
+
+    try {
+      const res = await fetch('/api/cms/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspaceLocale,
+          code: duplicatedCode,
+          adminName: newAdminName,
+          title: form.title,
+          description: form.description,
+          status: 'draft',
+          submitConfig: form.submitConfig,
+          fields: form.fields.map((f, i) => ({
+            ...f,
+            position: i + 1,
+            isLocked: false,
+          })),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể nhân bản: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      const json = await res.json();
+      const createdForm = json.form;
+      setForms((prev) => [
+        {
+          ...createdForm,
+          governance: { origin: 'custom', allowedPlacements: ['rich_text', 'cta_action'] },
+          analytics: { impressions: 0, clicks: 0, ctr: 0 },
+        },
+        ...prev,
+      ]);
+      showToast(`Đã nhân bản biểu mẫu "${newAdminName}" thành công!`);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   const handleDeleteForm = (id: string) => {
     const target = forms.find((f) => f.id === id);
     if (target) {
+      if (target.governance.origin === 'system') {
+        showToast('Không thể xóa biểu mẫu hệ thống (System Form).');
+        return;
+      }
       setTrashTargets([target]);
     }
   };
 
   const handleBulkDelete = () => {
     const targets = forms.filter((f) => selectedFormIds.includes(f.id));
-    if (targets.length > 0) {
-      setTrashTargets(targets);
+    const nonSystemTargets = targets.filter((f) => f.governance.origin !== 'system');
+    if (nonSystemTargets.length < targets.length) {
+      showToast('Một số biểu mẫu hệ thống đã được bỏ qua khỏi danh sách xóa.');
+    }
+    if (nonSystemTargets.length > 0) {
+      setTrashTargets(nonSystemTargets);
     }
   };
 
@@ -198,6 +252,18 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
     setIsDeleting(true);
     try {
       const ids = trashTargets.map((f) => f.id);
+      const res = await fetch('/api/cms/forms/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể xóa biểu mẫu: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
       const now = new Date().toISOString();
       setForms((prev) =>
         prev.map((f) => (ids.includes(f.id) ? { ...f, deletedAt: now } : f))
@@ -209,24 +275,45 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
           : `Đã chuyển ${trashTargets.length} biểu mẫu vào Thùng rác!`
       );
       setTrashTargets(null);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleQuickStatusToggle = (id: string, currentStatus: string) => {
+  const handleQuickStatusToggle = async (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    setForms(
-      forms.map((f) =>
-        f.id === id
-          ? {
-              ...f,
-              status: nextStatus as any,
-              updatedAt: new Date().toISOString(),
-            }
-          : f
-      )
-    );
+    try {
+      const res = await fetch(`/api/cms/forms/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      setForms((prev) =>
+        prev.map((f) =>
+          f.id === id
+            ? {
+                ...f,
+                status: nextStatus as any,
+                updatedAt: new Date().toISOString(),
+              }
+            : f
+        )
+      );
+      showToast(`Đã chuyển trạng thái sang "${nextStatus === 'active' ? 'Đang kích hoạt' : 'Ngưng hoạt động'}"`);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   const handleOpenSubmissions = (form: FormItem) => {
@@ -238,46 +325,91 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
     setFilter((prev) => ({ ...prev, status: newStatus }));
   };
 
-  const handleSaveForm = (formData: FormFormData, action: 'draft' | 'publish') => {
-    const normalizedData: FormFormData = {
-      ...formData,
-      status: action === 'publish' ? 'active' : 'draft',
-    };
-    if (editingForm) {
-      // Update existing form
-      setForms(
-        forms.map((f) =>
-          f.id === editingForm.id
-            ? {
-                ...f,
-                ...normalizedData,
-                currentVersion: action === 'publish' ? f.currentVersion + 1 : f.currentVersion,
-                updatedAt: new Date().toISOString(),
-              }
-            : f
-        )
-      );
-    } else {
-      // Create new form
-      const newForm: FormItem = {
-        id: `form_${Date.now()}`,
-        ...normalizedData,
-        currentVersion: 1,
-        analytics: {
-          impressions: 0,
-          clicks: 0,
-          ctr: 0,
-        },
-        createdBy: 'Current User',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        governance: { origin: 'custom', allowedPlacements: ['rich_text', 'cta_action'] },
-      };
-      setForms([newForm, ...forms]);
-    }
+  const handleSaveForm = async (formData: FormFormData, action: 'draft' | 'publish') => {
+    const targetStatus = action === 'publish' ? 'active' : 'draft';
 
-    setPageMode('list');
-    setEditingForm(null);
+    try {
+      if (editingForm) {
+        // Update existing form via PUT /api/cms/forms/[id]
+        const res = await fetch(`/api/cms/forms/${editingForm.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            adminName: formData.adminName,
+            title: formData.title,
+            description: formData.description,
+            status: targetStatus,
+            incrementVersion: action === 'publish',
+            submitConfig: formData.submitConfig,
+            fields: formData.fields,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(`Lỗi lưu biểu mẫu: ${err.error || 'Lỗi hệ thống'}`);
+          return;
+        }
+
+        const json = await res.json();
+        const updatedForm = json.form;
+
+        setForms((prev) =>
+          prev.map((f) =>
+            f.id === editingForm.id
+              ? {
+                  ...f,
+                  ...updatedForm,
+                  governance: f.governance,
+                  analytics: f.analytics,
+                }
+              : f
+          )
+        );
+        showToast(`Đã lưu biểu mẫu "${formData.adminName}" thành công!`);
+      } else {
+        // Create new form via POST /api/cms/forms
+        const res = await fetch('/api/cms/forms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspace: workspaceLocale,
+            code: formData.code,
+            adminName: formData.adminName,
+            title: formData.title,
+            description: formData.description,
+            status: targetStatus,
+            submitConfig: formData.submitConfig,
+            fields: formData.fields,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(`Lỗi tạo biểu mẫu: ${err.error || 'Lỗi hệ thống'}`);
+          return;
+        }
+
+        const json = await res.json();
+        const createdForm = json.form;
+
+        setForms((prev) => [
+          {
+            ...createdForm,
+            governance: { origin: 'custom', allowedPlacements: ['rich_text', 'cta_action'] },
+            analytics: { impressions: 0, clicks: 0, ctr: 0 },
+          },
+          ...prev,
+        ]);
+        showToast(`Đã tạo biểu mẫu mới "${formData.adminName}" thành công!`);
+      }
+
+      setPageMode('list');
+      setEditingForm(null);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   if (pageMode === 'builder') {
@@ -310,11 +442,12 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
         icon={<FileCheck2 />}
         title="Quản lý Biểu mẫu"
         description="Quản lý biểu mẫu thu thập thông tin khách hàng"
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{forms.filter((f) => !f.deletedAt).length} biểu mẫu</span>}
         actions={
-          <CmsButton variant="primary" size="sm" onClick={handleCreateNew} leadingIcon={<Plus />}>
-            Tạo biểu mẫu mới
-          </CmsButton>
+          capabilities.create ? (
+            <CmsButton variant="primary" size="sm" onClick={handleCreateNew} leadingIcon={<Plus />}>
+              Tạo biểu mẫu mới
+            </CmsButton>
+          ) : undefined
         }
       />
 
@@ -418,19 +551,15 @@ export const FormManager: React.FC<FormManagerProps> = ({ workspaceLocale, data 
         itemLabel="biểu mẫu"
         onClear={() => setSelectedFormIds([])}
         actions={[
-          {
-            label: 'Đổi trạng thái',
-            onClick: () => console.log('Change status'),
-          },
-          {
-            label: 'Lưu trữ',
-            onClick: () => console.log('Archive'),
-          },
-          {
-            label: 'Xóa',
-            variant: 'danger',
-            onClick: handleBulkDelete,
-          },
+          ...(capabilities.delete
+            ? [
+                {
+                  label: 'Xóa',
+                  variant: 'danger' as const,
+                  onClick: handleBulkDelete,
+                },
+              ]
+            : []),
         ]}
       />
 

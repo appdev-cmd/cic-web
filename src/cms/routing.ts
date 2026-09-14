@@ -202,6 +202,11 @@ export function isCustomerRequestsCmsPath(path: string): boolean {
   );
 }
 
+export function isFormsCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return normalizedPath === '/cms/forms' || normalizedPath.startsWith('/cms/forms/');
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }
