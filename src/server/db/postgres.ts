@@ -12,7 +12,6 @@ export function getPostgresClient(): Sql {
     prepare: false,
     ssl: 'require',
     connect_timeout: 10,
-    idle_timeout: 20,
     max_lifetime: 60 * 30,
   });
   return client;
