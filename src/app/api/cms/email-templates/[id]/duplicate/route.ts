@@ -22,7 +22,7 @@ export async function POST(
     }
 
     const { id } = await params;
-    const result = await duplicateEmailTemplate(id, principal.legacyUserId);
+    const result = await duplicateEmailTemplate(id, principal);
     return NextResponse.json({ success: true, ...result }, { status: 201 });
   } catch (err) {
     return errorResponse(err);

@@ -44,6 +44,7 @@ export function EmailTemplatesScreen({ initialData, capabilities }: Props) {
         workspaceLocale={locale}
         initialTemplates={currentTemplates}
         onRefresh={handleRefresh}
+        capabilities={capabilities}
       />
     </div>
   );

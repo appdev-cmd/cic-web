@@ -1,5 +1,6 @@
 import 'server-only';
-import { getPostgresClient } from '@/server/db/postgres';
+import type { Sql } from 'postgres';
+import { withTransaction } from '@/server/db/postgres';
 import type { EmailAudience, EmailTemplateStatus, EmailWorkspace } from '../types';
 import type { CmsPrincipal } from '@/server/auth/guards';
 import { writeAuditEvent } from '@/server/audit/writer';
@@ -27,22 +28,18 @@ export interface UpdateTemplateInput {
   publishNow?: boolean;
 }
 
-function getActorId(actor: CmsPrincipal | number | null = null): number | null {
-  if (!actor) return null;
-  if (typeof actor === 'number') return actor;
-  return actor.legacyUserId ?? null;
-}
+type CreateAuditContext = Readonly<{ duplicatedFromId?: string }>;
 
-export async function createEmailTemplate(
+export async function createEmailTemplateInTransaction(
+  sql: Sql,
   data: CreateTemplateInput,
-  actor: CmsPrincipal | number | null = null
+  principal: CmsPrincipal,
+  auditContext: CreateAuditContext = {}
 ) {
-  const sql = getPostgresClient();
-  const actorId = getActorId(actor);
+  const actorId = principal.legacyUserId;
   const status = data.publishNow ? 'active' : data.status || 'draft';
 
-  // 1. Insert Template
-  const [tmpl] = await sql`
+  const [template] = await sql`
     INSERT INTO cic_email_templates (
       workspace, name, event_key, audience, status,
       created_by, updated_by,
@@ -54,217 +51,246 @@ export async function createEmailTemplate(
     ) RETURNING id::text
   `;
 
-  // 2. Insert Version 1
-  const [ver] = await sql`
+  const [version] = await sql`
     INSERT INTO cic_email_template_versions (
       template_id, version_number, subject, content, created_by
     ) VALUES (
-      ${tmpl.id}, 1, ${data.subject}, ${data.content}, ${actorId}
+      ${template.id}, 1, ${data.subject}, ${data.content}, ${actorId}
     ) RETURNING id::text
   `;
 
-  // 3. Update Pointers
   await sql`
     UPDATE cic_email_templates
-    SET 
-      draft_version_id = ${ver.id},
-      active_version_id = ${data.publishNow ? ver.id : null}
-    WHERE id = ${tmpl.id}
+    SET
+      draft_version_id = ${version.id},
+      active_version_id = ${data.publishNow ? version.id : null}
+    WHERE id = ${template.id}
   `;
 
-  // 4. Audit Log
-  if (typeof actor === 'object' && actor !== null) {
-    void writeAuditEvent(actor, {
-      action: AUDIT_ACTIONS.EMAIL_TEMPLATE_CREATED,
-      entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE,
-      entityId: tmpl.id,
-      entityTitle: data.name,
-      module: 'email_templates',
-      workspace: data.workspace,
-      result: 'success',
-    }).catch((err) => console.error('[Audit Error in createEmailTemplate]', err));
-  }
+  await writeAuditEvent(principal, {
+    action: AUDIT_ACTIONS.EMAIL_TEMPLATE_CREATED,
+    entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE,
+    entityId: template.id,
+    entityTitle: data.name,
+    module: 'email_templates',
+    workspace: data.workspace,
+    result: 'success',
+    metadata: auditContext.duplicatedFromId
+      ? { duplicatedFromTemplateId: auditContext.duplicatedFromId }
+      : undefined,
+  }, sql);
 
-  return { id: tmpl.id, versionId: ver.id, versionNumber: 1 };
+  return { id: template.id, versionId: version.id, versionNumber: 1 };
+}
+
+export async function createEmailTemplate(
+  data: CreateTemplateInput,
+  principal: CmsPrincipal,
+  tx?: Sql
+) {
+  if (tx) {
+    return createEmailTemplateInTransaction(tx, data, principal);
+  }
+  return withTransaction((sql) => createEmailTemplateInTransaction(sql, data, principal));
 }
 
 export async function updateEmailTemplate(
   id: string,
   data: UpdateTemplateInput,
-  actor: CmsPrincipal | number | null = null
+  principal: CmsPrincipal,
+  tx?: Sql
 ) {
-  const sql = getPostgresClient();
-  const actorId = getActorId(actor);
+  const execute = async (sql: Sql) => {
+    const actorId = principal.legacyUserId;
+    const [template] = await sql`
+      SELECT id, workspace, name, status, active_version_id, draft_version_id
+      FROM cic_email_templates
+      WHERE id = ${id}
+      FOR UPDATE
+    `;
+    if (!template) throw new Error('Email template not found');
 
-  const [tmpl] = await sql`
-    SELECT id, workspace, name, active_version_id, draft_version_id 
-    FROM cic_email_templates 
-    WHERE id = ${id}
-  `;
-  if (!tmpl) throw new Error('Email template not found');
+    let nextVersionId: string | null = null;
+    let nextVersionNumber = 1;
 
-  // If content or subject changed, insert a new version
-  let nextVersionId: string | null = null;
-  let nextVersionNumber = 1;
+    if (data.subject !== undefined || data.content !== undefined) {
+      const [latestVersion] = await sql`
+        SELECT version_number, subject, content
+        FROM cic_email_template_versions
+        WHERE template_id = ${id}
+        ORDER BY version_number DESC
+        LIMIT 1
+      `;
 
-  if (data.subject !== undefined || data.content !== undefined) {
-    const [latestVer] = await sql`
-      SELECT version_number, subject, content 
-      FROM cic_email_template_versions 
-      WHERE template_id = ${id}
-      ORDER BY version_number DESC 
-      LIMIT 1
+      nextVersionNumber = latestVersion ? Number(latestVersion.version_number) + 1 : 1;
+      const finalSubject = data.subject !== undefined ? data.subject : (latestVersion?.subject || '');
+      const finalContent = data.content !== undefined ? data.content : (latestVersion?.content || '');
+
+      const [newVersion] = await sql`
+        INSERT INTO cic_email_template_versions (
+          template_id, version_number, subject, content, created_by
+        ) VALUES (
+          ${id}, ${nextVersionNumber}, ${finalSubject}, ${finalContent}, ${actorId}
+        ) RETURNING id::text
+      `;
+      nextVersionId = newVersion.id;
+    }
+
+    const shouldPublish = Boolean(data.publishNow);
+    const nextStatus = shouldPublish ? 'active' : (data.status ?? template.status);
+
+    await sql`
+      UPDATE cic_email_templates
+      SET
+        name = COALESCE(${data.name || null}, name),
+        event_key = COALESCE(${data.event || null}, event_key),
+        audience = COALESCE(${data.audience || null}, audience),
+        status = ${nextStatus},
+        draft_version_id = COALESCE(${nextVersionId}, draft_version_id),
+        active_version_id = ${shouldPublish ? sql`COALESCE(${nextVersionId}, draft_version_id, active_version_id)` : sql`active_version_id`},
+        activated_at = ${shouldPublish ? sql`now()` : sql`activated_at`},
+        activated_by = ${shouldPublish ? actorId : sql`activated_by`},
+        updated_at = now(),
+        updated_by = ${actorId}
+      WHERE id = ${id}
     `;
 
-    nextVersionNumber = latestVer ? Number(latestVer.version_number) + 1 : 1;
-    const finalSubject = data.subject !== undefined ? data.subject : (latestVer?.subject || '');
-    const finalContent = data.content !== undefined ? data.content : (latestVer?.content || '');
-
-    const [newVer] = await sql`
-      INSERT INTO cic_email_template_versions (
-        template_id, version_number, subject, content, created_by
-      ) VALUES (
-        ${id}, ${nextVersionNumber}, ${finalSubject}, ${finalContent}, ${actorId}
-      ) RETURNING id::text
-    `;
-    nextVersionId = newVer.id;
-  }
-
-  // Determine status and active pointer
-  const shouldPublish = Boolean(data.publishNow);
-  const nextStatus = shouldPublish ? 'active' : (data.status || 'draft');
-
-  await sql`
-    UPDATE cic_email_templates
-    SET
-      name = COALESCE(${data.name || null}, name),
-      event_key = COALESCE(${data.event || null}, event_key),
-      audience = COALESCE(${data.audience || null}, audience),
-      status = ${nextStatus},
-      draft_version_id = COALESCE(${nextVersionId}, draft_version_id),
-      active_version_id = ${shouldPublish ? sql`COALESCE(${nextVersionId}, draft_version_id, active_version_id)` : sql`active_version_id`},
-      activated_at = ${shouldPublish ? sql`now()` : sql`activated_at`},
-      activated_by = ${shouldPublish ? actorId : sql`activated_by`},
-      updated_at = now(),
-      updated_by = ${actorId}
-    WHERE id = ${id}
-  `;
-
-  // Audit Log
-  if (typeof actor === 'object' && actor !== null) {
-    const action = shouldPublish ? AUDIT_ACTIONS.EMAIL_TEMPLATE_PUBLISHED : AUDIT_ACTIONS.EMAIL_TEMPLATE_UPDATED;
-    void writeAuditEvent(actor, {
-      action,
+    await writeAuditEvent(principal, {
+      action: shouldPublish
+        ? AUDIT_ACTIONS.EMAIL_TEMPLATE_PUBLISHED
+        : AUDIT_ACTIONS.EMAIL_TEMPLATE_UPDATED,
       entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE,
       entityId: id,
-      entityTitle: data.name || tmpl.name,
+      entityTitle: data.name || template.name,
       module: 'email_templates',
-      workspace: tmpl.workspace,
+      workspace: template.workspace,
       result: 'success',
-    }).catch((err) => console.error('[Audit Error in updateEmailTemplate]', err));
-  }
+    }, sql);
 
-  return { id, versionId: nextVersionId, versionNumber: nextVersionNumber };
+    return { id, versionId: nextVersionId, versionNumber: nextVersionNumber };
+  };
+
+  return tx ? execute(tx) : withTransaction(execute);
 }
 
 export async function publishEmailTemplate(
   id: string,
-  targetVersion?: string | number,
-  actor: CmsPrincipal | number | null = null
+  targetVersion: string | number | undefined,
+  principal: CmsPrincipal,
+  tx?: Sql
 ) {
-  const sql = getPostgresClient();
-  const actorId = getActorId(actor);
-
-  let targetVersionId: string | null = null;
-  if (targetVersion) {
-    const isNum = typeof targetVersion === 'number' || /^\d+$/.test(String(targetVersion));
-    const [ver] = await sql`
-      SELECT id::text FROM cic_email_template_versions 
-      WHERE template_id = ${id} 
-        AND (id = ${String(targetVersion)} ${isNum ? sql`OR version_number = ${Number(targetVersion)}` : sql``})
-      LIMIT 1
-    `;
-    if (!ver) throw new Error(`Version ${targetVersion} not found`);
-    targetVersionId = ver.id;
-  } else {
-    const [t] = await sql`
-      SELECT draft_version_id, active_version_id, name, workspace
-      FROM cic_email_templates 
+  const execute = async (sql: Sql) => {
+    const actorId = principal.legacyUserId;
+    const [template] = await sql`
+      SELECT id, draft_version_id, active_version_id, name, workspace
+      FROM cic_email_templates
       WHERE id = ${id}
+      FOR UPDATE
     `;
-    if (!t) throw new Error('Email template not found');
-    targetVersionId = t.draft_version_id || t.active_version_id;
-  }
+    if (!template) throw new Error('Email template not found');
 
-  if (!targetVersionId) {
-    throw new Error('No valid version found to publish');
-  }
+    let targetVersionId: string | null = null;
+    if (targetVersion) {
+      const isNumeric = typeof targetVersion === 'number' || /^\d+$/.test(String(targetVersion));
+      const [version] = await sql`
+        SELECT id::text
+        FROM cic_email_template_versions
+        WHERE template_id = ${id}
+          AND (id = ${String(targetVersion)} ${isNumeric ? sql`OR version_number = ${Number(targetVersion)}` : sql``})
+        LIMIT 1
+      `;
+      if (!version) throw new Error(`Version ${targetVersion} not found`);
+      targetVersionId = version.id;
+    } else {
+      targetVersionId = template.draft_version_id || template.active_version_id;
+    }
 
-  const [updatedTmpl] = await sql`
-    UPDATE cic_email_templates
-    SET 
-      status = 'active',
-      active_version_id = ${targetVersionId},
-      activated_at = now(),
-      activated_by = ${actorId},
-      updated_at = now(),
-      updated_by = ${actorId}
-    WHERE id = ${id}
-    RETURNING id, name, workspace
-  `;
+    if (!targetVersionId) throw new Error('No valid version found to publish');
 
-  // Audit Log
-  if (typeof actor === 'object' && actor !== null && updatedTmpl) {
-    void writeAuditEvent(actor, {
+    const [updatedTemplate] = await sql`
+      UPDATE cic_email_templates
+      SET
+        status = 'active',
+        active_version_id = ${targetVersionId},
+        activated_at = now(),
+        activated_by = ${actorId},
+        updated_at = now(),
+        updated_by = ${actorId}
+      WHERE id = ${id}
+      RETURNING id, name, workspace
+    `;
+    if (!updatedTemplate) throw new Error('Email template not found');
+
+    await writeAuditEvent(principal, {
       action: AUDIT_ACTIONS.EMAIL_TEMPLATE_PUBLISHED,
       entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE,
       entityId: id,
-      entityTitle: updatedTmpl.name,
+      entityTitle: updatedTemplate.name,
       module: 'email_templates',
-      workspace: updatedTmpl.workspace,
+      workspace: updatedTemplate.workspace,
       result: 'success',
-    }).catch((err) => console.error('[Audit Error in publishEmailTemplate]', err));
-  }
+    }, sql);
 
-  return { id, activeVersionId: targetVersionId, status: 'active' };
+    return { id, activeVersionId: targetVersionId, status: 'active' };
+  };
+
+  return tx ? execute(tx) : withTransaction(execute);
 }
 
-export async function duplicateEmailTemplate(id: string, actor: CmsPrincipal | number | null = null) {
-  const sql = getPostgresClient();
+export async function duplicateEmailTemplate(
+  id: string,
+  principal: CmsPrincipal,
+  tx?: Sql
+) {
+  const execute = async (sql: Sql) => {
+    const [original] = await sql`
+      SELECT workspace, name, event_key, audience,
+             COALESCE(active_version_id, draft_version_id)::text AS source_version_id
+      FROM cic_email_templates
+      WHERE id = ${id}
+      FOR SHARE
+    `;
+    if (!original) throw new Error('Original email template not found');
 
-  const [orig] = await sql`
-    SELECT t.workspace, t.name, t.event_key, t.audience, v.subject, v.content
-    FROM cic_email_templates t
-    LEFT JOIN cic_email_template_versions v ON v.id = COALESCE(t.active_version_id, t.draft_version_id)
-    WHERE t.id = ${id}
-  `;
+    const [sourceVersion] = original.source_version_id
+      ? await sql`
+          SELECT subject, content
+          FROM cic_email_template_versions
+          WHERE id = ${original.source_version_id} AND template_id = ${id}
+        `
+      : [];
 
-  if (!orig) throw new Error('Original email template not found');
+    return createEmailTemplateInTransaction(
+      sql,
+      {
+        workspace: original.workspace,
+        name: `${original.name} (Bản sao)`,
+        event: original.event_key,
+        audience: original.audience,
+        subject: sourceVersion?.subject || '',
+        content: sourceVersion?.content || '',
+        status: 'draft',
+      },
+      principal,
+      { duplicatedFromId: id }
+    );
+  };
 
-  return createEmailTemplate(
-    {
-      workspace: orig.workspace,
-      name: `${orig.name} (Bản sao)`,
-      event: orig.event_key,
-      audience: orig.audience,
-      subject: orig.subject || '',
-      content: orig.content || '',
-      status: 'draft',
-    },
-    actor
-  );
+  return tx ? execute(tx) : withTransaction(execute);
 }
 
-export async function trashEmailTemplates(ids: string[], principal: CmsPrincipal) {
-  const sql = getPostgresClient();
-  if (!ids.length) return { trashedCount: 0 };
+export async function trashEmailTemplates(
+  ids: string[],
+  principal: CmsPrincipal,
+  tx?: Sql
+) {
+  const uniqueIds = [...new Set(ids)];
+  if (!uniqueIds.length) return { trashedCount: 0 };
 
-  let count = 0;
-  for (const id of ids) {
-    try {
-      const moved = await moveEmailTemplateToTrash(sql, id, principal.legacyUserId || 0);
-      count++;
-      void writeAuditEvent(principal, {
+  const execute = async (sql: Sql) => {
+    for (const id of uniqueIds) {
+      const moved = await moveEmailTemplateToTrash(sql, id, principal.legacyUserId);
+      await writeAuditEvent(principal, {
         action: AUDIT_ACTIONS.EMAIL_TEMPLATE_TRASHED,
         entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE,
         entityId: id,
@@ -272,37 +298,39 @@ export async function trashEmailTemplates(ids: string[], principal: CmsPrincipal
         module: 'email_templates',
         workspace: moved.workspace,
         result: 'success',
-      }).catch((err) => console.error('[Audit Error in trashEmailTemplates]', err));
-    } catch (err) {
-      console.error(`[Error moving template ${id} to trash]`, err);
+        after: { trashId: moved.trashId },
+      }, sql);
     }
-  }
 
-  return { trashedCount: count };
+    return { trashedCount: uniqueIds.length };
+  };
+
+  return tx ? execute(tx) : withTransaction(execute);
 }
 
-export async function deleteEmailTemplates(ids: string[]) {
-  const sql = getPostgresClient();
-  if (!ids.length) return { deletedCount: 0 };
+export async function deleteEmailTemplates(ids: string[], tx?: Sql) {
+  const uniqueIds = [...new Set(ids)];
+  if (!uniqueIds.length) return { deletedCount: 0 };
 
-  // 1. Disconnect versions from templates
-  await sql`
-    UPDATE cic_email_templates
-    SET draft_version_id = NULL, active_version_id = NULL
-    WHERE id = ANY(${ids})
-  `;
+  const execute = async (sql: Sql) => {
+    await sql`
+      UPDATE cic_email_templates
+      SET draft_version_id = NULL, active_version_id = NULL
+      WHERE id = ANY(${uniqueIds})
+    `;
 
-  // 2. Delete version rows
-  await sql`
-    DELETE FROM cic_email_template_versions
-    WHERE template_id = ANY(${ids})
-  `;
+    await sql`
+      DELETE FROM cic_email_template_versions
+      WHERE template_id = ANY(${uniqueIds})
+    `;
 
-  // 3. Delete template rows
-  const res = await sql`
-    DELETE FROM cic_email_templates
-    WHERE id = ANY(${ids})
-  `;
+    const result = await sql`
+      DELETE FROM cic_email_templates
+      WHERE id = ANY(${uniqueIds})
+    `;
 
-  return { deletedCount: res.count };
+    return { deletedCount: result.count };
+  };
+
+  return tx ? execute(tx) : withTransaction(execute);
 }

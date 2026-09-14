@@ -1,5 +1,6 @@
 import 'server-only';
 import { getPostgresClient } from '@/server/db/postgres';
+import { AppError } from '@/server/errors';
 import type { EmailTemplate, EmailTemplateDetail, EmailTemplateFilter, EmailTemplateVersion, EmailUsageItem } from '../types';
 
 export async function listEmailTemplates(filters: EmailTemplateFilter = {}): Promise<EmailTemplate[]> {
@@ -169,57 +170,67 @@ export async function getEmailTemplateForEvent(
   };
 }
 
-export async function getEmailTemplateUsage(id: string): Promise<EmailUsageItem[]> {
-  const sql = getPostgresClient();
-  const usages: EmailUsageItem[] = [];
+interface FormUsageRow {
+  id: string;
+  admin_name: string | null;
+  title: string | null;
+}
 
+interface CtaUsageRow {
+  id: string;
+  admin_name: string | null;
+  display_text: string | null;
+}
+
+export function isValidEmailTemplateId(id: unknown): id is string | number {
+  const rawId = typeof id === 'number' ? String(id) : typeof id === 'string' ? id.trim() : '';
+  if (!rawId || !/^\d+$/.test(rawId)) return false;
   try {
-    // Check in cic_forms if table exists
-    const hasForms = await sql`
-      SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'cic_forms'
-    `;
-    if (hasForms.length > 0) {
-      // Check column
-      const formCols = await sql`
-        SELECT column_name FROM information_schema.columns 
-        WHERE table_name = 'cic_forms' AND column_name IN ('email_template_id', 'admin_email_template_id', 'confirmation_email_template_id')
-      `;
-      if (formCols.length > 0) {
-        const rows = await sql.unsafe(`
-          SELECT id, name FROM cic_forms 
-          WHERE email_template_id = '${id}' 
-             OR admin_email_template_id = '${id}' 
-             OR confirmation_email_template_id = '${id}'
-        `);
-        for (const r of rows) {
-          usages.push({ id: r.id, name: r.name || `Biểu mẫu #${r.id}`, type: 'form' });
-        }
-      }
-    }
+    const val = BigInt(rawId);
+    return val > 0n && val <= 9223372036854775807n;
   } catch {
-    // ignore
+    return false;
+  }
+}
+
+export async function getEmailTemplateUsage(id: string | number): Promise<EmailUsageItem[]> {
+  if (!isValidEmailTemplateId(id)) {
+    throw new AppError('Invalid email template ID.', 'VALIDATION_ERROR');
   }
 
-  try {
-    const hasCta = await sql`
-      SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'cic_cta'
-    `;
-    if (hasCta.length > 0) {
-      const ctaCols = await sql`
-        SELECT column_name FROM information_schema.columns 
-        WHERE table_name = 'cic_cta' AND column_name = 'email_template_id'
-      `;
-      if (ctaCols.length > 0) {
-        const rows = await sql.unsafe(`
-          SELECT id, name FROM cic_cta WHERE email_template_id = '${id}'
-        `);
-        for (const r of rows) {
-          usages.push({ id: r.id, name: r.name || `Nút CTA #${r.id}`, type: 'cta' });
-        }
-      }
-    }
-  } catch {
-    // ignore
+  const templateIdStr = typeof id === 'number' ? String(id) : id.trim();
+  const sql = getPostgresClient();
+
+  const [formRows, ctaRows] = await Promise.all([
+    sql<FormUsageRow[]>`
+      SELECT id::text, admin_name, title
+      FROM cic_forms
+      WHERE deleted_at IS NULL
+        AND (
+          admin_email_template_id = ${templateIdStr}::bigint
+          OR confirmation_email_template_id = ${templateIdStr}::bigint
+        )
+      ORDER BY id ASC
+    `,
+    sql<CtaUsageRow[]>`
+      SELECT id::text, admin_name, display_text
+      FROM cic_ctas
+      WHERE deleted_at IS NULL
+        AND email_template_id = ${templateIdStr}::bigint
+      ORDER BY id ASC
+    `,
+  ]);
+
+  const usages: EmailUsageItem[] = [];
+
+  for (const r of formRows) {
+    const name = r.admin_name?.trim() || r.title?.trim() || `Biểu mẫu #${r.id}`;
+    usages.push({ id: String(r.id), name, type: 'form' });
+  }
+
+  for (const r of ctaRows) {
+    const name = r.admin_name?.trim() || r.display_text?.trim() || `Nút CTA #${r.id}`;
+    usages.push({ id: String(r.id), name, type: 'cta' });
   }
 
   return usages;

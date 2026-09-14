@@ -22,6 +22,11 @@ interface Props {
   initialTemplates?: EmailTemplate[];
   onRefresh?: () => void;
   data?: { templates: EmailTemplate[] };
+  capabilities?: {
+    create: boolean;
+    edit: boolean;
+    delete: boolean;
+  };
 }
 
 const renderSample = (value: string) =>
@@ -32,7 +37,12 @@ export const EmailTemplatesManager: React.FC<Props> = ({
   initialTemplates,
   onRefresh,
   data,
+  capabilities,
 }) => {
+  const canCreate = capabilities ? capabilities.create : true;
+  const canEdit = capabilities ? capabilities.edit : true;
+  const canDelete = capabilities ? capabilities.delete : true;
+
   const [templates, setTemplates] = useState<EmailTemplate[]>(initialTemplates || data?.templates || []);
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editing, setEditing] = useState<EmailTemplate | null>(null);
@@ -280,17 +290,19 @@ export const EmailTemplatesManager: React.FC<Props> = ({
         title="Mẫu email"
         description="Soạn và quản lý nội dung email. Biểu mẫu chọn mẫu cần gửi và tổng hợp nơi đang sử dụng."
         actions={
-          <CmsButton
-            variant="primary"
-            size="sm"
-            leadingIcon={<Plus />}
-            onClick={() => {
-              setEditing(null);
-              setView('form');
-            }}
-          >
-            Thêm mẫu email
-          </CmsButton>
+          canCreate ? (
+            <CmsButton
+              variant="primary"
+              size="sm"
+              leadingIcon={<Plus />}
+              onClick={() => {
+                setEditing(null);
+                setView('form');
+              }}
+            >
+              Thêm mẫu email
+            </CmsButton>
+          ) : undefined
         }
       />
 
@@ -343,7 +355,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
           </select>
         </div>
 
-        {selected.length > 0 && (
+        {selected.length > 0 && canDelete && (
           <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
             <span>
               <strong>{selected.length}</strong> mẫu đã chọn
@@ -416,8 +428,12 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                         <button
                           className="max-w-[420px] truncate text-left font-semibold text-slate-900 hover:text-orange-600 dark:text-white"
                           onClick={() => {
-                            setEditing(item);
-                            setView('form');
+                            if (canEdit) {
+                              setEditing(item);
+                              setView('form');
+                            } else {
+                              setPreviewing(item);
+                            }
                           }}
                         >
                           {item.name}
@@ -458,24 +474,28 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                             icon={<Link2 />}
                             onClick={() => setUsageTemplate(item)}
                           />
-                          <CmsIconButton
-                            size="sm"
-                            aria-label="Nhân bản"
-                            title="Nhân bản"
-                            icon={<Copy />}
-                            onClick={() => duplicateItem(item)}
-                          />
-                          <CmsIconButton
-                            size="sm"
-                            aria-label="Sửa"
-                            title="Sửa"
-                            icon={<Edit />}
-                            onClick={() => {
-                              setEditing(item);
-                              setView('form');
-                            }}
-                          />
-                          {item.status === 'draft' && (
+                          {canCreate && (
+                            <CmsIconButton
+                              size="sm"
+                              aria-label="Nhân bản"
+                              title="Nhân bản"
+                              icon={<Copy />}
+                              onClick={() => duplicateItem(item)}
+                            />
+                          )}
+                          {canEdit && (
+                            <CmsIconButton
+                              size="sm"
+                              aria-label="Sửa"
+                              title="Sửa"
+                              icon={<Edit />}
+                              onClick={() => {
+                                setEditing(item);
+                                setView('form');
+                              }}
+                            />
+                          )}
+                          {canEdit && item.status === 'draft' && (
                             <CmsIconButton
                               size="sm"
                               aria-label="Xuất bản"
@@ -484,14 +504,16 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                               onClick={() => publishItem(item)}
                             />
                           )}
-                          <CmsIconButton
-                            size="sm"
-                            variant="danger"
-                            aria-label="Xóa"
-                            title="Xóa mẫu email"
-                            icon={<Trash2 />}
-                            onClick={() => setDeleteTargets([item])}
-                          />
+                          {canDelete && (
+                            <CmsIconButton
+                              size="sm"
+                              variant="danger"
+                              aria-label="Xóa"
+                              title="Xóa mẫu email"
+                              icon={<Trash2 />}
+                              onClick={() => setDeleteTargets([item])}
+                            />
+                          )}
                         </div>
                       </td>
                     </tr>
