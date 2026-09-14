@@ -275,6 +275,66 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
   - `REMOVE`: `mockData.ts`, `MOCK_FORMS`, `sampleSubmissions` hard-code.
 - **G. Kết luận audit:** Module Biểu mẫu giữ trạng thái `[A]`. Đã hiểu rõ toàn bộ 4 nguồn tài liệu, cấu trúc DB thật, ràng buộc nghiệp vụ. **READY_TO_IMPLEMENT**.
 
+### Audit Nút kêu gọi hành động (CTA) — 2026-09-14
+
+- **A. Phạm vi & Bề mặt (Surfaces):**
+  - CMS Surface tại `/cms/cta`: Quản lý danh sách CTA tái sử dụng (reusable CTAs) theo workspace (`vi`/`en`), tìm kiếm theo tên/mã/nội dung hiển thị, lọc theo trạng thái (`active`, `draft`, `inactive`, `archived`), loại hành động (Action Type: 7 loại), khoảng ngày tạo, sắp xếp theo mới nhất, cũ nhất, tên (A-Z), lượt nhấp (clicks), CTR.
+  - CMS CTA Form View (`CtaFormView`): Chỉnh sửa hoặc tạo mới CTA với 4 khối thẻ chính:
+    1. Thông tin định danh (`CtaIdentityCard`): Tên quản trị (`adminName`), Mã CTA (`code`), Ghi chú nội bộ (`description`), Copy mã nhúng shortcode (`{{cta:code}}`).
+    2. Cấu hình hiển thị (`CtaDisplayCard`): Nội dung nút (`displayText`), Biểu tượng Lucide (`icon`), Kiểu nút (`styleVariant`: `primary`, `secondary`, `outline`, `gradient`), Kích thước nút preview (`buttonSize`: `sm`, `md`, `lg`).
+    3. Cấu hình hành động (`CtaActionConfigCard`): 7 loại hành động độc quyền với cấu hình tương ứng:
+       - `open_form`: Chọn Biểu mẫu tương tác mở Popup (FK trỏ tới `cic_forms(id)`).
+       - `redirect_internal`: Chọn trang nội bộ từ danh sách hoặc nhập đường dẫn tùy chỉnh, chọn mở cùng tab (`_self`) hoặc tab mới (`_blank`).
+       - `redirect_external`: Nhập URL bên ngoài (`url`), mở tab mới (`_blank`) hoặc cùng tab (`_self`).
+       - `scroll_to_section`: Chọn section từ danh sách trang thực tế hoặc nhập `#id` tùy chỉnh.
+       - `download_file`: Chọn tệp tài liệu từ Thư viện Media (FK trỏ tới `cic_media_assets(id)`).
+       - `call_phone`: Nhập số điện thoại hotline (`phoneNumber`).
+       - `send_email`: Nhập email nhận (`emailAddress`), chọn mẫu email (FK trỏ tới `cic_email_templates(id)`), bắt buộc bật xác nhận xem trước (`reviewBeforeSend: true`), nút xem trước email (`CtaEmailPreviewModal`).
+    4. Sidebar Xem trước & Thống kê (`CtaLivePreviewCard`, `CtaAnalyticsSidebar`): Preview nút động thời gian thực theo cấu hình hiển thị và màu sắc, hiển thị thông số thống kê hiệu suất (Lượt xem, Lượt nhấp, Tỷ lệ nhấp CTR, Xu hướng).
+  - CMS Modals: Xem trước CTA (`CtaPreviewModal`), Xem danh sách trang đang nhúng CTA (`CtaUsedByModal`), Modal xác nhận xóa chuyển Thùng rác (`CmsTrashConfirmDialog`).
+  - Public Surface: Render nút CTA tái sử dụng thông qua shortcode nhúng trong bài viết/trang (`{{cta:code}}`) hoặc các CTA cố định theo layout (như `SYSTEM_CTA_IDS` trên Header hotline, Hero trang chủ, Banner tư vấn chân trang).
+- **B. Đối chiếu Legacy (React Reference & PHP):**
+  - Hệ thống PHP legacy (`httpdocs`) không có bảng hoặc module CTA generic; toàn bộ các nút liên hệ/gọi điện được hard-code trực tiếp trong giao diện của từng module.
+  - React reference (`CtaManager.tsx`, `CtaFormView.tsx`, `mockData.ts` 327 dòng, các component con trong `cta/components/`) là chuẩn về mặt visual hierarchy và tương tác nghiệp vụ.
+  - Hiện tại Next.js CMS route `/cms/cta` chưa được mount vào `CmsCatchAllPage` (đang fallback qua `CmsFoundationRoute` vào mock data `getDemoCtaModuleData`).
+- **C. Database Schema & Data Authority:**
+  - Production authority là bảng PostgreSQL `cic_ctas` (19 cột) ĐÃ TỒN TẠI trong database:
+    - `id` (`bigint` identity PK)
+    - `workspace` (`varchar` NOT NULL, `vi`/`en`)
+    - `code` (`varchar` NOT NULL, Unique `(workspace, code)`)
+    - `is_system` (`boolean` NOT NULL DEFAULT false)
+    - `admin_name` (`varchar` NOT NULL)
+    - `display_text` (`varchar` NOT NULL)
+    - `description` (`text` NULL)
+    - `icon` (`varchar` NULL)
+    - `style_variant` (`varchar` NOT NULL DEFAULT 'primary')
+    - `action_type` (`varchar` NOT NULL, CHECK 7 loại hành động chuẩn)
+    - `action_config` (`jsonb` NOT NULL DEFAULT '{}'::jsonb)
+    - `form_id` (`bigint` NULL, FK → `cic_forms(id)` ON DELETE RESTRICT)
+    - `media_asset_id` (`bigint` NULL, FK → `cic_media_assets(id)` ON DELETE RESTRICT)
+    - `email_template_id` (`bigint` NULL, FK → `cic_email_templates(id)` ON DELETE RESTRICT)
+    - `status` (`varchar` NOT NULL DEFAULT 'draft')
+    - `created_by` (`integer` NULL, FK → `cic_users(id)` ON DELETE SET NULL)
+    - `created_at` (`timestamptz` NOT NULL DEFAULT now())
+    - `updated_at` (`timestamptz` NOT NULL DEFAULT now())
+    - `deleted_at` (`timestamptz` NULL)
+  - Dữ liệu thực tế: Hiện có 0 dòng trong `cic_ctas`. Cần seed dữ liệu CTA ban đầu cho cả 2 workspace `vi` và `en` tương ứng với 7 CTA trong `mockData.ts` (`cta_explore_products`, `cta_about_cic`, `cta_contact`, `cta_tuvan_erp`, `cta_baogia_intellicad`, `cta_tai_catalogue`, `cta_goi_hotline`).
+  - Phân định rõ: `form_id`, `media_asset_id`, `email_template_id` được lưu trực tiếp ở các cột FK chuyên biệt trên bảng `cic_ctas` (không nhét vào JSON `action_config`) nhằm đảm bảo tính toàn vẹn quan hệ (foreign key integrity). `action_config` chỉ lưu các tham số phi quan hệ (`url`, `openInNewTab`, `sectionId`, `phoneNumber`, `emailAddress`, `reviewBeforeSend`).
+- **D. Quan hệ & Ràng buộc toàn vẹn (Integrity & Dependencies):**
+  - Ràng buộc Form: Khi `action_type = 'open_form'`, `form_id` bắt buộc có giá trị và trỏ tới bản ghi active trong `cic_forms`. Khi xóa Form, DB chặn nếu đang được CTA tham chiếu (`ON DELETE RESTRICT`).
+  - Ràng buộc Email Template: Khi `action_type = 'send_email'`, `email_template_id` bắt buộc trỏ tới `cic_email_templates(id)` đang active và đúng workspace.
+  - Ràng buộc Media: Khi `action_type = 'download_file'`, `media_asset_id` trỏ tới `cic_media_assets(id)`.
+  - Quản trị hệ thống (`is_system`): Các CTA hệ thống (`is_system = true`, ví dụ: `cta_explore_products`, `cta_about_cic`, `cta_contact`) được bảo vệ không cho phép xóa khỏi hệ thống.
+- **E. Quyền hạn (RBAC) & Audit:**
+  - Quyền hạn: Bảng `cic_permission_tasks` chưa có module riêng `cta`. Áp dụng fallback chuẩn của hệ thống: `can(principal, 'cta', action) || can(principal, 'contents', action) || principal.isAdministrator`.
+  - Audit Trail: Đăng ký các action hệ thống trong `src/server/audit/registry.ts` (`CTA_CREATED`, `CTA_UPDATED`, `CTA_STATUS_CHANGED`, `CTA_TRASHED`) và ghi nhận qua `writeAuditEvent`.
+- **F. Phân loại Next.js (KEEP / REFACTOR / REPLACE / REMOVE):**
+  - `KEEP`: `CtaIdentityCard`, `CtaDisplayCard`, `CtaActionConfigCard`, `CtaLivePreviewCard`, `CtaAnalyticsSidebar`, `CtaPreviewModal`, `CtaUsedByModal`, `CtaEmailPreviewModal`.
+  - `REFACTOR`: `CtaManager.tsx` chuyển sang gọi API/Server queries thay vì mutate local state; mount `CtaRoute` vào `CmsCatchAllPage`.
+  - `REPLACE`: Demo data source `getDemoCtaModuleData` thay bằng Server Component `CtaRoute` và query PostgreSQL thật.
+  - `REMOVE`: `MOCK_CTAS` hard-code và `MOCK_PLACEMENTS` giả lập.
+- **G. Kết luận audit:** Module CTA ở trạng thái `[A]`. Đã hoàn tất audit toàn diện 4 nguồn (React reference, Next.js codebase, Database PostgreSQL thật, schema delta docs). Bảng `cic_ctas` cùng các FK đã tồn tại sẵn trên database thật. **READY_TO_IMPLEMENT**.
+
 ## Foundation/cross-module
 
 | Status | Foundation | Hard dependency đối với | Ghi chú audit |
