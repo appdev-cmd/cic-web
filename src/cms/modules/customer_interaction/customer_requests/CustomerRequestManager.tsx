@@ -20,27 +20,41 @@ import {
   MessageSquare,
   Sparkles,
 } from 'lucide-react';
-import { CustomerRequest, RequestFilterState } from './types';
+import type { CustomerRequest, RequestFilterState, RequestListTabType } from './types';
 import type { CustomerRequestModuleData } from '../../../data/CustomerInteractionDataSource';
+import type { CustomerRequestListResponse } from '@/features/customer-requests/types';
 import { RequestList } from './components/RequestList';
 import { RequestDetailPage } from './components/RequestDetailPage';
-import { RequestReassignModal } from './components/RequestReassignModal';
+import { RequestReassignModal, type AssignableStaffItem } from './components/RequestReassignModal';
 import { RequestQuickNotesModal } from './components/RequestQuickNotesModal';
 import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../shared/constants/statusTypes';
-import type { PriorityLevel } from '../shared/constants/statusTypes';
+import type { PriorityLevel, RequestStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
-import { StaffMember } from '../../contacts/types';
 import { MOCK_STAFF_MEMBERS } from '../../contacts/mockData';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 
-interface CustomerRequestManagerProps {
-  data: CustomerRequestModuleData;
+export interface CustomerRequestManagerProps {
+  data?: CustomerRequestModuleData;
+  serverData?: CustomerRequestListResponse;
+  workspaceLocale?: 'vi' | 'en';
+  capabilities?: {
+    edit?: boolean;
+    delete?: boolean;
+  };
+  onRefresh?: () => void;
 }
 
-export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ data }) => {
-  const [requests, setRequests] = useState<CustomerRequest[]>(data.requests);
+export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
+  data,
+  serverData,
+  workspaceLocale = 'vi',
+  capabilities = { edit: true, delete: true },
+  onRefresh,
+}) => {
+  const initialRequests = serverData?.requests ?? data?.requests ?? [];
+  const [requests, setRequests] = useState<CustomerRequest[]>(initialRequests);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<RequestFilterState>({
     searchQuery: '',
@@ -72,8 +86,35 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
+
+  // Sync with serverData updates
+  useEffect(() => {
+    if (serverData?.requests) {
+      setRequests(serverData.requests);
+    }
+  }, [serverData]);
+
+  // Fallback client fetch if neither serverData nor data was provided
+  useEffect(() => {
+    if (!serverData && !data) {
+      let ignore = false;
+      fetch(`/api/cms/customer-requests?workspace=${workspaceLocale}&pageSize=100`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json: CustomerRequestListResponse | null) => {
+          if (!ignore && json?.requests) {
+            setRequests(json.requests);
+          }
+        })
+        .catch((err) => {
+          console.error('[CustomerRequestManager] Failed to fetch requests:', err);
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [serverData, data, workspaceLocale]);
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -104,8 +145,25 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     return () => window.removeEventListener('popstate', handlePopState);
   }, [requests]);
 
-  // Extract unique filter options from request dataset
+  // Extract available staff members from serverData (cic_users) or mock fallback
+  const staffMembers: AssignableStaffItem[] = useMemo(() => {
+    if (serverData?.staffMembers && serverData.staffMembers.length > 0) {
+      return serverData.staffMembers.map((s) => ({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        username: s.username,
+        role: s.role,
+      }));
+    }
+    return MOCK_STAFF_MEMBERS as AssignableStaffItem[];
+  }, [serverData?.staffMembers]);
+
+  // Extract filter options from serverData or local dataset
   const formOptions = useMemo(() => {
+    if (serverData?.formOptions && serverData.formOptions.length > 0) {
+      return serverData.formOptions;
+    }
     const map = new Map<string, string>();
     requests.forEach((r) => {
       if (r.sourceConfig?.formId && r.sourceConfig?.formName) {
@@ -113,9 +171,12 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
       }
     });
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [requests]);
+  }, [serverData?.formOptions, requests]);
 
   const ctaOptions = useMemo(() => {
+    if (serverData?.ctaOptions && serverData.ctaOptions.length > 0) {
+      return serverData.ctaOptions;
+    }
     const map = new Map<string, string>();
     requests.forEach((r) => {
       if (r.sourceConfig?.ctaId && r.sourceConfig?.ctaName) {
@@ -123,11 +184,11 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
       }
     });
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [requests]);
+  }, [serverData?.ctaOptions, requests]);
 
   const assigneeOptions = useMemo(() => {
     const map = new Map<string, string>();
-    MOCK_STAFF_MEMBERS.forEach((m) => {
+    staffMembers.forEach((m) => {
       map.set(m.id, m.name);
     });
     requests.forEach((r) => {
@@ -136,17 +197,34 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
       }
     });
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [requests]);
+  }, [staffMembers, requests]);
+
+  // Overall counts for tabs
+  const stats = useMemo(() => {
+    if (serverData?.stats) {
+      return serverData.stats;
+    }
+    const active = requests.filter((r) => !r.deletedAt);
+    return {
+      all: active.length,
+      new: active.filter((r) => r.status === 'new').length,
+      processing: active.filter((r) => ['received', 'processing', 'contacted'].includes(r.status)).length,
+      completed: active.filter((r) => r.status === 'completed').length,
+      not_suitable: active.filter((r) => r.status === 'not_suitable').length,
+      cancelled: active.filter((r) => r.status === 'cancelled').length,
+    };
+  }, [serverData?.stats, requests]);
 
   // Check if any filters are active
   const hasActiveFilters = Boolean(
     filter.searchQuery.trim() ||
-    filter.status ||
-    filter.formId ||
-    filter.ctaId ||
-    filter.assignedUserId ||
-    filter.dateFrom ||
-    filter.dateTo
+      filter.status ||
+      filter.formId ||
+      filter.ctaId ||
+      filter.assignedUserId ||
+      filter.dateFrom ||
+      filter.dateTo ||
+      filter.tab !== 'all'
   );
 
   const handleResetFilters = () => {
@@ -163,70 +241,85 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   // Multi-condition filtering
-  const filteredRequests = requests.filter((request) => {
-    if (request.deletedAt) return false;
+  const filteredRequests = useMemo(() => {
+    return requests.filter((request) => {
+      if (request.deletedAt) return false;
 
-    // Search filter across submission values, metadata, form/CTA/page names
-    if (filter.searchQuery.trim()) {
-      const query = filter.searchQuery.toLowerCase();
-      const valuesString = request.submissionValues
-        .map((v) => `${v.fieldLabel} ${v.valueText || ''}`)
-        .join(' ')
-        .toLowerCase();
-      const formName = (request.sourceConfig.formName || '').toLowerCase();
-      const ctaName = (request.sourceConfig.ctaName || '').toLowerCase();
-      const pageTitle = (request.sourceConfig.pageTitle || '').toLowerCase();
-      const pageUrl = (request.sourceConfig.pageUrl || '').toLowerCase();
-      const reqId = request.id.toLowerCase();
-      const assigneeName = (request.assignedUserName || '').toLowerCase();
-
-      const matches =
-        valuesString.includes(query) ||
-        formName.includes(query) ||
-        ctaName.includes(query) ||
-        pageTitle.includes(query) ||
-        pageUrl.includes(query) ||
-        reqId.includes(query) ||
-        assigneeName.includes(query);
-
-      if (!matches) return false;
-    }
-
-    // Status filter
-    if (filter.status && request.status !== filter.status) return false;
-
-    // Form filter
-    if (filter.formId && request.sourceConfig.formId !== filter.formId) return false;
-
-    // CTA filter
-    if (filter.ctaId && request.sourceConfig.ctaId !== filter.ctaId) return false;
-
-    // Assignee filter
-    if (filter.assignedUserId) {
-      if (filter.assignedUserId === 'unassigned') {
-        if (request.assignedUserId) return false;
-      } else if (request.assignedUserId !== filter.assignedUserId) {
-        return false;
+      // Tab filter
+      if (filter.tab && filter.tab !== 'all') {
+        if (filter.tab === 'new' && request.status !== 'new') return false;
+        if (
+          filter.tab === 'processing' &&
+          !['received', 'processing', 'contacted'].includes(request.status)
+        )
+          return false;
+        if (filter.tab === 'completed' && request.status !== 'completed') return false;
+        if (filter.tab === 'not_suitable' && request.status !== 'not_suitable') return false;
+        if (filter.tab === 'cancelled' && request.status !== 'cancelled') return false;
       }
-    }
 
-    // Date range filter
-    if (filter.dateFrom) {
-      const fromDate = new Date(filter.dateFrom);
-      fromDate.setHours(0, 0, 0, 0);
-      const reqDate = new Date(request.sourceConfig.submittedAt);
-      if (reqDate < fromDate) return false;
-    }
+      // Search filter across submission values, metadata, form/CTA/page names
+      if (filter.searchQuery.trim()) {
+        const query = filter.searchQuery.toLowerCase();
+        const valuesString = (request.submissionValues || [])
+          .map((v) => `${v.fieldLabel} ${v.valueText || ''}`)
+          .join(' ')
+          .toLowerCase();
+        const formName = (request.sourceConfig?.formName || '').toLowerCase();
+        const ctaName = (request.sourceConfig?.ctaName || '').toLowerCase();
+        const pageTitle = (request.sourceConfig?.pageTitle || '').toLowerCase();
+        const pageUrl = (request.sourceConfig?.pageUrl || '').toLowerCase();
+        const reqId = request.id.toLowerCase();
+        const assigneeName = (request.assignedUserName || '').toLowerCase();
 
-    if (filter.dateTo) {
-      const toDate = new Date(filter.dateTo);
-      toDate.setHours(23, 59, 59, 999);
-      const reqDate = new Date(request.sourceConfig.submittedAt);
-      if (reqDate > toDate) return false;
-    }
+        const matches =
+          valuesString.includes(query) ||
+          formName.includes(query) ||
+          ctaName.includes(query) ||
+          pageTitle.includes(query) ||
+          pageUrl.includes(query) ||
+          reqId.includes(query) ||
+          assigneeName.includes(query);
 
-    return true;
-  });
+        if (!matches) return false;
+      }
+
+      // Status filter
+      if (filter.status && request.status !== filter.status) return false;
+
+      // Form filter
+      if (filter.formId && request.sourceConfig?.formId !== filter.formId) return false;
+
+      // CTA filter
+      if (filter.ctaId && request.sourceConfig?.ctaId !== filter.ctaId) return false;
+
+      // Assignee filter
+      if (filter.assignedUserId) {
+        if (filter.assignedUserId === 'unassigned') {
+          if (request.assignedUserId) return false;
+        } else if (request.assignedUserId !== filter.assignedUserId) {
+          return false;
+        }
+      }
+
+      // Date range filter
+      if (filter.dateFrom) {
+        const fromDate = new Date(filter.dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        const reqDate = new Date(request.sourceConfig?.submittedAt || request.createdAt);
+        if (reqDate < fromDate) return false;
+      }
+
+      if (filter.dateTo) {
+        const toDate = new Date(filter.dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        const reqDate = new Date(request.sourceConfig?.submittedAt || request.createdAt);
+        if (reqDate > toDate) return false;
+      }
+
+      return true;
+    });
+  }, [requests, filter]);
 
   // Export CSV based on filtered dataset
   const handleExportCSV = () => {
@@ -331,7 +424,13 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   const handleViewDetail = (request: CustomerRequest) => {
     setSelectedRequest(request);
     setViewMode('detail');
-    window.history.pushState({}, '', `/cms/customer-requests/detail/${request.id}`);
+    window.history.pushState({}, '', `/cms/customer-requests/detail/${encodeURIComponent(request.id)}`);
+  };
+
+  const handleBackToList = () => {
+    setViewMode('list');
+    setSelectedRequest(null);
+    window.history.pushState({}, '', '/cms/customer-requests');
   };
 
   const handleDeleteRequest = (id: string) => {
@@ -341,93 +440,130 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     }
   };
 
-  const handleAddNote = (requestId: string, noteContent: string) => {
-    const now = new Date().toISOString();
-    const newNote = {
-      id: `note_${Date.now()}`,
-      content: noteContent.trim(),
-      createdBy: 'current_user',
-      createdByName: 'Quản trị viên',
-      createdAt: now,
-    };
-    const newLog = {
-      id: `log_${Date.now()}`,
-      actionType: 'note_added',
-      createdBy: 'current_user',
-      createdByName: 'Quản trị viên',
-      createdAt: now,
-    };
+  // 1. Add Note Mutation
+  const handleAddNote = async (requestId: string, noteContent: string) => {
+    const trimmed = noteContent.trim();
+    if (!trimmed) return;
 
-    setRequests((prev) =>
-      prev.map((r) => {
-        if (r.id === requestId) {
-          const updated = {
-            ...r,
-            internalNotes: [...(r.internalNotes || []), newNote],
-            logs: [...(r.logs || []), newLog],
-            updatedAt: now,
-          };
-          if (selectedRequest?.id === requestId) {
-            setSelectedRequest(updated);
+    try {
+      const res = await fetch(`/api/cms/customer-requests/${encodeURIComponent(requestId)}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: trimmed }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể thêm ghi chú: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      const result = await res.json();
+      const updatedNote = result.note;
+      const updatedLog = result.log;
+
+      setRequests((prev) =>
+        prev.map((r) => {
+          if (r.id === requestId) {
+            const updated: CustomerRequest = {
+              ...r,
+              internalNotes: [...(r.internalNotes || []), updatedNote],
+              logs: updatedLog ? [...(r.logs || []), updatedLog] : r.logs,
+              updatedAt: new Date().toISOString(),
+            };
+            if (selectedRequest?.id === requestId) {
+              setSelectedRequest(updated);
+            }
+            if (notesModalData.isOpen && notesModalData.request?.id === requestId) {
+              setNotesModalData({ isOpen: true, request: updated });
+            }
+            return updated;
           }
-          if (notesModalData.isOpen && notesModalData.request?.id === requestId) {
-            setNotesModalData({ isOpen: true, request: updated });
-          }
-          return updated;
-        }
-        return r;
-      })
-    );
+          return r;
+        })
+      );
+
+      showToast('Đã thêm ghi chú nội bộ thành công!');
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
-  const handleConfirmReassign = (requestIds: string[], targetStaff: StaffMember, reason: string) => {
-    const now = new Date().toISOString();
-    setRequests((prev) =>
-      prev.map((r) => {
-        if (requestIds.includes(r.id)) {
-          const oldName = r.assignedUserName || 'Chưa phân công';
-          const newNotes = reason.trim()
-            ? [
-                ...(r.internalNotes || []),
+  // 2. Reassign Mutation
+  const handleConfirmReassign = async (
+    requestIds: string[],
+    targetStaff: AssignableStaffItem,
+    reason: string
+  ) => {
+    try {
+      const res = await fetch('/api/cms/customer-requests/reassign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ids: requestIds,
+          targetUserId: targetStaff.id,
+          reason,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể phân công: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      const now = new Date().toISOString();
+      setRequests((prev) =>
+        prev.map((r) => {
+          if (requestIds.includes(r.id)) {
+            const oldName = r.assignedUserName || 'Chưa phân công';
+            const updated: CustomerRequest = {
+              ...r,
+              assignedUserId: targetStaff.id,
+              assignedUserName: targetStaff.name,
+              updatedAt: now,
+              internalNotes: reason.trim()
+                ? [
+                    ...(r.internalNotes || []),
+                    {
+                      id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                      content: `[Chuyển giao người phụ trách] Từ "${oldName}" sang "${targetStaff.name}". Lý do: ${reason.trim()}`,
+                      createdBy: 'current_user',
+                      createdByName: 'Quản trị viên',
+                      createdAt: now,
+                    },
+                  ]
+                : r.internalNotes,
+              logs: [
+                ...(r.logs || []),
                 {
-                  id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-                  content: `[Chuyển giao người phụ trách] Từ "${oldName}" sang "${targetStaff.name}". Lý do: ${reason.trim()}`,
+                  id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                  actionType: 'reassigned',
+                  oldValue: oldName,
+                  newValue: targetStaff.name,
                   createdBy: 'current_user',
                   createdByName: 'Quản trị viên',
                   createdAt: now,
                 },
-              ]
-            : r.internalNotes || [];
-
-          const updated: CustomerRequest = {
-            ...r,
-            assignedUserId: targetStaff.id,
-            assignedUserName: targetStaff.name,
-            internalNotes: newNotes,
-            updatedAt: now,
-            logs: [
-              ...(r.logs || []),
-              {
-                id: `log_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-                actionType: 'reassigned',
-                oldValue: oldName,
-                newValue: targetStaff.name,
-                createdBy: 'current_user',
-                createdByName: 'Quản trị viên',
-                createdAt: now,
-              },
-            ],
-          };
-
-          if (selectedRequest?.id === r.id) {
-            setSelectedRequest(updated);
+              ],
+            };
+            if (selectedRequest?.id === r.id) {
+              setSelectedRequest(updated);
+            }
+            return updated;
           }
-          return updated;
-        }
-        return r;
-      })
-    );
-    setSelectedRequestIds([]);
+          return r;
+        })
+      );
+
+      setSelectedRequestIds([]);
+      setReassignModalData({ isOpen: false, requests: [] });
+      showToast(`Đã phân công ${requestIds.length} yêu cầu cho ${targetStaff.name}!`);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   const handleOpenReassignSingle = (request: CustomerRequest) => {
@@ -438,11 +574,11 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
   };
 
   const handleOpenReassignBulk = () => {
-    const targetRequests = requests.filter((r) => selectedRequestIds.includes(r.id));
-    if (targetRequests.length > 0) {
+    const targets = requests.filter((r) => selectedRequestIds.includes(r.id));
+    if (targets.length > 0) {
       setReassignModalData({
         isOpen: true,
-        requests: targetRequests,
+        requests: targets,
       });
     }
   };
@@ -466,6 +602,18 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
     setIsDeleting(true);
     try {
       const ids = trashTargets.map((r) => r.id);
+      const res = await fetch('/api/cms/customer-requests/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(`Không thể xóa yêu cầu: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
       setRequests((prev) => prev.filter((r) => !ids.includes(r.id)));
       setSelectedRequestIds((prev) => prev.filter((id) => !ids.includes(id)));
       showToast(
@@ -474,98 +622,181 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
           : `Đã chuyển ${trashTargets.length} yêu cầu vào Thùng rác!`
       );
       setTrashTargets(null);
+      onRefresh?.();
+    } catch (e: any) {
+      showToast(`Lỗi kết nối: ${e.message}`);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleQuickStatusToggle = (id: string, currentStatus: string) => {
-    const statusFlow: Record<string, string> = {
+  // 3. Status Mutation
+  const handleQuickStatusToggle = async (id: string, currentStatus: string) => {
+    const statusFlow: Record<string, RequestStatus> = {
       new: 'processing',
+      received: 'processing',
       processing: 'completed',
+      contacted: 'completed',
       completed: 'new',
       not_suitable: 'new',
       cancelled: 'new',
     };
-    const newStatus = statusFlow[currentStatus] || 'new';
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus as any } : r))
-    );
-  };
+    const nextStatus = statusFlow[currentStatus] || 'new';
 
-  const handleAssignUser = (id: string, userId: string) => {
-    const staff = MOCK_STAFF_MEMBERS.find((s) => s.id === userId);
-    if (staff) {
-      handleConfirmReassign([id], staff, 'Phân công trực tiếp');
+    // Optimistic update
+    setRequests((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status: nextStatus, updatedAt: new Date().toISOString() } : r))
+    );
+
+    try {
+      const res = await fetch(`/api/cms/customer-requests/${encodeURIComponent(id)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setRequests((prev) =>
+          prev.map((r) => (r.id === id ? { ...r, status: currentStatus as RequestStatus } : r))
+        );
+        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      showToast(`Đã chuyển trạng thái sang "${REQUEST_STATUS_LABELS[nextStatus]}"`);
+      onRefresh?.();
+    } catch (e: any) {
+      setRequests((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: currentStatus as RequestStatus } : r))
+      );
+      showToast(`Lỗi kết nối: ${e.message}`);
     }
   };
 
-  const handleBackToList = () => {
-    setViewMode('list');
-    setSelectedRequest(null);
-    window.history.pushState({}, '', '/cms/customer-requests');
-  };
+  const handleChangeStatus = async (id: string, newStatus: string) => {
+    const targetStatus = newStatus as RequestStatus;
+    const current = requests.find((r) => r.id === id);
+    const prevStatus = current?.status || 'new';
 
-  const handleChangeStatus = (id: string, currentStatus: string) => {
-    const statusOptions = ['new', 'received', 'processing', 'contacted', 'completed', 'not_suitable', 'cancelled'];
-    const currentIndex = statusOptions.indexOf(currentStatus);
-    const nextIndex = (currentIndex + 1) % statusOptions.length;
-    const nextStatus = statusOptions[nextIndex];
+    if (prevStatus === targetStatus) return;
 
-    setRequests(
-      requests.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: nextStatus as any,
-              updatedAt: new Date().toISOString(),
-              logs: [
-                ...r.logs,
-                {
-                  id: `log_${Date.now()}`,
-                  actionType: 'status_changed',
-                  oldValue: currentStatus,
-                  newValue: nextStatus,
-                  createdBy: 'Current User',
-                  createdByName: 'Current User',
-                  createdAt: new Date().toISOString(),
-                },
-              ],
-            }
-          : r
-      )
-    );
-  };
-
-  const handleUpdatePriority = (id: string, newPriority: PriorityLevel) => {
-    const now = new Date().toISOString();
-
+    // Optimistic update
     setRequests((prev) =>
-      prev.map((request) => {
-        if (request.id !== id || request.priority === newPriority) return request;
-
-        const updated: CustomerRequest = {
-          ...request,
-          priority: newPriority,
-          updatedAt: now,
-          logs: [
-            ...(request.logs || []),
-            {
-              id: `log_${Date.now()}`,
-              actionType: 'priority_changed',
-              oldValue: request.priority,
-              newValue: newPriority,
-              createdBy: 'current_user',
-              createdByName: 'Quản trị viên',
-              createdAt: now,
-            },
-          ],
-        };
-
-        setSelectedRequest((current) => (current?.id === id ? updated : current));
-        return updated;
+      prev.map((r) => {
+        if (r.id === id) {
+          const updated = { ...r, status: targetStatus, updatedAt: new Date().toISOString() };
+          if (selectedRequest?.id === id) setSelectedRequest(updated);
+          return updated;
+        }
+        return r;
       })
     );
+
+    try {
+      const res = await fetch(`/api/cms/customer-requests/${encodeURIComponent(id)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: targetStatus }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setRequests((prev) =>
+          prev.map((r) => {
+            if (r.id === id) {
+              const reverted = { ...r, status: prevStatus };
+              if (selectedRequest?.id === id) setSelectedRequest(reverted);
+              return reverted;
+            }
+            return r;
+          })
+        );
+        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      showToast(`Đã cập nhật trạng thái: ${REQUEST_STATUS_LABELS[targetStatus]}`);
+      onRefresh?.();
+    } catch (e: any) {
+      setRequests((prev) =>
+        prev.map((r) => {
+          if (r.id === id) {
+            const reverted = { ...r, status: prevStatus };
+            if (selectedRequest?.id === id) setSelectedRequest(reverted);
+            return reverted;
+          }
+          return r;
+        })
+      );
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
+  };
+
+  const handleAssignUser = (id: string, userId: string) => {
+    const staff = staffMembers.find((s) => s.id === userId);
+    if (staff) {
+      void handleConfirmReassign([id], staff, 'Phân công trực tiếp');
+    }
+  };
+
+  // 4. Priority Mutation
+  const handleUpdatePriority = async (id: string, newPriority: PriorityLevel) => {
+    const current = requests.find((r) => r.id === id);
+    const prevPriority = current?.priority || 'medium';
+
+    if (prevPriority === newPriority) return;
+
+    // Optimistic update
+    setRequests((prev) =>
+      prev.map((r) => {
+        if (r.id === id) {
+          const updated = { ...r, priority: newPriority, updatedAt: new Date().toISOString() };
+          if (selectedRequest?.id === id) setSelectedRequest(updated);
+          return updated;
+        }
+        return r;
+      })
+    );
+
+    try {
+      const res = await fetch(`/api/cms/customer-requests/${encodeURIComponent(id)}/priority`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priority: newPriority }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setRequests((prev) =>
+          prev.map((r) => {
+            if (r.id === id) {
+              const reverted = { ...r, priority: prevPriority };
+              if (selectedRequest?.id === id) setSelectedRequest(reverted);
+              return reverted;
+            }
+            return r;
+          })
+        );
+        showToast(`Không thể cập nhật độ ưu tiên: ${err.error || 'Lỗi hệ thống'}`);
+        return;
+      }
+
+      showToast(`Đã cập nhật độ ưu tiên: ${PRIORITY_LABELS[newPriority]}`);
+      onRefresh?.();
+    } catch (e: any) {
+      setRequests((prev) =>
+        prev.map((r) => {
+          if (r.id === id) {
+            const reverted = { ...r, priority: prevPriority };
+            if (selectedRequest?.id === id) setSelectedRequest(reverted);
+            return reverted;
+          }
+          return r;
+        })
+      );
+      showToast(`Lỗi kết nối: ${e.message}`);
+    }
   };
 
   return (
@@ -584,13 +815,50 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
           <CmsPageHeader
             icon={<MessageSquareText />}
             title="Yêu cầu khách hàng"
-            description="Quản lý, phân loại và xử lý yêu cầu tiếp nhận từ các biểu mẫu"
+            description="Quản lý, phân loại và xử lý yêu cầu tiếp nhận từ các biểu mẫu tương tác"
             meta={
               <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
                 {requests.filter((r) => !r.deletedAt).length} yêu cầu
               </span>
             }
           />
+
+          {/* Status Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-b border-slate-200 dark:border-slate-800">
+            {[
+              { key: 'all' as const, label: 'Tất cả', count: stats.all },
+              { key: 'new' as const, label: 'Mới tiếp nhận', count: stats.new },
+              { key: 'processing' as const, label: 'Đang xử lý', count: stats.processing },
+              { key: 'completed' as const, label: 'Hoàn thành', count: stats.completed },
+              { key: 'not_suitable' as const, label: 'Không phù hợp', count: stats.not_suitable },
+              { key: 'cancelled' as const, label: 'Đã hủy', count: stats.cancelled },
+            ].map((tab) => {
+              const isActive = filter.tab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setFilter((prev) => ({ ...prev, tab: tab.key }))}
+                  className={`px-3.5 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-orange-600 text-white shadow-xs'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
           {/* Multi-condition Filter Panel */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-4">
@@ -751,31 +1019,33 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
           </div>
 
           {/* Bulk Actions Bar */}
-          <CmsBulkActionBar
-            selectedCount={selectedRequestIds.length}
-            itemLabel="yêu cầu"
-            onClear={() => setSelectedRequestIds([])}
-            actions={[
-              {
-                label: 'Gán người phụ trách',
-                onClick: handleOpenReassignBulk,
-              },
-              {
-                label: 'Đổi trạng thái',
-                onClick: () => {
-                  selectedRequestIds.forEach((id) => {
-                    const req = requests.find((r) => r.id === id);
-                    if (req) handleQuickStatusToggle(id, req.status);
-                  });
-                },
-              },
-              {
-                label: 'Xóa',
-                variant: 'danger',
-                onClick: handleBulkDelete,
-              },
-            ]}
-          />
+          {/* Bulk Actions Bar */}
+          {selectedRequestIds.length > 0 && (
+            <CmsBulkActionBar
+              selectedCount={selectedRequestIds.length}
+              itemLabel="yêu cầu"
+              onClear={() => setSelectedRequestIds([])}
+              actions={[
+                ...(capabilities.edit
+                  ? [
+                      {
+                        label: 'Gán người phụ trách',
+                        onClick: handleOpenReassignBulk,
+                      },
+                    ]
+                  : []),
+                ...(capabilities.delete
+                  ? [
+                      {
+                        label: 'Xóa',
+                        variant: 'danger' as const,
+                        onClick: handleBulkDelete,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )}
 
           {/* Request List Table */}
           <RequestList
@@ -784,10 +1054,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             onToggleSelectAll={handleToggleSelectAll}
             onToggleSelectRequest={handleToggleSelectRequest}
             onViewRequest={handleViewDetail}
-            onDeleteRequest={handleDeleteRequest}
-            onQuickStatusToggle={handleQuickStatusToggle}
-            onReassignRequest={handleOpenReassignSingle}
-            onOpenNotesModal={handleOpenNotesModal}
+            onDeleteRequest={capabilities.delete ? handleDeleteRequest : () => {}}
+            onQuickStatusToggle={capabilities.edit ? handleQuickStatusToggle : () => {}}
+            onReassignRequest={capabilities.edit ? handleOpenReassignSingle : undefined}
+            onOpenNotesModal={capabilities.edit ? handleOpenNotesModal : undefined}
           />
         </>
       ) : (
@@ -797,11 +1067,11 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
             requestId={selectedRequest.id}
             request={selectedRequest}
             onBack={handleBackToList}
-            onAssignUser={handleAssignUser}
-            onReassignRequest={handleOpenReassignSingle}
-            onUpdateStatus={handleChangeStatus}
-            onUpdatePriority={handleUpdatePriority}
-            onAddNote={handleAddNote}
+            onAssignUser={capabilities.edit ? handleAssignUser : undefined}
+            onReassignRequest={capabilities.edit ? handleOpenReassignSingle : undefined}
+            onUpdateStatus={capabilities.edit ? handleChangeStatus : () => {}}
+            onUpdatePriority={capabilities.edit ? handleUpdatePriority : () => {}}
+            onAddNote={capabilities.edit ? handleAddNote : () => {}}
           />
         )
       )}
@@ -810,6 +1080,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({ 
       <RequestReassignModal
         isOpen={reassignModalData.isOpen}
         requests={reassignModalData.requests}
+        staffMembers={staffMembers}
         onClose={() => setReassignModalData({ isOpen: false, requests: [] })}
         onConfirmReassign={handleConfirmReassign}
       />

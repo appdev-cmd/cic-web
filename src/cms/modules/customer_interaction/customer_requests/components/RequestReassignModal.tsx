@@ -4,16 +4,29 @@ import { CustomerRequest } from '../types';
 import { StaffMember } from '../../../contacts/types';
 import { MOCK_STAFF_MEMBERS } from '../../../contacts/mockData';
 
+export interface AssignableStaffItem {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  avatar?: string;
+  team?: string;
+  role?: string;
+  active_cases_count?: number;
+}
+
 interface RequestReassignModalProps {
   isOpen: boolean;
   requests: CustomerRequest[];
+  staffMembers?: AssignableStaffItem[];
   onClose: () => void;
-  onConfirmReassign: (requestIds: string[], targetStaff: StaffMember, reason: string) => void;
+  onConfirmReassign: (requestIds: string[], targetStaff: AssignableStaffItem, reason: string) => void;
 }
 
 export const RequestReassignModal: React.FC<RequestReassignModalProps> = ({
   isOpen,
   requests,
+  staffMembers,
   onClose,
   onConfirmReassign,
 }) => {
@@ -27,11 +40,14 @@ export const RequestReassignModal: React.FC<RequestReassignModalProps> = ({
   const isBulk = requests.length > 1;
   const singleRequest = !isBulk ? requests[0] : null;
 
-  const filteredStaff = MOCK_STAFF_MEMBERS.filter(
+  const availableStaff: AssignableStaffItem[] =
+    staffMembers && staffMembers.length > 0 ? staffMembers : (MOCK_STAFF_MEMBERS as AssignableStaffItem[]);
+
+  const filteredStaff = availableStaff.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.team.toLowerCase().includes(searchQuery.toLowerCase())
+      (s.team && s.team.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,7 +56,7 @@ export const RequestReassignModal: React.FC<RequestReassignModalProps> = ({
       setError('Vui lòng chọn nhân sự phụ trách mới.');
       return;
     }
-    const staff = MOCK_STAFF_MEMBERS.find((member) => member.id === selectedStaffId);
+    const staff = availableStaff.find((member) => member.id === selectedStaffId);
     if (staff) {
       onConfirmReassign(
         requests.map((r) => r.id),
@@ -154,11 +170,17 @@ export const RequestReassignModal: React.FC<RequestReassignModalProps> = ({
                       }}
                       className="text-orange-600 focus:ring-orange-500 h-4 w-4"
                     />
-                    <img
-                      src={staff.avatar}
-                      alt={staff.name}
-                      className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
-                    />
+                    {staff.avatar ? (
+                      <img
+                        src={staff.avatar}
+                        alt={staff.name}
+                        className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-center text-xs shrink-0 border border-orange-200 dark:border-orange-800">
+                        {staff.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                         <span>{staff.name}</span>
@@ -167,7 +189,8 @@ export const RequestReassignModal: React.FC<RequestReassignModalProps> = ({
                         )}
                       </div>
                       <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                        <span>{staff.team}</span>
+                        {staff.team && <span>{staff.team}</span>}
+                        {staff.email && <span>{staff.email}</span>}
                         <span>•</span>
                         <span className="font-mono">{staff.email}</span>
                       </div>
@@ -175,7 +198,7 @@ export const RequestReassignModal: React.FC<RequestReassignModalProps> = ({
                   </div>
                   <div className="text-right shrink-0 ml-2">
                     <span className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] text-slate-600 dark:text-slate-400 font-mono">
-                      {staff.active_cases_count} việc
+                      {staff.active_cases_count ?? 0} việc
                     </span>
                   </div>
                 </label>

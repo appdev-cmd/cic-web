@@ -4,15 +4,15 @@ import { BaseEntity } from '../shared/types';
 import { RequestStatus, PriorityLevel } from '../shared/constants/statusTypes';
 
 export interface SourceConfig {
-  formId: string;
-  formVersion: number;
-  formName: string;
+  formId?: string;
+  formVersion?: number;
+  formName?: string;
   ctaId?: string;
   ctaName?: string;
-  pageType: string;
-  pageId: string;
-  pageUrl: string;
-  pageTitle: string;
+  pageType?: string;
+  pageId?: string;
+  pageUrl?: string;
+  pageTitle?: string;
   placementKey?: string;
   submittedAt: string;
   utmSource?: string;
@@ -20,10 +20,10 @@ export interface SourceConfig {
   utmCampaign?: string;
   referrer?: string;
   deviceInfo?: {
-    userAgent: string;
-    browser: string;
-    os: string;
-    device: string;
+    userAgent?: string;
+    browser?: string;
+    os?: string;
+    device?: string;
   };
 }
 
@@ -39,7 +39,7 @@ export interface SubmissionValue {
 export interface RequestNote {
   id: string;
   content: string;
-  createdBy: string;
+  createdBy?: string;
   createdByName: string;
   createdAt: string;
 }
@@ -49,12 +49,16 @@ export interface RequestLog {
   actionType: string;
   oldValue?: any;
   newValue?: any;
-  createdBy: string;
+  createdBy?: string;
   createdByName: string;
   createdAt: string;
 }
 
-export interface CustomerRequest extends BaseEntity {
+export interface CustomerRequest extends Omit<BaseEntity, 'createdBy'> {
+  createdBy?: string;
+  sourceType?: 'contact' | 'product_contact' | 'order' | 'form_submission';
+  sourceId?: number;
+  workspace?: 'vi' | 'en';
   sourceConfig: SourceConfig;
   submissionValues: SubmissionValue[];
   status: RequestStatus;

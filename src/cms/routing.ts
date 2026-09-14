@@ -192,6 +192,16 @@ export function isEmailTemplatesCmsPath(path: string): boolean {
   );
 }
 
+export function isCustomerRequestsCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return (
+    normalizedPath === '/cms/customer-requests' ||
+    normalizedPath === '/cms/requests' ||
+    normalizedPath.startsWith('/cms/customer-requests/') ||
+    normalizedPath.startsWith('/cms/requests/')
+  );
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }
