@@ -196,6 +196,53 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 - **Kết luận audit:** đủ schema và hard dependency để bắt đầu implementation; orphan phải được preserve/hiển thị cảnh báo, không tự xóa hoặc default. `READY_TO_IMPLEMENT`.
 - **Implementation `[C]` 2026-09-09:** Đã tách domain/query/repository/action cho `cic_business` và `cic_business_en` với projection tường minh, validation server, PATCH đúng field form-owned và hardening sequence/unique alias. CMS route thật có list/search/status/Product filter/pagination, create/edit, năm nhóm gán Product, bulk deactivate, permission server, relation guard, Audit và typed lossless Trash restore inactive. Product detail public đã bỏ toàn bộ contact hard-code và đọc cùng PostgreSQL read model, chỉ trả staff published. Roundtrip DB thật pass draft-hidden → publish-visible, preserve orphan + `khuvuc/khuvuc_name/products` legacy, chặn Trash khi còn assignment, restore inactive và Audit event. Không có public route riêng; Media/SEO/handover không thuộc surface bắt buộc đã duyệt. Riêng module Người phụ trách kinh doanh đạt `[C]`; chưa nâng `[x]` vì authenticated browser screenshot regression desktop/tablet/mobile chưa hoàn tất. Product Settings tổng vẫn giữ trạng thái riêng theo các module con còn lại.
 
+### Audit Yêu cầu khách hàng — 2026-09-14
+
+- **A. Scope:** CMS `/cms/customer-requests` và `/cms/customer-requests/detail/[id]`; tiếp nhận và theo dõi hồ sơ yêu cầu khách hàng từ mọi nguồn tương tác trên Website (Liên hệ, Đăng ký mua/Download sản phẩm, Đơn hàng, Biểu mẫu động); các dependency trực tiếp: `cic_contact`, `cic_contact_en`, `cic_product_contact`, `cic_order`, `cic_form_submissions`, `cic_customer_request_states`, `cic_customer_request_notes`, `cic_customer_request_events`, `cic_users` (nhân sự phân công), Auth/RBAC, Audit Writer và Trash foundation. Không bao gồm chỉnh sửa Form Builder, CTA Builder hay Email Template editor.
+- **B. UI Reference Map:** Giữ nguyên cấu trúc giao diện và trải nghiệm của React reference:
+  - **List view (`RequestList`):** Thanh công cụ tìm kiếm full-text; bộ lọc trạng thái (7 status), Form, CTA, người phụ trách (kèm filter `unassigned`), khoảng ngày gửi; 6 tab trạng thái (`all`, `new`, `processing`, `completed`, `not_suitable`, `cancelled`); bảng danh sách yêu cầu (checkbox chọn đơn/hàng loạt, khách hàng kèm email, số điện thoại `tel:`, Biểu mẫu & CTA badge, trang phát sinh kèm URL title, thời gian tương đối `formatRelativeTime`, avatar và nút gán người phụ trách nhanh, cột ghi chú nhanh kèm badge số lượng và snippet mới nhất, badge trạng thái kèm click đổi trạng thái nhanh theo vòng lặp, nút thao tác: Xem chi tiết, Gán người phụ trách, Ghi chú nội bộ, Xóa vào Thùng rác); phân trang 10 dòng/trang; thanh thao tác hàng loạt `CmsBulkActionBar` (gán người phụ trách hàng loạt, chuyển vào Thùng rác hàng loạt); xuất dữ liệu CSV định dạng UTF-8 BOM (`\uFEFF`) đầy đủ 14 cột nghiệp vụ.
+  - **Detail view (`RequestDetailPage`):** Thanh điều hướng quay lại danh sách; thẻ tóm tắt khách hàng và thông tin liên hệ (copy to clipboard); dropdown cập nhật Trạng thái, dropdown cập nhật Độ ưu tiên (`low`, `medium`, `high`, `urgent`), khu vực quản lý thẻ nhãn (Tags); 3 tab nội dung:
+    - Tab `info`: Toàn bộ các giá trị trường gửi (`submissionValues`), khu vực thảo luận/ghi chú nội bộ (danh sách ghi chú hiển thị người tạo, thời gian, nội dung và form nhập gửi ghi chú mới).
+    - Tab `source`: Thông tin nguồn phát sinh (Form ID, version, tên Form; CTA ID, tên CTA; loại trang, ID, URL, tiêu đề trang; vị trí placement; thời điểm gửi; tham số UTM `utm_source`, `utm_medium`, `utm_campaign`; `referrer`; thông tin thiết bị user-agent/browser/os/device).
+    - Tab `logs`: Nhật ký xử lý / Timeline lịch sử hoạt động (loại hành động: `created`, `status_changed`, `reassigned`, `note_added`, `priority_changed`, `tags_changed`, giá trị cũ, giá trị mới, người thực hiện, thời gian).
+  - **Modals:** Modal gán/chuyển giao nhân sự phụ trách `RequestReassignModal` (hỗ trợ gán đơn lẻ và hàng loạt, tìm kiếm nhân sự, bắt buộc/tuỳ chọn lý do chuyển giao để tự động ghi log và note nội bộ); modal ghi chú nhanh `RequestQuickNotesModal`; modal xác nhận xoá `CmsTrashConfirmDialog`.
+- **C. Phân loại Legacy/Reference:**
+  - `REUSE_PRESENTATION`: Toàn bộ visual presentation của `RequestList`, `RequestDetailPage`, `RequestReassignModal`, `RequestQuickNotesModal`, màu sắc badge trạng thái và độ ưu tiên.
+  - `EXTRACT_AND_REBUILD`: `CustomerRequestManager` cần tách rõ ranh giới Server/Client (tải dữ liệu qua Server Component, server-side pagination/filtering thay vì `slice` 10 dòng trên client memory; các mutation chuyển thành Server Actions / API routes chuẩn).
+  - `REFERENCE_ONLY`: `mockData.ts` (`MOCK_CUSTOMER_REQUESTS`, `MOCK_STAFF_MEMBERS`), demo datasource `getDemoCustomerRequestModuleData`, local `useState` mutations, `window.history.pushState`.
+- **D. Khảo sát Database thực tế & Data Authority:**
+  - **Quy tắc thiết kế bất di bất dịch (Decision 6):** KHÔNG gộp bảng vật lý. Toàn bộ bản ghi nguồn được giữ nguyên vẹn tại các bảng nguồn riêng biệt (`cic_contact`, `cic_contact_en`, `cic_product_contact`, `cic_order`, `cic_form_submissions`).
+  - **3 bảng operational overlay ĐÃ TỒN TẠI trên PostgreSQL:**
+    - `cic_customer_request_states`: id, workspace, source_type, source_id, status, assigned_user_id, priority, tags, created_at, updated_at. Unique `(workspace, source_type, source_id)`.
+    - `cic_customer_request_notes`: id, request_state_id, content, created_by, created_at.
+    - `cic_customer_request_events`: id, request_state_id, event_type, old_value, new_value, actor_id, created_at.
+  - **Dữ liệu nguồn thật hiện có trong DB (tổng 2.607 bản ghi):**
+    - `cic_contact`: 216 bản ghi (Liên hệ website VI).
+    - `cic_contact_en`: 132 bản ghi (Liên hệ website EN).
+    - `cic_product_contact`: 2.257 bản ghi (Đăng ký mua, Download sản phẩm, Liên hệ sản phẩm).
+    - `cic_order`: 2 bản ghi (Đơn hàng trực tiếp).
+    - `cic_form_submissions`: 0 bản ghi.
+    - Cả 3 bảng overlay hiện có 0 dòng.
+  - **Nhân sự phụ trách (`assigned_user_id`):** Phải lấy từ tài khoản CMS thật `cic_users(id, full_name, email, username)` đang active; loại bỏ hoàn toàn `MOCK_STAFF_MEMBERS`.
+- **E. Ranh giới Runtime & Next.js:**
+  - Public submission: `submitCustomerInteractionAction` hiện mới chỉ ghi `cic_contact` mà chưa tạo overlay `cic_customer_request_states`. Khi hoàn thiện, submission phải ghi atomic bản ghi nguồn kèm state khởi tạo ban đầu.
+  - CMS read model: Unified read model tổng hợp đa nguồn theo `workspace` (VI/EN). Khi truy vấn, query union/join có phân trang server-side kết hợp trạng thái từ `cic_customer_request_states` (nếu chưa có dòng state thì default `status='new', priority='medium'`).
+  - Server actions / API: Thao tác cập nhật trạng thái, đổi độ ưu tiên, gán nhân sự, thêm ghi chú, gắn thẻ tag và chuyển vào Thùng rác phải ghi đồng thời vào `cic_customer_request_states` + append row vào `cic_customer_request_events` (và `cic_customer_request_notes`) trong cùng một database transaction.
+- **F. Quyền hạn (RBAC) & Audit:**
+  - Quyền hạn: Bảng `cic_permission_tasks` chưa có module riêng `customer_requests`. Server guard áp dụng: `can(principal, 'customer_requests', action) || can(principal, 'contents', action) || principal.isAdministrator`.
+  - Audit Trail: Đăng ký đầy đủ các action hệ thống trong `src/server/audit/registry.ts` (`CUSTOMER_REQUEST_STATUS_CHANGED`, `CUSTOMER_REQUEST_REASSIGNED`, `CUSTOMER_REQUEST_TRASHED`) và ghi nhận qua Audit Writer chung.
+- **G. Phân loại Next.js (KEEP / REFACTOR / REPLACE / REMOVE):**
+  - `KEEP`: Layout bảng, drawer/page chi tiết 3 tabs, modals gán nhân sự và ghi chú nhanh, CSV export format.
+  - `REFACTOR`: `CustomerRequestManager` nhận paged read model và filter options từ server; URL detail dùng Next.js App Router hoặc query param `/cms/customer-requests?id=...` / modal; nhân sự phụ trách lấy từ `cic_users`.
+  - `REPLACE`: Demo data source `getDemoCustomerRequestModuleData` thay bằng `listCustomerRequests` server query đa nguồn; `getCustomerRequestsData` sơ sài (9 dòng) thay bằng Unified Customer Request Service; local `useState` mutation thay bằng Server Actions/API có transaction.
+  - `REMOVE`: `MOCK_CUSTOMER_REQUESTS`, `MOCK_STAFF_MEMBERS`, thao tác `pushState` thủ công, các trường device/UTM giả lập không có nguồn ghi.
+- **H. i18n:**
+  - Workspace độc lập `vi` và `en`:
+    - Workspace `vi`: tổng hợp `cic_contact` (216 rows), `cic_product_contact` (2.257 rows), `cic_order` (2 rows) và các submission tiếng Việt.
+    - Workspace `en`: tổng hợp `cic_contact_en` (132 rows) và các submission tiếng Anh.
+  - Không gộp lẫn lộn giữa hai workspace; bộ lọc workspace CMS điều khiển phạm vi hiển thị.
+- **I. Kết luận audit:** Module hiện đang ở trạng thái `[A]`. Đã hiểu rõ toàn diện 4 nguồn: React reference, Next.js codebase, Database schema và tài liệu migration. Hard dependencies (schema overlay, DB nguồn, auth, transaction, audit) đã sẵn sàng. **READY_TO_IMPLEMENT**.
+
 ## Foundation/cross-module
 
 | Status | Foundation | Hard dependency đối với | Ghi chú audit |
