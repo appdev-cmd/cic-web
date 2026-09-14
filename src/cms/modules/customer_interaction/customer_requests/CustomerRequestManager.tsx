@@ -19,6 +19,7 @@ import {
   UserCheck,
   MessageSquare,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import type { CustomerRequest, RequestFilterState, RequestListTabType } from './types';
 import type { CustomerRequestModuleData } from '../../../data/CustomerInteractionDataSource';
@@ -54,7 +55,12 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
   onRefresh,
 }) => {
   const initialRequests = serverData?.requests ?? data?.requests ?? [];
+  const initialTotalCount = serverData?.totalCount ?? initialRequests.length;
   const [requests, setRequests] = useState<CustomerRequest[]>(initialRequests);
+  const [totalCount, setTotalCount] = useState<number>(initialTotalCount);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<RequestFilterState>({
     searchQuery: '',
@@ -89,39 +95,81 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Sync with serverData updates
+  // Sync when serverData updates (e.g. on route change or initial load)
   useEffect(() => {
     if (serverData?.requests) {
       setRequests(serverData.requests);
+      setTotalCount(serverData.totalCount ?? serverData.requests.length);
     }
   }, [serverData]);
 
-  // Fallback client fetch if neither serverData nor data was provided
+  // Track whether we've already done the initial mount
+  const isInitialMount = React.useRef(true);
+
+  // Fetch from server when page, pageSize, filter or workspace changes
   useEffect(() => {
-    if (!serverData && !data) {
-      let ignore = false;
-      fetch(`/api/cms/customer-requests?workspace=${workspaceLocale}&pageSize=100`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json: CustomerRequestListResponse | null) => {
-          if (!ignore && json?.requests) {
-            setRequests(json.requests);
-          }
-        })
-        .catch((err) => {
-          console.error('[CustomerRequestManager] Failed to fetch requests:', err);
-        });
-      return () => {
-        ignore = true;
-      };
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // If serverData or data was provided, use it for the very first render without refetching
+      if (serverData || data) {
+        return;
+      }
     }
-  }, [serverData, data, workspaceLocale]);
+
+    let ignore = false;
+    setIsLoading(true);
+
+    const params = new URLSearchParams();
+    params.set('workspace', workspaceLocale);
+    params.set('page', String(currentPage));
+    params.set('pageSize', String(pageSize));
+    if (filter.tab && filter.tab !== 'all') params.set('tab', filter.tab);
+    if (filter.searchQuery.trim()) params.set('searchQuery', filter.searchQuery.trim());
+    if (filter.status) params.set('status', filter.status);
+    if (filter.formId) params.set('formId', filter.formId);
+    if (filter.ctaId) params.set('ctaId', filter.ctaId);
+    if (filter.assignedUserId) params.set('assignedUserId', filter.assignedUserId);
+    if (filter.dateFrom) params.set('dateFrom', filter.dateFrom);
+    if (filter.dateTo) params.set('dateTo', filter.dateTo);
+
+    fetch(`/api/cms/customer-requests?${params.toString()}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: CustomerRequestListResponse | null) => {
+        if (!ignore && json) {
+          setRequests(json.requests || []);
+          setTotalCount(json.totalCount || 0);
+        }
+      })
+      .catch((err) => {
+        console.error('[CustomerRequestManager] Failed to fetch requests:', err);
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [
+    workspaceLocale,
+    currentPage,
+    pageSize,
+    filter.tab,
+    filter.searchQuery,
+    filter.status,
+    filter.formId,
+    filter.ctaId,
+    filter.assignedUserId,
+    filter.dateFrom,
+    filter.dateTo,
+  ]);
 
   // Handle URL-based navigation
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname;
       const detailMatch = path.match(/\/cms\/customer-requests\/detail\/(.+)/);
-      
+
       if (detailMatch) {
         const requestId = detailMatch[1];
         const request = requests.find((r) => r.id === requestId);
@@ -129,8 +177,22 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
           setSelectedRequest(request);
           setViewMode('detail');
         } else {
-          setViewMode('list');
-          setSelectedRequest(null);
+          // If not in current page's list, fetch detail from API
+          fetch(`/api/cms/customer-requests/${encodeURIComponent(requestId)}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+              if (data?.request) {
+                setSelectedRequest(data.request);
+                setViewMode('detail');
+              } else {
+                setViewMode('list');
+                setSelectedRequest(null);
+              }
+            })
+            .catch(() => {
+              setViewMode('list');
+              setSelectedRequest(null);
+            });
         }
       } else {
         setViewMode('list');
@@ -140,7 +202,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
     // Initial check
     handlePopState();
-    
+
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [requests]);
@@ -228,6 +290,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
   );
 
   const handleResetFilters = () => {
+    setCurrentPage(1);
     setFilter({
       searchQuery: '',
       status: undefined,
@@ -818,7 +881,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
             description="Quản lý, phân loại và xử lý yêu cầu tiếp nhận từ các biểu mẫu tương tác"
             meta={
               <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-                {requests.filter((r) => !r.deletedAt).length} yêu cầu
+                {totalCount} yêu cầu
               </span>
             }
           />
@@ -838,7 +901,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                 <button
                   key={tab.key}
                   type="button"
-                  onClick={() => setFilter((prev) => ({ ...prev, tab: tab.key }))}
+                  onClick={() => {
+                    setCurrentPage(1);
+                    setFilter((prev) => ({ ...prev, tab: tab.key }));
+                  }}
                   className={`px-3.5 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
                     isActive
                       ? 'bg-orange-600 text-white shadow-xs'
@@ -873,13 +939,19 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                   type="text"
                   placeholder="Tìm kiếm theo tên, email, sđt, công ty, nội dung, mã yêu cầu..."
                   value={filter.searchQuery}
-                  onChange={(e) => setFilter({ ...filter, searchQuery: e.target.value })}
+                  onChange={(e) => {
+                    setCurrentPage(1);
+                    setFilter({ ...filter, searchQuery: e.target.value });
+                  }}
                   className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500 transition-colors"
                 />
                 {filter.searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setFilter({ ...filter, searchQuery: '' })}
+                    onClick={() => {
+                      setCurrentPage(1);
+                      setFilter({ ...filter, searchQuery: '' });
+                    }}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -895,7 +967,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                   <input
                     type="date"
                     value={filter.dateFrom || ''}
-                    onChange={(e) => setFilter({ ...filter, dateFrom: e.target.value || undefined })}
+                    onChange={(e) => {
+                      setCurrentPage(1);
+                      setFilter({ ...filter, dateFrom: e.target.value || undefined });
+                    }}
                     className="bg-transparent focus:outline-none text-xs text-slate-800 dark:text-slate-200 cursor-pointer"
                   />
                 </div>
@@ -906,7 +981,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                   <input
                     type="date"
                     value={filter.dateTo || ''}
-                    onChange={(e) => setFilter({ ...filter, dateTo: e.target.value || undefined })}
+                    onChange={(e) => {
+                      setCurrentPage(1);
+                      setFilter({ ...filter, dateTo: e.target.value || undefined });
+                    }}
                     className="bg-transparent focus:outline-none text-xs text-slate-800 dark:text-slate-200 cursor-pointer"
                   />
                 </div>
@@ -919,7 +997,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                   title="Xuất file CSV danh sách yêu cầu đang lọc"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Xuất CSV ({filteredRequests.length})</span>
+                  <span>Xuất CSV ({totalCount})</span>
                 </button>
 
                 {/* Reset Filters Button */}
@@ -946,7 +1024,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                 </label>
                 <select
                   value={filter.formId || ''}
-                  onChange={(e) => setFilter({ ...filter, formId: e.target.value || undefined })}
+                  onChange={(e) => {
+                    setCurrentPage(1);
+                    setFilter({ ...filter, formId: e.target.value || undefined });
+                  }}
                   className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
                 >
                   <option value="">Tất cả Biểu mẫu</option>
@@ -965,7 +1046,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                 </label>
                 <select
                   value={filter.ctaId || ''}
-                  onChange={(e) => setFilter({ ...filter, ctaId: e.target.value || undefined })}
+                  onChange={(e) => {
+                    setCurrentPage(1);
+                    setFilter({ ...filter, ctaId: e.target.value || undefined });
+                  }}
                   className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
                 >
                   <option value="">Tất cả CTA</option>
@@ -984,7 +1068,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                 </label>
                 <select
                   value={filter.status || ''}
-                  onChange={(e) => setFilter({ ...filter, status: (e.target.value as any) || undefined })}
+                  onChange={(e) => {
+                    setCurrentPage(1);
+                    setFilter({ ...filter, status: (e.target.value as any) || undefined });
+                  }}
                   className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
                 >
                   <option value="">Tất cả Trạng thái</option>
@@ -1003,7 +1090,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                 </label>
                 <select
                   value={filter.assignedUserId || ''}
-                  onChange={(e) => setFilter({ ...filter, assignedUserId: e.target.value || undefined })}
+                  onChange={(e) => {
+                    setCurrentPage(1);
+                    setFilter({ ...filter, assignedUserId: e.target.value || undefined });
+                  }}
                   className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
                 >
                   <option value="">Tất cả Người phụ trách</option>
@@ -1047,18 +1137,36 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
             />
           )}
 
-          {/* Request List Table */}
-          <RequestList
-            requests={filteredRequests}
-            selectedRequestIds={selectedRequestIds}
-            onToggleSelectAll={handleToggleSelectAll}
-            onToggleSelectRequest={handleToggleSelectRequest}
-            onViewRequest={handleViewDetail}
-            onDeleteRequest={capabilities.delete ? handleDeleteRequest : () => {}}
-            onQuickStatusToggle={capabilities.edit ? handleQuickStatusToggle : () => {}}
-            onReassignRequest={capabilities.edit ? handleOpenReassignSingle : undefined}
-            onOpenNotesModal={capabilities.edit ? handleOpenNotesModal : undefined}
-          />
+          {/* Request List Table with Loading State */}
+          <div className="relative">
+            {isLoading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px] dark:bg-slate-900/60 transition-all">
+                <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-md dark:bg-slate-800 dark:text-slate-200">
+                  <Loader2 className="size-4 animate-spin text-orange-600" />
+                  <span>Đang tải dữ liệu...</span>
+                </div>
+              </div>
+            )}
+            <RequestList
+              requests={filteredRequests}
+              selectedRequestIds={selectedRequestIds}
+              totalCount={totalCount}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageChange={(p) => setCurrentPage(p)}
+              onPageSizeChange={(s) => {
+                setPageSize(s);
+                setCurrentPage(1);
+              }}
+              onToggleSelectAll={handleToggleSelectAll}
+              onToggleSelectRequest={handleToggleSelectRequest}
+              onViewRequest={handleViewDetail}
+              onDeleteRequest={capabilities.delete ? handleDeleteRequest : () => {}}
+              onQuickStatusToggle={capabilities.edit ? handleQuickStatusToggle : () => {}}
+              onReassignRequest={capabilities.edit ? handleOpenReassignSingle : undefined}
+              onOpenNotesModal={capabilities.edit ? handleOpenNotesModal : undefined}
+            />
+          </div>
         </>
       ) : (
         /* Request Detail Page */

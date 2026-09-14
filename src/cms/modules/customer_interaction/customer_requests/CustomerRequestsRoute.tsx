@@ -18,8 +18,8 @@ export async function CustomerRequestsRoute() {
   }
 
   const [vi, en] = await Promise.all([
-    listCustomerRequests({ workspace: 'vi', page: 1, pageSize: 100 }),
-    listCustomerRequests({ workspace: 'en', page: 1, pageSize: 100 }),
+    listCustomerRequests({ workspace: 'vi', page: 1, pageSize: 10 }),
+    listCustomerRequests({ workspace: 'en', page: 1, pageSize: 10 }),
   ]);
 
   return (

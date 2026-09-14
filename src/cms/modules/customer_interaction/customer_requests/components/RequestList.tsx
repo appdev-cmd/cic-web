@@ -26,6 +26,11 @@ import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionChec
 interface RequestListProps {
   requests: CustomerRequest[];
   selectedRequestIds: string[];
+  totalCount?: number;
+  currentPage?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   onToggleSelectAll: (pageIds?: string[]) => void;
   onToggleSelectRequest: (id: string) => void;
   onViewRequest: (request: CustomerRequest) => void;
@@ -38,6 +43,11 @@ interface RequestListProps {
 export const RequestList: React.FC<RequestListProps> = ({
   requests,
   selectedRequestIds,
+  totalCount: controlledTotalCount,
+  currentPage: controlledCurrentPage,
+  pageSize: controlledPageSize,
+  onPageChange: controlledOnPageChange,
+  onPageSizeChange: controlledOnPageSizeChange,
   onToggleSelectAll,
   onToggleSelectRequest,
   onViewRequest,
@@ -46,9 +56,35 @@ export const RequestList: React.FC<RequestListProps> = ({
   onReassignRequest,
   onOpenNotesModal,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const paginatedRequests = requests.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
+  const [internalPageSize, setInternalPageSize] = useState(10);
+
+  const isServerPaged = controlledTotalCount !== undefined;
+  const currentPage = controlledCurrentPage ?? internalCurrentPage;
+  const pageSize = controlledPageSize ?? internalPageSize;
+  const totalCount = controlledTotalCount ?? requests.length;
+
+  const paginatedRequests = isServerPaged
+    ? requests
+    : requests.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handlePageChange = (page: number) => {
+    if (controlledOnPageChange) {
+      controlledOnPageChange(page);
+    } else {
+      setInternalCurrentPage(page);
+    }
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    if (controlledOnPageSizeChange) {
+      controlledOnPageSizeChange(size);
+    } else {
+      setInternalPageSize(size);
+      setInternalCurrentPage(1);
+    }
+  };
+
   const pageIds = paginatedRequests.map((r) => r.id);
   const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedRequestIds.includes(id));
   const isIndeterminate = pageIds.some((id) => selectedRequestIds.includes(id)) && !isAllSelected;
@@ -362,13 +398,10 @@ export const RequestList: React.FC<RequestListProps> = ({
         <CmsPagination
           currentPage={currentPage}
           pageSize={pageSize}
-          totalCount={requests.length}
+          totalCount={totalCount}
           itemLabel="yêu cầu"
-          onPageChange={setCurrentPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setCurrentPage(1);
-          }}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
     </div>

@@ -431,6 +431,31 @@ export async function listCustomerRequests(params: CustomerRequestFilterParams):
     )`;
   }
 
+  // Form type/id condition
+  let formCondition = sql`TRUE`;
+  if (params.formId) {
+    if (['contact', 'product_contact', 'order', 'form_submission'].includes(params.formId)) {
+      formCondition = sql`src.source_type = ${params.formId}`;
+    } else {
+      const parsedNum = Number(params.formId);
+      if (!isNaN(parsedNum)) {
+        formCondition = sql`(src.source_type = 'form_submission' AND src.source_id = ${parsedNum})`;
+      }
+    }
+  }
+
+  // CTA condition
+  let ctaCondition = sql`TRUE`;
+  if (params.ctaId) {
+    if (params.ctaId === 'consultation') {
+      ctaCondition = sql`src.source_type IN ('contact', 'product_contact')`;
+    } else if (params.ctaId === 'quote') {
+      ctaCondition = sql`(src.source_type = 'product_contact' OR src.subject ILIKE '%báo giá%')`;
+    } else if (params.ctaId === 'order') {
+      ctaCondition = sql`src.source_type = 'order'`;
+    }
+  }
+
   // Execute Count Query & Paged Query in parallel
   const [totalRes, rows, stats, staffMembers] = await Promise.all([
     sql`
@@ -445,6 +470,8 @@ export async function listCustomerRequests(params: CustomerRequestFilterParams):
         AND ${assigneeCondition} 
         AND ${dateCondition} 
         AND ${searchCondition}
+        AND ${formCondition}
+        AND ${ctaCondition}
     `,
     sql<RawUnifiedRow[]>`
       ${sourceCte}
@@ -485,6 +512,8 @@ export async function listCustomerRequests(params: CustomerRequestFilterParams):
         AND ${assigneeCondition} 
         AND ${dateCondition} 
         AND ${searchCondition}
+        AND ${formCondition}
+        AND ${ctaCondition}
       ORDER BY src.created_time DESC
       LIMIT ${pageSize} OFFSET ${offset}
     `,
