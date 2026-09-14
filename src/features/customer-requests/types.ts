@@ -66,9 +66,9 @@ export interface RequestLog {
 
 export interface CustomerRequest {
   id: string; // Unified key format: `${source_type}:${source_id}` (e.g. `contact:255`, `product_contact:2269`)
-  sourceType: CustomerRequestSourceType;
-  sourceId: number;
-  workspace: 'vi' | 'en';
+  sourceType?: CustomerRequestSourceType;
+  sourceId?: number;
+  workspace?: 'vi' | 'en';
   sourceConfig: SourceConfig;
   submissionValues: SubmissionValue[];
   status: RequestStatus;
@@ -78,6 +78,8 @@ export interface CustomerRequest {
   tags: string[];
   internalNotes: RequestNote[];
   logs: RequestLog[];
+  createdBy?: string;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
