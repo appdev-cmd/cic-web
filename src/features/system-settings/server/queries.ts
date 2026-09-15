@@ -72,7 +72,7 @@ const descriptions: Record<string, string> = {
   public_email: 'Email hiển thị công khai ở header, footer và trang liên hệ.',
   domain: 'URL chính thức của website (ví dụ: https://www.cic.com.vn).',
   address: 'Địa chỉ trụ sở chính hiển thị tại chân trang.',
-  footer_bottom: 'Dòng thông báo bản quyền hiển thị tại đáy website.',
+  footer_bottom: 'Dòng thông báo bản quyền hiển thị tại đáy website (hỗ trợ văn bản và HTML rich text).',
   zalo_url: 'Đường dẫn chat Zalo OA (ví dụ: https://zalo.me/...).',
   facebook: 'Đường dẫn trang Facebook chính thức của công ty.',
   linkedin_url: 'Đường dẫn trang LinkedIn doanh nghiệp.',

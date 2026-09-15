@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { APPROVED_SETTINGS_BY_KEY } from '../domain/settingsManifest';
 
 export const scopeSchema = z.enum(['site_cic', 'site_english', 'site_enjicad']);
-export const settingChangeSchema = z.object({ scopeId: scopeSchema, key: z.string().trim().toLowerCase().min(1).max(100), value: z.string().max(10_000) }).superRefine((change, context) => {
+export const settingChangeSchema = z.object({ scopeId: scopeSchema, key: z.string().trim().toLowerCase().min(1).max(100), value: z.string().max(50_000) }).superRefine((change, context) => {
   const definition = APPROVED_SETTINGS_BY_KEY.get(change.key);
   const scope = change.scopeId === 'site_cic' ? 'vi' : change.scopeId === 'site_english' ? 'en' : 'enjicad';
   if (!definition || !definition.scopes.includes(scope)) return context.addIssue({ code: 'custom', path: ['key'], message: 'Cấu hình không thuộc danh sách được phép.' });

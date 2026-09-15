@@ -2,7 +2,7 @@ export const SETTINGS_SCOPES = ['vi', 'en', 'enjicad'] as const;
 
 export type SettingsScope = (typeof SETTINGS_SCOPES)[number];
 export type SettingsSourceTable = 'cic_config' | 'cic_config_en' | 'cic_config_enjicad';
-export type SettingsValueType = 'text' | 'textarea' | 'email' | 'phone' | 'url' | 'image' | 'tracking_id';
+export type SettingsValueType = 'text' | 'textarea' | 'email' | 'phone' | 'url' | 'image' | 'tracking_id' | 'html';
 export type SettingsValidation = Readonly<{
   kind: SettingsValueType;
   maxLength: number;
@@ -43,7 +43,7 @@ const setting = (
   publicReadable,
   validation: {
     kind: type,
-    maxLength: type === 'image' || type === 'url' || type === 'textarea' ? 10_000 : 500,
+    maxLength: type === 'image' || type === 'url' || type === 'textarea' || type === 'html' ? 50_000 : 500,
     allowEmpty: true,
   },
   group,
@@ -82,7 +82,7 @@ export const APPROVED_SETTINGS_MANIFEST = [
   setting('address', 'company', 190, 'text', true),
 
   // 4. Footer & mạng xã hội (Footer & Social)
-  setting('footer_bottom', 'footer_social', 200, 'text', true),
+  setting('footer_bottom', 'footer_social', 200, 'html', true),
   setting('zalo_url', 'footer_social', 210, 'url', true),
   setting('facebook', 'footer_social', 220, 'url', true),
   setting('linkedin_url', 'footer_social', 230, 'url', true),

@@ -218,7 +218,14 @@ export const Footer = ({
 
         <div className={`pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 ${typeMeta}`}>
           <div className="flex items-center gap-4 flex-wrap">
-            <p>{values.footer_bottom || `© ${new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.`}</p>
+            {values.footer_bottom ? (
+              <div
+                className="[&_a]:text-orange-400 [&_a]:hover:underline inline [&_p]:inline [&_p]:m-0"
+                dangerouslySetInnerHTML={{ __html: values.footer_bottom }}
+              />
+            ) : (
+              <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+            )}
             {values.bct_badge_url && (
               <a href={values.bct_badge_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-orange-400 hover:underline">
                 <span>Chứng nhận Bộ Công Thương</span>

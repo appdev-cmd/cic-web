@@ -21,6 +21,7 @@ import type {
   CmsSettingsWorkspace,
 } from '@/features/system-settings/domain/model';
 import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
+import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { BranchesSettingsEditor, type BranchSetting } from './BranchesSettingsEditor';
 
 export const GROUPS = [
@@ -314,6 +315,15 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                               <span className="hidden sm:inline">Chọn Media</span>
                             </button>
                           </div>
+                        </div>
+                      ) : item.type === 'html' ? (
+                        <div className={`overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 ${!capabilities.edit || pending ? 'pointer-events-none opacity-60' : ''}`}>
+                          <RichTextEditor
+                            value={currentValue ?? ''}
+                            onChange={(val) => onChangeValue(item.key, val)}
+                            minHeight="140px"
+                            allowedEmbeds={[]}
+                          />
                         </div>
                       ) : item.type === 'textarea' ? (
                         <textarea
