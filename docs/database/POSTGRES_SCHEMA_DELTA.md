@@ -1054,10 +1054,10 @@ Không có field cần thêm. Tiếp tục dùng `cic_config`, `cic_config_en` v
 - Dữ liệu pháp nhân, hotline và email chung tiếp tục nằm trong `cic_config*`; địa chỉ, điện thoại, email, giờ làm việc và map gắn với từng địa điểm nằm trong `cic_branches`.
 - Page Builder chỉ giữ nội dung và cấu hình trình bày của section Liên hệ. Không lưu bản sao danh sách chi nhánh trong section config/reference; website resolve dữ liệu theo workspace khi đọc Published revision.
 - Label, group, description, options, sensitivity, regex, unit và used-by là metadata manifest/application; không nhân bản thành column DB.
-- Chính sách lưu cũng nằm trong manifest: cấu hình `standard` không có cảnh báo ảnh hưởng dùng `edit → save → Activity Log`; cấu hình `sensitive`, `secret` hoặc có `impactDescription` mới dùng `draft → compare → publish → version`.
+- Chính sách lưu nằm trong manifest: mọi Settings-owned value đều không-secret và dùng `edit → optional old/new confirmation → transactional direct-save → Activity Log`. Không có draft/publish/version persistence cho Settings.
 - Inheritance/effective value và các số liệu issue/override là dữ liệu derive.
-- Draft, atomic publish và version history chỉ áp dụng cho cấu hình ảnh hưởng lớn. Hiện chúng vẫn là local state/mock; chưa tạo bảng config workflow chỉ để giữ mockup. Lưu trực tiếp và publish đều phải ghi vào shared Activity Log khi backend được triển khai.
-- Secret test/rotate hiện là mô phỏng. Không lưu secret thô hoặc lịch sử secret trong `cic_config*`; production cần cơ chế mã hóa/secret store được duyệt.
+- Draft, publish, version history và inheritance simulation trong React reference là `REFERENCE_ONLY`; không tạo bảng workflow để giữ mockup.
+- API key, token, password, SMTP credential và private credential là ENV/server-only, ngoài ownership Cấu hình hệ thống. Không lưu hoặc expose chúng qua `cic_config*`, `cic_branches` hay CMS Settings; secret editor/rotate/reveal/test không thuộc module.
 
 ## SEO & URL
 

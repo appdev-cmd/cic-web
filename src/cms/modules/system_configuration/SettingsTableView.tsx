@@ -1,64 +1,63 @@
 import React, { useState } from 'react';
 import {
   Search,
-  Filter,
-  Key,
-  Globe,
-  CornerDownRight,
-  SlidersHorizontal,
-  ExternalLink,
-  ShieldAlert,
   ArrowUpRight,
-  Layers,
+  Globe,
+  Sliders,
+  CheckCircle2,
+  Image as ImageIcon,
+  Eye,
 } from 'lucide-react';
-import {
-  ConfigScope,
-  ConfigScopeId,
-  ConfigGroupDef,
-  ConfigItem,
-  ConfigValueRecord,
-  SensitivityLevel,
-} from './types';
+import type { CmsSettingsData, CmsSettingsScopeId } from '@/features/system-settings/domain/model';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
+const GROUP_LABELS: Record<string, string> = {
+  identity: 'Nhận diện chung',
+  contact: 'Thông tin liên hệ',
+  branding: 'Thương hiệu',
+  social: 'Mạng xã hội',
+  support: 'Hỗ trợ',
+  measurement: 'Đo lường',
+};
+
 interface SettingsTableViewProps {
-  scopes: ConfigScope[];
-  groups: ConfigGroupDef[];
-  items: ConfigItem[];
-  valuesRecordMap: Record<string, Record<string, ConfigValueRecord>>;
-  onLocateInEditor: (scopeId: ConfigScope['id'], groupId: ConfigGroupDef['id'], settingId: string) => void;
+  websiteData: CmsSettingsData;
+  valuesByScope: Record<string, Record<string, string>>;
+  onLocateInEditor: (scopeId: CmsSettingsScopeId, groupId: string, settingKey: string) => void;
 }
 
 export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
-  scopes,
-  groups,
-  items,
-  valuesRecordMap,
+  websiteData,
+  valuesByScope,
   onLocateInEditor,
 }) => {
-  const [selectedScopeId, setSelectedScopeId] = useState<string>('site_cic');
+  const [selectedScopeId, setSelectedScopeId] = useState<CmsSettingsScopeId>(
+    websiteData.workspaces[0]?.scope.id ?? 'site_cic'
+  );
   const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
-  const [selectedSensitivity, setSelectedSensitivity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const currentValues = valuesRecordMap[selectedScopeId] || {};
+  const activeWorkspace = websiteData.workspaces.find((w) => w.scope.id === selectedScopeId) || websiteData.workspaces[0];
+  const currentValues = valuesByScope[selectedScopeId] || {};
+
+  const items = activeWorkspace ? activeWorkspace.settings : [];
 
   const filteredItems = items.filter((item) => {
-    if (selectedGroupId !== 'all' && item.groupId !== selectedGroupId) return false;
-    if (selectedSensitivity !== 'all' && item.sensitivity !== selectedSensitivity) return false;
+    if (selectedGroupId !== 'all' && item.group !== selectedGroupId) return false;
 
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       return (
         item.label.toLowerCase().includes(q) ||
-        item.path.toLowerCase().includes(q) ||
+        item.key.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q)
       );
     }
     return true;
   });
+
   const paginatedItems = filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
@@ -73,24 +72,30 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm theo Tên cài đặt, Path hệ thống hoặc Mô tả..."
+              placeholder="Tìm kiếm theo Tên cài đặt, Khóa (Key) hoặc Mô tả..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-9 pr-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
             />
           </div>
 
           {/* SCOPE SELECTOR */}
           <div className="flex items-center gap-2 shrink-0">
-            <span className="font-bold text-slate-500">Scope:</span>
+            <span className="font-bold text-slate-500">Phạm vi:</span>
             <select
               value={selectedScopeId}
-              onChange={(e) => setSelectedScopeId(e.target.value)}
+              onChange={(e) => {
+                setSelectedScopeId(e.target.value as CmsSettingsScopeId);
+                setCurrentPage(1);
+              }}
               className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              {scopes.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.domain})
+              {websiteData.workspaces.map((ws) => (
+                <option key={ws.scope.id} value={ws.scope.id}>
+                  {ws.scope.name} ({ws.scope.domain})
                 </option>
               ))}
             </select>
@@ -101,30 +106,18 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
             <span className="font-bold text-slate-500">Nhóm:</span>
             <select
               value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
+              onChange={(e) => {
+                setSelectedGroupId(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">Tất cả Nhóm Cấu hình (9 Nhóm)</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.title}
+              <option value="all">Tất cả Nhóm Cấu hình</option>
+              {Object.entries(GROUP_LABELS).map(([gid, title]) => (
+                <option key={gid} value={gid}>
+                  {title}
                 </option>
               ))}
-            </select>
-          </div>
-
-          {/* SENSITIVITY */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="font-bold text-slate-500">Mức độ:</span>
-            <select
-              value={selectedSensitivity}
-              onChange={(e) => setSelectedSensitivity(e.target.value)}
-              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
-            >
-              <option value="all">Tất cả Mức bảo mật</option>
-              <option value="standard">Standard</option>
-              <option value="sensitive">Sensitive</option>
-              <option value="secret">Secret (API Keys)</option>
             </select>
           </div>
         </div>
@@ -133,114 +126,106 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
       {/* DATA TABLE */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="cms-data-table text-left">
+          <table className="cms-data-table text-left w-full text-xs">
             <thead>
               <tr className="bg-slate-100/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
-                <th className="py-3 px-4">Tên Cấu hình & Path</th>
-                <th className="py-3 px-4">Nhóm Cấu hình</th>
-                <th className="py-3 px-4">Trạng thái Kế thừa</th>
-                <th className="py-3 px-4">Bảo mật</th>
-                <th className="py-3 px-4">Giá trị Hiện tại (Effective Value)</th>
+                <th className="py-3 px-4">Tên Cấu hình & Khóa Key</th>
+                <th className="py-3 px-4">Nhóm</th>
+                <th className="py-3 px-4">Kiểu dữ liệu</th>
+                <th className="py-3 px-4">Website Public</th>
+                <th className="py-3 px-4">Giá trị Hiện hành</th>
                 <th className="py-3 px-4 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {paginatedItems.map((item) => {
-                const rec: ConfigValueRecord = currentValues[item.id] || {
-                  settingId: item.id,
-                  scopeId: selectedScopeId as ConfigScopeId,
-                  liveValue: '',
-                  draftValue: undefined,
-                  inheritanceState: selectedScopeId === 'global' ? 'default' : 'inherited',
-                  effectiveValue: '',
-                  lastUpdatedBy: 'system',
-                  lastUpdatedAt: 'N/A',
-                };
-
-                const groupDef = groups.find((g) => g.id === item.groupId);
-                const isDraftModified = rec.draftValue !== undefined;
-                const isOverridden = rec.inheritanceState === 'overridden';
-                const isInherited = rec.inheritanceState === 'inherited';
-                const isDefault = rec.inheritanceState === 'default';
+                const currentValue = currentValues[item.key] ?? item.value;
+                const isModified = currentValues[item.key] !== undefined && currentValues[item.key] !== item.value;
 
                 return (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={item.key} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        {item.type === 'image' && <ImageIcon className="w-3.5 h-3.5 text-orange-500" />}
                         <span>{item.label}</span>
-                        {item.isDeprecated && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-red-500/10 text-red-500 line-through">
-                            Deprecated
+                        {isModified && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/10 text-amber-600 font-bold border border-amber-500/20">
+                            Chưa lưu
                           </span>
                         )}
                       </div>
-                      <div className="font-mono text-[10px] text-slate-400 mt-0.5">{item.path}</div>
+                      <div className="font-mono text-[10px] text-slate-400 mt-0.5">{item.key}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{item.description}</div>
                     </td>
 
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-300 font-medium">
-                      {groupDef?.title || item.groupId}
+                    <td className="py-3 px-4 text-slate-700 dark:text-slate-300 font-medium">
+                      <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 font-semibold">
+                        {GROUP_LABELS[item.group] || item.group}
+                      </span>
                     </td>
 
-                    <td className="py-3 px-4 font-bold">
-                      {isDefault && (
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                          [Default]
-                        </span>
-                      )}
-                      {isInherited && (
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                          [Kế thừa Global]
-                        </span>
-                      )}
-                      {isOverridden && (
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                          [Ghi đè Site]
-                        </span>
-                      )}
-                      {isDraftModified && (
-                        <span className="ml-1.5 px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-600 font-mono">
-                          [Có Nháp]
-                        </span>
-                      )}
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+                      {item.type}
                     </td>
 
                     <td className="py-3 px-4">
-                      {item.sensitivity === 'secret' ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 flex items-center gap-1 w-fit">
-                          <Key className="w-3 h-3" /> Secret
-                        </span>
-                      ) : item.sensitivity === 'sensitive' ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 w-fit">
-                          Sensitive
+                      {item.publicReadable ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                          <Eye className="w-3.5 h-3.5" /> Có
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-[11px]">Standard</span>
+                        <span className="text-slate-400 text-[11px]">Chỉ CMS</span>
                       )}
                     </td>
 
                     <td className="py-3 px-4 font-mono break-all max-w-xs text-slate-700 dark:text-slate-200">
-                      {item.sensitivity === 'secret'
-                        ? '••••••••••••••••'
-                        : String(rec.effectiveValue ?? '(Trống)')}
+                      {item.type === 'image' && currentValue ? (
+                        <div className="flex items-center gap-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={currentValue} alt="" className="h-8 max-w-16 rounded object-contain border border-slate-200 dark:border-slate-700 p-0.5" />
+                          <span className="truncate max-w-[140px] text-[10px]">{currentValue}</span>
+                        </div>
+                      ) : (
+                        <span>{currentValue || <span className="text-slate-400 italic">(Trống)</span>}</span>
+                      )}
                     </td>
 
                     <td className="py-3 px-4 text-right">
                       <button
-                        onClick={() => onLocateInEditor(selectedScopeId as any, item.groupId, item.id)}
+                        type="button"
+                        onClick={() => onLocateInEditor(selectedScopeId, item.group, item.key)}
                         className="px-3 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold rounded-xl border border-orange-500/20 flex items-center gap-1.5 ml-auto cursor-pointer transition-all shrink-0"
                       >
-                        <span>Đến Editor</span>
+                        <span>Sửa</span>
                         <ArrowUpRight className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>
                 );
               })}
+              {paginatedItems.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                    Không tìm thấy cấu hình nào khớp với bộ lọc.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredItems.length} itemLabel="thiết lập" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
+        <CmsPagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalCount={filteredItems.length}
+          itemLabel="cài đặt"
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
       </div>
     </div>
   );
 };
+

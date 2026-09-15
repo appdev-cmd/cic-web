@@ -1,120 +1,83 @@
+/* eslint-disable @next/next/no-img-element -- media previews */
 import React, { useState } from 'react';
 import {
   Globe,
   Search,
   Save,
   CheckCircle2,
-  RotateCcw,
-  Key,
   FileImage,
-  GitCompare,
-  Send,
-  AlertTriangle,
-  Info,
-  ShieldAlert,
   Layers,
   Sparkles,
   Eye,
-  RefreshCw,
-  HelpCircle,
-  FileText,
-  Sliders,
-  Check,
+  Info,
+  Building2,
+  ExternalLink,
+  ShieldCheck,
+  LockKeyhole,
 } from 'lucide-react';
-import {
-  ConfigScope,
-  ConfigGroupDef,
-  ConfigItem,
-  ConfigValueRecord,
-  ConfigGroupId,
-  ValidationIssue,
-  requiresConfigReview,
-} from './types';
-import { NotFoundView } from '@web/components/NotFoundView';
-import { BranchesSettingsEditor } from './BranchesSettingsEditor';
+import type {
+  CmsSettingsData,
+  CmsSettingsScopeId,
+  CmsSettingsWorkspace,
+} from '@/features/system-settings/domain/model';
+import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
+
+export const GROUPS = [
+  { id: 'identity', title: 'Nhận diện chung', description: 'Tên hiển thị và tên miền định tuyến của hệ thống.' },
+  { id: 'contact', title: 'Thông tin liên hệ', description: 'Tên admin, email nhận thư, hotline và số điện thoại hỗ trợ.' },
+  { id: 'branding', title: 'Thương hiệu', description: 'Logo màu và logo trắng phục vụ header/footer giao diện.' },
+  { id: 'social', title: 'Mạng xã hội', description: 'Liên kết mạng xã hội chính thức: Facebook, X/Twitter, YouTube.' },
+  { id: 'support', title: 'Hỗ trợ kỹ thuật', description: 'Đường dẫn công cụ hỗ trợ trực tuyến từ xa (TeamViewer, v.v.).' },
+  { id: 'measurement', title: 'Đo lường & Phân tích', description: 'Mã theo dõi Google Analytics (GA4 / G-XXXXX).' },
+] as const;
 
 interface SettingsEditorTabProps {
-  scopes: ConfigScope[];
-  activeScopeId: ConfigScope['id'];
-  onSelectScope: (scopeId: ConfigScope['id']) => void;
-  groups: ConfigGroupDef[];
-  items: ConfigItem[];
-  valuesRecord: Record<string, ConfigValueRecord>;
-  issues: ValidationIssue[];
-  onUpdateDraftValue: (settingId: string, newValue: any) => void;
-  onResetToInherited: (settingId: string) => void;
-  onOverrideField: (settingId: string) => void;
-  onOpenSecretModal: (item: ConfigItem) => void;
-  onOpenAssetPicker: (title: string, type: 'image' | 'file', onSelect: (url: string) => void) => void;
-  onOpenCompareModal: () => void;
-  onSaveDirect: () => void;
-  onSaveDraft: () => void;
-  onPublish: () => void;
-  readOnly?: boolean;
+  workspace: CmsSettingsWorkspace;
+  allWorkspaces: readonly CmsSettingsWorkspace[];
+  values: Record<string, string>;
+  activeScopeId: CmsSettingsScopeId;
+  onSelectScope: (scopeId: CmsSettingsScopeId) => void;
+  onChangeValue: (key: string, value: string) => void;
+  onSave: () => void;
+  onReset: () => void;
+  changedKeys: string[];
+  pending: boolean;
+  capabilities: { edit: boolean };
+  onGoToBranches?: () => void;
 }
 
 export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
-  scopes,
+  workspace,
+  allWorkspaces,
+  values,
   activeScopeId,
   onSelectScope,
-  groups,
-  items,
-  valuesRecord,
-  issues,
-  onUpdateDraftValue,
-  onResetToInherited,
-  onOverrideField,
-  onOpenSecretModal,
-  onOpenAssetPicker,
-  onOpenCompareModal,
-  onSaveDirect,
-  onSaveDraft,
-  onPublish,
-  readOnly = false,
+  onChangeValue,
+  onSave,
+  onReset,
+  changedKeys,
+  pending,
+  capabilities,
+  onGoToBranches,
 }) => {
-  const [activeGroupId, setActiveGroupId] = useState<ConfigGroupId>('general');
+  const [activeGroupId, setActiveGroupId] = useState<string>('identity');
   const [searchTerm, setSearchTerm] = useState('');
-  const [resetConfirmId, setResetConfirmId] = useState<string | null>(null);
-
-  const activeScope = scopes.find((s) => s.id === activeScopeId) || scopes[0];
+  const [mediaPickerKey, setMediaPickerKey] = useState<string | null>(null);
 
   // Filter items by search or active group
-  const filteredItems = items.filter((item) => {
+  const filteredItems = workspace.settings.filter((item) => {
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       return (
         item.label.toLowerCase().includes(q) ||
-        item.path.toLowerCase().includes(q) ||
+        item.key.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q)
       );
     }
-    return item.groupId === activeGroupId;
+    return item.group === activeGroupId;
   });
 
-  // Calculate draft modified count for active scope
-  const changedItems = items.filter((item) => valuesRecord[item.id]?.draftValue !== undefined);
-  const directModifiedCount = changedItems.filter((item) => !requiresConfigReview(item)).length;
-  const reviewModifiedCount = changedItems.filter(requiresConfigReview).length;
-
-  const scopeIssues = issues.filter((i) => i.scopeId === activeScopeId);
-
-  const getPreviewValue = (settingId: string, fallback: string) => {
-    const record = valuesRecord[settingId];
-    if (!record) return fallback;
-    const value = record.draftValue !== undefined ? record.draftValue : record.effectiveValue;
-    return typeof value === 'string' && value.trim() ? value : fallback;
-  };
-
-  const errorPagePreview = {
-    title: getPreviewValue('error_404_title', 'Không tìm thấy trang'),
-    description: getPreviewValue(
-      'error_404_description',
-      'Trang bạn đang tìm kiếm không tồn tại hoặc đã được chuyển sang địa chỉ khác.',
-    ),
-    image: getPreviewValue('error_404_image', ''),
-    ctaLabel: getPreviewValue('error_404_cta_label', 'Về trang chủ'),
-    ctaUrl: getPreviewValue('error_404_cta_url', '/'),
-  };
+  const activeGroupDef = GROUPS.find((g) => g.id === activeGroupId) || GROUPS[0];
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
@@ -127,85 +90,68 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               <Globe className="w-6 h-6" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Phạm vi đang chỉnh sửa:</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Phạm vi đang chỉnh sửa (Scope):</div>
               <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
                 <select
                   value={activeScopeId}
-                  onChange={(e) => onSelectScope(e.target.value as any)}
-                  className="min-w-0 max-w-full flex-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
+                  onChange={(e) => onSelectScope(e.target.value as CmsSettingsScopeId)}
+                  className="min-w-0 max-w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
                 >
-                  {scopes.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} — {s.domain} {s.isDefault ? '[Mặc định]' : ''}
+                  {allWorkspaces.map((ws) => (
+                    <option key={ws.scope.id} value={ws.scope.id}>
+                      {ws.scope.name} — {ws.scope.domain}
                     </option>
                   ))}
                 </select>
 
                 <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  Mốc bảo vệ {activeScope.liveVersion}
+                  LIVE (PostgreSQL)
                 </span>
 
-                {directModifiedCount > 0 && (
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
-                    Lưu trực tiếp: {directModifiedCount}
-                  </span>
-                )}
-
-                {reviewModifiedCount > 0 && (
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
-                    Cần duyệt: {reviewModifiedCount}
+                {changedKeys.length > 0 && (
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 animate-pulse">
+                    {changedKeys.length} thay đổi chưa lưu
                   </span>
                 )}
               </div>
             </div>
           </div>
 
-          {/* RIGHT: STICKY ACTIONS */}
+          {/* RIGHT: DESKTOP STICKY ACTIONS */}
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={onOpenCompareModal}
-              disabled={reviewModifiedCount === 0}
-              className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <GitCompare className="w-4 h-4 text-blue-500" />
-              <span>So sánh thay đổi</span>
-            </button>
-
-            {directModifiedCount > 0 && (
+            {changedKeys.length > 0 && (
               <button
-                onClick={onSaveDirect}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
+                type="button"
+                onClick={onReset}
+                disabled={pending}
+                className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 transition cursor-pointer disabled:opacity-50"
               >
-                <Save className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Lưu thay đổi ({directModifiedCount})</span>
+                Hủy thay đổi
               </button>
             )}
 
-            {reviewModifiedCount > 0 && (
-              <>
-                <button
-                  onClick={onSaveDraft}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <Save className="w-4 h-4 text-orange-500" />
-                  <span>Lưu bản nháp</span>
-                </button>
-                <button
-                  onClick={onPublish}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 transition-all cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Kiểm tra & xuất bản ({reviewModifiedCount})</span>
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={!capabilities.edit || pending || changedKeys.length === 0}
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-orange-600/20 flex items-center gap-2 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {pending ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>
+                {pending ? 'Đang lưu...' : `Lưu trực tiếp${changedKeys.length > 0 ? ` (${changedKeys.length})` : ''}`}
+              </span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* MAIN LAYOUT: LEFT GROUP NAV + CENTRAL FORM + RIGHT CONTEXT DRAWER */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* LEFT NAV: 9 GROUPS & SEARCH (3 COLS) */}
+        {/* LEFT NAV: GROUPS & SEARCH (3 COLS) */}
         <div className="lg:col-span-3 space-y-3 lg:sticky lg:top-20 lg:self-start">
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3 shadow-xs space-y-2">
             {/* SEARCH BOX */}
@@ -215,7 +161,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               </div>
               <input
                 type="text"
-                placeholder="Lọc từ khóa / path..."
+                placeholder="Lọc cài đặt / key..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
@@ -224,13 +170,17 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
 
             {/* GROUPS LIST */}
             <div className="space-y-1">
-              {groups.map((group) => {
+              {GROUPS.map((group) => {
                 const isActive = !searchTerm && activeGroupId === group.id;
-                const itemCountInGroup = items.filter((i) => i.groupId === group.id).length;
+                const itemCountInGroup = workspace.settings.filter((i) => i.group === group.id).length;
+                const changedCountInGroup = workspace.settings.filter(
+                  (i) => i.group === group.id && changedKeys.includes(i.key)
+                ).length;
 
                 return (
                   <button
                     key={group.id}
+                    type="button"
                     onClick={() => {
                       setSearchTerm('');
                       setActiveGroupId(group.id);
@@ -244,15 +194,22 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                     <div className="truncate pr-2">
                       <div className="truncate">{group.title}</div>
                     </div>
-                    <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 ${
-                        isActive
-                          ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-900/40'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                      }`}
-                    >
-                      {itemCountInGroup}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      {changedCountInGroup > 0 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500 text-white">
+                          +{changedCountInGroup}
+                        </span>
+                      )}
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 ${
+                          isActive
+                            ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-900/40'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {itemCountInGroup}
+                      </span>
+                    </div>
                   </button>
                 );
               })}
@@ -266,33 +223,12 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
             {/* SECTION TITLE */}
             <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>{groups.find((g) => g.id === activeGroupId)?.title}</span>
+                <span>{activeGroupDef.title}</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {groups.find((g) => g.id === activeGroupId)?.description}
+                {activeGroupDef.description}
               </p>
             </div>
-
-            {activeGroupId === 'error_page' && !searchTerm.trim() && (
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-                  <div>
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                      <Eye className="h-4 w-4 text-orange-500" />
-                      Mô phỏng nội dung trang 404
-                    </div>
-                    <p className="mt-0.5 text-[11px] text-slate-500">
-                      Cập nhật ngay theo bản nháp đang nhập; bố cục thực tế do frontend quyết định.
-                    </p>
-                  </div>
-                  <span className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
-                    XEM TRƯỚC THAY ĐỔI
-                  </span>
-                </div>
-
-                <NotFoundView content={errorPagePreview} embedded />
-              </div>
-            )}
 
             {/* RENDER FIELD ITEMS */}
             {filteredItems.length === 0 ? (
@@ -301,34 +237,15 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               </div>
             ) : (
               filteredItems.map((item) => {
-                const rec = valuesRecord[item.id] || {
-                  settingId: item.id,
-                  scopeId: activeScopeId,
-                  liveValue: '',
-                  inheritanceState: activeScope.isDefault ? 'default' : 'inherited',
-                  effectiveValue: '',
-                  lastUpdatedBy: 'system',
-                  lastUpdatedAt: 'N/A',
-                };
-
-                const isDraftModified = rec.draftValue !== undefined;
-                const needsReview = requiresConfigReview(item);
-                const isOverridden = rec.inheritanceState === 'overridden';
-                const isInherited = rec.inheritanceState === 'inherited';
-                const isDefault = rec.inheritanceState === 'default';
-
-                const displayValue = isDraftModified ? rec.draftValue : rec.effectiveValue;
+                const currentValue = values[item.key] ?? item.value;
+                const isModified = changedKeys.includes(item.key);
 
                 return (
                   <div
-                    key={item.id}
+                    key={item.key}
                     className={`p-4 rounded-xl border transition-all space-y-3 ${
-                      isDraftModified
-                        ? needsReview
-                          ? 'border-amber-400/80 bg-amber-50/20 dark:bg-amber-950/10'
-                          : 'border-blue-300 bg-blue-50/20 dark:border-blue-900/60 dark:bg-blue-950/10'
-                        : isOverridden
-                        ? 'border-blue-300 dark:border-blue-900/60 bg-blue-50/10 dark:bg-blue-950/10'
+                      isModified
+                        ? 'border-amber-400/80 bg-amber-50/20 dark:bg-amber-950/10'
                         : 'border-slate-200/80 dark:border-slate-800'
                     }`}
                   >
@@ -339,252 +256,71 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                           <label className="text-xs font-bold text-slate-900 dark:text-white">
                             {item.label}
                           </label>
-                          {isDraftModified && (
-                            <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${needsReview ? 'border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300' : 'border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300'}`}>
-                              {needsReview ? 'Bản nháp cần duyệt' : 'Chưa lưu'}
+                          {isModified && (
+                            <span className="rounded px-2 py-0.5 text-[10px] font-bold border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+                              Chưa lưu
                             </span>
                           )}
-
-                          {/* INHERITANCE TAG */}
-                          {isDefault && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                              [Gốc Default]
-                            </span>
-                          )}
-                          {isInherited && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                              [Kế thừa từ Global]
-                            </span>
-                          )}
-                          {isOverridden && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                              [Ghi đè - Site Specific]
-                            </span>
-                          )}
-
-                          {/* SENSITIVITY TAG */}
-                          {item.sensitivity === 'secret' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 flex items-center gap-1">
-                              <Key className="w-3 h-3" /> API Secret
-                            </span>
-                          )}
-                          {item.sensitivity === 'sensitive' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                              Sensitive
-                            </span>
-                          )}
-                          {item.isDeprecated && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-500 line-through">
-                              Deprecated
+                          {item.publicReadable && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1" title="Dữ liệu được dùng trên website công khai">
+                              <Eye className="w-3 h-3" /> Website Public
                             </span>
                           )}
                         </div>
 
                         <div className="text-[10px] font-mono text-slate-400 mt-0.5">
-                          {item.path}
+                          {item.key}
                         </div>
                       </div>
-
-                      {/* INHERITANCE CONTROL BUTTONS */}
-                      {!activeScope.isDefault && (
-                        <div>
-                          {isInherited && (
-                            <button
-                              type="button"
-                              onClick={() => onOverrideField(item.id)}
-                              className="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 text-blue-700 dark:text-blue-300 font-bold text-[11px] rounded-lg border border-blue-200 dark:border-blue-800 cursor-pointer transition-all"
-                            >
-                              + Ghi đè cho Site này
-                            </button>
-                          )}
-                          {isOverridden && (
-                            <div>
-                              {resetConfirmId === item.id ? (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      onResetToInherited(item.id);
-                                      setResetConfirmId(null);
-                                    }}
-                                    className="px-2 py-0.5 bg-red-600 text-white font-bold text-[10px] rounded cursor-pointer"
-                                  >
-                                    Xác nhận Reset
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setResetConfirmId(null)}
-                                    className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] rounded cursor-pointer"
-                                  >
-                                    Hủy
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => setResetConfirmId(item.id)}
-                                  className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-bold text-[11px] rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer transition-all flex items-center gap-1"
-                                >
-                                  <RotateCcw className="w-3 h-3" />
-                                  <span>Reset về Kế thừa</span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {item.description}
                     </p>
 
-                    {item.usedBy && item.usedBy.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        <span className="font-bold">Hiển thị tại:</span>
-                        {item.usedBy.map((place) => (
-                          <span key={place} className="rounded-md bg-slate-100 px-2 py-0.5 font-semibold dark:bg-slate-800">{place}</span>
-                        ))}
-                      </div>
-                    )}
-
-                    {item.impactDescription && (
-                      <div className="p-2 bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-lg text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
-                        <span>{item.impactDescription}</span>
-                      </div>
-                    )}
-
                     {/* INPUT FORM ELEMENTS DEPENDING ON TYPE */}
                     <div className="pt-1">
-                      {item.type === 'list' && item.id === 'comp_branches' && (
-                        <BranchesSettingsEditor
-                          value={displayValue}
-                          disabled={readOnly || isInherited}
-                          onChange={(branches) => onUpdateDraftValue(item.id, branches)}
-                        />
-                      )}
+                      {item.type === 'image' ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            {currentValue ? (
+                              <img
+                                src={currentValue}
+                                alt={item.label}
+                                className="h-12 max-w-28 object-contain rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-white"
+                              />
+                            ) : null}
 
-                      {item.type === 'text' && (
-                        <input
-                          type="text"
-                          value={displayValue ?? ''}
-                          disabled={readOnly || isInherited}
-                          onChange={(e) => onUpdateDraftValue(item.id, e.target.value)}
-                          placeholder={item.placeholder}
-                          className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60"
-                        />
-                      )}
-
-                      {item.type === 'textarea' && (
-                        <textarea
-                          rows={3}
-                          value={displayValue ?? ''}
-                          disabled={readOnly || isInherited}
-                          onChange={(e) => onUpdateDraftValue(item.id, e.target.value)}
-                          placeholder={item.placeholder}
-                          className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 font-mono disabled:opacity-60"
-                        />
-                      )}
-
-                      {item.type === 'number' && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            value={displayValue ?? 0}
-                            disabled={readOnly || isInherited}
-                            onChange={(e) => onUpdateDraftValue(item.id, Number(e.target.value))}
-                            className="w-48 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60 font-mono font-bold"
-                          />
-                          {item.unit && (
-                            <span className="text-xs font-bold text-slate-500">{item.unit}</span>
-                          )}
-                        </div>
-                      )}
-
-                      {item.type === 'boolean' && (
-                        <label className="flex items-center gap-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(displayValue)}
-                            disabled={readOnly || isInherited}
-                            onChange={(e) => onUpdateDraftValue(item.id, e.target.checked)}
-                            className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer"
-                          />
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                            {displayValue ? 'ĐANG BẬT (ACTIVE)' : 'ĐANG TẮT (DISABLED)'}
-                          </span>
-                        </label>
-                      )}
-
-                      {item.type === 'select' && item.options && (
-                        <select
-                          value={displayValue ?? ''}
-                          disabled={readOnly || isInherited}
-                          onChange={(e) => onUpdateDraftValue(item.id, e.target.value)}
-                          className="w-full sm:w-64 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60 cursor-pointer"
-                        >
-                          {item.options.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-
-                      {/* SECRET FIELD */}
-                      {item.type === 'secret' && (
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <div className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-mono text-xs font-bold text-slate-500 tracking-widest border border-slate-200 dark:border-slate-700">
-                            ••••••••••••••••
-                          </div>
-
-                          {rec.isTestedOk && (
-                            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Kiểm tra kết nối OK ({rec.testLastRun})
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => onOpenSecretModal(item)}
-                            className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer transition-all"
-                          >
-                            <Key className="w-3.5 h-3.5" />
-                            <span>Cập nhật / Xoay Khóa Secret</span>
-                          </button>
-                        </div>
-                      )}
-
-                      {/* IMAGE & FILE FIELD */}
-                      {(item.type === 'image' || item.type === 'file') && (
-                        <div className="flex items-center gap-3 flex-wrap">
-                          {displayValue && item.type === 'image' && (
-                            <img
-                              src={displayValue}
-                              alt="Asset preview"
-                              className="w-16 h-12 object-cover rounded-lg border border-slate-200 dark:border-slate-700"
+                            <input
+                              type="text"
+                              value={currentValue ?? ''}
+                              disabled={!capabilities.edit || pending}
+                              onChange={(e) => onChangeValue(item.key, e.target.value)}
+                              placeholder="Nhập link ảnh hoặc chọn từ Thư viện Media..."
+                              className="flex-1 min-h-10 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60 font-mono"
                             />
-                          )}
 
-                          <div className="flex-1 truncate font-mono text-xs text-slate-600 dark:text-slate-300">
-                            {displayValue || '(Chưa chọn tài nguyên)'}
+                            <button
+                              type="button"
+                              onClick={() => setMediaPickerKey(item.key)}
+                              disabled={!capabilities.edit || pending}
+                              className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold text-xs rounded-xl border border-orange-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                            >
+                              <FileImage className="w-4 h-4" />
+                              <span className="hidden sm:inline">Chọn Media</span>
+                            </button>
                           </div>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              onOpenAssetPicker(item.label, item.type as any, (url) =>
-                                onUpdateDraftValue(item.id, url)
-                              )
-                            }
-                            disabled={readOnly || isInherited}
-                            className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold text-xs rounded-xl border border-orange-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          >
-                            <FileImage className="w-3.5 h-3.5" />
-                            <span>Chọn từ Thư viện Media</span>
-                          </button>
                         </div>
+                      ) : (
+                        <input
+                          type={item.type === 'email' ? 'email' : item.type === 'url' ? 'url' : 'text'}
+                          value={currentValue ?? ''}
+                          maxLength={item.maxLength}
+                          disabled={!capabilities.edit || pending}
+                          onChange={(e) => onChangeValue(item.key, e.target.value)}
+                          placeholder={`Nhập ${item.label.toLowerCase()}...`}
+                          className="w-full min-h-10 px-3.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60"
+                        />
                       )}
                     </div>
                   </div>
@@ -596,62 +332,80 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
 
         {/* RIGHT CONTEXT DRAWER (3 COLS) */}
         <div className="lg:col-span-3 space-y-4 lg:sticky lg:top-20 lg:self-start">
-          {/* SCOPE INHERITANCE SUMMARY */}
+          {/* SCOPE INFO */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3 text-xs">
-            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <Layers className="w-4 h-4 text-orange-500" />
-              <span>Cây Kế thừa Cấu hình</span>
-            </h4>
-
-            <div className="space-y-2">
-              <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
-                <div className="text-[10px] text-slate-400">Gốc Kế thừa (Global)</div>
-                <div className="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                  Global Default Scope
-                </div>
-              </div>
-
-              {!activeScope.isDefault && (
-                <div className="pl-4 border-l-2 border-orange-500 space-y-1">
-                  <div className="p-2.5 bg-orange-500/10 text-orange-900 dark:text-orange-300 rounded-xl border border-orange-500/20">
-                    <div className="text-[10px] text-orange-600 dark:text-orange-400 font-bold">
-                      Scope Hiện tại ({activeScope.name})
-                    </div>
-                    <div className="text-[11px] mt-0.5">
-                      Kế thừa <strong>{items.length - activeScope.overrideCount}</strong> giá trị; Ghi đè <strong>{activeScope.overrideCount}</strong> giá trị.
-                    </div>
-                  </div>
-                </div>
-              )}
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+              <Globe className="w-4 h-4 text-orange-500" />
+              <span>{workspace.scope.name}</span>
             </div>
+            <p className="text-slate-500 leading-relaxed">
+              Dữ liệu của Scope này được lưu vào bảng PostgreSQL tương ứng (
+              <code className="text-[11px] text-orange-600 font-mono">
+                {workspace.scope.locale === 'vi'
+                  ? 'cic_config'
+                  : workspace.scope.locale === 'en'
+                  ? 'cic_config_en'
+                  : 'cic_config_enjicad'}
+              </code>
+              ).
+            </p>
+            <a
+              href={workspace.scope.domain.startsWith('http') ? workspace.scope.domain : `https://${workspace.scope.domain}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 font-semibold text-orange-600 hover:underline"
+            >
+              <span>{workspace.scope.domain}</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
           </div>
 
-          {/* ACTIVE ISSUES FOR THIS SCOPE */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3 text-xs">
-            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
-              <ShieldAlert className="w-4 h-4 text-red-500" />
-              <span>Cảnh báo Scope ({scopeIssues.length})</span>
-            </h4>
-
-            {scopeIssues.length === 0 ? (
-              <div className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Không phát hiện lỗi cấu hình nào tại Scope này.</span>
+          {/* BRANCHES QUICK SHORTCUT */}
+          {workspace.scope.locale !== 'enjicad' && onGoToBranches && (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+                <Building2 className="w-4 h-4 text-orange-500" />
+                <span>Trụ sở & Chi nhánh</span>
               </div>
-            ) : (
-              scopeIssues.map((issue) => (
-                <div
-                  key={issue.id}
-                  className="p-2.5 bg-red-50/60 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 rounded-xl text-red-900 dark:text-red-300 space-y-1"
-                >
-                  <div className="font-bold">{issue.settingLabel}</div>
-                  <div className="text-[11px]">{issue.message}</div>
-                </div>
-              ))
-            )}
+              <p className="text-slate-500 leading-relaxed">
+                Quản lý các địa điểm văn phòng, hotline, email và bản đồ Google Maps nhúng.
+              </p>
+              <button
+                type="button"
+                onClick={onGoToBranches}
+                className="w-full mt-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Mở tab Chi nhánh ({workspace.branches.length})</span>
+              </button>
+            </div>
+          )}
+
+          {/* SECURITY NOTE */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-2 text-xs">
+            <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+              <LockKeyhole className="w-4 h-4 text-slate-500" />
+              <span>Thông tin nhạy cảm</span>
+            </div>
+            <p className="text-slate-500 leading-relaxed">
+              API key, secret tokens, mật khẩu và SMTP credentials chỉ được cấu hình an toàn qua file biến môi trường <code>.env</code> phía máy chủ.
+            </p>
           </div>
         </div>
       </div>
+
+      {/* MEDIA PICKER MODAL */}
+      {mediaPickerKey && (
+        <PageMediaPickerModal
+          currentId={values[mediaPickerKey] ?? ''}
+          returnValue="url"
+          locale={workspace.scope.locale === 'en' ? 'en' : 'vi'}
+          onClose={() => setMediaPickerKey(null)}
+          onConfirm={(selectedUrl) => {
+            onChangeValue(mediaPickerKey, selectedUrl);
+            setMediaPickerKey(null);
+          }}
+        />
+      )}
     </div>
   );
 };

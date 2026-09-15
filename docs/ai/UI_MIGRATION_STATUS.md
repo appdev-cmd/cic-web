@@ -191,6 +191,17 @@ Một module chỉ có thể lên `[x]` sau khi kiểm chứng cùng content/ass
 - `invite`, delete/Trash không thuộc scope đã duyệt. Security/2FA/presence vẫn là integration bên ngoài chưa có producer; `status_online` hiện chỉ là projection legacy, không được coi là realtime.
 - Trạng thái `[I] Integration pending`: **PENDING: Người dùng → Auth/session security producer → realtime online, last visit, login/security events và 2FA.** Chưa đủ điều kiện `[x]`.
 
+## Audit Cấu hình hệ thống — 2026-09-14
+
+- CMS surface `/cms/settings`/`/cms/system-settings` giữ header và năm tab Tổng quan, Chỉnh sửa, Cảnh báo, Phiên bản quan trọng, Nhật ký; editor có scope selector, search/group navigation, field cards, branch collection editor, context sidebar và compare/secret/media modals. Public không có route cấu hình riêng; Contact/Footer/Header là consumer.
+- Implementation 2026-09-14 thay workflow mock bằng màn hình direct-save theo ba scope độc lập, search/group, field allowlist, branch editor, trạng thái read-only/loading/error/success và responsive stacking. Secret/draft/version modal không còn được import vào runtime. Footer đã đọc published Settings/branch projection; Media selector và Contact consumer còn integration pending.
+- `KEEP`: CMS shell, header/tabs, hierarchy card/table/editor và visual direction. `ADAPT`: toolbar/tab/group navigation, table/diff/branch form wrapping và local scroll. `FIX`: touch target dưới 44px, modal focus/Escape/scroll lock/`dvh`, safe-area toast, long key/value/URL và reduced-motion. `DO_NOT_COPY`: fake metrics/workflows, hover-only actions, desktop-dense table mobile và unbounded overlays.
+- Impeccable static detector có 2 advisory: side accent `border-l-4` và contrast chữ slate trên amber toast. Chưa có authenticated browser evidence; audit không sửa UI.
+- Next read đang dùng PostgreSQL thật, nhưng editor vẫn trộn local draft/version/issue/audit/secret simulation; save-draft/publish ghi thẳng live value và có flow vẫn dựng success state sau DB error. Server query còn import presentation types và expose toàn bộ legacy keys thay vì approved ownership manifest.
+- Live DB: config VI 35/30 published, EN 34/30, Enjicad 57/55; zero blank/normalized duplicate key. `cic_branches` schema/constraint/RLS có nhưng 0 row; dữ liệu hai địa điểm/workspace còn nằm trong `cic_address*` HTML và phải migration có mapping review.
+- Unblock 2026-09-14: secret/credential là ENV server-only, toàn bộ secret editor/rotate/reveal/test mock là `REFERENCE_ONLY / OUT_OF_SCOPE`; Settings chỉ direct-save non-secret values, compare old/new là bước xác nhận chứ không phải draft/version workflow.
+- Approved manifest đã chốt các nhóm identity/contact/branding/social/support/measurement; các owner Function SEO/Page Builder/Product/Email Template/Enjicad content và legacy-preserve keys không được render tự động. Migration permission đã publish task `settings` với `view,edit`; live verify task + RLS 4 bảng pass. Module giữ `[A]` và chuyển gate sang `READY_TO_IMPLEMENT`.
+
 ## Audit Thùng rác — 2026-09-03
 
 - Chỉ có CMS surface tại `/cms/trash` (alias `/cms/recycle-bin`); không có Website public/list/detail/SEO/locale content surface.

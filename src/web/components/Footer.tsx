@@ -18,8 +18,10 @@ import {
 import { ZaloIcon } from '@shared/components/Icons';
 import { typeH4, typeButton, typeCaption, typeLabel, typeMeta } from '@shared/components/Typography';
 import { getNavigationData, type FooterNavigationItem, type PublicNavigationView } from '../features/navigation/navigationData';
+import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 
 interface FooterProps {
+  settings?: PublicSystemSettings;
   onNavigate?: (href: string) => void;
   setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'cms') => void;
   setActiveLink?: (link: string) => void;
@@ -31,6 +33,7 @@ interface FooterProps {
 }
 
 export const Footer = ({ 
+  settings,
   onNavigate,
   setCurrentView: setLegacyCurrentView,
   setActiveLink: setLegacyActiveLink,
@@ -43,6 +46,10 @@ export const Footer = ({
   const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = getNavigationData();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const values = settings?.values ?? {};
+  const publicBranches = settings?.branches ?? [];
+  const headOffice = publicBranches.find((branch) => branch.isHeadOffice) ?? publicBranches[0];
+  const otherBranches = publicBranches.filter((branch) => branch.id !== headOffice?.id);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +87,7 @@ export const Footer = ({
           <div className="lg:col-span-4">
             <div className="mb-8">
               <img 
-                src="/LOGO - 1990-08.png" 
+                src={values.logo_white || values.logo || '/LOGO - 1990-08.png'}
                 alt="CIC Logo Small" 
                 className="h-26 sm:h-30 w-auto mb-4 rounded-[10px]"
               />
@@ -109,13 +116,13 @@ export const Footer = ({
               )}
             </div>
             <div className="flex flex-wrap gap-4 mb-8">
-              <a href="https://www.facebook.com/CICTechnologyandConsultancyVN/" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
+              <a href={values.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN/'} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] text-white transition-all shadow-lg group">
                 <Facebook size={20} className="group-hover:scale-110 transition-transform" />
               </a>
               <span aria-label="LinkedIn chưa được cấu hình" aria-disabled="true" title="LinkedIn chưa được cấu hình" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center text-white/50 shadow-lg group cursor-not-allowed">
                 <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
               </span>
-              <a href="https://www.youtube.com/channel/UCVrD2Lw1V96ggdwQNs87qEQ" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
+              <a href={values.youtube || 'https://www.youtube.com/channel/UCVrD2Lw1V96ggdwQNs87qEQ'} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] text-white transition-all shadow-lg group">
                 <Youtube size={20} className="group-hover:scale-110 transition-transform" />
               </a>
               <a href="https://zalo.me/02439761381" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center hover:bg-sky-500 hover:border-sky-500 text-white transition-all shadow-lg group">
@@ -164,13 +171,13 @@ export const Footer = ({
                 <MapPin size={18} className="text-orange-600" /> Trụ sở chính
               </h3>
               <div className={`${typeCaption} space-y-4 text-slate-400`}>
-                <p className="leading-relaxed">Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam</p>
+                <p className="leading-relaxed">{headOffice?.address || 'Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam'}</p>
                 <div className="flex flex-col gap-2">
-                  <a href="tel:02439761381" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
-                    <Phone size={14} className="text-orange-600" /> 024 3976 1381
+                  <a href={`tel:${(headOffice?.phone || values.tel || '02439761381').replace(/\D/g, '')}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
+                    <Phone size={14} className="text-orange-600" /> {headOffice?.phone || values.tel || '024 3976 1381'}
                   </a>
-                  <a href="mailto:info@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
-                    <Mail size={14} className="text-orange-600" /> info@cic.com.vn
+                  <a href={`mailto:${headOffice?.email || values.admin_email || 'info@cic.com.vn'}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
+                    <Mail size={14} className="text-orange-600" /> {headOffice?.email || values.admin_email || 'info@cic.com.vn'}
                   </a>
                   <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <ExternalLink size={14} className="text-orange-600" /> www.cic.com.vn
@@ -179,22 +186,22 @@ export const Footer = ({
               </div>
             </div>
 
-            <div>
+            {otherBranches.map((branch) => <div key={branch.id}>
               <h3 className={`${typeLabel} text-white mb-6 flex items-center gap-2`}>
-                <MapPin size={18} className="text-orange-600" /> Chi nhánh Tp HCM
+                <MapPin size={18} className="text-orange-600" /> {branch.name}
               </h3>
               <div className={`${typeCaption} space-y-4 text-slate-400`}>
-                <p className="leading-relaxed">Số 36 Nguyễn Huy Lượng, P. Bình Thạnh, TP. Hồ Chí Minh</p>
+                <p className="leading-relaxed">{branch.address}</p>
                 <div className="flex flex-col gap-2">
-                  <a href="tel:0886452020" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
-                    <Phone size={14} className="text-orange-600" /> 088 645 2020 - 028 628 99022 - 028 628 99033
+                  <a href={`tel:${branch.phone.replace(/\D/g, '')}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
+                    <Phone size={14} className="text-orange-600" /> {branch.phone}
                   </a>
-                  <a href="mailto:cichcm@cic.com.vn" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
-                    <Mail size={14} className="text-orange-600" /> cichcm@cic.com.vn
+                  <a href={`mailto:${branch.email}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
+                    <Mail size={14} className="text-orange-600" /> {branch.email}
                   </a>
                 </div>
               </div>
-            </div>
+            </div>)}
           </div>
         </div>
 

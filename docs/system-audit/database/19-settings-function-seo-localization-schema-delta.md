@@ -22,9 +22,8 @@ Không có.
 
 - `settingId/path → name`, `liveValue/effectiveValue → value`, kiểu điều khiển → `data_type`; scope map sang đúng một trong ba bảng `cic_config*` hiện có.
 - `ConfigScope`, `ConfigGroupDef` và `ConfigItem` là metadata ứng dụng. `issueCount`, `overrideCount`, effective/inherited value là dữ liệu derive, không tạo column.
-- Draft, atomic publish, version history, validation issue và activity log hiện chỉ thay đổi local state/mock. Chúng chưa được chốt thành workflow backend nên không tạo các bảng config draft/version/change/issue chỉ để giữ mockup.
-- Nếu sau này duyệt versioning cấu hình thật, phải audit riêng cơ chế immutable version và publish transaction; không lưu `draftValue` cạnh `value` trên từng bảng legacy một cách tùy tiện.
-- Secret test/rotate hiện là mô phỏng. Không lưu secret thô hoặc lịch sử secret trong `cic_config*`; secret production phải đi qua cơ chế mã hóa/secret store được duyệt.
+- Settings-owned values dùng transactional direct-save; compare old/new chỉ là confirmation trước mutation. Draft, publish, version, inheritance, validation scanner và local activity fixtures là reference-only, không tạo bảng workflow để giữ mockup.
+- API key, token, password, SMTP credential và private credential là ENV/server-only, ngoài ownership Cấu hình hệ thống. Không lưu hoặc expose qua `cic_config*`, `cic_branches` hay CMS; secret editor/rotate/reveal/test không thuộc module.
 
 ## Cấu hình SEO chức năng
 

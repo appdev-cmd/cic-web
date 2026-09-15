@@ -626,6 +626,7 @@ Phạm vi hiện tại được giới hạn như sau:
 - Quản lý thông tin dùng chung và thông tin thay đổi theo ngôn ngữ.
 - Lưu trực tiếp các thay đổi thông thường; hệ thống ghi lại người thực hiện và nội dung đã sửa.
 - Với thiết lập quan trọng liên quan bảo mật hoặc kết nối dịch vụ khác, hệ thống yêu cầu kiểm tra giá trị cũ–mới trước khi áp dụng.
+- API key, token, mật khẩu, SMTP credential và thông tin xác thực riêng tư được cấu hình phía server qua ENV; không quản lý, hiển thị, kiểm tra hoặc xoay secret trong CMS Cấu hình hệ thống.
 - Xem lại lịch sử các lần thay đổi quan trọng khi cần đối chiếu.
 
 **Cách sử dụng:**  

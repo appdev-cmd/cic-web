@@ -1,37 +1,35 @@
 import 'server-only';
-import { getDatabaseClient } from '@/server/db/foundation';
-import type { SystemConfigurationData } from '@/cms/data/ConfigurationDataSource';
-import type { ConfigItem, ConfigScopeId, ConfigValueType } from '@/cms/modules/system_configuration/types';
+import { getPostgresClient } from '@/server/db/postgres';
+import { APPROVED_SETTINGS_MANIFEST } from '../domain/settingsManifest';
+import type { CmsBranch, CmsSettingsData, PublicSystemSettings } from '../domain/model';
 
-const empty = (): SystemConfigurationData => ({ scopes: [], groups: [], items: [], values: {}, issues: [], drafts: [], versions: [], activityLogs: [] });
-const typeOf = (value: string | null): ConfigValueType => { const type = (value ?? '').toLowerCase(); if (type.includes('bool')) return 'boolean'; if (type.includes('int') || type.includes('number')) return 'number'; if (type.includes('text') || type.includes('textarea')) return 'textarea'; if (type.includes('image')) return 'image'; if (type.includes('file')) return 'file'; if (type.includes('secret') || type.includes('password') || type.includes('key')) return 'secret'; return 'text'; };
-const parseValue = (value: string | null, type: ConfigValueType) => type === 'boolean' ? ['1','true','yes','on'].includes((value ?? '').toLowerCase()) : type === 'number' ? Number(value ?? 0) : value ?? '';
+const SCOPE_DEFS = [
+  { id: 'site_cic', locale: 'vi', name: 'CIC Tiếng Việt', domain: 'cic.com.vn' },
+  { id: 'site_english', locale: 'en', name: 'CIC English', domain: 'cic.com.vn/en' },
+  { id: 'site_enjicad', locale: 'enjicad', name: 'Enjicad', domain: 'enjicad.vn' },
+] as const;
+const labels: Record<string, string> = { site_name: 'Tên website', domain: 'Tên miền', admin_name: 'Người phụ trách', admin_email: 'Email liên hệ', tel: 'Hotline chính', tel2: 'Hotline phụ', logo: 'Logo', logo_white: 'Logo nền tối', facebook: 'Facebook', twitter: 'Twitter / X', youtube: 'YouTube', teamview: 'Hỗ trợ từ xa', google_analytics: 'Google Analytics ID' };
+const descriptions: Record<string, string> = { admin_name: 'Thông tin vận hành nội bộ, không công khai.', google_analytics: 'Chỉ lưu mã đo lường công khai; credential và secret phải đặt trong ENV.' };
+const mapBranch = (row: Record<string, unknown>): CmsBranch => ({ id: String(row.id), code: String(row.code ?? ''), name: String(row.name ?? ''), address: String(row.address ?? ''), phone: String(row.phone ?? ''), email: String(row.email ?? ''), fax: String(row.fax ?? ''), workingHours: String(row.working_hours ?? ''), mapEmbedUrl: String(row.map_embed_url ?? ''), mapSearchQuery: String(row.map_search_query ?? ''), isHeadOffice: Boolean(row.is_head_office), published: Boolean(row.published), ordering: Number(row.ordering ?? 0) });
 
-export async function getCmsSystemSettingsData(): Promise<SystemConfigurationData> {
-  const db = await getDatabaseClient();
+export async function getCmsSystemSettingsData(): Promise<CmsSettingsData> {
+  const sql = getPostgresClient(); const keys = APPROVED_SETTINGS_MANIFEST.map((item) => item.key);
   const [vi, en, enjicad, branches] = await Promise.all([
-    db.from('cic_config').select('id,name,value,data_type,is_common,published,is_ga,ordering,title').order('ordering'),
-    db.from('cic_config_en').select('id,name,value,data_type,is_common,published,is_ga,ordering,title').order('ordering'),
-    db.from('cic_config_enjicad').select('id,name,value,data_type,is_common,published,is_ga,ordering,title').order('ordering'),
-    db.from('cic_branches').select('id,workspace,code,name,address,phone,email,fax,working_hours,map_embed_url,map_search_query,is_head_office,published,ordering,updated_at').order('workspace').order('ordering'),
+    sql`SELECT name,value,title FROM cic_config WHERE lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
+    sql`SELECT name,value,title FROM cic_config_en WHERE lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
+    sql`SELECT name,value,title FROM cic_config_enjicad WHERE lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
+    sql`SELECT id,workspace,code,name,address,phone,email,fax,working_hours,map_embed_url,map_search_query,is_head_office,published,ordering FROM cic_branches ORDER BY workspace,ordering,id`,
   ]);
-  if (vi.error || en.error || enjicad.error || branches.error) throw new Error('Không thể tải cấu hình hệ thống.');
-  const data = empty();
-  const scopeDefs: Array<{ id: ConfigScopeId; name: string; domain: string; rows: typeof vi.data }> = [{ id: 'site_cic', name: 'CIC Tiếng Việt', domain: 'cic.com.vn', rows: vi.data }, { id: 'site_english', name: 'CIC English', domain: 'cic.com.vn/en', rows: en.data }, { id: 'site_enjicad', name: 'Enjicad', domain: 'enjicad.vn', rows: enjicad.data }];
-  data.scopes = scopeDefs.map((scope, index) => ({ id: scope.id, name: scope.name, domain: scope.domain, description: 'Cấu hình PostgreSQL theo workspace', badgeColor: index ? 'blue' : 'orange', isDefault: true, liveVersion: 'live', lastPublished: '', issueCount: 0, overrideCount: scope.rows?.length ?? 0 }));
-  data.groups = [{ id: 'general', title: 'Cấu hình chung', description: 'Các giá trị cấu hình đã có trong PostgreSQL.', iconName: 'Settings' }, { id: 'company', title: 'Doanh nghiệp & liên hệ', description: 'Trụ sở và chi nhánh theo workspace.', iconName: 'Building' }];
-  const itemMap = new Map<string, ConfigItem>();
-  for (const scope of scopeDefs) {
-    const scopeValues: Record<string, never> = {};
-    data.values[scope.id] = scopeValues;
-    for (const row of scope.rows ?? []) {
-      const id = `${scope.id}:${row.id}`; const valueType = typeOf(row.data_type); const secret = valueType === 'secret';
-      itemMap.set(id, { id, path: `${scope.id}.${row.name}`, label: row.title || row.name, groupId: 'general', description: `Khóa cấu hình: ${row.name}`, type: valueType, sensitivity: 'standard', isShared: Boolean(row.is_common) });
-      (data.values[scope.id] as Record<string, unknown>)[id] = { settingId: id, scopeId: scope.id, liveValue: secret ? '' : parseValue(row.value, valueType), inheritanceState: 'default', effectiveValue: secret ? '' : parseValue(row.value, valueType), lastUpdatedBy: 'PostgreSQL', lastUpdatedAt: '', isMaskedSecret: secret };
-    }
-    const workspace = scope.id === 'site_english' ? 'en' : 'vi'; const branchRows = (branches.data ?? []).filter((branch) => branch.workspace === workspace);
-    if (scope.id !== 'site_enjicad') (data.values[scope.id] as Record<string, unknown>).comp_branches = { settingId: 'comp_branches', scopeId: scope.id, liveValue: branchRows.map((branch) => ({ id: String(branch.id), code: branch.code, name: branch.name, address: branch.address, phone: branch.phone ?? '', email: branch.email ?? '', fax: branch.fax ?? '', workingHours: branch.working_hours ?? '', mapEmbedUrl: branch.map_embed_url ?? '', mapSearchQuery: branch.map_search_query ?? '', isHeadOffice: branch.is_head_office, published: branch.published, ordering: branch.ordering })), inheritanceState: 'default', effectiveValue: branchRows, lastUpdatedBy: 'PostgreSQL', lastUpdatedAt: '' };
-  }
-  data.items = [...itemMap.values(), { id: 'comp_branches', path: 'system.company.branches', label: 'Trụ sở & chi nhánh', groupId: 'company', description: 'Nguồn dùng chung cho Trang Liên hệ và Footer.', type: 'list', sensitivity: 'standard', isShared: false }];
-  return data;
+  const rowsByScope = { vi, en, enjicad } as const;
+  return { workspaces: SCOPE_DEFS.map((scope) => { const values = new Map(rowsByScope[scope.locale].map((row) => [String(row.name).trim().toLowerCase(), row])); return { scope, settings: APPROVED_SETTINGS_MANIFEST.filter((item) => item.scopes.includes(scope.locale)).map((item) => ({ key: item.key, label: labels[item.key] ?? item.key, description: descriptions[item.key] ?? `Cấu hình ${labels[item.key] ?? item.key}.`, group: item.group, type: item.type, value: String(values.get(item.key)?.value ?? ''), publicReadable: item.publicReadable, maxLength: item.validation.maxLength })), branches: scope.locale === 'enjicad' ? [] : branches.filter((row) => row.workspace === scope.locale).map(mapBranch) }; }) };
+}
+
+export async function getPublicSystemSettings(locale: 'vi' | 'en' = 'vi'): Promise<PublicSystemSettings> {
+  const sql = getPostgresClient(); const table = locale === 'en' ? 'cic_config_en' : 'cic_config';
+  const keys = APPROVED_SETTINGS_MANIFEST.filter((item) => item.publicReadable && item.scopes.includes(locale)).map((item) => item.key);
+  const [values, branches] = await Promise.all([
+    sql`SELECT name,value FROM ${sql(table)} WHERE published IS TRUE AND lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
+    sql`SELECT id,workspace,code,name,address,phone,email,fax,working_hours,map_embed_url,map_search_query,is_head_office,published,ordering FROM cic_branches WHERE workspace=${locale} AND published IS TRUE ORDER BY ordering,id`,
+  ]);
+  return { values: Object.fromEntries(values.map((row) => [String(row.name).trim().toLowerCase(), String(row.value ?? '')])), branches: branches.map(mapBranch) };
 }

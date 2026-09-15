@@ -18,7 +18,7 @@ Activity Logs là shared governance domain, không phải dữ liệu website pu
 
 ## Cấu hình hệ thống (7.x-R)
 
-Workspace configuration maps to `cic_config` (VI), `cic_config_en` (EN), and the approved legacy Enjicad table `cic_config_enjicad`; keys map from `name`, values from `value`, and UI control types derive only from the persisted `data_type`. Configuration identifiers retain table identity at the feature boundary (`scope:id`) so updates cannot cross workspaces. Branch/contact settings map to `cic_branches` by `workspace`, preserving code, address, contact, map, publication, head-office and ordering fields. Standard and reviewed values are both validated server-side and persisted in a PostgreSQL transaction; secret values are never returned to the client.
+Workspace configuration maps to `cic_config` (VI), `cic_config_en` (EN), and the approved legacy Enjicad table `cic_config_enjicad`, but only keys in `src/features/system-settings/domain/settingsManifest.ts` belong to Settings. The manifest, not raw `data_type`, owns control type, validation, scope, editability and public visibility. Configuration identifiers retain table identity at the server feature boundary so updates cannot cross workspaces. Branch/contact settings map to `cic_branches` by `workspace`, preserving code, address, contact, map, publication, head-office and ordering fields. Settings uses transactional direct-save with Audit; compare old/new is confirmation only, not a persisted draft/version workflow. API keys, tokens, passwords, SMTP credentials and every other secret are server-side ENV configuration outside Settings ownership and never enter the manifest, client payload or Audit diff.
 
 ## Phân quyền (7.x-Q)
 

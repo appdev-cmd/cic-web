@@ -16,7 +16,7 @@ import type { CmsDashboardData, CmsLocale } from '../data/CmsDataSource';
 import type { CmsSearchRecord } from '@/features/cms-search/types';
 import { getCmsSearchRecordsAction } from '@/features/cms-search/server/actions';
 import type { AuditGovernanceData, PermissionsGovernanceData, TrashGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
-import type { SystemConfigurationData } from '../data/ConfigurationDataSource';
+import type { CmsSettingsData } from '@/features/system-settings/domain/model';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
 import { CmsWorkspaceLocaleProvider } from '../context/CmsWorkspaceLocaleContext';
@@ -192,7 +192,7 @@ export interface CmsDashboardProps {
   userCapabilities?: { create: boolean; edit: boolean; delete: boolean; currentUserId: string };
   permissionsData?: PermissionsGovernanceData | null;
   permissionCapabilities?: { create: boolean; edit: boolean; delete: boolean };
-  settingsData?: SystemConfigurationData | null;
+  settingsData?: CmsSettingsData | null;
   settingsCapabilities?: { edit: boolean };
   functionSeoData?: FunctionSeoRecord[];
   activityData?: AuditGovernanceData | null;

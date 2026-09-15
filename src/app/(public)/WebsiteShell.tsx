@@ -10,8 +10,9 @@ import { ChatbotWidget } from '@/web/components/ChatbotWidget';
 import { Constellation } from '@/web/components/Constellation';
 import { Footer } from '@/web/components/Footer';
 import { Header } from '@/web/components/Header';
+import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 
-export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
+export function WebsiteShell({ children, settings }: Readonly<{ children: ReactNode; settings: PublicSystemSettings }>) {
   const pathname = usePathname();
   const router = useRouter();
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
@@ -20,6 +21,7 @@ export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
 
   const navigate = (href: string) => router.push(href);
   const headerVariant = pathname === '/' ? 'overlay' : 'solid';
+  const hotline = settings.values.tel || '024 3976 1381';
 
   return (
     <div className="public-shell min-h-screen bg-white text-slate-900 relative selection:bg-orange-500 selection:text-white">
@@ -57,9 +59,9 @@ export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
                 { 
                   id: 'hotline',
                   icon: <Phone size={22} className="animate-pulse text-white" />, 
-                  label: 'Hotline: 024 3976 1381', 
+                  label: `Hotline: ${hotline}`,
                   color: 'bg-orange-600 hover:bg-orange-500 shadow-orange-600/20', 
-                  link: 'tel:02439761381' 
+                  link: `tel:${hotline.replace(/\D/g, '')}`
                 },
                 { 
                   id: 'zalo',
@@ -73,7 +75,7 @@ export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
                   icon: <Facebook size={22} className="text-white" />, 
                   label: 'Fanpage Facebook CIC', 
                   color: 'bg-[#1877F2] hover:bg-[#1566d2] shadow-blue-600/20', 
-                  link: 'https://www.facebook.com/CICTechnologyandConsultancyVN' 
+                  link: settings.values.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN'
                 },
                 { 
                   id: 'linkedin',
@@ -167,7 +169,7 @@ export function WebsiteShell({ children }: Readonly<{ children: ReactNode }>) {
 
       <Header variant={headerVariant} pathname={pathname} onNavigate={navigate} onOpenConsultation={() => setIsConsultationOpen(true)} />
       <main className="public-shell-content" data-header-variant={headerVariant}>{children}</main>
-      <Footer onNavigate={navigate} />
+      <Footer onNavigate={navigate} settings={settings} />
       <ConsultationModal isOpen={isConsultationOpen} onClose={() => setIsConsultationOpen(false)} />
 
       {/* Interactive AI Chatbot Widget */}
