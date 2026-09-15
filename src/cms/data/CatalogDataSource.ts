@@ -3,7 +3,7 @@ import type {
   ProductActivityLog,
   ProductBrand,
   ProductCategory,
-  ProductItem,
+  CmsProductListItem,
   ProductOwnerOption,
 } from '../modules/products/types';
 import type {
@@ -16,7 +16,7 @@ import type {
 } from '../modules/product_settings/types';
 
 export interface ProductsModuleData {
-  products: ProductItem[];
+  products: CmsProductListItem[];
   categories: ProductCategory[];
   brands: ProductBrand[];
   applications: MasterApplicationItem[];
@@ -35,7 +35,7 @@ export interface ProductTaxonomyModuleData {
 
 export interface ProductSettingsGlobalData {
   salesStaff: MasterSalesStaffItem[];
-  productOptions: Pick<ProductItem, 'id' | 'name'>[];
+  productOptions: Pick<CmsProductListItem, 'id' | 'name'>[];
   usageImpactRecords: UsageImpactRecord[];
 }
 

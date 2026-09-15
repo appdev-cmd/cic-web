@@ -19,6 +19,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import {
+  CmsProductListItem,
   ProductItem,
   ProductCategory,
   ProductBrand,
@@ -44,7 +45,7 @@ import { CmsTabs } from '../../components/ui/CmsTabs';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
-import { saveProductAction, setProductsFeaturedAction, setProductsPublishedAction, trashProductAction } from '@/features/products/server/actions';
+import { getCmsProductActivityAction, getCmsProductDetailAction, saveProductAction, setProductsFeaturedAction, setProductsPublishedAction, trashProductAction } from '@/features/products/server/actions';
 
 import { useProductFilters, type SystemViewTab } from './useProductFilters';
 
@@ -68,7 +69,7 @@ const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
 export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspaceLocale, capabilities = { create: false, edit: false, delete: false } }) => {
   const router = useRouter();
   // Main Products List State
-  const [products, setProducts] = useState<ProductItem[]>(() =>
+  const [products, setProducts] = useState<CmsProductListItem[]>(() =>
     (data?.products ?? []).map((item) => ({
       ...item,
       name: item.name || item.title || '',
@@ -90,7 +91,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const [applications] = useState<MasterApplicationItem[]>(data?.applications ?? []);
   const [productTypes] = useState<MasterProductTypeItem[]>(data?.productTypes ?? []);
   const [owners] = useState(data?.owners ?? []);
-  const [activityLogs] = useState<ProductActivityLog[]>(data?.activityLogs ?? []);
+  const [activityLogs, setActivityLogs] = useState<ProductActivityLog[]>(data?.activityLogs ?? []);
 
   // Navigation State: 'list' | 'form'
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
@@ -108,11 +109,12 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
   // Modals & Drawers State
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [trashTargets, setTrashTargets] = useState<ProductItem[] | null>(null);
+  const [trashTargets, setTrashTargets] = useState<CmsProductListItem[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [productToPreview, setProductToPreview] = useState<ProductItem | null>(null);
-  const [productForActivity, setProductForActivity] = useState<ProductItem | null>(null);
+  const [productForActivity, setProductForActivity] = useState<CmsProductListItem | null>(null);
   const [productToDuplicate, setProductToDuplicate] = useState<ProductItem | null>(null);
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
 
   // Toast message
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -130,6 +132,42 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
       const sanitized = sanitizeCmsErrorMessage(error, fallbackMsg);
       showToast(sanitized);
       throw new Error(sanitized);
+    }
+  };
+
+  const loadProductDetail = async (product: CmsProductListItem, target: 'edit' | 'preview' | 'duplicate') => {
+    setLoadingProductId(product.id);
+    try {
+      const detail = await getCmsProductDetailAction(workspaceLocale, product.id);
+      if (!detail) {
+        showToast('Không tìm thấy dữ liệu chi tiết sản phẩm.');
+        return;
+      }
+      const fullProduct = detail;
+      if (target === 'edit') {
+        setSelectedProductForForm(fullProduct);
+        setViewMode('form');
+      } else if (target === 'preview') {
+        setProductToPreview(fullProduct);
+      } else {
+        setProductToDuplicate(fullProduct);
+      }
+    } catch (error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể tải chi tiết sản phẩm.'));
+    } finally {
+      setLoadingProductId(null);
+    }
+  };
+
+  const loadProductActivity = async (product: CmsProductListItem) => {
+    setLoadingProductId(product.id);
+    try {
+      setActivityLogs(await getCmsProductActivityAction(workspaceLocale, product.id));
+      setProductForActivity(product);
+    } catch (error) {
+      showToast(sanitizeCmsErrorMessage(error, 'Không thể tải lịch sử sản phẩm.'));
+    } finally {
+      setLoadingProductId(null);
     }
   };
 
@@ -300,11 +338,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                 application: productData.application || productData.application_areas || p.application,
                 summary: productData.summary ?? productData.short_description ?? p.summary,
                 short_description: productData.summary ?? productData.short_description ?? p.short_description,
-                description: productData.description ?? productData.content_html ?? p.description,
-                content_html: productData.description ?? productData.content_html ?? p.content_html,
                 editorial_status: editorialStatus,
                 published: editorialStatus === 'published',
-                published_time: editorialStatus === 'published' ? p.published_time || now : undefined,
                 updated_time: now,
               }
             : p
@@ -672,10 +707,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                           <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                             <button
                               type="button"
-                              onClick={() => {
-                                setSelectedProductForForm(p);
-                                setViewMode('form');
-                              }}
+                              onClick={() => { void loadProductDetail(p, 'edit'); }}
+                              disabled={loadingProductId === p.id}
                               className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer text-left line-clamp-1"
                             >
                               {prodName}
@@ -834,10 +867,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                         <div className="flex items-center justify-center gap-1">
                           {/* Edit Full */}
                           <CmsIconButton
-                            onClick={() => {
-                              setSelectedProductForForm(p);
-                              setViewMode('form');
-                            }}
+                            onClick={() => { void loadProductDetail(p, 'edit'); }}
                             icon={<Edit />}
                             size="sm"
                             aria-label="Chỉnh sửa chi tiết"
@@ -846,7 +876,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
                           {/* Preview */}
                           <CmsIconButton
-                            onClick={() => setProductToPreview(p)}
+                            onClick={() => { void loadProductDetail(p, 'preview'); }}
                             icon={<Eye />}
                             size="sm"
                             aria-label="Xem thử sản phẩm"
@@ -855,7 +885,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
                           {/* Audit History */}
                           <CmsIconButton
-                            onClick={() => setProductForActivity(p)}
+                            onClick={() => { void loadProductActivity(p); }}
                             icon={<History />}
                             size="sm"
                             aria-label="Xem lịch sử sản phẩm"
@@ -864,7 +894,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
                           {/* Duplicate */}
                           <CmsIconButton
-                            onClick={() => setProductToDuplicate(p)}
+                            onClick={() => { void loadProductDetail(p, 'duplicate'); }}
                             icon={<Copy />}
                             size="sm"
                             aria-label="Nhân bản sản phẩm"

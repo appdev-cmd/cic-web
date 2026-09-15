@@ -11,7 +11,7 @@ import { MyAccountModal } from './MyAccountModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
 
 import { ContactMessage, ProductRegistration, PendingContent, CmsUser, type CmsMenuGroup } from '../types';
-import { resolveCmsModule } from '../routing';
+import { resolveCmsModule, type CmsModuleKey } from '../routing';
 import type { CmsDashboardData, CmsLocale } from '../data/CmsDataSource';
 import type { CmsSearchRecord } from '@/features/cms-search/types';
 import { getCmsSearchRecordsAction } from '@/features/cms-search/server/actions';
@@ -20,6 +20,7 @@ import type { CmsSettingsData } from '@/features/system-settings/domain/model';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
 import { CmsWorkspaceLocaleProvider } from '../context/CmsWorkspaceLocaleContext';
+import { ApplicationLoadingState } from '@/shared/ui/application';
 
 const getProductSettingsDataType = (path: string): MasterDataType => {
   const cleanPath = path.split('?')[0];
@@ -202,9 +203,17 @@ export interface CmsDashboardProps {
   mediaData?: import('../data/MediaDataSource').MediaModuleData | null;
   mediaCapabilities?: { create: boolean; edit: boolean; delete: boolean; replace: boolean };
   moduleContent?: ReactNode;
+  navigationPending?: boolean;
+  moduleAccess?: Partial<Record<CmsModuleKey, boolean>>;
 }
 
-export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent }) => {
+function GuardedModule({ authorized, ready, message, children }: Readonly<{ authorized: boolean; ready: boolean; message: string; children: ReactNode }>) {
+  if (!authorized) return <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{message}</div>;
+  if (!ready) return <ApplicationLoadingState label="Đang tải dữ liệu module…" />;
+  return children;
+}
+
+export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent, navigationPending = false, moduleAccess = {} }) => {
   // Theme & Layout States (Persisted & Synced)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -237,11 +246,16 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const initialPageTitle = initialPath.includes('/brands') || initialPath.includes('/manufacturers')
+  const activePath = initialPath;
+  const normalizedActivePath = activePath.split(/[?#]/, 1)[0].replace(/\/$/, '') || '/';
+  const matchedMenuItem = menuGroups
+    .flatMap((group) => group.items)
+    .flatMap((item) => [item, ...(item.children ?? [])])
+    .sort((left, right) => (right.path?.length ?? 0) - (left.path?.length ?? 0))
+    .find((item) => item.path && (normalizedActivePath === item.path || normalizedActivePath.startsWith(`${item.path}/`)));
+  const currentPageTitle = initialPath.includes('/brands') || initialPath.includes('/manufacturers')
     ? 'Hãng sản xuất'
-    : 'Tổng quan CMS';
-  const [activePath, setActivePath] = useState(initialPath);
-  const [currentPageTitle, setCurrentPageTitle] = useState(initialPageTitle);
+    : matchedMenuItem?.title ?? (resolveCmsModule(activePath) === 'dashboard' ? 'Tổng quan CMS' : 'CMS');
 
   // Command Palette & Right Drawer
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -262,20 +276,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   const [registrations, setRegistrations] = useState<ProductRegistration[]>(initialDashboardData?.productRegistrations ?? []);
   const [pendingItems, setPendingItems] = useState<PendingContent[]>(initialDashboardData?.pendingContents ?? []);
   const activeModule = resolveCmsModule(activePath);
-
-  useEffect(() => {
-    const handlePopState = () => setActivePath(`${window.location.pathname}${window.location.search}` || '/cms/dashboard');
-    handlePopState();
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  useEffect(() => {
-    setActivePath(initialPath);
-    if (initialPath.includes('/brands') || initialPath.includes('/manufacturers')) {
-      setCurrentPageTitle('Hãng sản xuất');
-    }
-  }, [initialPath]);
 
   // Global Keyboard Shortcuts (Ctrl+K / Cmd+K and '/' key)
   useEffect(() => {
@@ -310,9 +310,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
 
   const navigateToCmsPath = (path: string, title: string) => {
     onNavigate?.(path);
-    const target = new URL(path, window.location.origin);
-    setActivePath(`${target.pathname}${target.search}`);
-    setCurrentPageTitle(title);
+    // The route and its server props commit together when the RSC payload arrives.
+    // Updating local route state here would temporarily pair the new module with old props.
+    void title;
   };
 
   // Status updates handler
@@ -420,7 +420,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
               </div>
             )}
           >
-          {moduleContent ? (
+          {navigationPending ? (
+            <ApplicationLoadingState label="Đang chuyển trang…" />
+          ) : moduleContent ? (
             moduleContent
           ) : activeModule === 'search' ? (
             <CmsGlobalSearchPage
@@ -433,17 +435,17 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
               }}
             />
           ) : activeModule === 'users' ? (
-            usersData ? <CicUsersManager data={usersData} capabilities={userCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem danh sách người dùng CMS.</div>
+            <GuardedModule authorized={moduleAccess.users === true} ready={usersData !== null} message="Bạn không có quyền xem danh sách người dùng CMS.">{usersData && <CicUsersManager data={usersData} capabilities={userCapabilities} />}</GuardedModule>
           ) : activeModule === 'permissions' ? (
-            permissionsData ? <PermissionManagement data={permissionsData} capabilities={permissionCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem phân quyền CMS.</div>
+            <GuardedModule authorized={moduleAccess.permissions === true} ready={permissionsData !== null} message="Bạn không có quyền xem phân quyền CMS.">{permissionsData && <PermissionManagement data={permissionsData} capabilities={permissionCapabilities} />}</GuardedModule>
           ) : activeModule === 'settings' ? (
-            settingsData ? <SystemConfiguration websiteData={settingsData} capabilities={settingsCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem cấu hình hệ thống.</div>
+            <GuardedModule authorized={moduleAccess.settings === true} ready={settingsData !== null} message="Bạn không có quyền xem cấu hình hệ thống.">{settingsData && <SystemConfiguration websiteData={settingsData} capabilities={settingsCapabilities} />}</GuardedModule>
           ) : activeModule === 'function_seo' ? (
             <FunctionSeoManager key={workspaceLocale} workspaceLocale={workspaceLocale} data={functionSeoData} />
           ) : activeModule === 'activity_logs' ? (
-            activityData ? <ActivityLogsManager data={activityData} capabilities={auditCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem Nhật ký hoạt động.</div>
+            <GuardedModule authorized={moduleAccess.activity_logs === true} ready={activityData !== null} message="Bạn không có quyền xem Nhật ký hoạt động.">{activityData && <ActivityLogsManager data={activityData} capabilities={auditCapabilities} />}</GuardedModule>
           ) : activeModule === 'trash' ? (
-            trashData ? <TrashManager data={trashData} capabilities={trashCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">Bạn không có quyền xem Thùng rác.</div>
+            <GuardedModule authorized={moduleAccess.trash === true} ready={trashData !== null} message="Bạn không có quyền xem Thùng rác.">{trashData && <TrashManager data={trashData} capabilities={trashCapabilities} />}</GuardedModule>
           ) : activeModule === 'static_pages' ? (
             <StaticPagesManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'news' ? (
@@ -463,7 +465,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
           ) : activeModule === 'menu' ? (
             <MenuManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'media' ? (
-            mediaData ? <MediaManager key={workspaceLocale} data={mediaData} workspaceLocale={workspaceLocale} capabilities={mediaCapabilities} /> : <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm font-semibold text-amber-800">Bạn không có quyền xem Thư viện Media.</div>
+            <GuardedModule authorized={moduleAccess.media === true} ready={mediaData !== null} message="Bạn không có quyền xem Thư viện Media.">{mediaData && <MediaManager key={workspaceLocale} data={mediaData} workspaceLocale={workspaceLocale} capabilities={mediaCapabilities} />}</GuardedModule>
           ) : activeModule === 'contacts' ? (
             <ContactsManager key={workspaceLocale} workspaceLocale={workspaceLocale} />
           ) : activeModule === 'localization' ? (

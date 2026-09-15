@@ -45,11 +45,11 @@ async function inspect(sql: Sql, raw: unknown): Promise<TrashInspection> {
 async function restore(sql: Sql, raw: unknown, mode: TrashRestoreMode) {
   const snapshot = schema.parse(raw); const check = await inspect(sql, snapshot); if (!check.restoreModes.includes(mode)) throw new Error(check.details);
   const t = tables(snapshot.locale); const record: Record<string, unknown> = { ...snapshot.record, published: false, is_hot: false, edited_time: new Date().toISOString() }; const productId = Number(record.id);
-  await sql.unsafe(`INSERT INTO ${t.p} SELECT (jsonb_populate_record(NULL::${t.p},$1::jsonb)).*`, [JSON.stringify(record)]);
+  await sql.unsafe(`INSERT INTO ${t.p} OVERRIDING SYSTEM VALUE SELECT (jsonb_populate_record(NULL::${t.p},$1::text::jsonb)).*`, [JSON.stringify(record)]);
   for (const id of snapshot.categories) await sql.unsafe(`INSERT INTO ${t.cr}(product_id,category_id) VALUES($1,$2)`, [productId, id]);
   for (const value of snapshot.applications) await sql.unsafe(`INSERT INTO ${t.ar}(product_id,application_id,ordering) VALUES($1,$2,$3)`, [productId, value.id, value.ordering]);
   for (const value of snapshot.related) await sql.unsafe(`INSERT INTO ${t.rr}(product_id,related_product_id,ordering) VALUES($1,$2,$3)`, [productId, value.id, value.ordering]);
-  for (const image of snapshot.images) await sql.unsafe(`INSERT INTO ${t.im} SELECT (jsonb_populate_record(NULL::${t.im},$1::jsonb)).*`, [JSON.stringify(image)]);
+  for (const image of snapshot.images) await sql.unsafe(`INSERT INTO ${t.im} OVERRIDING SYSTEM VALUE SELECT (jsonb_populate_record(NULL::${t.im},$1::text::jsonb)).*`, [JSON.stringify(image)]);
   return { title: String(record.name ?? productId), restoredEntityId: String(productId), restoredState: 'draft' as const };
 }
 

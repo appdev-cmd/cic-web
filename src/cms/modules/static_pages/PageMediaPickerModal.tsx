@@ -84,7 +84,8 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    if (!file.type.startsWith('image/')) return setUploadError('Vui lòng chọn đúng định dạng ảnh.');
+    const isImage = file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.ico');
+    if (!isImage) return setUploadError('Vui lòng chọn đúng định dạng ảnh.');
     if (file.size > 10 * 1024 * 1024) return setUploadError('Ảnh không được vượt quá 10 MB.');
 
     try { const form=new FormData();form.set('file',file);form.set('locale',locale);form.set('title',file.name.replace(/\.[^.]+$/,''));form.set('altText','');const created=await uploadMediaAction(form);const live=await getMediaPickerItemsAction(locale);setImages(live);setSelectedId(created.id);setUploadError(''); }
@@ -104,7 +105,7 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
             <label className="flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-700 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-orange-500">
               <Upload className="size-4" />
               Tải ảnh từ máy
-              <input type="file" accept="image/*" onChange={handleUpload} className="sr-only" />
+              <input type="file" accept="image/*,.ico" onChange={handleUpload} className="sr-only" />
             </label>
             <div className="relative flex flex-1 items-center">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">

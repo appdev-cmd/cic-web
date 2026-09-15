@@ -223,7 +223,7 @@ export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocal
 
   return (
     <div className="space-y-6">
-      <input ref={uploadInputRef} type="file" multiple className="sr-only" onChange={(event)=>void handleFiles(event.target.files)} accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml,video/mp4,video/webm,application/pdf,.doc,.docx,.xls,.xlsx" />
+      <input ref={uploadInputRef} type="file" multiple className="sr-only" onChange={(event)=>void handleFiles(event.target.files)} accept="image/jpeg,image/png,image/webp,image/avif,image/gif,image/svg+xml,image/x-icon,image/vnd.microsoft.icon,.ico,video/mp4,video/webm,application/pdf,.doc,.docx,.xls,.xlsx" />
       {/* Toast Notification */}
       {toastMessage && (
         <div role="status" className="fixed inset-x-4 top-20 z-[100] bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200 sm:left-auto sm:right-6 sm:max-w-md">

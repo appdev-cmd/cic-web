@@ -51,6 +51,7 @@ export async function renderCmsFoundationRoute(module: CmsModuleKey, path = '/cm
     permissionsData={permissionsData}
     permissionCapabilities={{ create: canAny(['roles', 'permissions'], 'create'), edit: canAny(['roles', 'permissions'], 'edit'), delete: canAny(['roles', 'permissions'], 'delete') }}
     settingsData={settingsData}
+    moduleAccess={{ users: canViewUsers, permissions: canViewPermissions, settings: canViewSettings, activity_logs: canViewAudit, trash: canViewTrash, media: canViewMedia }}
     settingsCapabilities={{ edit: canAny(['settings', 'config'], 'edit') }}
     functionSeoData={functionSeoData}
     activityData={activityData}

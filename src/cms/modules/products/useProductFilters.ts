@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import type {
-  ProductItem,
+  CmsProductListItem,
   ProductCategory,
   ProductBrand,
 } from './types';
@@ -18,7 +18,7 @@ export const removeVietnameseTones = (str: string = ''): string => {
 };
 
 export interface UseProductFiltersParams {
-  products: ProductItem[];
+  products: CmsProductListItem[];
   categories: ProductCategory[];
   brands: ProductBrand[];
   productTypes: MasterProductTypeItem[];
@@ -46,11 +46,11 @@ export interface UseProductFiltersReturn {
   handleResetFilters: () => void;
   isFilterActive: boolean;
   activeFiltersCount: number;
-  filteredProducts: ProductItem[];
-  getCategoryNames: (p: ProductItem) => string[];
-  getBrandName: (p: ProductItem) => string;
-  getProductTypeName: (p: ProductItem) => string;
-  getApplicationNames: (p: ProductItem) => string[];
+  filteredProducts: CmsProductListItem[];
+  getCategoryNames: (p: CmsProductListItem) => string[];
+  getBrandName: (p: CmsProductListItem) => string;
+  getProductTypeName: (p: CmsProductListItem) => string;
+  getApplicationNames: (p: CmsProductListItem) => string[];
 }
 
 export const useProductFilters = ({
@@ -70,7 +70,7 @@ export const useProductFilters = ({
 
   // Helper lookups
   const getCategoryNames = useCallback(
-    (p: ProductItem): string[] => {
+    (p: CmsProductListItem): string[] => {
       const ids = p.category_ids && p.category_ids.length > 0 ? p.category_ids : p.category_id ? [p.category_id] : [];
       const matched = categories.filter((c) => ids.includes(c.id) || ids.includes(c.name));
       if (matched.length > 0) return matched.map((c) => c.name);
@@ -81,7 +81,7 @@ export const useProductFilters = ({
   );
 
   const getBrandName = useCallback(
-    (p: ProductItem): string => {
+    (p: CmsProductListItem): string => {
       const brandId = p.manufactory || p.brand_id;
       const found = brands.find((b) => b.id === brandId || b.name === brandId || b.name === p.brand_name);
       return found ? found.name : p.brand_name || brandId || '—';
@@ -90,7 +90,7 @@ export const useProductFilters = ({
   );
 
   const getProductTypeName = useCallback(
-    (p: ProductItem): string => {
+    (p: CmsProductListItem): string => {
       const typeId = p.types || p.product_type;
       const found = productTypes.find((t) => t.id === typeId || t.name === typeId);
       return found ? found.name : typeId || '—';
@@ -99,7 +99,7 @@ export const useProductFilters = ({
   );
 
   const getApplicationNames = useCallback(
-    (p: ProductItem): string[] => {
+    (p: CmsProductListItem): string[] => {
       const appIds = (p.application || p.application_areas || []).map(String);
       const matched = applications.filter((a) => appIds.includes(String(a.id)) || appIds.includes(a.name));
       if (matched.length > 0) return matched.map((a) => a.name);
@@ -198,7 +198,6 @@ export const useProductFilters = ({
           p.alias,
           p.summary,
           p.short_description,
-          p.description,
           p.price,
           p.price_old,
           brandName,

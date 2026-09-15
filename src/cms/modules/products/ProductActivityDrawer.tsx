@@ -1,10 +1,10 @@
 import React from 'react';
 import { X, History, GitBranch, CheckCircle, Clock, User, ShieldCheck, ArrowRight, Tag } from 'lucide-react';
-import { ProductItem, ProductActivityLog } from './types';
+import { CmsProductListItem, ProductActivityLog } from './types';
 
 interface ProductActivityDrawerProps {
   isOpen: boolean;
-  product: ProductItem | null;
+  product: CmsProductListItem | null;
   activityLogs: ProductActivityLog[];
   onClose: () => void;
 }

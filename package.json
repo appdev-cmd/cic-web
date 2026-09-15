@@ -46,6 +46,7 @@
     "verify:sales-owner-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-sales-owner-roundtrip.ts",
     "db:apply-products": "node --env-file=.env.local scripts/apply-products-hardening.mjs",
     "verify:product-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-roundtrip.ts",
+    "verify:product-trash-identity": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-trash-identity.ts",
     "verify:product-legacy-media": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-product-legacy-media.ts",
     "verify:news-category-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-category-roundtrip.ts",
     "verify:news-roundtrip": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-news-roundtrip.ts",

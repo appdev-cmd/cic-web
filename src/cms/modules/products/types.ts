@@ -9,6 +9,21 @@ export type CatalogStatus = 'active' | 'inactive' | 'archived';
 
 export type AvailabilitySignal = 'in_stock' | 'pre_order' | 'contact' | 'out_of_stock';
 
+/** Lightweight CMS table/search contract. Full editor fields are loaded by id. */
+export interface CmsProductListItem {
+  id: string; name?: string; title: string; code?: string; sku: string; alias: string;
+  summary?: string; short_description: string; image: string; icon?: string;
+  price?: string; price_old?: string; tags?: string[];
+  category_id: string; category_ids?: string[];
+  brand_id: string; brand_name?: string; manufactory?: string;
+  product_type: string; types?: string;
+  application?: string[]; application_areas: string[];
+  editorial_status: EditorialStatus; published?: boolean;
+  is_hot?: boolean; teamview?: boolean; ordering?: number;
+  working_version_id?: string;
+  created_time?: string; updated_time: string;
+}
+
 export interface TechSpecParam {
   id: string;
   key: string;

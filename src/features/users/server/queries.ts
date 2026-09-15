@@ -11,16 +11,27 @@ const date = (value: unknown) => value ? String(value) : undefined;
 export async function getCmsUsersData(): Promise<UsersGovernanceData> {
   await requirePermission('users','view');
   const sql=getPostgresClient();
-  const [userRows,roleRows,assignments,branchRows,taskRows,rolePermissions]=await Promise.all([
+  const [userRows,roleRows,branchRows,taskRows]=await Promise.all([
     sql`SELECT id,username,email,fname,lname,full_name,phone,address,summary,image,account_status,agencies,password_changed_at,status_online,created_time,updated_time,last_visit_time,nums_visit FROM cic_users u WHERE NOT EXISTS (SELECT 1 FROM cic_trash_items ti WHERE ti.entity_type='user' AND ti.entity_id=u.id::text AND ti.status='trashed') ORDER BY ordering NULLS LAST,id`,
     sql`SELECT id,code,name,description,status FROM cic_roles WHERE status='active' ORDER BY name`,
-    sql`SELECT user_id,role_id FROM cic_user_roles WHERE status='active' ORDER BY assigned_at DESC,id DESC`,
     sql`SELECT id,code,name FROM cic_branches WHERE workspace='vi' AND published=true ORDER BY ordering NULLS LAST,id`,
     sql`SELECT id,module,view,_task,description,published,ordering FROM cic_permission_tasks WHERE published=true ORDER BY module,ordering NULLS LAST,id`,
+  ]);
+  const [assignments,rolePermissions]=await Promise.all([
+    sql`SELECT user_id,role_id FROM cic_user_roles WHERE status='active' ORDER BY assigned_at DESC,id DESC`,
     sql`SELECT role_id,permission_task_id,action,allowed FROM cic_role_permissions WHERE allowed=true`,
   ]);
+  const primaryRoleByUser = new Map<number, string>();
+  for (const assignment of assignments) if (!primaryRoleByUser.has(Number(assignment.user_id))) primaryRoleByUser.set(Number(assignment.user_id), String(assignment.role_id));
+  const permissionsByRole = new Map<number, Array<(typeof rolePermissions)[number]>>();
+  for (const permission of rolePermissions) {
+    const roleId = Number(permission.role_id);
+    const current = permissionsByRole.get(roleId) ?? [];
+    current.push(permission);
+    permissionsByRole.set(roleId, current);
+  }
   const users: CicUser[] = userRows.map((row) => {
-    const roleId = String(assignments.find((item) => item.user_id === row.id)?.role_id ?? '');
+    const roleId = primaryRoleByUser.get(Number(row.id)) ?? '';
     return {
       id: String(row.id), username: str(row.username), email: str(row.email), fname: str(row.fname), lname: str(row.lname), full_name: str(row.full_name) || `${str(row.lname)} ${str(row.fname)}`.trim(), phone: str(row.phone), address: str(row.address), summary: str(row.summary), avatar: str(row.image), status: (row.account_status ?? 'deactivated') as UserAccountStatus, primaryRoleId: roleId, agencies: list(row.agencies), passwordChangedAt: date(row.password_changed_at), isOnline: row.status_online === true, created_time: date(row.created_time) ?? '', updated_time: date(row.updated_time), last_visit_time: date(row.last_visit_time), nums_visit: row.nums_visit ?? 0,
       status_history: [],
@@ -28,10 +39,10 @@ export async function getCmsUsersData(): Promise<UsersGovernanceData> {
     };
   });
   const tasks = taskRows.map((item) => ({ id: String(item.id), module: str(item.module), view: str(item.view), task: item._task, description: str(item.description), published: item.published, ordering: item.ordering ?? 0 }));
-  const rolePermissionsByRole = Object.fromEntries(roleRows.map((role) => [String(role.id), rolePermissions.filter((item) => item.role_id === role.id).map((item) => ({ taskId: String(item.permission_task_id), action: str(item.action) }))]));
+  const rolePermissionsByRole = Object.fromEntries(roleRows.map((role) => [String(role.id), (permissionsByRole.get(Number(role.id)) ?? []).map((item) => ({ taskId: String(item.permission_task_id), action: str(item.action) }))]));
   return {
     users,
-    roles: roleRows.map((item) => ({ id: String(item.id), name: String(item.name), description: str(item.description), permissions_count: new Set(rolePermissions.filter((permission) => permission.role_id === item.id).map((permission) => permission.permission_task_id)).size, badge_color: 'slate' })),
+    roles: roleRows.map((item) => ({ id: String(item.id), name: String(item.name), description: str(item.description), permissions_count: new Set((permissionsByRole.get(Number(item.id)) ?? []).map((permission) => permission.permission_task_id)).size, badge_color: 'slate' })),
     agencies: branchRows.map((item) => ({ id: String(item.id), name: String(item.name), code: String(item.code) })),
     permissionTasks: tasks,
     rolePermissions: rolePermissionsByRole,

@@ -14,7 +14,16 @@ const allowedMime = new Set([
   'image/avif',
   'image/gif',
   'image/svg+xml',
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
 ]);
+
+const resolveMime = (file: File): string => {
+  if (file.name.toLowerCase().endsWith('.ico') && (!file.type || file.type === 'application/octet-stream')) {
+    return 'image/x-icon';
+  }
+  return file.type;
+};
 
 const safeFilename = (name: string) =>
   name
@@ -43,9 +52,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!allowedMime.has(file.type)) {
+    const mime = resolveMime(file);
+    if (!allowedMime.has(mime)) {
       return NextResponse.json(
-        { error: { message: 'Chỉ chấp nhận các tệp định dạng hình ảnh (JPEG, PNG, WebP, GIF, SVG).' } },
+        { error: { message: 'Chỉ chấp nhận các tệp định dạng hình ảnh (JPEG, PNG, WebP, GIF, SVG, ICO).' } },
         { status: 400 }
       );
     }
@@ -63,7 +73,7 @@ export async function POST(req: NextRequest) {
     const { error: uploadError } = await supabase.storage
       .from(MEDIA_BUCKET)
       .upload(storagePath, file, {
-        contentType: file.type,
+        contentType: mime,
         upsert: false,
         cacheControl: '3600',
       });

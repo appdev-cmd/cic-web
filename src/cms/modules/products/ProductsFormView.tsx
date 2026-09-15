@@ -5,7 +5,7 @@ import { SearchableMultiSelect, SearchableSelect } from '../../components/Search
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { findPageBuilderImage, PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
 import { ProductFileInput } from './ProductFileInput';
-import type { ProductBrand, ProductCategory, ProductItem, ProductOwnerOption } from './types';
+import type { CmsProductListItem, ProductBrand, ProductCategory, ProductItem, ProductOwnerOption } from './types';
 import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 
@@ -16,7 +16,7 @@ interface ProductsFormViewProps {
   brands: ProductBrand[];
   applications: MasterApplicationItem[];
   productTypes: MasterProductTypeItem[];
-  relatedProducts: ProductItem[];
+  relatedProducts: CmsProductListItem[];
   owners: ProductOwnerOption[];
   featuredCount: number;
   onSave: (productData: Partial<ProductItem>, actionType: 'draft' | 'publish') => Promise<void> | void;
