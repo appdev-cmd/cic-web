@@ -317,11 +317,11 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                           </div>
                         </div>
                       ) : item.type === 'html' ? (
-                        <div className={`overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 ${!capabilities.edit || pending ? 'pointer-events-none opacity-60' : ''}`}>
+                        <div className={!capabilities.edit || pending ? 'pointer-events-none opacity-60' : ''}>
                           <RichTextEditor
                             value={currentValue ?? ''}
                             onChange={(val) => onChangeValue(item.key, val)}
-                            minHeight="140px"
+                            minHeight="220px"
                             allowedEmbeds={[]}
                           />
                         </div>
