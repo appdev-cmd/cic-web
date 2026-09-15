@@ -20,7 +20,7 @@ async function uploadFile(file:File,locale:MediaLocale) {
   if(file.size<=0||file.size>MEDIA_MAX_FILE_BYTES)throw new Error('Tệp phải có dung lượng từ 1 byte đến 100 MiB.');
   const path=`${locale}/${new Date().toISOString().slice(0,7)}/${randomUUID()}-${safeFilename(file.name)}`;
   const {error}=await createSupabaseAdminClient().storage.from(MEDIA_BUCKET).upload(path,file,{contentType:mime,upsert:false,cacheControl:'3600'});
-  if(error)throw new Error('Không thể tải tệp lên kho Media.'); return {path,mime};
+  if(error)throw new Error(`Không thể tải tệp lên kho Media: ${error.message}`); return {path,mime};
 }
 export async function refreshMediaAction(locale:MediaLocale){return getCmsMediaData(locale);}
 export async function getMediaPickerItemsAction(locale:MediaLocale){return getCmsMediaPickerItems(locale);}

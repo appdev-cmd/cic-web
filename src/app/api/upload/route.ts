@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     if (uploadError) {
       return NextResponse.json(
-        { error: { message: 'Lỗi tải ảnh lên kho lưu trữ.' } },
+        { error: { message: `Lỗi tải ảnh lên kho lưu trữ: ${uploadError.message}` } },
         { status: 500 }
       );
     }
