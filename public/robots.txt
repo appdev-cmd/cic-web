@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.cic.com.vn/sitemap.xml

@@ -273,6 +273,13 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
           pending={pending}
           capabilities={capabilities}
           onGoToBranches={() => setActiveTab('branches')}
+          branches={branches}
+          onBranchesChange={(next) =>
+            setBranchesByScope((current) => ({
+              ...current,
+              [scopeId]: next,
+            }))
+          }
         />
       )}
 

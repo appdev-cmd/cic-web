@@ -12,12 +12,11 @@ import type { CmsSettingsData, CmsSettingsScopeId } from '@/features/system-sett
 import { CmsPagination } from '../../components/ui/CmsPagination';
 
 const GROUP_LABELS: Record<string, string> = {
-  identity: 'Nhận diện chung',
-  contact: 'Thông tin liên hệ',
   branding: 'Thương hiệu',
-  social: 'Mạng xã hội',
-  support: 'Hỗ trợ',
-  measurement: 'Đo lường',
+  seo: 'SEO mặc định',
+  company: 'Doanh nghiệp & liên hệ',
+  footer_social: 'Footer & mạng xã hội',
+  measurement: 'Đo lường & tiếp thị',
 };
 
 interface SettingsTableViewProps {

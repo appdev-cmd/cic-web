@@ -21,14 +21,14 @@ import type {
   CmsSettingsWorkspace,
 } from '@/features/system-settings/domain/model';
 import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
+import { BranchesSettingsEditor, type BranchSetting } from './BranchesSettingsEditor';
 
 export const GROUPS = [
-  { id: 'identity', title: 'Nhận diện chung', description: 'Tên hiển thị và tên miền định tuyến của hệ thống.' },
-  { id: 'contact', title: 'Thông tin liên hệ', description: 'Tên admin, email nhận thư, hotline và số điện thoại hỗ trợ.' },
-  { id: 'branding', title: 'Thương hiệu', description: 'Logo màu và logo trắng phục vụ header/footer giao diện.' },
-  { id: 'social', title: 'Mạng xã hội', description: 'Liên kết mạng xã hội chính thức: Facebook, X/Twitter, YouTube.' },
-  { id: 'support', title: 'Hỗ trợ kỹ thuật', description: 'Đường dẫn công cụ hỗ trợ trực tuyến từ xa (TeamViewer, v.v.).' },
-  { id: 'measurement', title: 'Đo lường & Phân tích', description: 'Mã theo dõi Google Analytics (GA4 / G-XXXXX).' },
+  { id: 'branding', title: 'Thương hiệu', description: 'Tên hệ thống, logo, favicon và tài nguyên thương hiệu đang được website sử dụng.' },
+  { id: 'seo', title: 'SEO mặc định', description: 'Cấu hình thẻ tiêu đề, mô tả tóm tắt, từ khóa và OpenGraph chia sẻ mạng xã hội.' },
+  { id: 'company', title: 'Doanh nghiệp & liên hệ', description: 'Tên pháp nhân, mã số thuế, hotline, email và địa điểm các chi nhánh của công ty.' },
+  { id: 'footer_social', title: 'Footer & mạng xã hội', description: 'Bản quyền chân trang, liên kết mạng xã hội chính thức và chứng nhận Bộ Công Thương.' },
+  { id: 'measurement', title: 'Đo lường & tiếp thị', description: 'Mã định danh GA4, Google Tag Manager, Google Ads và Facebook Pixel.' },
 ] as const;
 
 interface SettingsEditorTabProps {
@@ -44,6 +44,8 @@ interface SettingsEditorTabProps {
   pending: boolean;
   capabilities: { edit: boolean };
   onGoToBranches?: () => void;
+  branches?: BranchSetting[];
+  onBranchesChange?: (branches: BranchSetting[]) => void;
 }
 
 export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
@@ -59,8 +61,10 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
   pending,
   capabilities,
   onGoToBranches,
+  branches,
+  onBranchesChange,
 }) => {
-  const [activeGroupId, setActiveGroupId] = useState<string>('identity');
+  const [activeGroupId, setActiveGroupId] = useState<string>('branding');
   const [searchTerm, setSearchTerm] = useState('');
   const [mediaPickerKey, setMediaPickerKey] = useState<string | null>(null);
 
@@ -311,6 +315,18 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                             </button>
                           </div>
                         </div>
+                      ) : item.type === 'textarea' ? (
+                        <textarea
+                          rows={item.key === 'robots_txt' ? 6 : 3}
+                          value={currentValue ?? ''}
+                          maxLength={item.maxLength}
+                          disabled={!capabilities.edit || pending}
+                          onChange={(e) => onChangeValue(item.key, e.target.value)}
+                          placeholder={`Nhập ${item.label.toLowerCase()}...`}
+                          className={`w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 disabled:opacity-60 resize-y leading-relaxed ${
+                            item.key === 'robots_txt' ? 'font-mono text-[11px]' : ''
+                          }`}
+                        />
                       ) : (
                         <input
                           type={item.type === 'email' ? 'email' : item.type === 'url' ? 'url' : 'text'}
@@ -326,6 +342,35 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                   </div>
                 );
               })
+            )}
+
+            {/* EMBEDDED BRANCHES EDITOR FOR COMPANY GROUP */}
+            {activeGroupId === 'company' && !searchTerm && (
+              <div className="pt-5 border-t border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-orange-500" />
+                    <span>Trụ sở chính & Chi nhánh ({workspace.scope.name})</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Cấu hình danh sách địa chỉ, hotline, email và mã nhúng bản đồ Google Maps của từng chi nhánh.
+                  </p>
+                </div>
+
+                {workspace.scope.locale === 'enjicad' ? (
+                  <div className="p-6 text-center text-xs text-slate-400 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                    Phân hệ enjiCAD sử dụng thông tin trụ sở đồng bộ từ Tiếng Việt (VI). Vui lòng chuyển sang Scope Tiếng Việt để chỉnh sửa.
+                  </div>
+                ) : branches && onBranchesChange ? (
+                  <div className="pt-2">
+                    <BranchesSettingsEditor
+                      value={branches}
+                      disabled={!capabilities.edit || pending}
+                      onChange={onBranchesChange}
+                    />
+                  </div>
+                ) : null}
+              </div>
             )}
           </div>
         </div>
