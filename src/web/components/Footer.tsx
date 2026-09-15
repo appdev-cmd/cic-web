@@ -187,8 +187,8 @@ export const Footer = ({
                   <a href={`tel:${(headOffice?.phone || values.tel || '02439761381').replace(/\D/g, '')}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Phone size={14} className="text-orange-600" /> {headOffice?.phone || values.tel || '024 3976 1381'}
                   </a>
-                  <a href={`mailto:${headOffice?.email || values.admin_email || 'info@cic.com.vn'}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
-                    <Mail size={14} className="text-orange-600" /> {headOffice?.email || values.admin_email || 'info@cic.com.vn'}
+                  <a href={`mailto:${headOffice?.email || values.public_email || values.admin_email || 'info@cic.com.vn'}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
+                    <Mail size={14} className="text-orange-600" /> {headOffice?.email || values.public_email || values.admin_email || 'info@cic.com.vn'}
                   </a>
                   <a href="https://www.cic.com.vn" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <ExternalLink size={14} className="text-orange-600" /> www.cic.com.vn

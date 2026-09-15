@@ -12,9 +12,10 @@ import { SYSTEM_CTA_IDS, SYSTEM_FORM_IDS } from '../../shared/customerInteractio
 interface ConsultationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  hotline?: string;
 }
 
-export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) => {
+export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }: ConsultationModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -258,7 +259,7 @@ export const ConsultationModal = ({ isOpen, onClose }: ConsultationModalProps) =
                       Chuyên gia của chúng tôi sẽ liên hệ trực tiếp với bạn qua số điện thoại đã cung cấp trong vòng tối đa 15 phút.
                     </p>
                     <p className="text-xs text-slate-400">
-                      Hotline hỗ trợ khẩn cấp 24/7: <a href="tel:02439761381" className="font-black hover:underline text-slate-600">024 3976 1381</a>
+                      Hotline hỗ trợ khẩn cấp 24/7: <a href={`tel:${hotline.replace(/\D/g, '')}`} className="font-black hover:underline text-slate-600">{hotline}</a>
                     </p>
                   </div>
                   <div className="pt-6">

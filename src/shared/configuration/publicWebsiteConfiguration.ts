@@ -15,8 +15,12 @@ interface PublicBranchConfiguration {
   ordering: number;
 }
 
-/** Public projection of system.company.branches returned by the configuration API. */
-const demoPublicBranches: PublicBranchConfiguration[] = [
+/** 
+ * DEPRECATED / SAFE_TO_REMOVE: 
+ * Static fallback branches retained only when PostgreSQL database is unseeded or unreachable.
+ * The primary source of truth is PostgreSQL `cic_branches` consumed via `getPublicSystemSettings('vi')`.
+ */
+export const demoPublicBranches: PublicBranchConfiguration[] = [
   {
     id: 'branch_hanoi', code: 'ha-noi', name: 'Trụ sở chính Hà Nội',
     address: 'Số 37 Lê Đại Hành, Phường Lê Đại Hành, Quận Hai Bà Trưng, Hà Nội',

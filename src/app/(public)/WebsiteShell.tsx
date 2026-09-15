@@ -167,10 +167,20 @@ export function WebsiteShell({ children, settings }: Readonly<{ children: ReactN
         </motion.button>
       </div>
 
-      <Header variant={headerVariant} pathname={pathname} onNavigate={navigate} onOpenConsultation={() => setIsConsultationOpen(true)} />
+      <Header
+        variant={headerVariant}
+        pathname={pathname}
+        onNavigate={navigate}
+        onOpenConsultation={() => setIsConsultationOpen(true)}
+        settings={settings}
+      />
       <main className="public-shell-content" data-header-variant={headerVariant}>{children}</main>
       <Footer onNavigate={navigate} settings={settings} />
-      <ConsultationModal isOpen={isConsultationOpen} onClose={() => setIsConsultationOpen(false)} />
+      <ConsultationModal
+        isOpen={isConsultationOpen}
+        onClose={() => setIsConsultationOpen(false)}
+        hotline={hotline}
+      />
 
       {/* Interactive AI Chatbot Widget */}
       <ChatbotWidget
@@ -181,6 +191,9 @@ export function WebsiteShell({ children, settings }: Readonly<{ children: ReactN
           navigate(`/${view}`);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        hotline={hotline}
+        email={settings.values.public_email || settings.values.admin_email || 'info@cic.com.vn'}
+        address={settings.branches.find((b) => b.isHeadOffice)?.address || settings.values.address || 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội'}
       />
     </div>
   );

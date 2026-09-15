@@ -1,4 +1,48 @@
-'use client';
-import { useState } from 'react';
-import { submitContactAction } from '@/features/contact/server/actions';
-export default function ContactPage() { const [sent, setSent] = useState(false); const [error, setError] = useState(''); async function submit(e: React.FormEvent<HTMLFormElement>) { e.preventDefault(); setError(''); const data = Object.fromEntries(new FormData(e.currentTarget)); try { await submitContactAction(data); setSent(true); } catch (err) { setError(err instanceof Error ? err.message : 'Không thể gửi liên hệ.'); } } return <main className="mx-auto max-w-3xl px-6 py-16"><h1 className="text-4xl font-extrabold">Liên hệ</h1>{sent ? <p className="mt-8 rounded-xl bg-emerald-50 p-5 text-emerald-700">Cảm ơn bạn đã liên hệ CIC Technology.</p> : <form onSubmit={submit} className="mt-8 space-y-4"><input name="fullname" placeholder="Họ và tên" className="w-full rounded-lg border p-3" /><input name="email" type="email" required placeholder="Email" className="w-full rounded-lg border p-3" /><input name="telephone" placeholder="Số điện thoại" className="w-full rounded-lg border p-3" /><input name="subject" placeholder="Chủ đề" className="w-full rounded-lg border p-3" /><textarea name="message" rows={5} placeholder="Nội dung" className="w-full rounded-lg border p-3" />{error && <p className="text-sm text-red-600">{error}</p>}<button className="rounded-lg bg-orange-600 px-5 py-3 font-bold text-white">Gửi liên hệ</button></form>}</main>; }
+import { getPublicSystemSettings } from '@/features/system-settings/server/queries';
+import { ContactView } from '@/web/components/ContactView';
+import { getPublicContactContentFromConfiguration } from '@/shared/configuration/publicWebsiteConfiguration';
+import type { ContactPageModel } from '@/shared/page-content/models';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Liên hệ | CIC Technology',
+  description: 'Thông tin liên hệ, trụ sở chính và các chi nhánh của CIC Technology.',
+};
+
+export default async function ContactPage() {
+  const settings = await getPublicSystemSettings('vi');
+
+  const publishedBranches = settings.branches
+    .filter((b) => b.published)
+    .sort((a, b) => a.ordering - b.ordering);
+
+  let contactContent: ContactPageModel;
+
+  if (publishedBranches.length > 0) {
+    contactContent = {
+      branches: {
+        title: 'Bản đồ & Chi nhánh',
+        branches: publishedBranches.map((b) => {
+          const searchQuery = b.mapSearchQuery || b.address;
+          return {
+            id: b.id,
+            name: b.name,
+            address: b.address,
+            phone: b.phone,
+            email: b.email,
+            fax: b.fax || undefined,
+            workingHours: b.workingHours,
+            mapUrl:
+              b.mapEmbedUrl ||
+              `https://www.google.com/maps?q=${encodeURIComponent(searchQuery)}&output=embed`,
+            searchQuery,
+          };
+        }),
+      },
+    };
+  } else {
+    contactContent = getPublicContactContentFromConfiguration('vi');
+  }
+
+  return <ContactView content={contactContent} />;
+}

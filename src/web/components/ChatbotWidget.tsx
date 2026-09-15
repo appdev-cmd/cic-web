@@ -20,11 +20,22 @@ interface ChatbotWidgetProps {
   onClose: () => void;
   onOpenConsultation: () => void;
   onNavigateView: (view: 'products' | 'services' | 'contact' | 'projects') => void;
+  hotline?: string;
+  email?: string;
+  address?: string;
 }
 
 const DEFAULT_WEBHOOK_URL = 'http://10.0.0.51:5678/webhook/cic/chat';
 
-export function ChatbotWidget({ isOpen, onClose, onOpenConsultation, onNavigateView }: ChatbotWidgetProps) {
+export function ChatbotWidget({
+  isOpen,
+  onClose,
+  onOpenConsultation,
+  onNavigateView,
+  hotline = '024 3976 1381',
+  email = 'info@cic.com.vn',
+  address = 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội',
+}: ChatbotWidgetProps) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(() => 'session_' + Math.random().toString(36).substring(2, 9));
@@ -99,7 +110,7 @@ export function ChatbotWidget({ isOpen, onClose, onOpenConsultation, onNavigateV
       botResponse = 'Rất vui được hỗ trợ bạn! CIC Technology là đối tác chiến lược hàng đầu trong lĩnh vực phần mềm Xây dựng, Giao thông, Công nghiệp và tư vấn ứng dụng BIM tại Việt Nam.';
       suggestions = ['Xem danh mục Sản phẩm', 'Đăng ký tư vấn báo giá', 'Dịch vụ Tư vấn BIM'];
     } else if (lower.includes('báo giá') || lower.includes('giá') || lower.includes('tư vấn') || lower.includes('đăng ký')) {
-      botResponse = 'Để nhận báo giá chi tiết và được tư vấn trực tiếp theo nhu cầu dự án của bạn, bạn có thể gửi yêu cầu qua Form tư vấn nhanh hoặc liên hệ Hotline 024 3976 1381.';
+      botResponse = `Để nhận báo giá chi tiết và được tư vấn trực tiếp theo nhu cầu dự án của bạn, bạn có thể gửi yêu cầu qua Form tư vấn nhanh hoặc liên hệ Hotline ${hotline}.`;
       actionBtn = {
         label: 'Mở Form Đăng ký Tư vấn',
         action: () => {
@@ -107,7 +118,7 @@ export function ChatbotWidget({ isOpen, onClose, onOpenConsultation, onNavigateV
           onOpenConsultation();
         }
       };
-      suggestions = ['Gọi Hotline: 024 3976 1381', 'Trang liên hệ chi tiết'];
+      suggestions = [`Gọi Hotline: ${hotline}`, 'Trang liên hệ chi tiết'];
     } else if (lower.includes('bim') || lower.includes('xây dựng') || lower.includes('phần mềm') || lower.includes('sản phẩm')) {
       botResponse = 'CIC cung cấp hệ sinh thái phần mềm bản quyền chuyên ngành Xây dựng, Kết cấu, Đất đai, Hạ tầng & giải pháp BIM tiên tiến. Bạn có thể xem danh mục sản phẩm đầy đủ trên website.';
       actionBtn = {
@@ -138,7 +149,7 @@ export function ChatbotWidget({ isOpen, onClose, onOpenConsultation, onNavigateV
         }
       };
     } else if (lower.includes('hotline') || lower.includes('liên hệ') || lower.includes('sđt') || lower.includes('điện thoại') || lower.includes('zalo')) {
-      botResponse = 'Thông tin liên hệ trực tiếp của CIC Technology:\n• Hotline: 024 3976 1381\n• Email: cic.truyenthong@gmail.com\n• Địa chỉ: 37 Lê Đại Hành, Hai Bà Trưng, Hà Nội.';
+      botResponse = `Thông tin liên hệ trực tiếp của CIC Technology:\n• Hotline: ${hotline}\n• Email: ${email}\n• Địa chỉ: ${address}.`;
       actionBtn = {
         label: 'Xem thông tin Liên hệ',
         action: () => {
@@ -147,8 +158,8 @@ export function ChatbotWidget({ isOpen, onClose, onOpenConsultation, onNavigateV
         }
       };
     } else {
-      botResponse = `Cảm ơn câu hỏi của bạn về "${query}". Đội ngũ chuyên gia kĩ thuật của CIC sẵn sàng hỗ trợ chuyên sâu mọi yêu cầu của bạn. Bạn có thể gửi yêu cầu tư vấn hoặc liên hệ Hotline 024 3976 1381.`;
-      suggestions = ['Đăng ký tư vấn trực tiếp', 'Liên hệ Hotline 024 3976 1381', 'Xem sản phẩm phần mềm'];
+      botResponse = `Cảm ơn câu hỏi của bạn về "${query}". Đội ngũ chuyên gia kĩ thuật của CIC sẵn sàng hỗ trợ chuyên sâu mọi yêu cầu của bạn. Bạn có thể gửi yêu cầu tư vấn hoặc liên hệ Hotline ${hotline}.`;
+      suggestions = ['Đăng ký tư vấn trực tiếp', `Liên hệ Hotline ${hotline}`, 'Xem sản phẩm phần mềm'];
       actionBtn = {
         label: 'Đăng ký tư vấn ngay',
         action: () => {

@@ -14,12 +14,14 @@ import {
 } from 'lucide-react';
 import { typeNav } from '@shared/components/Typography';
 import { getNavigationData } from '../features/navigation/navigationData';
+import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 
 interface HeaderProps {
   embedded?: boolean;
   variant?: 'overlay' | 'solid';
   pathname?: string;
   onNavigate?: (href: string) => void;
+  settings?: PublicSystemSettings;
   currentView?: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
   setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   activeLink?: string;
@@ -42,6 +44,7 @@ export const Header = ({
   variant,
   pathname,
   onNavigate,
+  settings,
   currentView: legacyCurrentView,
   setCurrentView: setLegacyCurrentView,
   activeLink = '',
@@ -144,8 +147,12 @@ export const Header = ({
               className="flex items-center group h-full"
             >
               <img 
-                src="/LOGO - 1990-08.png" 
-                alt="CIC Logo" 
+                src={
+                  (!isHeaderWhite && settings?.values?.logo_white)
+                    ? settings.values.logo_white
+                    : (settings?.values?.logo || settings?.values?.logo_white || '/LOGO - 1990-08.png')
+                } 
+                alt={settings?.values?.site_name || 'CIC Logo'} 
                 className="h-16 md:h-18 max-h-18 w-auto object-contain transition-all duration-300 group-hover:scale-105"
               />
             </a>
@@ -426,11 +433,11 @@ export const Header = ({
               <div className="flex justify-between items-center pb-4 border-b border-slate-800 shrink-0">
                 <div className="flex items-center gap-2.5">
                   <img 
-                    src="/logo.png" 
-                    alt="CIC Logo" 
+                    src={settings?.values?.logo_white || settings?.values?.logo || '/logo.png'} 
+                    alt={settings?.values?.site_name || 'CIC Logo'} 
                     className="h-8 w-auto object-contain filter brightness-110" 
                   />
-                  <span className="text-sm font-black tracking-wider text-white uppercase">CIC Technology</span>
+                  <span className="text-sm font-black tracking-wider text-white uppercase">{settings?.values?.site_name || 'CIC Technology'}</span>
                 </div>
                 <button 
                   className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" 
