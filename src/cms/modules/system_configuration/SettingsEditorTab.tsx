@@ -321,7 +321,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                           <RichTextEditor
                             value={currentValue ?? ''}
                             onChange={(val) => onChangeValue(item.key, val)}
-                            minHeight="220px"
+                            minHeight="160px"
                             allowedEmbeds={[]}
                           />
                         </div>
