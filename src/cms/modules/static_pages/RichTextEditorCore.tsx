@@ -408,6 +408,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         data={editorData}
         onReady={(editor) => {
           editorRef.current = editor;
+          const root = editor.editing.view.document.getRoot();
+          if (root) {
+            editor.editing.view.change((writer) => {
+              writer.setStyle('min-height', minHeight, root);
+              writer.setStyle('height', minHeight, root);
+              writer.setStyle('max-height', minHeight, root);
+              writer.setStyle('overflow-y', 'auto', root);
+            });
+          }
         }}
         onChange={(_, editor) => {
           try {

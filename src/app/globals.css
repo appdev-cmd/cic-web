@@ -287,3 +287,109 @@ html.dark, body.dark, .dark { color-scheme: dark; }
 /* ── Scrollbar hide utility (used in News category tabs) ── */
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ── CKEditor 5 CMS styling ── */
+.cms-ckeditor {
+  --ck-border-radius: 0;
+  --ck-color-base-border: transparent;
+  --ck-color-base-background: #fff;
+  --ck-color-toolbar-background: #f8fafc;
+  --ck-color-button-default-hover-background: #e2e8f0;
+  --ck-color-button-on-background: #ffedd5;
+  --ck-color-button-on-color: #c2410c;
+  --ck-color-focus-border: #f97316;
+  --ck-focus-ring: 1px solid #f97316;
+}
+
+.cms-ckeditor .ck.ck-toolbar {
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem;
+}
+
+.cms-ckeditor .ck-toolbar__items {
+  align-items: center;
+  flex-wrap: wrap !important;
+  row-gap: 0.35rem;
+}
+
+.cms-ckeditor .ck.ck-editor__main > .ck-editor__editable,
+.cms-ckeditor .ck.ck-content.ck-editor__editable {
+  border: 0 !important;
+  box-shadow: none !important;
+  height: var(--cms-editor-min-height, 280px);
+  max-height: var(--cms-editor-min-height, 280px);
+  min-height: var(--cms-editor-min-height, 280px);
+  overflow-y: auto !important;
+  padding: 1.25rem 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.cms-ckeditor .ck.ck-editor__main > .ck-editor__editable::-webkit-scrollbar,
+.cms-ckeditor .ck.ck-content.ck-editor__editable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cms-ckeditor .ck.ck-editor__main > .ck-editor__editable::-webkit-scrollbar-track,
+.cms-ckeditor .ck.ck-content.ck-editor__editable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cms-ckeditor .ck.ck-editor__main > .ck-editor__editable::-webkit-scrollbar-thumb,
+.cms-ckeditor .ck.ck-content.ck-editor__editable::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+.cms-ckeditor .ck.ck-editor__main > .ck-editor__editable::-webkit-scrollbar-thumb:hover,
+.cms-ckeditor .ck.ck-content.ck-editor__editable::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.6);
+}
+
+.cms-ckeditor .ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable) {
+  border: 0;
+  box-shadow: none;
+}
+
+.cms-ckeditor .ck-content {
+  color: #1e293b;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.cms-ckeditor .ck-source-editing-area {
+  height: var(--cms-editor-min-height, 280px);
+  max-height: var(--cms-editor-min-height, 280px);
+  min-height: var(--cms-editor-min-height, 280px);
+}
+
+.cms-ckeditor .ck-source-editing-area textarea {
+  background: #fff;
+  color: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  height: 100%;
+  max-height: 100%;
+  min-height: var(--cms-editor-min-height, 280px);
+  overflow: auto;
+  resize: none;
+}
+
+.dark .cms-ckeditor {
+  --ck-color-base-background: #0f172a;
+  --ck-color-base-foreground: #1e293b;
+  --ck-color-base-border: #334155;
+  --ck-color-toolbar-background: #1e293b;
+  --ck-color-text: #e2e8f0;
+  --ck-color-button-default-hover-background: #334155;
+}
+
+.dark .cms-ckeditor .ck.ck-toolbar {
+  border-bottom-color: #334155;
+}
+
+.dark .cms-ckeditor .ck-content,
+.dark .cms-ckeditor .ck-source-editing-area textarea {
+  background: #0f172a;
+  color: #e2e8f0;
+}
