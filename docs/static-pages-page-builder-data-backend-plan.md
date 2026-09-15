@@ -28,11 +28,12 @@ Các component React và thiết kế website hiện tại tiếp tục là sour
 | `about` | `/gioi-thieu` | `about` | Không |
 | `organization` | `/gioi-thieu/co-cau-to-chuc` | `organization` | Không |
 | `capacity_experience` | `/gioi-thieu/nang-luc-kinh-nghiem` | `capacity_experience` | Không |
-| `contact` | `/lien-he` | `contact` | Không |
 | `privacy_policy` | `/chinh-sach-bao-mat` | `legal_standard` | Không |
 | `terms_of_use` | `/dieu-khoan-su-dung` | `legal_standard` | Không |
 
-`contact` đã có trong mock gốc nhưng hiện chưa được đưa vào danh sách Page của CMS. Khi hoàn thiện mock/frontend phải bổ sung lại Page này, không tạo một thiết kế Liên hệ mới.
+> **LƯU Ý QUAN TRỌNG VỀ TRANG LIÊN HỆ (CONTACT):**  
+> `contact` **KHÔNG THUỘC** phạm vi quản lý của Page Builder Core. Trang Liên hệ tại route `/contact` (`/lien-he`) có nguồn dữ liệu nghiệp vụ (runtime authority) hoàn toàn độc lập: **Cấu hình hệ thống (System Settings / `cic_branches`) + Biểu mẫu liên hệ (`cic_forms` / `cic_form_fields`)**. Không tạo template hoặc section Page Builder cho Contact trong môi trường production.
+
 
 ### Page nội dung có thể tạo thêm
 
@@ -167,6 +168,28 @@ Ví dụ:
 ```
 
 Registry nằm trong code và được deploy cùng component. Database không phải nơi tạo Section hay layout mới.
+
+### 4.1. Hợp đồng lưu trữ chế độ tham chiếu (Reference Source Contract)
+
+Chế độ nguồn dữ liệu tham chiếu (`referenceSource`) là **cấu hình của Section**, được lưu trực tiếp trong cột JSONB `cic_content_page_sections.config`:
+
+```json
+{
+  "referenceSource": {
+    "mode": "manual" | "auto_featured",
+    "limit": 3
+  }
+}
+```
+
+- **`manual` (Chọn thủ công):**
+  - Danh sách ID thực thể được lưu tại bảng `cic_content_page_section_references` (`section_id`, `entity_type`, `entity_id`, `position`).
+  - Cấu hình Section **KHÔNG** snapshot full object thực thể. Runtime resolver hydrate dữ liệu theo ID.
+- **`auto_featured` (Tự động lấy nổi bật):**
+  - **KHÔNG** lưu entity IDs vào bảng `cic_content_page_section_references`.
+  - Section config chỉ lưu `mode: "auto_featured"` và tham số được cho phép (ví dụ `limit`).
+  - Runtime resolver tự động lấy danh sách thực thể theo domain rule được code/registry định nghĩa.
+
 
 ## 5. API contract dự kiến
 

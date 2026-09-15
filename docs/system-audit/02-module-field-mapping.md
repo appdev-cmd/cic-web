@@ -48,6 +48,9 @@ Projection bắt buộc: public list; public detail; CMS list; CMS form/detail; 
 | Entity selection | productIds/newsIds/... | Một số CSV legacy rời rạc | Không có model chung | Không có | Chọn thủ công có thứ tự | D | Có relation/config có kiểm soát | Không auto selection |
 | Rich article template | `legal.header` + `legal.content.richTextHtml` | title/content | fs_contents.title/content | cic_contents.title/content | Chính sách/điều khoản/trang cùng layout | A hoặc Page config | Không thêm column nội dung nhỏ | Chỉ hai section cố định: tiêu đề và một Rich Text body; heading/list/bảng/ảnh nằm trong body |
 
+Live audit 2026-09-15: bốn bảng `cic_content_pages`, `cic_content_page_revisions`, `cic_content_page_sections`, `cic_content_page_section_references` đã tồn tại và đã được seed 12 canonical pages (6 VI + 6 EN), 12 revisions và 56 sections; `cic_contents` có 12 row và `_en` có 9 row, chỉ `LEGACY_PRESERVE_ONLY`/nguồn import theo manifest (`privacy_policy` VI seed `PUBLISHED_FROM_APPROVED_LEGACY` từ id 12). Field usage target: Page identity/template/pointers = `CMS_OPERATIONAL`/`SYSTEM_MANAGED`; revision SEO = `CMS_EDITABLE`, state/version/publish actor-time = `SYSTEM_MANAGED`/`AUDIT`; section key/type/position = registry-owned, config allowlist = `CMS_EDITABLE` + `PUBLIC_READ`; entity type/id/position = `RELATION` + `PUBLIC_READ`. Hợp đồng `referenceSource: { mode: 'manual' | 'auto_featured' }` đã được chuẩn hóa lưu tại `cic_content_page_sections.config`. Contact loại khỏi Page Builder (thuộc Settings/Branches + Contact Form). Module: `READY_TO_IMPLEMENT`.
+
+
 ## Sự kiện
 
 | UI/CMS field | Mock field | CMS cũ | DB cũ | PostgreSQL mới | Ý nghĩa | Mapping được? | Cần DB mới? | Ghi chú |

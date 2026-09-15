@@ -102,7 +102,7 @@ Index/unique:
 
 Quan hệ:
 
-- Section N–N entity được chọn thủ công và giữ đúng thứ tự hiển thị.
+- Section N–N entity giữ đúng thứ tự hiển thị. `referenceSource: { mode: 'manual' | 'auto_featured' }` được lưu tại cột `cic_content_page_sections.config`. Khi mode='manual', các ID thực thể được lưu tại `cic_content_page_section_references`; khi mode='auto_featured', không lưu rows trong bảng reference mà resolve runtime.
 - Không tạo FK đa hình giả từ `entity_id` tới nhiều bảng. Backend resolve và kiểm tra tồn tại/published theo `entity_type` trước khi publish.
 
 Mức độ: **BẮT BUỘC** — Home/About và các template thiết kế riêng đang chọn thủ công Product, News, Service, Project, Partner và Event.
@@ -112,7 +112,8 @@ Mức độ: **BẮT BUỘC** — Home/About và các template thiết kế riê
 - `PageBuilderPage.code/name/slug/pageType/templateKey/systemDefined → cic_content_pages`.
 - `draft` và `published → cic_content_page_revisions`; SEO nằm trong revision để Published không đổi khi Draft tiếp tục được sửa.
 - `sections[].sectionKey/sectionType/position/config → cic_content_page_sections`.
-- `sections[].references → cic_content_page_section_references`.
+- `sections[].references → cic_content_page_section_references`; lưu entity IDs khi `referenceSource.mode = 'manual'`.
+- Contact KHÔNG thuộc Page Builder; sử dụng Cấu hình hệ thống (Settings/Branches + Contact Form).
 - Trang Chính sách bảo mật, Điều khoản sử dụng và page legal tạo thêm chỉ có đúng hai section: `legal.header` lưu tiêu đề/subtitle và `legal.content` lưu một Rich Text `richTextHtml`. Không tạo column cho từng heading, đoạn, danh sách hoặc bảng trong bài.
 - CTA/Form được chọn qua modal phải lưu ID trong config theo schema section và được backend kiểm tra với `cic_ctas`/`cic_forms`; không nhét HTML của CTA/Form vào Rich Text và chưa tạo column CTA/Form riêng trên Page.
 - Media trong config lưu ID asset theo contract Media, không copy URL/metadata vào Page Builder.
@@ -126,3 +127,10 @@ Mức độ: **BẮT BUỘC** — Home/About và các template thiết kế riê
 - Field thêm vào bảng legacy: **0**.
 - Bảng mới bắt buộc: **4**.
 - Không xóa, rename hoặc tái diễn giải `cic_contents*`.
+- Unblock verification 2026-09-15:
+  - Task RBAC `static_pages` với capabilities `view,edit,preview,publish,create_legal` đã được publish vào `cic_permission_tasks`.
+  - Hợp đồng `referenceSource` (`manual` vs `auto_featured`) đã được chuẩn hóa trong `cic_content_page_sections.config`.
+  - Đã seed thành công 12 canonical pages (6 VI + 6 EN) vào `cic_content_pages`, 12 revisions vào `cic_content_page_revisions`, 56 sections vào `cic_content_page_sections`.
+  - `privacy_policy` (VI) đã được seed ở trạng thái `PUBLISHED_FROM_APPROVED_LEGACY` từ `cic_contents` ID 12; các trang còn lại ở trạng thái `DRAFT_ONLY`.
+  - Module sẵn sàng chuyển sang `READY_TO_IMPLEMENT`.
+

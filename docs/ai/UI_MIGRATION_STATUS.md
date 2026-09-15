@@ -191,6 +191,21 @@ Một module chỉ có thể lên `[x]` sau khi kiểm chứng cùng content/ass
 - `invite`, delete/Trash không thuộc scope đã duyệt. Security/2FA/presence vẫn là integration bên ngoài chưa có producer; `status_online` hiện chỉ là projection legacy, không được coi là realtime.
 - Trạng thái `[I] Integration pending`: **PENDING: Người dùng → Auth/session security producer → realtime online, last visit, login/security events và 2FA.** Chưa đủ điều kiện `[x]`.
 
+## UI Reference Map — Trang nội dung – Core (audit 2026-09-15)
+
+| Surface | Reference/structure | Data & interaction | Responsive disposition |
+|---|---|---|---|
+| CMS list `/cms/static-pages` | CMS shell, header/count/workspace, create CTA, search/status/reset, desktop table + mobile cards, pagination | Page name/type/code/slug/fixed-section count, Draft/Published version/date, Preview/Edit; create only legal template | **KEEP** hierarchy; **ADAPT** toolbar/table→cards; **FIX** long slug and touch targets |
+| Visual editor | Sticky action header; viewport selector; undo/redo/history; canvas using website components; section inspector | Save Draft, preview, publish; config by type; Media/video/CTA/Form/entity picker; validation and ordered collections/references | **KEEP** visual editing intent; **ADAPT** inspector/canvas stacking; **FIX** popover/modal bounds, focus/Escape/scroll and reduced motion |
+| Draft preview/history | Full overlay with Desktop/Tablet/Mobile; published version history and restore-as-new-Draft | Preview must use authenticated Draft; public must use Published snapshot only | **FIX** focus management, `dvh`, safe-area and overflow; **DO_NOT_COPY** local fake versions/success |
+| Public fixed pages | Home; About/organization/capacity; Privacy/Terms and created legal pages | Same code-owned layout, hydrated from Published sections/references. Contact is owned by Settings/Branches + Contact Form, not Page Builder | **KEEP** React hierarchy/assets/animation; **ADAPT/FIX** only audited responsive defects; no redesign |
+| States | loading, empty EN, validation error, missing/unpublished reference, permission denied, DB failure | Permission comes from server guard; DB error differs empty; Publish blocked for invalid references/config | **DO_NOT_COPY** mock fallback, Date.now IDs, fake toast, hard-coded CTA/Form/entity options |
+
+Live 2026-09-15: four `cic_content_page*` tables have been seeded with 12 canonical pages (6 VI + 6 EN), 12 revisions, and 56 sections. `privacy_policy` (VI) seeded as `PUBLISHED_FROM_APPROVED_LEGACY` from `cic_contents` ID 12; other 11 pages are `DRAFT_ONLY`. Contact is explicitly excluded (owned by Settings/Branches + Contact Form). Reference sections support auto-from-featured or manual selection via standardized `referenceSource: { mode: 'manual' | 'auto_featured' }` in `cic_content_page_sections.config`. RBAC task `static_pages` (id 90) published with capabilities `view,edit,preview,publish,create_legal`.
+
+Final audit gate: `[A]` (Audited & Unblocked). **READY_TO_IMPLEMENT**.
+
+
 ## Audit Cấu hình hệ thống — 2026-09-14
 
 - CMS surface `/cms/settings`/`/cms/system-settings` giữ header và năm tab Tổng quan, Chỉnh sửa, Cảnh báo, Phiên bản quan trọng, Nhật ký; editor có scope selector, search/group navigation, field cards, branch collection editor, context sidebar và compare/secret/media modals. Public không có route cấu hình riêng; Contact/Footer/Header là consumer.
