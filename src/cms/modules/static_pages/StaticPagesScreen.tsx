@@ -96,15 +96,17 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
           'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
           'home.events': { entityType: 'event', defaultIds: ['2'] },
           'home.news': { entityType: 'news', defaultIds: ['571', '18', '15', '52'] },
-          'home.partners': { entityType: 'partner', defaultIds: ['3', '4', '5', '6', '2'] },
         };
         const def = defaultRefsBySection[s.sectionKey];
         if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
           refMap.set(def.entityType, def.defaultIds);
         }
+        const cfg = (s.config || {}) as Record<string, any>;
+        const refSources = (cfg._referenceSources || {}) as Record<string, any>;
         const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => ({
           entityType,
           entityIds,
+          source: refSources[entityType] ?? { mode: 'featured', limit: entityIds.length },
         }));
         return {
           id: s.id,
@@ -138,15 +140,17 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
               'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
               'home.events': { entityType: 'event', defaultIds: ['2'] },
               'home.news': { entityType: 'news', defaultIds: ['571', '18', '15', '52'] },
-              'home.partners': { entityType: 'partner', defaultIds: ['3', '4', '5', '6', '2'] },
             };
             const def = defaultRefsBySection[s.sectionKey];
             if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
               refMap.set(def.entityType, def.defaultIds);
             }
+            const cfg = (s.config || {}) as Record<string, any>;
+            const refSources = (cfg._referenceSources || {}) as Record<string, any>;
             const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => ({
               entityType,
               entityIds,
+              source: refSources[entityType] ?? { mode: 'featured', limit: entityIds.length },
             }));
             return {
               id: s.id,
@@ -183,19 +187,31 @@ function toSaveDraftInput(page: PageBuilderPage): SaveDraftInput {
       title: page.draft.seo.title,
       description: page.draft.seo.description,
     },
-    sections: page.draft.sections.map((sec, idx) => ({
-      sectionKey: sec.sectionKey,
-      sectionType: sec.sectionType,
-      position: sec.position || idx + 1,
-      config: sec.config as Record<string, unknown>,
-      references: sec.references?.flatMap((ref) =>
-        ref.entityIds.map((id, p) => ({
-          entityType: ref.entityType,
-          entityId: id,
-          position: p + 1,
-        }))
-      ),
-    })),
+    sections: page.draft.sections.map((sec, idx) => {
+      const config = { ...sec.config } as Record<string, unknown>;
+      if (sec.references && sec.references.length > 0) {
+        const refSources: Record<string, any> = {};
+        sec.references.forEach((ref) => {
+          if (ref.source) refSources[ref.entityType] = ref.source;
+        });
+        if (Object.keys(refSources).length > 0) {
+          config._referenceSources = refSources;
+        }
+      }
+      return {
+        sectionKey: sec.sectionKey,
+        sectionType: sec.sectionType,
+        position: sec.position || idx + 1,
+        config,
+        references: sec.references?.flatMap((ref) =>
+          ref.entityIds.map((id, p) => ({
+            entityType: ref.entityType,
+            entityId: id,
+            position: p + 1,
+          }))
+        ),
+      };
+    }),
   };
 }
 

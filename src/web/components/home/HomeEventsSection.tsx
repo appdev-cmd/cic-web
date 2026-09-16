@@ -17,6 +17,8 @@ export type HomeEventDisplayItem = {
 export interface HomeEventsSectionProps {
   title?: string;
   subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
   upcomingEvents?: readonly HomeEventDisplayItem[];
   pastEvents?: readonly HomeEventDisplayItem[];
   setCurrentView: (view: any) => void;
@@ -28,6 +30,8 @@ export interface HomeEventsSectionProps {
 export const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({
   title,
   subtitle,
+  ctaLabel,
+  ctaUrl,
   upcomingEvents = [],
   pastEvents = [],
   setCurrentView,
@@ -146,14 +150,20 @@ export const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({
             
             <div className="pt-10">
               <button 
+                data-page-builder-config-path={JSON.stringify(['ctaLabel'])}
+                data-page-builder-cta-key={JSON.stringify(['ctaUrl'])}
                 onClick={() => {
+                  if (ctaUrl && (ctaUrl.startsWith('http') || ctaUrl.startsWith('/'))) {
+                    window.location.href = ctaUrl;
+                    return;
+                  }
                   setCurrentView('events');
                   setActiveLink('Sự kiện');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="w-full py-2.5 border-2 border-orange-600/20 text-orange-600 rounded-[8px] font-bold text-sm hover:bg-orange-600 hover:text-white transition-all uppercase tracking-widest shadow-sm btn-modern-interaction"
+                className="w-full py-2.5 border-2 border-orange-600/20 text-orange-600 rounded-[8px] font-bold text-sm hover:bg-orange-600 hover:text-white transition-all uppercase tracking-widest shadow-sm btn-modern-interaction cursor-pointer"
               >
-                Xem tất cả sự kiện
+                <span>{ctaLabel || 'Xem tất cả sự kiện'}</span>
               </button>
             </div>
           </div>

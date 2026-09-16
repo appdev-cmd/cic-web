@@ -113,6 +113,8 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       fields: [
         { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaLabel', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaUrl', semantic: 'link', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
       ],
       references: {
         items: { path: 'items', entityType: 'project', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 3, layoutBehavior: { wrap: false } },
@@ -126,6 +128,8 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       fields: [
         { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaLabel', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaUrl', semantic: 'link', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
       ],
       references: {
         items: { path: 'items', entityType: 'event', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 1, layoutBehavior: { wrap: false } },
@@ -139,6 +143,8 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       fields: [
         { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaLabel', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaUrl', semantic: 'link', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
       ],
       references: {
         items: { path: 'items', entityType: 'news', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 4, layoutBehavior: { wrap: false } },
@@ -146,7 +152,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     },
   },
   'home.partners': {
-    label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 }, canHide: true, canMove: true,
+    label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', canHide: true, canMove: true,
     editableContract: {
       sectionKey: 'home.partners',
       fields: [

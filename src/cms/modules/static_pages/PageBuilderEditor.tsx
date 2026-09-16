@@ -1619,7 +1619,33 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     setWorkingPage((current) => {
       setPast((items) => [...items.slice(-49), deepClone(current)]);
       setFuture([]);
-      return { ...current, draft: { ...current.draft, sections: current.draft.sections.map((section) => section.id === sectionId ? { ...section, references: (section.references ?? []).map((reference) => reference.entityType === entityType ? { ...reference, source } : reference) } : section) } };
+      return {
+        ...current,
+        draft: {
+          ...current.draft,
+          sections: current.draft.sections.map((section) => {
+            if (section.id !== sectionId) return section;
+            return {
+              ...section,
+              references: (section.references ?? []).map((reference) => {
+                if (reference.entityType !== entityType) return reference;
+                let nextEntityIds = reference.entityIds;
+                if (source?.mode === 'featured') {
+                  const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[entityType] ?? source?.limit ?? 4;
+                  const featuredEntities = entityOptions
+                    .filter((opt) => opt.entityType === entityType && (opt.status ?? 'published') === 'published' && opt.meta?.isFeatured)
+                    .slice(0, limit)
+                    .map((opt) => opt.id);
+                  if (featuredEntities.length > 0) {
+                    nextEntityIds = featuredEntities;
+                  }
+                }
+                return { ...reference, source, entityIds: nextEntityIds };
+              }),
+            };
+          }),
+        },
+      };
     });
   };
 

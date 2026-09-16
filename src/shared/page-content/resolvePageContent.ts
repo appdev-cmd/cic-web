@@ -79,6 +79,8 @@ function resolveHomeContent(
     ...legacyFallback.projects,
     ...(typeof projCfg.title === 'string' ? { title: projCfg.title } : {}),
     ...(typeof projCfg.subtitle === 'string' ? { subtitle: projCfg.subtitle } : {}),
+    ...(typeof projCfg.ctaLabel === 'string' ? { ctaLabel: projCfg.ctaLabel } : {}),
+    ...(typeof projCfg.ctaUrl === 'string' ? { ctaUrl: projCfg.ctaUrl } : {}),
     ...(projectItems.length > 0 ? { items: projectItems } : {}),
   };
 
@@ -204,22 +206,17 @@ function resolveHomeContent(
   const partnersSec = sectionMap.get('home.partners');
   if (partnersSec) {
     const cfg = isRecord(partnersSec.config) ? partnersSec.config : {};
-    const ref = partnersSec.references?.find((item) => item.entityType === 'partner');
-    const refItems: HomePartnerItemModel[] = [];
-    if (ref && ref.entityIds.length > 0) {
-      ref.entityIds.forEach((id) => {
-        const item = resolvePartnerEntity(id);
-        if (item) refItems.push(item);
-      });
-    }
     const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
-    const cfgItems = rawItems
+    const cfgItems: HomePartnerItemModel[] = rawItems
       .filter((item): item is Record<string, unknown> => isRecord(item))
-      .map((item) => ({
+      .map((item, idx) => ({
+        id: typeof item.id === 'string' ? item.id : `partner-${idx + 1}`,
         name: typeof item.name === 'string' ? item.name : '',
         logo: typeof item.logo === 'string' ? item.logo : (typeof item.imageId === 'string' ? item.imageId : ''),
+        imageId: typeof item.imageId === 'string' ? item.imageId : undefined,
+        link: typeof item.link === 'string' ? item.link : undefined,
       }));
-    const finalItems = refItems.length > 0 ? refItems : (cfgItems.length > 0 ? cfgItems : (partners?.items ?? []));
+    const finalItems = cfgItems.length > 0 ? cfgItems : (partners?.items ?? []);
     partners = {
       badge: typeof cfg.badge === 'string' ? cfg.badge : partners?.badge,
       title: typeof cfg.title === 'string' ? cfg.title : partners?.title,
@@ -263,6 +260,8 @@ function resolveHomeContent(
       ...(typeof cfg.title === 'string' ? { title: cfg.title } : {}),
       ...(typeof cfg.subtitle === 'string' ? { subtitle: cfg.subtitle } : {}),
       ...(typeof cfg.badge === 'string' ? { badge: cfg.badge } : {}),
+      ...(typeof cfg.ctaLabel === 'string' ? { ctaLabel: cfg.ctaLabel } : {}),
+      ...(typeof cfg.ctaUrl === 'string' ? { ctaUrl: cfg.ctaUrl } : {}),
       upcomingEvents: refUpcoming.length > 0 ? refUpcoming : (legacyFallback.events?.upcomingEvents ?? []),
       pastEvents: legacyFallback.events?.pastEvents ?? [],
     };
@@ -286,6 +285,8 @@ function resolveHomeContent(
       ...(typeof cfg.title === 'string' ? { title: cfg.title } : {}),
       ...(typeof cfg.subtitle === 'string' ? { subtitle: cfg.subtitle } : {}),
       ...(typeof cfg.badge === 'string' ? { badge: cfg.badge } : {}),
+      ...(typeof cfg.ctaLabel === 'string' ? { ctaLabel: cfg.ctaLabel } : {}),
+      ...(typeof cfg.ctaUrl === 'string' ? { ctaUrl: cfg.ctaUrl } : {}),
       items: refNews.length > 0 ? refNews : (legacyFallback.news?.items ?? []),
     };
   }

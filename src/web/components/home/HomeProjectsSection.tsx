@@ -13,6 +13,8 @@ import type { Project } from '@shared/types';
 export interface HomeProjectsSectionProps {
   title?: string;
   subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
   projects: HomeProjectModel[];
   editMode?: boolean;
   bindingRegistry?: ElementBindingRegistry;
@@ -24,6 +26,8 @@ export interface HomeProjectsSectionProps {
 export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
   title,
   subtitle,
+  ctaLabel,
+  ctaUrl,
   projects,
   editMode = false,
   bindingRegistry = elementBindingRegistry,
@@ -305,14 +309,20 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
 
         <div className="text-center mt-5 md:mt-6">
           <button 
+            data-page-builder-config-path={JSON.stringify(['ctaLabel'])}
+            data-page-builder-cta-key={JSON.stringify(['ctaUrl'])}
             onClick={() => {
+              if (ctaUrl && (ctaUrl.startsWith('http') || ctaUrl.startsWith('/'))) {
+                window.location.href = ctaUrl;
+                return;
+              }
               setCurrentView('projects');
               setActiveLink('Dự án');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
           >
-            Xem tất cả dự án <ChevronRight className="inline-block group-hover:translate-x-1.5 transition-transform" />
+            <span>{ctaLabel || 'Xem tất cả dự án'}</span> <ChevronRight className="inline-block group-hover:translate-x-1.5 transition-transform" />
           </button>
         </div>
       </div>

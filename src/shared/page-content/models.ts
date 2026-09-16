@@ -67,6 +67,8 @@ export interface HomeProjectsModel {
   badge?: string;
   title?: string;
   subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
   items: readonly HomeProjectModel[];
 }
 
@@ -84,6 +86,8 @@ export interface HomeEventsModel {
   badge?: string;
   title?: string;
   subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
   upcomingEvents: readonly HomeEventItemModel[];
   pastEvents: readonly HomeEventItemModel[];
 }
@@ -101,12 +105,17 @@ export interface HomeNewsModel {
   badge?: string;
   title?: string;
   subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
   items: readonly HomeNewsItemModel[];
 }
 
 export interface HomePartnerItemModel {
+  id?: string;
   name: string;
   logo: string;
+  imageId?: string;
+  link?: string;
 }
 
 export interface HomePartnersModel {

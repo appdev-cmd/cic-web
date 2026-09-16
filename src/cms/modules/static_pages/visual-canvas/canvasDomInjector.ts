@@ -36,7 +36,8 @@ export function editableNodes(root: HTMLElement, page: PageBuilderPage): HTMLEle
 export const inlineEditableKeys = new Set([
   'title', 'subtitle', 'description', 'badge', 'eyebrow', 'phone', 'email', 'name', 
   'address', 'workingHours', 'vision', 'mission', 'label', 'text', 'submitLabel', 
-  'successTitle', 'successMessage', 'categoryTag', 'readingTime', 'lastUpdated'
+  'successTitle', 'successMessage', 'categoryTag', 'readingTime', 'lastUpdated',
+  'ctaLabel'
 ]);
 
 export function hasHtml(value: string): boolean {
@@ -353,20 +354,20 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         label.style.cssText = 'padding:0 5px;color:#0f172a;';
         toolbar.appendChild(label);
         addButton('+ Thêm', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
-      } else if (section.sectionType === 'partner_marquee' && Array.isArray(section.config.items)) {
+      } else if ((section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') && Array.isArray(section.config.items)) {
         const items = section.config.items;
         const label = node.ownerDocument.createElement('strong');
         label.textContent = `Logo đối tác · ${items.length} ảnh`;
         label.style.cssText = 'padding:0 5px;color:#0f172a;';
         toolbar.appendChild(label);
-        addButton('+ Thêm ảnh', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+        addButton('+ Thêm logo đối tác', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
       } else if (section.references?.length) {
         section.references.forEach((reference) => {
           const entityLabel = node.ownerDocument.createElement('strong');
           entityLabel.textContent = sectionDefinitions[section.sectionKey]?.label ?? reference.entityType;
           entityLabel.style.cssText = 'padding:0 5px;color:#0f172a;';
           toolbar.appendChild(entityLabel);
-          if (['home.projects', 'home.events', 'home.news', 'home.partners'].includes(section.sectionKey)) {
+          if (['home.projects', 'home.events', 'home.news'].includes(section.sectionKey)) {
             const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[reference.entityType] ?? reference.source?.limit ?? reference.entityIds.length;
             const isFeatured = reference.source?.mode === 'featured';
             addButton(
@@ -721,6 +722,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       if (collectionAnchor && !showFullCollectionInventory) {
         const reference = section.references?.find((item) => collectionAnchor.matches(`[data-page-collection~="${item.entityType}"]`));
         const isAwardCollection = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards';
+        const isPartnerCollection = section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
         const itemContainer = isAwardCollection
           ? collectionAnchor.querySelector<HTMLElement>('.overflow-hidden > .flex')
           : collectionAnchor;
@@ -731,7 +733,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           : [];
         const visibleCards = reference
           ? productionCards.slice(0, reference.entityIds.length)
-          : isAwardCollection && Array.isArray(section.config.items)
+          : (isAwardCollection || isPartnerCollection) && Array.isArray(section.config.items)
             ? productionCards.slice(0, section.config.items.length)
             : productionCards;
 
@@ -817,7 +819,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               next.splice(to, 0, moved);
               onReferenceItemsChange?.(section.id, reference.entityType, next);
             });
-          } else if (isAwardCollection && Array.isArray(section.config.items)) {
+          } else if ((isAwardCollection || isPartnerCollection) && Array.isArray(section.config.items)) {
             const handle = createCardAction('⠿ Kéo', () => undefined);
             handle.style.cursor = 'grab';
             controls.appendChild(handle);
@@ -831,9 +833,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               items.splice(to, 0, moved); 
               onConfigValueChange?.(section.id, ['items'], items);
             });
-            const award = (section.config.items[itemIndex] ?? {}) as Record<string, PageBuilderConfigValue>;
-            const title = card.querySelector<HTMLElement>('h3');
-            if (title) {
+            const itemRecord = (section.config.items[itemIndex] ?? {}) as Record<string, PageBuilderConfigValue>;
+            const title = card.querySelector<HTMLElement>('h3, span');
+            if (title && (isAwardCollection || !card.querySelector('img'))) {
               title.contentEditable = 'true'; 
               title.setAttribute('role', 'textbox'); 
               title.style.cursor = 'text';
@@ -844,10 +846,11 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
             const image = card.querySelector<HTMLImageElement>('img');
             if (image) {
               image.style.cursor = 'pointer';
+              image.title = isPartnerCollection ? 'Bấm để đổi logo đối tác' : 'Bấm để đổi ảnh';
               const replaceImage = (event: MouseEvent) => { 
                 event.preventDefault(); 
                 event.stopPropagation(); 
-                onEditMedia?.(section.id, ['items', itemIndex, 'imageId'], String(award.imageId ?? '')); 
+                onEditMedia?.(section.id, ['items', itemIndex, 'imageId'], String(itemRecord.imageId ?? itemRecord.logo ?? '')); 
               };
               image.addEventListener('click', replaceImage); 
               actionCleanups.push(() => image.removeEventListener('click', replaceImage));
@@ -868,22 +871,26 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           card.appendChild(controls);
         });
 
-        if (itemContainer && isAwardCollection) {
+        if (itemContainer && (isAwardCollection || isPartnerCollection)) {
           const addSlot = node.ownerDocument.createElement('button');
           addSlot.type = 'button'; 
           addSlot.dataset.pageBuilderAction = 'add-slot';
-          addSlot.textContent = '+ Thêm giải thưởng';
-          addSlot.style.cssText = 'min-height:180px;min-width:210px;border:2px dashed #fb923c;border-radius:12px;padding:18px;background:#fff7ed;color:#9a3412;font:800 13px/1.3 system-ui;cursor:pointer;align-self:stretch;';
+          addSlot.textContent = isAwardCollection ? '+ Thêm giải thưởng' : '+ Thêm logo đối tác';
+          addSlot.style.cssText = isAwardCollection
+            ? 'min-height:180px;min-width:210px;border:2px dashed #fb923c;border-radius:12px;padding:18px;background:#fff7ed;color:#9a3412;font:800 13px/1.3 system-ui;cursor:pointer;align-self:stretch;'
+            : 'min-height:80px;min-width:160px;border:2px dashed #fb923c;border-radius:10px;padding:12px;background:#fff7ed;color:#9a3412;font:800 12px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;';
           const add = (event: MouseEvent) => {
             event.preventDefault(); 
-            event.stopPropagation();
+            event.stopPropagation(); 
             onCollectionAction?.(section.id, 'items', 'add', Array.isArray(section.config.items) ? section.config.items.length : 0);
           };
           addSlot.addEventListener('click', add); 
           actionCleanups.push(() => addSlot.removeEventListener('click', add));
           const wrapper = node.ownerDocument.createElement('div'); 
           wrapper.dataset.pageBuilderAction = 'add-slot-wrapper'; 
-          wrapper.className = productionCards[0]?.parentElement?.className ?? 'flex-none px-3'; 
+          wrapper.className = isAwardCollection 
+            ? (productionCards[0]?.parentElement?.className ?? 'flex-none px-3')
+            : 'flex items-center justify-center p-2'; 
           wrapper.appendChild(addSlot); 
           itemContainer.appendChild(wrapper);
         } else if (itemContainer && reference && reference.source?.mode === 'manual') {

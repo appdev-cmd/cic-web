@@ -4,7 +4,6 @@ import { homeStatsElementEditingAdapter } from './homeStatsElementEditing';
 import { aboutStrategyElementEditingAdapter, aboutTimelineElementEditingAdapter, contactBranchesElementEditingAdapter, createEmbeddedTextAdapter } from './embeddedSectionElementEditing';
 import type { PageBuilderSection } from './pageBuilderTypes';
 import type { PageBuilderResolvedElementEdit, PageBuilderVisualElementEditingAdapter } from './visualElementEditingAdapterTypes';
-import { directReferenceSectionKeys } from './referenceSectionInteractions';
 
 const adapters: readonly PageBuilderVisualElementEditingAdapter[] = [
   homeStatsElementEditingAdapter,
@@ -18,7 +17,6 @@ const adapterBySectionKey = new Map(adapters.map((adapter) => [adapter.sectionKe
 
 export const directEditingSectionKeys = new Set([
   ...adapterBySectionKey.keys(),
-  ...directReferenceSectionKeys,
 ]);
 
 export function resolveVisualElementEdit(

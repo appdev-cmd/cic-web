@@ -16,6 +16,8 @@ export type HomeNewsDisplayItem = {
 export interface HomeNewsSectionProps {
   title?: string;
   subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
   newsItems: readonly HomeNewsDisplayItem[];
   renderPolicy?: any;
   setCurrentView: (view: any) => void;
@@ -26,6 +28,8 @@ export interface HomeNewsSectionProps {
 export const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
   title,
   subtitle,
+  ctaLabel,
+  ctaUrl,
   newsItems,
   setCurrentView,
   setActiveLink,
@@ -124,6 +128,8 @@ export const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
 
         <div className="text-center mt-5 md:mt-6">
           <button
+            data-page-builder-config-path={JSON.stringify(['ctaLabel'])}
+            data-page-builder-cta-key={JSON.stringify(['ctaUrl'])}
             onClick={() => {
               setCurrentView('news');
               setActiveLink('Tin tức');
@@ -134,7 +140,8 @@ export const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
             }}
             className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-black uppercase tracking-widest text-xs transition-all group btn-modern-interaction shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
           >
-            Xem tất cả tin tức <ChevronRight size={16} className="inline-block group-hover:translate-x-1.5 transition-transform" />
+            <span>{ctaLabel || 'Xem tất cả tin tức'}</span>
+            <ChevronRight size={16} className="inline-block group-hover:translate-x-1.5 transition-transform" />
           </button>
         </div>
       </div>
