@@ -7,6 +7,7 @@ export const fieldLabels: Record<string, string> = {
   name: 'Tên', address: 'Địa chỉ', workingHours: 'Giờ làm việc', year: 'Năm', value: 'Giá trị', suffix: 'Hậu tố', label: 'Nhãn',
   text: 'Nội dung', richTextHtml: 'Nội dung', downloadMediaId: 'Hồ sơ năng lực', mediaId: 'Media', targetId: 'Dữ liệu liên kết', slotKey: 'Vị trí cố định',
   logo: 'Logo', img: 'Hình ảnh', image: 'Hình ảnh', icon: 'Biểu tượng', mobileImageId: 'Ảnh mobile',
+  syncWithHome: 'Đồng bộ từ Trang chủ',
 };
 
 export const imageKeys = new Set(['imageId', 'backgroundImageId', 'mobileImageId', 'image', 'logo', 'img', 'icon']);

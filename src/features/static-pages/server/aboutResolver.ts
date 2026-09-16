@@ -137,6 +137,46 @@ export async function getPublishedAboutPage(
       };
     }
 
+    // Sync about.awards & about.partners with home sections if enabled (default: true)
+    if (code === 'about') {
+      try {
+        const homePage = await getPublicPublishedPage(workspace, 'home');
+        const homeSections = homePage?.sections ?? [];
+        const homeAwardsSec = homeSections.find((s) => s.sectionKey === 'home.awards');
+        const homePartnersSec = homeSections.find((s) => s.sectionKey === 'home.partners');
+
+        const awardsSec = sections.find((s) => s.sectionKey === 'about.awards');
+        if (awardsSec) {
+          const cfg = awardsSec.config;
+          const sync = cfg.syncWithHome !== false;
+          if (sync) {
+            const homeAwardsItems = Array.isArray(homeAwardsSec?.config?.items) && homeAwardsSec.config.items.length > 0
+              ? homeAwardsSec.config.items
+              : undefined;
+            if (homeAwardsItems) {
+              cfg.items = homeAwardsItems;
+            }
+          }
+        }
+
+        const partnersSec = sections.find((s) => s.sectionKey === 'about.partners');
+        if (partnersSec) {
+          const cfg = partnersSec.config;
+          const sync = cfg.syncWithHome !== false;
+          if (sync) {
+            const homePartnersItems = Array.isArray(homePartnersSec?.config?.items) && homePartnersSec.config.items.length > 0
+              ? homePartnersSec.config.items
+              : undefined;
+            if (homePartnersItems) {
+              cfg.items = homePartnersItems;
+            }
+          }
+        }
+      } catch (homeErr) {
+        console.warn('[aboutResolver] Warning: could not load home page for sync:', homeErr);
+      }
+    }
+
     return {
       page: {
         id: Number(publishedPage.pageId),

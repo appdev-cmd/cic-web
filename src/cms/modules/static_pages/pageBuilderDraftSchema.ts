@@ -1,4 +1,4 @@
-export type DraftElementKind = 'text' | 'media' | 'video' | 'cta' | 'link' | 'collection' | 'reference' | 'form' | 'richtext';
+export type DraftElementKind = 'text' | 'media' | 'video' | 'cta' | 'link' | 'collection' | 'reference' | 'form' | 'richtext' | 'boolean';
 
 export interface DraftElementDefinition {
   key: string;
@@ -10,6 +10,7 @@ export interface DraftElementDefinition {
 
 const text = (key: string, label: string, optional = false): DraftElementDefinition => ({ key, label, kind: 'text', optional });
 const media = (key: string, label: string, optional = false): DraftElementDefinition => ({ key, label, kind: 'media', optional });
+const booleanField = (key: string, label: string, optional = true): DraftElementDefinition => ({ key, label, kind: 'boolean', optional });
 const item = (key: string, label: string): DraftElementDefinition => ({ key, label, kind: 'collection', collection: true });
 const reference = (key: string, label: string): DraftElementDefinition => ({ key, label, kind: 'reference', collection: true });
 
@@ -29,8 +30,8 @@ export const draftSectionSchemas: Record<string, DraftElementDefinition[]> = {
   'about.timeline': [text('title', 'Tiêu đề'), text('description', 'Mô tả'), item('milestones', 'Các mốc thời gian')],
   'about.strategy': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), media('imageId', 'Ảnh định hướng'), text('vision', 'Tầm nhìn'), text('mission', 'Sứ mệnh'), item('coreValues', 'Giá trị cốt lõi')],
   'about.offerings': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), reference('product', 'Sản phẩm'), reference('service', 'Dịch vụ')],
-  'about.awards': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), item('items', 'Giải thưởng')],
-  'about.partners': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), text('description', 'Nội dung giới thiệu', true), item('items', 'Logo đối tác')],
+  'about.awards': [booleanField('syncWithHome', 'Đồng bộ từ Trang chủ'), text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), item('items', 'Giải thưởng')],
+  'about.partners': [booleanField('syncWithHome', 'Đồng bộ từ Trang chủ'), text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), text('description', 'Nội dung giới thiệu', true), item('items', 'Logo đối tác')],
   'about.organization': [text('title', 'Tiêu đề')],
   'about.capacity': [text('title', 'Tiêu đề'), text('description', 'Mô tả'), item('metrics', 'Chỉ số năng lực')],
   'about.experience': [text('title', 'Tiêu đề'), item('categoryKeys', 'Nhóm kinh nghiệm')],

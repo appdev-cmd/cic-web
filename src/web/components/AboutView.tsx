@@ -106,12 +106,36 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   ];
   const displayedOverviewParagraphs = defaultOverviewParagraphs.map((fallback, index) => typeof overviewParagraphs[index] === 'string' ? overviewParagraphs[index] as string : fallback);
   const displayedPartners = useMemo(() => {
+    const syncWithHome = partnersConfig.syncWithHome !== false;
     const items = Array.isArray(partnersConfig.items) ? partnersConfig.items : [];
-    if (!items.length) return partners.map((partner, index) => ({ ...partner, entityId: `legacy-partner-${index + 1}`, link: '' }));
+    if (syncWithHome && items.length > 0) {
+      return items.flatMap((item, index) => item && typeof item === 'object' && !Array.isArray(item)
+        ? [{ entityId: typeof item.id === 'string' ? item.id : `partner-${index + 1}`, name: typeof item.name === 'string' ? item.name : '', logo: typeof item.imageId === 'string' ? resolveMediaUrl(item.imageId) : (typeof item.logo === 'string' ? item.logo : ''), link: typeof item.link === 'string' ? item.link : '' }]
+        : []);
+    }
+    if (!items.length || syncWithHome) {
+      return partners.map((partner, index) => ({ ...partner, entityId: `legacy-partner-${index + 1}`, link: '' }));
+    }
     return items.flatMap((item, index) => item && typeof item === 'object' && !Array.isArray(item)
-      ? [{ entityId: typeof item.id === 'string' ? item.id : `partner-${index + 1}`, name: typeof item.name === 'string' ? item.name : '', logo: typeof item.imageId === 'string' ? resolveMediaUrl(item.imageId) : '', link: typeof item.link === 'string' ? item.link : '' }]
+      ? [{ entityId: typeof item.id === 'string' ? item.id : `partner-${index + 1}`, name: typeof item.name === 'string' ? item.name : '', logo: typeof item.imageId === 'string' ? resolveMediaUrl(item.imageId) : (typeof item.logo === 'string' ? item.logo : ''), link: typeof item.link === 'string' ? item.link : '' }]
       : []);
-  }, [partners, partnersConfig.items, resolveMediaUrl]);
+  }, [partners, partnersConfig.items, partnersConfig.syncWithHome, resolveMediaUrl]);
+
+  const displayedAwards = useMemo(() => {
+    const syncWithHome = awardsConfig.syncWithHome !== false;
+    const items = Array.isArray(awardsConfig.items) ? awardsConfig.items : [];
+    if (syncWithHome && items.length > 0) {
+      return items.flatMap((item) => item && typeof item === 'object' && !Array.isArray(item) && typeof item.name === 'string'
+        ? [{ name: item.name, img: resolveMediaUrl((item.imageId || item.img || '') as string) }]
+        : []);
+    }
+    if (!items.length || syncWithHome) {
+      return homeAwards;
+    }
+    return items.flatMap((item) => item && typeof item === 'object' && !Array.isArray(item) && typeof item.name === 'string'
+      ? [{ name: item.name, img: resolveMediaUrl((item.imageId || item.img || '') as string) }]
+      : []);
+  }, [awardsConfig.items, awardsConfig.syncWithHome, homeAwards, resolveMediaUrl]);
   // Interactive active states for redesigned sections
   const [activeCoreIndex, setActiveCoreIndex] = useState(0);
   const [activeFieldIndex, setActiveFieldIndex] = useState(0);
@@ -450,7 +474,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       </p>
                     </div>
                     <div className="mt-8">
-                      <AwardsSlider paused={!renderPolicy.motionEnabled} awards={Array.isArray(awardsConfig.items) ? awardsConfig.items.flatMap((item) => item && typeof item === 'object' && !Array.isArray(item) && typeof item.name === 'string' && typeof item.imageId === 'string' ? [{ name: item.name, img: resolveMediaUrl(item.imageId) }] : []) : homeAwards} />
+                      <AwardsSlider paused={!renderPolicy.motionEnabled} awards={displayedAwards} />
                     </div>
                   </div>
                 </section>

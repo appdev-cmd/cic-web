@@ -42,6 +42,34 @@ export function ConfigField({
   entityOptions,
   onActiveHeroSlideChange,
 }: ConfigFieldProps) {
+  if (fieldKey === 'syncWithHome' || typeof value === 'boolean') {
+    const isChecked = value !== false;
+    return (
+      <div className="flex items-center justify-between p-4 bg-orange-50/60 dark:bg-slate-900 border border-orange-200/70 dark:border-slate-800 rounded-xl md:col-span-2">
+        <div className="space-y-1 pr-4">
+          <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            {labelFor(fieldKey)}
+            {isChecked && <span className="text-[10px] px-2 py-0.5 bg-orange-600 text-white font-semibold rounded-full">Đang đồng bộ</span>}
+          </span>
+          <span className="block text-[11px] text-slate-500 leading-relaxed">
+            {fieldKey === 'syncWithHome'
+              ? 'Tự động hiển thị dữ liệu từ Trang chủ. Tắt tùy chọn này nếu muốn cấu hình danh sách giải thưởng/đối tác riêng cho trang Giới thiệu.'
+              : 'Bật hoặc tắt cấu hình này.'}
+          </span>
+        </div>
+        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={(e) => onChange(path, e.target.checked)}
+            className="sr-only peer"
+          />
+          <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+        </label>
+      </div>
+    );
+  }
+
   if (fieldKey === 'richTextHtml') {
     return (
       <div className="space-y-1.5 md:col-span-2">
