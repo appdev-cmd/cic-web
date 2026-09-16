@@ -1332,9 +1332,11 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
     selectedSectionRoot.querySelectorAll<HTMLElement>('[data-page-builder-video-path]').forEach((node) => {
       const path = JSON.parse(node.dataset.pageBuilderVideoPath ?? '[]') as Array<string | number>;
       if (!path.length || !onEditVideo) return;
-      const currentUrl = String(configValueAtPath(selectedSection.config, path) ?? '');
-      const videoId = youtubeVideoId(currentUrl);
       const iframe = node.querySelector<HTMLIFrameElement>('iframe');
+      const fallbackUrl = node.dataset.pageBuilderVideoUrl || iframe?.src || 'https://www.youtube.com/watch?v=hdLFK_09-tU?start=448';
+      const configVal = configValueAtPath(selectedSection.config, path);
+      const currentUrl = String(configVal || fallbackUrl || '');
+      const videoId = youtubeVideoId(currentUrl);
       const image = node.querySelector<HTMLImageElement>('img');
       if (iframe && videoId) iframe.src = `https://www.youtube.com/embed/${videoId}`;
       if (image && videoId) image.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
@@ -1349,7 +1351,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         event.stopPropagation();
         const rect = button.getBoundingClientRect();
         const frameRect = frame?.getBoundingClientRect();
-        onEditVideo(selectedSection.id, path, currentUrl, { left: (frameRect?.left ?? 0) + rect.left * scale, top: (frameRect?.top ?? 0) + rect.bottom * scale + 8 });
+        const liveVal = configValueAtPath(selectedSection.config, path);
+        const liveUrl = String(liveVal || node.dataset.pageBuilderVideoUrl || iframe?.src || fallbackUrl);
+        onEditVideo(selectedSection.id, path, liveUrl, { left: (frameRect?.left ?? 0) + rect.left * scale, top: (frameRect?.top ?? 0) + rect.bottom * scale + 8 });
       };
       button.addEventListener('click', open);
       node.appendChild(button);

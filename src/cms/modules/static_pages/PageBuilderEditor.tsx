@@ -363,7 +363,13 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
               onTextChange={updateInlineText}
               onConfigValueChange={updateSectionConfig}
               onEditMedia={(sectionId, path, currentId) => setMediaPicker({ sectionId, path, currentId })}
-              onEditVideo={(sectionId, path, currentUrl, anchor) => { setSelectedSectionId(sectionId); setVideoPopover({ sectionId, path, url: currentUrl, anchor }); }}
+              onEditVideo={(sectionId, path, currentUrl, anchor) => {
+                const section = workingPage.draft.sections.find((item) => item.id === sectionId);
+                const fallbackUrl = section?.sectionKey === 'about.overview' ? 'https://www.youtube.com/watch?v=hdLFK_09-tU?start=448' : '';
+                const initialUrl = currentUrl || fallbackUrl;
+                setSelectedSectionId(sectionId);
+                setVideoPopover({ sectionId, path, url: initialUrl, anchor });
+              }}
               onEditCta={(sectionId, path, currentLabel, anchor) => { setSelectedSectionId(sectionId); setCtaPopover({ sectionId, path, fallbackLabel: currentLabel, anchor }); }}
               onSectionAction={updateSectionStructure}
               onReferenceSourceChange={updateReferenceSource}

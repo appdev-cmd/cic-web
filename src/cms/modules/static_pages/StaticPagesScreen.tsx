@@ -150,7 +150,7 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
         'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
       ];
     }
-    if (!cfg.videoUrl) cfg.videoUrl = 'https://www.youtube.com/embed/hdLFK_09-tU?start=448';
+    if (!cfg.videoUrl) cfg.videoUrl = 'https://www.youtube.com/watch?v=hdLFK_09-tU?start=448';
   }
   if (sectionKey === 'about.awards') {
     if (!cfg.title) cfg.title = 'Giải thưởng & Chứng nhận';

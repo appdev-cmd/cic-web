@@ -206,7 +206,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   return (
     <div className="bg-transparent min-h-screen relative pt-0">
       {/* Visual Top Hero Banner */}
-      <section data-page-builder-section-key="about.hero" className="relative py-5 lg:py-7 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
+      <section data-page-builder-section-key="about.hero" className="relative pt-10 pb-12 lg:pt-14 lg:pb-16 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <img
             data-page-builder-media-path={JSON.stringify(['backgroundImageId'])}
@@ -228,9 +228,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-900/60 border border-white/20 rounded-[8px] mb-2 backdrop-blur-md shadow-sm">
-            <span className={`flex h-1.5 w-1.5 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/60 border border-white/20 rounded-[8px] mb-4 lg:mb-6 backdrop-blur-md shadow-lg">
+            <span className={`flex h-2 w-2 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
               Về chúng tôi
             </span>
           </div>
@@ -238,7 +238,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
           <h1 
             {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} 
             data-page-builder-config-path={JSON.stringify(['title'])}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-white leading-snug mb-1.5 tracking-tight max-w-2xl mx-auto [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-3 lg:mb-4 tracking-tighter max-w-4xl mx-auto [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]"
           >
             {textFrom(heroConfig, 'title', 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ')}
           </h1>
@@ -246,7 +246,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
           <p 
             {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))} 
             data-page-builder-config-path={JSON.stringify(['subtitle'])}
-            className="text-slate-200 text-xs sm:text-sm max-w-xl mx-auto font-medium leading-relaxed [text-shadow:_0_1px_4px_rgb(0_0_0_/_80%)]"
+            className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]"
           >
             {textFrom(heroConfig, 'subtitle', 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.')}
           </p>
@@ -254,9 +254,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
       </section>
 
       {/* Modern Tab Menu Bar */}
-      <div className="bg-white border-b border-slate-200 z-30 relative shadow-xs">
+      <div className="bg-white border-b border-slate-200 z-30 relative shadow-sm">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex space-x-1 md:space-x-8 overflow-x-auto scrollbar-hide py-0.5">
+          <div className="flex space-x-1 md:space-x-8 overflow-x-auto scrollbar-hide py-1">
             {[
               { id: 'overview', label: 'Tổng quan doanh nghiệp' },
               { id: 'structure', label: 'Cơ cấu tổ chức' },
@@ -270,7 +270,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     setActiveTab(tab.id as any);
                     window.scrollTo({ top: 320, behavior: 'smooth' });
                   }}
-                  className={`relative px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-2 rounded-[6px] ${
+                  className={`relative px-4 py-4 text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-2 rounded-[8px] ${
                     active 
                       ? 'text-orange-600' 
                       : 'text-slate-500 hover:text-slate-900'
@@ -283,7 +283,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   {active && (
                     <motion.div 
                       layoutId="activeAboutTabLine" 
-                      className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-orange-600"
+                      className="absolute bottom-0 left-0 right-0 h-[3px] bg-orange-600"
                     />
                   )}
                 </button>
@@ -355,6 +355,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       <div 
                         {...bindElement<HTMLDivElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'videoUrl', semantic: 'text', ownership: 'section-config', editable: true }))}
                         data-page-builder-video-path={JSON.stringify(['videoUrl'])} 
+                        data-page-builder-video-url={textFrom(overviewConfig, 'videoUrl', 'https://www.youtube.com/watch?v=hdLFK_09-tU?start=448')}
                         className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black"
                       >
                         <iframe 
