@@ -209,6 +209,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         setCurrentView={setCurrentView}
         setActiveLink={setActiveLink}
         setActiveProjectId={setActiveProjectId}
+        editMode={editMode}
       />
 
       <HomeEventsSection
