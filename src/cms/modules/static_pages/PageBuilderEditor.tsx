@@ -1552,7 +1552,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
   const [mediaPicker, setMediaPicker] = useState<{ sectionId: string; path: Array<string | number>; currentId: string } | null>(null);
   const [showValidation, setShowValidation] = useState(false);
   const [showMobileCanvas, setShowMobileCanvas] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [ctaPopover, setCtaPopover] = useState<{ sectionId: string; path: Array<string | number>; fallbackLabel: string; anchor: { left: number; top: number } } | null>(null);
   const [videoPopover, setVideoPopover] = useState<{ sectionId: string; path: Array<string | number>; url: string; anchor: { left: number; top: number } } | null>(null);
@@ -1759,7 +1759,6 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
             <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">{([['desktop', Monitor, 'Desktop'], ['tablet', Tablet, 'Tablet'], ['mobile', Smartphone, 'Mobile']] as const).map(([value, Icon, label]) => <button key={value} type="button" title={label} aria-label={label} onClick={() => setViewport(value)} className={`rounded-md p-2 ${viewport === value ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}><Icon className="h-4 w-4" /></button>)}</div>
             <div className="flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900"><button type="button" onClick={undo} disabled={past.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hoàn tác" title="Hoàn tác"><Undo2 className="h-4 w-4" /></button><button type="button" onClick={redo} disabled={future.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Làm lại" title="Làm lại"><Redo2 className="h-4 w-4" /></button></div>
             <button type="button" onClick={() => { setShowHistory((value) => !value); setIsExpanded(false); }} className={`rounded-lg border p-2 ${showHistory ? 'border-orange-300 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`} aria-label="Lịch sử phiên bản" title="Lịch sử phiên bản"><History className="h-4 w-4" /></button>
-            <button type="button" onClick={() => { setIsExpanded((value) => !value); setShowHistory(false); }} className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${isExpanded ? 'border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`} aria-label="Bật/tắt bảng cấu hình" title="Bật/tắt bảng cấu hình"><SlidersHorizontal className="h-4 w-4" /><span className="hidden sm:inline">Bảng cấu hình</span></button>
             <CmsButton variant="secondary" leadingIcon={<Save />} onClick={() => runValidAction(onSaveDraft)}>Lưu bản nháp</CmsButton><CmsButton variant="secondary" leadingIcon={<Eye />} onClick={() => runValidAction(onPreview)}>Xem trước</CmsButton><CmsButton leadingIcon={<Send />} onClick={() => runValidAction(onPublish)}>Xuất bản</CmsButton>
           </div>
         </div>
@@ -1767,7 +1766,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
 
       {showValidation && issueCount > 0 && <div className="shrink-0 border-b border-red-200 bg-red-50 px-5 py-2 text-sm text-red-700"><div className="flex items-center gap-2 font-bold"><AlertCircle className="h-4 w-4" />Có {issueCount} lỗi cần sửa trước khi tiếp tục.</div></div>}
 
-      <div className={`grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 lg:overflow-hidden ${isExpanded || showHistory ? 'lg:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px]' : 'lg:grid-cols-1'}`}>
+      <div className={`grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 lg:overflow-hidden ${showHistory ? 'lg:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px]' : 'lg:grid-cols-1'}`}>
         <aside className="hidden">
           <div className="px-2 pb-3"><h2 className="text-sm font-bold text-slate-900 dark:text-white">Khu vực trang</h2><p className="mt-1 text-xs text-slate-500">Chọn khu vực để sửa nội dung.</p></div>
           <nav className="space-y-1" aria-label="Các khu vực của trang">{workingPage.draft.sections.map((item) => { const definition = sectionDefinitions[item.sectionKey] ?? { label: item.sectionKey, description: '' }; const active = item.id === selectedSectionId; const hasIssue = Boolean(issues[item.id]?.length); return <button key={item.id} type="button" onClick={() => setSelectedSectionId(item.id)} className={`flex w-full items-start gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? 'bg-orange-50 text-orange-800 ring-1 ring-orange-200 dark:bg-orange-950/30 dark:text-orange-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800'}`}><span className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${active ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'}`}>{item.position}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-bold">{definition.label}</span><span className="mt-0.5 block truncate text-[10px] text-slate-400">{definition.description}</span></span>{hasIssue && <span className="mt-1 size-2 shrink-0 rounded-full bg-red-500" aria-label="Có lỗi" />}</button>; })}</nav>
@@ -1787,7 +1786,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
               viewport={viewport}
               activeHeroSlide={activeHeroSlide}
               entityOptions={entityOptions}
-              onSelect={(id) => { setSelectedSectionId(id); setIsExpanded(true); }}
+              onSelect={(id) => { setSelectedSectionId(id); setIsExpanded(false); }}
               onTextChange={updateInlineText}
               onConfigValueChange={updateSectionConfig}
               onEditMedia={(sectionId, path, currentId) => setMediaPicker({ sectionId, path, currentId })}

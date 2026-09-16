@@ -14,7 +14,7 @@ import type { CommitElementEditRequest } from '../../../shared/visual-editing/in
 import { sortableDescriptorFromBinding, type SortableReorderRequest } from '../../../shared/visual-editing/sortableBoundCollection';
 import { findPageBuilderImage } from './PageMediaPickerModal';
 import { draftSectionSchemas } from './pageBuilderDraftSchema';
-import { sectionDefinitions } from './pageBuilderRegistry';
+import { entityTypeLabels, sectionDefinitions } from './pageBuilderRegistry';
 import { isCapabilityEnabled } from '../../../shared/visual-editing/editableSectionContract';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 import { reorderReferenceItems, resolveReferenceItem } from './referenceSectionInteractions';
@@ -452,20 +452,22 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             entityLabel.textContent = sectionDefinitions[section.sectionKey]?.label ?? reference.entityType;
             entityLabel.style.cssText = 'padding:0 5px;color:#0f172a;';
             toolbar.appendChild(entityLabel);
-            if (['home.projects', 'home.events', 'home.news'].includes(section.sectionKey)) {
+            if (['home.projects', 'home.events', 'home.news', 'home.partners'].includes(section.sectionKey)) {
               const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[reference.entityType] ?? reference.source?.limit ?? reference.entityIds.length;
+              const isFeatured = reference.source?.mode === 'featured';
               addButton(
-                reference.source?.mode === 'featured' ? `Tự động: Nổi bật (${limit})` : 'Lấy tự động từ Nổi bật',
+                isFeatured ? `⚡ Tự động: Nổi bật (${reference.entityIds.length})` : 'Chuyển sang Tự động',
                 () => onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'featured', limit }),
-                reference.source?.mode === 'featured',
+                isFeatured,
               );
               addButton(
-                'Chọn thủ công',
-                () => {
-                  onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'manual', limit });
-                  onPickReference?.(section.id, reference.entityType);
-                },
+                !isFeatured ? `⚙️ Chọn thủ công (${reference.entityIds.length})` : 'Chuyển sang Thủ công',
+                () => onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'manual', limit }),
+                !isFeatured,
               );
+              if (!isFeatured && reference.entityIds.length < limit) {
+                addButton(`+ Thêm ${entityTypeLabels[reference.entityType] || 'mục'}`, () => onPickReference?.(section.id, reference.entityType));
+              }
             }
           });
         }
@@ -779,7 +781,22 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             controls.dataset.pageBuilderAction = 'card-controls';
             controls.style.cssText = 'position:absolute;z-index:20;top:8px;right:8px;display:flex;align-items:center;gap:6px;padding:6px;border-radius:10px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(15,23,42,.18);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity 140ms ease,transform 140ms ease;';
             if (reference) {
+              const handle = createCardAction('⠿ Kéo', () => undefined);
+              handle.style.cursor = 'grab';
+              controls.appendChild(handle);
               controls.append(createCardAction('Thay', () => onPickReference?.(section.id, reference.entityType, itemIndex)));
+              if (reference.source?.mode === 'manual' && reference.entityIds.length > 1) {
+                controls.append(createCardAction('Xóa', () => {
+                  const next = reference.entityIds.filter((_, idx) => idx !== itemIndex);
+                  onReferenceItemsChange?.(section.id, reference.entityType, next);
+                }, true));
+              }
+              attachProductionDrag(handle, card, itemIndex, (from, to) => {
+                const next = [...reference.entityIds];
+                const [moved] = next.splice(from, 1);
+                next.splice(to, 0, moved);
+                onReferenceItemsChange?.(section.id, reference.entityType, next);
+              });
             } else if (isAwardCollection && Array.isArray(section.config.items)) {
               const handle = createCardAction('⠿ Kéo', () => undefined);
               handle.style.cursor = 'grab';
@@ -825,6 +842,26 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
             if (isAwardCollection) {
               const wrapper = node.ownerDocument.createElement('div'); wrapper.dataset.pageBuilderAction = 'add-slot-wrapper'; wrapper.className = productionCards[0]?.parentElement?.className ?? 'flex-none px-3'; wrapper.appendChild(addSlot); itemContainer.appendChild(wrapper);
             } else itemContainer.appendChild(addSlot);
+          } else if (itemContainer && reference && reference.source?.mode === 'manual') {
+            const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[reference.entityType] ?? 20;
+            if (reference.entityIds.length < limit) {
+              const addSlot = node.ownerDocument.createElement('button');
+              addSlot.type = 'button';
+              addSlot.dataset.pageBuilderAction = 'add-slot';
+              addSlot.textContent = `+ Thêm ${entityTypeLabels[reference.entityType] || 'mục'}`;
+              addSlot.style.cssText = 'min-height:160px;min-width:200px;border:2px dashed #fb923c;border-radius:12px;padding:16px;background:#fff7ed;color:#9a3412;font:800 13px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 150ms ease;align-self:stretch;';
+              const add = (event: MouseEvent) => {
+                event.preventDefault(); event.stopPropagation();
+                onPickReference?.(section.id, reference.entityType);
+              };
+              addSlot.addEventListener('click', add);
+              actionCleanups.push(() => addSlot.removeEventListener('click', add));
+              const wrapper = node.ownerDocument.createElement('div');
+              wrapper.dataset.pageBuilderAction = 'add-slot-wrapper';
+              wrapper.className = productionCards[0]?.parentElement?.className ?? 'flex-none px-3';
+              wrapper.appendChild(addSlot);
+              itemContainer.appendChild(wrapper);
+            }
           }
         } else if (!showFullCollectionInventory) {
           const embeddedCollections = (draftSectionSchemas[section.sectionKey] ?? []).filter((element) => element.kind === 'collection');
