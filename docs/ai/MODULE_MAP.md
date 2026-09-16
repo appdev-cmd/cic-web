@@ -82,6 +82,76 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 - **Kết luận:** Giữ `[A]` (Audited & Unblocked). **READY_TO_IMPLEMENT**.
 
 
+### Audit Trang chủ và Page Builder Trang chủ — 2026-09-16
+
+- **A. Scope & Boundaries:**
+  - Public Website surface: Tuyến đường `/` (Trang chủ tiếng Việt) và `/en` (Trang chủ tiếng Anh).
+  - CMS Page Builder surface: Quản lý bản ghi `code = 'home'` (VI: ID 1, EN: ID 7, `template_key = 'home'`, `system_defined = true`) tại `/cms/static-pages`.
+  - Cấu trúc gồm chính xác 10 Sections theo thứ tự: `home.hero`, `home.intro`, `home.stats`, `home.awards`, `home.ecosystem`, `home.projects`, `home.events`, `home.news`, `home.partners`, `home.contact_cta`.
+  - Giới hạn: Trang chủ là consumer (bộ tổng hợp dữ liệu) hiển thị; không sở hữu nghiệp vụ gốc của các module liên kết (`cic_projects`, `cic_event`, `cic_news`, `cic_banners`, `cic_forms`).
+- **B. UI Reference Map (10 Sections):**
+  1. `home.hero`: Carousel banner mở đầu, tiêu đề HTML rich-text, phụ đề, nút CTA kép ("Khám phá giải pháp", "Về chúng tôi"), ticker thông báo "HOT NEWS" chạy chữ marquee.
+  2. `home.intro`: Giới thiệu 35 năm đồng hành, 2 đoạn văn tóm lược, video popover (YouTube modal), ảnh đại diện doanh nghiệp, nút tải hồ sơ năng lực.
+  3. `home.stats`: Bốn chỉ số thống kê năng lực quy mô (35+ Năm kinh nghiệm, 300+ Giải pháp, 5000+ Dự án, 100+ Đối tác).
+  4. `home.awards`: Slider danh sách bằng khen, huân chương, cúp Sao Khuê / VIFOTEC.
+  5. `home.ecosystem`: Hệ sinh thái 6 mảng công nghệ (AI, BIM/Digital Twins, Phần mềm, Thiết bị, Net Zero, Tư vấn & Đào tạo) với điều hướng chuyên biệt.
+  6. `home.projects`: Lưới 3 dự án tiêu biểu (Landmark 81, Cao tốc Bắc - Nam, Điện gió Mũi Dinh), tab phân loại, modal chi tiết.
+  7. `home.events`: Sự kiện nổi bật sắp diễn ra / đã diễn ra, thông tin ngày giờ, địa điểm, form đăng ký.
+  8. `home.news`: 4 tin tức và góc nhìn chuyển đổi số tiêu biểu, tab phân loại danh mục.
+  9. `home.partners`: Dải marquee đối tác chiến lược chạy vô tận (Bentley, Autodesk, Instantel, VC Group...).
+  10. `home.contact_cta`: Form tư vấn nhanh trang chủ gửi về `SYSTEM_FORM_IDS.homeConsultation`.
+- **C. Legacy Classification:**
+  - `REUSE_PRESENTATION`: `HomeView.tsx`, `HomeEcosystemSection.tsx`, `AwardsSlider.tsx`, typography, các icons Lucide.
+  - `EXTRACT_AND_REBUILD`: Data adapter / hydrator chuyển đổi cấu hình 10 sections từ DB thành props; dynamic reference resolver cho projects, events, news.
+  - `REFERENCE_ONLY`: `homeData.ts`, `mockData.ts`, `pageBuilderMockData.json`, fixture IDs (`project_landmark_81`).
+- **D. CMS Page Builder Governance:**
+  - Trang hệ thống bất biến: Không cho phép xóa, không đổi slug (`/`), không thêm bớt section ngoài 10 section chuẩn, không đổi `section_type`.
+  - Bật/tắt (`canHide`) và thứ tự (`canMove`): Theo `pageBuilderRegistry.ts` (`home.hero` cố định đầu trang).
+  - Quản lý tham chiếu (`referenceSource`): Hỗ trợ `auto_featured` (tự động lấy theo cờ nổi bật) và `manual` (danh sách ID cụ thể lưu tại `cic_content_page_section_references`).
+- **E. Database & Schema Realities:**
+  - Bảng core: `cic_content_pages` (VI ID 1, EN ID 7), `cic_content_page_sections` (10 rows đã seed cho mỗi locale). Cả 2 trang hiện đang ở `draft_revision_id` với config rỗng `{}`; `published_revision_id = NULL`.
+  - Bảng liên kết thật:
+    - `cic_projects`: 8 dự án (có cột `is_featured`, `ordering`, `published`, `title`, `alias`, `image`; 3 dự án nổi bật ID 3, 4, 5 trùng khớp với landmark 81, cao tốc, điện gió).
+    - `cic_event`: 39 sự kiện (`time_event`, `end_time`, `is_hot`, `show_in_homepage`, `published`).
+    - `cic_news`: 1553 tin tức (`is_hot`, `show_in_homepage`, `published`, `start_time`).
+    - `cic_banners`: 100 banners (nguồn media cho slide & awards).
+    - `cic_forms`: Hệ thống form tương tác khách hàng.
+- **F. Field Usage Map & Data Contract:**
+  - `home.hero`: `badge` (string), `slides` (array: `title`, `subtitle`, `backgroundImageId`, `primaryCtaId`, `secondaryCtaId`), `tickerItems` (string[]).
+  - `home.intro`: `eyebrow` (string), `title` (string), `paragraphs` (string[]), `imageId`, `videoUrl`, `downloadMediaId`.
+  - `home.stats`: `items` (array: `id`, `value` number, `suffix` string, `label` string).
+  - `home.awards`: `title`, `subtitle`, `items` (array: `name`, `imageId`).
+  - `home.ecosystem`: `title`, `subtitle`, `items` (array: `id`, `title`, `description`, `badge`, `imageId`, `link`).
+  - `home.projects`: `title`, `subtitle`, `referenceSource` (`mode`: `auto_featured` | `manual`, `limit`: 3).
+  - `home.events`: `title`, `subtitle`, `referenceSource` (`mode`: `auto_featured` | `manual`, `limit`: 1).
+  - `home.news`: `title`, `subtitle`, `referenceSource` (`mode`: `auto_featured` | `manual`, `limit`: 4).
+  - `home.partners`: `title`, `subtitle`, `items` (`id`, `name`, `imageId`, `link`) hoặc `referenceSource` (`manual`, limit: 12).
+  - `home.contact_cta`: `title`, `description`, `phone`, `email`, `formId`, `submitLabel`.
+- **G. Runtime Authority:**
+  - Hiện tại: `HomeRoute.tsx` chỉ nhận `content: HomePageModel` (chứa `stats` và `projects`), còn 8 sections khác lấy trực tiếp từ mock `getHomeData()`.
+  - Target: `page.tsx` nạp snapshot `published_revision_id` từ `cic_content_pages` -> Hydrate toàn bộ 10 sections qua database resolver -> Chuyển vào `HomeView`. Khi chưa publish, duy trì fallback giao diện an toàn (fail-safe).
+- **H/I. Server/Client Boundary:**
+  - Server: DB query, batch reference resolution, security sanitization, draft/publish mutations, audit logging.
+  - Client: UI rendering, animations (Framer Motion), video modal popover, client tabs filter, customer interaction submit.
+- **J/K. Dependencies:**
+  - Hard: RBAC task 90 (`static_pages`), `cic_content_pages*`, `cic_projects`, `cic_event`, `cic_news`.
+  - Soft: `cic_forms`, Thư viện Media asset URLs, Contact CTA action.
+- **L. Next.js Classification:**
+  - `KEEP`: UI design components của `HomeView` và `HomeEcosystemSection`.
+  - `REFACTOR`: `resolvePageContent.ts` để map đầy đủ cả 10 sections; mở rộng `HomeViewProps` nhận config của các section thay vì đọc trực tiếp `getHomeData()`.
+  - `REPLACE`: `resolveReferenceEntity.ts` bỏ fixture IDs, thay bằng query DB thật.
+  - `REMOVE`: Tránh hardcode dữ liệu tĩnh trong các subcomponents khi chạy môi trường production.
+- **M. Responsive & Performance:**
+  - Carousel hero tự động chuyển động với fallback reduced-motion, ticker marquee hardware-accelerated.
+  - Tối ưu tải trước ảnh slide đầu tiên (`preload`).
+- **N. Cross-cutting:**
+  - Audit logging khi xuất bản bản ghi Home.
+  - Tách biệt hoàn toàn bản ghi Trang chủ VI (`/`) và EN (`/en`).
+- **Q. Kết luận Audit:**
+  - Module Trang chủ và Page Builder Trang chủ: **READY_TO_UNBLOCK_AND_IMPLEMENT**.
+  - Không có rủi ro phá vỡ schema database do schema `cic_content_pages*` đã sẵn sàng.
+
+
 ### Audit Cấu hình hệ thống — 2026-09-14
 
 - **A. Scope:** CMS route `/cms/settings` (alias `/cms/system-settings`) quản lý cấu hình dùng chung theo ba scope `site_cic`, `site_english`, `site_enjicad` và collection trụ sở/chi nhánh VI/EN. Public không có route Cấu hình riêng; Trang Liên hệ, Footer, Header/widget và metadata chỉ là consumer của projection published/allowlisted. Function SEO, Page Builder, Mẫu email và cấu hình nội dung riêng từng module không thuộc ownership này.
