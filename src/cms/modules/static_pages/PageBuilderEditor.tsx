@@ -49,6 +49,7 @@ import { findPageBuilderImage, PageMediaPickerModal } from './PageMediaPickerMod
 import { PageBuilderVisualCanvas } from './PageBuilderVisualCanvas';
 import { RichTextEditor } from './RichTextEditor';
 import { mockArticles } from '../news/mockData';
+import { formatHeroHeading } from '@/web/components/HomeView';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 
 interface PageBuilderEditorProps {
@@ -351,7 +352,7 @@ function HeroSlidesEditor({
             </span>
             <h4 
               className="text-base font-bold leading-snug line-clamp-2"
-              dangerouslySetInnerHTML={{ __html: currentSlide.title || '(Chưa nhập tiêu đề slide)' }}
+              dangerouslySetInnerHTML={{ __html: formatHeroHeading(currentSlide.title) || '(Chưa nhập tiêu đề slide)' }}
             />
             <p 
               className="text-xs text-slate-300 line-clamp-2"

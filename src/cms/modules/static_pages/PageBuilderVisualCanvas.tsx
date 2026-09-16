@@ -182,6 +182,14 @@ function editableNodes(root: HTMLElement, page: PageBuilderPage): HTMLElement[] 
 
 const inlineEditableKeys = new Set(['title', 'subtitle', 'description', 'badge', 'eyebrow', 'phone', 'email', 'name', 'address', 'workingHours', 'vision', 'mission', 'label', 'text', 'submitLabel', 'successTitle', 'successMessage', 'categoryTag', 'readingTime', 'lastUpdated']);
 
+function hasHtml(value: string): boolean {
+  return /<[a-z][\s\S]*>/i.test(value);
+}
+
+function stripHtml(value: string): string {
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function normalizeText(value: string) {
   return value.replace(/\s+/g, ' ').trim();
 }
@@ -213,7 +221,7 @@ function ctaEntriesForSection(section: PageBuilderSection, activeHeroSlide = 0) 
 }
 
 function findTextNode(root: HTMLElement, value: string, claimed: Set<HTMLElement>) {
-  const expected = normalizeText(value);
+  const expected = normalizeText(stripHtml(value));
   if (!expected) return null;
   const candidates = Array.from(root.querySelectorAll<HTMLElement>('h1,h2,h3,h4,h5,h6,p,span,a,button,li,div'));
   return candidates.find((node) => {
@@ -921,7 +929,17 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
           node.setAttribute('role', 'textbox');
           node.style.cursor = 'text';
         }
-        if (node !== node.ownerDocument.activeElement && normalizeText(node.textContent ?? '') !== normalizeText(value)) node.textContent = value;
+        if (node !== node.ownerDocument.activeElement) {
+          const stripped = stripHtml(value);
+          const currentText = normalizeText(node.textContent ?? '');
+          if (hasHtml(value)) {
+            if (currentText !== normalizeText(stripped)) {
+              node.innerHTML = value;
+            }
+          } else if (currentText !== normalizeText(value)) {
+            node.textContent = value;
+          }
+        }
       });
 
       let mediaId = typeof section.config.imageId === 'string' ? section.config.imageId : typeof section.config.backgroundImageId === 'string' ? section.config.backgroundImageId : '';
@@ -1034,7 +1052,17 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       const node = existing ?? findTextNode(sectionRoot, value, claimed);
       if (!node) return;
       claimed.add(node);
-      if (node !== node.ownerDocument.activeElement && normalizeText(node.textContent ?? '') !== normalizeText(value)) node.textContent = value;
+      if (node !== node.ownerDocument.activeElement) {
+        const stripped = stripHtml(value);
+        const currentText = normalizeText(node.textContent ?? '');
+        if (hasHtml(value)) {
+          if (currentText !== normalizeText(stripped)) {
+            node.innerHTML = value;
+          }
+        } else if (currentText !== normalizeText(value)) {
+          node.textContent = value;
+        }
+      }
       if (!onTextChange) return;
       node.contentEditable = 'true';
       node.dataset.pageBuilderInlineEdit = key;
@@ -1060,7 +1088,11 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
           node.blur();
         }
         if (event.key === 'Escape') {
-          node.textContent = value;
+          if (hasHtml(value)) {
+            node.innerHTML = value;
+          } else {
+            node.textContent = value;
+          }
           node.blur();
         }
       };

@@ -12,7 +12,7 @@ SET config = '{
   "badge": "Leading Innovation since 1990",
   "slides": [
     {
-      "title": "Đối tác công nghệ <br /><span class=\"text-orange-600 whitespace-nowrap\">chiến lược</span>",
+      "title": "Đối tác công nghệ chiến lược",
       "subtitle": "Hơn 35 năm tiên phong thúc đẩy số hóa toàn diện.",
       "backgroundImageId": "/banner_hero/doi_tac_cong_nghe_chien_luoc.png",
       "mobileImageId": "/banner_hero/doi_tac_cong_nghe_chien_luoc.png",
@@ -20,7 +20,7 @@ SET config = '{
       "secondaryCtaId": "cta_about_cic"
     },
     {
-      "title": "Hệ sinh thái <br /><span class=\"text-orange-600 whitespace-nowrap\">giải pháp số</span>",
+      "title": "Hệ sinh thái giải pháp số",
       "subtitle": "Ứng dụng AI, BIM và Digital Twins vào quy trình vận hành, giúp tối ưu hóa hiệu suất và tiết kiệm tài nguyên cho doanh nghiệp.",
       "backgroundImageId": "/banner_hero/He_sinh_thai_giai_phap_so.png",
       "mobileImageId": "/banner_hero/He_sinh_thai_giai_phap_so.png",
@@ -28,7 +28,7 @@ SET config = '{
       "secondaryCtaId": "cta_about_cic"
     },
     {
-      "title": "Dẫn đầu <br /><span class=\"text-orange-600 whitespace-nowrap\">chuyển đổi số</span>",
+      "title": "Dẫn đầu chuyển đổi số",
       "subtitle": "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới mang lại những giải pháp đột phá cho tương lai hạ tầng Việt Nam.",
       "backgroundImageId": "/banner_hero/dan_dau_chuyen_doi_so.png",
       "mobileImageId": "/banner_hero/dan_dau_chuyen_doi_so.png",
@@ -36,7 +36,7 @@ SET config = '{
       "secondaryCtaId": "cta_about_cic"
     },
     {
-      "title": "Phần mềm bản quyền <br /><span class=\"text-orange-600 whitespace-nowrap\">chính hãng</span>",
+      "title": "Phần mềm bản quyền chính hãng",
       "subtitle": "Cung cấp hệ thống phần mềm bản quyền chính hãng, hỗ trợ kỹ thuật tận tâm, đảm bảo an toàn thông tin và tuân thủ pháp lý.",
       "backgroundImageId": "/banner_hero/Phan_mem_ban_quyen_chinh_hang.jpg",
       "mobileImageId": "/banner_hero/Phan_mem_ban_quyen_chinh_hang.jpg",

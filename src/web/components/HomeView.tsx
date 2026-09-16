@@ -64,6 +64,39 @@ interface HomeViewProps {
   bindingRegistry?: ElementBindingRegistry;
 }
 
+export function formatHeroHeading(rawTitle?: string): string {
+  if (!rawTitle) return '';
+  // If the title already contains HTML markup, render it as-is
+  if (/<[a-z][\s\S]*>/i.test(rawTitle)) return rawTitle;
+
+  const trimmed = rawTitle.trim();
+  const knownPresets: Record<string, { main: string; highlight: string }> = {
+    'Đối tác công nghệ chiến lược': { main: 'Đối tác công nghệ', highlight: 'chiến lược' },
+    'Hệ sinh thái giải pháp số': { main: 'Hệ sinh thái', highlight: 'giải pháp số' },
+    'Dẫn đầu chuyển đổi số': { main: 'Dẫn đầu', highlight: 'chuyển đổi số' },
+    'Phần mềm bản quyền chính hãng': { main: 'Phần mềm bản quyền', highlight: 'chính hãng' },
+  };
+
+  if (knownPresets[trimmed]) {
+    const { main, highlight } = knownPresets[trimmed];
+    return `${main} <br /><span class="text-orange-600 whitespace-nowrap">${highlight}</span>`;
+  }
+
+  if (trimmed.includes('\n')) {
+    const [line1, ...rest] = trimmed.split('\n');
+    return `${line1.trim()} <br /><span class="text-orange-600 whitespace-nowrap">${rest.join(' ').trim()}</span>`;
+  }
+
+  const words = trimmed.split(/\s+/);
+  if (words.length >= 4) {
+    const main = words.slice(0, words.length - 2).join(' ');
+    const highlight = words.slice(words.length - 2).join(' ');
+    return `${main} <br /><span class="text-orange-600 whitespace-nowrap">${highlight}</span>`;
+  }
+
+  return trimmed;
+}
+
 export const HomeView = ({
   content,
   renderPolicy = productionRenderPolicy,
@@ -235,7 +268,7 @@ export const HomeView = ({
             
             <h1 
               className={`${typeHero} text-white mb-4`}
-              dangerouslySetInnerHTML={{ __html: currentHeroSlide?.title || '' }}
+              dangerouslySetInnerHTML={{ __html: formatHeroHeading(currentHeroSlide?.title) }}
             />
             
             <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>
