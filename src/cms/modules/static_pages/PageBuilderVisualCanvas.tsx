@@ -5,6 +5,7 @@ import { ContactView } from '../../../web/components/ContactView';
 import { HomeView } from '../../../web/components/HomeView';
 import { getLegacyAboutCapacityContent, getLegacyAboutPageContent, getLegacyContactPageContent, getLegacyHomePageContent } from '../../../shared/page-content/legacyPageContent';
 import { resolvePageContent } from '../../../shared/page-content/resolvePageContent';
+import { registerEntityOptions } from '../../../shared/page-content/resolveReferenceEntity';
 import { ElementBindingRegistry } from '../../../shared/visual-editing/elementBindingRegistry';
 import { VisualEditingOverlay } from './VisualEditingOverlay';
 import { reorderHomeStatsItems } from './homeStatsElementEditing';
@@ -206,10 +207,25 @@ function youtubeVideoId(url: string) {
   return match?.[1] ?? '';
 }
 
-function ctaEntriesForSection(section: PageBuilderSection, activeHeroSlide = 0) {
+function ctaEntriesForSection(section: PageBuilderSection, activeHeroSlide = 0, sectionRoot?: HTMLElement) {
   const entries = Object.keys(section.config)
     .filter((key) => key.toLowerCase().endsWith('ctaid') && typeof section.config[key] === 'string')
     .map((key) => ({ key, path: [key] as Array<string | number> }));
+  if (section.sectionKey === 'home.intro' && !entries.some((e) => e.key === 'primaryCtaId')) {
+    entries.push({ key: 'primaryCtaId', path: ['primaryCtaId'] });
+  }
+  if (sectionRoot) {
+    const explicitCtaNodes = Array.from(sectionRoot.querySelectorAll<HTMLElement>('[data-page-builder-cta-key]'));
+    explicitCtaNodes.forEach((node) => {
+      try {
+        const path = JSON.parse(node.dataset.pageBuilderCtaKey ?? '[]');
+        const key = String(path[path.length - 1] ?? '');
+        if (key && !entries.some((e) => JSON.stringify(e.path) === JSON.stringify(path))) {
+          entries.push({ key, path });
+        }
+      } catch {}
+    });
+  }
   if (section.sectionKey !== 'home.hero' || !Array.isArray(section.config.slides)) return entries;
   const slideIndex = Math.min(activeHeroSlide, Math.max(0, section.config.slides.length - 1));
   const slide = section.config.slides[slideIndex];
@@ -244,6 +260,9 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
   const rootRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const bindingRegistry = useMemo(() => new ElementBindingRegistry(), []);
+  if (entityOptions && entityOptions.length > 0) {
+    registerEntityOptions(entityOptions);
+  }
   const [frameBody, setFrameBody] = useState<HTMLElement | null>(null);
   const [interactionRoot, setInteractionRoot] = useState<HTMLDivElement | null>(null);
   const [contentHeight, setContentHeight] = useState(900);
@@ -326,7 +345,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       const section = sections.find((item) => item.sectionKey === node.dataset.pageBuilderSectionKey) ?? sections[index];
       if (!section) return;
       const definition = sectionDefinitions[section.sectionKey];
-      const allowsCollectionStructureChanges = section.sectionType === 'hero_carousel' || section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem' || section.sectionType === 'partner_marquee';
+      const allowsCollectionStructureChanges = section.sectionType === 'hero_carousel' || section.sectionKey === 'home.hero' || section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem' || section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
       node.dataset.pageBuilderSectionId = section.id;
       node.dataset.pageBuilderSectionKey = section.sectionKey;
       node.style.display = section.visible === false ? (onTextChange ? '' : 'none') : '';
@@ -614,10 +633,10 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
           } else if (element.kind === 'collection' && Array.isArray(value)) {
             const cards = node.ownerDocument.createElement('div'); cards.style.cssText = `display:grid;grid-template-columns:${section.sectionType === 'hero_carousel' ? '1fr' : 'repeat(auto-fit,minmax(240px,1fr))'};gap:12px;`;
             value.forEach((collectionItem, itemIndex) => {
-              const isAward = section.sectionType === 'award_slider' && element.key === 'items';
-              const isSlide = section.sectionType === 'hero_carousel' && element.key === 'slides';
-              const isEcosystem = section.sectionType === 'technology_ecosystem' && element.key === 'items';
-              const isPartner = section.sectionType === 'partner_marquee' && element.key === 'items';
+              const isAward = (section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards') && element.key === 'items';
+              const isSlide = (section.sectionType === 'hero_carousel' || section.sectionKey === 'home.hero') && element.key === 'slides';
+              const isEcosystem = (section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') && element.key === 'items';
+              const isPartner = (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') && element.key === 'items';
               const card = node.ownerDocument.createElement('article');
               card.style.cssText = `position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;overflow:hidden;${isAward ? 'min-height:310px;padding:20px;align-items:center;box-shadow:0 1px 3px rgba(15,23,42,.08);' : ''}${isEcosystem ? 'min-height:430px;padding:8px;background:#f1f5f9;' : ''}${isSlide ? 'min-height:440px;justify-content:flex-end;background:#0f172a;color:#fff;' : isAward || isEcosystem ? '' : 'padding:12px;'}`;
               const dragHandle = node.ownerDocument.createElement('span'); dragHandle.textContent = '⠿ Kéo'; dragHandle.style.cssText = 'cursor:grab;color:#334155;font:800 11px/1 system-ui;';
@@ -689,12 +708,12 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         // Carousel content needs a complete, stable editing surface. Rendering its
         // schema inventory as a grid keeps every item visible while the website and
         // preview continue to use the production slider.
-        const showFullCollectionInventory = section.sectionType === 'award_slider' || section.sectionType === 'technology_ecosystem' || section.sectionType === 'partner_marquee';
+        const showFullCollectionInventory = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem' || section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
         if (showFullCollectionInventory) {
           inventory.style.cssText = 'display:block;margin:18px 0 8px;';
           draftLayer.appendChild(inventory);
         }
-        const collectionType = section.sectionType === 'award_slider' ? 'award' : section.sectionType === 'partner_marquee' ? 'partner' : section.references?.[0]?.entityType;
+        const collectionType = (section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards') ? 'award' : (section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') ? 'ecosystem' : (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') ? 'partner' : section.references?.[0]?.entityType;
         const collectionAnchor = collectionType ? node.querySelector<HTMLElement>(`[data-page-collection~="${collectionType}"]`) : null;
         if (collectionAnchor) collectionAnchor.parentElement?.insertBefore(draftLayer, collectionAnchor);
         else node.insertBefore(draftLayer, node.firstChild);
@@ -707,7 +726,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
 
         if (collectionAnchor && !showFullCollectionInventory) {
           const reference = section.references?.find((item) => collectionAnchor.matches(`[data-page-collection~="${item.entityType}"]`));
-          const isAwardCollection = section.sectionType === 'award_slider';
+          const isAwardCollection = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards';
           const itemContainer = isAwardCollection
             ? collectionAnchor.querySelector<HTMLElement>('.overflow-hidden > .flex')
             : collectionAnchor;
@@ -959,19 +978,24 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         image.dataset.pageBuilderMediaId = mediaId;
       }
 
-      const ctaEntries = ctaEntriesForSection(section, activeHeroSlide);
+      const ctaEntries = ctaEntriesForSection(section, activeHeroSlide, sectionRoot);
       const actionCandidates = Array.from(sectionRoot.querySelectorAll<HTMLElement>('a,button')).filter((node) => !node.closest('[data-page-builder-action]'));
       const linkCandidates = actionCandidates.filter((node) => node.tagName === 'A');
       const labeledCandidates = actionCandidates.filter((node) => !node.getAttribute('aria-label') && normalizeText(node.textContent ?? '').length > 2);
       const ctaNodes = linkCandidates.length >= ctaEntries.length ? linkCandidates : labeledCandidates;
       ctaEntries.forEach(({ key, path }, index) => {
-        const node = ctaNodes[index];
+        const serializedPath = JSON.stringify(path);
+        const node = sectionRoot.querySelector<HTMLElement>(`[data-page-builder-cta-key='${serializedPath}']`) ?? ctaNodes[index];
         if (!node) return;
-        node.dataset.pageBuilderCtaKey = JSON.stringify(path);
+        node.dataset.pageBuilderCtaKey = serializedPath;
         const label = section.config[`${key}Label`];
         const url = section.config[`${key}Url`];
         const newTab = section.config[`${key}NewTab`];
-        if (typeof label === 'string' && label.trim()) node.textContent = label;
+        if (typeof label === 'string' && label.trim()) {
+          const span = node.querySelector('span');
+          if (span) span.textContent = label;
+          else node.textContent = label;
+        }
         if (node.tagName === 'A' && typeof url === 'string' && url.trim()) node.setAttribute('href', url);
         if (node.tagName === 'A') newTab ? node.setAttribute('target', '_blank') : node.removeAttribute('target');
       });
@@ -1171,20 +1195,25 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       }
     }
 
-    const ctaEntries = ctaEntriesForSection(section, activeHeroSlide);
+    const ctaEntries = ctaEntriesForSection(section, activeHeroSlide, sectionRoot);
     const actionCandidates = Array.from(sectionRoot.querySelectorAll<HTMLElement>('a,button')).filter((node) => !node.closest('[data-page-builder-action]'));
     const linkCandidates = actionCandidates.filter((node) => node.tagName === 'A');
     const labeledCandidates = actionCandidates.filter((node) => !node.getAttribute('aria-label') && normalizeText(node.textContent ?? '').length > 2);
     const ctaNodes = linkCandidates.length >= ctaEntries.length ? linkCandidates : labeledCandidates;
     ctaEntries.forEach(({ key, path }, index) => {
-      const node = ctaNodes[index];
+      const serializedPath = JSON.stringify(path);
+      const node = sectionRoot.querySelector<HTMLElement>(`[data-page-builder-cta-key='${serializedPath}']`) ?? ctaNodes[index];
       if (!node) return;
       const labelKey = `${key}Label`;
       const urlKey = `${key}Url`;
       const overrideLabel = section.config[labelKey];
       const overrideUrl = section.config[urlKey];
       const overrideNewTab = section.config[`${key}NewTab`];
-      if (typeof overrideLabel === 'string' && overrideLabel.trim()) node.textContent = overrideLabel;
+      if (typeof overrideLabel === 'string' && overrideLabel.trim()) {
+        const span = node.querySelector('span');
+        if (span) span.textContent = overrideLabel;
+        else node.textContent = overrideLabel;
+      }
       if (node.tagName === 'A' && typeof overrideUrl === 'string' && overrideUrl.trim()) node.setAttribute('href', overrideUrl);
       if (node.tagName === 'A') overrideNewTab ? node.setAttribute('target', '_blank') : node.removeAttribute('target');
       if (!onEditCta) return;
@@ -1198,7 +1227,8 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
         event.preventDefault(); event.stopPropagation();
         const nodeRect = node.getBoundingClientRect();
         const frameRect = frameRef.current?.getBoundingClientRect();
-        onEditCta(section.id, path, normalizeText(node.textContent ?? ''), {
+        const labelSpan = node.querySelector('span');
+        onEditCta(section.id, path, normalizeText(labelSpan?.textContent ?? node.textContent ?? ''), {
           left: (frameRect?.left ?? 0) + nodeRect.left * scale,
           top: (frameRect?.top ?? 0) + nodeRect.bottom * scale + 8,
         });
@@ -1311,6 +1341,39 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
       <div ref={attachRoot} onClickCapture={(event) => {
         const target = event.target as HTMLElement;
         if (target.closest('[data-page-builder-native-editor]')) return;
+
+        const ctaNode = target.closest<HTMLElement>('[data-page-builder-cta-key], [data-page-builder-cta-edit]');
+        if (ctaNode && onEditCta) {
+          event.preventDefault();
+          event.stopPropagation();
+          const sectionNode = ctaNode.closest<HTMLElement>('[data-page-builder-section-id]');
+          const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? selectedId;
+          onSelect(sectionId);
+          const nodeRect = ctaNode.getBoundingClientRect();
+          const frameRect = frameRef.current?.getBoundingClientRect();
+          const path = ctaNode.dataset.pageBuilderCtaKey
+            ? (JSON.parse(ctaNode.dataset.pageBuilderCtaKey) as Array<string | number>)
+            : [ctaNode.dataset.pageBuilderCtaEdit ?? 'primaryCtaId'];
+          const labelSpan = ctaNode.querySelector('span');
+          const currentLabel = normalizeText(labelSpan?.textContent ?? ctaNode.textContent ?? '');
+          onEditCta(sectionId, path, currentLabel, {
+            left: (frameRect?.left ?? 0) + nodeRect.left * scale,
+            top: (frameRect?.top ?? 0) + nodeRect.bottom * scale + 8,
+          });
+          return;
+        }
+
+        const mediaNode = target.closest<HTMLElement>('[data-page-builder-media-path]');
+        if (mediaNode && onEditMedia) {
+          event.preventDefault();
+          event.stopPropagation();
+          const sectionNode = mediaNode.closest<HTMLElement>('[data-page-builder-section-id]');
+          const sectionId = sectionNode?.dataset.pageBuilderSectionId ?? selectedId;
+          onSelect(sectionId);
+          onEditMedia(sectionId, JSON.parse(mediaNode.dataset.pageBuilderMediaPath ?? '[]') as Array<string | number>, mediaNode.dataset.pageBuilderMediaId ?? '');
+          return;
+        }
+
         if (mode === 'edit' && target.closest('[data-ve-editable="true"], [data-ve-semantic~="reference-item"]')) return;
         const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
         if (!sectionNode) { onSelect(''); return; }
@@ -1324,21 +1387,6 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
           return;
         }
         event.stopPropagation();
-        const mediaNode = target.closest<HTMLElement>('[data-page-builder-media-path]');
-        if (mediaNode && onEditMedia) {
-          event.preventDefault();
-          onEditMedia(sectionId, JSON.parse(mediaNode.dataset.pageBuilderMediaPath ?? '[]') as Array<string | number>, mediaNode.dataset.pageBuilderMediaId ?? '');
-          return;
-        }
-        const ctaNode = target.closest<HTMLElement>('[data-page-builder-cta-key]');
-        if (ctaNode && onEditCta) {
-          event.preventDefault();
-          const nodeRect = ctaNode.getBoundingClientRect();
-          const frameRect = frameRef.current?.getBoundingClientRect();
-          const path = JSON.parse(ctaNode.dataset.pageBuilderCtaKey ?? '[]') as Array<string | number>;
-          onEditCta(sectionId, path, normalizeText(ctaNode.textContent ?? ''), { left: (frameRect?.left ?? 0) + nodeRect.left * scale, top: (frameRect?.top ?? 0) + nodeRect.bottom * scale + 8 });
-          return;
-        }
         if (!target.closest('[data-page-builder-inline-edit]')) event.preventDefault();
       }}>
         <WebsitePage page={{ ...page, draft: { ...page.draft, sections } }} activeHeroSlide={activeHeroSlide} editMode={mode === 'edit'} bindingRegistry={bindingRegistry} selectedId={selectedId} onConfigValueChange={onConfigValueChange} />

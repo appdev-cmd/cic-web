@@ -72,6 +72,15 @@ export interface PageBuilderEntityOption {
   description: string;
   entityType: PageBuilderEntityType;
   status?: 'published' | 'unpublished' | 'deleted';
+  meta?: {
+    image?: string;
+    location?: string;
+    category?: string;
+    summary?: string;
+    date?: string;
+    isFeatured?: boolean;
+    link?: string;
+  };
 }
 
 export interface SectionDefinition {

@@ -1,5 +1,5 @@
-import type { AboutCapacityMetricModel, AboutPageModel, AboutStrategyCoreValueModel, AboutTimelineMilestoneModel, CapacityExperiencePageModel, ContactBranchModel, ContactPageModel, HomePageModel, HomeProjectModel, HomeStatModel } from './models';
-import { resolveProjectEntity } from './resolveReferenceEntity';
+import type { AboutCapacityMetricModel, AboutPageModel, AboutStrategyCoreValueModel, AboutTimelineMilestoneModel, CapacityExperiencePageModel, ContactBranchModel, ContactPageModel, HomePageModel, HomeProjectModel, HomeStatModel, HomeEventItemModel, HomeNewsItemModel, HomePartnerItemModel } from './models';
+import { resolveProjectEntity, resolveEventEntity, resolveNewsEntity, resolvePartnerEntity } from './resolveReferenceEntity';
 
 export interface PageContentSectionSource {
   sectionKey: string;
@@ -74,7 +74,13 @@ function resolveHomeContent(
       });
     }
   }
-  const projects = projectItems.length > 0 ? { ...legacyFallback.projects, items: projectItems } : legacyFallback.projects;
+  const projCfg = isRecord(projectSection?.config) ? projectSection.config : {};
+  const projects = {
+    ...legacyFallback.projects,
+    ...(typeof projCfg.title === 'string' ? { title: projCfg.title } : {}),
+    ...(typeof projCfg.subtitle === 'string' ? { subtitle: projCfg.subtitle } : {}),
+    ...(projectItems.length > 0 ? { items: projectItems } : {}),
+  };
 
   // Stats
   let stats = legacyFallback.stats;
@@ -139,6 +145,10 @@ function resolveHomeContent(
       paragraphs: rawParagraphs.length > 0 ? rawParagraphs.map(String) : (intro?.paragraphs || []),
       videoUrl: typeof cfg.videoUrl === 'string' ? cfg.videoUrl : intro?.videoUrl,
       profilePdfUrl: typeof cfg.profilePdfUrl === 'string' ? cfg.profilePdfUrl : intro?.profilePdfUrl,
+      primaryCtaId: typeof cfg.primaryCtaId === 'string' ? cfg.primaryCtaId : intro?.primaryCtaId,
+      primaryCtaLabel: typeof cfg.primaryCtaLabel === 'string' ? cfg.primaryCtaLabel : intro?.primaryCtaLabel,
+      primaryCtaUrl: typeof cfg.primaryCtaUrl === 'string' ? cfg.primaryCtaUrl : intro?.primaryCtaUrl,
+      primaryCtaNewTab: typeof cfg.primaryCtaNewTab === 'boolean' ? cfg.primaryCtaNewTab : intro?.primaryCtaNewTab,
     };
   }
 
@@ -192,22 +202,30 @@ function resolveHomeContent(
   // Partners
   let partners = legacyFallback.partners;
   const partnersSec = sectionMap.get('home.partners');
-  if (partnersSec && isRecord(partnersSec.config)) {
-    const cfg = partnersSec.config;
+  if (partnersSec) {
+    const cfg = isRecord(partnersSec.config) ? partnersSec.config : {};
+    const ref = partnersSec.references?.find((item) => item.entityType === 'partner');
+    const refItems: HomePartnerItemModel[] = [];
+    if (ref && ref.entityIds.length > 0) {
+      ref.entityIds.forEach((id) => {
+        const item = resolvePartnerEntity(id);
+        if (item) refItems.push(item);
+      });
+    }
     const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
-    const items = rawItems
+    const cfgItems = rawItems
       .filter((item): item is Record<string, unknown> => isRecord(item))
       .map((item) => ({
         name: typeof item.name === 'string' ? item.name : '',
         logo: typeof item.logo === 'string' ? item.logo : (typeof item.imageId === 'string' ? item.imageId : ''),
       }));
-    if (items.length > 0) {
-      partners = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : partners?.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : partners?.title,
-        items,
-      };
-    }
+    const finalItems = refItems.length > 0 ? refItems : (cfgItems.length > 0 ? cfgItems : (partners?.items ?? []));
+    partners = {
+      badge: typeof cfg.badge === 'string' ? cfg.badge : partners?.badge,
+      title: typeof cfg.title === 'string' ? cfg.title : partners?.title,
+      subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : partners?.subtitle,
+      items: finalItems,
+    };
   }
 
   // Contact CTA
@@ -227,6 +245,51 @@ function resolveHomeContent(
     };
   }
 
+  // Events
+  let events = legacyFallback.events;
+  const eventsSec = sectionMap.get('home.events');
+  if (eventsSec) {
+    const cfg = isRecord(eventsSec.config) ? eventsSec.config : {};
+    const ref = eventsSec.references?.find((item) => item.entityType === 'event');
+    const refUpcoming: HomeEventItemModel[] = [];
+    if (ref && ref.entityIds.length > 0) {
+      ref.entityIds.forEach((id) => {
+        const item = resolveEventEntity(id);
+        if (item) refUpcoming.push(item);
+      });
+    }
+    events = {
+      ...legacyFallback.events,
+      ...(typeof cfg.title === 'string' ? { title: cfg.title } : {}),
+      ...(typeof cfg.subtitle === 'string' ? { subtitle: cfg.subtitle } : {}),
+      ...(typeof cfg.badge === 'string' ? { badge: cfg.badge } : {}),
+      upcomingEvents: refUpcoming.length > 0 ? refUpcoming : (legacyFallback.events?.upcomingEvents ?? []),
+      pastEvents: legacyFallback.events?.pastEvents ?? [],
+    };
+  }
+
+  // News
+  let news = legacyFallback.news;
+  const newsSec = sectionMap.get('home.news');
+  if (newsSec) {
+    const cfg = isRecord(newsSec.config) ? newsSec.config : {};
+    const ref = newsSec.references?.find((item) => item.entityType === 'news');
+    const refNews: HomeNewsItemModel[] = [];
+    if (ref && ref.entityIds.length > 0) {
+      ref.entityIds.forEach((id) => {
+        const item = resolveNewsEntity(id);
+        if (item) refNews.push(item);
+      });
+    }
+    news = {
+      ...legacyFallback.news,
+      ...(typeof cfg.title === 'string' ? { title: cfg.title } : {}),
+      ...(typeof cfg.subtitle === 'string' ? { subtitle: cfg.subtitle } : {}),
+      ...(typeof cfg.badge === 'string' ? { badge: cfg.badge } : {}),
+      items: refNews.length > 0 ? refNews : (legacyFallback.news?.items ?? []),
+    };
+  }
+
   return {
     content: {
       hero,
@@ -235,8 +298,8 @@ function resolveHomeContent(
       awards,
       ecosystem,
       projects,
-      events: legacyFallback.events,
-      news: legacyFallback.news,
+      events,
+      news,
       partners,
       contactCta,
     },

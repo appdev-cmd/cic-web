@@ -381,7 +381,16 @@ export const HomeView = ({
               </div>
               <div className="flex flex-wrap gap-3">
                 <button 
-                  onClick={() => {
+                  data-page-builder-cta-key={JSON.stringify(['primaryCtaId'])}
+                  onClick={(e) => {
+                    if (editMode) {
+                      e.preventDefault();
+                      return;
+                    }
+                    if (introData?.primaryCtaUrl) {
+                      window.open(introData.primaryCtaUrl, introData.primaryCtaNewTab ? '_blank' : '_self');
+                      return;
+                    }
                     setCurrentView('about');
                     setActiveLink('Giới thiệu');
                     setAboutSubTab('overview');
@@ -389,7 +398,7 @@ export const HomeView = ({
                   }}
                   className="px-4 py-2 sm:px-5 sm:py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-sm shadow-orange-600/20 border-2 border-orange-600 btn-modern-interaction flex items-center gap-2 cursor-pointer"
                 >
-                  Khám phá hành trình CIC <ArrowRight size={15} />
+                  <span>{introData?.primaryCtaLabel || "Khám phá hành trình CIC"}</span> <ArrowRight size={15} />
                 </button>
                 <a 
                   href={introData?.profilePdfUrl || "https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf"}
@@ -542,6 +551,8 @@ export const HomeView = ({
           <SectionHeader 
             title={content.awards?.title || "Thành tựu & Giải thưởng"} 
             sub={content.awards?.subtitle || "Minh chứng cho nỗ lực không ngừng nghỉ"} 
+            titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
+            subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
           />
           <div className="mt-6">
             <AwardsSlider awards={homeAwards} paused={editMode} />
@@ -551,66 +562,98 @@ export const HomeView = ({
 
       {/* Ecosystem Section */}
       <HomeEcosystemSection
+        title={content.ecosystem?.title}
+        subtitle={content.ecosystem?.subtitle}
         editMode={editMode}
-        items={[
-          {
-            id: 'ai-smart-tech',
-            title: 'AI & Công nghệ thông minh',
-            description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
-            badge: 'Advanced Technology',
-            image: heroSlides[2]?.img ?? heroSlides[1]?.img,
-            view: 'products',
-            activeLink: 'Sản phẩm',
-          },
-          {
-            id: 'bim-digital-twins',
-            title: 'BIM & Digital Twins',
-            description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
-            badge: 'BIM & Digital Twins',
-            image: projects[0]?.img ?? heroSlides[1]?.img,
-            view: 'services',
-            activeLink: 'Dịch vụ',
-            serviceId: 'tu-van-bim',
-          },
-          {
-            id: 'licensed-software',
-            title: 'Phần mềm kỹ thuật bản quyền',
-            description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
-            badge: 'Phần mềm',
-            image: heroSlides[3]?.img ?? heroSlides[1]?.img,
-            view: 'products',
-            activeLink: 'Sản phẩm',
-          },
-          {
-            id: 'technology-equipment',
-            title: 'Thiết bị công nghệ',
-            description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.',
-            badge: 'Thiết bị & IoT',
-            image: projects.find((project) => project.type === 'equipment')?.img ?? heroSlides[1]?.img,
-            view: 'products',
-            activeLink: 'Sản phẩm',
-          },
-          {
-            id: 'net-zero',
-            title: 'Net Zero và phát triển bền vững',
-            description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.',
-            badge: 'Sustainability',
-            image: newsItems.find((item) => item.category === 'specialty')?.img ?? heroSlides[1]?.img,
-            view: 'services',
-            activeLink: 'Dịch vụ',
-            serviceId: 'tu-van-kiem-ke-khi-nha-kinh',
-          },
-          {
-            id: 'consulting-training',
-            title: 'Tư vấn & Đào tạo',
-            description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.',
-            badge: 'Tư vấn chuyên sâu',
-            image: newsItems.find((item) => item.category === 'international')?.img ?? heroSlides[1]?.img,
-            view: 'services',
-            activeLink: 'Dịch vụ',
-            serviceId: null,
-          },
-        ] satisfies readonly HomeEcosystemItem[]}
+        items={(content.ecosystem?.items && content.ecosystem.items.length > 0)
+          ? content.ecosystem.items.map((item, idx) => {
+              const fallbackItems = [
+                { id: 'ai-smart-tech', title: 'AI & Công nghệ thông minh', description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.', badge: 'Advanced Technology', image: heroSlides[2]?.img ?? heroSlides[1]?.img, view: 'products' as const, activeLink: 'Sản phẩm' as const },
+                { id: 'bim-digital-twins', title: 'BIM & Digital Twins', description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.', badge: 'BIM & Digital Twins', image: projects[0]?.img ?? heroSlides[1]?.img, view: 'services' as const, activeLink: 'Dịch vụ' as const, serviceId: 'tu-van-bim' },
+                { id: 'licensed-software', title: 'Phần mềm kỹ thuật bản quyền', description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.', badge: 'Phần mềm', image: heroSlides[3]?.img ?? heroSlides[1]?.img, view: 'products' as const, activeLink: 'Sản phẩm' as const },
+                { id: 'technology-equipment', title: 'Thiết bị công nghệ', description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.', badge: 'Thiết bị & IoT', image: projects.find((p) => p.type === 'equipment')?.img ?? heroSlides[1]?.img, view: 'products' as const, activeLink: 'Sản phẩm' as const },
+                { id: 'net-zero', title: 'Net Zero và phát triển bền vững', description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.', badge: 'Sustainability', image: newsItems.find((n) => n.category === 'specialty')?.img ?? heroSlides[1]?.img, view: 'services' as const, activeLink: 'Dịch vụ' as const, serviceId: 'tu-van-kiem-ke-khi-nha-kinh' },
+                { id: 'consulting-training', title: 'Tư vấn & Đào tạo', description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.', badge: 'Tư vấn chuyên sâu', image: newsItems.find((n) => n.category === 'international')?.img ?? heroSlides[1]?.img, view: 'services' as const, activeLink: 'Dịch vụ' as const, serviceId: null },
+              ];
+              const fallback = fallbackItems[idx % fallbackItems.length];
+              const rawItem = item as unknown as Record<string, unknown>;
+              const link = typeof item.link === 'string' ? item.link : '';
+              const isService = link.includes('dich-vu') || link.includes('service');
+              const image = typeof rawItem.image === 'string' && rawItem.image
+                ? rawItem.image
+                : typeof rawItem.imageId === 'string' && rawItem.imageId
+                  ? rawItem.imageId
+                  : fallback.image;
+              return {
+                id: item.id || fallback.id,
+                title: item.title || fallback.title,
+                description: item.desc || (typeof rawItem.description === 'string' ? rawItem.description : fallback.description),
+                badge: item.tag || (typeof rawItem.badge === 'string' ? rawItem.badge : fallback.badge),
+                image,
+                view: isService ? ('services' as const) : ('products' as const),
+                activeLink: isService ? ('Dịch vụ' as const) : ('Sản phẩm' as const),
+                serviceId: isService ? fallback.serviceId : null,
+              };
+            })
+          : [
+              {
+                id: 'ai-smart-tech',
+                title: 'AI & Công nghệ thông minh',
+                description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
+                badge: 'Advanced Technology',
+                image: heroSlides[2]?.img ?? heroSlides[1]?.img,
+                view: 'products' as const,
+                activeLink: 'Sản phẩm' as const,
+              },
+              {
+                id: 'bim-digital-twins',
+                title: 'BIM & Digital Twins',
+                description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
+                badge: 'BIM & Digital Twins',
+                image: projects[0]?.img ?? heroSlides[1]?.img,
+                view: 'services' as const,
+                activeLink: 'Dịch vụ' as const,
+                serviceId: 'tu-van-bim',
+              },
+              {
+                id: 'licensed-software',
+                title: 'Phần mềm kỹ thuật bản quyền',
+                description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
+                badge: 'Phần mềm',
+                image: heroSlides[3]?.img ?? heroSlides[1]?.img,
+                view: 'products' as const,
+                activeLink: 'Sản phẩm' as const,
+              },
+              {
+                id: 'technology-equipment',
+                title: 'Thiết bị công nghệ',
+                description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.',
+                badge: 'Thiết bị & IoT',
+                image: projects.find((project) => project.type === 'equipment')?.img ?? heroSlides[1]?.img,
+                view: 'products' as const,
+                activeLink: 'Sản phẩm' as const,
+              },
+              {
+                id: 'net-zero',
+                title: 'Net Zero và phát triển bền vững',
+                description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.',
+                badge: 'Sustainability',
+                image: newsItems.find((item) => item.category === 'specialty')?.img ?? heroSlides[1]?.img,
+                view: 'services' as const,
+                activeLink: 'Dịch vụ' as const,
+                serviceId: 'tu-van-kiem-ke-khi-nha-kinh',
+              },
+              {
+                id: 'consulting-training',
+                title: 'Tư vấn & Đào tạo',
+                description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.',
+                badge: 'Tư vấn chuyên sâu',
+                image: newsItems.find((item) => item.category === 'international')?.img ?? heroSlides[1]?.img,
+                view: 'services' as const,
+                activeLink: 'Dịch vụ' as const,
+                serviceId: null,
+              },
+            ]}
         onSelect={(item) => {
           setCurrentView(item.view);
           setActiveLink(item.activeLink);
@@ -625,6 +668,8 @@ export const HomeView = ({
           <SectionHeader 
              title={content.projects.title || "Dự án tiêu biểu"} 
              sub={content.projects.subtitle || "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện"} 
+             titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
+             subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
           />
           
           {/* Project Tabs and Search */}
@@ -955,6 +1000,8 @@ export const HomeView = ({
           <SectionHeader 
             title={content.events?.title || "Sự kiện & Hội thảo"} 
             sub={content.events?.subtitle || "Kết nối chuyên gia - Chia sẻ tri thức công nghệ"} 
+            titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
+            subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
             dark
           />
           
@@ -1076,6 +1123,8 @@ export const HomeView = ({
           <SectionHeader 
             title={content.news?.title || "Tin tức và Góc nhìn"} 
             sub={content.news?.subtitle || "Cập nhật xu hướng công nghệ & chuyển đổi số mới nhất"} 
+            titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
+            subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
           />
 
           {/* News Categories */}
@@ -1171,7 +1220,9 @@ export const HomeView = ({
         <div className="max-w-7xl mx-auto px-6 mb-6 relative z-10">
           <SectionHeader 
             title={content.partners?.title || "Đối tác chiến lược"} 
-            sub="Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" 
+            sub={content.partners?.subtitle || "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới"} 
+            titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
+            subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
           />
         </div>
         

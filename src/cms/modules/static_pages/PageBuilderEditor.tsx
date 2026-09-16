@@ -49,7 +49,8 @@ import { findPageBuilderImage, PageMediaPickerModal } from './PageMediaPickerMod
 import { PageBuilderVisualCanvas } from './PageBuilderVisualCanvas';
 import { RichTextEditor } from './RichTextEditor';
 import { mockArticles } from '../news/mockData';
-import { formatHeroHeading } from '@/web/components/HomeView';
+import { registerEntityOptions } from '@/shared/page-content/resolveReferenceEntity';
+import { formatHeroHeading } from '../../../web/components/HomeView';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 
 interface PageBuilderEditorProps {
@@ -1252,17 +1253,134 @@ function ConfigField({
         </label>
       );
     }
+    const moveItem = (fromIndex: number, toIndex: number) => {
+      if (toIndex < 0 || toIndex >= value.length) return;
+      const next = [...value];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      onChange(path, next);
+    };
+
+    const duplicateItem = (targetIndex: number) => {
+      const next = [...value];
+      const itemToClone = deepClone(next[targetIndex]);
+      if (typeof itemToClone === 'object' && itemToClone !== null && 'id' in itemToClone) {
+        (itemToClone as any).id = `${(itemToClone as any).id}_copy_${Date.now()}`;
+      }
+      next.splice(targetIndex + 1, 0, itemToClone);
+      onChange(path, next);
+    };
+
+    const removeItem = (targetIndex: number) => {
+      const next = value.filter((_, idx) => idx !== targetIndex);
+      onChange(path, next);
+    };
+
+    const addItem = () => {
+      const sample = value[value.length - 1] ?? value[0];
+      let newItem: PageBuilderConfigValue;
+      if (sample && typeof sample === 'object' && !Array.isArray(sample)) {
+        const fresh: Record<string, PageBuilderConfigValue> = {};
+        for (const [k, v] of Object.entries(sample)) {
+          if (k === 'id') fresh[k] = `item_${Date.now()}`;
+          else if (typeof v === 'number') fresh[k] = 0;
+          else if (typeof v === 'boolean') fresh[k] = false;
+          else fresh[k] = '';
+        }
+        newItem = fresh;
+      } else if (typeof sample === 'string') {
+        newItem = '';
+      } else if (typeof sample === 'number') {
+        newItem = 0;
+      } else {
+        newItem = { id: `item_${Date.now()}`, title: '', description: '' };
+      }
+      onChange(path, [...value, newItem]);
+    };
+
     return (
-      <div className="space-y-2 md:col-span-2">
-        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{labelFor(fieldKey)}</p>
+      <div className="space-y-3 md:col-span-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{labelFor(fieldKey)} ({value.length} mục)</p>
+          <button
+            type="button"
+            onClick={addItem}
+            className="flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-300"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Thêm mục</span>
+          </button>
+        </div>
         {value.map((item, index) => (
-          <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Mục {index + 1}</p>
+          <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-700 dark:bg-slate-800/60">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Mục {index + 1}</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => moveItem(index, index - 1)}
+                  disabled={index === 0}
+                  className="rounded-md p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-30 dark:hover:bg-slate-700"
+                  title="Di chuyển lên"
+                >
+                  <MoveUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveItem(index, index + 1)}
+                  disabled={index === value.length - 1}
+                  className="rounded-md p-1 text-slate-500 hover:bg-slate-200 disabled:opacity-30 dark:hover:bg-slate-700"
+                  title="Di chuyển xuống"
+                >
+                  <MoveDown className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => duplicateItem(index)}
+                  className="rounded-md p-1 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  title="Nhân bản"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeItem(index)}
+                  disabled={value.length <= 1}
+                  className="rounded-md p-1 text-red-500 hover:bg-red-50 disabled:opacity-30 dark:hover:bg-red-950/40"
+                  title="Xóa mục"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
             {typeof item === 'object' && item !== null ? (
               <div className="grid gap-3 md:grid-cols-2">
-                {Object.entries(item).map(([key, child]) => <ConfigField key={key} fieldKey={key} value={child} path={[...path, index, key]} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} entityOptions={entityOptions} onActiveHeroSlideChange={onActiveHeroSlideChange} />)}
+                {Object.entries(item).map(([key, child]) => (
+                  <ConfigField
+                    key={key}
+                    fieldKey={key}
+                    value={child}
+                    path={[...path, index, key]}
+                    onChange={onChange}
+                    onPickImage={onPickImage}
+                    mediaImages={mediaImages}
+                    entityOptions={entityOptions}
+                    onActiveHeroSlideChange={onActiveHeroSlideChange}
+                  />
+                ))}
               </div>
-            ) : <ConfigField fieldKey={`${fieldKey}_${index + 1}`} value={item} path={[...path, index]} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} entityOptions={entityOptions} onActiveHeroSlideChange={onActiveHeroSlideChange} />}
+            ) : (
+              <ConfigField
+                fieldKey={`${fieldKey}_${index + 1}`}
+                value={item}
+                path={[...path, index]}
+                onChange={onChange}
+                onPickImage={onPickImage}
+                mediaImages={mediaImages}
+                entityOptions={entityOptions}
+                onActiveHeroSlideChange={onActiveHeroSlideChange}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -1434,7 +1552,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
   const [mediaPicker, setMediaPicker] = useState<{ sectionId: string; path: Array<string | number>; currentId: string } | null>(null);
   const [showValidation, setShowValidation] = useState(false);
   const [showMobileCanvas, setShowMobileCanvas] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [ctaPopover, setCtaPopover] = useState<{ sectionId: string; path: Array<string | number>; fallbackLabel: string; anchor: { left: number; top: number } } | null>(null);
   const [videoPopover, setVideoPopover] = useState<{ sectionId: string; path: Array<string | number>; url: string; anchor: { left: number; top: number } } | null>(null);
@@ -1443,6 +1561,12 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
   const [future, setFuture] = useState<PageBuilderPage[]>([]);
   const issues = useMemo(() => validate(workingPage, entityOptions), [entityOptions, workingPage]);
   const issueCount = Object.values(issues).reduce((total, values) => total + values.length, 0);
+
+  useEffect(() => {
+    if (entityOptions && entityOptions.length > 0) {
+      registerEntityOptions(entityOptions);
+    }
+  }, [entityOptions]);
 
   useEffect(() => {
     if (!ctaPopover) return;
@@ -1473,7 +1597,21 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     setWorkingPage((current) => {
       setPast((items) => [...items.slice(-49), deepClone(current)]);
       setFuture([]);
-      return { ...current, draft: { ...current.draft, sections: current.draft.sections.map((section) => section.id === sectionId ? { ...section, references: (section.references ?? []).map((reference) => reference.entityType === entityType ? { ...reference, entityIds: ids } : reference) } : section) } };
+      return {
+        ...current,
+        draft: {
+          ...current.draft,
+          sections: current.draft.sections.map((section) => {
+            if (section.id !== sectionId) return section;
+            const existing = section.references ?? [];
+            const hasType = existing.some((reference) => reference.entityType === entityType);
+            const nextRefs = hasType
+              ? existing.map((reference) => (reference.entityType === entityType ? { ...reference, entityIds: ids } : reference))
+              : [...existing, { entityType, entityIds: ids }];
+            return { ...section, references: nextRefs };
+          }),
+        },
+      };
     });
   };
 
@@ -1491,14 +1629,17 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     if (!Array.isArray(current)) return;
     const items = [...current];
     if (action === 'add') {
+      const isAwards = section?.sectionType === 'award_slider' || section?.sectionType === 'awards' || section?.sectionKey === 'home.awards';
+      const isEcosystem = section?.sectionType === 'technology_ecosystem' || section?.sectionType === 'ecosystem' || section?.sectionKey === 'home.ecosystem';
+      const isPartners = section?.sectionType === 'partner_marquee' || section?.sectionType === 'partners' || section?.sectionKey === 'home.partners';
       const defaults: Record<string, PageBuilderConfigValue> = {
         slides: { title: '', subtitle: '', backgroundImageId: '', mobileImageId: '', primaryCtaId: '', secondaryCtaId: '' },
-        items: section?.sectionType === 'award_slider'
-          ? { name: '', year: '', description: '', imageId: '' }
-          : section?.sectionType === 'technology_ecosystem'
-            ? { id: `ecosystem_${items.length + 1}`, title: 'Giải pháp mới', description: 'Nhập mô tả.', badge: 'Công nghệ', imageId: '', link: '/' }
-            : section?.sectionType === 'partner_marquee'
-              ? { id: `partner_${items.length + 1}`, imageId: '' }
+        items: isAwards
+          ? { name: 'Giải thưởng mới', imageId: '' }
+          : isEcosystem
+            ? { id: `ecosystem_${items.length + 1}`, title: 'Giải pháp mới', description: 'Nhập mô tả giải pháp.', badge: 'Công nghệ', imageId: '', link: '/products' }
+            : isPartners
+              ? { id: `partner_${items.length + 1}`, name: 'Đối tác mới', imageId: '', link: '/' }
             : { value: 0, suffix: '+', label: '' },
         paragraphs: 'Nhập đoạn nội dung mới',
         tickerItems: 'Nhập thông báo mới',
@@ -1618,6 +1759,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
             <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">{([['desktop', Monitor, 'Desktop'], ['tablet', Tablet, 'Tablet'], ['mobile', Smartphone, 'Mobile']] as const).map(([value, Icon, label]) => <button key={value} type="button" title={label} aria-label={label} onClick={() => setViewport(value)} className={`rounded-md p-2 ${viewport === value ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}><Icon className="h-4 w-4" /></button>)}</div>
             <div className="flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900"><button type="button" onClick={undo} disabled={past.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hoàn tác" title="Hoàn tác"><Undo2 className="h-4 w-4" /></button><button type="button" onClick={redo} disabled={future.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Làm lại" title="Làm lại"><Redo2 className="h-4 w-4" /></button></div>
             <button type="button" onClick={() => { setShowHistory((value) => !value); setIsExpanded(false); }} className={`rounded-lg border p-2 ${showHistory ? 'border-orange-300 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`} aria-label="Lịch sử phiên bản" title="Lịch sử phiên bản"><History className="h-4 w-4" /></button>
+            <button type="button" onClick={() => { setIsExpanded((value) => !value); setShowHistory(false); }} className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${isExpanded ? 'border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950/40 dark:text-orange-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`} aria-label="Bật/tắt bảng cấu hình" title="Bật/tắt bảng cấu hình"><SlidersHorizontal className="h-4 w-4" /><span className="hidden sm:inline">Bảng cấu hình</span></button>
             <CmsButton variant="secondary" leadingIcon={<Save />} onClick={() => runValidAction(onSaveDraft)}>Lưu bản nháp</CmsButton><CmsButton variant="secondary" leadingIcon={<Eye />} onClick={() => runValidAction(onPreview)}>Xem trước</CmsButton><CmsButton leadingIcon={<Send />} onClick={() => runValidAction(onPublish)}>Xuất bản</CmsButton>
           </div>
         </div>
@@ -1645,7 +1787,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
               viewport={viewport}
               activeHeroSlide={activeHeroSlide}
               entityOptions={entityOptions}
-              onSelect={(id) => { setSelectedSectionId(id); setIsExpanded(false); setCtaPopover(null); }}
+              onSelect={(id) => { setSelectedSectionId(id); setIsExpanded(true); }}
               onTextChange={updateInlineText}
               onConfigValueChange={updateSectionConfig}
               onEditMedia={(sectionId, path, currentId) => setMediaPicker({ sectionId, path, currentId })}
@@ -1709,28 +1851,160 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
                   ))}
                 </div>
 
-                {section.references?.map((reference) => {
-                  const limit = definition.referenceLimit?.[reference.entityType] ?? 20;
-                  const source = reference.source ?? { mode: 'manual' as const, limit };
-                  return (
-                    <div key={reference.entityType} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white">{entityTypeLabels[reference.entityType]} đã chọn</p>
-                          <p className="text-xs text-slate-500">{reference.entityIds.length}/{limit} mục · đúng thứ tự hiển thị</p>
-                        </div>
-                      </div>
-                      <div className="mt-3 space-y-1.5">
-                        {reference.entityIds.map((id, index) => (
-                          <div key={id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                            <span>{index + 1}. {entityOptions.find((item) => item.id === id)?.label ?? id}</span>
-                            <CmsButton size="sm" variant="secondary" leadingIcon={<Link2 />} onClick={() => setPicker({ sectionId: section.id, entityType: reference.entityType, selectedIds: [], excludedIds: reference.entityIds.filter((_, itemIndex) => itemIndex !== index), limit: 1, replaceIndex: index })}>Thay</CmsButton>
+                {(() => {
+                  const supportedEntityTypes = Object.keys(definition.referenceLimit ?? {}) as PageBuilderEntityType[];
+                  if (supportedEntityTypes.length === 0) return null;
+
+                  return supportedEntityTypes.map((entityType) => {
+                    const reference = section.references?.find((item) => item.entityType === entityType) ?? { entityType, entityIds: [] };
+                    const limit = definition.referenceLimit?.[entityType] ?? 20;
+                    const source = reference.source ?? { mode: 'manual' as const, limit };
+                    const isFeatured = source.mode === 'featured';
+
+                    const moveRef = (from: number, to: number) => {
+                      if (to < 0 || to >= reference.entityIds.length) return;
+                      const next = [...reference.entityIds];
+                      const [moved] = next.splice(from, 1);
+                      next.splice(to, 0, moved);
+                      updateReference(section.id, entityType, next);
+                    };
+
+                    const removeRef = (targetIndex: number) => {
+                      const next = reference.entityIds.filter((_, idx) => idx !== targetIndex);
+                      updateReference(section.id, entityType, next);
+                    };
+
+                    const switchToFeatured = () => {
+                      const featuredItems = entityOptions
+                        .filter((opt) => opt.entityType === entityType && (opt.meta as any)?.isFeatured)
+                        .slice(0, limit);
+                      const fallbackItems = entityOptions
+                        .filter((opt) => opt.entityType === entityType)
+                        .slice(0, limit);
+                      const autoIds = (featuredItems.length > 0 ? featuredItems : fallbackItems).map((i) => i.id);
+                      updateReferenceSource(section.id, entityType, { mode: 'featured', limit });
+                      if (autoIds.length > 0) {
+                        updateReference(section.id, entityType, autoIds);
+                      }
+                    };
+
+                    const switchToManual = () => {
+                      updateReferenceSource(section.id, entityType, { mode: 'manual', limit });
+                    };
+
+                    return (
+                      <div key={entityType} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{entityTypeLabels[entityType]} đã chọn</p>
+                            <p className="text-xs text-slate-500">{reference.entityIds.length}/{limit} mục · đúng thứ tự hiển thị</p>
                           </div>
-                        ))}
+                          <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-slate-700 dark:bg-slate-900">
+                            <button
+                              type="button"
+                              onClick={switchToFeatured}
+                              className={`rounded-md px-2.5 py-1 text-xs font-bold transition ${
+                                isFeatured
+                                  ? 'bg-orange-600 text-white shadow-xs'
+                                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                              }`}
+                            >
+                              Tự động: Nổi bật
+                            </button>
+                            <button
+                              type="button"
+                              onClick={switchToManual}
+                              className={`rounded-md px-2.5 py-1 text-xs font-bold transition ${
+                                !isFeatured
+                                  ? 'bg-orange-600 text-white shadow-xs'
+                                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                              }`}
+                            >
+                              Chọn thủ công
+                            </button>
+                          </div>
+                        </div>
+
+                        {isFeatured && (
+                          <div className="rounded-lg bg-orange-50/80 p-2.5 text-xs text-orange-900 border border-orange-200/80 dark:bg-orange-950/30 dark:border-orange-800/60 dark:text-orange-200">
+                            <p className="font-semibold">Hệ thống đang tự động hiển thị {reference.entityIds.length} mục nổi bật từ cơ sở dữ liệu.</p>
+                          </div>
+                        )}
+
+                        <div className="space-y-1.5">
+                          {reference.entityIds.map((id, index) => (
+                            <div key={id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                              <span className="min-w-0 flex-1 truncate">
+                                <span className="text-slate-400 mr-1.5">{index + 1}.</span>
+                                {entityOptions.find((item) => item.id === id)?.label ?? id}
+                              </span>
+                              {!isFeatured && (
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => moveRef(index, index - 1)}
+                                    disabled={index === 0}
+                                    className="rounded p-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800"
+                                    title="Di chuyển lên"
+                                  >
+                                    <MoveUp className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => moveRef(index, index + 1)}
+                                    disabled={index === reference.entityIds.length - 1}
+                                    className="rounded p-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800"
+                                    title="Di chuyển xuống"
+                                  >
+                                    <MoveDown className="h-3.5 w-3.5" />
+                                  </button>
+                                  <CmsButton
+                                    size="sm"
+                                    variant="secondary"
+                                    leadingIcon={<Link2 />}
+                                    onClick={() => setPicker({
+                                      sectionId: section.id,
+                                      entityType,
+                                      selectedIds: [],
+                                      excludedIds: reference.entityIds.filter((_, itemIndex) => itemIndex !== index),
+                                      limit: 1,
+                                      replaceIndex: index
+                                    })}
+                                  >
+                                    Thay
+                                  </CmsButton>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeRef(index)}
+                                    className="rounded p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                    title="Xóa mục"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {!isFeatured && reference.entityIds.length < limit && (
+                          <button
+                            type="button"
+                            onClick={() => setPicker({
+                              sectionId: section.id,
+                              entityType,
+                              selectedIds: reference.entityIds,
+                              limit,
+                            })}
+                            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-xs font-bold text-slate-600 hover:border-orange-500 hover:text-orange-600 dark:border-slate-700 dark:text-slate-300"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Thêm {entityTypeLabels[entityType] || 'mục'}
+                          </button>
+                        )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
 
                 {showValidation && issues[section.id]?.map((issue) => (
                   <p key={issue} className="flex items-center gap-1.5 text-xs font-semibold text-red-600">
@@ -1761,7 +2035,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
         </aside>}
       </div>
 
-      {ctaPopover && selectedSection && <div data-cta-popover className="fixed z-[75] w-[min(360px,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-2xl dark:border-slate-700 dark:bg-slate-900" style={{ left: Math.min(ctaPopover.anchor.left, window.innerWidth - 376), top: Math.min(ctaPopover.anchor.top, window.innerHeight - 330) }} onPointerDown={(event) => event.stopPropagation()}><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Chỉnh sửa CTA</h3><button type="button" onClick={() => setCtaPopover(null)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng chỉnh sửa CTA"><X className="h-4 w-4" /></button></div><div className="mt-3 space-y-3"><label className="block space-y-1.5"><span className="text-xs font-semibold">CTA liên kết</span><select value={String(valueAtPath(selectedSection.config, ctaPopover.path) ?? '')} onChange={(event) => updateSectionConfig(selectedSection.id, ctaPopover.path, event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950">{CTA_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><label className="block space-y-1.5"><span className="text-xs font-semibold">Nhãn</span><input value={String(valueAtPath(selectedSection.config, siblingPath(ctaPopover.path, 'Label')) ?? ctaPopover.fallbackLabel)} onChange={(event) => updateSectionConfig(selectedSection.id, siblingPath(ctaPopover.path, 'Label'), event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><label className="block space-y-1.5"><span className="text-xs font-semibold">Link</span><input value={String(valueAtPath(selectedSection.config, siblingPath(ctaPopover.path, 'Url')) ?? '')} onChange={(event) => updateSectionConfig(selectedSection.id, siblingPath(ctaPopover.path, 'Url'), event.target.value)} placeholder="Dùng link của CTA nếu để trống" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300"><input type="checkbox" checked={Boolean(valueAtPath(selectedSection.config, siblingPath(ctaPopover.path, 'NewTab')))} onChange={(event) => updateSectionConfig(selectedSection.id, siblingPath(ctaPopover.path, 'NewTab'), event.target.checked)} className="h-4 w-4 accent-orange-600" />Mở tab mới</label></div></div>}
+      {ctaPopover && selectedSection && <div data-cta-popover className="fixed z-[75] w-[min(360px,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-2xl dark:border-slate-700 dark:bg-slate-900" style={{ left: Math.max(16, Math.min(ctaPopover.anchor.left, window.innerWidth - 376)), top: Math.max(16, Math.min(ctaPopover.anchor.top, window.innerHeight - 330)) }} onPointerDown={(event) => event.stopPropagation()}><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Chỉnh sửa CTA</h3><button type="button" onClick={() => setCtaPopover(null)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng chỉnh sửa CTA"><X className="h-4 w-4" /></button></div><div className="mt-3 space-y-3"><label className="block space-y-1.5"><span className="text-xs font-semibold">CTA liên kết</span><select value={String(valueAtPath(selectedSection.config, ctaPopover.path) ?? '')} onChange={(event) => updateSectionConfig(selectedSection.id, ctaPopover.path, event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950">{CTA_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><label className="block space-y-1.5"><span className="text-xs font-semibold">Nhãn</span><input value={String(valueAtPath(selectedSection.config, siblingPath(ctaPopover.path, 'Label')) ?? ctaPopover.fallbackLabel)} onChange={(event) => updateSectionConfig(selectedSection.id, siblingPath(ctaPopover.path, 'Label'), event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><label className="block space-y-1.5"><span className="text-xs font-semibold">Link</span><input value={String(valueAtPath(selectedSection.config, siblingPath(ctaPopover.path, 'Url')) ?? '')} onChange={(event) => updateSectionConfig(selectedSection.id, siblingPath(ctaPopover.path, 'Url'), event.target.value)} placeholder="Dùng link của CTA nếu để trống" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300"><input type="checkbox" checked={Boolean(valueAtPath(selectedSection.config, siblingPath(ctaPopover.path, 'NewTab')))} onChange={(event) => updateSectionConfig(selectedSection.id, siblingPath(ctaPopover.path, 'NewTab'), event.target.checked)} className="h-4 w-4 accent-orange-600" />Mở tab mới</label></div></div>}
 
       {picker && <PageEntityPickerModal isOpen entityType={picker.entityType} selectedIds={picker.selectedIds} limit={picker.limit} options={entityOptions.filter((option) => !picker.excludedIds?.includes(option.id))} onClose={() => setPicker(null)} onConfirm={(ids) => {
         if (picker.replaceIndex === undefined) updateReference(picker.sectionId, picker.entityType, ids);
@@ -1771,7 +2045,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
           if (reference && ids[0]) { const next = [...reference.entityIds]; next[picker.replaceIndex] = ids[0]; updateReference(picker.sectionId, picker.entityType, next); }
         }
       }} />}
-      {videoPopover && <div data-video-popover className="fixed z-[75] w-[min(420px,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-2xl dark:border-slate-700 dark:bg-slate-900" style={{ left: Math.min(videoPopover.anchor.left, window.innerWidth - 436), top: Math.min(videoPopover.anchor.top, window.innerHeight - 210) }} onPointerDown={(event) => event.stopPropagation()}><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Thay video</h3><button type="button" onClick={() => setVideoPopover(null)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng chỉnh sửa video"><X className="h-4 w-4" /></button></div><label className="mt-3 block space-y-1.5"><span className="text-xs font-semibold">Đường dẫn YouTube hoặc video</span><input autoFocus value={videoPopover.url} onChange={(event) => setVideoPopover((current) => current ? { ...current, url: event.target.value } : current)} onKeyDown={(event) => { if (event.key === 'Enter') { updateSectionConfig(videoPopover.sectionId, videoPopover.path, videoPopover.url); setVideoPopover(null); } }} placeholder="https://www.youtube.com/watch?v=..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><div className="mt-3 flex justify-end gap-2"><button type="button" onClick={() => setVideoPopover(null)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">Hủy</button><button type="button" onClick={() => { updateSectionConfig(videoPopover.sectionId, videoPopover.path, videoPopover.url); setVideoPopover(null); }} className="rounded-lg bg-orange-600 px-3 py-2 text-xs font-bold text-white hover:bg-orange-500">Áp dụng</button></div></div>}
+      {videoPopover && <div data-video-popover className="fixed z-[75] w-[min(420px,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-2xl dark:border-slate-700 dark:bg-slate-900" style={{ left: Math.max(16, Math.min(videoPopover.anchor.left, window.innerWidth - 436)), top: Math.max(16, Math.min(videoPopover.anchor.top, window.innerHeight - 210)) }} onPointerDown={(event) => event.stopPropagation()}><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-bold">Thay video</h3><button type="button" onClick={() => setVideoPopover(null)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng chỉnh sửa video"><X className="h-4 w-4" /></button></div><label className="mt-3 block space-y-1.5"><span className="text-xs font-semibold">Đường dẫn YouTube hoặc video</span><input autoFocus value={videoPopover.url} onChange={(event) => setVideoPopover((current) => current ? { ...current, url: event.target.value } : current)} onKeyDown={(event) => { if (event.key === 'Enter') { updateSectionConfig(videoPopover.sectionId, videoPopover.path, videoPopover.url); setVideoPopover(null); } }} placeholder="https://www.youtube.com/watch?v=..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950" /></label><div className="mt-3 flex justify-end gap-2"><button type="button" onClick={() => setVideoPopover(null)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">Hủy</button><button type="button" onClick={() => { updateSectionConfig(videoPopover.sectionId, videoPopover.path, videoPopover.url); setVideoPopover(null); }} className="rounded-lg bg-orange-600 px-3 py-2 text-xs font-bold text-white hover:bg-orange-500">Áp dụng</button></div></div>}
       {mediaPicker && <PageMediaPickerModal locale={workspaceLocale} currentId={mediaPicker.currentId} images={mediaImages} onClose={() => setMediaPicker(null)} onConfirm={(mediaId) => updateSectionConfig(mediaPicker.sectionId, mediaPicker.path, mediaId)} />}
     </div>
   );

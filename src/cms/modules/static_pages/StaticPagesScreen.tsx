@@ -24,12 +24,13 @@ import { PageBuilderPreviewModal } from './PageBuilderPreviewModal';
 import { pageBuilderEntityOptions } from './pageBuilderData';
 import { getDemoMediaPickerItems } from '../../data/demoMediaDataSource';
 import type { CmsStaticPageListItem, SaveDraftInput, StaticPageFullDetail } from '@/features/static-pages/types';
-import type { PageBuilderPage } from './pageBuilderTypes';
+import type { PageBuilderPage, PageBuilderEntityType, PageBuilderReference, PageBuilderEntityOption } from './pageBuilderTypes';
 import {
   savePageDraftAction,
   publishPageAction,
   createLegalPageAction,
   getCmsPageDetailAction,
+  getPageBuilderEntityOptionsAction,
 } from '@/features/static-pages/server/actions';
 
 interface StaticPagesScreenProps {
@@ -83,17 +84,37 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
         title: detail.draft.seoTitle,
         description: detail.draft.seoDescription,
       },
-      sections: detail.draft.sections.map((s) => ({
-        id: s.id,
-        sectionKey: s.sectionKey,
-        sectionType: s.sectionType,
-        position: s.position,
-        config: s.config as any,
-        references: s.references?.map((r) => ({
-          entityType: r.entityType as any,
-          entityIds: [r.entityId],
-        })),
-      })),
+      sections: detail.draft.sections.map((s) => {
+        const refMap = new Map<PageBuilderEntityType, string[]>();
+        s.references?.forEach((r) => {
+          const type = r.entityType as PageBuilderEntityType;
+          const list = refMap.get(type) ?? [];
+          list.push(r.entityId);
+          refMap.set(type, list);
+        });
+        const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
+          'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
+          'home.events': { entityType: 'event', defaultIds: ['2'] },
+          'home.news': { entityType: 'news', defaultIds: ['571', '18', '15', '52'] },
+          'home.partners': { entityType: 'partner', defaultIds: ['3', '4', '5', '6', '2'] },
+        };
+        const def = defaultRefsBySection[s.sectionKey];
+        if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
+          refMap.set(def.entityType, def.defaultIds);
+        }
+        const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => ({
+          entityType,
+          entityIds,
+        }));
+        return {
+          id: s.id,
+          sectionKey: s.sectionKey,
+          sectionType: s.sectionType,
+          position: s.position,
+          config: s.config as any,
+          references: references.length > 0 ? references : undefined,
+        };
+      }),
     },
     published: detail.published
       ? {
@@ -105,17 +126,37 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
             title: detail.published.seoTitle,
             description: detail.published.seoDescription,
           },
-          sections: detail.published.sections.map((s) => ({
-            id: s.id,
-            sectionKey: s.sectionKey,
-            sectionType: s.sectionType,
-            position: s.position,
-            config: s.config as any,
-            references: s.references?.map((r) => ({
-              entityType: r.entityType as any,
-              entityIds: [r.entityId],
-            })),
-          })),
+          sections: detail.published.sections.map((s) => {
+            const refMap = new Map<PageBuilderEntityType, string[]>();
+            s.references?.forEach((r) => {
+              const type = r.entityType as PageBuilderEntityType;
+              const list = refMap.get(type) ?? [];
+              list.push(r.entityId);
+              refMap.set(type, list);
+            });
+            const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
+              'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
+              'home.events': { entityType: 'event', defaultIds: ['2'] },
+              'home.news': { entityType: 'news', defaultIds: ['571', '18', '15', '52'] },
+              'home.partners': { entityType: 'partner', defaultIds: ['3', '4', '5', '6', '2'] },
+            };
+            const def = defaultRefsBySection[s.sectionKey];
+            if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
+              refMap.set(def.entityType, def.defaultIds);
+            }
+            const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => ({
+              entityType,
+              entityIds,
+            }));
+            return {
+              id: s.id,
+              sectionKey: s.sectionKey,
+              sectionType: s.sectionType,
+              position: s.position,
+              config: s.config as any,
+              references: references.length > 0 ? references : undefined,
+            };
+          }),
         }
       : {
           version: 0,
@@ -172,6 +213,20 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isPending, startTransition] = useTransition();
+  const [entityOptions, setEntityOptions] = useState<PageBuilderEntityOption[]>(() => pageBuilderEntityOptions);
+
+  // Load real entities from database
+  React.useEffect(() => {
+    getPageBuilderEntityOptionsAction(workspaceLocale).then((res) => {
+      if (res.success && res.data && res.data.length > 0) {
+        const existingIds = new Set(res.data.map((item) => item.id));
+        const merged = [...res.data, ...pageBuilderEntityOptions.filter((item) => !existingIds.has(item.id))];
+        setEntityOptions(merged);
+      }
+    }).catch((err) => {
+      console.error('Failed to load DB entity options for page builder:', err);
+    });
+  }, [workspaceLocale]);
 
   // Keep pages in sync when workspace locale changes
   React.useEffect(() => {
@@ -359,7 +414,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
           key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`}
           workspaceLocale={workspaceLocale}
           page={editingPage}
-          entityOptions={pageBuilderEntityOptions}
+          entityOptions={entityOptions}
           mediaImages={mediaImages}
           onBack={() => setEditingPage(null)}
           onSaveDraft={handleSaveDraft}

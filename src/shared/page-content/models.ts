@@ -17,6 +17,10 @@ export interface HomeIntroModel {
   paragraphs: readonly string[];
   videoUrl?: string;
   profilePdfUrl?: string;
+  primaryCtaId?: string;
+  primaryCtaLabel?: string;
+  primaryCtaUrl?: string;
+  primaryCtaNewTab?: boolean;
 }
 
 export interface HomeStatModel {
@@ -108,6 +112,7 @@ export interface HomePartnerItemModel {
 export interface HomePartnersModel {
   badge?: string;
   title?: string;
+  subtitle?: string;
   items: readonly HomePartnerItemModel[];
 }
 

@@ -86,7 +86,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
         images: { path: 'items.*.img', semantic: 'image', ownership: 'embedded', replace: 'enabled' },
       },
       collections: {
-        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } },
+        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } },
       },
     },
   },
@@ -110,15 +110,58 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     label: 'Dự án tiêu biểu', description: 'Tự động lấy tối đa 3 dự án đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { project: 3 }, canHide: true, canMove: true,
     editableContract: {
       sectionKey: 'home.projects',
-      fields: [],
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
       references: {
-        items: { path: 'items', entityType: 'project', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'blocked', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 3, layoutBehavior: { wrap: false } },
+        items: { path: 'items', entityType: 'project', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 3, layoutBehavior: { wrap: false } },
       },
     },
   },
-  'home.events': { label: 'Sự kiện nổi bật', description: 'Tự động lấy 1 sự kiện đã đánh dấu Nổi bật.', referenceLimit: { event: 1 }, canHide: true, canMove: true, editableContract: blockedContract('home.events') },
-  'home.news': { label: 'Tin tức và Góc nhìn', description: 'Tự động lấy tối đa 4 tin đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { news: 4 }, canHide: true, canMove: true, editableContract: blockedContract('home.news') },
-  'home.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 }, canHide: true, canMove: true, editableContract: blockedContract('home.partners') },
+  'home.events': {
+    label: 'Sự kiện nổi bật', description: 'Tự động lấy 1 sự kiện đã đánh dấu Nổi bật.', referenceLimit: { event: 1 }, canHide: true, canMove: true,
+    editableContract: {
+      sectionKey: 'home.events',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      references: {
+        items: { path: 'items', entityType: 'event', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 1, layoutBehavior: { wrap: false } },
+      },
+    },
+  },
+  'home.news': {
+    label: 'Tin tức và Góc nhìn', description: 'Tự động lấy tối đa 4 tin đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { news: 4 }, canHide: true, canMove: true,
+    editableContract: {
+      sectionKey: 'home.news',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      references: {
+        items: { path: 'items', entityType: 'news', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 4, layoutBehavior: { wrap: false } },
+      },
+    },
+  },
+  'home.partners': {
+    label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 }, canHide: true, canMove: true,
+    editableContract: {
+      sectionKey: 'home.partners',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.name', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        images: { path: 'items.*.logo', semantic: 'image', ownership: 'embedded', replace: 'enabled' },
+      },
+      collections: {
+        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } },
+      },
+    },
+  },
   'home.contact_cta': {
     label: 'CTA & Form tư vấn',
     description: 'Nội dung liên hệ và form cố định.',

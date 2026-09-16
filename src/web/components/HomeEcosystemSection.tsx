@@ -13,12 +13,20 @@ export interface HomeEcosystemItem {
 }
 
 interface HomeEcosystemSectionProps {
+  title?: string;
+  subtitle?: string;
   items: readonly HomeEcosystemItem[];
   editMode?: boolean;
   onSelect: (item: HomeEcosystemItem) => void;
 }
 
-export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({ items, editMode = false, onSelect }) => {
+export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
+  title = 'Hệ sinh thái Công nghệ CIC',
+  subtitle = 'Phần mềm, thiết bị, AI, BIM, Digital Twins cùng năng lực tư vấn và đào tạo chuyên sâu trong một hệ sinh thái công nghệ thống nhất.',
+  items,
+  editMode = false,
+  onSelect,
+}) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -50,12 +58,18 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({ item
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
         <div className="grid items-start gap-9 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4 lg:sticky lg:top-28">
-            <h2 className="max-w-md text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl">
-              Hệ sinh thái Công nghệ CIC
+            <h2
+              data-page-builder-config-path={JSON.stringify(['title'])}
+              className="max-w-md text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
+            >
+              {title}
             </h2>
             <div aria-hidden="true" className="my-5 h-1 w-14 rounded-full bg-orange-600" />
-            <p className="max-w-md text-base leading-7 text-slate-600">
-              Phần mềm, thiết bị, AI, BIM, Digital Twins cùng năng lực tư vấn và đào tạo chuyên sâu trong một hệ sinh thái công nghệ thống nhất.
+            <p
+              data-page-builder-config-path={JSON.stringify(['subtitle'])}
+              className="max-w-md text-base leading-7 text-slate-600"
+            >
+              {subtitle}
             </p>
 
             <div className="mt-7 flex items-center gap-4 sm:mt-9">
@@ -76,7 +90,7 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({ item
           </div>
 
           <div className="min-w-0 lg:col-span-8">
-            <div ref={trackRef} onScroll={syncScrollState} className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div ref={trackRef} data-page-collection="ecosystem" onScroll={syncScrollState} className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5" style={{ WebkitOverflowScrolling: 'touch' }}>
               {items.map((item) => (
                 <button
                   key={item.id}
