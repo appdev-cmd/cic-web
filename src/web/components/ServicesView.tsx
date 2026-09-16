@@ -238,7 +238,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 pt-28 pb-20 relative">
+    <div className="min-h-screen bg-slate-50/60 pt-8 pb-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         <AnimatePresence mode="wait">
           {!activeService ? (

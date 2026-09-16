@@ -98,7 +98,7 @@ export const EventsView: React.FC<EventsViewProps> = ({
   }, [selectedEvent, heroEvent]);
 
   return (
-    <div className="pt-24 pb-20 relative min-h-screen bg-[#F5F6F8] text-slate-900 font-sans">
+    <div className="pt-8 pb-20 relative min-h-screen bg-[#F5F6F8] text-slate-900 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <AnimatePresence mode="wait">
           {registerEvent ? (

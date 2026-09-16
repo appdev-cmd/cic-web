@@ -166,9 +166,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   const ActiveFieldIcon = businessFields[activeFieldIndex].icon;
 
   return (
-    <div className="pt-24 bg-transparent min-h-screen relative">
+    <div className="bg-transparent min-h-screen relative pt-0">
       {/* Visual Top Hero Banner */}
-      <section data-page-builder-section-key="about.hero" className="relative pt-24 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
+      <section data-page-builder-section-key="about.hero" className="relative pt-12 pb-12 lg:pt-16 lg:pb-16 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <img
             data-page-builder-media-path={JSON.stringify(['backgroundImageId'])}

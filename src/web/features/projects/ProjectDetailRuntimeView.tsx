@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -44,7 +44,7 @@ export function ProjectDetailRuntimeView({
   };
 
   return (
-    <div className="pt-28 pb-20 relative z-10 bg-slate-50/50">
+    <div className="pt-8 pb-20 relative z-10 bg-slate-50/50">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}

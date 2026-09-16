@@ -39,7 +39,7 @@ export const PublicLegalPageView: React.FC<PublicLegalPageViewProps> = ({
     : 'Chưa cập nhật';
 
   return (
-    <div className="pt-28 pb-20 relative z-10 min-h-screen bg-slate-50/60">
+    <div className="pt-8 pb-20 relative z-10 min-h-screen bg-slate-50/60">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center gap-2 text-xs text-slate-500 mb-6 font-sans">
           <button 

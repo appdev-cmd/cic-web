@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
@@ -70,7 +70,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
   };
 
   return (
-    <div className="pt-28 pb-20 relative z-10 bg-slate-50/50">
+    <div className="pt-8 pb-20 relative z-10 bg-slate-50/50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="space-y-12">
           {/* Header section */}

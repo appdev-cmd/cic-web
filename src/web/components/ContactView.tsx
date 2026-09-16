@@ -174,7 +174,7 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
 
 
   return (
-    <div className="pt-24 pb-20 relative min-h-screen bg-slate-50/70">
+    <div className="pt-8 pb-20 relative min-h-screen bg-slate-50/70">
       <div className="max-w-7xl mx-auto px-6">
 
         {/* HERO TITLE AREA */}
