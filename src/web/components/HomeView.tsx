@@ -96,6 +96,80 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const introData = content.intro;
   const contactCta = content.contactCta;
 
+  const homeEcosystemItems: readonly HomeEcosystemItem[] = useMemo(() => {
+    if (content.ecosystem?.items && content.ecosystem.items.length > 0) {
+      return content.ecosystem.items.map((item, idx) => ({
+        id: item.id || `eco-${idx + 1}`,
+        title: item.title,
+        description: item.desc,
+        badge: item.badge || item.tag || 'Công nghệ',
+        image: item.image || item.imageId || heroSlides[idx % Math.max(heroSlides.length, 1)]?.img || '/banner_hero/dan_dau_chuyen_doi_so.png',
+        view: item.view ?? 'products',
+        activeLink: item.activeLink ?? 'Sản phẩm',
+        serviceId: item.serviceId ?? null,
+      }));
+    }
+    return [
+      {
+        id: 'ai-smart-tech',
+        title: 'AI & Công nghệ thông minh',
+        description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
+        badge: 'Advanced Technology',
+        image: heroSlides[2]?.img ?? heroSlides[1]?.img ?? '/banner_hero/dan_dau_chuyen_doi_so.png',
+        view: 'products' as const,
+        activeLink: 'Sản phẩm' as const,
+      },
+      {
+        id: 'bim-digital-twins',
+        title: 'BIM & Digital Twins',
+        description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
+        badge: 'BIM & Digital Twins',
+        image: projects[0]?.img ?? heroSlides[1]?.img ?? '/banner_hero/He_sinh_thai_giai_phap_so.png',
+        view: 'services' as const,
+        activeLink: 'Dịch vụ' as const,
+        serviceId: 'tu-van-bim',
+      },
+      {
+        id: 'licensed-software',
+        title: 'Phần mềm kỹ thuật bản quyền',
+        description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
+        badge: 'Phần mềm',
+        image: heroSlides[3]?.img ?? heroSlides[1]?.img ?? '/banner_hero/Phan_mem_ban_quyen_chinh_hang.jpg',
+        view: 'products' as const,
+        activeLink: 'Sản phẩm' as const,
+      },
+      {
+        id: 'technology-equipment',
+        title: 'Thiết bị công nghệ',
+        description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.',
+        badge: 'Thiết bị & IoT',
+        image: projects.find((project) => project.type === 'equipment')?.img ?? heroSlides[1]?.img ?? '/banner_hero/He_sinh_thai_giai_phap_so.png',
+        view: 'products' as const,
+        activeLink: 'Sản phẩm' as const,
+      },
+      {
+        id: 'net-zero',
+        title: 'Net Zero và phát triển bền vững',
+        description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.',
+        badge: 'Sustainability',
+        image: newsItems.find((item) => item.category === 'specialty')?.img ?? heroSlides[1]?.img ?? '/banner_hero/dan_dau_chuyen_doi_so.png',
+        view: 'services' as const,
+        activeLink: 'Dịch vụ' as const,
+        serviceId: 'tu-van-kiem-ke-khi-nha-kinh',
+      },
+      {
+        id: 'consulting-training',
+        title: 'Tư vấn & Đào tạo',
+        description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.',
+        badge: 'Tư vấn chuyên sâu',
+        image: newsItems.find((item) => item.category === 'international')?.img ?? heroSlides[1]?.img ?? '/banner_hero/doi_tac_cong_nghe_chien_luoc.png',
+        view: 'services' as const,
+        activeLink: 'Dịch vụ' as const,
+        serviceId: null,
+      },
+    ];
+  }, [content.ecosystem?.items, heroSlides, projects, newsItems]);
+
   return (
     <>
       <HomeHeroSection
@@ -132,69 +206,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       />
 
       <HomeEcosystemSection
+        title={content.ecosystem?.title}
+        subtitle={content.ecosystem?.subtitle}
         editMode={editMode}
-        items={[
-          {
-            id: 'ai-smart-tech',
-            title: 'AI & Công nghệ thông minh',
-            description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
-            badge: 'Advanced Technology',
-            image: heroSlides[2]?.img ?? heroSlides[1]?.img,
-            view: 'products',
-            activeLink: 'Sản phẩm',
-          },
-          {
-            id: 'bim-digital-twins',
-            title: 'BIM & Digital Twins',
-            description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
-            badge: 'BIM & Digital Twins',
-            image: projects[0]?.img ?? heroSlides[1]?.img,
-            view: 'services',
-            activeLink: 'Dịch vụ',
-            serviceId: 'tu-van-bim',
-          },
-          {
-            id: 'licensed-software',
-            title: 'Phần mềm kỹ thuật bản quyền',
-            description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
-            badge: 'Phần mềm',
-            image: heroSlides[3]?.img ?? heroSlides[1]?.img,
-            view: 'products',
-            activeLink: 'Sản phẩm',
-          },
-          {
-            id: 'technology-equipment',
-            title: 'Thiết bị công nghệ',
-            description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.',
-            badge: 'Thiết bị & IoT',
-            image: projects.find((project) => project.type === 'equipment')?.img ?? heroSlides[1]?.img,
-            view: 'products',
-            activeLink: 'Sản phẩm',
-          },
-          {
-            id: 'net-zero',
-            title: 'Net Zero và phát triển bền vững',
-            description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.',
-            badge: 'Sustainability',
-            image: newsItems.find((item) => item.category === 'specialty')?.img ?? heroSlides[1]?.img,
-            view: 'services',
-            activeLink: 'Dịch vụ',
-            serviceId: 'tu-van-kiem-ke-khi-nha-kinh',
-          },
-          {
-            id: 'consulting-training',
-            title: 'Tư vấn & Đào tạo',
-            description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.',
-            badge: 'Tư vấn chuyên sâu',
-            image: newsItems.find((item) => item.category === 'international')?.img ?? heroSlides[1]?.img,
-            view: 'services',
-            activeLink: 'Dịch vụ',
-            serviceId: null,
-          },
-        ] satisfies readonly HomeEcosystemItem[]}
+        items={homeEcosystemItems}
         onSelect={(item) => {
-          setCurrentView(item.view);
-          setActiveLink(item.activeLink);
+          if (item.view) setCurrentView(item.view);
+          if (item.activeLink) setActiveLink(item.activeLink);
           if (item.view === 'services' && setActiveServiceId) setActiveServiceId(item.serviceId ?? null);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}

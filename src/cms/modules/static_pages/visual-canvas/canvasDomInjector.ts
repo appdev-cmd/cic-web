@@ -354,6 +354,13 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         label.style.cssText = 'padding:0 5px;color:#0f172a;';
         toolbar.appendChild(label);
         addButton('+ Thêm', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+      } else if ((section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') && Array.isArray(section.config.items)) {
+        const items = section.config.items;
+        const label = node.ownerDocument.createElement('strong');
+        label.textContent = `Hệ sinh thái · ${items.length} giải pháp`;
+        label.style.cssText = 'padding:0 5px;color:#0f172a;';
+        toolbar.appendChild(label);
+        addButton('+ Thêm', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
       } else if ((section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') && Array.isArray(section.config.items)) {
         const items = section.config.items;
         const label = node.ownerDocument.createElement('strong');
@@ -721,6 +728,8 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         const reference = section.references?.find((item) => collectionAnchor.matches(`[data-page-collection~="${item.entityType}"]`));
         const isAwardCollection = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards';
         const isPartnerCollection = section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
+        const isEcosystemCollection = section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem';
+        const isItemCollection = isAwardCollection || isPartnerCollection || isEcosystemCollection;
         const isProjectSection = section.sectionKey === 'home.projects' || section.sectionType === 'projects';
         const isEventSection = section.sectionKey === 'home.events' || section.sectionType === 'events';
         const itemContainer = isAwardCollection
@@ -736,7 +745,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
             : [];
         const visibleCards = reference
           ? productionCards.slice(0, reference.entityIds.length)
-          : (isAwardCollection || isPartnerCollection) && Array.isArray(section.config.items)
+          : isItemCollection && Array.isArray(section.config.items)
             ? productionCards.slice(0, section.config.items.length)
             : productionCards;
 
@@ -826,7 +835,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               next.splice(to, 0, moved);
               onReferenceItemsChange?.(section.id, reference.entityType, next);
             });
-          } else if ((isAwardCollection || isPartnerCollection) && Array.isArray(section.config.items)) {
+          } else if (isItemCollection && Array.isArray(section.config.items)) {
             const handle = createCardAction('⠿ Kéo', () => undefined);
             handle.style.cursor = 'grab';
             controls.appendChild(handle);
@@ -841,23 +850,53 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               onConfigValueChange?.(section.id, ['items'], items);
             });
             const itemRecord = (section.config.items[itemIndex] ?? {}) as Record<string, PageBuilderConfigValue>;
-            const title = card.querySelector<HTMLElement>('h3, span');
-            if (title && (isAwardCollection || !card.querySelector('img'))) {
-              title.contentEditable = 'true'; 
-              title.setAttribute('role', 'textbox'); 
-              title.style.cursor = 'text';
-              const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'name'], title.textContent ?? '');
-              title.addEventListener('input', updateTitle); 
-              actionCleanups.push(() => title.removeEventListener('input', updateTitle));
+            if (isAwardCollection) {
+              const title = card.querySelector<HTMLElement>('h3, span');
+              if (title) {
+                title.contentEditable = 'true'; 
+                title.setAttribute('role', 'textbox'); 
+                title.style.cursor = 'text';
+                const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'name'], title.textContent ?? '');
+                title.addEventListener('input', updateTitle); 
+                actionCleanups.push(() => title.removeEventListener('input', updateTitle));
+              }
+            } else if (isEcosystemCollection) {
+              const badgeEl = card.querySelector<HTMLElement>('.rounded-full.bg-orange-600');
+              if (badgeEl) {
+                badgeEl.contentEditable = 'true';
+                badgeEl.setAttribute('role', 'textbox');
+                badgeEl.style.cursor = 'text';
+                const updateBadge = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'badge'], badgeEl.textContent ?? '');
+                badgeEl.addEventListener('input', updateBadge);
+                actionCleanups.push(() => badgeEl.removeEventListener('input', updateBadge));
+              }
+              const titleEl = card.querySelector<HTMLElement>('.font-black.leading-tight');
+              if (titleEl) {
+                titleEl.contentEditable = 'true';
+                titleEl.setAttribute('role', 'textbox');
+                titleEl.style.cursor = 'text';
+                const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'title'], titleEl.textContent ?? '');
+                titleEl.addEventListener('input', updateTitle);
+                actionCleanups.push(() => titleEl.removeEventListener('input', updateTitle));
+              }
+              const descEl = card.querySelector<HTMLElement>('.line-clamp-4');
+              if (descEl) {
+                descEl.contentEditable = 'true';
+                descEl.setAttribute('role', 'textbox');
+                descEl.style.cursor = 'text';
+                const updateDesc = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'description'], descEl.textContent ?? '');
+                descEl.addEventListener('input', updateDesc);
+                actionCleanups.push(() => descEl.removeEventListener('input', updateDesc));
+              }
             }
             const image = card.querySelector<HTMLImageElement>('img');
             if (image) {
               image.style.cursor = 'pointer';
-              image.title = isPartnerCollection ? 'Bấm để đổi logo đối tác' : 'Bấm để đổi ảnh';
+              image.title = isPartnerCollection ? 'Bấm để đổi logo đối tác' : isEcosystemCollection ? 'Bấm để đổi ảnh giải pháp' : 'Bấm để đổi ảnh';
               const replaceImage = (event: MouseEvent) => { 
                 event.preventDefault(); 
                 event.stopPropagation(); 
-                onEditMedia?.(section.id, ['items', itemIndex, 'imageId'], String(itemRecord.imageId ?? itemRecord.logo ?? '')); 
+                onEditMedia?.(section.id, ['items', itemIndex, 'imageId'], String(itemRecord.imageId ?? itemRecord.logo ?? itemRecord.image ?? '')); 
               };
               image.addEventListener('click', replaceImage); 
               actionCleanups.push(() => image.removeEventListener('click', replaceImage));
@@ -878,13 +917,15 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           card.appendChild(controls);
         });
 
-        if (itemContainer && (isAwardCollection || isPartnerCollection)) {
+        if (itemContainer && isItemCollection) {
           const addSlot = node.ownerDocument.createElement('button');
           addSlot.type = 'button'; 
           addSlot.dataset.pageBuilderAction = 'add-slot';
-          addSlot.textContent = isAwardCollection ? '+ Thêm giải thưởng' : '+ Thêm logo đối tác';
+          addSlot.textContent = isAwardCollection ? '+ Thêm giải thưởng' : isPartnerCollection ? '+ Thêm logo đối tác' : '+ Thêm giải pháp';
           addSlot.style.cssText = isAwardCollection
             ? 'min-height:180px;min-width:210px;border:2px dashed #fb923c;border-radius:12px;padding:18px;background:#fff7ed;color:#9a3412;font:800 13px/1.3 system-ui;cursor:pointer;align-self:stretch;'
+            : isEcosystemCollection
+            ? 'min-height:380px;min-width:260px;border:2px dashed #fb923c;border-radius:10px;padding:24px;background:#fff7ed;color:#9a3412;font:800 14px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;'
             : 'min-height:80px;min-width:160px;border:2px dashed #fb923c;border-radius:10px;padding:12px;background:#fff7ed;color:#9a3412;font:800 12px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;';
           const add = (event: MouseEvent) => {
             event.preventDefault(); 
@@ -897,6 +938,8 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           wrapper.dataset.pageBuilderAction = 'add-slot-wrapper'; 
           wrapper.className = isAwardCollection 
             ? (productionCards[0]?.parentElement?.className ?? 'flex-none px-3')
+            : isEcosystemCollection
+            ? 'shrink-0 snap-start flex items-center justify-center p-2'
             : 'flex items-center justify-center p-2'; 
           wrapper.appendChild(addSlot); 
           itemContainer.appendChild(wrapper);

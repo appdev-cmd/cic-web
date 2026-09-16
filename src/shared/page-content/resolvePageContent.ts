@@ -187,9 +187,15 @@ function resolveHomeContent(
       .map((item, idx) => ({
         id: typeof item.id === 'string' ? item.id : `eco-${idx + 1}`,
         title: typeof item.title === 'string' ? item.title : '',
-        desc: typeof item.desc === 'string' ? item.desc : (typeof item.description === 'string' ? item.description : ''),
-        tag: typeof item.tag === 'string' ? item.tag : '',
+        desc: typeof item.description === 'string' ? item.description : (typeof item.desc === 'string' ? item.desc : ''),
+        tag: typeof item.tag === 'string' ? item.tag : (typeof item.badge === 'string' ? item.badge : ''),
         link: typeof item.link === 'string' ? item.link : '',
+        badge: typeof item.badge === 'string' ? item.badge : (typeof item.tag === 'string' ? item.tag : 'Công nghệ'),
+        imageId: typeof item.imageId === 'string' ? item.imageId : (typeof item.image === 'string' ? item.image : ''),
+        image: typeof item.image === 'string' ? item.image : (typeof item.imageId === 'string' ? item.imageId : ''),
+        view: item.view === 'services' ? ('services' as const) : ('products' as const),
+        activeLink: item.activeLink === 'Dịch vụ' ? ('Dịch vụ' as const) : ('Sản phẩm' as const),
+        serviceId: typeof item.serviceId === 'string' ? item.serviceId : null,
       }));
     if (items.length > 0) {
       ecosystem = {
@@ -197,6 +203,13 @@ function resolveHomeContent(
         title: typeof cfg.title === 'string' ? cfg.title : (ecosystem?.title || ''),
         subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : ecosystem?.subtitle,
         items,
+      };
+    } else if (cfg.title || cfg.subtitle) {
+      ecosystem = {
+        badge: typeof cfg.badge === 'string' ? cfg.badge : ecosystem?.badge,
+        title: typeof cfg.title === 'string' ? cfg.title : (ecosystem?.title || ''),
+        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : ecosystem?.subtitle,
+        items: ecosystem?.items ?? [],
       };
     }
   }

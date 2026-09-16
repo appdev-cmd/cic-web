@@ -65,6 +65,72 @@ const slugify = (value: string) =>
 const shortSlug = (value: string) =>
   slugify(value).split('-').slice(0, 6).join('-').slice(0, 42).replace(/-$/, '');
 
+const defaultEcosystemItems = [
+  {
+    id: 'ai-smart-tech',
+    link: '/products',
+    view: 'products',
+    badge: 'Advanced Technology',
+    title: 'AI & Công nghệ thông minh',
+    imageId: '/banner_hero/dan_dau_chuyen_doi_so.png',
+    activeLink: 'Sản phẩm',
+    description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
+  },
+  {
+    id: 'bim-digital-twins',
+    link: '/services/tu-van-bim',
+    view: 'services',
+    badge: 'BIM & Digital Twins',
+    title: 'BIM & Digital Twins',
+    imageId: '/banner_hero/He_sinh_thai_giai_phap_so.png',
+    serviceId: 'tu-van-bim',
+    activeLink: 'Dịch vụ',
+    description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
+  },
+  {
+    id: 'licensed-software',
+    link: '/products',
+    view: 'products',
+    badge: 'Phần mềm',
+    title: 'Phần mềm kỹ thuật bản quyền',
+    imageId: '/banner_hero/Phan_mem_ban_quyen_chinh_hang.jpg',
+    activeLink: 'Sản phẩm',
+    description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
+  },
+  {
+    id: 'technology-equipment',
+    link: '/products',
+    view: 'products',
+    badge: 'Thiết bị & IoT',
+    title: 'Thiết bị công nghệ',
+    imageId: '/banner_hero/He_sinh_thai_giai_phap_so.png',
+    activeLink: 'Sản phẩm',
+    description: 'Thiết bị khảo sát, kiểm định, đo đạc, UAV, LiDAR và GPR phục vụ ngành kỹ thuật.',
+  },
+  {
+    id: 'net-zero',
+    link: '/services/tu-van-kiem-ke-khi-nha-kinh',
+    view: 'services',
+    badge: 'Sustainability',
+    title: 'Net Zero và phát triển bền vững',
+    imageId: '/banner_hero/dan_dau_chuyen_doi_so.png',
+    serviceId: 'tu-van-kiem-ke-khi-nha-kinh',
+    activeLink: 'Dịch vụ',
+    description: 'Giải pháp kiểm kê phát thải, LCA, EPD, CBAM và xây dựng lộ trình Net Zero.',
+  },
+  {
+    id: 'consulting-training',
+    link: '/services',
+    view: 'services',
+    badge: 'Tư vấn chuyên sâu',
+    title: 'Tư vấn & Đào tạo',
+    imageId: '/banner_hero/doi_tac_cong_nghe_chien_luoc.png',
+    serviceId: null,
+    activeLink: 'Dịch vụ',
+    description: 'Đồng hành chuyển đổi số, triển khai công nghệ AI, Net Zero và BIM chuyên sâu.',
+  },
+];
+
 /** Maps StaticPageFullDetail from server to PageBuilderPage for PageBuilderEditor */
 function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
   return {
@@ -102,6 +168,9 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
           refMap.set(def.entityType, def.defaultIds);
         }
         const cfg = (s.config || {}) as Record<string, any>;
+        if (s.sectionKey === 'home.ecosystem' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
+          cfg.items = defaultEcosystemItems;
+        }
         const refSources = (cfg._referenceSources || {}) as Record<string, any>;
         const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
           const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
@@ -150,6 +219,9 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
               refMap.set(def.entityType, def.defaultIds);
             }
             const cfg = (s.config || {}) as Record<string, any>;
+            if (s.sectionKey === 'home.ecosystem' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
+              cfg.items = defaultEcosystemItems;
+            }
             const refSources = (cfg._referenceSources || {}) as Record<string, any>;
             const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
               const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';

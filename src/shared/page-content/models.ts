@@ -52,6 +52,12 @@ export interface HomeEcosystemItemModel {
   desc: string;
   tag: string;
   link: string;
+  badge?: string;
+  imageId?: string;
+  image?: string;
+  view?: 'products' | 'services';
+  activeLink?: 'Sản phẩm' | 'Dịch vụ';
+  serviceId?: string | null;
 }
 
 export interface HomeEcosystemModel {
