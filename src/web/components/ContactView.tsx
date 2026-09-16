@@ -233,7 +233,7 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
                   transition={{ duration: renderPolicy.motionEnabled ? 0.2 : 0 }}
                   className="space-y-5"
                 >
-                  <div className="space-y-3.5">
+                  <div key="branch-info" className="space-y-3.5">
                     <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
                       <Building className="text-orange-600 shrink-0" size={19} />
                       <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'contact.branches', elementPath: `${activeBranchPath}.name`, semantic: 'text', ownership: 'embedded', editable: true, itemId: activeBranchModel.id, collectionPath: 'branches' }))}>{activeBranchModel.name}</span>
@@ -274,7 +274,7 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
                   </div>
 
                   {/* MAP CONTAINER */}
-                  <div className="space-y-2.5">
+                  <div key="branch-map" className="space-y-2.5">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Bản đồ Google Maps</span>
                       <a
