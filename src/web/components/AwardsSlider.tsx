@@ -46,8 +46,8 @@ export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards, paused = fal
     return () => window.removeEventListener('resize', updateItemsPerPage);
   }, [updateItemsPerPage]);
 
-  // Duplicate items array for seamless looping
-  const extendedAwards = [...awards, ...awards, ...awards];
+  // Only duplicate items array for seamless looping on live site, NOT when paused (in PageBuilder)
+  const displayAwards = paused ? awards : [...awards, ...awards, ...awards];
 
   const handleNext = useCallback(() => {
     setIsTransitioning(true);
@@ -128,47 +128,51 @@ export const AwardsSlider: React.FC<AwardsSliderProps> = ({ awards, paused = fal
   return (
     <div 
       data-page-collection="award"
-      className="relative w-full py-2 px-8 sm:px-12 md:px-16 group/slider select-none"
+      className={paused ? "relative w-full py-2 select-none" : "relative w-full py-2 px-8 sm:px-12 md:px-16 group/slider select-none"}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Navigation Controls positioned outside card viewport */}
-      <button
-        onClick={handlePrev}
-        aria-label="Previous Award"
-        className="absolute left-0 sm:left-1 md:left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 bg-white/80 backdrop-blur-xs border border-slate-200/80 text-slate-600 rounded-full flex items-center justify-center shadow-sm hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all duration-300 opacity-60 hover:opacity-100 group-hover/slider:opacity-90 hover:scale-105 active:scale-95"
-      >
-        <ChevronLeft size={20} className="sm:hidden" />
-        <ChevronLeft size={22} className="hidden sm:block" />
-      </button>
+      {!paused && (
+        <>
+          <button
+            onClick={handlePrev}
+            aria-label="Previous Award"
+            className="absolute left-0 sm:left-1 md:left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 bg-white/80 backdrop-blur-xs border border-slate-200/80 text-slate-600 rounded-full flex items-center justify-center shadow-sm hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all duration-300 opacity-60 hover:opacity-100 group-hover/slider:opacity-90 hover:scale-105 active:scale-95"
+          >
+            <ChevronLeft size={20} className="sm:hidden" />
+            <ChevronLeft size={22} className="hidden sm:block" />
+          </button>
 
-      <button
-        onClick={handleNext}
-        aria-label="Next Award"
-        className="absolute right-0 sm:right-1 md:right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 bg-white/80 backdrop-blur-xs border border-slate-200/80 text-slate-600 rounded-full flex items-center justify-center shadow-md hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all duration-300 opacity-60 hover:opacity-100 group-hover/slider:opacity-90 hover:scale-105 active:scale-95"
-      >
-        <ChevronRight size={20} className="sm:hidden" />
-        <ChevronRight size={22} className="hidden sm:block" />
-      </button>
+          <button
+            onClick={handleNext}
+            aria-label="Next Award"
+            className="absolute right-0 sm:right-1 md:right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 bg-white/80 backdrop-blur-xs border border-slate-200/80 text-slate-600 rounded-full flex items-center justify-center shadow-md hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all duration-300 opacity-60 hover:opacity-100 group-hover/slider:opacity-90 hover:scale-105 active:scale-95"
+          >
+            <ChevronRight size={20} className="sm:hidden" />
+            <ChevronRight size={22} className="hidden sm:block" />
+          </button>
+        </>
+      )}
 
       {/* Slider Viewport */}
       <div 
-        className="overflow-hidden w-full py-5"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className={paused ? "overflow-visible w-full py-5" : "overflow-hidden w-full py-5"}
+        onTouchStart={paused ? undefined : handleTouchStart}
+        onTouchMove={paused ? undefined : handleTouchMove}
+        onTouchEnd={paused ? undefined : handleTouchEnd}
       >
         <div 
-          className="flex transition-transform duration-500 ease-out"
-          style={{
+          className={paused ? "flex flex-wrap gap-4 justify-center" : "flex transition-transform duration-500 ease-out"}
+          style={paused ? undefined : {
             transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)`,
             transitionProperty: isTransitioning ? 'transform' : 'none',
           }}
         >
-          {extendedAwards.map((award, i) => (
+          {displayAwards.map((award, i) => (
             <div 
               key={i} 
-              className={`${getItemWidthClass()} flex-none px-2 sm:px-3`}
+              className={paused ? "w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1rem)] shrink-0" : `${getItemWidthClass()} flex-none px-2 sm:px-3`}
             >
               <div className="bg-white p-5 sm:p-6 md:p-7 shadow-sm hover:shadow-xl border border-slate-100 rounded-xl flex flex-col items-center group hover:-translate-y-1.5 hover:border-orange-300 transition-all duration-300 h-full min-h-[260px] sm:min-h-[290px] md:min-h-[310px] justify-between">
                 <div className="h-32 sm:h-40 md:h-44 flex items-center justify-center overflow-hidden w-full my-auto p-2">

@@ -733,7 +733,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         const isProjectSection = section.sectionKey === 'home.projects' || section.sectionType === 'projects';
         const isEventSection = section.sectionKey === 'home.events' || section.sectionType === 'events';
         const itemContainer = isAwardCollection
-          ? collectionAnchor.querySelector<HTMLElement>('.overflow-hidden > .flex')
+          ? (collectionAnchor.querySelector<HTMLElement>('.overflow-hidden > .flex') ?? collectionAnchor.querySelector<HTMLElement>('.overflow-visible > .flex') ?? collectionAnchor.querySelector<HTMLElement>('.flex'))
           : collectionAnchor;
         const customCards = collectionAnchor.querySelectorAll<HTMLElement>('[data-page-builder-card]');
         const productionCards = customCards.length > 0
@@ -925,7 +925,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           addSlot.style.cssText = isAwardCollection
             ? 'min-height:180px;min-width:210px;border:2px dashed #fb923c;border-radius:12px;padding:18px;background:#fff7ed;color:#9a3412;font:800 13px/1.3 system-ui;cursor:pointer;align-self:stretch;'
             : isEcosystemCollection
-            ? 'min-height:380px;min-width:260px;border:2px dashed #fb923c;border-radius:10px;padding:24px;background:#fff7ed;color:#9a3412;font:800 14px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;'
+            ? 'min-height:380px;width:100%;height:100%;border:2px dashed #fb923c;border-radius:10px;padding:24px;background:#fff7ed;color:#9a3412;font:800 14px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;'
             : 'min-height:80px;min-width:160px;border:2px dashed #fb923c;border-radius:10px;padding:12px;background:#fff7ed;color:#9a3412;font:800 12px/1.3 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;';
           const add = (event: MouseEvent) => {
             event.preventDefault(); 
@@ -939,7 +939,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           wrapper.className = isAwardCollection 
             ? (productionCards[0]?.parentElement?.className ?? 'flex-none px-3')
             : isEcosystemCollection
-            ? 'shrink-0 snap-start flex items-center justify-center p-2'
+            ? 'flex items-center justify-center min-h-[380px] w-full p-2'
             : 'flex items-center justify-center p-2'; 
           wrapper.appendChild(addSlot); 
           itemContainer.appendChild(wrapper);

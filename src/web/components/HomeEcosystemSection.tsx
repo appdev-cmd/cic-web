@@ -53,6 +53,65 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
     track.scrollBy({ left: direction * step, behavior: 'smooth' });
   };
 
+  if (editMode) {
+    return (
+      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <h2
+              data-page-builder-config-path={JSON.stringify(['title'])}
+              className="text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
+            >
+              {title}
+            </h2>
+            <div aria-hidden="true" className="mx-auto my-5 h-1 w-14 rounded-full bg-orange-600" />
+            <p
+              data-page-builder-config-path={JSON.stringify(['subtitle'])}
+              className="text-base leading-7 text-slate-600"
+            >
+              {subtitle}
+            </p>
+          </div>
+
+          <div
+            ref={trackRef}
+            data-page-collection="ecosystem"
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full"
+          >
+            {items.map((item) => (
+              <div
+                key={item.id}
+                data-ecosystem-card
+                className="group relative flex flex-col rounded-[10px] border border-slate-200/80 bg-slate-100 p-2 text-left shadow-sm w-full transition-[border-color,box-shadow] duration-200 hover:border-slate-300"
+              >
+                <span className="relative block h-[350px] overflow-hidden rounded-[8px] bg-slate-900 sm:h-[390px] lg:h-[410px]">
+                  <img src={item.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" aria-hidden="true" />
+                  <span className="absolute left-4 top-4 rounded-full bg-orange-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
+                    {item.badge}
+                  </span>
+                  <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                    <span className="line-clamp-4 block text-sm leading-6 text-slate-100 drop-shadow-sm">
+                      {item.description}
+                    </span>
+                  </span>
+                </span>
+                <span className="flex min-h-20 items-center justify-between gap-3 px-3 py-3 sm:px-4">
+                  <span className="text-lg font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-orange-600 sm:text-xl">
+                    {item.title}
+                  </span>
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-sm transition-colors" aria-hidden="true">
+                    <ArrowUpRight className="size-5" />
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 overflow-hidden bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
