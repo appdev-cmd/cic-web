@@ -164,7 +164,7 @@ function resolveHomeContent(
       .filter((item): item is Record<string, unknown> => isRecord(item))
       .map((item) => ({
         name: typeof item.name === 'string' ? item.name : '',
-        img: typeof item.img === 'string' ? item.img : (typeof item.imageId === 'string' ? item.imageId : ''),
+        img: typeof item.img === 'string' && item.img ? item.img : (typeof item.imageId === 'string' ? item.imageId : ''),
       }));
     if (items.length > 0) {
       awards = {
@@ -225,8 +225,8 @@ function resolveHomeContent(
       .map((item, idx) => ({
         id: typeof item.id === 'string' ? item.id : `partner-${idx + 1}`,
         name: typeof item.name === 'string' ? item.name : '',
-        logo: typeof item.logo === 'string' ? item.logo : (typeof item.imageId === 'string' ? item.imageId : ''),
-        imageId: typeof item.imageId === 'string' ? item.imageId : undefined,
+        logo: typeof item.logo === 'string' && item.logo ? item.logo : (typeof item.imageId === 'string' ? item.imageId : ''),
+        imageId: typeof item.imageId === 'string' && item.imageId ? item.imageId : (typeof item.logo === 'string' ? item.logo : undefined),
         link: typeof item.link === 'string' ? item.link : undefined,
       }));
     const finalItems = cfgItems.length > 0 ? cfgItems : (partners?.items ?? []);

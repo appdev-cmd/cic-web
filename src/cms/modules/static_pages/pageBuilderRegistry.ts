@@ -122,7 +122,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     },
   },
   'home.events': {
-    label: 'Sự kiện nổi bật', description: 'Tự động lấy 1 sự kiện đã đánh dấu Nổi bật.', referenceLimit: { event: 1 }, canHide: true, canMove: true,
+    label: 'Sự kiện nổi bật', description: 'Tự động lấy tối đa 4 sự kiện đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { event: 4 }, canHide: true, canMove: true,
     editableContract: {
       sectionKey: 'home.events',
       fields: [
@@ -132,7 +132,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
         { path: 'ctaUrl', semantic: 'link', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
       ],
       references: {
-        items: { path: 'items', entityType: 'event', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 1, layoutBehavior: { wrap: false } },
+        items: { path: 'items', entityType: 'event', identity: 'entity-id', capabilities: { replace: 'enabled', reorder: 'enabled', add: 'blocked', remove: 'blocked' }, allowDuplicates: false, maxItems: 4, layoutBehavior: { wrap: false } },
       },
     },
   },

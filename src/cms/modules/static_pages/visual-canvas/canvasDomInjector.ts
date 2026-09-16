@@ -839,7 +839,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
             const handle = createCardAction('⠿ Kéo', () => undefined);
             handle.style.cursor = 'grab';
             controls.appendChild(handle);
+            const targetMediaKey = isPartnerCollection ? 'logo' : isAwardCollection ? 'img' : isEcosystemCollection ? 'image' : 'imageId';
             controls.append(
+              createCardAction(isPartnerCollection ? 'Đổi Logo' : 'Đổi ảnh', () => onEditMedia?.(section.id, ['items', itemIndex, targetMediaKey], String(itemRecord[targetMediaKey] ?? itemRecord.imageId ?? itemRecord.logo ?? itemRecord.image ?? itemRecord.img ?? ''))),
               createCardAction('Nhân bản', () => onCollectionAction?.(section.id, 'items', 'duplicate', itemIndex)),
               createCardAction('Xóa', () => onCollectionAction?.(section.id, 'items', 'remove', itemIndex), true),
             );
@@ -856,9 +858,14 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
                 title.contentEditable = 'true'; 
                 title.setAttribute('role', 'textbox'); 
                 title.style.cursor = 'text';
-                const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'name'], title.textContent ?? '');
-                title.addEventListener('input', updateTitle); 
-                actionCleanups.push(() => title.removeEventListener('input', updateTitle));
+                const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'name'], title.textContent?.trim() ?? '');
+                const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); title.blur(); } };
+                title.addEventListener('blur', updateTitle); 
+                title.addEventListener('keydown', onKeyDown);
+                actionCleanups.push(() => {
+                  title.removeEventListener('blur', updateTitle);
+                  title.removeEventListener('keydown', onKeyDown);
+                });
               }
             } else if (isEcosystemCollection) {
               const badgeEl = card.querySelector<HTMLElement>('.rounded-full.bg-orange-600');
@@ -866,27 +873,57 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
                 badgeEl.contentEditable = 'true';
                 badgeEl.setAttribute('role', 'textbox');
                 badgeEl.style.cursor = 'text';
-                const updateBadge = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'badge'], badgeEl.textContent ?? '');
-                badgeEl.addEventListener('input', updateBadge);
-                actionCleanups.push(() => badgeEl.removeEventListener('input', updateBadge));
+                const updateBadge = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'badge'], badgeEl.textContent?.trim() ?? '');
+                const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); badgeEl.blur(); } };
+                badgeEl.addEventListener('blur', updateBadge);
+                badgeEl.addEventListener('keydown', onKeyDown);
+                actionCleanups.push(() => {
+                  badgeEl.removeEventListener('blur', updateBadge);
+                  badgeEl.removeEventListener('keydown', onKeyDown);
+                });
               }
               const titleEl = card.querySelector<HTMLElement>('.font-black.leading-tight');
               if (titleEl) {
                 titleEl.contentEditable = 'true';
                 titleEl.setAttribute('role', 'textbox');
                 titleEl.style.cursor = 'text';
-                const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'title'], titleEl.textContent ?? '');
-                titleEl.addEventListener('input', updateTitle);
-                actionCleanups.push(() => titleEl.removeEventListener('input', updateTitle));
+                const updateTitle = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'title'], titleEl.textContent?.trim() ?? '');
+                const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); } };
+                titleEl.addEventListener('blur', updateTitle);
+                titleEl.addEventListener('keydown', onKeyDown);
+                actionCleanups.push(() => {
+                  titleEl.removeEventListener('blur', updateTitle);
+                  titleEl.removeEventListener('keydown', onKeyDown);
+                });
               }
               const descEl = card.querySelector<HTMLElement>('.line-clamp-4');
               if (descEl) {
                 descEl.contentEditable = 'true';
                 descEl.setAttribute('role', 'textbox');
                 descEl.style.cursor = 'text';
-                const updateDesc = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'description'], descEl.textContent ?? '');
-                descEl.addEventListener('input', updateDesc);
-                actionCleanups.push(() => descEl.removeEventListener('input', updateDesc));
+                const updateDesc = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'description'], descEl.textContent?.trim() ?? '');
+                const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); descEl.blur(); } };
+                descEl.addEventListener('blur', updateDesc);
+                descEl.addEventListener('keydown', onKeyDown);
+                actionCleanups.push(() => {
+                  descEl.removeEventListener('blur', updateDesc);
+                  descEl.removeEventListener('keydown', onKeyDown);
+                });
+              }
+            } else if (isPartnerCollection) {
+              const nameEl = card.querySelector<HTMLElement>('span.whitespace-normal, span.capitalize, span.text-sm');
+              if (nameEl) {
+                nameEl.contentEditable = 'true';
+                nameEl.setAttribute('role', 'textbox');
+                nameEl.style.cursor = 'text';
+                const updateName = () => onConfigValueChange?.(section.id, ['items', itemIndex, 'name'], nameEl.textContent?.trim() ?? '');
+                const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); } };
+                nameEl.addEventListener('blur', updateName);
+                nameEl.addEventListener('keydown', onKeyDown);
+                actionCleanups.push(() => {
+                  nameEl.removeEventListener('blur', updateName);
+                  nameEl.removeEventListener('keydown', onKeyDown);
+                });
               }
             }
             const image = card.querySelector<HTMLImageElement>('img');
@@ -896,7 +933,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               const replaceImage = (event: MouseEvent) => { 
                 event.preventDefault(); 
                 event.stopPropagation(); 
-                onEditMedia?.(section.id, ['items', itemIndex, 'imageId'], String(itemRecord.imageId ?? itemRecord.logo ?? itemRecord.image ?? '')); 
+                onEditMedia?.(section.id, ['items', itemIndex, targetMediaKey], String(itemRecord[targetMediaKey] ?? itemRecord.imageId ?? itemRecord.logo ?? itemRecord.image ?? itemRecord.img ?? '')); 
               };
               image.addEventListener('click', replaceImage); 
               actionCleanups.push(() => image.removeEventListener('click', replaceImage));
@@ -1013,10 +1050,14 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
                 editable.contentEditable = 'true'; 
                 editable.setAttribute('role', 'textbox'); 
                 editable.style.cursor = 'text'; 
-                editable.style.outline = 'none';
-                const update = () => onConfigValueChange?.(section.id, [element.key, itemIndex, fieldKey], typeof fieldValue === 'number' ? Number(editable.textContent ?? 0) : editable.textContent ?? '');
-                editable.addEventListener('input', update); 
-                actionCleanups.push(() => editable.removeEventListener('input', update));
+                const update = () => onConfigValueChange?.(section.id, [element.key, itemIndex, fieldKey], typeof fieldValue === 'number' ? Number(editable.textContent?.trim() ?? 0) : editable.textContent?.trim() ?? '');
+                const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); editable.blur(); } };
+                editable.addEventListener('blur', update); 
+                editable.addEventListener('keydown', onKeyDown);
+                actionCleanups.push(() => {
+                  editable.removeEventListener('blur', update);
+                  editable.removeEventListener('keydown', onKeyDown);
+                });
               });
             }
 
@@ -1215,9 +1256,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.style.outline = '1px dashed rgb(249 115 22 / 0.65)';
       node.style.outlineOffset = '5px';
       const update = () => onConfigValueChange?.(selectedSection.id, path, node.innerHTML);
-      node.addEventListener('input', update);
+      node.addEventListener('blur', update);
       actionCleanups.push(() => { 
-        node.removeEventListener('input', update); 
+        node.removeEventListener('blur', update); 
         node.removeAttribute('contenteditable'); 
         node.removeAttribute('role'); 
         node.style.cursor = ''; 
@@ -1237,10 +1278,13 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.style.cursor = 'text';
       node.style.outline = '1px dashed rgb(249 115 22 / 0.65)';
       node.style.outlineOffset = '3px';
-      const update = () => onConfigValueChange?.(selectedSection.id, path, typeof value === 'number' ? Number(node.textContent ?? 0) : node.textContent ?? '');
-      node.addEventListener('input', update);
+      const update = () => onConfigValueChange?.(selectedSection.id, path, typeof value === 'number' ? Number(node.textContent?.trim() ?? 0) : node.textContent?.trim() ?? '');
+      const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); node.blur(); } };
+      node.addEventListener('blur', update);
+      node.addEventListener('keydown', onKeyDown);
       actionCleanups.push(() => { 
-        node.removeEventListener('input', update); 
+        node.removeEventListener('blur', update); 
+        node.removeEventListener('keydown', onKeyDown);
         node.removeAttribute('contenteditable'); 
         node.removeAttribute('role'); 
         node.style.cursor = ''; 

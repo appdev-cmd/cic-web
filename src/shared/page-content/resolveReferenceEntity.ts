@@ -32,6 +32,7 @@ let registeredOptionsMap = new Map<string, PageBuilderEntityOption>();
 export function registerEntityOptions(options: readonly PageBuilderEntityOption[]) {
   if (!options || !Array.isArray(options)) return;
   for (const opt of options) {
+    registeredOptionsMap.set(`${opt.entityType}:${opt.id}`, opt);
     registeredOptionsMap.set(opt.id, opt);
   }
 }
@@ -52,7 +53,7 @@ const projectFixtureIdByEntityId: Readonly<Record<string, number>> = {
  * Resolves a project reference entity by ID or name
  */
 export function resolveProjectEntity(entityId: string): HomeProjectModel | null {
-  const opt = registeredOptionsMap.get(entityId);
+  const opt = registeredOptionsMap.get(`project:${entityId}`) ?? registeredOptionsMap.get(entityId);
   if (opt && opt.entityType === 'project') {
     const meta = opt.meta ?? {};
     return {
@@ -144,7 +145,7 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
  * Resolves an event reference entity by ID
  */
 export function resolveEventEntity(entityId: string): HomeEventItemModel | null {
-  const opt = registeredOptionsMap.get(entityId);
+  const opt = registeredOptionsMap.get(`event:${entityId}`) ?? registeredOptionsMap.get(entityId);
   if (opt && opt.entityType === 'event') {
     const meta = opt.meta ?? {};
     return {
@@ -192,7 +193,7 @@ const newsFixtureMap: Readonly<Record<string, number>> = {
  * Resolves a news reference entity by ID
  */
 export function resolveNewsEntity(entityId: string): HomeNewsItemModel | null {
-  const opt = registeredOptionsMap.get(entityId);
+  const opt = registeredOptionsMap.get(`news:${entityId}`) ?? registeredOptionsMap.get(entityId);
   if (opt && opt.entityType === 'news') {
     const meta = opt.meta ?? {};
     return {
@@ -234,7 +235,7 @@ const partnerFixtureMap: Readonly<Record<string, HomePartnerItemModel>> = {
  * Resolves a partner reference entity by ID
  */
 export function resolvePartnerEntity(entityId: string): HomePartnerItemModel | null {
-  const opt = registeredOptionsMap.get(entityId);
+  const opt = registeredOptionsMap.get(`partner:${entityId}`) ?? registeredOptionsMap.get(entityId);
   if (opt && opt.entityType === 'partner') {
     const meta = opt.meta ?? {};
     return {
