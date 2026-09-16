@@ -101,7 +101,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       return content.ecosystem.items.map((item, idx) => ({
         id: item.id || `eco-${idx + 1}`,
         title: item.title,
-        description: item.desc,
+        description: item.desc || (item as any).description || '',
         badge: item.badge || item.tag || 'Công nghệ',
         image: item.image || item.imageId || heroSlides[idx % Math.max(heroSlides.length, 1)]?.img || '/banner_hero/dan_dau_chuyen_doi_so.png',
         view: item.view ?? 'products',

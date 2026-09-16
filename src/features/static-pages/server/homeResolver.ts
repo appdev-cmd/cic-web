@@ -151,13 +151,24 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     const cfg = ecoSec.config as Record<string, unknown>;
     const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
     if (rawItems.length > 0) {
-      const items: HomeEcosystemItemModel[] = rawItems.map((item: Record<string, unknown>, idx: number) => ({
-        id: String(item.id || `eco-${idx + 1}`),
-        title: typeof item.title === 'string' ? item.title : '',
-        desc: typeof item.desc === 'string' ? item.desc : (typeof item.description === 'string' ? item.description : ''),
-        tag: typeof item.tag === 'string' ? item.tag : '',
-        link: typeof item.link === 'string' ? item.link : '',
-      }));
+      const items: HomeEcosystemItemModel[] = rawItems.map((item: Record<string, unknown>, idx: number) => {
+        const desc = typeof item.desc === 'string' && item.desc ? item.desc : (typeof item.description === 'string' ? item.description : '');
+        const badge = typeof item.badge === 'string' && item.badge ? item.badge : (typeof item.tag === 'string' && item.tag ? item.tag : 'Công nghệ');
+        const img = normalizeImageUrl(item.image || item.imageId || item.img);
+        return {
+          id: String(item.id || `eco-${idx + 1}`),
+          title: typeof item.title === 'string' ? item.title : '',
+          desc,
+          tag: badge,
+          badge,
+          link: typeof item.link === 'string' ? item.link : '',
+          image: img,
+          imageId: typeof item.imageId === 'string' ? item.imageId : undefined,
+          view: item.view === 'services' ? ('services' as const) : ('products' as const),
+          activeLink: item.activeLink === 'Dịch vụ' ? ('Dịch vụ' as const) : ('Sản phẩm' as const),
+          serviceId: typeof item.serviceId === 'string' ? item.serviceId : (item.serviceId === null ? null : undefined),
+        };
+      });
       ecosystem = {
         badge: typeof cfg.badge === 'string' ? cfg.badge : ecosystem.badge,
         title: typeof cfg.title === 'string' ? cfg.title : ecosystem.title,
