@@ -1,7 +1,12 @@
 import { projects, newsItems, partners } from '@web/data/mockData';
 import { upcomingHomeEvents, pastHomeEvents } from '@web/data/homeData';
-import type { PageBuilderEntityOption } from '@/cms/modules/static_pages/pageBuilderTypes';
-import type { HomeProjectModel, HomeEventItemModel, HomeNewsItemModel, HomePartnerItemModel } from './models';
+import type { 
+  HomeProjectModel, 
+  HomeEventItemModel, 
+  HomeNewsItemModel, 
+  HomePartnerItemModel,
+  PageBuilderEntityOption 
+} from './models';
 
 function normalizeImageUrl(url?: string): string {
   if (!url || typeof url !== 'string') return '';

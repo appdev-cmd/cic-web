@@ -212,4 +212,30 @@ export interface PageRenderPolicy {
 export const productionRenderPolicy: PageRenderPolicy = {
   motionEnabled: true,
 };
+
+export type PageBuilderEntityType =
+  | 'product'
+  | 'news'
+  | 'service'
+  | 'project'
+  | 'partner'
+  | 'event';
+
+export interface PageBuilderEntityOption {
+  id: string;
+  label: string;
+  description: string;
+  entityType: PageBuilderEntityType;
+  status?: 'published' | 'unpublished' | 'deleted';
+  meta?: {
+    image?: string;
+    location?: string;
+    category?: string;
+    summary?: string;
+    date?: string;
+    isFeatured?: boolean;
+    link?: string;
+  };
+}
+
 import type { Project } from '../types';

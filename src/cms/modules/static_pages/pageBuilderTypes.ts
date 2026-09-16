@@ -1,14 +1,9 @@
 import type { EditableSectionContract } from '../../../shared/visual-editing/editableSectionContract';
+import type { PageBuilderEntityType, PageBuilderEntityOption } from '../../../shared/page-content/models';
+
+export type { PageBuilderEntityType, PageBuilderEntityOption };
 
 export type PageBuilderStatus = 'draft' | 'published';
-
-export type PageBuilderEntityType =
-  | 'product'
-  | 'news'
-  | 'service'
-  | 'project'
-  | 'partner'
-  | 'event';
 
 export interface PageBuilderReference {
   entityType: PageBuilderEntityType;
@@ -64,23 +59,6 @@ export interface PageBuilderPage {
   draft: PageBuilderVersion;
   published: PageBuilderVersion;
   history?: PageBuilderVersion[];
-}
-
-export interface PageBuilderEntityOption {
-  id: string;
-  label: string;
-  description: string;
-  entityType: PageBuilderEntityType;
-  status?: 'published' | 'unpublished' | 'deleted';
-  meta?: {
-    image?: string;
-    location?: string;
-    category?: string;
-    summary?: string;
-    date?: string;
-    isFeatured?: boolean;
-    link?: string;
-  };
 }
 
 export interface SectionDefinition {
