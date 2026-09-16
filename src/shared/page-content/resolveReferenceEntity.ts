@@ -96,7 +96,7 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '09:00 - 10:40',
     loc: 'Online',
     attendees: '300+ Khách mời',
-    img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop',
+    img: 'https://www.cic.com.vn/images/news/2024/05/original/tk-banner-event-opera_1716350330.jpg',
     desc: 'Giải pháp hoàn thiện cho thiết kế nhà máy hiệu quả phối hợp cùng hãng Hexagon.',
   },
   event_bentley_2026: {
@@ -106,7 +106,7 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '08:30 - 16:30',
     loc: 'Trung tâm Hội nghị White Palace, TP.HCM',
     attendees: '500+ Khách mời',
-    img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop',
+    img: 'https://www.cic.com.vn/images/news/2024/05/original/tk-banner-event-opera_1716350330.jpg',
     desc: 'Hội thảo thường niên lớn nhất của Bentley Systems tại Việt Nam giới thiệu các giải pháp chuyển đổi số hạ tầng.',
   },
   event_bim_enterprise: {
@@ -116,7 +116,7 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '08:30 - 11:30',
     loc: 'Khách sạn JW Marriott, Hà Nội',
     attendees: '300+ Doanh nghiệp',
-    img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop',
+    img: 'https://www.cic.com.vn/images/news/2024/05/original/hoi-thao-phan-mem-cage-carbon2_1716351734.jpg',
     desc: 'Chương trình tư vấn chuyên sâu về lộ trình áp dụng BIM theo đề án của Bộ Xây Dựng cho các doanh nghiệp xây dựng.',
   },
   event_net_zero: {
@@ -126,7 +126,7 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '09:00 - 12:00',
     loc: 'Khách sạn Melia, Hà Nội',
     attendees: '200+ Chuyên gia',
-    img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop',
+    img: 'https://www.cic.com.vn/images/news/2024/05/original/webinar-cubicost_1716945974.jpg',
     desc: 'Giải pháp tính toán phát thải, tín chỉ carbon và các tiêu chuẩn chứng nhận xanh quốc tế LEED, EDGE, LOTUS.',
   },
   event_ai_construction: {

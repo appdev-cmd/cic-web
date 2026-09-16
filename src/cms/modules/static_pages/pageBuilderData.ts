@@ -220,7 +220,7 @@ export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
     entityType: 'event',
     status: 'published',
     meta: {
-      image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop',
+      image: 'https://www.cic.com.vn/images/news/2024/05/original/hoi-thao-phan-mem-cage-carbon2_1716351734.jpg',
       location: 'Online',
       date: '08/06/2026',
       time: '09:00 - 11:30',
@@ -235,7 +235,7 @@ export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
     entityType: 'event',
     status: 'published',
     meta: {
-      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop',
+      image: 'https://www.cic.com.vn/images/news/2024/05/original/tk-banner-event-opera_1716350330.jpg',
       location: 'TP. Hồ Chí Minh',
       date: '20/05/2026',
       time: '08:30 - 11:30',
@@ -250,7 +250,7 @@ export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
     entityType: 'event',
     status: 'published',
     meta: {
-      image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop',
+      image: 'https://www.cic.com.vn/images/news/2024/05/original/webinar-cubicost_1716945974.jpg',
       location: 'Hà Nội',
       date: '15/06/2026',
       time: '14:00 - 17:00',

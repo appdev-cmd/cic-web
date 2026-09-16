@@ -250,47 +250,70 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   let events: HomeEventsModel = legacy.events ?? { upcomingEvents: [], pastEvents: [] };
   const eventSec = sectionMap.get('home.events');
   try {
-    const rawEvents = await sql`
-      SELECT id, title, alias, image, summary, time_event, place, link_dangky
-      FROM cic_event
-      WHERE published = true AND (show_in_homepage = true OR is_hot = true)
-      ORDER BY coalesce(time_event, created_time) DESC
-      LIMIT 2
-    `;
+    const eventRefs = eventSec?.references?.filter((r) => r.entityType === 'event') ?? [];
+    let eventRows: any[] = [];
 
-    const pastEventsRows = await sql`
-      SELECT id, title, alias, image, summary, time_event, place
-      FROM cic_event
-      WHERE published = true
-      ORDER BY coalesce(time_event, created_time) DESC
-      OFFSET 2
-      LIMIT 3
-    `;
+    if (eventRefs.length > 0) {
+      const entityIds = eventRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
+      if (entityIds.length > 0) {
+        eventRows = await sql`
+          SELECT id, title, alias, image, summary, time_event, place, link_dangky
+          FROM cic_event
+          WHERE id IN ${sql(entityIds)} AND published = true
+        `;
+        // preserve order of references from Page Builder
+        const map = new Map(eventRows.map((r) => [Number(r.id), r]));
+        eventRows = entityIds.map((id) => map.get(id)).filter(Boolean);
+      }
+    }
 
-    const upcomingEvents: HomeEventItemModel[] = rawEvents.map((e) => ({
-      id: Number(e.id),
-      title: e.title || '',
-      date: formatDate(e.time_event),
-      time: '08:30 - 16:30',
-      loc: e.place || 'Trung tâm Hội thảo CIC',
-    }));
+    if (eventRows.length === 0) {
+      eventRows = await sql`
+        SELECT id, title, alias, image, summary, time_event, place, link_dangky
+        FROM cic_event
+        WHERE published = true AND (show_in_homepage = true OR is_hot = true)
+        ORDER BY coalesce(time_event, created_time) DESC
+        LIMIT 4
+      `;
+      if (eventRows.length === 0) {
+        eventRows = await sql`
+          SELECT id, title, alias, image, summary, time_event, place, link_dangky
+          FROM cic_event
+          WHERE published = true
+          ORDER BY coalesce(time_event, created_time) DESC
+          LIMIT 4
+        `;
+      }
+    }
 
-    const pastEvents: HomeEventItemModel[] = pastEventsRows.map((e) => ({
-      id: Number(e.id),
-      title: e.title || '',
-      date: formatDate(e.time_event),
-      attendees: '300+ Khách mời',
-      isPast: true,
-    }));
+    if (eventRows.length > 0) {
+      const mappedEvents: HomeEventItemModel[] = eventRows.map((e) => {
+        const isPast = e.time_event ? new Date(e.time_event).getTime() < Date.now() : false;
+        return {
+          id: Number(e.id),
+          title: e.title || '',
+          date: formatDate(e.time_event),
+          time: '08:30 - 16:30',
+          loc: e.place || 'Trung tâm Hội thảo CIC',
+          attendees: isPast ? '300+ Khách mời' : '500+ Khách mời',
+          isPast,
+          img: normalizeImageUrl(e.image),
+          desc: e.summary || '',
+          ctaUrl: e.link_dangky || (e.alias ? `/events/${e.alias}` : `/events/${e.id}`),
+        };
+      });
 
-    const cfg = (eventSec?.config ?? {}) as Record<string, unknown>;
-    events = {
-      badge: typeof cfg.badge === 'string' ? cfg.badge : events.badge,
-      title: typeof cfg.title === 'string' ? cfg.title : events.title,
-      subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : events.subtitle,
-      upcomingEvents: upcomingEvents.length > 0 ? upcomingEvents : events.upcomingEvents,
-      pastEvents: pastEvents.length > 0 ? pastEvents : events.pastEvents,
-    };
+      const cfg = (eventSec?.config ?? {}) as Record<string, unknown>;
+      events = {
+        badge: typeof cfg.badge === 'string' ? cfg.badge : events.badge,
+        title: typeof cfg.title === 'string' ? cfg.title : events.title,
+        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : events.subtitle,
+        ctaLabel: typeof cfg.ctaLabel === 'string' ? cfg.ctaLabel : events.ctaLabel,
+        ctaUrl: typeof cfg.ctaUrl === 'string' ? cfg.ctaUrl : events.ctaUrl,
+        upcomingEvents: mappedEvents,
+        pastEvents: [],
+      };
+    }
   } catch (err) {
     console.error('Failed to load events for home page:', err);
   }
@@ -299,13 +322,40 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   let news: HomeNewsModel = legacy.news ?? { items: [] };
   const newsSec = sectionMap.get('home.news');
   try {
-    const rawNews = await sql`
-      SELECT id, title, alias, image, summary, category_name, start_time, created_time
-      FROM cic_news
-      WHERE published = true AND (show_in_homepage = true OR is_hot = true)
-      ORDER BY coalesce(start_time, created_time) DESC
-      LIMIT 4
-    `;
+    const newsRefs = newsSec?.references?.filter((r) => r.entityType === 'news') ?? [];
+    let rawNews: any[] = [];
+
+    if (newsRefs.length > 0) {
+      const entityIds = newsRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
+      if (entityIds.length > 0) {
+        rawNews = await sql`
+          SELECT id, title, alias, image, summary, category_name, start_time, created_time
+          FROM cic_news
+          WHERE id IN ${sql(entityIds)} AND published = true
+        `;
+        const map = new Map(rawNews.map((r) => [Number(r.id), r]));
+        rawNews = entityIds.map((id) => map.get(id)).filter(Boolean);
+      }
+    }
+
+    if (rawNews.length === 0) {
+      rawNews = await sql`
+        SELECT id, title, alias, image, summary, category_name, start_time, created_time
+        FROM cic_news
+        WHERE published = true AND (show_in_homepage = true OR is_hot = true)
+        ORDER BY coalesce(start_time, created_time) DESC
+        LIMIT 4
+      `;
+      if (rawNews.length === 0) {
+        rawNews = await sql`
+          SELECT id, title, alias, image, summary, category_name, start_time, created_time
+          FROM cic_news
+          WHERE published = true
+          ORDER BY coalesce(start_time, created_time) DESC
+          LIMIT 4
+        `;
+      }
+    }
 
     if (rawNews.length > 0) {
       const newsItems: HomeNewsItemModel[] = rawNews.map((n) => ({
@@ -322,6 +372,8 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
         badge: typeof cfg.badge === 'string' ? cfg.badge : news.badge,
         title: typeof cfg.title === 'string' ? cfg.title : news.title,
         subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : news.subtitle,
+        ctaLabel: typeof cfg.ctaLabel === 'string' ? cfg.ctaLabel : news.ctaLabel,
+        ctaUrl: typeof cfg.ctaUrl === 'string' ? cfg.ctaUrl : news.ctaUrl,
         items: newsItems,
       };
     }

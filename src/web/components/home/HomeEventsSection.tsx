@@ -28,9 +28,9 @@ const DEFAULT_MAIN_EVENT: HomeEventDisplayItem = {
 };
 
 const DEFAULT_SIDE_EVENTS: readonly HomeEventDisplayItem[] = [
-  { title: 'Tư vấn Chuyển đổi số & BIM cho Doanh nghiệp', date: '20/05', loc: 'TP. Hồ Chí Minh', img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop' },
-  { title: 'Hội thảo Lộ trình Net Zero và Tín chỉ Carbon', date: '08/06', loc: 'Hà Nội', img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop' },
-  { title: 'Workshop: Ứng dụng AI trong Giám sát Công trình', date: '15/06', loc: 'Online (Zoom)', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop' },
+  { title: 'Webinar: Phần mềm Cage Carbon - Cage CBAM trong kiểm kê phát thải khí nhà kính', date: '26/06', loc: 'Online', img: 'https://www.cic.com.vn/images/news/2024/05/original/hoi-thao-phan-mem-cage-carbon2_1716351734.jpg' },
+  { title: 'Webinar: Cập nhật tính năng mới trong Opera Job Management', date: '13/06', loc: 'Online', img: 'https://www.cic.com.vn/images/news/2024/05/original/tk-banner-event-opera_1716350330.jpg' },
+  { title: 'Webinar: Tăng tốc Chuyển đổi BIM 5D với Cubicost', date: '30/05', loc: 'Online', img: 'https://www.cic.com.vn/images/news/2024/05/original/webinar-cubicost_1716945974.jpg' },
 ];
 
 export interface HomeEventsSectionProps {
