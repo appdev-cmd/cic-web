@@ -4,9 +4,6 @@ import React, { useState, CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ArrowUpRight, ChevronRight, ChevronLeft } from 'lucide-react';
 import { SectionHeader } from '@shared/components/Typography';
-import { bindElement } from '@shared/visual-editing/bindElement';
-import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
-import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import type { HomeProjectModel } from '@shared/page-content/models';
 import type { Project } from '@shared/types';
 
@@ -16,8 +13,6 @@ export interface HomeProjectsSectionProps {
   ctaLabel?: string;
   ctaUrl?: string;
   projects: HomeProjectModel[];
-  editMode?: boolean;
-  bindingRegistry?: ElementBindingRegistry;
   setCurrentView: (view: any) => void;
   setActiveLink: (link: any) => void;
   setActiveProjectId: (id: any) => void;
@@ -29,8 +24,6 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
   ctaLabel,
   ctaUrl,
   projects,
-  editMode = false,
-  bindingRegistry = elementBindingRegistry,
   setCurrentView,
   setActiveLink,
   setActiveProjectId,
@@ -72,7 +65,6 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
               <button
                 key={tab.id}
                 onClick={() => {
-                  if (editMode) return;
                   setActiveProjectTab(tab.id);
                   setHoveredProjectIndex(null);
                 }}
@@ -92,7 +84,6 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
               type="text"
               placeholder="Tìm kiếm dự án..."
               value={projectSearchQuery}
-              readOnly={editMode}
               onChange={(e) => {
                 setProjectSearchQuery(e.target.value);
                 setHoveredProjectIndex(null);
@@ -114,7 +105,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
               const totalVisible = displayProjects.length;
 
               return displayProjects.map((proj, i) => {
-                const isHovered = !editMode && hoveredProjectIndex === i;
+                const isHovered = hoveredProjectIndex === i;
 
                 // Base 1/3 column width matching "Tất cả" grid layout
                 const baseWidth = '0 0 calc((100% - 2 * 1.5rem) / 3)';
@@ -157,20 +148,10 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
 
                 return (
                   <div
-                    key={proj.entityId}
-                    {...bindElement<HTMLDivElement>(createElementBinding({
-                      sectionKey: 'home.projects',
-                      elementPath: createCollectionItemPath('items', proj.entityId),
-                      semantic: 'reference-item',
-                      ownership: 'reference',
-                      editable: false,
-                      itemId: proj.entityId,
-                      collectionPath: 'items',
-                    }), bindingRegistry)}
-                    onMouseEnter={() => { if (!editMode) setHoveredProjectIndex(i); }}
-                    onFocus={() => { if (!editMode) setHoveredProjectIndex(i); }}
+                    key={proj.entityId ?? proj.id}
+                    onMouseEnter={() => setHoveredProjectIndex(i)}
+                    onFocus={() => setHoveredProjectIndex(i)}
                     onClick={() => {
-                      if (editMode) return;
                       // Toggle expansion on click for touch devices
                       if (hoveredProjectIndex === i) {
                         handleProjectClick();
@@ -179,7 +160,6 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                       }
                     }}
                     onKeyDown={(e) => { 
-                      if (editMode) return;
                       if (e.key === 'Enter' || e.key === ' ') { 
                         e.preventDefault(); 
                         if (hoveredProjectIndex === i) {

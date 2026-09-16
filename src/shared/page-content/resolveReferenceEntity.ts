@@ -55,14 +55,14 @@ export function resolveProjectEntity(entityId: string): HomeProjectModel | null 
       entityId: opt.id,
       type: 'services' as const,
       name: opt.label,
-      short: opt.label,
+      short: meta.summary || opt.label,
       service: meta.category || 'Tư vấn kỹ thuật',
-      client: meta.location ? `Khách hàng · ${meta.location}` : 'Đối tác',
+      client: meta.client ? `Khách hàng · ${meta.client}` : (meta.location ? `Khách hàng · ${meta.location}` : 'Đối tác'),
       category: meta.category || 'Dự án trọng điểm',
       description: meta.summary || opt.description,
       img: meta.image ? normalizeImageUrl(meta.image) : (projects[0]?.img || '/banner_hero/doi_tac_cong_nghe_chien_luoc.png'),
       location: meta.location || 'Việt Nam',
-      tags: ['BIM', 'Digital Twins'],
+      tags: Array.isArray(meta.tags) && meta.tags.length > 0 ? meta.tags : ['BIM', 'Digital Twins'],
       size: 'small' as const,
     };
   }
@@ -80,6 +80,8 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '08:30 - 16:30',
     loc: 'Trung tâm Hội nghị White Palace, TP.HCM',
     attendees: '500+ Khách mời',
+    img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop',
+    desc: 'Hội thảo thường niên lớn nhất của Bentley Systems tại Việt Nam giới thiệu các giải pháp chuyển đổi số hạ tầng.',
   },
   event_bim_enterprise: {
     id: 'event_bim_enterprise',
@@ -88,6 +90,8 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '08:30 - 11:30',
     loc: 'Khách sạn JW Marriott, Hà Nội',
     attendees: '300+ Doanh nghiệp',
+    img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop',
+    desc: 'Chương trình tư vấn chuyên sâu về lộ trình áp dụng BIM theo đề án của Bộ Xây Dựng cho các doanh nghiệp xây dựng.',
   },
   event_net_zero: {
     id: 'event_net_zero',
@@ -96,6 +100,8 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '09:00 - 12:00',
     loc: 'Khách sạn Melia, Hà Nội',
     attendees: '200+ Chuyên gia',
+    img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop',
+    desc: 'Giải pháp tính toán phát thải, tín chỉ carbon và các tiêu chuẩn chứng nhận xanh quốc tế LEED, EDGE, LOTUS.',
   },
   event_ai_construction: {
     id: 'event_ai_construction',
@@ -104,6 +110,8 @@ const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
     time: '14:00 - 17:00',
     loc: 'Online qua Zoom / MS Teams',
     attendees: '1000+ Kỹ sư',
+    img: 'https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png',
+    desc: 'Công nghệ thị giác máy tính và AI phân tích hình ảnh camera tại công trường nhằm cảnh báo nguy cơ mất an toàn.',
   },
 };
 
@@ -118,9 +126,12 @@ export function resolveEventEntity(entityId: string): HomeEventItemModel | null 
       id: opt.id,
       title: opt.label,
       date: meta.date ? formatDisplayDate(meta.date) : '2026',
-      time: '08:30 - 16:30',
-      loc: meta.location || 'Trung tâm Hội nghị CIC',
+      time: meta.time || '08:30 - 16:30',
+      loc: meta.location || 'Online (Zoom)',
       attendees: '300+ Khách mời',
+      img: meta.image ? normalizeImageUrl(meta.image) : 'https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png',
+      desc: meta.summary || opt.description,
+      ctaUrl: meta.ctaUrl || undefined,
     };
   }
 
@@ -135,6 +146,8 @@ export function resolveEventEntity(entityId: string): HomeEventItemModel | null 
       time: found.time,
       loc: found.loc,
       attendees: found.attendees,
+      img: (found as any).img || 'https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png',
+      desc: (found as any).desc || 'Sự kiện công nghệ và hội thảo chuyên sâu do CIC và các đối tác quốc tế tổ chức.',
     };
   }
   return null;

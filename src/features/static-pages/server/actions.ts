@@ -110,7 +110,7 @@ export async function getPageBuilderEntityOptionsAction(
     // 1. Projects
     try {
       const projectRows = await sql`
-        SELECT id, title, tagline, solution, sector, image, location, is_featured
+        SELECT id, title, tagline, solution, sector, image, location, is_featured, customer_name, technologies
         FROM cic_projects
         WHERE published = true
         ORDER BY is_featured DESC, ordering, id
@@ -128,6 +128,8 @@ export async function getPageBuilderEntityOptionsAction(
             location: p.location || undefined,
             category: p.solution || p.sector || 'Dự án',
             summary: p.tagline || undefined,
+            client: p.customer_name || undefined,
+            tags: Array.isArray(p.technologies) ? p.technologies : undefined,
             isFeatured: Boolean(p.is_featured),
           },
         });
@@ -139,7 +141,7 @@ export async function getPageBuilderEntityOptionsAction(
     // 2. Events
     try {
       const eventRows = await sql`
-        SELECT id, title, time_event, place, image, is_hot, show_in_homepage
+        SELECT id, title, time_event, specific_time, place, image, summary, is_hot, show_in_homepage, link_dangky
         FROM cic_event
         WHERE published = true
         ORDER BY is_hot DESC, show_in_homepage DESC, coalesce(time_event, created_time) DESC
@@ -156,6 +158,9 @@ export async function getPageBuilderEntityOptionsAction(
             image: e.image || undefined,
             location: e.place || undefined,
             date: e.time_event ? String(e.time_event) : undefined,
+            time: e.specific_time || undefined,
+            summary: e.summary || undefined,
+            ctaUrl: e.link_dangky || undefined,
             isFeatured: Boolean(e.is_hot || e.show_in_homepage),
           },
         });

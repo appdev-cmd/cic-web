@@ -80,6 +80,9 @@ export interface HomeEventItemModel {
   loc?: string;
   attendees?: string;
   isPast?: boolean;
+  img?: string;
+  desc?: string;
+  ctaUrl?: string;
 }
 
 export interface HomeEventsModel {
@@ -242,6 +245,10 @@ export interface PageBuilderEntityOption {
     category?: string;
     summary?: string;
     date?: string;
+    time?: string;
+    client?: string;
+    tags?: string[];
+    ctaUrl?: string;
     isFeatured?: boolean;
     link?: string;
   };

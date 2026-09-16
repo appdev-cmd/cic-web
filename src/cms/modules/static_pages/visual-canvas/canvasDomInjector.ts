@@ -693,10 +693,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         inventory.appendChild(group);
       });
 
-      const showFullCollectionInventory = 
-        section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || 
-        section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem' || 
-        section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
+      const showFullCollectionInventory = false;
 
       if (showFullCollectionInventory) {
         inventory.style.cssText = 'display:block;margin:18px 0 8px;';
@@ -723,14 +720,19 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         const reference = section.references?.find((item) => collectionAnchor.matches(`[data-page-collection~="${item.entityType}"]`));
         const isAwardCollection = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards';
         const isPartnerCollection = section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
+        const isProjectSection = section.sectionKey === 'home.projects' || section.sectionType === 'projects';
+        const isEventSection = section.sectionKey === 'home.events' || section.sectionType === 'events';
         const itemContainer = isAwardCollection
           ? collectionAnchor.querySelector<HTMLElement>('.overflow-hidden > .flex')
           : collectionAnchor;
-        const productionCards = itemContainer
-          ? (isAwardCollection
-            ? Array.from(itemContainer.children).map((wrapper) => wrapper.firstElementChild).filter((item): item is HTMLElement => item instanceof node.ownerDocument.defaultView!.HTMLElement)
-            : Array.from(itemContainer.children).filter((item): item is HTMLElement => item instanceof node.ownerDocument.defaultView!.HTMLElement && !item.dataset.pageBuilderAction))
-          : [];
+        const customCards = collectionAnchor.querySelectorAll<HTMLElement>('[data-page-builder-card]');
+        const productionCards = customCards.length > 0
+          ? Array.from(customCards)
+          : itemContainer
+            ? (isAwardCollection
+              ? Array.from(itemContainer.children).map((wrapper) => wrapper.firstElementChild).filter((item): item is HTMLElement => item instanceof node.ownerDocument.defaultView!.HTMLElement)
+              : Array.from(itemContainer.children).filter((item): item is HTMLElement => item instanceof node.ownerDocument.defaultView!.HTMLElement && !item.dataset.pageBuilderAction))
+            : [];
         const visibleCards = reference
           ? productionCards.slice(0, reference.entityIds.length)
           : (isAwardCollection || isPartnerCollection) && Array.isArray(section.config.items)
@@ -800,7 +802,8 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           card.style.position = 'relative';
           const controls = node.ownerDocument.createElement('div');
           controls.dataset.pageBuilderAction = 'card-controls';
-          controls.style.cssText = 'position:absolute;z-index:20;top:8px;right:8px;display:flex;align-items:center;gap:6px;padding:6px;border-radius:10px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(15,23,42,.18);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity 140ms ease,transform 140ms ease;';
+          const isTopLeft = isProjectSection;
+          controls.style.cssText = `position:absolute;z-index:20;top:10px;${isTopLeft ? 'left:10px;' : 'right:10px;'}display:flex;align-items:center;gap:6px;padding:6px;border-radius:10px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(15,23,42,.18);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity 140ms ease,transform 140ms ease;`;
           
           if (reference) {
             const handle = createCardAction('⠿ Kéo', () => undefined);
@@ -893,7 +896,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
             : 'flex items-center justify-center p-2'; 
           wrapper.appendChild(addSlot); 
           itemContainer.appendChild(wrapper);
-        } else if (itemContainer && reference && reference.source?.mode === 'manual') {
+        } else if (itemContainer && reference && reference.source?.mode === 'manual' && !isProjectSection && !isEventSection) {
           const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[reference.entityType] ?? 20;
           if (reference.entityIds.length < limit) {
             const addSlot = node.ownerDocument.createElement('button');
