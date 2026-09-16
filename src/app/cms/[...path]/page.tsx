@@ -1,4 +1,4 @@
-import { isCtaCmsPath, isCustomerRequestsCmsPath, isEmailTemplatesCmsPath, isFormsCmsPath, isNewsCategoryCmsPath, isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, resolveCmsModule } from '@/cms/routing';
+import { isCtaCmsPath, isCustomerRequestsCmsPath, isEmailTemplatesCmsPath, isFormsCmsPath, isNewsCategoryCmsPath, isProductApplicationCmsPath, isProductBrandCmsPath, isProductCategoryCmsPath, isProductTypeCmsPath, isSalesOwnerCmsPath, isStaticPagesCmsPath, resolveCmsModule } from '@/cms/routing';
 import { NewsCategoriesRoute } from '@/cms/modules/news_categories/NewsCategoriesRoute';
 import { ProductApplicationsRoute } from '@/cms/modules/product_applications/ProductApplicationsRoute';
 import { ProductBrandsRoute } from '@/cms/modules/product_brands/ProductBrandsRoute';
@@ -14,12 +14,15 @@ import { EmailTemplatesRoute } from '@/cms/modules/email_templates/EmailTemplate
 import { CustomerRequestsRoute } from '@/cms/modules/customer_interaction/customer_requests/CustomerRequestsRoute';
 import { FormsRoute } from '@/cms/modules/customer_interaction/forms/FormsRoute';
 import { CtaRoute } from '@/cms/modules/customer_interaction/cta/CtaRoute';
+import { StaticPagesRoute } from '@/cms/modules/static_pages/StaticPagesRoute';
 import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
 
 export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
   const { path } = await params;
   const cmsPath = `/cms/${path.join('/')}`;
-  const moduleContent = isNewsCategoryCmsPath(cmsPath)
+  const moduleContent = isStaticPagesCmsPath(cmsPath)
+    ? <StaticPagesRoute />
+    : isNewsCategoryCmsPath(cmsPath)
     ? <NewsCategoriesRoute />
     : (cmsPath==='/cms/articles'||cmsPath==='/cms/news'||cmsPath.startsWith('/cms/news/'))
     ? <NewsRoute />

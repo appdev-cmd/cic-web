@@ -1,0 +1,757 @@
+'use client';
+
+import React, { useMemo, useState, useTransition } from 'react';
+import {
+  CheckCircle2,
+  Edit,
+  Eye,
+  FileText,
+  Globe2,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  X,
+  Loader2,
+  AlertTriangle,
+} from 'lucide-react';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { CmsButton } from '../../components/ui/CmsButton';
+import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { CmsPagination } from '../../components/ui/CmsPagination';
+import { PageBuilderEditor } from './PageBuilderEditor';
+import { PageBuilderPreviewModal } from './PageBuilderPreviewModal';
+import { pageBuilderEntityOptions } from './pageBuilderData';
+import { getDemoMediaPickerItems } from '../../data/demoMediaDataSource';
+import type { CmsStaticPageListItem, SaveDraftInput, StaticPageFullDetail } from '@/features/static-pages/types';
+import type { PageBuilderPage } from './pageBuilderTypes';
+import {
+  savePageDraftAction,
+  publishPageAction,
+  createLegalPageAction,
+  getCmsPageDetailAction,
+} from '@/features/static-pages/server/actions';
+
+interface StaticPagesScreenProps {
+  pagesByLocale: Record<'vi' | 'en', CmsStaticPageListItem[]>;
+  capabilities: {
+    edit: boolean;
+    publish: boolean;
+    createLegal: boolean;
+  };
+}
+
+const formatTime = (value: string | null) => {
+  if (!value) return 'Chưa cập nhật';
+  try {
+    return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
+  } catch {
+    return value;
+  }
+};
+
+const slugify = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+const shortSlug = (value: string) =>
+  slugify(value).split('-').slice(0, 6).join('-').slice(0, 42).replace(/-$/, '');
+
+/** Maps StaticPageFullDetail from server to PageBuilderPage for PageBuilderEditor */
+function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
+  return {
+    id: detail.id,
+    code: detail.code,
+    name: detail.name,
+    slug: detail.slug,
+    pageType: detail.pageType,
+    templateKey: detail.templateKey,
+    systemDefined: detail.systemDefined,
+    draft: {
+      version: detail.draft.versionNumber,
+      status: detail.draft.state,
+      updatedAt: detail.draft.createdAt,
+      publishedAt: detail.draft.publishedAt ?? undefined,
+      seo: {
+        title: detail.draft.seoTitle,
+        description: detail.draft.seoDescription,
+      },
+      sections: detail.draft.sections.map((s) => ({
+        id: s.id,
+        sectionKey: s.sectionKey,
+        sectionType: s.sectionType,
+        position: s.position,
+        config: s.config as any,
+        references: s.references?.map((r) => ({
+          entityType: r.entityType as any,
+          entityIds: [r.entityId],
+        })),
+      })),
+    },
+    published: detail.published
+      ? {
+          version: detail.published.versionNumber,
+          status: detail.published.state,
+          updatedAt: detail.published.createdAt,
+          publishedAt: detail.published.publishedAt ?? undefined,
+          seo: {
+            title: detail.published.seoTitle,
+            description: detail.published.seoDescription,
+          },
+          sections: detail.published.sections.map((s) => ({
+            id: s.id,
+            sectionKey: s.sectionKey,
+            sectionType: s.sectionType,
+            position: s.position,
+            config: s.config as any,
+            references: s.references?.map((r) => ({
+              entityType: r.entityType as any,
+              entityIds: [r.entityId],
+            })),
+          })),
+        }
+      : {
+          version: 0,
+          status: 'published',
+          updatedAt: detail.updatedAt,
+          seo: { title: detail.name, description: '' },
+          sections: [],
+        },
+    history: detail.history?.map((h) => ({
+      version: h.versionNumber,
+      status: h.state as any,
+      updatedAt: h.createdAt,
+      publishedAt: h.publishedAt ?? undefined,
+      seo: { title: '', description: '' },
+      sections: [],
+    })),
+  };
+}
+
+/** Maps PageBuilderPage from editor back to SaveDraftInput for server action */
+function toSaveDraftInput(page: PageBuilderPage): SaveDraftInput {
+  return {
+    seo: {
+      title: page.draft.seo.title,
+      description: page.draft.seo.description,
+    },
+    sections: page.draft.sections.map((sec, idx) => ({
+      sectionKey: sec.sectionKey,
+      sectionType: sec.sectionType,
+      position: sec.position || idx + 1,
+      config: sec.config as Record<string, unknown>,
+      references: sec.references?.flatMap((ref) =>
+        ref.entityIds.map((id, p) => ({
+          entityType: ref.entityType,
+          entityId: id,
+          position: p + 1,
+        }))
+      ),
+    })),
+  };
+}
+
+export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesScreenProps) {
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const [pages, setPages] = useState<CmsStaticPageListItem[]>(() => pagesByLocale[workspaceLocale] ?? []);
+  const [editingPage, setEditingPage] = useState<PageBuilderPage | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [previewPage, setPreviewPage] = useState<PageBuilderPage | null>(null);
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'has_draft' | 'published'>('all');
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newPageName, setNewPageName] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [isPending, startTransition] = useTransition();
+
+  // Keep pages in sync when workspace locale changes
+  React.useEffect(() => {
+    setPages(pagesByLocale[workspaceLocale] ?? []);
+    setCurrentPage(1);
+  }, [workspaceLocale, pagesByLocale]);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    window.setTimeout(() => setToast(null), 3500);
+  };
+
+  const filteredPages = useMemo(() => {
+    return pages.filter((page) => {
+      const normalized = query.trim().toLowerCase();
+      const matchesQuery =
+        !normalized ||
+        page.name.toLowerCase().includes(normalized) ||
+        page.slug.toLowerCase().includes(normalized) ||
+        page.code.toLowerCase().includes(normalized);
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'published'
+          ? page.published.version > 0
+          : page.draft.version > page.published.version);
+      return matchesQuery && matchesStatus;
+    });
+  }, [pages, query, statusFilter]);
+
+  const paginatedPages = useMemo(() => {
+    return filteredPages.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  }, [filteredPages, currentPage, pageSize]);
+
+  const suggestedSlug = useMemo(() => {
+    const base = shortSlug(newPageName) || 'trang-noi-dung';
+    if (!pages.some((page) => page.slug === `/${base}`)) return base;
+    let suffix = 2;
+    while (pages.some((page) => page.slug === `/${base}-${suffix}`)) suffix += 1;
+    return `${base}-${suffix}`;
+  }, [newPageName, pages]);
+
+  const handleEdit = async (pageListItem: CmsStaticPageListItem) => {
+    setIsLoadingDetail(true);
+    try {
+      const res = await getCmsPageDetailAction(Number(pageListItem.id));
+      if (!res.success || !res.data) {
+        showToast(res.error ?? 'Không thể tải dữ liệu trang.', 'error');
+        return;
+      }
+      const editorPage = toPageBuilderPage(res.data as StaticPageFullDetail);
+      setEditingPage(editorPage);
+    } catch {
+      showToast('Lỗi khi tải chi tiết trang.', 'error');
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
+
+  const handleSaveDraft = (nextPage: PageBuilderPage) => {
+    startTransition(async () => {
+      const input = toSaveDraftInput(nextPage);
+      const res = await savePageDraftAction(Number(nextPage.id), input);
+      if (!res.success || !res.data) {
+        showToast(res.error ?? 'Lỗi lưu bản nháp.', 'error');
+        return;
+      }
+      const newVersion = res.data.versionNumber;
+      const updatedPage: PageBuilderPage = {
+        ...nextPage,
+        draft: {
+          ...nextPage.draft,
+          version: newVersion,
+          status: 'draft',
+          updatedAt: new Date().toISOString(),
+        },
+      };
+      setEditingPage(updatedPage);
+      setPages((current) =>
+        current.map((p) =>
+          p.id === nextPage.id
+            ? {
+                ...p,
+                draft: {
+                  ...p.draft,
+                  version: newVersion,
+                  updatedAt: new Date().toISOString(),
+                },
+              }
+            : p
+        )
+      );
+      showToast('Đã lưu bản nháp vào Database. Website công khai chưa thay đổi.');
+    });
+  };
+
+  const handlePublish = (nextPage: PageBuilderPage) => {
+    startTransition(async () => {
+      // First save draft if modified, then publish
+      const input = toSaveDraftInput(nextPage);
+      const saveRes = await savePageDraftAction(Number(nextPage.id), input);
+      if (!saveRes.success) {
+        showToast(saveRes.error ?? 'Lỗi lưu trước khi xuất bản.', 'error');
+        return;
+      }
+
+      const pubRes = await publishPageAction(Number(nextPage.id));
+      if (!pubRes.success || !pubRes.data) {
+        showToast(pubRes.error ?? 'Lỗi xuất bản trang.', 'error');
+        return;
+      }
+
+      const newVersion = pubRes.data.versionNumber;
+      const nowIso = new Date().toISOString();
+      const updatedPage: PageBuilderPage = {
+        ...nextPage,
+        published: {
+          ...JSON.parse(JSON.stringify(nextPage.draft)),
+          version: newVersion,
+          status: 'published',
+          publishedAt: nowIso,
+          updatedAt: nowIso,
+        },
+      };
+      setEditingPage(updatedPage);
+      setPages((current) =>
+        current.map((p) =>
+          p.id === nextPage.id
+            ? {
+                ...p,
+                published: {
+                  ...p.published,
+                  version: newVersion,
+                  publishedAt: nowIso,
+                },
+              }
+            : p
+        )
+      );
+      showToast(`Đã xuất bản thành công! Link công khai: https://cic.com.vn${nextPage.slug}`);
+    });
+  };
+
+  const handleCreateLegal = () => {
+    if (!capabilities.createLegal) {
+      showToast('Bạn không có quyền tạo trang nội dung.', 'error');
+      return;
+    }
+    const name = newPageName.trim();
+    const slug = `/${suggestedSlug}`;
+    if (!name) return;
+
+    startTransition(async () => {
+      const res = await createLegalPageAction({
+        workspace: workspaceLocale,
+        name,
+        slug,
+      });
+
+      if (!res.success || !res.data) {
+        showToast(res.error ?? 'Không thể tạo trang mới.', 'error');
+        return;
+      }
+
+      setCreateOpen(false);
+      setNewPageName('');
+      showToast(`Đã tạo trang "${name}" (Draft). Bắt đầu biên tập nội dung.`);
+
+      // Open editor for new page
+      const detailRes = await getCmsPageDetailAction(Number(res.data.id));
+      if (detailRes.success && detailRes.data) {
+        const editorPage = toPageBuilderPage(detailRes.data as StaticPageFullDetail);
+        setEditingPage(editorPage);
+      }
+    });
+  };
+
+  const mediaImages = useMemo(() => getDemoMediaPickerItems(workspaceLocale), [workspaceLocale]);
+
+  // If in editor view
+  if (editingPage) {
+    return (
+      <>
+        {toast && <Toast message={toast.message} type={toast.type} />}
+        <PageBuilderEditor
+          key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`}
+          workspaceLocale={workspaceLocale}
+          page={editingPage}
+          entityOptions={pageBuilderEntityOptions}
+          mediaImages={mediaImages}
+          onBack={() => setEditingPage(null)}
+          onSaveDraft={handleSaveDraft}
+          onPreview={setPreviewPage}
+          onPublish={handlePublish}
+        />
+        <PageBuilderPreviewModal page={previewPage} onClose={() => setPreviewPage(null)} />
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      {toast && <Toast message={toast.message} type={toast.type} />}
+      {isLoadingDetail && <LoadingOverlay message="Đang tải dữ liệu trang từ Database..." />}
+
+      <CmsPageHeader
+        icon={<FileText />}
+        title="Trang nội dung"
+        description="Quản lý các trang thiết kế riêng và tạo trang mới theo mẫu nội dung chuẩn."
+        meta={
+          <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
+            {pages.length} Page · {workspaceLocale.toUpperCase()}
+          </span>
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <CmsButton
+              variant="secondary"
+              leadingIcon={<RefreshCw className={isPending ? 'animate-spin' : ''} />}
+              onClick={() => {
+                showToast('Đã làm mới danh sách trang.');
+              }}
+            >
+              Làm mới
+            </CmsButton>
+            {capabilities.createLegal && (
+              <CmsButton leadingIcon={<Plus />} onClick={() => setCreateOpen(true)}>
+                Tạo trang nội dung
+              </CmsButton>
+            )}
+          </div>
+        }
+      />
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
+        <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-12">
+          <div className="relative flex items-center md:col-span-6">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
+            <input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Tìm theo tên, code hoặc đường dẫn..."
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs font-medium outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800"
+            />
+          </div>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as typeof statusFilter);
+              setCurrentPage(1);
+            }}
+            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium outline-none focus:border-orange-500 md:col-span-3 dark:border-slate-700 dark:bg-slate-800"
+          >
+            <option value="all">Trạng thái: Tất cả</option>
+            <option value="has_draft">Có thay đổi bản nháp</option>
+            <option value="published">Đã xuất bản</option>
+          </select>
+
+          <div className="flex justify-end md:col-span-3">
+            <button
+              type="button"
+              disabled={!query && statusFilter === 'all'}
+              onClick={() => {
+                setQuery('');
+                setStatusFilter('all');
+                setCurrentPage(1);
+              }}
+              className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Đặt lại
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <div className="hidden overflow-x-auto md:block">
+          <table className="cms-data-table min-w-[920px] text-left w-full">
+            <thead>
+              <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-500">
+                <th className="p-3">Page</th>
+                <th className="p-3">Code / đường dẫn</th>
+                <th className="p-3">Section</th>
+                <th className="p-3">Draft</th>
+                <th className="p-3">Published</th>
+                <th className="p-3 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedPages.map((page) => (
+                <PageRow
+                  key={page.id}
+                  page={page}
+                  onPreview={() => {
+                    // Preview requires loading full detail
+                    handleEdit(page);
+                  }}
+                  onEdit={() => handleEdit(page)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
+          {paginatedPages.map((page) => (
+            <PageCard
+              key={page.id}
+              page={page}
+              onPreview={() => handleEdit(page)}
+              onEdit={() => handleEdit(page)}
+            />
+          ))}
+        </div>
+
+        {filteredPages.length === 0 && (
+          <div className="py-12 text-center text-sm text-slate-500">
+            Không tìm thấy Page phù hợp.
+          </div>
+        )}
+
+        <CmsPagination
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalCount={filteredPages.length}
+          itemLabel="Page"
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+        />
+      </section>
+
+      <PageBuilderPreviewModal page={previewPage} onClose={() => setPreviewPage(null)} />
+
+      {createOpen && (
+        <CreatePageModal
+          name={newPageName}
+          slug={suggestedSlug}
+          isSubmitting={isPending}
+          onNameChange={setNewPageName}
+          onClose={() => setCreateOpen(false)}
+          onCreate={handleCreateLegal}
+        />
+      )}
+    </div>
+  );
+}
+
+function Toast({ message, type = 'success' }: { message: string; type?: 'success' | 'error' }) {
+  const isError = type === 'error';
+  return (
+    <div
+      className={`fixed bottom-6 right-6 z-[80] flex max-w-[calc(100vw-3rem)] items-center gap-2 rounded-xl border px-4 py-3 text-xs font-semibold text-white shadow-2xl ${
+        isError ? 'border-rose-700 bg-rose-900' : 'border-slate-700 bg-slate-900'
+      }`}
+    >
+      {isError ? (
+        <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+      ) : (
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+      )}
+      {message}
+    </div>
+  );
+}
+
+function LoadingOverlay({ message }: { message: string }) {
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 backdrop-blur-xs">
+      <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-slate-900 px-6 py-4 shadow-2xl border border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-800 dark:text-slate-100">
+        <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
+        {message}
+      </div>
+    </div>
+  );
+}
+
+function typeLabel(templateKey: string) {
+  return templateKey === 'legal_standard' ? 'Mẫu nội dung chuẩn' : 'Thiết kế riêng';
+}
+
+function PageRow({
+  page,
+  onPreview,
+  onEdit,
+}: {
+  page: CmsStaticPageListItem;
+  onPreview: () => void;
+  onEdit: () => void;
+}) {
+  const changed = page.draft.version > page.published.version;
+  return (
+    <tr className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+      <td className="p-3">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400">
+            <Globe2 className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{page.name}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{typeLabel(page.templateKey)}</p>
+          </div>
+        </div>
+      </td>
+      <td className="p-3">
+        <p className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">{page.code}</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{page.slug}</p>
+      </td>
+      <td className="p-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
+        {page.sectionCount} cố định
+      </td>
+      <td className="p-3">
+        <span
+          className={`rounded-md px-2 py-1 text-xs font-bold ${
+            changed
+              ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+          }`}
+        >
+          v{page.draft.version}
+          {changed ? ' · Chưa publish' : ''}
+        </span>
+        <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
+          {formatTime(page.draft.updatedAt)}
+        </p>
+      </td>
+      <td className="p-3">
+        {page.published.version > 0 ? (
+          <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+            v{page.published.version} · Published
+          </span>
+        ) : (
+          <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+            Chưa xuất bản
+          </span>
+        )}
+      </td>
+      <td className="p-3">
+        <div className="flex justify-end gap-1">
+          <button
+            onClick={onEdit}
+            className="rounded-lg p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer"
+            title="Chỉnh sửa & Xem trước"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function PageCard({
+  page,
+  onPreview,
+  onEdit,
+}: {
+  page: CmsStaticPageListItem;
+  onPreview: () => void;
+  onEdit: () => void;
+}) {
+  return (
+    <article className="space-y-3 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400">
+            <Globe2 className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-bold text-slate-900 dark:text-white">{page.name}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{typeLabel(page.templateKey)}</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 gap-1">
+          <button
+            onClick={onEdit}
+            className="rounded-lg bg-orange-50 dark:bg-orange-950/50 p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 cursor-pointer"
+            aria-label={`Chỉnh sửa ${page.name}`}
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 py-2">
+        <p className="break-all font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
+          {page.slug}
+        </p>
+        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+          {page.sectionCount} section cố định · Draft v{page.draft.version}
+          {page.published.version > 0 ? ` · Published v${page.published.version}` : ' · Chưa xuất bản'}
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function CreatePageModal({
+  name,
+  slug,
+  isSubmitting,
+  onNameChange,
+  onClose,
+  onCreate,
+}: {
+  name: string;
+  slug: string;
+  isSubmitting: boolean;
+  onNameChange: (value: string) => void;
+  onClose: () => void;
+  onCreate: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-xs"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Tạo trang nội dung"
+    >
+      <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">Tạo trang nội dung</h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Dùng cùng thiết kế chuẩn với Chính sách bảo mật và Điều khoản sử dụng.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            aria-label="Đóng"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-4">
+          <label className="block space-y-1.5">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Tên trang *</span>
+            <input
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2.5 text-sm outline-none focus:border-orange-500"
+              placeholder="Ví dụ: Quy chế hoạt động"
+            />
+          </label>
+
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-3">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Đường dẫn tự động
+            </p>
+            <p className="mt-1 break-all font-mono text-sm font-semibold text-slate-800 dark:text-slate-100">
+              /{slug}
+            </p>
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Nếu đã tồn tại, hệ thống tự thêm hậu tố ngắn như -2, -3.
+            </p>
+          </div>
+
+          <div className="break-all rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 p-3 text-xs text-orange-800 dark:text-orange-300">
+            <span className="font-bold">Link sau khi xuất bản:</span> https://cic.com.vn/{slug}
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-2">
+          <CmsButton variant="secondary" onClick={onClose} disabled={isSubmitting}>
+            Hủy
+          </CmsButton>
+          <CmsButton onClick={onCreate} disabled={!name.trim() || isSubmitting}>
+            {isSubmitting ? 'Đang tạo...' : 'Tạo Draft'}
+          </CmsButton>
+        </div>
+      </div>
+    </div>
+  );
+}

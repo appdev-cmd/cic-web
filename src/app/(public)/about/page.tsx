@@ -1,3 +1,47 @@
-import { getPublishedAboutContent } from '@/features/about/server/queries';
+import type { Metadata } from 'next';
+import { getPublicStaticPage } from '@/features/static-pages/server/queries';
+import { getLegacyAboutPageContent } from '@/shared/page-content/legacyPageContent';
+import { resolvePageContent } from '@/shared/page-content/resolvePageContent';
+import { PublicAboutRoute } from './PublicAboutRoute';
+
 export const dynamic = 'force-dynamic';
-export default async function AboutPage() { const items = await getPublishedAboutContent(); return <section className="mx-auto max-w-5xl px-6 py-16"><h1 className="text-4xl font-extrabold">Về CIC Technology</h1><div className="mt-8 space-y-6">{items.length ? items.map((item) => <section key={item.key}><h2 className="text-xl font-bold">{item.title}</h2><p className="mt-2 whitespace-pre-wrap text-slate-600">{item.value}</p></section>) : <p className="text-slate-600">Thông tin đang được cập nhật.</p>}</div></section>; }
+
+export const metadata: Metadata = {
+  title: 'Về CIC Technology | Đối tác công nghệ chiến lược',
+  description: 'Tìm hiểu về lịch sử hình thành, tầm nhìn sứ mệnh và các cột mốc phát triển của CIC Technology.',
+};
+
+export default async function AboutPage() {
+  const pageData = await getPublicStaticPage('vi', 'about');
+
+  let aboutContent = getLegacyAboutPageContent();
+  let pageSections = undefined;
+
+  if (pageData && pageData.sections.length > 0) {
+    pageSections = pageData.sections.map((s) => ({
+      sectionKey: s.sectionKey,
+      config: s.config,
+      references: s.references ? [
+        {
+          entityType: 'project',
+          entityIds: s.references.filter((r) => r.entityType === 'project').map((r) => r.entityId),
+        },
+      ] : [],
+    }));
+
+    const resolved = resolvePageContent({
+      pageType: 'about',
+      version: { sections: pageSections },
+      legacyFallback: aboutContent,
+    });
+    aboutContent = resolved.content;
+  }
+
+  return (
+    <PublicAboutRoute
+      activeTab="overview"
+      pageSections={pageSections}
+      aboutContent={aboutContent}
+    />
+  );
+}

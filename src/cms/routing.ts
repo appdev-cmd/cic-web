@@ -212,6 +212,16 @@ export function isCtaCmsPath(path: string): boolean {
   return normalizedPath === '/cms/cta' || normalizedPath.startsWith('/cms/cta/');
 }
 
+export function isStaticPagesCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return (
+    normalizedPath === '/cms/static-pages' ||
+    normalizedPath === '/cms/pages' ||
+    normalizedPath.startsWith('/cms/static-pages/') ||
+    normalizedPath.startsWith('/cms/pages/')
+  );
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }
