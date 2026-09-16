@@ -137,6 +137,7 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
     cfg.items = defaultEcosystemItems;
   }
   if (sectionKey === 'about.hero') {
+    if (!cfg.badge) cfg.badge = 'Về chúng tôi';
     if (!cfg.title) cfg.title = 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ';
     if (!cfg.subtitle) cfg.subtitle = 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.';
     if (!cfg.backgroundImageId) cfg.backgroundImageId = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80';
@@ -152,17 +153,49 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
     }
     if (!cfg.videoUrl) cfg.videoUrl = 'https://www.youtube.com/watch?v=hdLFK_09-tU?start=448';
   }
+  if (sectionKey === 'about.timeline') {
+    if (!cfg.badge) cfg.badge = 'Hành trình 35 năm';
+    if (!cfg.title) cfg.title = 'Tiến trình phát triển';
+    if (!cfg.description) cfg.description = 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.';
+  }
+  if (sectionKey === 'about.strategy') {
+    if (!cfg.title) cfg.title = 'Định hướng chiến lược';
+    if (!cfg.subtitle) cfg.subtitle = 'Tầm nhìn kiến tạo giá trị công nghệ bền vững';
+    if (!cfg.imageId) cfg.imageId = '/35nam_cic_1.JPG';
+    if (!cfg.mission) cfg.mission = 'Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.';
+    if (!cfg.vision) cfg.vision = 'Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.';
+  }
+  if (sectionKey === 'about.offerings') {
+    if (!cfg.title) cfg.title = 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP';
+    if (!cfg.subtitle) cfg.subtitle = 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi';
+  }
   if (sectionKey === 'about.awards') {
-    if (!cfg.title) cfg.title = 'Giải thưởng & Chứng nhận';
+    if (!cfg.title) cfg.title = 'Thành tựu & Giải thưởng';
+    if (!cfg.subtitle) cfg.subtitle = 'Minh chứng cho nỗ lực không ngừng nghỉ';
+    if (!cfg.description) cfg.description = 'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.';
     if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
   }
   if (sectionKey === 'about.partners') {
-    if (!cfg.title) cfg.title = 'Đối tác chiến lược';
+    if (!cfg.title) cfg.title = 'Đối tác chiến lược & Khách hàng tiêu biểu';
+    if (!cfg.subtitle) cfg.subtitle = 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới';
+    if (!cfg.description) cfg.description = 'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.';
     if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
+  }
+  if (sectionKey === 'about.organization') {
+    if (!cfg.title) cfg.title = 'Cơ cấu tổ chức';
+    if (!cfg.subtitle) cfg.subtitle = 'Sơ đồ cơ cấu tổ chức chuyên nghiệp và hiệu quả';
   }
   if (sectionKey === 'about.capacity') {
     if (!cfg.title) cfg.title = 'Tiềm lực vững vàng, vươn tầm quốc tế';
     if (!cfg.description) cfg.description = 'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.';
+  }
+  if (sectionKey === 'about.experience') {
+    if (!cfg.title) cfg.title = 'Năng lực & Kinh nghiệm';
+  }
+  if (sectionKey === 'about.contact_cta') {
+    if (!cfg.title) cfg.title = 'Hồ sơ năng lực (Profile)';
+    if (!cfg.ctaLabel) cfg.ctaLabel = 'Hồ sơ năng lực (Profile)';
+    if (!cfg.ctaUrl) cfg.ctaUrl = 'https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf';
   }
   return cfg;
 }

@@ -169,9 +169,16 @@ export function WebsitePage({
   }
   if (page.pageType === 'about') {
     const resolved = resolvePageContent({ pageType: 'about', version: page.draft, legacyFallback: getLegacyAboutPageContent() });
+    const selectedSection = page.draft.sections.find((s) => s.id === selectedId);
+    const inferredTab: 'overview' | 'structure' | 'experience' = (selectedSection?.sectionKey === 'about.organization')
+      ? 'structure'
+      : (['about.capacity', 'about.experience', 'about.software_partners', 'about.hardware_partners', 'about.contact_cta'].includes(selectedSection?.sectionKey ?? ''))
+        ? 'experience'
+        : 'overview';
+
     return (
       <AboutView 
-        activeTab="overview" 
+        activeTab={inferredTab} 
         setActiveTab={noop} 
         onNavigateToContact={noop} 
         aboutContent={resolved.content} 

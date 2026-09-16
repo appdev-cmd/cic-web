@@ -182,7 +182,19 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       ],
     },
   },
-  'about.hero': { label: 'Hero Giới thiệu', description: 'Tiêu đề và ảnh mở đầu.', editableContract: { sectionKey: 'about.hero', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { background: { path: 'backgroundImageId', semantic: 'background-image', ownership: 'section-config', replace: 'enabled' } } } },
+  'about.hero': {
+    label: 'Hero Giới thiệu',
+    description: 'Tiêu đề, nhãn và ảnh mở đầu.',
+    editableContract: {
+      sectionKey: 'about.hero',
+      fields: [
+        { path: 'badge', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: { background: { path: 'backgroundImageId', semantic: 'background-image', ownership: 'section-config', replace: 'enabled' } },
+    },
+  },
   'about.overview': {
     label: 'Tổng quan doanh nghiệp',
     description: 'Nội dung giới thiệu và video doanh nghiệp.',
@@ -205,6 +217,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     editableContract: {
       sectionKey: 'about.timeline',
       fields: [
+        { path: 'badge', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'milestones.*.year', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
@@ -229,10 +242,67 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       collections: { coreValues: { path: 'coreValues', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } },
     },
   },
-  'about.offerings': { label: 'Sản phẩm và dịch vụ cung cấp', description: 'Các nội dung được chọn cho lưới cố định.', referenceLimit: { product: 2, service: 4 }, editableContract: { sectionKey: 'about.offerings', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }] } },
-  'about.awards': { label: 'Thành tựu & Giải thưởng', description: 'Danh sách giải thưởng.', editableContract: { sectionKey: 'about.awards', fields: [{ path: 'syncWithHome', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'enabled' } }, collections: { items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } } } },
-  'about.partners': { label: 'Đối tác chiến lược', description: 'Dải logo đối tác cuối khu vực, hiển thị dạng carousel.', editableContract: { sectionKey: 'about.partners', fields: [{ path: 'syncWithHome', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'enabled' } }, collections: { items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } } } },
-  'about.organization': { label: 'Cơ cấu tổ chức', description: 'Sơ đồ và topology được giữ trong code.', editableContract: blockedContract('about.organization') },
+  'about.offerings': {
+    label: 'Sản phẩm và dịch vụ cung cấp',
+    description: 'Các nội dung giải pháp công nghệ và tư vấn.',
+    referenceLimit: { product: 2, service: 4 },
+    editableContract: {
+      sectionKey: 'about.offerings',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.title', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.desc', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      collections: {
+        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } },
+      },
+    },
+  },
+  'about.awards': {
+    label: 'Thành tựu & Giải thưởng',
+    description: 'Danh sách giải thưởng và mô tả.',
+    editableContract: {
+      sectionKey: 'about.awards',
+      fields: [
+        { path: 'syncWithHome', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: { images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'enabled' } },
+      collections: { items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } },
+    },
+  },
+  'about.partners': {
+    label: 'Đối tác chiến lược',
+    description: 'Dải logo đối tác và album ảnh Bento Grid.',
+    editableContract: {
+      sectionKey: 'about.partners',
+      fields: [
+        { path: 'syncWithHome', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'enabled' },
+        gallery: { path: 'galleryImages.*', semantic: 'image', ownership: 'section-config', replace: 'enabled' },
+      },
+      collections: { items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } },
+    },
+  },
+  'about.organization': {
+    label: 'Cơ cấu tổ chức',
+    description: 'Sơ đồ cơ cấu tổ chức doanh nghiệp.',
+    editableContract: {
+      sectionKey: 'about.organization',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+    },
+  },
   'about.capacity': {
     label: 'Năng lực doanh nghiệp', description: 'Giới thiệu và bốn chỉ số năng lực.',
     editableContract: {
@@ -248,10 +318,38 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       },
     },
   },
-  'about.experience': { label: 'Năng lực & Kinh nghiệm', description: 'Danh mục kinh nghiệm theo thiết kế.', editableContract: blockedContract('about.experience') },
+  'about.experience': {
+    label: 'Năng lực & Kinh nghiệm',
+    description: 'Các khối năng lực và nguồn nhân lực cốt lõi.',
+    editableContract: {
+      sectionKey: 'about.experience',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.title', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.description', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'enabled' },
+      },
+      collections: {
+        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } },
+      },
+    },
+  },
   'about.software_partners': { label: 'Đối tác phần mềm', description: 'Danh sách đối tác phần mềm.', referenceLimit: { partner: 12 }, editableContract: blockedContract('about.software_partners') },
   'about.hardware_partners': { label: 'Đối tác thiết bị', description: 'Danh sách đối tác thiết bị.', referenceLimit: { partner: 12 }, editableContract: blockedContract('about.hardware_partners') },
-  'about.contact_cta': { label: 'CTA liên hệ', description: 'Kêu gọi kết nối chuyên gia CIC.', editableContract: blockedContract('about.contact_cta') },
+  'about.contact_cta': {
+    label: 'CTA liên hệ',
+    description: 'Kêu gọi kết nối chuyên gia và tải Profile CIC.',
+    editableContract: {
+      sectionKey: 'about.contact_cta',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaLabel', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'ctaUrl', semantic: 'link', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+    },
+  },
   'contact.header': { label: 'Header Liên hệ', description: 'Tiêu đề trang Liên hệ.', editableContract: blockedContract('contact.header') },
   'contact.branches': {
     label: 'Chi nhánh & Bản đồ', description: 'Hai chi nhánh theo layout hiện tại.',

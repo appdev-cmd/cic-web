@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building2, 
@@ -132,17 +132,89 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   const textFrom = (config: Record<string, unknown>, key: string, fallback: string) => typeof config[key] === 'string' ? config[key] as string : fallback;
   const heroConfig = configFor('about.hero');
   const overviewConfig = configFor('about.overview');
+  const timelineConfig = configFor('about.timeline');
   const strategyConfig = configFor('about.strategy');
   const offeringsConfig = configFor('about.offerings');
   const awardsConfig = configFor('about.awards');
   const partnersConfig = configFor('about.partners');
+  const orgConfig = configFor('about.organization');
+  const capacityConfig = configFor('about.capacity');
+  const experienceConfig = configFor('about.experience');
+  const ctaConfig = configFor('about.contact_cta');
+
+  const [localTab, setLocalTab] = useState<'overview' | 'structure' | 'experience'>(activeTab);
+  useEffect(() => {
+    setLocalTab(activeTab);
+  }, [activeTab]);
+
   const overviewParagraphs = Array.isArray(overviewConfig.paragraphs) ? overviewConfig.paragraphs : [];
   const defaultOverviewParagraphs = [
     'Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.',
     'Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.',
     'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
   ];
-  const displayedOverviewParagraphs = defaultOverviewParagraphs.map((fallback, index) => typeof overviewParagraphs[index] === 'string' ? overviewParagraphs[index] as string : fallback);
+  const displayedOverviewParagraphs = overviewParagraphs.length > 0 ? overviewParagraphs.map(String) : defaultOverviewParagraphs;
+
+  const defaultOfferingsItems = [
+    { title: 'Phát triển phần mềm xây dựng', desc: 'Phát triển các phần mềm chuyên ngành xây dựng, quản lý, quy hoạch làm nên thương hiệu CIC (KPW, Escon, RDW, VinaSAS…) và enjiCAD – phần mềm vẽ kỹ thuật chất lượng cao, giá cạnh tranh hơn nhiều so với CAD ngoại nhập.' },
+    { title: 'Phân phối phần mềm nhập khẩu chính hãng', desc: 'Phân phối phần mềm bản quyền từ các hãng công nghệ hàng đầu thế giới như Microsoft, Autodesk, CSI, Cubicost, ANSYS, Bentley, DHI, Hexagon, DNV GL, Prokon, Risa…' },
+    { title: 'Thiết bị công nghệ', desc: 'Phân phối các thiết bị công nghệ hàm lượng khoa học cao từ những hãng uy tín thế giới như Piletest, Tecknotrove, ZXLidars, A.P. van den Berg, AQ System, Sewer Robotics, Radiodetection, Pearpoint, DJI…' },
+    { title: 'Tư vấn Xây dựng', desc: 'Tư vấn thiết kế, thẩm tra, giám sát, quản lý dự án công trình xây dựng, đảm bảo chất lượng và an toàn.' },
+    { title: 'BIM & Digital Twins', desc: 'Đồng hành chuyển đổi số, triển khai BIM chuyên sâu, xây dựng bản sao số (Digital Twins) cho công trình.' },
+    { title: 'Giải pháp Công nghệ thông minh', desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
+    { title: 'Giải pháp phát triển bền vững', desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
+  ];
+  const displayedOfferingsItems: Array<{ title: string; desc: string }> = Array.isArray(offeringsConfig.items) && offeringsConfig.items.length > 0
+    ? (offeringsConfig.items as any[]).map((it, idx) => ({
+        title: typeof it?.title === 'string' ? it.title : (defaultOfferingsItems[idx]?.title ?? ''),
+        desc: typeof it?.desc === 'string' ? it.desc : (typeof it?.description === 'string' ? it.description : (defaultOfferingsItems[idx]?.desc ?? '')),
+      }))
+    : defaultOfferingsItems;
+
+  const defaultGalleryImages = [
+    'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80',
+  ];
+  const displayedGalleryImages = Array.isArray(partnersConfig.galleryImages) && partnersConfig.galleryImages.length === 4
+    ? partnersConfig.galleryImages.map(String)
+    : defaultGalleryImages;
+
+  const defaultExperienceItems = [
+    {
+      title: 'Phát triển nguồn nhân lực chất lượng cao',
+      description: 'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
+      imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
+    },
+    {
+      title: 'Đối tác chiến lược với các hãng công nghệ danh tiếng',
+      description: 'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
+      imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
+    },
+    {
+      title: 'Cập nhật xu hướng công nghệ hàng đầu',
+      description: 'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
+      imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+    },
+  ];
+  const displayedExperienceItems = Array.isArray(experienceConfig.items) && experienceConfig.items.length > 0
+    ? (experienceConfig.items as any[]).map((it, idx) => ({
+        title: typeof it?.title === 'string' ? it.title : (defaultExperienceItems[idx]?.title ?? ''),
+        description: typeof it?.description === 'string' ? it.description : (typeof it?.desc === 'string' ? it.desc : (defaultExperienceItems[idx]?.description ?? '')),
+        imageId: typeof it?.imageId === 'string' ? it.imageId : (defaultExperienceItems[idx]?.imageId ?? ''),
+      }))
+    : defaultExperienceItems;
+
+  const timelineMilestones = Array.isArray(timelineConfig.milestones) ? (timelineConfig.milestones as Array<{ id?: string; year: string; description: string; title?: string }>) : [];
+  const displayedMilestones = timelineMilestones.length > 0 ? timelineMilestones : aboutContent.timeline.milestones;
+
+  const strategyCoreValues = Array.isArray(strategyConfig.coreValues) ? (strategyConfig.coreValues as Array<{ id?: string; value: string }>) : [];
+  const displayedCoreValues = strategyCoreValues.length > 0 ? strategyCoreValues : aboutContent.strategy.coreValues;
+
+  const capacityMetrics = Array.isArray(capacityConfig.metrics) ? (capacityConfig.metrics as Array<{ id?: string; value: string; label: string }>) : [];
+  const displayedMetrics = capacityMetrics.length > 0 ? capacityMetrics : capacityContent.metrics;
+
   const displayedPartners = useMemo(() => {
     const syncWithHome = partnersConfig.syncWithHome !== false;
     const items = Array.isArray(partnersConfig.items) ? partnersConfig.items : [];
@@ -230,8 +302,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/60 border border-white/20 rounded-[8px] mb-4 lg:mb-6 backdrop-blur-md shadow-lg">
             <span className={`flex h-2 w-2 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
-              Về chúng tôi
+            <span 
+              {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'badge', semantic: 'text', ownership: 'section-config', editable: true }))}
+              data-page-builder-config-path={JSON.stringify(['badge'])}
+              className="text-[10px] font-black uppercase tracking-[0.3em] text-white"
+            >
+              {textFrom(heroConfig, 'badge', 'Về chúng tôi')}
             </span>
           </div>
           
@@ -262,11 +338,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
               { id: 'structure', label: 'Cơ cấu tổ chức' },
               { id: 'experience', label: 'Năng lực & Kinh nghiệm' }
             ].map((tab) => {
-              const active = activeTab === tab.id;
+              const active = localTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => {
+                    setLocalTab(tab.id as any);
                     setActiveTab(tab.id as any);
                     window.scrollTo({ top: 320, behavior: 'smooth' });
                   }}
@@ -296,7 +373,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
       {/* Main Dynamic View Content Container */}
       <div className="relative min-h-[600px]">
         {/* Contained Brand Watermark */}
-        {activeTab === 'structure' ? (
+        {localTab === 'structure' ? (
           /* Static Watermark for Structure Page - Fully fixed & centered behind the organization diagram */
           <div 
             className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 pt-16" 
@@ -332,7 +409,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
         <div className="max-w-7xl mx-auto px-6 pt-3 md:pt-4 pb-12 lg:pb-16 relative z-10">
         
         {/* ==================== 1. TỔNG QUAN DOANH NGHIỆP ==================== */}
-        {activeTab === 'overview' && (
+        {localTab === 'overview' && (
              <motion.div
               key="overview"
               {...(renderPolicy.motionEnabled ? { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -20 }, transition: { duration: 0.4 } } : { initial: false })}
@@ -378,18 +455,24 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <div className="text-center mb-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-[8px] mb-2">
                         <span className={`w-2 h-2 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
-                        <span className="text-[10px] font-black uppercase tracking-widest">Hành trình 35 năm</span>
+                        <span 
+                          {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'badge', semantic: 'text', ownership: 'section-config', editable: true }))} 
+                          data-page-builder-config-path={JSON.stringify(['badge'])}
+                          className="text-[10px] font-black uppercase tracking-widest"
+                        >
+                          {textFrom(timelineConfig, 'badge', 'Hành trình 35 năm')}
+                        </span>
                       </div>
                       <h2 
                         {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} 
                         data-page-builder-config-path={JSON.stringify(['title'])}
                         className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900"
-                      >{aboutContent.timeline.title}</h2>
+                      >{textFrom(timelineConfig, 'title', aboutContent.timeline.title || 'Hành trình 35 năm')}</h2>
                       <p 
                         {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} 
                         data-page-builder-config-path={JSON.stringify(['description'])}
                         className="text-slate-500 max-w-2xl mx-auto text-sm"
-                      >{textFrom(configFor('about.timeline'), 'description', 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.')}</p>
+                      >{textFrom(timelineConfig, 'description', 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.')}</p>
                     </div>
 
                     <div className="relative max-w-6xl mx-auto px-4 mt-4 md:mt-6">
@@ -397,9 +480,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       <div className="absolute top-[28px] left-[10%] right-[10%] h-[1px] bg-slate-300 hidden md:block"></div>
                       
                       <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'milestones', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'milestones' }))} className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 relative z-10">
-                        {aboutContent.timeline.milestones.map((item, index) => {
-                          const itemPath = createCollectionItemPath('milestones', item.id);
-                          return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'milestones' }))} key={item.id ? `ms-${item.id}-${index}` : `timeline-ms-${index}`} className="relative flex flex-col items-center text-center group">
+                        {displayedMilestones.map((item, index) => {
+                          const itemPath = createCollectionItemPath('milestones', item.id ?? `ms-${index}`);
+                          return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} key={item.id ? `ms-${item.id}-${index}` : `timeline-ms-${index}`} className="relative flex flex-col items-center text-center group">
                             {/* Dot */}
                             <div className={`hidden md:flex w-3 h-3 rounded-full bg-orange-500 ring-[6px] ring-white mb-6 relative z-10 items-center justify-center -translate-y-1/2 mt-[28px] ${renderPolicy.motionEnabled ? 'group-hover:scale-150 group-hover:bg-orange-600 transition-all duration-300' : ''}`}>
                               <div className={`absolute inset-0 rounded-full bg-orange-500 opacity-50 ${renderPolicy.motionEnabled ? 'animate-ping' : ''}`}></div>
@@ -408,12 +491,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                             {/* Content */}
                             <div className="w-full flex flex-col items-center md:-mt-4">
                               <h3 
-                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} 
+                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} 
                                 data-page-builder-config-path={JSON.stringify(['milestones', index, 'year'])}
                                 className="text-3xl font-black text-slate-900 tracking-tighter mb-2"
                               >{item.year}</h3>
                               <p 
-                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} 
+                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} 
                                 data-page-builder-config-path={JSON.stringify(['milestones', index, 'description'])}
                                 className="text-slate-600 text-sm leading-relaxed"
                               >{item.description}</p>
@@ -429,8 +512,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                 <section data-page-builder-section-key="about.strategy" className="py-10 bg-slate-50 border-b border-slate-100 z-10 relative overflow-hidden">
                   <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <SectionHeader 
-                      title={aboutContent.strategy.title}
-                      sub={aboutContent.strategy.subtitle}
+                      title={textFrom(strategyConfig, 'title', aboutContent.strategy.title || 'Định hướng chiến lược')}
+                      sub={textFrom(strategyConfig, 'subtitle', aboutContent.strategy.subtitle || 'Tầm nhìn kiến tạo giá trị công nghệ bền vững')}
                       titleProps={{
                         ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
                         'data-page-builder-config-path': JSON.stringify(['title']),
@@ -461,7 +544,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                               {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'mission', semantic: 'text', ownership: 'section-config', editable: true }))} 
                               data-page-builder-config-path={JSON.stringify(['mission'])}
                               className="text-slate-600 leading-relaxed text-sm md:text-base"
-                            >{aboutContent.strategy.mission}</p>
+                            >{textFrom(strategyConfig, 'mission', aboutContent.strategy.mission || 'Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.')}</p>
                           </div>
                         </div>
 
@@ -476,7 +559,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                               {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'vision', semantic: 'text', ownership: 'section-config', editable: true }))} 
                               data-page-builder-config-path={JSON.stringify(['vision'])}
                               className="text-slate-600 leading-relaxed text-sm md:text-base"
-                            >{aboutContent.strategy.vision}</p>
+                            >{textFrom(strategyConfig, 'vision', aboutContent.strategy.vision || 'Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.')}</p>
                           </div>
                         </div>
 
@@ -488,12 +571,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           <div className="relative z-10 w-full">
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Giá trị cốt lõi</h3>
                             <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'coreValues', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'coreValues' }))} className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 w-full">
-                              {aboutContent.strategy.coreValues.map((item, index) => {
-                                const itemPath = createCollectionItemPath('coreValues', item.id);
-                                return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'coreValues' }))} key={item.id ? `cv-${item.id}-${index}` : `core-val-${index}`} className="flex items-center gap-3">
+                              {displayedCoreValues.map((item, index) => {
+                                const itemPath = createCollectionItemPath('coreValues', item.id ?? `cv-${index}`);
+                                return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id ?? `cv-${index}`, collectionPath: 'coreValues' }))} key={item.id ? `cv-${item.id}-${index}` : `core-val-${index}`} className="flex items-center gap-3">
                                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></div>
                                   <span 
-                                    {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'coreValues' }))} 
+                                    {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id ?? `cv-${index}`, collectionPath: 'coreValues' }))} 
                                     data-page-builder-config-path={JSON.stringify(['coreValues', index, 'value'])}
                                     className="text-slate-600 leading-relaxed text-sm md:text-base"
                                   >{item.value}</span>
@@ -527,28 +610,30 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       data-page-collection="product service"
                       className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                     >
-                      {[
-                        { title: 'Phát triển phần mềm xây dựng', icon: <BIMIcon />, desc: 'Phát triển các phần mềm chuyên ngành xây dựng, quản lý, quy hoạch làm nên thương hiệu CIC (KPW, Escon, RDW, VinaSAS…) và enjiCAD – phần mềm vẽ kỹ thuật chất lượng cao, giá cạnh tranh hơn nhiều so với CAD ngoại nhập.' },
-                        { title: 'Phân phối phần mềm nhập khẩu chính hãng', icon: <ShieldCheck />, desc: 'Phân phối phần mềm bản quyền từ các hãng công nghệ hàng đầu thế giới như Microsoft, Autodesk, CSI, Cubicost, ANSYS, Bentley, DHI, Hexagon, DNV GL, Prokon, Risa…' },
-                        { title: 'Thiết bị công nghệ', icon: <Cpu />, desc: 'Phân phối các thiết bị công nghệ hàm lượng khoa học cao từ những hãng uy tín thế giới như Piletest, Tecknotrove, ZXLidars, A.P. van den Berg, AQ System, Sewer Robotics, Radiodetection, Pearpoint, DJI…' },
-                        { title: 'Tư vấn Xây dựng', icon: <Building2 />, desc: 'Tư vấn thiết kế, thẩm tra, giám sát, quản lý dự án công trình xây dựng, đảm bảo chất lượng và an toàn.' },
-                        { title: 'BIM & Digital Twins', icon: <Box />, desc: 'Đồng hành chuyển đổi số, triển khai BIM chuyên sâu, xây dựng bản sao số (Digital Twins) cho công trình.' },
-                        { title: 'Giải pháp Công nghệ thông minh', icon: <Lightbulb />, desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
-                        { title: 'Giải pháp phát triển bền vững', icon: <Leaf />, desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
-                      ].map((item, i) => (
-                        <div 
-                          key={i}
-                          className="flex flex-col gap-4 p-5 md:p-6 bg-slate-50 border border-slate-200 rounded-[10px] hover:border-orange-300 hover:shadow-md transition-all"
-                        >
-                          <div className="w-14 h-14 shrink-0 rounded-[8px] bg-white border border-slate-200 flex items-center justify-center text-orange-600 shadow-sm">
-                            {item.icon}
+                      {displayedOfferingsItems.map((item, i) => {
+                        const icons = [<BIMIcon key="0" />, <ShieldCheck key="1" />, <Cpu key="2" />, <Building2 key="3" />, <Box key="4" />, <Lightbulb key="5" />, <Leaf key="6" />];
+                        const icon = icons[i % icons.length];
+                        return (
+                          <div 
+                            key={i}
+                            className="flex flex-col gap-4 p-5 md:p-6 bg-slate-50 border border-slate-200 rounded-[10px] hover:border-orange-300 hover:shadow-md transition-all"
+                          >
+                            <div className="w-14 h-14 shrink-0 rounded-[8px] bg-white border border-slate-200 flex items-center justify-center text-orange-600 shadow-sm">
+                              {icon}
+                            </div>
+                            <div>
+                              <h3 
+                                data-page-builder-config-path={JSON.stringify(['items', i, 'title'])}
+                                className="text-lg font-bold text-slate-900 mb-2"
+                              >{item.title}</h3>
+                              <p 
+                                data-page-builder-config-path={JSON.stringify(['items', i, 'desc'])}
+                                className="text-slate-600 text-sm leading-relaxed"
+                              >{item.desc}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
-                            <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </section>
@@ -569,8 +654,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       } as any}
                     />
                     <div className="text-center mt-6 mb-12">
-                      <p className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify">
-                        Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.
+                      <p 
+                        {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))}
+                        data-page-builder-config-path={JSON.stringify(['description'])}
+                        className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify"
+                      >
+                        {textFrom(awardsConfig, 'description', 'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.')}
                       </p>
                     </div>
                     <div className="mt-8">
@@ -608,19 +697,43 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     {/* Modern Photo Album (Bento Grid) */}
                     <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[250px] mb-12">
                       <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
+                        <img 
+                          data-page-builder-media-path={JSON.stringify(['galleryImages', 0])}
+                          data-page-builder-media-id={displayedGalleryImages[0]}
+                          src={resolveMediaUrl(displayedGalleryImages[0])} 
+                          alt="Hoạt động đối tác" 
+                          className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
+                        <img 
+                          data-page-builder-media-path={JSON.stringify(['galleryImages', 1])}
+                          data-page-builder-media-id={displayedGalleryImages[1]}
+                          src={resolveMediaUrl(displayedGalleryImages[1])} 
+                          alt="Hoạt động đối tác" 
+                          className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
+                        <img 
+                          data-page-builder-media-path={JSON.stringify(['galleryImages', 2])}
+                          data-page-builder-media-id={displayedGalleryImages[2]}
+                          src={resolveMediaUrl(displayedGalleryImages[2])} 
+                          alt="Hoạt động đối tác" 
+                          className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                       <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
-                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80" alt="Hoạt động đối tác" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
+                        <img 
+                          data-page-builder-media-path={JSON.stringify(['galleryImages', 3])}
+                          data-page-builder-media-id={displayedGalleryImages[3]}
+                          src={resolveMediaUrl(displayedGalleryImages[3])} 
+                          alt="Hoạt động đối tác" 
+                          className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     </div>
@@ -658,7 +771,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
           )}
 
         {/* ==================== 2. CƠ CẤU TỔ CHỨC ==================== */}
-        {activeTab === 'structure' && (
+        {localTab === 'structure' && (
           <motion.div
             data-page-builder-section-key="about.organization"
             initial={{ opacity: 0, y: 15 }}
@@ -668,7 +781,18 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
           >
             {/* Structural Banner */}
             <div className="relative z-10">
-              <SectionHeader title="Cơ cấu tổ chức" />
+              <SectionHeader 
+                title={textFrom(orgConfig, 'title', 'Cơ cấu tổ chức')}
+                sub={textFrom(orgConfig, 'subtitle', 'Sơ đồ cơ cấu tổ chức chuyên nghiệp và hiệu quả')}
+                titleProps={{
+                  ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.organization', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
+                  'data-page-builder-config-path': JSON.stringify(['title']),
+                } as any}
+                subProps={{
+                  ...bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.organization', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true })),
+                  'data-page-builder-config-path': JSON.stringify(['subtitle']),
+                } as any}
+              />
             </div>
 
             {/* Sơ đồ cơ cấu tổ chức chuẩn xác theo sơ đồ gốc CIC - Tự động co giãn full chiều ngang không kéo scrollbar trên PC */}
@@ -895,7 +1019,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
         )}
 
         {/* ==================== 3. NĂNG LỰC & KINH NGHIỆM ==================== */}
-        {activeTab === 'experience' && (
+        {localTab === 'experience' && (
           <motion.div
             key="capacity"
             {...(renderPolicy.motionEnabled ? {
@@ -917,7 +1041,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     data-page-builder-config-path={JSON.stringify(['title'])}
                     className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight"
                   >
-                    {textFrom(configFor('about.capacity'), 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế')}
+                    {textFrom(capacityConfig, 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế')}
                   </h2>
                   <div className="w-16 h-1 bg-orange-600 mx-auto mt-3 mb-6"></div>
                   <p
@@ -927,7 +1051,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     data-page-builder-config-path={JSON.stringify(['description'])}
                     className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl"
                   >
-                    {capacityContent.description}
+                    {textFrom(capacityConfig, 'description', capacityContent.description || 'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.')}
                   </p>
                   
                   <div
@@ -936,25 +1060,25 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     }), bindingRegistry)}
                     className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full"
                   >
-                    {capacityContent.metrics.map((metric, index) => {
-                      const itemPath = createCollectionItemPath('metrics', metric.id);
+                    {displayedMetrics.map((metric, index) => {
+                      const itemPath = createCollectionItemPath('metrics', metric.id ?? `cap-${index}`);
                       return <div
                         key={metric.id ? `cap-metric-${metric.id}-${index}` : `cap-metric-${index}`}
                         {...bindElementRuntime<HTMLDivElement>(createElementBinding({
-                          sectionKey: 'about.capacity', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: metric.id, collectionPath: 'metrics',
+                          sectionKey: 'about.capacity', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: metric.id ?? `cap-${index}`, collectionPath: 'metrics',
                         }), bindingRegistry)}
                         className={`bg-slate-50 p-6 rounded-[10px] border border-slate-200 flex flex-col items-center text-center ${renderPolicy.motionEnabled ? 'hover:border-orange-500 hover:shadow-md transition-all' : ''}`}
                       >
                         <div
                           {...bindElementRuntime<HTMLDivElement>(createElementBinding({
-                            sectionKey: 'about.capacity', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
+                            sectionKey: 'about.capacity', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id ?? `cap-${index}`, collectionPath: 'metrics',
                           }), bindingRegistry)}
                           data-page-builder-config-path={JSON.stringify(['metrics', index, 'value'])}
                           className="text-3xl md:text-4xl font-black text-orange-600 mb-2"
                         >{metric.value}</div>
                         <div
                           {...bindElementRuntime<HTMLDivElement>(createElementBinding({
-                            sectionKey: 'about.capacity', elementPath: `${itemPath}.label`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
+                            sectionKey: 'about.capacity', elementPath: `${itemPath}.label`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id ?? `cap-${index}`, collectionPath: 'metrics',
                           }), bindingRegistry)}
                           data-page-builder-config-path={JSON.stringify(['metrics', index, 'label'])}
                           className="text-xs md:text-sm font-bold text-slate-600 uppercase"
@@ -964,44 +1088,37 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   </div>
 
                   <div data-page-builder-section-key="about.experience" className="flex flex-col gap-12 lg:gap-16 text-left w-full mb-12">
-                    {/* 1. Phát triển nguồn nhân lực chất lượng cao */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
-                      <div className="rounded-[10px] overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80" alt="Phát triển nguồn nhân lực chất lượng cao" className="w-full h-[260px] md:h-[320px] object-cover rounded-[10px]" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Phát triển nguồn nhân lực chất lượng cao</h3>
-                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
-                          Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* 2. Đối tác chiến lược với các hãng công nghệ danh tiếng */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center md:flex-row-reverse">
-                      <div className="order-1 md:order-2 rounded-[10px] overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80" alt="Đối tác chiến lược" className="w-full h-[260px] md:h-[320px] object-cover rounded-[10px]" />
-                      </div>
-                      <div className="order-2 md:order-1">
-                        <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Đối tác chiến lược với các hãng công nghệ danh tiếng</h3>
-                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
-                          Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* 3. Cập nhật xu hướng công nghệ hàng đầu */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
-                      <div className="rounded-[10px] overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80" alt="Xu hướng công nghệ" className="w-full h-[260px] md:h-[320px] object-cover rounded-[10px]" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl md:text-2xl font-black text-slate-900 mb-4">Cập nhật xu hướng công nghệ hàng đầu</h3>
-                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
-                          Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.
-                        </p>
-                      </div>
-                    </div>
+                    {displayedExperienceItems.map((item, idx) => {
+                      const isEven = idx % 2 === 1;
+                      return (
+                        <div key={idx} className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center ${isEven ? 'md:flex-row-reverse' : ''}`}>
+                          <div className={`${isEven ? 'order-1 md:order-2' : ''} rounded-[10px] overflow-hidden shadow-md group relative`}>
+                            <img 
+                              data-page-builder-media-path={JSON.stringify(['items', idx, 'imageId'])}
+                              data-page-builder-media-id={item.imageId}
+                              src={resolveMediaUrl(item.imageId)} 
+                              alt={item.title} 
+                              className={`w-full h-[260px] md:h-[320px] object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          </div>
+                          <div className={isEven ? 'order-2 md:order-1' : ''}>
+                            <h3 
+                              data-page-builder-config-path={JSON.stringify(['items', idx, 'title'])}
+                              className="text-xl md:text-2xl font-black text-slate-900 mb-4"
+                            >
+                              {item.title}
+                            </h3>
+                            <p 
+                              data-page-builder-config-path={JSON.stringify(['items', idx, 'description'])}
+                              className="text-slate-600 text-base md:text-lg leading-relaxed"
+                            >
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                   
                   {/* Global Technology Partner Network Map Component */}
@@ -1011,12 +1128,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
 
                   <a
                     data-page-builder-section-key="about.contact_cta"
-                    href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf" 
+                    data-page-builder-cta-key={JSON.stringify(['ctaLabel'])}
+                    href={textFrom(ctaConfig, 'ctaUrl', 'https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf')} 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-sm hover:bg-orange-700 transition-colors inline-flex items-center gap-3 rounded-[8px] shadow-lg shadow-orange-600/30 cursor-pointer"
                   >
-                    <ArrowUpRight size={20} /> Hồ sơ năng lực (Profile)
+                    <ArrowUpRight size={20} />
+                    <span data-page-builder-config-path={JSON.stringify(['ctaLabel'])}>
+                      {textFrom(ctaConfig, 'ctaLabel', textFrom(ctaConfig, 'title', 'Hồ sơ năng lực (Profile)'))}
+                    </span>
                   </a>
                 </div>
               </div>

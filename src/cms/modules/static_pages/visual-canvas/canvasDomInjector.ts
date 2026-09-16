@@ -1442,42 +1442,75 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       });
     });
 
-    let imageEntry: { key: string; path: Array<string | number>; value: string } | undefined;
-    const topLevelImage = Object.entries(selectedSection.config).find(([key, value]) => ['imageId', 'backgroundImageId'].includes(key) && typeof value === 'string');
-    if (topLevelImage) imageEntry = { key: topLevelImage[0], path: [topLevelImage[0]], value: String(topLevelImage[1]) };
-    if (!imageEntry && selectedSection.sectionKey === 'home.hero' && Array.isArray(selectedSection.config.slides)) {
-      const slideIndex = Math.min(activeHeroSlide, Math.max(0, selectedSection.config.slides.length - 1));
-      const slide = selectedSection.config.slides[slideIndex];
-      if (slide && typeof slide === 'object' && !Array.isArray(slide)) {
-        const field = 'backgroundImageId';
-        if (typeof slide[field] === 'string') imageEntry = { key: field, path: ['slides', slideIndex, field], value: String(slide[field]) };
+    const explicitMediaNodes = Array.from(selectedSectionRoot.querySelectorAll<HTMLElement>('[data-page-builder-media-path]'));
+    if (explicitMediaNodes.length > 0) {
+      explicitMediaNodes.forEach((node) => {
+        try {
+          const path = JSON.parse(node.dataset.pageBuilderMediaPath ?? '[]') as Array<string | number>;
+          const value = node.dataset.pageBuilderMediaId || String(configValueAtPath(selectedSection.config, path) ?? '');
+          const asset = findPageBuilderImage(value);
+          if (asset && node.tagName === 'IMG') (node as HTMLImageElement).src = asset.thumbnail_url ?? asset.url;
+          node.dataset.pageBuilderMediaEdit = JSON.stringify(path);
+          if (onEditMedia) {
+            node.title = 'Bấm để thay ảnh';
+            node.style.cursor = 'pointer';
+            node.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
+            node.style.outlineOffset = '3px';
+            const editImage = (event: MouseEvent) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onEditMedia(selectedSection.id, path, value);
+            };
+            node.addEventListener('click', editImage);
+            actionCleanups.push(() => {
+              node.removeEventListener('click', editImage);
+              delete node.dataset.pageBuilderMediaEdit;
+              node.removeAttribute('title');
+              node.style.cursor = '';
+              node.style.outline = '';
+              node.style.outlineOffset = '';
+            });
+          }
+        } catch {}
+      });
+    } else {
+      let imageEntry: { key: string; path: Array<string | number>; value: string } | undefined;
+      const topLevelImage = Object.entries(selectedSection.config).find(([key, value]) => ['imageId', 'backgroundImageId'].includes(key) && typeof value === 'string');
+      if (topLevelImage) imageEntry = { key: topLevelImage[0], path: [topLevelImage[0]], value: String(topLevelImage[1]) };
+      if (!imageEntry && selectedSection.sectionKey === 'home.hero' && Array.isArray(selectedSection.config.slides)) {
+        const slideIndex = Math.min(activeHeroSlide, Math.max(0, selectedSection.config.slides.length - 1));
+        const slide = selectedSection.config.slides[slideIndex];
+        if (slide && typeof slide === 'object' && !Array.isArray(slide)) {
+          const field = 'backgroundImageId';
+          if (typeof slide[field] === 'string') imageEntry = { key: field, path: ['slides', slideIndex, field], value: String(slide[field]) };
+        }
       }
-    }
-    const imageNode = selectedSectionRoot.querySelector<HTMLElement>('img');
-    if (imageEntry && imageNode) {
-      const { key, path, value } = imageEntry;
-      const asset = findPageBuilderImage(value);
-      if (asset && imageNode.tagName === 'IMG') (imageNode as HTMLImageElement).src = asset.thumbnail_url ?? asset.url;
-      imageNode.dataset.pageBuilderMediaEdit = key;
-      if (onEditMedia) {
-        imageNode.title = 'Bấm để thay ảnh';
-        imageNode.style.cursor = 'pointer';
-        imageNode.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
-        imageNode.style.outlineOffset = '3px';
-        const editImage = (event: MouseEvent) => { 
-          event.preventDefault(); 
-          event.stopPropagation(); 
-          onEditMedia(selectedSection.id, path, value); 
-        };
-        imageNode.addEventListener('click', editImage);
-        actionCleanups.push(() => {
-          imageNode.removeEventListener('click', editImage);
-          delete imageNode.dataset.pageBuilderMediaEdit;
-          imageNode.removeAttribute('title');
-          imageNode.style.cursor = '';
-          imageNode.style.outline = '';
-          imageNode.style.outlineOffset = '';
-        });
+      const imageNode = selectedSectionRoot.querySelector<HTMLElement>('img');
+      if (imageEntry && imageNode) {
+        const { key, path, value } = imageEntry;
+        const asset = findPageBuilderImage(value);
+        if (asset && imageNode.tagName === 'IMG') (imageNode as HTMLImageElement).src = asset.thumbnail_url ?? asset.url;
+        imageNode.dataset.pageBuilderMediaEdit = key;
+        if (onEditMedia) {
+          imageNode.title = 'Bấm để thay ảnh';
+          imageNode.style.cursor = 'pointer';
+          imageNode.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
+          imageNode.style.outlineOffset = '3px';
+          const editImage = (event: MouseEvent) => { 
+            event.preventDefault(); 
+            event.stopPropagation(); 
+            onEditMedia(selectedSection.id, path, value); 
+          };
+          imageNode.addEventListener('click', editImage);
+          actionCleanups.push(() => {
+            imageNode.removeEventListener('click', editImage);
+            delete imageNode.dataset.pageBuilderMediaEdit;
+            imageNode.removeAttribute('title');
+            imageNode.style.cursor = '';
+            imageNode.style.outline = '';
+            imageNode.style.outlineOffset = '';
+          });
+        }
       }
     }
 
