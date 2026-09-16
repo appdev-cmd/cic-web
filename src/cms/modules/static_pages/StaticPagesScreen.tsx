@@ -131,6 +131,42 @@ const defaultEcosystemItems = [
   },
 ];
 
+function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> | null | undefined): Record<string, any> {
+  const cfg = { ...(rawConfig || {}) };
+  if (sectionKey === 'home.ecosystem' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
+    cfg.items = defaultEcosystemItems;
+  }
+  if (sectionKey === 'about.hero') {
+    if (!cfg.title) cfg.title = 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ';
+    if (!cfg.subtitle) cfg.subtitle = 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.';
+    if (!cfg.backgroundImageId) cfg.backgroundImageId = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80';
+  }
+  if (sectionKey === 'about.overview') {
+    if (!cfg.title) cfg.title = 'Tổng quan doanh nghiệp';
+    if (!cfg.paragraphs || !Array.isArray(cfg.paragraphs) || cfg.paragraphs.length === 0) {
+      cfg.paragraphs = [
+        'Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.',
+        'Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.',
+        'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
+      ];
+    }
+    if (!cfg.videoUrl) cfg.videoUrl = 'https://www.youtube.com/embed/hdLFK_09-tU?start=448';
+  }
+  if (sectionKey === 'about.awards') {
+    if (!cfg.title) cfg.title = 'Giải thưởng & Chứng nhận';
+    if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
+  }
+  if (sectionKey === 'about.partners') {
+    if (!cfg.title) cfg.title = 'Đối tác chiến lược';
+    if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
+  }
+  if (sectionKey === 'about.capacity') {
+    if (!cfg.title) cfg.title = 'Tiềm lực vững vàng, vươn tầm quốc tế';
+    if (!cfg.description) cfg.description = 'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.';
+  }
+  return cfg;
+}
+
 /** Maps StaticPageFullDetail from server to PageBuilderPage for PageBuilderEditor */
 function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
   return {
@@ -167,10 +203,7 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
         if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
           refMap.set(def.entityType, def.defaultIds);
         }
-        const cfg = (s.config || {}) as Record<string, any>;
-        if (s.sectionKey === 'home.ecosystem' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
-          cfg.items = defaultEcosystemItems;
-        }
+        const cfg = enrichSectionConfig(s.sectionKey, s.config as any);
         const refSources = (cfg._referenceSources || {}) as Record<string, any>;
         const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
           const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
@@ -186,7 +219,7 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
           sectionKey: s.sectionKey,
           sectionType: s.sectionType,
           position: s.position,
-          config: s.config as any,
+          config: cfg as any,
           references: references.length > 0 ? references : undefined,
         };
       }),
@@ -218,10 +251,7 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
             if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
               refMap.set(def.entityType, def.defaultIds);
             }
-            const cfg = (s.config || {}) as Record<string, any>;
-            if (s.sectionKey === 'home.ecosystem' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
-              cfg.items = defaultEcosystemItems;
-            }
+            const cfg = enrichSectionConfig(s.sectionKey, s.config as any);
             const refSources = (cfg._referenceSources || {}) as Record<string, any>;
             const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
               const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
@@ -237,7 +267,7 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
               sectionKey: s.sectionKey,
               sectionType: s.sectionType,
               position: s.position,
-              config: s.config as any,
+              config: cfg as any,
               references: references.length > 0 ? references : undefined,
             };
           }),

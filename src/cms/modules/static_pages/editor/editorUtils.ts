@@ -10,12 +10,21 @@ export function labelFor(key: string): string {
 }
 
 export function updateAtPath(config: Record<string, PageBuilderConfigValue>, path: Array<string | number>, value: PageBuilderConfigValue) {
-  const next = deepClone(config);
-  let cursor: PageBuilderConfigValue = next;
-  path.slice(0, -1).forEach((part) => {
-    cursor = (cursor as Record<string | number, PageBuilderConfigValue>)[part];
-  });
-  (cursor as Record<string | number, PageBuilderConfigValue>)[path[path.length - 1]] = value;
+  const next = deepClone(config || {});
+  if (!path || path.length === 0) return next;
+  let cursor: any = next;
+  for (let i = 0; i < path.length - 1; i++) {
+    const part = path[i];
+    const nextPart = path[i + 1];
+    if (cursor[part] === undefined || cursor[part] === null || typeof cursor[part] !== 'object') {
+      cursor[part] = typeof nextPart === 'number' ? [] : {};
+    }
+    cursor = cursor[part];
+  }
+  const lastPart = path[path.length - 1];
+  if (cursor && typeof cursor === 'object') {
+    cursor[lastPart] = value;
+  }
   return next;
 }
 
