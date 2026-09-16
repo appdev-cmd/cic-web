@@ -73,9 +73,9 @@ export const SECTION_REFERENCE_REGISTRY: Record<string, ReferenceSectionCapabili
     allowedEntityTypes: ['event'],
     allowedModes: ['manual', 'auto_featured'],
     defaultMode: 'auto_featured',
-    maxItems: 1,
+    maxItems: 4,
     orderingSemantics: 'manual_position',
-    description: 'Sự kiện nổi bật: tự động lấy 1 sự kiện nổi bật gần nhất hoặc chọn thủ công 1 sự kiện.',
+    description: 'Sự kiện nổi bật: tự động lấy tối đa 4 sự kiện nổi bật (1 chính + 3 phụ) hoặc chọn thủ công tối đa 4 sự kiện.',
   },
   'home.news': {
     sectionKey: 'home.news',
