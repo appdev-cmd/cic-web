@@ -67,12 +67,18 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   if (heroSec && heroSec.config) {
     const cfg = heroSec.config as Record<string, unknown>;
     const rawSlides = Array.isArray(cfg.slides) ? cfg.slides : [];
-    const slides: HomeHeroSlideModel[] = rawSlides.map((s: Record<string, unknown>) => ({
-      img: normalizeImageUrl(s.img || s.image || s.imageUrl),
-      badge: typeof s.badge === 'string' ? s.badge : undefined,
-      title: typeof s.title === 'string' ? s.title : '',
-      sub: typeof s.sub === 'string' ? s.sub : (typeof s.subtitle === 'string' ? s.subtitle : ''),
-    }));
+    const fallbackSlides = legacy.hero?.slides ?? [];
+    const slides: HomeHeroSlideModel[] = rawSlides.map((s: Record<string, unknown>, idx: number) => {
+      const rawImg = s.img || s.image || s.imageUrl || s.backgroundImageId || s.background;
+      const normalized = typeof rawImg === 'string' && rawImg.trim() ? normalizeImageUrl(rawImg) : '';
+      const defaultImg = fallbackSlides[idx % Math.max(1, fallbackSlides.length)]?.img || '/banner_hero/doi_tac_cong_nghe_chien_luoc.png';
+      return {
+        img: normalized || defaultImg,
+        badge: typeof s.badge === 'string' ? s.badge : undefined,
+        title: typeof s.title === 'string' ? s.title : '',
+        sub: typeof s.sub === 'string' ? s.sub : (typeof s.subtitle === 'string' ? s.subtitle : ''),
+      };
+    });
 
     const rawMarquee = Array.isArray(cfg.marqueeTexts) ? cfg.marqueeTexts : [];
     const marqueeTexts = rawMarquee.map((t: unknown) => String(t));

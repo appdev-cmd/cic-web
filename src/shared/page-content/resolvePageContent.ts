@@ -102,14 +102,20 @@ function resolveHomeContent(
   const heroSec = sectionMap.get('home.hero');
   if (heroSec && isRecord(heroSec.config)) {
     const rawSlides = Array.isArray(heroSec.config.slides) ? heroSec.config.slides : [];
+    const fallbackSlides = legacyFallback.hero?.slides ?? [];
     const slides = rawSlides
       .filter((s): s is Record<string, unknown> => isRecord(s))
-      .map((s) => ({
-        img: typeof s.img === 'string' ? s.img : (typeof s.image === 'string' ? s.image : ''),
-        badge: typeof s.badge === 'string' ? s.badge : undefined,
-        title: typeof s.title === 'string' ? s.title : '',
-        sub: typeof s.sub === 'string' ? s.sub : (typeof s.subtitle === 'string' ? s.subtitle : ''),
-      }));
+      .map((s, idx) => {
+        const rawImg = s.img ?? s.image ?? s.imageUrl ?? s.backgroundImageId ?? s.background;
+        const defaultImg = fallbackSlides[idx % Math.max(1, fallbackSlides.length)]?.img || '/banner_hero/doi_tac_cong_nghe_chien_luoc.png';
+        const img = typeof rawImg === 'string' && rawImg.trim() ? rawImg.trim() : defaultImg;
+        return {
+          img,
+          badge: typeof s.badge === 'string' ? s.badge : undefined,
+          title: typeof s.title === 'string' ? s.title : '',
+          sub: typeof s.sub === 'string' ? s.sub : (typeof s.subtitle === 'string' ? s.subtitle : ''),
+        };
+      });
     const rawMarquee = Array.isArray(heroSec.config.marqueeTexts) ? heroSec.config.marqueeTexts : [];
     const marqueeTexts = rawMarquee.map(String);
     if (slides.length > 0) {

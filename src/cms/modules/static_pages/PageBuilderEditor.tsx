@@ -286,7 +286,7 @@ function HeroSlidesEditor({
                 {idx + 1}
               </span>
               <span className="max-w-[140px] truncate text-xs font-semibold">
-                {s.title ? s.title : `Slide ${idx + 1}`}
+                {s.title ? String(s.title).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : `Slide ${idx + 1}`}
               </span>
             </button>
           );
@@ -349,12 +349,14 @@ function HeroSlidesEditor({
             <span className="inline-block rounded-md bg-orange-600/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
               Xem trước slide {currentIdx + 1}
             </span>
-            <h4 className="text-base font-bold leading-snug line-clamp-2">
-              {currentSlide.title || '(Chưa nhập tiêu đề slide)'}
-            </h4>
-            <p className="text-xs text-slate-300 line-clamp-2">
-              {currentSlide.subtitle || '(Chưa nhập mô tả phụ)'}
-            </p>
+            <h4 
+              className="text-base font-bold leading-snug line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: currentSlide.title || '(Chưa nhập tiêu đề slide)' }}
+            />
+            <p 
+              className="text-xs text-slate-300 line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: currentSlide.subtitle || '(Chưa nhập mô tả phụ)' }}
+            />
           </div>
         </div>
 

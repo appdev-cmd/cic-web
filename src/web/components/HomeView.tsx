@@ -89,7 +89,18 @@ export const HomeView = ({
     homeAwards: defaultHomeAwards,
     homeSolutionsList: defaultHomeSolutions,
   } = React.useMemo(getHomeData, []);
-  const heroSlides = (content.hero?.slides && content.hero.slides.length > 0) ? content.hero.slides : defaultHeroSlides;
+  const heroSlides = React.useMemo(() => {
+    const rawList = (content.hero?.slides && content.hero.slides.length > 0) ? content.hero.slides : defaultHeroSlides;
+    return rawList.map((slide, idx) => {
+      const fallbackImg = defaultHeroSlides[idx % defaultHeroSlides.length]?.img || '/banner_hero/doi_tac_cong_nghe_chien_luoc.png';
+      const img = typeof slide?.img === 'string' && slide.img.trim() ? slide.img.trim() : fallbackImg;
+      return {
+        ...slide,
+        img,
+      };
+    });
+  }, [content.hero?.slides, defaultHeroSlides]);
+
   const marqueeTexts = (content.hero?.marqueeTexts && content.hero.marqueeTexts.length > 0) ? content.hero.marqueeTexts : defaultMarqueeTexts;
   const heroBadge = content.hero?.badge || 'Leading Innovation since 1990';
   const homeStats = content.stats.items;
@@ -102,6 +113,8 @@ export const HomeView = ({
   const introData = content.intro;
   const contactCta = content.contactCta;
   const [currentSlide, setCurrentSlide] = useState(0);
+  const activeSlideIndex = Math.min(Math.max(0, currentSlide), Math.max(0, heroSlides.length - 1));
+  const currentHeroSlide = heroSlides[activeSlideIndex] ?? defaultHeroSlides[0];
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
   const [activeProjectTab, setActiveProjectTab] = useState('all');
   const [activeNewsCategory, setActiveNewsCategory] = useState('all');
@@ -120,11 +133,14 @@ export const HomeView = ({
   useEffect(() => {
     // Preload hero slide images for instant loading
     heroSlides.forEach((slide) => {
-      const img = new Image();
-      img.src = slide.img;
+      if (slide?.img) {
+        const img = new Image();
+        img.src = slide.img;
+      }
     });
 
     if (editMode) return undefined;
+    if (heroSlides.length <= 1) return undefined;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
@@ -132,7 +148,9 @@ export const HomeView = ({
   }, [editMode, heroSlides]);
 
   useEffect(() => {
-    if (typeof previewSlideIndex === 'number' && heroSlides.length > 0) setCurrentSlide(Math.min(Math.max(0, previewSlideIndex), heroSlides.length - 1));
+    if (typeof previewSlideIndex === 'number' && heroSlides.length > 0) {
+      setCurrentSlide(Math.min(Math.max(0, previewSlideIndex), heroSlides.length - 1));
+    }
   }, [heroSlides.length, previewSlideIndex]);
 
   useEffect(() => {
@@ -184,23 +202,25 @@ export const HomeView = ({
       <section data-page-builder-section-key="home.hero" id="home" className="relative h-[520px] sm:h-[560px] md:h-[600px] lg:h-[640px] xl:h-[660px] flex items-center overflow-hidden bg-slate-950 z-10 border-b border-orange-500/60 shadow-lg">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <AnimatePresence mode="wait">
-            <motion.img 
-              key={currentSlide}
-              src={heroSlides[currentSlide].img} 
-              alt="Slide" 
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="w-full h-full object-cover animate-none"
-            />
+            {currentHeroSlide?.img ? (
+              <motion.img 
+                key={activeSlideIndex}
+                src={currentHeroSlide.img} 
+                alt="Slide" 
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+                className="w-full h-full object-cover animate-none"
+              />
+            ) : null}
           </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 via-60% to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10 w-full mb-4">
           <motion.div
-            key={currentSlide}
+            key={activeSlideIndex}
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
@@ -215,11 +235,11 @@ export const HomeView = ({
             
             <h1 
               className={`${typeHero} text-white mb-4`}
-              dangerouslySetInnerHTML={{ __html: heroSlides[currentSlide]?.title || '' }}
+              dangerouslySetInnerHTML={{ __html: currentHeroSlide?.title || '' }}
             />
             
             <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>
-              {heroSlides[currentSlide]?.sub || ''}
+              {currentHeroSlide?.sub || ''}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -248,12 +268,12 @@ export const HomeView = ({
           </motion.div>
         </div>
 
-        {!editMode && <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-40">
+        {!editMode && heroSlides.length > 1 && <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-3 z-40">
           {heroSlides.map((_, i) => (
             <button 
               key={i} 
               onClick={() => setCurrentSlide(i)}
-              className={`h-2 rounded-[8px] transition-all duration-300 ${i === currentSlide ? 'w-10 bg-orange-600' : 'w-4 bg-white/20 hover:bg-white/40'}`}
+              className={`h-2 rounded-[8px] transition-all duration-300 ${i === activeSlideIndex ? 'w-10 bg-orange-600' : 'w-4 bg-white/20 hover:bg-white/40'}`}
               title={`Slide ${i + 1}`}
             />
           ))}
