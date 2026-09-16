@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
-import { getPublicStaticPage } from '@/features/static-pages/server/queries';
-import { getLegacyHomePageContent } from '@/shared/page-content/legacyPageContent';
-import { resolvePageContent } from '@/shared/page-content/resolvePageContent';
-import type { PageContentVersionSource } from '@/shared/page-content/resolvePageContent';
+import { getPublishedHomePage } from '@/features/static-pages/server/homeResolver';
 import { HomeRoute } from './HomeRoute';
 
 export const dynamic = 'force-dynamic';
@@ -13,32 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const pageData = await getPublicStaticPage('vi', 'home');
-  let homeContent = getLegacyHomePageContent();
-
-  if (pageData && pageData.sections.length > 0) {
-    const versionSource: PageContentVersionSource = {
-      sections: pageData.sections.map((s) => ({
-        sectionKey: s.sectionKey,
-        config: s.config,
-        references: s.references ? [
-          {
-            entityType: 'project',
-            entityIds: s.references
-              .filter((r) => r.entityType === 'project')
-              .sort((a, b) => a.position - b.position)
-              .map((r) => r.entityId),
-          },
-        ] : [],
-      })),
-    };
-    const resolved = resolvePageContent({
-      pageType: 'home',
-      version: versionSource,
-      legacyFallback: homeContent,
-    });
-    homeContent = resolved.content;
-  }
-
+  const homeContent = await getPublishedHomePage('vi');
   return <HomeRoute initialContent={homeContent} />;
 }

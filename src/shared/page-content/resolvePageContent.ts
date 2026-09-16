@@ -55,78 +55,185 @@ function resolveHomeContent(
   version: PageContentVersionSource | undefined,
   legacyFallback: HomePageModel,
 ): ResolvedHomePageContent {
-  const section = version?.sections.find((item) => item.sectionKey === 'home.stats');
-  const projectSection = version?.sections.find((item) => item.sectionKey === 'home.projects');
-  if (!section && !projectSection) return { content: legacyFallback, diagnostics: [], source: 'legacy' };
+  if (!version?.sections || version.sections.length === 0) {
+    return { content: legacyFallback, diagnostics: [], source: 'legacy' };
+  }
   const diagnostics: PageContentDiagnostic[] = [];
+  const sectionMap = new Map(version.sections.map((s) => [s.sectionKey, s]));
+
+  // Projects
+  const projectSection = sectionMap.get('home.projects');
   const projectItems: HomeProjectModel[] = [];
   if (projectSection) {
     const reference = projectSection.references?.find((item) => item.entityType === 'project');
-    if (!reference) diagnostics.push({ code: 'INVALID_HOME_PROJECTS', sectionKey: 'home.projects', path: 'references.project', message: 'home.projects requires an ordered project reference.' });
-    else reference.entityIds.forEach((entityId, index) => {
-      const entity = resolveProjectEntity(entityId);
-      if (entity) projectItems.push(entity);
-      else diagnostics.push({ code: 'UNRESOLVED_REFERENCE_ENTITY', sectionKey: 'home.projects', path: `references.project.entityIds[${index}]`, message: `Project entity ${entityId} is unavailable in the production entity resolver.` });
-    });
+    if (reference && reference.entityIds.length > 0) {
+      reference.entityIds.forEach((entityId, index) => {
+        const entity = resolveProjectEntity(entityId);
+        if (entity) projectItems.push(entity);
+        else diagnostics.push({ code: 'UNRESOLVED_REFERENCE_ENTITY', sectionKey: 'home.projects', path: `references.project.entityIds[${index}]`, message: `Project entity ${entityId} is unavailable in the production entity resolver.` });
+      });
+    }
   }
-  const projects = projectSection ? { items: projectItems } : legacyFallback.projects;
-  if (!section) return { content: { ...legacyFallback, projects }, diagnostics, source: 'page-builder' };
+  const projects = projectItems.length > 0 ? { ...legacyFallback.projects, items: projectItems } : legacyFallback.projects;
 
-  const rawItems = section.config.items;
-  if (!Array.isArray(rawItems)) {
-    return {
-      content: { stats: { items: [] }, projects },
-      diagnostics: [{
-        code: 'INVALID_HOME_STATS',
-        sectionKey: 'home.stats',
-        path: 'config.items',
-        message: 'home.stats.config.items must be an array.',
-      }],
-      source: 'invalid',
+  // Stats
+  let stats = legacyFallback.stats;
+  const statsSec = sectionMap.get('home.stats');
+  if (statsSec && isRecord(statsSec.config) && Array.isArray(statsSec.config.items)) {
+    const items: HomeStatModel[] = [];
+    for (const [index, rawItem] of statsSec.config.items.entries()) {
+      if (isRecord(rawItem) && typeof rawItem.value === 'number' && Number.isFinite(rawItem.value) && typeof rawItem.label === 'string') {
+        const hasPersistentId = typeof rawItem.id === 'string' && rawItem.id.length > 0;
+        items.push({
+          id: hasPersistentId ? (rawItem.id as string) : `unpersisted-home-stat-${index + 1}`,
+          value: rawItem.value,
+          suffix: typeof rawItem.suffix === 'string' ? rawItem.suffix : undefined,
+          label: rawItem.label,
+        });
+      }
+    }
+    if (items.length > 0) {
+      stats = { items };
+    }
+  }
+
+  // Hero
+  let hero = legacyFallback.hero;
+  const heroSec = sectionMap.get('home.hero');
+  if (heroSec && isRecord(heroSec.config)) {
+    const rawSlides = Array.isArray(heroSec.config.slides) ? heroSec.config.slides : [];
+    const slides = rawSlides
+      .filter((s): s is Record<string, unknown> => isRecord(s))
+      .map((s) => ({
+        img: typeof s.img === 'string' ? s.img : (typeof s.image === 'string' ? s.image : ''),
+        badge: typeof s.badge === 'string' ? s.badge : undefined,
+        title: typeof s.title === 'string' ? s.title : '',
+        sub: typeof s.sub === 'string' ? s.sub : (typeof s.subtitle === 'string' ? s.subtitle : ''),
+      }));
+    const rawMarquee = Array.isArray(heroSec.config.marqueeTexts) ? heroSec.config.marqueeTexts : [];
+    const marqueeTexts = rawMarquee.map(String);
+    if (slides.length > 0) {
+      hero = {
+        badge: typeof heroSec.config.badge === 'string' ? heroSec.config.badge : undefined,
+        slides,
+        marqueeTexts: marqueeTexts.length > 0 ? marqueeTexts : hero?.marqueeTexts,
+      };
+    }
+  }
+
+  // Intro
+  let intro = legacyFallback.intro;
+  const introSec = sectionMap.get('home.intro');
+  if (introSec && isRecord(introSec.config)) {
+    const cfg = introSec.config;
+    const rawParagraphs = Array.isArray(cfg.paragraphs) ? cfg.paragraphs : [];
+    intro = {
+      badge: typeof cfg.badge === 'string' ? cfg.badge : intro?.badge,
+      title: typeof cfg.title === 'string' ? cfg.title : (intro?.title || ''),
+      paragraphs: rawParagraphs.length > 0 ? rawParagraphs.map(String) : (intro?.paragraphs || []),
+      videoUrl: typeof cfg.videoUrl === 'string' ? cfg.videoUrl : intro?.videoUrl,
+      profilePdfUrl: typeof cfg.profilePdfUrl === 'string' ? cfg.profilePdfUrl : intro?.profilePdfUrl,
     };
   }
 
-  const items: HomeStatModel[] = [];
-
-  for (const [index, rawItem] of rawItems.entries()) {
-    const path = `config.items[${index}]`;
-    if (!isRecord(rawItem)
-      || typeof rawItem.value !== 'number'
-      || !Number.isFinite(rawItem.value)
-      || typeof rawItem.label !== 'string'
-      || (rawItem.suffix !== undefined && typeof rawItem.suffix !== 'string')) {
-      return {
-        content: { stats: { items: [] }, projects },
-        diagnostics: [{
-          code: 'INVALID_HOME_STATS',
-          sectionKey: 'home.stats',
-          path,
-          message: 'Each home.stats item requires a finite numeric value, a string label, and an optional string suffix.',
-        }],
-        source: 'invalid',
+  // Awards
+  let awards = legacyFallback.awards;
+  const awardsSec = sectionMap.get('home.awards');
+  if (awardsSec && isRecord(awardsSec.config)) {
+    const cfg = awardsSec.config;
+    const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
+    const items = rawItems
+      .filter((item): item is Record<string, unknown> => isRecord(item))
+      .map((item) => ({
+        name: typeof item.name === 'string' ? item.name : '',
+        img: typeof item.img === 'string' ? item.img : (typeof item.imageId === 'string' ? item.imageId : ''),
+      }));
+    if (items.length > 0) {
+      awards = {
+        badge: typeof cfg.badge === 'string' ? cfg.badge : awards?.badge,
+        title: typeof cfg.title === 'string' ? cfg.title : awards?.title,
+        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : awards?.subtitle,
+        items,
       };
     }
+  }
 
-    const hasPersistentId = typeof rawItem.id === 'string' && rawItem.id.length > 0;
-    if (!hasPersistentId) {
-      diagnostics.push({
-        code: 'UNPERSISTED_HOME_STAT_ID',
-        sectionKey: 'home.stats',
-        path: `${path}.id`,
-        message: 'The item has no persistent ID. A transient render key is used; reorder remains blocked.',
-      });
+  // Ecosystem
+  let ecosystem = legacyFallback.ecosystem;
+  const ecoSec = sectionMap.get('home.ecosystem');
+  if (ecoSec && isRecord(ecoSec.config)) {
+    const cfg = ecoSec.config;
+    const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
+    const items = rawItems
+      .filter((item): item is Record<string, unknown> => isRecord(item))
+      .map((item, idx) => ({
+        id: typeof item.id === 'string' ? item.id : `eco-${idx + 1}`,
+        title: typeof item.title === 'string' ? item.title : '',
+        desc: typeof item.desc === 'string' ? item.desc : (typeof item.description === 'string' ? item.description : ''),
+        tag: typeof item.tag === 'string' ? item.tag : '',
+        link: typeof item.link === 'string' ? item.link : '',
+      }));
+    if (items.length > 0) {
+      ecosystem = {
+        badge: typeof cfg.badge === 'string' ? cfg.badge : ecosystem?.badge,
+        title: typeof cfg.title === 'string' ? cfg.title : (ecosystem?.title || ''),
+        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : ecosystem?.subtitle,
+        items,
+      };
     }
+  }
 
-    items.push({
-      id: hasPersistentId ? rawItem.id as string : `unpersisted-home-stat-${index + 1}`,
-      value: rawItem.value,
-      suffix: rawItem.suffix as string | undefined,
-      label: rawItem.label,
-    });
+  // Partners
+  let partners = legacyFallback.partners;
+  const partnersSec = sectionMap.get('home.partners');
+  if (partnersSec && isRecord(partnersSec.config)) {
+    const cfg = partnersSec.config;
+    const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
+    const items = rawItems
+      .filter((item): item is Record<string, unknown> => isRecord(item))
+      .map((item) => ({
+        name: typeof item.name === 'string' ? item.name : '',
+        logo: typeof item.logo === 'string' ? item.logo : (typeof item.imageId === 'string' ? item.imageId : ''),
+      }));
+    if (items.length > 0) {
+      partners = {
+        badge: typeof cfg.badge === 'string' ? cfg.badge : partners?.badge,
+        title: typeof cfg.title === 'string' ? cfg.title : partners?.title,
+        items,
+      };
+    }
+  }
+
+  // Contact CTA
+  let contactCta = legacyFallback.contactCta;
+  const ctaSec = sectionMap.get('home.contact_cta');
+  if (ctaSec && isRecord(ctaSec.config)) {
+    const cfg = ctaSec.config;
+    contactCta = {
+      badge: typeof cfg.badge === 'string' ? cfg.badge : contactCta?.badge,
+      title: typeof cfg.title === 'string' ? cfg.title : (contactCta?.title || ''),
+      description: typeof cfg.description === 'string' ? cfg.description : contactCta?.description,
+      phone: typeof cfg.phone === 'string' ? cfg.phone : contactCta?.phone,
+      email: typeof cfg.email === 'string' ? cfg.email : contactCta?.email,
+      workingHours: typeof cfg.workingHours === 'string' ? cfg.workingHours : contactCta?.workingHours,
+      formId: typeof cfg.formId === 'string' ? cfg.formId : contactCta?.formId,
+      submitLabel: typeof cfg.submitLabel === 'string' ? cfg.submitLabel : contactCta?.submitLabel,
+    };
   }
 
   return {
-    content: { stats: { items }, projects },
+    content: {
+      hero,
+      intro,
+      stats,
+      awards,
+      ecosystem,
+      projects,
+      events: legacyFallback.events,
+      news: legacyFallback.news,
+      partners,
+      contactCta,
+    },
     diagnostics,
     source: 'page-builder',
   };

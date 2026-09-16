@@ -17,12 +17,75 @@ export function adaptLegacyHomeStats(items: readonly LegacyHomeStat[]): readonly
 }
 
 export function getLegacyHomePageContent(): HomePageModel {
-  const { homeStats, projects } = getHomeData();
+  const {
+    heroSlides,
+    projects,
+    newsItems,
+    partners,
+    marqueeTexts,
+    upcomingHomeEvents,
+    pastHomeEvents,
+    homeStats,
+    homeAwards,
+    homeSolutionsList,
+  } = getHomeData();
   return {
+    hero: {
+      slides: heroSlides,
+      marqueeTexts,
+    },
+    intro: {
+      badge: 'Về chúng tôi',
+      title: 'Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam',
+      paragraphs: [
+        'Được thành lập từ năm 1990 trực thuộc Bộ Xây dựng, CIC tự hào là đơn vị tiên phong trong chuyển đổi số ngành xây dựng, kiến trúc và kỹ thuật công trình.',
+        'Chúng tôi cung cấp giải pháp toàn diện từ phần mềm bản quyền chính hãng, tư vấn chuyển đổi số BIM/GIS, đào tạo chuyên sâu đến phát triển phần mềm may đo theo yêu cầu.',
+      ],
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      profilePdfUrl: '/cic_profile.pdf',
+    },
     stats: {
       items: adaptLegacyHomeStats(homeStats),
     },
-    projects: { items: projects.map((project) => ({ ...project, entityId: `legacy-project-${project.id}` })) },
+    awards: {
+      title: 'Thành tựu & Giải thưởng',
+      subtitle: 'Minh chứng cho nỗ lực không ngừng nghỉ',
+      items: homeAwards,
+    },
+    ecosystem: {
+      title: 'Hệ sinh thái Công nghệ CIC',
+      subtitle: 'Giải pháp toàn diện cho vòng đời công trình số',
+      items: homeSolutionsList.map((sol, idx) => ({
+        id: `legacy-solution-${idx + 1}`,
+        title: sol.title,
+        desc: sol.desc,
+        tag: 'Giải pháp',
+        link: '/products',
+      })),
+    },
+    projects: {
+      items: projects.map((project) => ({ ...project, entityId: `legacy-project-${project.id}` })),
+    },
+    events: {
+      title: 'Sự kiện nổi bật',
+      upcomingEvents: upcomingHomeEvents.map((e, idx) => ({ id: `legacy-upcoming-${idx}`, ...e })),
+      pastEvents: pastHomeEvents.map((e, idx) => ({ id: `legacy-past-${idx}`, ...e, isPast: true })),
+    },
+    news: {
+      title: 'Tin tức và Góc nhìn',
+      items: newsItems.map((n, idx) => ({ id: `legacy-news-${idx}`, ...n })),
+    },
+    partners: {
+      title: 'Đối tác chiến lược',
+      items: partners,
+    },
+    contactCta: {
+      title: 'Sẵn sàng kiến tạo Tương lai số',
+      description: 'Đội ngũ chuyên gia CIC sẵn sàng lắng nghe và tư vấn giải pháp phù hợp nhất với nhu cầu doanh nghiệp của bạn.',
+      phone: '024 3976 1381',
+      email: 'info@cic.com.vn',
+      workingHours: 'Thứ 2 - Thứ 6: 08:00 - 17:30',
+    },
   };
 }
 

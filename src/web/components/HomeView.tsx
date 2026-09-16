@@ -80,16 +80,27 @@ export const HomeView = ({
   bindingRegistry = elementBindingRegistry,
 }: HomeViewProps) => {
   const {
-    heroSlides,
-    newsItems,
-    partners,
-    marqueeTexts,
-    upcomingHomeEvents,
-    pastHomeEvents,
-    homeAwards,
+    heroSlides: defaultHeroSlides,
+    newsItems: defaultNewsItems,
+    partners: defaultPartners,
+    marqueeTexts: defaultMarqueeTexts,
+    upcomingHomeEvents: defaultUpcomingHomeEvents,
+    pastHomeEvents: defaultPastHomeEvents,
+    homeAwards: defaultHomeAwards,
+    homeSolutionsList: defaultHomeSolutions,
   } = React.useMemo(getHomeData, []);
+  const heroSlides = (content.hero?.slides && content.hero.slides.length > 0) ? content.hero.slides : defaultHeroSlides;
+  const marqueeTexts = (content.hero?.marqueeTexts && content.hero.marqueeTexts.length > 0) ? content.hero.marqueeTexts : defaultMarqueeTexts;
+  const heroBadge = content.hero?.badge || 'Leading Innovation since 1990';
   const homeStats = content.stats.items;
+  const homeAwards = (content.awards?.items && content.awards.items.length > 0) ? content.awards.items : defaultHomeAwards;
   const projects = content.projects.items;
+  const upcomingHomeEvents = (content.events?.upcomingEvents && content.events.upcomingEvents.length > 0) ? content.events.upcomingEvents : defaultUpcomingHomeEvents;
+  const pastHomeEvents = (content.events?.pastEvents && content.events.pastEvents.length > 0) ? content.events.pastEvents : defaultPastHomeEvents;
+  const newsItems = (content.news?.items && content.news.items.length > 0) ? content.news.items : defaultNewsItems;
+  const partners = (content.partners?.items && content.partners.items.length > 0) ? content.partners.items : defaultPartners;
+  const introData = content.intro;
+  const contactCta = content.contactCta;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeEventTab, setActiveEventTab] = useState('upcoming');
   const [activeProjectTab, setActiveProjectTab] = useState('all');
@@ -198,17 +209,17 @@ export const HomeView = ({
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg mb-5 backdrop-blur-md">
               <span className="flex h-2 w-2 rounded-full bg-orange-600 animate-pulse"></span>
               <span className={`${typeBadge} text-white`}>
-                Leading Innovation since 1990
+                {heroBadge}
               </span>
             </div>
             
             <h1 
               className={`${typeHero} text-white mb-4`}
-              dangerouslySetInnerHTML={{ __html: heroSlides[currentSlide].title }}
+              dangerouslySetInnerHTML={{ __html: heroSlides[currentSlide]?.title || '' }}
             />
             
             <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>
-              {heroSlides[currentSlide].sub}
+              {heroSlides[currentSlide]?.sub || ''}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -285,15 +296,35 @@ export const HomeView = ({
               transition={{ duration: 0.8 }}
             >
               <h2 className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
-                Hơn 35 năm <span className="text-orange-600">đồng hành</span><br className="hidden md:block" /> cùng kỹ thuật Việt Nam
+                {introData?.title ? (
+                  introData.title.includes('đồng hành') ? (
+                    <>
+                      {introData.title.split('đồng hành')[0]}
+                      <span className="text-orange-600">đồng hành</span>
+                      {introData.title.split('đồng hành')[1]}
+                    </>
+                  ) : introData.title
+                ) : (
+                  <>Hơn 35 năm <span className="text-orange-600">đồng hành</span><br className="hidden md:block" /> cùng kỹ thuật Việt Nam</>
+                )}
               </h2>
               <div className={`${typeProse} space-y-4 text-slate-600 mb-10 text-justify`}>
-                <p data-page-builder-config-path={JSON.stringify(['paragraphs', 0])}>
-                  CIC (tiền thân là Trung tâm Tin học - Bộ Xây dựng, thành lập năm 1990) là đơn vị hàng đầu cung cấp phần mềm, thiết bị và giải pháp số cho ngành xây dựng.
-                </p>
-                <p data-page-builder-config-path={JSON.stringify(['paragraphs', 1])}>
-                  Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.
-                </p>
+                {introData?.paragraphs && introData.paragraphs.length > 0 ? (
+                  introData.paragraphs.map((para, idx) => (
+                    <p key={idx} data-page-builder-config-path={JSON.stringify(['paragraphs', idx])}>
+                      {para}
+                    </p>
+                  ))
+                ) : (
+                  <>
+                    <p data-page-builder-config-path={JSON.stringify(['paragraphs', 0])}>
+                      CIC (tiền thân là Trung tâm Tin học - Bộ Xây dựng, thành lập năm 1990) là đơn vị hàng đầu cung cấp phần mềm, thiết bị và giải pháp số cho ngành xây dựng.
+                    </p>
+                    <p data-page-builder-config-path={JSON.stringify(['paragraphs', 1])}>
+                      Suốt hơn 35 năm, chúng tôi luôn đi đầu ứng dụng ICT, mang đến dịch vụ tư vấn chuyên sâu cho hàng nghìn doanh nghiệp, đối tác trong nước và quốc tế.
+                    </p>
+                  </>
+                )}
               </div>
               <div className="flex flex-wrap gap-3">
                 <button 
@@ -308,7 +339,7 @@ export const HomeView = ({
                   Khám phá hành trình CIC <ArrowRight size={15} />
                 </button>
                 <a 
-                  href="https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf"
+                  href={introData?.profilePdfUrl || "https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-slate-900 rounded-lg font-bold uppercase tracking-wider text-xs transition-all active:scale-95 shadow-sm border border-slate-200 hover:bg-slate-100 hover:border-slate-300 btn-modern-interaction flex items-center gap-2 cursor-pointer"
@@ -456,8 +487,8 @@ export const HomeView = ({
       <section data-page-builder-section-key="home.awards" className="py-16 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
-            title="Thành tựu & Giải thưởng" 
-            sub="Minh chứng cho nỗ lực không ngừng nghỉ" 
+            title={content.awards?.title || "Thành tựu & Giải thưởng"} 
+            sub={content.awards?.subtitle || "Minh chứng cho nỗ lực không ngừng nghỉ"} 
           />
           <div className="mt-6">
             <AwardsSlider awards={homeAwards} paused={editMode} />
@@ -539,8 +570,8 @@ export const HomeView = ({
       <section data-page-builder-section-key="home.projects" id="projects" className="py-16 bg-white relative overflow-hidden border-t border-slate-100 z-10">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
-             title="Dự án tiêu biểu" 
-             sub="Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện" 
+             title={content.projects.title || "Dự án tiêu biểu"} 
+             sub={content.projects.subtitle || "Kiến tạo hệ sinh thái giải pháp công nghệ kỹ thuật số toàn diện"} 
           />
           
           {/* Project Tabs and Search */}
@@ -869,8 +900,8 @@ export const HomeView = ({
         <div className="absolute inset-0 bg-tech-grid opacity-10 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <SectionHeader 
-            title="Sự kiện & Hội thảo" 
-            sub="Kết nối chuyên gia - Chia sẻ tri thức công nghệ" 
+            title={content.events?.title || "Sự kiện & Hội thảo"} 
+            sub={content.events?.subtitle || "Kết nối chuyên gia - Chia sẻ tri thức công nghệ"} 
             dark
           />
           
@@ -990,8 +1021,8 @@ export const HomeView = ({
       <section data-page-builder-section-key="home.news" id="news" className="py-12 bg-slate-50/40 border-t border-slate-100 z-10 relative">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeader 
-            title="Tin tức và Góc nhìn" 
-            sub="Cập nhật xu hướng công nghệ & chuyển đổi số mới nhất" 
+            title={content.news?.title || "Tin tức và Góc nhìn"} 
+            sub={content.news?.subtitle || "Cập nhật xu hướng công nghệ & chuyển đổi số mới nhất"} 
           />
 
           {/* News Categories */}
@@ -1086,7 +1117,7 @@ export const HomeView = ({
       <section data-page-builder-section-key="home.partners" className="py-10 bg-white/40 border-t border-slate-100 overflow-hidden relative z-10">
         <div className="max-w-7xl mx-auto px-6 mb-6 relative z-10">
           <SectionHeader 
-            title="Đối tác chiến lược" 
+            title={content.partners?.title || "Đối tác chiến lược"} 
             sub="Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới" 
           />
         </div>
@@ -1133,10 +1164,19 @@ export const HomeView = ({
               transition={{ duration: 0.8 }}
             >
               <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-8 leading-[1.1] tracking-tighter">
-                Sẵn sàng kiến tạo <br /> <span className="text-orange-600">Tương lai số</span>
+                {contactCta?.title ? (
+                  contactCta.title.includes('Tương lai số') ? (
+                    <>
+                      {contactCta.title.split('Tương lai số')[0]}
+                      <br /> <span className="text-orange-600">Tương lai số</span>
+                    </>
+                  ) : contactCta.title
+                ) : (
+                  <>Sẵn sàng kiến tạo <br /> <span className="text-orange-600">Tương lai số</span></>
+                )}
               </h2>
               <p className="text-slate-600 text-base mb-10 max-w-xl font-medium leading-relaxed">
-                Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và cung cấp những giải pháp công nghệ tối ưu nhất cho doanh nghiệp của bạn.
+                {contactCta?.description || 'Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và cung cấp những giải pháp công nghệ tối ưu nhất cho doanh nghiệp của bạn.'}
               </p>
               
               <div className="space-y-6">
@@ -1146,7 +1186,7 @@ export const HomeView = ({
                   </div>
                   <div>
                     <div className="text-slate-500 font-black uppercase text-[10px] tracking-widest mb-1">Hotline tư vấn</div>
-                    <div className="text-xl text-slate-950 font-black">024 3976 1381</div>
+                    <div className="text-xl text-slate-950 font-black">{contactCta?.phone || '024 3976 1381'}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -1155,7 +1195,7 @@ export const HomeView = ({
                   </div>
                   <div>
                     <div className="text-slate-500 font-black uppercase text-[10px] tracking-widest mb-1">Email liên hệ</div>
-                    <div className="text-xl text-slate-950 font-black">info@cic.com.vn</div>
+                    <div className="text-xl text-slate-950 font-black">{contactCta?.email || 'info@cic.com.vn'}</div>
                   </div>
                 </div>
               </div>
@@ -1238,7 +1278,7 @@ export const HomeView = ({
                   />
                 </div>
                 <button type="submit" className="w-full py-4 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest text-xs btn-modern-interaction shadow-xl shadow-orange-600/20">
-                  Gửi thông tin ngay
+                  {contactCta?.submitLabel || 'Gửi thông tin ngay'}
                 </button>
               </form>
             </motion.div>

@@ -18,8 +18,44 @@ export const entityTypeLabels: Record<PageBuilderEntityType, string> = {
 };
 
 export const sectionDefinitions: Record<string, SectionDefinition> = {
-  'home.hero': { label: 'Hero', description: 'Carousel mở đầu của Trang chủ.', canHide: false, canMove: false, editableContract: blockedContract('home.hero', { fields: [{ path: 'slides.*.title', semantic: 'rich-text', ownership: 'static-unwired', valueKind: 'string', editing: 'blocked', blockedReason: 'representation-mismatch' }, { path: 'slides.*.subtitle', semantic: 'text', ownership: 'static-unwired', valueKind: 'string', editing: 'blocked', blockedReason: 'data-unwired' }], media: { background: { path: 'slides.*.backgroundImageId', semantic: 'background-image', ownership: 'static-unwired', replace: 'blocked', blockedReason: 'data-unwired' }, mobileBackground: { path: 'slides.*.mobileImageId', semantic: 'background-image', ownership: 'static-unwired', replace: 'blocked', optional: true, blockedReason: 'data-unwired' } }, actions: { primary: { path: 'slides.*.primaryCtaId', semantic: 'cta', ownership: 'reference', editing: 'blocked', replace: 'blocked', blockedReason: 'data-unwired' }, secondary: { path: 'slides.*.secondaryCtaId', semantic: 'cta', ownership: 'reference', editing: 'blocked', replace: 'blocked', optional: true, blockedReason: 'data-unwired' } } }) },
-  'home.intro': { label: 'Giới thiệu ngắn', description: 'Nội dung giới thiệu và video doanh nghiệp.', canHide: true, canMove: true, editableContract: blockedContract('home.intro', { media: { image: { path: 'imageId', semantic: 'image', ownership: 'static-unwired', replace: 'blocked', optional: true, blockedReason: 'data-unwired' }, video: { path: 'videoUrl', semantic: 'video', ownership: 'static-unwired', replace: 'blocked', optional: true, blockedReason: 'data-unwired' } }, actions: { primary: { path: 'primaryCtaId', semantic: 'cta', ownership: 'reference', editing: 'blocked', replace: 'blocked', optional: true, blockedReason: 'data-unwired' }, profile: { path: 'downloadMediaId', semantic: 'link', ownership: 'reference', editing: 'blocked', replace: 'blocked', optional: true, blockedReason: 'data-unwired' } } }) },
+  'home.hero': {
+    label: 'Hero',
+    description: 'Carousel mở đầu của Trang chủ.',
+    canHide: false,
+    canMove: false,
+    editableContract: {
+      sectionKey: 'home.hero',
+      fields: [
+        { path: 'badge', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'slides.*.title', semantic: 'rich-text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+        { path: 'slides.*.sub', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        images: { path: 'slides.*.img', semantic: 'image', ownership: 'embedded', replace: 'enabled' },
+      },
+      collections: {
+        slides: { path: 'slides', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: false } },
+      },
+    },
+  },
+  'home.intro': {
+    label: 'Giới thiệu ngắn',
+    description: 'Nội dung giới thiệu và video doanh nghiệp.',
+    canHide: true,
+    canMove: true,
+    editableContract: {
+      sectionKey: 'home.intro',
+      fields: [
+        { path: 'badge', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'paragraphs.0', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'paragraphs.1', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        video: { path: 'videoUrl', semantic: 'video', ownership: 'section-config', replace: 'enabled', optional: true },
+      },
+    },
+  },
   'home.stats': {
     label: 'Thống kê', description: 'Bốn chỉ số theo thiết kế hiện tại.', canHide: true, canMove: true,
     editableContract: {
@@ -34,7 +70,26 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       },
     },
   },
-  'home.awards': { label: 'Giải thưởng', description: 'Danh sách giải thưởng trong slider.', canHide: true, canMove: true, editableContract: blockedContract('home.awards', { media: { images: { path: 'items.*.imageId', semantic: 'image', ownership: 'embedded', replace: 'blocked', blockedReason: 'identity-unresolved' } } }) },
+  'home.awards': {
+    label: 'Giải thưởng',
+    description: 'Danh sách giải thưởng trong slider.',
+    canHide: true,
+    canMove: true,
+    editableContract: {
+      sectionKey: 'home.awards',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'items.*.name', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        images: { path: 'items.*.img', semantic: 'image', ownership: 'embedded', replace: 'enabled' },
+      },
+      collections: {
+        items: { path: 'items', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } },
+      },
+    },
+  },
   'home.ecosystem': {
     label: 'Hệ sinh thái công nghệ', description: 'Carousel nội dung nhập trực tiếp, mỗi mục có ảnh và liên kết riêng.', canHide: true, canMove: true,
     editableContract: {
@@ -64,7 +119,20 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
   'home.events': { label: 'Sự kiện nổi bật', description: 'Tự động lấy 1 sự kiện đã đánh dấu Nổi bật.', referenceLimit: { event: 1 }, canHide: true, canMove: true, editableContract: blockedContract('home.events') },
   'home.news': { label: 'Tin tức và Góc nhìn', description: 'Tự động lấy tối đa 4 tin đã đánh dấu Nổi bật; có thể chuyển sang chọn thủ công.', referenceLimit: { news: 4 }, canHide: true, canMove: true, editableContract: blockedContract('home.news') },
   'home.partners': { label: 'Đối tác chiến lược', description: 'Danh sách đối tác theo thứ tự marquee.', referenceLimit: { partner: 12 }, canHide: true, canMove: true, editableContract: blockedContract('home.partners') },
-  'home.contact_cta': { label: 'CTA & Form tư vấn', description: 'Nội dung liên hệ và form cố định.', editableContract: blockedContract('home.contact_cta') },
+  'home.contact_cta': {
+    label: 'CTA & Form tư vấn',
+    description: 'Nội dung liên hệ và form cố định.',
+    editableContract: {
+      sectionKey: 'home.contact_cta',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'phone', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'email', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'submitLabel', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+    },
+  },
   'about.hero': { label: 'Hero Giới thiệu', description: 'Tiêu đề và ảnh mở đầu.', editableContract: { sectionKey: 'about.hero', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { background: { path: 'backgroundImageId', semantic: 'background-image', ownership: 'section-config', replace: 'enabled' } } } },
   'about.overview': { label: 'Tổng quan doanh nghiệp', description: 'Nội dung giới thiệu và video doanh nghiệp.', editableContract: { sectionKey: 'about.overview', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { video: { path: 'videoUrl', semantic: 'video', ownership: 'section-config', replace: 'enabled', optional: true } } } },
   'about.timeline': {

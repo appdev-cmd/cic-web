@@ -1,3 +1,24 @@
+export interface HomeHeroSlideModel {
+  img: string;
+  badge?: string;
+  title: string;
+  sub: string;
+}
+
+export interface HomeHeroModel {
+  badge?: string;
+  slides: readonly HomeHeroSlideModel[];
+  marqueeTexts?: readonly string[];
+}
+
+export interface HomeIntroModel {
+  badge?: string;
+  title: string;
+  paragraphs: readonly string[];
+  videoUrl?: string;
+  profilePdfUrl?: string;
+}
+
 export interface HomeStatModel {
   id: string;
   value: number;
@@ -9,15 +30,109 @@ export interface HomeStatsModel {
   items: readonly HomeStatModel[];
 }
 
-export interface HomePageModel {
-  stats: HomeStatsModel;
-  projects: HomeProjectsModel;
+export interface HomeAwardItemModel {
+  name: string;
+  img: string;
+}
+
+export interface HomeAwardsModel {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  items: readonly HomeAwardItemModel[];
+}
+
+export interface HomeEcosystemItemModel {
+  id: string;
+  title: string;
+  desc: string;
+  tag: string;
+  link: string;
+}
+
+export interface HomeEcosystemModel {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  items: readonly HomeEcosystemItemModel[];
 }
 
 export type HomeProjectModel = Project & { entityId: string };
 
 export interface HomeProjectsModel {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
   items: readonly HomeProjectModel[];
+}
+
+export interface HomeEventItemModel {
+  id: string | number;
+  title: string;
+  date: string;
+  time?: string;
+  loc?: string;
+  attendees?: string;
+  isPast?: boolean;
+}
+
+export interface HomeEventsModel {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  upcomingEvents: readonly HomeEventItemModel[];
+  pastEvents: readonly HomeEventItemModel[];
+}
+
+export interface HomeNewsItemModel {
+  id: string | number;
+  category: string;
+  title: string;
+  date: string;
+  desc: string;
+  img: string;
+}
+
+export interface HomeNewsModel {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  items: readonly HomeNewsItemModel[];
+}
+
+export interface HomePartnerItemModel {
+  name: string;
+  logo: string;
+}
+
+export interface HomePartnersModel {
+  badge?: string;
+  title?: string;
+  items: readonly HomePartnerItemModel[];
+}
+
+export interface HomeContactCtaModel {
+  badge?: string;
+  title: string;
+  description?: string;
+  phone?: string;
+  email?: string;
+  workingHours?: string;
+  formId?: string;
+  submitLabel?: string;
+}
+
+export interface HomePageModel {
+  hero?: HomeHeroModel;
+  intro?: HomeIntroModel;
+  stats: HomeStatsModel;
+  awards?: HomeAwardsModel;
+  ecosystem?: HomeEcosystemModel;
+  projects: HomeProjectsModel;
+  events?: HomeEventsModel;
+  news?: HomeNewsModel;
+  partners?: HomePartnersModel;
+  contactCta?: HomeContactCtaModel;
 }
 
 export interface AboutTimelineMilestoneModel {

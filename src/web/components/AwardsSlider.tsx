@@ -8,7 +8,7 @@ interface AwardItem {
 }
 
 interface AwardsSliderProps {
-  awards: AwardItem[];
+  awards: readonly AwardItem[] | AwardItem[];
   paused?: boolean;
 }
 
