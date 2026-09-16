@@ -325,33 +325,28 @@ function resolveHomeContent(
 function resolveAboutCapacity(input: ResolveCapacityExperiencePageContentInput): ResolvedCapacityExperiencePageContent {
   const section = input.version?.sections.find((item) => item.sectionKey === 'about.capacity');
   if (!section) return { content: input.legacyFallback, diagnostics: [], source: 'legacy' };
-  const { description, metrics: rawMetrics } = section.config;
-  if (typeof description !== 'string' || !Array.isArray(rawMetrics)) {
-    return {
-      content: { capacity: { description: '', metrics: [] } },
-      diagnostics: [{ code: 'INVALID_ABOUT_CAPACITY', sectionKey: 'about.capacity', path: 'config', message: 'about.capacity requires a string description and a metrics array.' }],
-      source: 'invalid',
-    };
-  }
+  const rawDesc = section.config.description;
+  const rawMetrics = section.config.metrics;
+  const description = typeof rawDesc === 'string' && rawDesc.trim() ? rawDesc.trim() : input.legacyFallback.capacity.description;
   const diagnostics: PageContentDiagnostic[] = [];
   const metrics: AboutCapacityMetricModel[] = [];
-  for (const [index, rawMetric] of rawMetrics.entries()) {
-    const path = `config.metrics[${index}]`;
-    if (!isRecord(rawMetric) || typeof rawMetric.value !== 'string' || typeof rawMetric.label !== 'string') {
-      return {
-        content: { capacity: { description: '', metrics: [] } },
-        diagnostics: [{ code: 'INVALID_ABOUT_CAPACITY', sectionKey: 'about.capacity', path, message: 'Each about.capacity metric requires string value and label fields.' }],
-        source: 'invalid',
-      };
+
+  if (Array.isArray(rawMetrics) && rawMetrics.length > 0) {
+    for (const [index, rawMetric] of rawMetrics.entries()) {
+      const path = `config.metrics[${index}]`;
+      if (isRecord(rawMetric) && typeof rawMetric.value === 'string' && typeof rawMetric.label === 'string') {
+        const hasPersistentId = typeof rawMetric.id === 'string' && rawMetric.id.length > 0;
+        if (!hasPersistentId) diagnostics.push({
+          code: 'UNPERSISTED_ABOUT_CAPACITY_METRIC_ID', sectionKey: 'about.capacity', path: `${path}.id`,
+          message: 'The metric has no persistent ID. Inline persistence remains blocked for this item.',
+        });
+        metrics.push({ id: hasPersistentId ? rawMetric.id as string : `unpersisted-about-capacity-metric-${index + 1}`, value: rawMetric.value, label: rawMetric.label });
+      }
     }
-    const hasPersistentId = typeof rawMetric.id === 'string' && rawMetric.id.length > 0;
-    if (!hasPersistentId) diagnostics.push({
-      code: 'UNPERSISTED_ABOUT_CAPACITY_METRIC_ID', sectionKey: 'about.capacity', path: `${path}.id`,
-      message: 'The metric has no persistent ID. Inline persistence remains blocked for this item.',
-    });
-    metrics.push({ id: hasPersistentId ? rawMetric.id as string : `unpersisted-about-capacity-metric-${index + 1}`, value: rawMetric.value, label: rawMetric.label });
   }
-  return { content: { capacity: { description, metrics } }, diagnostics, source: 'page-builder' };
+
+  const finalMetrics = metrics.length > 0 ? metrics : input.legacyFallback.capacity.metrics;
+  return { content: { capacity: { description, metrics: finalMetrics } }, diagnostics, source: 'page-builder' };
 }
 
 function resolveAboutPage(input: ResolveAboutPageContentInput): ResolvedAboutPageContent {
@@ -359,27 +354,48 @@ function resolveAboutPage(input: ResolveAboutPageContentInput): ResolvedAboutPag
   const timelineSection = input.version.sections.find((item) => item.sectionKey === 'about.timeline');
   const strategySection = input.version.sections.find((item) => item.sectionKey === 'about.strategy');
   if (!timelineSection || !strategySection) return { content: input.legacyFallback, diagnostics: [], source: 'legacy' };
-  if (typeof timelineSection.config.title !== 'string' || !Array.isArray(timelineSection.config.milestones)) {
-    return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_TIMELINE', sectionKey: 'about.timeline', path: 'config', message: 'about.timeline requires title and milestones.' }], source: 'invalid' };
-  }
+
   const diagnostics: PageContentDiagnostic[] = [];
   const milestones: AboutTimelineMilestoneModel[] = [];
-  for (const [index, raw] of timelineSection.config.milestones.entries()) {
-    if (!isRecord(raw) || typeof raw.year !== 'string' || typeof raw.description !== 'string') return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_TIMELINE', sectionKey: 'about.timeline', path: `config.milestones[${index}]`, message: 'Timeline milestones require string year and description fields.' }], source: 'invalid' };
-    const persisted = typeof raw.id === 'string' && raw.id.length > 0;
-    if (!persisted) diagnostics.push({ code: 'UNPERSISTED_ABOUT_TIMELINE_ID', sectionKey: 'about.timeline', path: `config.milestones[${index}].id`, message: 'Timeline milestone identity is not persisted.' });
-    milestones.push({ id: persisted ? raw.id as string : `unpersisted-about-timeline-${index + 1}`, year: raw.year, description: raw.description });
+  const rawMilestones = Array.isArray(timelineSection.config.milestones) ? timelineSection.config.milestones : [];
+  for (const [index, raw] of rawMilestones.entries()) {
+    if (isRecord(raw) && typeof raw.year === 'string' && typeof raw.description === 'string') {
+      const persisted = typeof raw.id === 'string' && raw.id.length > 0;
+      if (!persisted) diagnostics.push({ code: 'UNPERSISTED_ABOUT_TIMELINE_ID', sectionKey: 'about.timeline', path: `config.milestones[${index}].id`, message: 'Timeline milestone identity is not persisted.' });
+      milestones.push({ id: persisted ? raw.id as string : `unpersisted-about-timeline-${index + 1}`, year: raw.year, description: raw.description });
+    }
   }
-  const { title, subtitle, vision, mission, coreValues: rawCoreValues } = strategySection.config;
-  if ([title, subtitle, vision, mission].some((value) => typeof value !== 'string') || !Array.isArray(rawCoreValues)) return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_STRATEGY', sectionKey: 'about.strategy', path: 'config', message: 'about.strategy requires string copy and a coreValues array.' }], source: 'invalid' };
+
+  const timelineTitle = typeof timelineSection.config.title === 'string' && timelineSection.config.title.trim()
+    ? timelineSection.config.title.trim()
+    : input.legacyFallback.timeline.title;
+  const finalMilestones = milestones.length > 0 ? milestones : input.legacyFallback.timeline.milestones;
+
+  const stratCfg = strategySection.config;
+  const title = typeof stratCfg.title === 'string' && stratCfg.title.trim() ? stratCfg.title.trim() : input.legacyFallback.strategy.title;
+  const subtitle = typeof stratCfg.subtitle === 'string' && stratCfg.subtitle.trim() ? stratCfg.subtitle.trim() : input.legacyFallback.strategy.subtitle;
+  const vision = typeof stratCfg.vision === 'string' && stratCfg.vision.trim() ? stratCfg.vision.trim() : input.legacyFallback.strategy.vision;
+  const mission = typeof stratCfg.mission === 'string' && stratCfg.mission.trim() ? stratCfg.mission.trim() : input.legacyFallback.strategy.mission;
+
   const coreValues: AboutStrategyCoreValueModel[] = [];
+  const rawCoreValues = Array.isArray(stratCfg.coreValues) ? stratCfg.coreValues : [];
   for (const [index, raw] of rawCoreValues.entries()) {
-    if (!isRecord(raw) || typeof raw.value !== 'string') return { content: input.legacyFallback, diagnostics: [{ code: 'INVALID_ABOUT_STRATEGY', sectionKey: 'about.strategy', path: `config.coreValues[${index}]`, message: 'Core values require an object with a string value.' }], source: 'invalid' };
-    const persisted = typeof raw.id === 'string' && raw.id.length > 0;
-    if (!persisted) diagnostics.push({ code: 'UNPERSISTED_ABOUT_CORE_VALUE_ID', sectionKey: 'about.strategy', path: `config.coreValues[${index}].id`, message: 'Core value identity is not persisted.' });
-    coreValues.push({ id: persisted ? raw.id as string : `unpersisted-about-core-value-${index + 1}`, value: raw.value });
+    if (isRecord(raw) && typeof raw.value === 'string') {
+      const persisted = typeof raw.id === 'string' && raw.id.length > 0;
+      if (!persisted) diagnostics.push({ code: 'UNPERSISTED_ABOUT_CORE_VALUE_ID', sectionKey: 'about.strategy', path: `config.coreValues[${index}].id`, message: 'Core value identity is not persisted.' });
+      coreValues.push({ id: persisted ? raw.id as string : `unpersisted-about-core-value-${index + 1}`, value: raw.value });
+    }
   }
-  return { content: { timeline: { title: timelineSection.config.title, milestones }, strategy: { title: title as string, subtitle: subtitle as string, vision: vision as string, mission: mission as string, coreValues } }, diagnostics, source: 'page-builder' };
+  const finalCoreValues = coreValues.length > 0 ? coreValues : input.legacyFallback.strategy.coreValues;
+
+  return {
+    content: {
+      timeline: { title: timelineTitle, milestones: finalMilestones },
+      strategy: { title, subtitle, vision, mission, coreValues: finalCoreValues },
+    },
+    diagnostics,
+    source: 'page-builder',
+  };
 }
 
 function resolveContactPage(input: ResolveContactPageContentInput): ResolvedContactPageContent {

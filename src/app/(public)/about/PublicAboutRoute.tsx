@@ -25,7 +25,7 @@ export function PublicAboutRoute({
   const router = useRouter();
 
   const handleTabChange = (tab: 'overview' | 'structure' | 'experience') => {
-    if (tab === 'overview') router.push('/about');
+    if (tab === 'overview') router.push('/gioi-thieu');
     else if (tab === 'structure') router.push('/gioi-thieu/co-cau-to-chuc');
     else if (tab === 'experience') router.push('/gioi-thieu/nang-luc-kinh-nghiem');
   };

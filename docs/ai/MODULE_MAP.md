@@ -15,7 +15,7 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 | Status | Domain/module | Public surface | Persistence/CMS owner | Hard dependency | Soft/integration dependency | Hiện trạng quan sát |
 |---|---|---|---|---|---|---|
 | `[A]` | Home | `/`, hero, ecosystem, highlights, stats | Static Pages/Page Builder, config | public shell; published page/config read model | products, services, projects, news, events, partners, CTA | Next route dùng legacy presentation/content adapter; integration còn mixed |
-| `[A]` | About/company/partners | `/about` | Static Pages, config, media | public shell; published about/config | partners/map assets, awards, contact | Next route có read boundary; parity/integration chưa chứng minh |
+| `[I]` | About/company/partners | `/about`, `/gioi-thieu/*` | Static Pages/Page Builder | public shell; published about snapshot | products, services, media, partner assets, awards | Hoàn tất core implementation 2026-09-16: Tạo `aboutResolver.ts` map đủ 8 sections (about), 2 sections (organization), 4 sections (capacity_experience) từ DB với fail-safe fallback; Chuẩn hóa route `/gioi-thieu` (slug DB) và redirect 301 từ `/about`; Đồng bộ Visual Canvas CMS; Server action revalidate; Soft integration: các liên kết external flipbook PDF và form tư vấn popup |
 | `[I]` | Products | `/products`, `/products/[slug]` | Products + Product Settings | product schema/query/mapper; taxonomy; media; published visibility | projects, services, CTA/forms, SEO | Core DB-backed: published list/detail, gallery/files/relations; CTA submission còn integration pending |
 | `[I]` | Services | `/services`, `/services/[slug]` | Services | service schema/query/mapper; media; published visibility | products, projects, contacts, SEO | Core DB-backed: danh sách, chi tiết, quan hệ sản phẩm, form tư vấn nối submitCustomerInteractionAction thật vào DB; SEO/public EN routing còn pending |
 | `[I]` | Projects | `/projects`, `/projects/[slug]` | Projects | project schema/query/mapper; media; published visibility | products, services, CTA, SEO | Core DB-backed: danh sách studio portfolio 2 cột bất đối xứng 7-5/5-7, chi tiết 8/4, factsheet, công nghệ, quan hệ sản phẩm & dịch vụ, 3 dự án liên quan cùng sector, consultation modal; public EN routing còn pending |
@@ -150,6 +150,98 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 - **Q. Kết luận Audit:**
   - Module Trang chủ và Page Builder Trang chủ: **READY_TO_UNBLOCK_AND_IMPLEMENT**.
   - Không có rủi ro phá vỡ schema database do schema `cic_content_pages*` đã sẵn sàng.
+
+
+### Audit Nhóm trang Giới thiệu và Page Builder của chúng — 2026-09-16
+
+- **A. Scope & Boundaries:**
+  - Nhóm 3 trang thông tin doanh nghiệp cố định thuộc hệ thống (`system_defined = true`) cho cả 2 workspace:
+    1. **Giới thiệu chung (About Us)**: VI ID 2 (`code: 'about'`, `slug: '/gioi-thieu'`), EN ID 8 (`code: 'about'`, `slug: '/about'`). Gồm 8 sections: `about.hero`, `about.overview`, `about.timeline`, `about.strategy`, `about.offerings`, `about.awards`, `about.partners`, `about.contact_cta`.
+    2. **Cơ cấu tổ chức (Organization Structure)**: VI ID 3 (`code: 'organization'`, `slug: '/gioi-thieu/co-cau-to-chuc'`), EN ID 9 (`code: 'organization'`, `slug: '/about/organization'`). Gồm 2 sections: `about.hero`, `about.organization`.
+    3. **Năng lực & Kinh nghiệm (Capacity & Experience)**: VI ID 4 (`code: 'capacity_experience'`, `slug: '/gioi-thieu/nang-luc-kinh-nghiem'`), EN ID 10 (`code: 'capacity_experience'`, `slug: '/about/capacity-experience'`). Gồm 4 sections: `about.hero`, `about.capacity`, `about.experience`, `about.contact_cta`.
+  - Giới hạn: Nhóm trang Giới thiệu là trang trình bày tĩnh và tổng hợp thông tin thể chế doanh nghiệp; sơ đồ tổ chức là code-owned SVG; hồ sơ năng lực liên kết flipbook PDF bên ngoài; các đối tác/sản phẩm tham chiếu từ các module nguồn tương ứng.
+
+- **B. UI Reference Map (React Legacy & Presentation):**
+  - Component trình chiếu cốt lõi: `src/web/components/AboutView.tsx` (888 dòng) bọc dưới dạng 1 shell tabbed 3 view (`overview`, `structure`, `experience`):
+    1. **Banner chung (`about.hero`)**: Background image + video loop hòa trộn lớp phủ tối, badge "Về chúng tôi", tiêu đề lớn (Hơn 35 năm nhịp bước cùng công nghệ) và đoạn dẫn phụ đề.
+    2. **Tab 1: Tổng quan doanh nghiệp (`overview`)**:
+       - `about.overview`: Tiêu đề, 3 đoạn văn giới thiệu lịch sử hình thành (1990 thuộc Bộ Xây dựng -> VC Group), khung video nhúng YouTube (`https://www.youtube.com/embed/hdLFK_09-tU?start=448`).
+       - `about.timeline`: Trục thời gian 5 cột mốc lớn (1990, 2000, 2006, 2019, 2025).
+       - `about.strategy`: Định hướng chiến lược, ảnh banner minh họa, 3 khối card: Sứ mệnh, Tầm nhìn, 5 Giá trị cốt lõi.
+       - `about.offerings`: "Sản phẩm và dịch vụ cung cấp", lưới 7 card nghiệp vụ (Phần mềm xây dựng, Phần mềm ngoại nhập, Thiết bị công nghệ, Tư vấn XD, BIM/Digital Twins, Công nghệ thông minh, Phát triển bền vững).
+       - `about.awards`: "Thành tựu & Giải thưởng", slider chứng nhận/huân chương (Huân chương Lao động hạng Ba, Bằng khen Thủ tướng, Sao Khuê, Sao Vàng Đất Việt, VIFOTEC).
+       - `about.partners`: "Đối tác chiến lược & Khách hàng tiêu biểu", Bento grid 4 ảnh album hoạt động đối tác + dải marquee logo đối tác vô tận.
+    3. **Tab 2: Cơ cấu tổ chức (`structure`)**:
+       - `about.organization`: Sơ đồ cây tổ chức trực quan dạng vector SVG kích thước 1600x560 (Đại hội đồng cổ đông -> HĐQT & Ban kiểm soát -> TGĐ & 2 PTGĐ -> 2 Phòng ban hành chính giữa -> 3 Trung tâm nghiệp vụ kỹ thuật -> 5 Đơn vị/Chi nhánh cấp cơ sở).
+    4. **Tab 3: Năng lực & Kinh nghiệm (`experience`)**:
+       - `about.capacity`: Tiêu đề lớn "Tiềm lực vững vàng, vươn tầm quốc tế", mô tả quy mô, 4 chỉ số KPI năng lực (150+ Nhân sự, 100+ Đối tác toàn cầu, 5.000+ Dự án, 35+ Năm kinh nghiệm).
+       - `about.experience`: 3 trụ cột năng lực kèm ảnh (Nhân lực chất lượng cao, Đối tác chiến lược, Xu hướng công nghệ) + Bản đồ mạng lưới đối tác toàn cầu `<GlobalPartnerMap />`.
+       - `about.contact_cta`: Nút bấm "Hồ sơ năng lực (Profile)" dẫn tới flipbook PDF (`https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf`).
+
+- **C. Next.js Hiện trạng & Kiến trúc Routing:**
+  - Tuyến đường công khai:
+    - `/about`: Route Next.js tại `src/app/(public)/about/page.tsx` nạp `getPublicStaticPage('vi', 'about')`, chạy qua `resolvePageContent({ pageType: 'about' })`, render `<PublicAboutRoute activeTab="overview" />`.
+    - `/gioi-thieu/co-cau-to-chuc`: Route tại `src/app/(public)/gioi-thieu/co-cau-to-chuc/page.tsx` nạp `getPublicStaticPage('vi', 'organization')`, render `<PublicAboutRoute activeTab="structure" />`.
+    - `/gioi-thieu/nang-luc-kinh-nghiem`: Route tại `src/app/(public)/gioi-thieu/nang-luc-kinh-nghiem/page.tsx` nạp `getPublicStaticPage('vi', 'capacity_experience')`, render `<PublicAboutRoute activeTab="experience" />`.
+  - **Phát hiện xung đột & khiếm khuyết kiến trúc nghiêm trọng:**
+    1. **Xung đột định tuyến (Routing Conflict)**: Trong DB `cic_content_pages`, Page 2 có slug là `/gioi-thieu`. Nhưng Next.js chỉ có route file `/about/page.tsx` mà KHÔNG có route `/gioi-thieu/page.tsx`. Khi người dùng truy cập `/gioi-thieu`, route động `[slug]/page.tsx` bắt lấy slug này và render nhầm thành `<PublicLegalPageView categoryTag="Pháp lý & Chính sách" />`!
+    2. **Xung đột điều hướng tab**: `PublicAboutRoute.tsx` điều hướng tab `overview` về `/about`, nhưng tab `structure` và `experience` lại điều hướng về subpath của `/gioi-thieu` (`/gioi-thieu/co-cau-to-chuc` và `/gioi-thieu/nang-luc-kinh-nghiem`).
+    3. **Lỗi Revalidation khi Publish**: Trong `actions.ts`, khi xuất bản trang 2, hàm revalidate theo `result.slug` (`/gioi-thieu`), do đó trang thật `/about` không hề được revalidate.
+    4. **Resolver phân mảnh (Fragmented Resolver)**: `src/shared/page-content/resolvePageContent.ts` chỉ parse 2 section là `about.timeline` và `about.strategy`. Cả 6 sections còn lại (`about.hero`, `about.overview`, `about.offerings`, `about.awards`, `about.partners`, `about.contact_cta`) bị bỏ qua hoàn toàn, buộc `AboutView.tsx` phải tự đọc sống từ `configFor()` nội bộ.
+    5. **Visual Canvas thiếu props**: Tại `WebsitePageRenderer.tsx`, khi `pageType === 'organization'` và `pageType === 'capacity_experience'`, component không hề truyền prop `pageSections={page.draft.sections}` vào `AboutView`, khiến canvas không thể hiển thị cấu hình draft của `about.hero` trên các trang này.
+    6. **Offerings bị ngắt kết nối**: `pageBuilderRegistry.ts` khai báo `referenceLimit: { product: 2, service: 4 }` cho `about.offerings`, nhưng `AboutView.tsx` lại render cứng (hardcoded) 7 cards giải pháp cố định, không nhận sản phẩm/dịch vụ tham chiếu.
+
+- **D. Database Schema & Data Thật (PostgreSQL / Supabase):**
+  - Bảng core:
+    - `cic_content_pages`: 6 trang thuộc nhóm Giới thiệu (VI ID 2, 3, 4; EN ID 8, 9, 10) đều đã được seed với `system_defined = true`, `draft_revision_id` trỏ đúng revision nháp, `published_revision_id = NULL`.
+    - `cic_content_page_revisions`: 6 revisions (ID 2, 3, 4, 8, 9, 10) đều ở trạng thái `state = 'draft'`, `version_number = 1`.
+    - `cic_content_page_sections`:
+      - Trang 2 & 8 (`about`): 8 sections, toàn bộ config hiện là rỗng (`{}` hoặc `{ milestones: [] }`, `{ coreValues: [] }`, `{ items: [] }`).
+      - Trang 3 & 9 (`organization`): 2 sections (`about.hero`, `about.organization` với config `{ imageId: null }`).
+      - Trang 4 & 10 (`capacity_experience`): 4 sections (`about.hero`, `about.capacity` với `{ metrics: [] }`, `about.experience`, `about.contact_cta`).
+    - `cic_content_page_section_references`: 0 bản ghi cho toàn bộ nhóm trang Giới thiệu.
+  - Dữ liệu lịch sử legacy (`cic_contents`):
+    - ID 1: "Giới thiệu CIC" (`alias: 'gioi-thieu'`, `category_id: 1`, 15KB HTML bài viết năm 2019).
+    - ID 2: "Cơ cấu tổ chức" (`alias: 'co-cau-to-chuc'`, 177 bytes HTML chứa đường dẫn ảnh sơ đồ cũ).
+    - ID 3: "Năng lực và kinh nghiệm" (`alias: 'nang-luc-va-kinh-nghiem'`, 120KB HTML chứa văn bản năng lực và bảng biểu).
+    - ID 4: "Một số thành tựu đạt được" (Hình ảnh bằng khen, giải thưởng).
+    - ID 13: "HỒ SƠ NĂNG LỰC" (Chứa link flipbook PDF `CICProfile2024Final.pdf`).
+  - Phân loại import legacy theo `manifest.ts`: Toàn bộ các bản ghi trên đều được xếp loại `PARTIAL_REFERENCE` (chỉ dùng tham khảo nội dung/ảnh để biên tập vào sections cấu trúc, tuyệt đối không nhồi HTML thô vào Page Builder).
+
+- **E. Field Contract & Governance trong Page Builder Registry:**
+  - `about.hero`: `title` (text, editable), `subtitle` (text, editable), `backgroundImageId` (media image, editable).
+  - `about.overview`: `title` (text, editable), `videoUrl` (media video, editable).
+  - `about.timeline`: `title` (text, editable), `description` (text, editable), `milestones` (collection: `year`, `description` editable; `reorder/add/remove` blocked).
+  - `about.strategy`: `title`, `subtitle`, `vision`, `mission`, `coreValues` (collection: `value` editable; `reorder/add/remove` blocked), `imageId` (media, editable).
+  - `about.offerings`: `title`, `subtitle` (editable). Cần liên kết thực tế với `product` (tối đa 2) và `service` (tối đa 4).
+  - `about.awards`: `title`, `subtitle`, `items` (collection: `name`, `imageId` editable; `reorder/add/remove` enabled).
+  - `about.partners`: `title`, `subtitle`, `description`, `items` (collection: `name`, `imageId` editable; `reorder/add/remove` enabled).
+  - `about.organization`: `blockedContract` (code-owned SVG topology diagram; bảo lưu kiến trúc SVG trong code).
+  - `about.capacity`: `description` (text, editable), `metrics` (collection: `value`, `label` editable; `reorder/add/remove` blocked; `title` blocked vì representation mismatch).
+  - `about.experience`: `blockedContract` (3 khối trụ cột năng lực + GlobalPartnerMap).
+  - `about.contact_cta`: `blockedContract` (nút liên kết tải Hồ sơ năng lực PDF).
+
+- **F. Dependencies & Quyền hạn:**
+  - Hard: RBAC task `static_pages` (id 90, capabilities: `view,edit,preview,publish,create_legal`), `cic_content_pages*`, Media foundation.
+  - Soft: `cic_products`, `cic_services` (cho section offerings), Thư viện Media (cho logo đối tác, bằng khen, banner).
+
+- **G. Khuyến nghị chuẩn bị trước khi Implementation / Migration:**
+  1. **Thống nhất URL Slug**: Cần quyết định chuẩn hóa slug trang Giới thiệu tiếng Việt là `/gioi-thieu` (đồng bộ với DB và subpages `/gioi-thieu/co-cau-to-chuc`, `/gioi-thieu/nang-luc-kinh-nghiem`) hoặc đổi DB slug thành `/about`. Đồng thời bổ sung route hoặc redirect `/gioi-thieu` để không rơi vào `[slug]/page.tsx` (tránh bị hiển thị nhầm thành trang pháp lý).
+  2. **Hoàn thiện Resolver `aboutResolver`**: Tách logic resolve nhóm Giới thiệu thành resolver độc lập, map đầy đủ cả 8 sections thay vì chỉ có 2 section như hiện tại.
+  3. **Truyền `pageSections` vào Visual Canvas**: Đảm bảo `WebsitePageRenderer` truyền đủ `pageSections` cho cả 3 trang để xem trước chính xác.
+  4. **Giữ nguyên sơ đồ tổ chức SVG**: Sơ đồ tổ chức đã được thiết kế tinh xảo dưới dạng SVG responsive sắc nét, tiếp tục duy trì dưới dạng code-owned contract.
+
+- **Q. Kết luận Audit:**
+  - Nhóm trang Giới thiệu và Page Builder của chúng: **AUDITED & CLEARLY_SCOPED**.
+  - Đã làm rõ toàn bộ nguồn dữ liệu, contract section, quan hệ database và các điểm nghẽn kiến trúc trước khi bước vào giai đoạn implementation.
+
+- **Implementation 2026-09-16:**
+  - **Data Layer & Resolver**: Xây dựng `src/features/static-pages/server/aboutResolver.ts` query từ PostgreSQL database thật (`getPublicPublishedPage`), phân giải đầy đủ 8 sections (Trang 2 Giới thiệu), 2 sections (Trang 3 Cơ cấu tổ chức), 4 sections (Trang 4 Năng lực & Kinh nghiệm). Kèm theo fail-safe fallback sang `getLegacyAboutPageContent()` và `getLegacyAboutCapacityContent()` nếu DB chưa publish hoặc config rỗng.
+  - **Routing Alignment**: Tạo route chuẩn `src/app/(public)/gioi-thieu/page.tsx` đồng bộ với DB slug `/gioi-thieu`. Cấu hình redirect 301 từ `/about` về `/gioi-thieu`. Cập nhật `[slug]/page.tsx` loại trừ `/gioi-thieu` để không bị nhận nhầm thành Legal page. Cập nhật `PublicAboutRoute.tsx` điều hướng tab overview về `/gioi-thieu`. Cập nhật 2 subroutes `/gioi-thieu/co-cau-to-chuc` và `/gioi-thieu/nang-luc-kinh-nghiem` nạp data qua `aboutResolver.ts`.
+  - **CMS Visual Canvas Preview**: Cập nhật `WebsitePageRenderer.tsx` truyền đầy đủ `pageSections` và `resolveMediaUrl` cho cả 3 trang (`about`, `organization`, `capacity_experience`), đảm bảo xem trước WYSIWYG chính xác.
+  - **Cache Revalidation**: Cập nhật `actions.ts` revalidate đồng thời cả `/gioi-thieu` và `/about` khi publish trang.
+  - **Testing & Parity**: Xác minh HTTP 200/307, Typecheck pass 100%, giữ nguyên toàn bộ giao diện và SVG responsive. Trạng thái: `[I]`.
+
 
 
 ### Audit Cấu hình hệ thống — 2026-09-14

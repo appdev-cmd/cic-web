@@ -55,6 +55,10 @@ export async function publishPageAction(
       if (result.slug === '/') {
         revalidatePath('/', 'page');
       }
+      if (result.slug === '/gioi-thieu' || result.slug === '/about') {
+        revalidatePath('/gioi-thieu');
+        revalidatePath('/about');
+      }
     }
     return { success: true, data: result };
   } catch (err) {

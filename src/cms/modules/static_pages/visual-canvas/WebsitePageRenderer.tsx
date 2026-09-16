@@ -183,7 +183,17 @@ export function WebsitePage({
     );
   }
   if (page.pageType === 'organization') {
-    return <AboutView activeTab="structure" setActiveTab={noop} onNavigateToContact={noop} renderPolicy={{ motionEnabled: !editMode }} />;
+    return (
+      <AboutView 
+        activeTab="structure" 
+        setActiveTab={noop} 
+        onNavigateToContact={noop} 
+        renderPolicy={{ motionEnabled: !editMode }} 
+        bindingRegistry={bindingRegistry} 
+        pageSections={page.draft.sections} 
+        resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+      />
+    );
   }
   if (page.pageType === 'capacity_experience') {
     const resolved = resolvePageContent({
@@ -199,6 +209,8 @@ export function WebsitePage({
         capacityContent={resolved.content.capacity} 
         renderPolicy={{ motionEnabled: !editMode }} 
         bindingRegistry={bindingRegistry} 
+        pageSections={page.draft.sections} 
+        resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
       />
     );
   }

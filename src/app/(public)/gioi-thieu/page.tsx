@@ -5,19 +5,19 @@ import { PublicAboutRoute } from '@/app/(public)/about/PublicAboutRoute';
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const pageData = await getPublishedAboutPage('vi', 'organization');
+  const pageData = await getPublishedAboutPage('vi', 'about');
   return {
-    title: pageData.page.seoTitle || 'Cơ cấu tổ chức | CIC Technology',
-    description: pageData.page.seoDescription || 'Sơ đồ cơ cấu tổ chức và ban lãnh đạo Công ty CP Công nghệ và Tư vấn CIC.',
+    title: pageData.page.seoTitle || 'Về CIC Technology | Đối tác công nghệ chiến lược',
+    description: pageData.page.seoDescription || 'Tìm hiểu về lịch sử hình thành, tầm nhìn sứ mệnh và các cột mốc phát triển của CIC Technology.',
   };
 }
 
-export default async function OrganizationPage() {
-  const pageData = await getPublishedAboutPage('vi', 'organization');
+export default async function GioiThieuPage() {
+  const pageData = await getPublishedAboutPage('vi', 'about');
 
   return (
     <PublicAboutRoute
-      activeTab="structure"
+      activeTab="overview"
       pageSections={pageData.pageSections}
       aboutContent={pageData.aboutContent}
       capacityContent={pageData.capacityContent}
