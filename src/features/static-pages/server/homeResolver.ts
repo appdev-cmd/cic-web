@@ -221,7 +221,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
         entityId: `cic-project-${p.id}`,
         type: 'services' as const,
         name: p.title || '',
-        short: p.tagline || p.alias || p.title || '',
+        short: p.title || '',
         service: p.solution || 'Tư vấn kỹ thuật',
         client: p.customer_name ? `${p.customer_name}${p.location ? ` · ${p.location}` : ''}` : (p.location || ''),
         category: p.solution || p.sector || 'Dự án trọng điểm',

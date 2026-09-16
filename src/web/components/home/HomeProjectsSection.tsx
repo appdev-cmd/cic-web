@@ -282,7 +282,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                         {proj.category || (proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn')}
                       </div>
                       <h3 className="text-slate-900 font-black text-base leading-snug line-clamp-2 group-hover:text-orange-600 transition-colors">
-                        {proj.short || proj.name}
+                        {proj.name}
                       </h3>
                       <p className="text-slate-500 text-xs font-medium line-clamp-1 mt-1">
                         {proj.client || proj.location}

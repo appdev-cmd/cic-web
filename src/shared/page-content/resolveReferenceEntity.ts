@@ -61,7 +61,7 @@ export function resolveProjectEntity(entityId: string): HomeProjectModel | null 
       entityId: opt.id,
       type: 'services' as const,
       name: opt.label,
-      short: meta.summary || opt.label,
+      short: opt.label,
       service: meta.category || 'Tư vấn kỹ thuật',
       client: meta.client ? `Khách hàng · ${meta.client}` : (meta.location ? `Khách hàng · ${meta.location}` : 'Đối tác'),
       category: meta.category || 'Dự án trọng điểm',
