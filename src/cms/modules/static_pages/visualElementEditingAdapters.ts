@@ -15,9 +15,8 @@ const adapters: readonly PageBuilderVisualElementEditingAdapter[] = [
 ];
 const adapterBySectionKey = new Map(adapters.map((adapter) => [adapter.sectionKey, adapter]));
 
-export const directEditingSectionKeys = new Set([
-  ...adapterBySectionKey.keys(),
-]);
+// Unify inline editing: allow canvasDomInjector to run across all sections uniformly (matching Home page logic)
+export const directEditingSectionKeys = new Set<string>();
 
 export function resolveVisualElementEdit(
   sections: readonly PageBuilderSection[],

@@ -300,7 +300,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                 return;
               }
 
-              if (mode === 'edit' && target.closest('[data-ve-editable="true"], [data-ve-semantic~="reference-item"]')) return;
+              if (mode === 'edit' && target.closest('[data-ve-semantic~="reference-item"]')) return;
               const sectionNode = target.closest<HTMLElement>('[data-page-builder-section-id]');
               if (!sectionNode) {
                 onSelect('');
@@ -316,7 +316,7 @@ export const PageBuilderVisualCanvas: React.FC<PageBuilderVisualCanvasProps> = (
                 return;
               }
               event.stopPropagation();
-              if (!target.closest('[data-page-builder-inline-edit]')) event.preventDefault();
+              if (!target.closest('[data-page-builder-inline-edit], [contenteditable="true"], [data-ve-editable="true"]')) event.preventDefault();
             }}
           >
             <WebsitePage

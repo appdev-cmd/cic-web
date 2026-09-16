@@ -1202,6 +1202,23 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       }
     });
 
+    sectionRoot.querySelectorAll<HTMLElement>('[data-page-builder-config-path], [data-ve-element]').forEach((node) => {
+      let path: Array<string | number> = [];
+      if (node.dataset.pageBuilderConfigPath) {
+        try { path = JSON.parse(node.dataset.pageBuilderConfigPath) as Array<string | number>; } catch {}
+      } else if (node.dataset.veElement && node.dataset.veEditable === 'true') {
+        path = node.dataset.veElement.split('.').map((p) => /^\d+$/.test(p) ? Number(p) : p);
+      }
+      if (!path.length) return;
+      claimed.add(node);
+      node.dataset.pageBuilderInlineEdit = path.join('-');
+      if (onTextChange) {
+        node.contentEditable = 'true';
+        node.setAttribute('role', 'textbox');
+        node.style.cursor = 'text';
+      }
+    });
+
     let mediaId = typeof section.config.imageId === 'string' ? section.config.imageId : typeof section.config.backgroundImageId === 'string' ? section.config.backgroundImageId : '';
     if (section.sectionKey === 'home.hero' && Array.isArray(section.config.slides)) {
       const slideIndex = Math.min(activeHeroSlide, Math.max(0, section.config.slides.length - 1));
@@ -1267,8 +1284,13 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       });
     });
 
-    selectedSectionRoot.querySelectorAll<HTMLElement>('[data-page-builder-config-path]').forEach((node) => {
-      const path = JSON.parse(node.dataset.pageBuilderConfigPath ?? '[]') as Array<string | number>;
+    selectedSectionRoot.querySelectorAll<HTMLElement>('[data-page-builder-config-path], [data-ve-element]').forEach((node) => {
+      let path: Array<string | number> = [];
+      if (node.dataset.pageBuilderConfigPath) {
+        try { path = JSON.parse(node.dataset.pageBuilderConfigPath) as Array<string | number>; } catch {}
+      } else if (node.dataset.veElement && node.dataset.veEditable === 'true') {
+        path = node.dataset.veElement.split('.').map((p) => /^\d+$/.test(p) ? Number(p) : p);
+      }
       const value = configValueAtPath(selectedSection.config, path);
       if (!path.length || (value !== undefined && typeof value !== 'string' && typeof value !== 'number')) return;
       claimed.add(node);
@@ -1278,18 +1300,32 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.style.cursor = 'text';
       node.style.outline = '1px dashed rgb(249 115 22 / 0.65)';
       node.style.outlineOffset = '3px';
-      const update = () => onConfigValueChange?.(selectedSection.id, path, typeof value === 'number' ? Number(node.textContent?.trim() ?? 0) : node.textContent?.trim() ?? '');
+      node.style.borderRadius = '3px';
+      const showOutline = () => { node.style.outline = '2px solid rgb(249 115 22 / .82)'; };
+      const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = '1px dashed rgb(249 115 22 / 0.65)'; };
+      const update = () => {
+        const nextVal = typeof value === 'number' ? Number(node.textContent?.trim() ?? 0) : node.textContent?.trim() ?? '';
+        if (onConfigValueChange) onConfigValueChange(selectedSection.id, path, nextVal);
+        else if (onTextChange && typeof nextVal === 'string') onTextChange(selectedSection.id, path, nextVal);
+      };
       const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); node.blur(); } };
       node.addEventListener('blur', update);
       node.addEventListener('keydown', onKeyDown);
+      node.addEventListener('mouseenter', showOutline);
+      node.addEventListener('mouseleave', hideOutline);
+      node.addEventListener('focus', showOutline);
       actionCleanups.push(() => { 
         node.removeEventListener('blur', update); 
         node.removeEventListener('keydown', onKeyDown);
+        node.removeEventListener('mouseenter', showOutline);
+        node.removeEventListener('mouseleave', hideOutline);
+        node.removeEventListener('focus', showOutline);
         node.removeAttribute('contenteditable'); 
         node.removeAttribute('role'); 
         node.style.cursor = ''; 
         node.style.outline = ''; 
         node.style.outlineOffset = ''; 
+        node.style.borderRadius = '';
       });
     });
 

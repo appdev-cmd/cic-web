@@ -206,7 +206,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   return (
     <div className="bg-transparent min-h-screen relative pt-0">
       {/* Visual Top Hero Banner */}
-      <section data-page-builder-section-key="about.hero" className="relative pt-24 pb-14 lg:pt-32 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
+      <section data-page-builder-section-key="about.hero" className="relative pt-10 pb-12 lg:pt-14 lg:pb-16 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <img
             data-page-builder-media-path={JSON.stringify(['backgroundImageId'])}
@@ -235,11 +235,19 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
             </span>
           </div>
           
-          <h1 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-3 lg:mb-4 tracking-tighter max-w-full mx-auto [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]">
+          <h1 
+            {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} 
+            data-page-builder-config-path={JSON.stringify(['title'])}
+            className="text-[4.5vw] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-[1.3] mb-3 lg:mb-4 tracking-tighter max-w-full mx-auto [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]"
+          >
             {textFrom(heroConfig, 'title', 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ')}
           </h1>
 
-          <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]">
+          <p 
+            {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.hero', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))} 
+            data-page-builder-config-path={JSON.stringify(['subtitle'])}
+            className="text-slate-100 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)]"
+          >
             {textFrom(heroConfig, 'subtitle', 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.')}
           </p>
         </div>
@@ -335,7 +343,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   <div className="w-full relative z-10">
                     <SectionHeader
                       title={textFrom(overviewConfig, 'title', 'Tổng quan doanh nghiệp')}
-                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      titleProps={{
+                        ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['title']),
+                      } as any}
                     />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                       <div>
@@ -368,8 +379,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                         <span className={`w-2 h-2 rounded-full bg-orange-600 ${renderPolicy.motionEnabled ? 'animate-pulse' : ''}`}></span>
                         <span className="text-[10px] font-black uppercase tracking-widest">Hành trình 35 năm</span>
                       </div>
-                      <h2 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">{aboutContent.timeline.title}</h2>
-                      <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-500 max-w-2xl mx-auto text-sm">{textFrom(configFor('about.timeline'), 'description', 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.')}</p>
+                      <h2 
+                        {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} 
+                        data-page-builder-config-path={JSON.stringify(['title'])}
+                        className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900"
+                      >{aboutContent.timeline.title}</h2>
+                      <p 
+                        {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} 
+                        data-page-builder-config-path={JSON.stringify(['description'])}
+                        className="text-slate-500 max-w-2xl mx-auto text-sm"
+                      >{textFrom(configFor('about.timeline'), 'description', 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.')}</p>
                     </div>
 
                     <div className="relative max-w-6xl mx-auto px-4 mt-4 md:mt-6">
@@ -387,8 +406,16 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                             
                             {/* Content */}
                             <div className="w-full flex flex-col items-center md:-mt-4">
-                              <h3 {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} className="text-3xl font-black text-slate-900 tracking-tighter mb-2">{item.year}</h3>
-                              <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} className="text-slate-600 text-sm leading-relaxed">{item.description}</p>
+                              <h3 
+                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} 
+                                data-page-builder-config-path={JSON.stringify(['milestones', index, 'year'])}
+                                className="text-3xl font-black text-slate-900 tracking-tighter mb-2"
+                              >{item.year}</h3>
+                              <p 
+                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'milestones' }))} 
+                                data-page-builder-config-path={JSON.stringify(['milestones', index, 'description'])}
+                                className="text-slate-600 text-sm leading-relaxed"
+                              >{item.description}</p>
                             </div>
                           </div>;
                         })}
@@ -403,8 +430,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <SectionHeader 
                       title={aboutContent.strategy.title}
                       sub={aboutContent.strategy.subtitle}
-                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
-                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      titleProps={{
+                        ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['title']),
+                      } as any}
+                      subProps={{
+                        ...bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['subtitle']),
+                      } as any}
                     />
                     
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -423,7 +456,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           </div>
                           <div>
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">Sứ mệnh</h3>
-                            <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'mission', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{aboutContent.strategy.mission}</p>
+                            <p 
+                              {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'mission', semantic: 'text', ownership: 'section-config', editable: true }))} 
+                              data-page-builder-config-path={JSON.stringify(['mission'])}
+                              className="text-slate-600 leading-relaxed text-sm md:text-base"
+                            >{aboutContent.strategy.mission}</p>
                           </div>
                         </div>
 
@@ -434,7 +471,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           </div>
                           <div>
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-2">Tầm nhìn</h3>
-                            <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'vision', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{aboutContent.strategy.vision}</p>
+                            <p 
+                              {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'vision', semantic: 'text', ownership: 'section-config', editable: true }))} 
+                              data-page-builder-config-path={JSON.stringify(['vision'])}
+                              className="text-slate-600 leading-relaxed text-sm md:text-base"
+                            >{aboutContent.strategy.vision}</p>
                           </div>
                         </div>
 
@@ -450,7 +491,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                                 const itemPath = createCollectionItemPath('coreValues', item.id);
                                 return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'coreValues' }))} key={item.id ? `cv-${item.id}-${index}` : `core-val-${index}`} className="flex items-center gap-3">
                                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></div>
-                                  <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'coreValues' }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{item.value}</span>
+                                  <span 
+                                    {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'coreValues' }))} 
+                                    data-page-builder-config-path={JSON.stringify(['coreValues', index, 'value'])}
+                                    className="text-slate-600 leading-relaxed text-sm md:text-base"
+                                  >{item.value}</span>
                                 </div>;
                               })}
                             </div>
@@ -467,8 +512,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <SectionHeader 
                       title={textFrom(offeringsConfig, 'title', 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP')}
                       sub={textFrom(offeringsConfig, 'subtitle', 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi')}
-                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.offerings', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
-                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.offerings', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      titleProps={{
+                        ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.offerings', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['title']),
+                      } as any}
+                      subProps={{
+                        ...bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.offerings', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['subtitle']),
+                      } as any}
                     />
 
                     <div
@@ -507,8 +558,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <SectionHeader 
                       title={textFrom(awardsConfig, 'title', 'Thành tựu & Giải thưởng')}
                       sub={textFrom(awardsConfig, 'subtitle', 'Minh chứng cho nỗ lực không ngừng nghỉ')}
-                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
-                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      titleProps={{
+                        ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['title']),
+                      } as any}
+                      subProps={{
+                        ...bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.awards', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['subtitle']),
+                      } as any}
                     />
                     <div className="text-center mt-6 mb-12">
                       <p className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify">
@@ -527,12 +584,22 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <SectionHeader 
                       title={textFrom(partnersConfig, 'title', 'Đối tác chiến lược & Khách hàng tiêu biểu')}
                       sub={textFrom(partnersConfig, 'subtitle', 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới')}
-                      titleProps={bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))}
-                      subProps={bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true }))}
+                      titleProps={{
+                        ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['title']),
+                      } as any}
+                      subProps={{
+                        ...bindElement<HTMLParagraphElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'subtitle', semantic: 'text', ownership: 'section-config', editable: true })),
+                        'data-page-builder-config-path': JSON.stringify(['subtitle']),
+                      } as any}
                     />
                     
                     <div className="text-center mt-6 mb-12">
-                      <p {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify">
+                      <p 
+                        {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.partners', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} 
+                        data-page-builder-config-path={JSON.stringify(['description'])}
+                        className="text-sm md:text-base text-slate-600 max-w-4xl mx-auto leading-relaxed font-normal text-justify"
+                      >
                         {textFrom(partnersConfig, 'description', 'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.')}
                       </p>
                     </div>
@@ -846,6 +913,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     {...bindElementRuntime<HTMLHeadingElement>(createElementBinding({
                       sectionKey: 'about.capacity', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true,
                     }), bindingRegistry)}
+                    data-page-builder-config-path={JSON.stringify(['title'])}
                     className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight"
                   >
                     {textFrom(configFor('about.capacity'), 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế')}
@@ -855,6 +923,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     {...bindElementRuntime<HTMLParagraphElement>(createElementBinding({
                       sectionKey: 'about.capacity', elementPath: 'description', semantic: 'text', ownership: 'embedded', editable: true,
                     }), bindingRegistry)}
+                    data-page-builder-config-path={JSON.stringify(['description'])}
                     className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl"
                   >
                     {capacityContent.description}
@@ -879,12 +948,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                             sectionKey: 'about.capacity', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
                           }), bindingRegistry)}
+                          data-page-builder-config-path={JSON.stringify(['metrics', index, 'value'])}
                           className="text-3xl md:text-4xl font-black text-orange-600 mb-2"
                         >{metric.value}</div>
                         <div
                           {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                             sectionKey: 'about.capacity', elementPath: `${itemPath}.label`, semantic: 'text', ownership: 'embedded', editable: true, itemId: metric.id, collectionPath: 'metrics',
                           }), bindingRegistry)}
+                          data-page-builder-config-path={JSON.stringify(['metrics', index, 'label'])}
                           className="text-xs md:text-sm font-bold text-slate-600 uppercase"
                         >{metric.label}</div>
                       </div>;

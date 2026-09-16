@@ -64,11 +64,21 @@ export const Header = ({
   const { headerLinks: navLinks } = getNavigationData();
   const resolvePublicHref = (href: string) => href.startsWith('/') ? href : `/services/${href.replace(/^\/+/, '')}`;
   const routeSegment = pathname?.split('/').filter(Boolean)[0];
-  const currentView = legacyCurrentView ?? (
-    routeSegment && ['products', 'about', 'services', 'projects', 'news', 'events', 'contact', 'privacy', 'terms', 'search'].includes(routeSegment)
-      ? routeSegment as Exclude<NonNullable<HeaderProps['currentView']>, 'not-found'>
-      : 'home'
-  );
+  const viewFromSegment = (segment?: string): Exclude<NonNullable<HeaderProps['currentView']>, 'not-found'> => {
+    if (!segment) return 'home';
+    if (segment === 'about' || segment === 'gioi-thieu') return 'about';
+    if (segment === 'products' || segment === 'san-pham') return 'products';
+    if (segment === 'services' || segment === 'dich-vu') return 'services';
+    if (segment === 'projects' || segment === 'du-an') return 'projects';
+    if (segment === 'news' || segment === 'tin-tuc') return 'news';
+    if (segment === 'events' || segment === 'su-kien') return 'events';
+    if (segment === 'contact' || segment === 'lien-he') return 'contact';
+    if (segment === 'privacy' || segment === 'chinh-sach-bao-mat') return 'privacy';
+    if (segment === 'terms' || segment === 'dieu-khoan-su-dung') return 'terms';
+    if (segment === 'search' || segment === 'tim-kiem') return 'search';
+    return 'home';
+  };
+  const currentView = legacyCurrentView ?? viewFromSegment(routeSegment);
   const navigateTo = (href: string) => {
     if (onNavigate) onNavigate(href);
     else window.location.assign(href);
