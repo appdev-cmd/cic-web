@@ -148,6 +148,174 @@ termsPage.systemDefined = true;
 export const pageBuilderPagesMock: PageBuilderPage[] = [homePage, aboutPage, organizationPage, capacityPage, privacyPage, termsPage];
 
 export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
+  // Real DB Projects
+  {
+    id: '3',
+    label: 'Áp Dụng Công Nghệ BIM 5D Cho Toà Siêu Nhà Cao Tầng Landmark 81',
+    description: 'Dự án · Tư vấn BIM/Digital Twins · Nổi bật',
+    entityType: 'project',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80',
+      location: 'Bình Thạnh, TP. Hồ Chí Minh',
+      category: 'Tư vấn BIM/Digital Twins',
+      summary: 'Số hóa toàn diện dữ liệu thiết kế, phát hiện xung đột và quản lý khối lượng vật tư chính xác hơn 98%.',
+      client: 'Tập đoàn Vingroup',
+      tags: ['Autodesk Revit', 'Navisworks Manage', 'CDE Autodesk Construction Cloud (ACC)'],
+      isFeatured: true,
+    },
+  },
+  {
+    id: '4',
+    label: 'Mô Hình Hóa Digital Twins Tuyến Cao Tốc Bắc - Nam (Đoạn Cam Lộ - La Sơn)',
+    description: 'Dự án · Hạ tầng số · Nổi bật',
+    entityType: 'project',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&q=80',
+      location: 'Quảng Trị - Thừa Thiên Huế',
+      category: 'Hạ tầng số & Digital Twins',
+      summary: 'Ứng dụng công nghệ bản sao số iTwin và GIS để quản lý bảo trì hạ tầng giao thông thông minh.',
+      client: 'Bộ Giao thông Vận tải',
+      tags: ['Bentley iTwin', 'GIS 3D', 'IoT Sensors'],
+      isFeatured: true,
+    },
+  },
+  {
+    id: '5',
+    label: 'Đánh Giá Sản Lượng Điện Gió Đạt Chuẩn Bankable Dự Án Điện Gió Mũi Dinh',
+    description: 'Dự án · Năng lượng tái tạo · Nổi bật',
+    entityType: 'project',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&q=80',
+      location: 'Ninh Thuận',
+      category: 'Năng lượng tái tạo',
+      summary: 'Thẩm định số liệu gió chi tiết, phục vụ mục đích gọi vốn đầu tư quốc tế thành công.',
+      client: 'Tập đoàn Điện lực Việt Nam (EVN)',
+      tags: ['WindSim CFD', 'Bankable', 'Net Zero'],
+      isFeatured: true,
+    },
+  },
+  // Real DB Events
+  {
+    id: '40',
+    label: 'Hội thảo: Đột Phá Ứng Dụng AI Trong Vận Hành Cảng Biển Việt Nam Thập Kỷ Tới',
+    description: 'Sự kiện · Online (Zoom) · Nổi bật',
+    entityType: 'event',
+    status: 'published',
+    meta: {
+      image: 'https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png',
+      location: 'Online (Zoom)',
+      date: '19/08/2026',
+      time: '08:30',
+      summary: 'Khám phá xu hướng Smart Port, Digital Twin kết hợp Terminal Operating System (TOS) và các giải pháp AI tối ưu hóa hoạt động khai thác cảng biển.',
+      isFeatured: true,
+    },
+  },
+  {
+    id: '11',
+    label: 'Webinar: Phần mềm Cage Carbon - Cage CBAM trong kiểm kê phát thải khí nhà kính và lập hồ sơ CBAM - Thuế carbon Châu Âu',
+    description: 'Sự kiện · Online · Nổi bật',
+    entityType: 'event',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070&auto=format&fit=crop',
+      location: 'Online',
+      date: '08/06/2026',
+      time: '09:00 - 11:30',
+      summary: 'Tư vấn Chuyển đổi số & Lộ trình Net Zero và Tín chỉ Carbon cho Doanh nghiệp.',
+      isFeatured: true,
+    },
+  },
+  {
+    id: '9',
+    label: 'Webinar: Cập nhật tính năng mới trong Opera Job Management cho nhà thầu nhôm kính',
+    description: 'Sự kiện · TP. Hồ Chí Minh · Nổi bật',
+    entityType: 'event',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop',
+      location: 'TP. Hồ Chí Minh',
+      date: '20/05/2026',
+      time: '08:30 - 11:30',
+      summary: 'Tư vấn Chuyển đổi số & BIM cho Doanh nghiệp.',
+      isFeatured: true,
+    },
+  },
+  {
+    id: '13',
+    label: 'Webinar: Tương lai bắt đầu từ hiện tại: Tăng tốc Chuyển đổi BIM 5D với Cubicost',
+    description: 'Sự kiện · Hà Nội · Nổi bật',
+    entityType: 'event',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop',
+      location: 'Hà Nội',
+      date: '15/06/2026',
+      time: '14:00 - 17:00',
+      summary: 'Workshop: Ứng dụng AI và BIM trong Giám sát Công trình.',
+      isFeatured: true,
+    },
+  },
+  // Real DB News
+  {
+    id: '1719',
+    label: 'Giải pháp AI và Digital Twin trong Vận hành Cảng biển Smart Port: Đột phá Hạ tầng & Tối ưu Năng suất',
+    description: 'Tin tức · Tin Chuyên ngành · Nổi bật',
+    entityType: 'news',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+      category: 'specialty',
+      date: '10/05/2024',
+      summary: 'Hợp tác chiến lược mang đến các giải pháp iTwin và Digital Twins tiên tiến cho các dự án trọng điểm tại Việt Nam.',
+      isFeatured: true,
+    },
+  },
+  {
+    id: '1718',
+    label: 'KOMPAS-3D V24 ra mắt với loạt nâng cấp cho thiết kế cơ khí',
+    description: 'Tin tức · Tin Chuyên ngành · Nổi bật',
+    entityType: 'news',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80',
+      category: 'specialty',
+      date: '28/04/2024',
+      summary: 'Cập nhật tính năng mô hình hóa 3D tham số hóa nhanh hơn, tích hợp xuất trực tiếp sang mô hình phân tích CAE.',
+      isFeatured: true,
+    },
+  },
+  {
+    id: '1717',
+    label: 'Mô Hình Hóa Địa Chất Thủy Văn 3D: Giảm Thiểu Rủi Ro Trong Điều Kiện Địa Chất Phức Tạp',
+    description: 'Tin tức · Tin Chuyên ngành · Nổi bật',
+    entityType: 'news',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80',
+      category: 'specialty',
+      date: '15/04/2024',
+      summary: 'Ứng dụng các công cụ mô phỏng dòng thấm ngầm và ổn định hố đào sâu cho các siêu dự án đô thị ngầm.',
+      isFeatured: true,
+    },
+  },
+  {
+    id: '1716',
+    label: 'CIC tổ chức thành công Hội thảo ứng dụng AI trong vận hành cảng biển Việt Nam',
+    description: 'Tin tức · Tin Công ty · Nổi bật',
+    entityType: 'news',
+    status: 'published',
+    meta: {
+      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80',
+      category: 'company',
+      date: '02/04/2024',
+      summary: 'Sự kiện quy tụ hơn 200 chuyên gia hàng hải, logistics và công nghệ cảng thông minh cùng thảo luận về lộ trình chuyển đổi số.',
+      isFeatured: true,
+    },
+  },
+  // Legacy / generic fixtures
   { id: 'product_ai_platform', label: 'Nền tảng AI CIC', description: 'Sản phẩm · AI và dữ liệu', entityType: 'product' },
   { id: 'product_software_catalog', label: 'Phần mềm kỹ thuật bản quyền', description: 'Sản phẩm · Danh mục phần mềm', entityType: 'product' },
   { id: 'product_equipment_catalog', label: 'Thiết bị công nghệ', description: 'Sản phẩm · Thiết bị', entityType: 'product' },
@@ -177,3 +345,7 @@ export const pageBuilderEntityOptions: PageBuilderEntityOption[] = [
   { id: 'event_net_zero', label: 'Lộ trình Net Zero và Tín chỉ Carbon', description: 'Sự kiện · Hà Nội', entityType: 'event' },
   { id: 'event_ai_construction', label: 'Ứng dụng AI trong Giám sát Công trình', description: 'Sự kiện · Online', entityType: 'event' },
 ];
+
+import { registerEntityOptions } from '@/shared/page-content/resolveReferenceEntity';
+registerEntityOptions(pageBuilderEntityOptions);
+

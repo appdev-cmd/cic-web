@@ -37,6 +37,11 @@ export function registerEntityOptions(options: readonly PageBuilderEntityOption[
 }
 
 const projectFixtureIdByEntityId: Readonly<Record<string, number>> = {
+  '3': 1,
+  '4': 2,
+  '5': 3,
+  '1': 1,
+  '2': 2,
   project_landmark_81: 1,
   project_cao_toc_bac_nam: 2,
   project_dien_gio_mui_dinh: 3,
@@ -73,6 +78,26 @@ export function resolveProjectEntity(entityId: string): HomeProjectModel | null 
 }
 
 const eventFixtureMap: Readonly<Record<string, HomeEventItemModel>> = {
+  '40': {
+    id: '40',
+    title: 'Hội thảo: Đột Phá Ứng Dụng AI Trong Vận Hành Cảng Biển Việt Nam Thập Kỷ Tới',
+    date: '19/08/2026',
+    time: '08:30',
+    loc: 'Online (Zoom)',
+    attendees: '500+ Khách mời',
+    img: 'https://www.cic.com.vn/images/news/2026/08/resized/tphngdngAItrongvnhnhcngbin1_1785830161.png',
+    desc: 'Khám phá xu hướng Smart Port, Digital Twin kết hợp Terminal Operating System (TOS) và các giải pháp AI tối ưu hóa hoạt động khai thác cảng biển.',
+  },
+  '2': {
+    id: '2',
+    title: 'Đừng bỏ lỡ sự kiện tháng 4: Webinar CADWorx - Giải pháp hoàn thiện cho thiết kế nhà máy hiệu quả',
+    date: '27/04/2024',
+    time: '09:00 - 10:40',
+    loc: 'Online',
+    attendees: '300+ Khách mời',
+    img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop',
+    desc: 'Giải pháp hoàn thiện cho thiết kế nhà máy hiệu quả phối hợp cùng hãng Hexagon.',
+  },
   event_bentley_2026: {
     id: 'event_bentley_2026',
     title: 'Bentley Innovation Day 2026',
@@ -154,9 +179,13 @@ export function resolveEventEntity(entityId: string): HomeEventItemModel | null 
 }
 
 const newsFixtureMap: Readonly<Record<string, number>> = {
-  news_05: 5,
+  '1719': 1,
+  '1718': 2,
+  '1717': 3,
+  '1716': 4,
+  news_05: 1,
   news_02: 2,
-  news_08: 8,
+  news_08: 3,
 };
 
 /**

@@ -369,7 +369,8 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           toolbar.appendChild(entityLabel);
           if (['home.projects', 'home.events', 'home.news'].includes(section.sectionKey)) {
             const limit = sectionDefinitions[section.sectionKey]?.referenceLimit?.[reference.entityType] ?? reference.source?.limit ?? reference.entityIds.length;
-            const isFeatured = reference.source?.mode === 'featured';
+            const mode = (reference.source?.mode as string | undefined) ?? 'featured';
+            const isFeatured = mode !== 'manual';
             addButton(
               isFeatured ? `⚡ Tự động: Nổi bật (${reference.entityIds.length})` : 'Chuyển sang Tự động',
               () => onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'featured', limit }),
@@ -806,11 +807,14 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           controls.style.cssText = `position:absolute;z-index:20;top:10px;${isTopLeft ? 'left:10px;' : 'right:10px;'}display:flex;align-items:center;gap:6px;padding:6px;border-radius:10px;background:rgba(255,255,255,.97);box-shadow:0 8px 24px rgba(15,23,42,.18);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity 140ms ease,transform 140ms ease;`;
           
           if (reference) {
+            const isManualMode = reference.source?.mode === 'manual';
             const handle = createCardAction('⠿ Kéo', () => undefined);
             handle.style.cursor = 'grab';
             controls.appendChild(handle);
-            controls.append(createCardAction('Thay', () => onPickReference?.(section.id, reference.entityType, itemIndex)));
-            if (reference.source?.mode === 'manual' && reference.entityIds.length > 1) {
+            if (isManualMode) {
+              controls.append(createCardAction('Thay', () => onPickReference?.(section.id, reference.entityType, itemIndex)));
+            }
+            if (reference.entityIds.length > 1) {
               controls.append(createCardAction('Xóa', () => {
                 const next = reference.entityIds.filter((_, idx) => idx !== itemIndex);
                 onReferenceItemsChange?.(section.id, reference.entityType, next);

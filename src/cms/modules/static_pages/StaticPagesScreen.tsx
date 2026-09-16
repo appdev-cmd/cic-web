@@ -94,8 +94,8 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
         });
         const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
           'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
-          'home.events': { entityType: 'event', defaultIds: ['2'] },
-          'home.news': { entityType: 'news', defaultIds: ['571', '18', '15', '52'] },
+          'home.events': { entityType: 'event', defaultIds: ['40', '11', '9', '13'] },
+          'home.news': { entityType: 'news', defaultIds: ['1719', '1718', '1717', '1716'] },
         };
         const def = defaultRefsBySection[s.sectionKey];
         if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
@@ -103,11 +103,15 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
         }
         const cfg = (s.config || {}) as Record<string, any>;
         const refSources = (cfg._referenceSources || {}) as Record<string, any>;
-        const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => ({
-          entityType,
-          entityIds,
-          source: refSources[entityType] ?? { mode: 'featured', limit: entityIds.length },
-        }));
+        const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
+          const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
+          const defaultSource = isFeatured ? cfg.referenceSource : { mode: 'featured', limit: entityIds.length };
+          return {
+            entityType,
+            entityIds,
+            source: refSources[entityType] ?? defaultSource,
+          };
+        });
         return {
           id: s.id,
           sectionKey: s.sectionKey,
@@ -138,8 +142,8 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
             });
             const defaultRefsBySection: Record<string, { entityType: PageBuilderEntityType; defaultIds: string[] }> = {
               'home.projects': { entityType: 'project', defaultIds: ['3', '4', '5'] },
-              'home.events': { entityType: 'event', defaultIds: ['2'] },
-              'home.news': { entityType: 'news', defaultIds: ['571', '18', '15', '52'] },
+              'home.events': { entityType: 'event', defaultIds: ['40', '11', '9', '13'] },
+              'home.news': { entityType: 'news', defaultIds: ['1719', '1718', '1717', '1716'] },
             };
             const def = defaultRefsBySection[s.sectionKey];
             if (def && (!refMap.has(def.entityType) || refMap.get(def.entityType)!.length === 0)) {
@@ -147,11 +151,15 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
             }
             const cfg = (s.config || {}) as Record<string, any>;
             const refSources = (cfg._referenceSources || {}) as Record<string, any>;
-            const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => ({
-              entityType,
-              entityIds,
-              source: refSources[entityType] ?? { mode: 'featured', limit: entityIds.length },
-            }));
+            const references: PageBuilderReference[] = Array.from(refMap.entries()).map(([entityType, entityIds]) => {
+              const isFeatured = cfg.referenceSource?.mode === 'auto_featured' || cfg.referenceSource?.mode === 'featured';
+              const defaultSource = isFeatured ? cfg.referenceSource : { mode: 'featured', limit: entityIds.length };
+              return {
+                entityType,
+                entityIds,
+                source: refSources[entityType] ?? defaultSource,
+              };
+            });
             return {
               id: s.id,
               sectionKey: s.sectionKey,

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, CSSProperties } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, ArrowUpRight, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, ChevronRight, ChevronLeft } from 'lucide-react';
 import { SectionHeader } from '@shared/components/Typography';
 import type { HomeProjectModel } from '@shared/page-content/models';
 import type { Project } from '@shared/types';
@@ -30,7 +30,6 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
 }) => {
   const [activeProjectTab, setActiveProjectTab] = useState('all');
   const [projectSearchQuery, setProjectSearchQuery] = useState('');
-  const [hoveredProjectIndex, setHoveredProjectIndex] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const filteredProjects = projects.filter((p) => {
@@ -66,7 +65,6 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                 key={tab.id}
                 onClick={() => {
                   setActiveProjectTab(tab.id);
-                  setHoveredProjectIndex(null);
                 }}
                 className={`px-8 py-2.5 rounded-[8px] font-black text-xs uppercase tracking-widest transition-all ${
                   activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
@@ -86,52 +84,22 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
               value={projectSearchQuery}
               onChange={(e) => {
                 setProjectSearchQuery(e.target.value);
-                setHoveredProjectIndex(null);
               }}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
             />
           </div>
         </div>
 
-        {/* 3 Cards 16:9 Expanding Accordion Container */}
+        {/* 3 Cards 16:9 Static Grid Container */}
         <div 
           data-page-collection="project"
-          onMouseLeave={() => setHoveredProjectIndex(null)}
-          className="flex flex-col md:flex-row items-start justify-start gap-4 lg:gap-4 w-full"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full"
         >
           {filteredProjects.length > 0 ? (
             (() => {
               const displayProjects = filteredProjects.slice(0, 3);
-              const totalVisible = displayProjects.length;
 
               return displayProjects.map((proj, i) => {
-                const isHovered = hoveredProjectIndex === i;
-
-                // Base 1/3 column width matching "Tất cả" grid layout
-                const baseWidth = '0 0 calc((100% - 2 * 1.5rem) / 3)';
-
-                let flexStyle = baseWidth;
-
-                if (totalVisible === 3) {
-                  if (hoveredProjectIndex !== null) {
-                    flexStyle = isHovered ? '1.8 1 0%' : '1 1 0%';
-                  } else {
-                    flexStyle = '1 1 0%';
-                  }
-                } else if (totalVisible === 2) {
-                  if (hoveredProjectIndex !== null) {
-                    flexStyle = isHovered ? '0 0 calc(((100% - 2 * 1.5rem) / 3) * 1.4)' : baseWidth;
-                  } else {
-                    flexStyle = baseWidth;
-                  }
-                } else if (totalVisible === 1) {
-                  if (isHovered) {
-                    flexStyle = '0 0 calc(((100% - 2 * 1.5rem) / 3) * 1.35)';
-                  } else {
-                    flexStyle = baseWidth;
-                  }
-                }
-
                 const targetId =
                   proj.id === 1 ? 'landmark-81-bim' :
                   proj.id === 2 ? 'cao-toc-bac-nam-twin' :
@@ -149,123 +117,31 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                 return (
                   <div
                     key={proj.entityId ?? proj.id}
-                    onMouseEnter={() => setHoveredProjectIndex(i)}
-                    onFocus={() => setHoveredProjectIndex(i)}
-                    onClick={() => {
-                      // Toggle expansion on click for touch devices
-                      if (hoveredProjectIndex === i) {
-                        handleProjectClick();
-                      } else {
-                        setHoveredProjectIndex(i);
-                      }
-                    }}
-                    onKeyDown={(e) => { 
-                      if (e.key === 'Enter' || e.key === ' ') { 
-                        e.preventDefault(); 
-                        if (hoveredProjectIndex === i) {
-                          handleProjectClick();
-                        } else {
-                          setHoveredProjectIndex(i);
-                        }
-                      } 
-                    }}
+                    onClick={handleProjectClick}
                     tabIndex={0}
                     role="button"
-                    aria-expanded={isHovered}
                     aria-label={`${i + 1}. ${proj.name}`}
-                    style={{
-                      ['--card-flex' as string]: flexStyle,
-                      transition: 'flex 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                    } as CSSProperties}
-                    className={`group relative flex flex-col cursor-pointer w-full md:flex-[var(--card-flex)] ${
-                      isHovered ? 'z-20' : 'z-10'
-                    }`}
+                    className="group relative flex flex-col cursor-pointer w-full"
                   >
                     {/* 16:9 Aspect Ratio Image Box */}
-                    <div className={`relative w-full aspect-video md:aspect-[16/9] overflow-hidden rounded-xl border transition-all duration-300 bg-slate-950 ${
-                      isHovered 
-                        ? 'shadow-xl border-orange-500/60 ring-2 ring-orange-500/20 -translate-y-1' 
-                        : 'shadow-sm border-slate-200 group-hover:border-slate-300'
-                    }`}>
+                    <div className="relative w-full aspect-video md:aspect-[16/9] overflow-hidden rounded-xl border border-slate-200 group-hover:border-orange-500/60 shadow-sm group-hover:shadow-md transition-all duration-300 bg-slate-950">
                       <img 
                         src={proj.img} 
                         alt={proj.name} 
-                        className={`w-full h-full object-cover transition-all duration-300 rounded-lg ${
-                          isHovered ? 'scale-105 brightness-100' : 'scale-100 brightness-95 group-hover:scale-105'
-                        }`}
+                        className="w-full h-full object-cover transition-transform duration-300 rounded-lg group-hover:scale-105"
                         referrerPolicy="no-referrer"
                       />
 
                       {/* Top Right Number Badge */}
                       <div className="absolute top-3.5 right-3.5 z-20">
-                        <span className={`inline-flex items-center justify-center min-w-[36px] h-8 px-2.5 rounded-lg font-black text-xs tracking-wider shadow-sm transition-all duration-300 ${
-                          isHovered 
-                            ? 'bg-orange-600 text-white border border-orange-400/50 scale-105' 
-                            : 'bg-slate-950/60 text-white/90 backdrop-blur-md border border-white/20'
-                        }`}>
+                        <span className="inline-flex items-center justify-center min-w-[36px] h-8 px-2.5 rounded-lg font-black text-xs tracking-wider shadow-sm transition-all duration-300 bg-slate-950/60 text-white/90 backdrop-blur-md border border-white/20 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-400/50">
                           {String(i + 1).padStart(2, '0')}
                         </span>
                       </div>
-
-                      {/* Text Content INSIDE Card Overlay (Shown ONLY when hovered) */}
-                      <AnimatePresence>
-                        {isHovered && (
-                          <>
-                            <motion.div 
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-slate-950/10 z-10"
-                            />
-
-                            <motion.div 
-                              initial={{ opacity: 0, y: 6 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 4 }}
-                              transition={{ duration: 0.25, ease: 'easeOut' }}
-                              className="absolute inset-x-4 bottom-4 md:inset-x-5 md:bottom-5 z-20 text-white"
-                            >
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className="px-2.5 py-0.5 bg-orange-600/90 text-white text-[10px] font-black uppercase tracking-widest rounded-[8px] backdrop-blur-sm">
-                                  {proj.category || (proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn')}
-                                </span>
-                                <span className="text-slate-300 text-xs font-semibold">• {proj.location}</span>
-                              </div>
-
-                              <h3 className="text-base sm:text-lg md:text-xl font-black text-white leading-snug mb-1.5 tracking-tight drop-shadow-sm line-clamp-2">
-                                {proj.name}
-                              </h3>
-
-                              {proj.client && (
-                                <p className="text-slate-300 text-xs font-medium mb-2.5 line-clamp-1">
-                                  <span className="text-orange-400 font-bold">Khách hàng:</span> {proj.client}
-                                </p>
-                              )}
-
-                              <div className="flex items-center justify-between gap-3 mt-1">
-                                <div className="flex flex-wrap gap-1.5">
-                                  {proj.tags?.slice(0, 2).map((tag: string) => (
-                                    <span key={tag} className="px-2 py-0.5 bg-white/10 text-white text-[10px] font-bold rounded-[8px] border border-white/20 backdrop-blur-sm">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-
-                                <button className="inline-flex items-center gap-1 px-3 py-1 bg-orange-600 hover:bg-orange-500 text-white text-xs font-black uppercase tracking-wider rounded-[8px] shadow-md transition-all shrink-0">
-                                  Chi tiết <ArrowUpRight size={15} />
-                                </button>
-                              </div>
-                            </motion.div>
-                          </>
-                        )}
-                      </AnimatePresence>
                     </div>
 
                     {/* Text Content BELOW Card */}
-                    <div className={`mt-3 px-1 transition-all duration-300 ${
-                      isHovered ? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible'
-                    }`}>
+                    <div className="mt-3 px-1">
                       <div className="text-orange-600 text-[11px] font-extrabold uppercase tracking-wider mb-1 truncate">
                         {proj.category || (proj.type === 'software' ? 'Phần mềm' : proj.type === 'equipment' ? 'Thiết bị' : 'Tư vấn')}
                       </div>
