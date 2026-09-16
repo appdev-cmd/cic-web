@@ -183,7 +183,23 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     },
   },
   'about.hero': { label: 'Hero Giới thiệu', description: 'Tiêu đề và ảnh mở đầu.', editableContract: { sectionKey: 'about.hero', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { background: { path: 'backgroundImageId', semantic: 'background-image', ownership: 'section-config', replace: 'enabled' } } } },
-  'about.overview': { label: 'Tổng quan doanh nghiệp', description: 'Nội dung giới thiệu và video doanh nghiệp.', editableContract: { sectionKey: 'about.overview', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }], media: { video: { path: 'videoUrl', semantic: 'video', ownership: 'section-config', replace: 'enabled', optional: true } } } },
+  'about.overview': {
+    label: 'Tổng quan doanh nghiệp',
+    description: 'Nội dung giới thiệu và video doanh nghiệp.',
+    editableContract: {
+      sectionKey: 'about.overview',
+      fields: [
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'videoUrl', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'paragraphs.0', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'paragraphs.1', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'paragraphs.2', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+      ],
+      media: {
+        video: { path: 'videoUrl', semantic: 'video', ownership: 'section-config', replace: 'enabled', optional: true },
+      },
+    },
+  },
   'about.timeline': {
     label: 'Tiến trình phát triển', description: 'Các mốc lịch sử theo thiết kế timeline.',
     editableContract: {
@@ -192,10 +208,10 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
         { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'milestones.*.year', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
-        { path: 'milestones.*.title', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'blocked', blockedReason: 'representation-mismatch' },
+        { path: 'milestones.*.title', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
         { path: 'milestones.*.description', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
       ],
-      collections: { milestones: { path: 'milestones', identity: 'persistent-item-id', capabilities: { reorder: 'blocked', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } } },
+      collections: { milestones: { path: 'milestones', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } },
     },
   },
   'about.strategy': {
@@ -210,7 +226,7 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
         { path: 'coreValues.*.value', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
       ],
       media: { image: { path: 'imageId', semantic: 'image', ownership: 'section-config', replace: 'enabled' } },
-      collections: { coreValues: { path: 'coreValues', identity: 'persistent-item-id', capabilities: { reorder: 'blocked', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } } },
+      collections: { coreValues: { path: 'coreValues', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } } },
     },
   },
   'about.offerings': { label: 'Sản phẩm và dịch vụ cung cấp', description: 'Các nội dung được chọn cho lưới cố định.', referenceLimit: { product: 2, service: 4 }, editableContract: { sectionKey: 'about.offerings', fields: [{ path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }, { path: 'subtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' }] } },
@@ -222,14 +238,13 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
     editableContract: {
       sectionKey: 'about.capacity',
       fields: [
-        { path: 'title', semantic: 'rich-text', ownership: 'static-unwired', valueKind: 'string', editing: 'blocked', blockedReason: 'representation-mismatch' },
-        { path: 'description', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
-        { path: 'separator', semantic: 'decorative', ownership: 'decorative', editing: 'disabled' },
+        { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'description', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'metrics.*.value', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
         { path: 'metrics.*.label', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
       ],
       collections: {
-        metrics: { path: 'metrics', identity: 'persistent-item-id', capabilities: { reorder: 'blocked', add: 'blocked', remove: 'blocked' }, layoutBehavior: { wrap: true } },
+        metrics: { path: 'metrics', identity: 'persistent-item-id', capabilities: { reorder: 'enabled', add: 'enabled', remove: 'enabled' }, layoutBehavior: { wrap: true } },
       },
     },
   },

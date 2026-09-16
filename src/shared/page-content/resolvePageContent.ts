@@ -124,8 +124,10 @@ function resolveHomeContent(
           sub: typeof s.sub === 'string' ? s.sub : (typeof s.subtitle === 'string' ? s.subtitle : ''),
         };
       });
-    const rawMarquee = Array.isArray(heroSec.config.marqueeTexts) ? heroSec.config.marqueeTexts : [];
-    const marqueeTexts = rawMarquee.map(String);
+    const rawMarquee = Array.isArray(heroSec.config.marqueeTexts) && heroSec.config.marqueeTexts.length > 0
+      ? heroSec.config.marqueeTexts
+      : (Array.isArray(heroSec.config.tickerItems) && heroSec.config.tickerItems.length > 0 ? heroSec.config.tickerItems : []);
+    const marqueeTexts = rawMarquee.map(String).filter((t) => t.trim().length > 0);
     if (slides.length > 0) {
       hero = {
         badge: typeof heroSec.config.badge === 'string' ? heroSec.config.badge : undefined,

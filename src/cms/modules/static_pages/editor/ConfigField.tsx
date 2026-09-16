@@ -80,6 +80,26 @@ export function ConfigField({
     );
   }
 
+  if (fieldKey === 'videoUrl') {
+    return (
+      <label className="block space-y-1.5 md:col-span-2">
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {labelFor(fieldKey)} (Link YouTube hoặc video trực tiếp)
+        </span>
+        <input
+          type="text"
+          placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
+          value={String(value ?? '')}
+          onChange={(event) => onChange(path, event.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 font-mono text-xs"
+        />
+        <span className="block text-[11px] text-slate-400">
+          Hỗ trợ link YouTube tiêu chuẩn, link rút gọn youtu.be, link embed hoặc tham số thời gian bắt đầu (?t=... hoặc &t=...s).
+        </span>
+      </label>
+    );
+  }
+
   if (fieldKey === 'slides' && Array.isArray(value)) {
     return <HeroSlidesEditor slides={value as any} path={path} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} onActiveSlideChange={onActiveHeroSlideChange} />;
   }

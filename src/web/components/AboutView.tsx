@@ -75,6 +75,44 @@ function bindElement<T extends Element>(registry: ElementBindingRegistry, bindin
   return bindElementRuntime<T>(binding, registry);
 }
 
+function getYoutubeEmbedUrl(rawUrl: string): string {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    return 'https://www.youtube.com/embed/hdLFK_09-tU?start=448';
+  }
+  const trimmed = rawUrl.trim();
+  const iframeMatch = trimmed.match(/src=["']([^"']+)["']/i);
+  const target = iframeMatch ? iframeMatch[1] : trimmed;
+
+  try {
+    const parsed = new URL(target.startsWith('http') ? target : `https://${target}`);
+    let videoId = '';
+    let start = '';
+
+    if (parsed.hostname.includes('youtu.be')) {
+      videoId = parsed.pathname.replace(/^\//, '');
+      start = parsed.searchParams.get('t') || parsed.searchParams.get('start') || '';
+    } else if (parsed.hostname.includes('youtube.com')) {
+      if (parsed.pathname.includes('/embed/')) {
+        videoId = parsed.pathname.split('/embed/')[1];
+      } else {
+        videoId = parsed.searchParams.get('v') || '';
+      }
+      start = parsed.searchParams.get('t') || parsed.searchParams.get('start') || '';
+    }
+
+    if (videoId) {
+      const cleanVideoId = videoId.split(/[?&]/)[0];
+      const cleanStart = start.replace(/s$/i, '');
+      return `https://www.youtube.com/embed/${cleanVideoId}${cleanStart ? `?start=${cleanStart}` : ''}`;
+    }
+  } catch {
+    // fallback if parsing fails
+  }
+
+  return target.replace('watch?v=', 'embed/').replace(/[?&]t=([0-9]+)s?/, '?start=$1');
+}
+
+
 interface AboutViewProps {
   activeTab: 'overview' | 'structure' | 'experience';
   setActiveTab: (tab: 'overview' | 'structure' | 'experience') => void;
@@ -168,7 +206,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   return (
     <div className="bg-transparent min-h-screen relative pt-0">
       {/* Visual Top Hero Banner */}
-      <section data-page-builder-section-key="about.hero" className="relative pt-12 pb-12 lg:pt-16 lg:pb-16 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
+      <section data-page-builder-section-key="about.hero" className="relative pt-24 pb-14 lg:pt-32 lg:pb-20 overflow-hidden bg-slate-900 z-10 border-b border-slate-800">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <img
             data-page-builder-media-path={JSON.stringify(['backgroundImageId'])}
@@ -303,10 +341,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       <div>
                         {displayedOverviewParagraphs.map((paragraph, index) => <p key={index} data-page-builder-config-path={JSON.stringify(['paragraphs', index])} className="text-sm md:text-base text-slate-600 mb-4 last:mb-0 leading-relaxed font-normal text-justify">{paragraph}</p>)}
                       </div>
-                      <div data-page-builder-video-path={JSON.stringify(['videoUrl'])} className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black">
+                      <div 
+                        {...bindElement<HTMLDivElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'videoUrl', semantic: 'text', ownership: 'section-config', editable: true }))}
+                        data-page-builder-video-path={JSON.stringify(['videoUrl'])} 
+                        className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black"
+                      >
                         <iframe 
                           className="w-full h-full scale-[1.03] origin-center"
-                          src={textFrom(overviewConfig, 'videoUrl', 'https://www.youtube.com/embed/hdLFK_09-tU?start=448').replace('watch?v=', 'embed/').replace('&t=', '?start=')}
+                          src={getYoutubeEmbedUrl(textFrom(overviewConfig, 'videoUrl', 'https://www.youtube.com/embed/hdLFK_09-tU?start=448'))}
                           title="YouTube video player" 
                           frameBorder="0" 
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -335,9 +377,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       <div className="absolute top-[28px] left-[10%] right-[10%] h-[1px] bg-slate-300 hidden md:block"></div>
                       
                       <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'milestones', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'milestones' }))} className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 relative z-10">
-                        {aboutContent.timeline.milestones.map((item) => {
+                        {aboutContent.timeline.milestones.map((item, index) => {
                           const itemPath = createCollectionItemPath('milestones', item.id);
-                          return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'milestones' }))} key={item.id} className="relative flex flex-col items-center text-center group">
+                          return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'milestones' }))} key={item.id ? `ms-${item.id}-${index}` : `timeline-ms-${index}`} className="relative flex flex-col items-center text-center group">
                             {/* Dot */}
                             <div className={`hidden md:flex w-3 h-3 rounded-full bg-orange-500 ring-[6px] ring-white mb-6 relative z-10 items-center justify-center -translate-y-1/2 mt-[28px] ${renderPolicy.motionEnabled ? 'group-hover:scale-150 group-hover:bg-orange-600 transition-all duration-300' : ''}`}>
                               <div className={`absolute inset-0 rounded-full bg-orange-500 opacity-50 ${renderPolicy.motionEnabled ? 'animate-ping' : ''}`}></div>
@@ -404,9 +446,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           <div className="relative z-10 w-full">
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Giá trị cốt lõi</h3>
                             <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'coreValues', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'coreValues' }))} className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 w-full">
-                              {aboutContent.strategy.coreValues.map((item) => {
+                              {aboutContent.strategy.coreValues.map((item, index) => {
                                 const itemPath = createCollectionItemPath('coreValues', item.id);
-                                return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'coreValues' }))} key={item.id} className="flex items-center gap-3">
+                                return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id, collectionPath: 'coreValues' }))} key={item.id ? `cv-${item.id}-${index}` : `core-val-${index}`} className="flex items-center gap-3">
                                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></div>
                                   <span {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id, collectionPath: 'coreValues' }))} className="text-slate-600 leading-relaxed text-sm md:text-base">{item.value}</span>
                                 </div>;
@@ -800,8 +842,13 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
             <div data-page-builder-section-key="about.capacity" className="w-full bg-transparent">
               <div className="max-w-7xl mx-auto relative z-10">
                 <div className="flex flex-col items-center text-center pt-2">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight">
-                    Tiềm lực vững vàng, <br/><span className="text-orange-600">vươn tầm quốc tế</span>
+                  <h2 
+                    {...bindElementRuntime<HTMLHeadingElement>(createElementBinding({
+                      sectionKey: 'about.capacity', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true,
+                    }), bindingRegistry)}
+                    className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight"
+                  >
+                    {textFrom(configFor('about.capacity'), 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế')}
                   </h2>
                   <div className="w-16 h-1 bg-orange-600 mx-auto mt-3 mb-6"></div>
                   <p
@@ -819,10 +866,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     }), bindingRegistry)}
                     className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full"
                   >
-                    {capacityContent.metrics.map((metric) => {
+                    {capacityContent.metrics.map((metric, index) => {
                       const itemPath = createCollectionItemPath('metrics', metric.id);
                       return <div
-                        key={metric.id}
+                        key={metric.id ? `cap-metric-${metric.id}-${index}` : `cap-metric-${index}`}
                         {...bindElementRuntime<HTMLDivElement>(createElementBinding({
                           sectionKey: 'about.capacity', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: metric.id, collectionPath: 'metrics',
                         }), bindingRegistry)}

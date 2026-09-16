@@ -80,8 +80,36 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       };
     });
 
-    const rawMarquee = Array.isArray(cfg.marqueeTexts) ? cfg.marqueeTexts : [];
-    const marqueeTexts = rawMarquee.map((t: unknown) => String(t));
+    const rawMarquee = Array.isArray(cfg.marqueeTexts) && cfg.marqueeTexts.length > 0
+      ? cfg.marqueeTexts
+      : (Array.isArray(cfg.tickerItems) && cfg.tickerItems.length > 0 ? cfg.tickerItems : []);
+    let marqueeTexts = rawMarquee.map((t: unknown) => String(t)).filter((t: string) => t.trim().length > 0);
+
+    if (marqueeTexts.length === 0) {
+      try {
+        let hotNewsRows = await sql`
+          SELECT title
+          FROM cic_news
+          WHERE published = true AND is_hot = true
+          ORDER BY coalesce(start_time, created_time) DESC
+          LIMIT 6
+        `;
+        if (hotNewsRows.length === 0) {
+          hotNewsRows = await sql`
+            SELECT title
+            FROM cic_news
+            WHERE published = true
+            ORDER BY coalesce(start_time, created_time) DESC
+            LIMIT 6
+          `;
+        }
+        if (hotNewsRows.length > 0) {
+          marqueeTexts = hotNewsRows.map((r: any) => String(r.title).trim()).filter(Boolean);
+        }
+      } catch (tickerErr) {
+        console.warn('[homeResolver] Failed to load hot news ticker from cic_news:', tickerErr);
+      }
+    }
 
     hero = {
       badge: typeof cfg.badge === 'string' ? cfg.badge : undefined,

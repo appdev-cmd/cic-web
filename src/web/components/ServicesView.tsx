@@ -334,7 +334,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                               {/* Uniform Image Banner */}
                               <div className="h-48 sm:h-52 w-full overflow-hidden rounded-[12px] relative mb-4 shrink-0 bg-slate-100">
                                 <img 
-                                  src={service.image} 
+                                  src={service.image?.trim() ? service.image : '/banner_hero/doi_tac_cong_nghe_chien_luoc.png'} 
                                   alt={service.title} 
                                   className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                                   referrerPolicy="no-referrer"
@@ -741,7 +741,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                           >
                             <div className="w-12 h-12 shrink-0 bg-slate-100 border border-slate-200 overflow-hidden relative rounded-[6px]">
                               <img 
-                                src={prod.img} 
+                                src={prod.img?.trim() ? prod.img : '/banner_hero/doi_tac_cong_nghe_chien_luoc.png'} 
                                 alt={prod.name} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                 referrerPolicy="no-referrer"
@@ -791,7 +791,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
                             {/* Uniform Image Banner */}
                             <div className="h-44 w-full overflow-hidden rounded-[10px] relative mb-4 shrink-0 bg-slate-100">
                               <img 
-                                src={relService.image} 
+                                src={relService.image?.trim() ? relService.image : '/banner_hero/doi_tac_cong_nghe_chien_luoc.png'} 
                                 alt={relService.title} 
                                 className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                                 referrerPolicy="no-referrer"
@@ -837,7 +837,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
             </button>
 
             <div className="h-40 w-full overflow-hidden rounded-[10px] bg-slate-100 relative">
-              <img src={selectedProductModal.img} alt={selectedProductModal.name} className="w-full h-full object-cover" />
+              <img src={selectedProductModal.img?.trim() ? selectedProductModal.img : '/banner_hero/doi_tac_cong_nghe_chien_luoc.png'} alt={selectedProductModal.name} className="w-full h-full object-cover" />
             </div>
 
             <div className="space-y-2">

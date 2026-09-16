@@ -20,7 +20,8 @@ export function WebsiteShell({ children, settings }: Readonly<{ children: ReactN
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
 
   const navigate = (href: string) => router.push(href);
-  const headerVariant = pathname === '/' ? 'overlay' : 'solid';
+  const isOverlayHeader = pathname === '/' || pathname === '/about' || pathname.startsWith('/gioi-thieu');
+  const headerVariant = isOverlayHeader ? 'overlay' : 'solid';
   const hotline = settings.values.tel || '024 3976 1381';
 
   return (
