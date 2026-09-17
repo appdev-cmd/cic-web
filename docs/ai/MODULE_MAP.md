@@ -24,7 +24,7 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 | `[A]` | Contact/consultation | `/contact`, global consultation | Contacts, CTA, Forms, Customer Requests | form/CTA contract; validated submission; anti-spam/rate limit; persistence | staff assignment, email template/delivery, audit | Có Server Action nhưng end-to-end workflow chưa đủ bằng chứng |
 | `[A]` | Public search | `/search` | Search projection | published read models của các domain được index; visibility/locale | ranking, SEO analytics | Có aggregate query; coverage phụ thuộc module nguồn |
 | `[A]` | Menu/navigation | Header, Footer, route links | Menu | route registry; published menu query; locale | referenced content visibility, SEO redirects | Legacy navigation và Next route semantics đang cùng tồn tại |
-| `[A]` | Legal/static content | `/privacy`, `/terms`, 404 | Static Pages/config hoặc approved static source | public shell; approved content authority | SEO, localization | Routes tồn tại; privacy/terms đang hard-code presentation content |
+| `[A]` | Legal/static content | `/privacy`, `/terms`, `/chinh-sach-bao-mat`, `/dieu-khoan-su-dung`, `/[slug]` | Static Pages (`cic_content_pages*`, template: `legal_standard`) | public shell; published legal snapshot | SEO, localization, trash for custom pages | Audit chi tiết Module 26 ngày 2026-09-17: DB schema & repository transaction hoàn tất; Privacy đã publish DB; Terms/EN ở draft; Public view & CMS create/edit/publish đã sẵn sàng; READY_TO_IMPLEMENT |
 | `[A]` | Public widgets | chatbot, floating contact, consultation | Config, CTA/Forms/Requests | public shell; approved config/submission boundary | external webhook/chat provider, audit | Phần lớn vẫn legacy/client-config |
 
 ## CMS/business modules
@@ -241,6 +241,68 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
   - **CMS Visual Canvas Preview**: Cập nhật `WebsitePageRenderer.tsx` truyền đầy đủ `pageSections` và `resolveMediaUrl` cho cả 3 trang (`about`, `organization`, `capacity_experience`), đảm bảo xem trước WYSIWYG chính xác.
   - **Cache Revalidation**: Cập nhật `actions.ts` revalidate đồng thời cả `/gioi-thieu` và `/about` khi publish trang.
   - **Testing & Parity**: Xác minh HTTP 200/307, Typecheck pass 100%, giữ nguyên toàn bộ giao diện và SVG responsive. Trạng thái: `[I]`.
+
+
+### Audit Module 26: Trang thông tin chuẩn / Chính sách / Điều khoản — 2026-09-17
+
+- **A. Scope & Boundaries:**
+  - Public Website surface:
+    - Tuyến đường cố định tiếng Việt: `/privacy` (alias `/chinh-sach-bao-mat`), `/terms` (alias `/dieu-khoan-su-dung`).
+    - Tuyến đường cố định tiếng Anh: `/privacy-policy`, `/terms-of-use`.
+    - Tuyến đường động đa trang: `/[slug]` (cho các văn bản quy chế, hướng dẫn, thông báo dài hạn do quản trị viên tạo thêm theo mẫu chuẩn).
+  - CMS Surface: Màn hình `/cms/static-pages` (PageBuilder):
+    - Danh sách trang nội dung: Quản lý các trang có `template_key = 'legal_standard'`.
+    - Modal tạo trang mới (`handleCreateLegal`): Tên trang -> Slug tự sinh -> tạo bản ghi `template_key: 'legal_standard'`, `page_type: 'legal'`, `system_defined: false`.
+    - Trình soạn thảo Visual Canvas (`PageBuilderEditor` -> `WebsitePageRenderer` -> `LegalPage`): Soạn thảo `legal.header` và `legal.content` với RichTextEditor trực quan.
+    - Quy trình: Lưu bản nháp (Draft) -> Xem trước 3 viewport -> Xuất bản (Publish tạo snapshot immutable) -> Ghi nhật ký Audit.
+  - Ranh giới rõ ràng: Module chỉ quản lý các trang nội dung dùng mẫu layout chuẩn (gồm Header thông tin cố định + 1 vùng soạn thảo Rich Text). Không có các khối phức hợp (Hero carousel, số liệu stats, danh sách cards, form nghiệp vụ riêng).
+- **B. UI Reference Map:**
+  - Header Card: Phân loại (`categoryTag` badge cam), Tiêu đề chính (`title` h1 uppercase), Phụ đề mô tả (`subtitle`), Meta bar (icon Calendar + `lastUpdated`, icon ShieldCheck + `versionNumber` / readingTime, tên pháp nhân "Công ty CP Công nghệ và Tư vấn CIC").
+  - Main Article Body: Vùng bài viết typography chuẩn (`prose prose-slate max-w-none`, H2, H3, lists kèm icon CheckCircle2, blockquotes, bảng).
+  - Contact Assistance Box: Hộp hỗ trợ tối màu `bg-slate-900 text-white rounded-[12px]`, icon ShieldCheck, hotline 024 3976 1381, email info@cic.com.vn.
+  - Breadcrumb & Navigation: `Trang chủ / {title}`, nút "Quay lại trang chủ" (icon ArrowLeft) kèm bản quyền chân trang.
+- **C. Legacy Classification:**
+  - `REUSE_PRESENTATION`: `LegalArticleLayout.tsx` (khung giao diện chuẩn), `RichTextEditorCore.tsx` (trình soạn thảo Rich Text).
+  - `EXTRACT_AND_REBUILD`: `PublicLegalPageView.tsx` (bổ sung Contact Box, Subtitle, readingTime từ `LegalArticleLayout` và chuyển link điều hướng sang Server Component), `LegalPage` trong `WebsitePageRenderer.tsx` (đồng bộ visual editor với public view).
+  - `REFERENCE_ONLY`: `PrivacyPolicyView.tsx`, `TermsOfUseView.tsx` (nội dung tĩnh 5 điều khoản legacy dùng để tham khảo đối chiếu, không dùng làm runtime data).
+- **D. CMS Capability & Form Map:**
+  - Danh sách trang tĩnh có lọc theo `template_key = 'legal_standard'`, phân biệt rõ trang mặc định hệ thống (`system_defined = true`) không được xóa.
+  - Form tạo trang mới: Tên trang, tự sinh slug, kiểm tra hợp lệ và chống trùng slug.
+  - Editor: Chỉnh sửa `richTextHtml` của `legal.header` và `legal.content`, cấu hình SEO Meta (title, description), lưu nháp, xem trước, xuất bản.
+- **E. DB Tables & Relations:**
+  - Core: `cic_content_pages` (VI ID 5: `privacy_policy`, ID 6: `terms_of_use`; EN ID 11: `privacy_policy`, ID 12: `terms_of_use`; các trang bổ sung có `system_defined = false`).
+  - Revision & Sections: `cic_content_page_revisions` (lưu snapshot `draft` và `published`), `cic_content_page_sections` (`legal.header` position 1, `legal.content` position 2).
+  - Legacy table: `cic_contents` (Row 12: Chính sách bảo mật legacy đã được seed an toàn vào DB; không đọc runtime).
+- **F. Field Usage Map:**
+  - `name`, `slug`, `config.richTextHtml`, `seo_title`, `seo_description`: `CMS_EDITABLE`.
+  - `workspace`, `state`: `CMS_OPERATIONAL`.
+  - `id`, `page_id`, `version_number`, `position`, `template_key`, `page_type`, `system_defined`: `SYSTEM_MANAGED`.
+  - `draft_revision_id`, `published_revision_id`, `revision_id`: `RELATION`.
+  - `created_at`, `updated_at`, `created_by`, `published_at`, `published_by`: `AUDIT`.
+- **G. Runtime Data Authority:**
+  - 100% PostgreSQL qua `getPublicPublishedPage(workspace, codeOrSlug)`.
+  - Bỏ dần fallback tĩnh `PrivacyRoute`/`TermsRoute` khi dữ liệu `terms_of_use` được publish chính thức.
+- **H/I. Shared Domain & Server/Client Boundary:**
+  - Server Component: `privacy/page.tsx`, `terms/page.tsx`, `[slug]/page.tsx`, `repository.ts`, `actions.ts`.
+  - Client Component: `StaticPagesScreen.tsx` (CMS list/modal), `PageBuilderEditor.tsx` (CMS visual canvas).
+  - Shared domain types & contracts: `src/features/static-pages/types.ts`.
+- **J/K. Dependencies:**
+  - Hard: PostgreSQL schema `cic_content_pages*`, Task 90 `static_pages` trong `cic_permission_tasks`, Transaction & Audit Writer.
+  - Soft: Thư viện Media (chọn ảnh nhúng), Trash (xóa tạm thời trang custom), i18n routing tiếng Anh.
+- **L. Next Classification:**
+  - `KEEP`: Dynamic route `[slug]/page.tsx`, schema và repository transaction.
+  - `REFACTOR`: `PublicLegalPageView.tsx` bổ sung Contact Box và chuyển thành Server Component; chuẩn hóa alias redirect `/privacy` <-> `/chinh-sach-bao-mat`, `/terms` <-> `/dieu-khoan-su-dung`.
+  - `REPLACE`: Dữ liệu hardcoded trong `PrivacyPolicyView`/`TermsOfUseView` bằng dữ liệu xuất bản trong DB.
+  - `REMOVE`: `PrivacyRoute.tsx` và `TermsRoute.tsx` sau khi chuyển giao hoàn toàn.
+- **M. Responsive:** `KEEP` bố cục 1 cột tối ưu đọc văn bản pháp lý; `ADAPT` bảng table trong nội dung sang `overflow-x-auto`.
+- **N. Cross-cutting:** RBAC task 90 enforcement; Audit Logging (`STATIC_PAGE_CREATED`, `STATIC_PAGE_UPDATED`, `STATIC_PAGE_STATUS_CHANGED`); Bảo vệ trang hệ thống không bị xóa.
+- **O. i18n:** `BILINGUAL_CONTENT` (workspace độc lập `vi` và `en`).
+- **P. Implementation Order:** (1) Seed & Xuất bản `terms_of_use` và EN pages -> (2) Hoàn thiện `PublicLegalPageView.tsx` -> (3) Chuẩn hóa route alias -> (4) Kiểm thử CMS create/publish -> public end-to-end.
+- **Q. Acceptance Checklist:**
+  - [ ] Truy cập `/chinh-sach-bao-mat` và `/dieu-khoan-su-dung` lấy 100% dữ liệu từ DB thật.
+  - [ ] Admin tạo được trang pháp lý mới trên CMS, xuất bản hiển thị tại `/[slug]`.
+  - [ ] Quyền hạn và nhật ký hoạt động ghi nhận chuẩn xác.
+- **Kết luận:** **READY_TO_IMPLEMENT**.
 
 
 
