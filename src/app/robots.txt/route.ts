@@ -5,8 +5,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const settings = await getPublicSystemSettings('vi');
-    const robotsContent = settings.values.robots_txt?.trim();
+    let robotsContent = settings.values.robots_txt?.trim();
     if (robotsContent) {
+      if (!robotsContent.toLowerCase().includes('sitemap:')) {
+        robotsContent += '\n\nSitemap: https://www.cic.com.vn/sitemap.xml\n';
+      }
       return new Response(robotsContent, {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',

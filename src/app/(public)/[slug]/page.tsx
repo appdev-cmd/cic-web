@@ -36,7 +36,8 @@ export async function generateMetadata({ params }: DynamicSlugPageProps): Promis
     const { resolveRedirect } = await import('@/features/function-seo/server/queries');
     const redirectMatch = await resolveRedirect(`/${slug}`);
     if (redirectMatch) {
-      return { title: 'Đang chuyển hướng... | CIC Technology' };
+      const { redirect, RedirectType } = await import('next/navigation');
+      redirect(redirectMatch.targetPath, redirectMatch.statusCode === 301 ? RedirectType.replace : RedirectType.push);
     }
     return { title: 'Trang không tồn tại | CIC Technology' };
   }
