@@ -8,6 +8,7 @@ import { draftSectionSchemas } from '../pageBuilderDraftSchema';
 import { entityTypeLabels, sectionDefinitions } from '../pageBuilderRegistry';
 import { directEditingSectionKeys } from '../visualElementEditingAdapters';
 import { getLegacyHomePageContent } from '../../../../shared/page-content/legacyPageContent';
+import { parseLocaleNumber, parseNumberAndSuffix } from '../../../../shared/visual-editing/inlineTextEditing';
 import { deepClone } from '../editor/editorUtils';
 import type { 
   PageBuilderConfigValue, 
@@ -1118,7 +1119,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
                 editable.contentEditable = 'true'; 
                 editable.setAttribute('role', 'textbox'); 
                 editable.style.cursor = 'text'; 
-                const update = () => onConfigValueChange?.(section.id, [element.key, itemIndex, fieldKey], typeof fieldValue === 'number' ? Number(editable.textContent?.trim() ?? 0) : editable.textContent?.trim() ?? '');
+                const update = () => onConfigValueChange?.(section.id, [element.key, itemIndex, fieldKey], typeof fieldValue === 'number' ? (parseLocaleNumber(editable.textContent?.trim() ?? '') ?? 0) : editable.textContent?.trim() ?? '');
                 const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); editable.blur(); } };
                 editable.addEventListener('blur', update); 
                 editable.addEventListener('keydown', onKeyDown);
@@ -1379,16 +1380,39 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.style.borderRadius = '3px';
       const showOutline = () => { node.style.outline = '2px solid rgb(249 115 22 / .82)'; };
       const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = '1px dashed rgb(249 115 22 / 0.65)'; };
-      const initialText = node.textContent?.trim() ?? '';
+      let currentInitialText = node.textContent?.trim() ?? '';
+      const onFocus = () => {
+        currentInitialText = node.textContent?.trim() ?? '';
+        showOutline();
+      };
       const update = () => {
-        let text = node.textContent?.trim() ?? '';
+        const text = node.textContent?.trim() ?? '';
+        if (text === currentInitialText) return;
+
+        // If updating a number field or stat value (e.g. Counter)
+        if (typeof value === 'number' || (path.length >= 2 && path[path.length - 1] === 'value')) {
+          const parsed = parseNumberAndSuffix(text);
+          if (parsed !== null) {
+            if (onConfigValueChange) {
+              onConfigValueChange(selectedSection.id, path, parsed.value);
+              // If there is an adjacent suffix property (like in home.stats items), sync the suffix too!
+              if (path[path.length - 1] === 'value') {
+                const suffixPath = [...path.slice(0, -1), 'suffix'];
+                const currentSuffix = configValueAtPath(selectedSection.config, suffixPath);
+                if (typeof currentSuffix === 'string' && parsed.suffix !== undefined && parsed.suffix !== currentSuffix) {
+                  onConfigValueChange(selectedSection.id, suffixPath, parsed.suffix);
+                }
+              }
+            }
+            return;
+          }
+        }
+
         let nextVal: string | number = text;
         if (typeof value === 'number') {
-          const cleaned = text.replace(/[^\d.-]/g, '');
-          const num = Number(cleaned);
-          nextVal = Number.isFinite(num) ? num : value;
+          const num = parseLocaleNumber(text);
+          nextVal = num !== null ? num : value;
         }
-        if (String(nextVal) === initialText) return;
         if (onConfigValueChange) onConfigValueChange(selectedSection.id, path, nextVal);
         else if (onTextChange && typeof nextVal === 'string') onTextChange(selectedSection.id, path, nextVal);
       };
@@ -1397,13 +1421,13 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.addEventListener('keydown', onKeyDown);
       node.addEventListener('mouseenter', showOutline);
       node.addEventListener('mouseleave', hideOutline);
-      node.addEventListener('focus', showOutline);
+      node.addEventListener('focus', onFocus);
       actionCleanups.push(() => { 
         node.removeEventListener('blur', update); 
         node.removeEventListener('keydown', onKeyDown);
         node.removeEventListener('mouseenter', showOutline);
         node.removeEventListener('mouseleave', hideOutline);
-        node.removeEventListener('focus', showOutline);
+        node.removeEventListener('focus', onFocus);
         node.removeAttribute('contenteditable'); 
         node.removeAttribute('role'); 
         node.style.cursor = ''; 

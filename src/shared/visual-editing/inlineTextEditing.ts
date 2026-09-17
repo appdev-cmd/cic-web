@@ -28,11 +28,103 @@ export interface CommitElementEditRequest {
 
 export type CommitElementEdit = (request: CommitElementEditRequest) => boolean;
 
+export function parseLocaleNumber(raw: string | number): number | null {
+  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  // Find the numeric core (digits, dots, commas, optional leading minus/plus)
+  const match = trimmed.match(/^[+-]?[\d.,]+/);
+  if (!match) return null;
+  const numStr = match[0];
+
+  // If there are multiple dots (e.g. "1.000.000"): dots are thousands separators
+  const dotCount = (numStr.match(/\./g) || []).length;
+  const commaCount = (numStr.match(/,/g) || []).length;
+
+  if (dotCount > 1) {
+    const cleaned = numStr.replace(/\./g, '').replace(',', '.');
+    const val = Number(cleaned);
+    return Number.isFinite(val) ? val : null;
+  }
+
+  if (commaCount > 1) {
+    const cleaned = numStr.replace(/,/g, '');
+    const val = Number(cleaned);
+    return Number.isFinite(val) ? val : null;
+  }
+
+  if (dotCount === 1 && commaCount === 1) {
+    const dotIndex = numStr.indexOf('.');
+    const commaIndex = numStr.indexOf(',');
+    if (dotIndex < commaIndex) {
+      // "1.000,5": dot is thousand, comma is decimal
+      const cleaned = numStr.replace('.', '').replace(',', '.');
+      const val = Number(cleaned);
+      return Number.isFinite(val) ? val : null;
+    } else {
+      // "1,000.5": comma is thousand, dot is decimal
+      const cleaned = numStr.replace(',', '');
+      const val = Number(cleaned);
+      return Number.isFinite(val) ? val : null;
+    }
+  }
+
+  if (dotCount === 1) {
+    const parts = numStr.split('.');
+    const integerPart = parts[0];
+    const fractionPart = parts[1];
+    // In Vietnamese (and vi-VN toLocaleString), a dot followed by exactly 3 digits
+    // (e.g. 5.000, 10.000, 50.000) represents a thousands separator!
+    if (fractionPart.length === 3) {
+      const val = Number(integerPart + fractionPart);
+      return Number.isFinite(val) ? val : null;
+    } else {
+      // Standard decimal
+      const val = Number(numStr);
+      return Number.isFinite(val) ? val : null;
+    }
+  }
+
+  if (commaCount === 1) {
+    const parts = numStr.split(',');
+    const integerPart = parts[0];
+    const fractionPart = parts[1];
+    // Comma followed by 3 digits (e.g. "5,000") is English thousands separator
+    if (fractionPart.length === 3) {
+      const val = Number(integerPart + fractionPart);
+      return Number.isFinite(val) ? val : null;
+    } else {
+      // Vietnamese decimal (e.g. "5,5")
+      const val = Number(integerPart + '.' + fractionPart);
+      return Number.isFinite(val) ? val : null;
+    }
+  }
+
+  const val = Number(numStr);
+  return Number.isFinite(val) ? val : null;
+}
+
+export function parseNumberAndSuffix(raw: string | number): { value: number; suffix: string } | null {
+  if (typeof raw === 'number') {
+    return Number.isFinite(raw) ? { value: raw, suffix: '' } : null;
+  }
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const match = trimmed.match(/^([+-]?[\d.,]+)\s*(.*)$/);
+  if (!match) return null;
+  const numPart = match[1];
+  const suffixPart = match[2] || '';
+  const num = parseLocaleNumber(numPart);
+  if (num === null) return null;
+  return { value: num, suffix: suffixPart };
+}
+
 export function parseFiniteNumber(rawValue: string): number | null {
-  const normalized = rawValue.trim();
-  if (!/^-?(?:\d+|\d*\.\d+)$/.test(normalized)) return null;
-  const value = Number(normalized);
-  return Number.isFinite(value) ? value : null;
+  return parseLocaleNumber(rawValue);
 }
 
 export const stringValueCodec: FieldValueCodec<string> = {

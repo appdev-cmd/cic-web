@@ -1,5 +1,5 @@
 import type { EditableElementBinding } from '../../../shared/visual-editing/elementBindingTypes';
-import { createInlineTextEditDescriptor, type CommitElementEditRequest, type InlineTextEditDescriptor } from '../../../shared/visual-editing/inlineTextEditing';
+import { createInlineTextEditDescriptor, parseLocaleNumber, type CommitElementEditRequest, type InlineTextEditDescriptor } from '../../../shared/visual-editing/inlineTextEditing';
 import type { SortableReorderMutation, SortableReorderRequest } from '../../../shared/visual-editing/sortableBoundCollection';
 import { isPersistentSortableId } from '../../../shared/visual-editing/sortableBoundCollection';
 import type { PageBuilderConfigValue, PageBuilderSection } from './pageBuilderTypes';
@@ -45,7 +45,7 @@ export function resolveHomeStatsEditTarget(
   if (field === 'value') {
     const numVal = typeof item.value === 'number' && Number.isFinite(item.value)
       ? item.value
-      : (typeof item.value === 'string' ? Number((item.value as string).replace(/[^\d.-]/g, '')) || 0 : 0);
+      : (typeof item.value === 'string' ? parseLocaleNumber(item.value) ?? 0 : (typeof item.val === 'number' && Number.isFinite(item.val) ? item.val : 0));
     const descriptor = createInlineTextEditDescriptor(binding, getEditableFieldContract('home.stats', 'items.*.value')!, numVal, typeof item.suffix === 'string' ? item.suffix : '');
     if (!descriptor) return null;
     return {
@@ -66,8 +66,8 @@ export function isMatchingHomeStatsCommit(target: HomeStatsEditTarget, request: 
   if (target.descriptor.valueKind === 'number') {
     if (typeof request.after === 'number' && Number.isFinite(request.after)) return true;
     if (typeof request.after === 'string') {
-      const num = Number(request.after.replace(/[^\d.-]/g, ''));
-      return Number.isFinite(num);
+      const num = parseLocaleNumber(request.after);
+      return num !== null && Number.isFinite(num);
     }
     return false;
   }

@@ -265,7 +265,14 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
     : [];
   const displayedMetrics = useMemo(() => {
     if (capacityMetrics.length === 0) return defaultMetrics;
-    const valid = capacityMetrics.filter((it): it is { id?: string; value: string; label: string } => it != null && typeof it === 'object' && typeof it.value === 'string');
+    const valid = capacityMetrics
+      .filter((it): it is NonNullable<typeof it> => it != null && typeof it === 'object')
+      .map((it) => ({
+        id: it.id,
+        value: typeof it.value === 'string' ? it.value : (it.value != null ? String(it.value) : ''),
+        label: typeof it.label === 'string' ? it.label : (it.label != null ? String(it.label) : ''),
+      }))
+      .filter((it) => it.value.length > 0 || it.label.length > 0);
     return valid.length > 0 ? valid : defaultMetrics;
   }, [capacityMetrics, defaultMetrics]);
 

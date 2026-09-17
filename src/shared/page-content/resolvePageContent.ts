@@ -1,5 +1,6 @@
 import type { AboutCapacityMetricModel, AboutPageModel, AboutStrategyCoreValueModel, AboutTimelineMilestoneModel, CapacityExperiencePageModel, ContactBranchModel, ContactPageModel, HomePageModel, HomeProjectModel, HomeStatModel, HomeEventItemModel, HomeNewsItemModel, HomePartnerItemModel } from './models';
 import { resolveProjectEntity, resolveEventEntity, resolveNewsEntity, resolvePartnerEntity } from './resolveReferenceEntity';
+import { parseLocaleNumber } from '../visual-editing/inlineTextEditing';
 
 export interface PageContentSectionSource {
   sectionKey: string;
@@ -90,14 +91,25 @@ function resolveHomeContent(
   if (statsSec && isRecord(statsSec.config) && Array.isArray(statsSec.config.items)) {
     const items: HomeStatModel[] = [];
     for (const [index, rawItem] of statsSec.config.items.entries()) {
-      if (isRecord(rawItem) && typeof rawItem.value === 'number' && Number.isFinite(rawItem.value) && typeof rawItem.label === 'string') {
-        const hasPersistentId = typeof rawItem.id === 'string' && rawItem.id.length > 0;
-        items.push({
-          id: hasPersistentId ? (rawItem.id as string) : `unpersisted-home-stat-${index + 1}`,
-          value: rawItem.value,
-          suffix: typeof rawItem.suffix === 'string' ? rawItem.suffix : undefined,
-          label: rawItem.label,
-        });
+      if (isRecord(rawItem) && typeof rawItem.label === 'string') {
+        const rawNum = typeof rawItem.value === 'number' && Number.isFinite(rawItem.value)
+          ? rawItem.value
+          : typeof rawItem.value === 'string'
+            ? parseLocaleNumber(rawItem.value)
+            : typeof rawItem.val === 'number' && Number.isFinite(rawItem.val)
+              ? rawItem.val
+              : typeof rawItem.val === 'string'
+                ? parseLocaleNumber(rawItem.val)
+                : null;
+        if (rawNum !== null) {
+          const hasPersistentId = typeof rawItem.id === 'string' && rawItem.id.length > 0;
+          items.push({
+            id: hasPersistentId ? (rawItem.id as string) : `unpersisted-home-stat-${index + 1}`,
+            value: rawNum,
+            suffix: typeof rawItem.suffix === 'string' ? rawItem.suffix : undefined,
+            label: rawItem.label,
+          });
+        }
       }
     }
     if (items.length > 0) {
@@ -336,13 +348,18 @@ function resolveAboutCapacity(input: ResolveCapacityExperiencePageContentInput):
   if (Array.isArray(rawMetrics) && rawMetrics.length > 0) {
     for (const [index, rawMetric] of rawMetrics.entries()) {
       const path = `config.metrics[${index}]`;
-      if (isRecord(rawMetric) && typeof rawMetric.value === 'string' && typeof rawMetric.label === 'string') {
-        const hasPersistentId = typeof rawMetric.id === 'string' && rawMetric.id.length > 0;
-        if (!hasPersistentId) diagnostics.push({
-          code: 'UNPERSISTED_ABOUT_CAPACITY_METRIC_ID', sectionKey: 'about.capacity', path: `${path}.id`,
-          message: 'The metric has no persistent ID. Inline persistence remains blocked for this item.',
-        });
-        metrics.push({ id: hasPersistentId ? rawMetric.id as string : `unpersisted-about-capacity-metric-${index + 1}`, value: rawMetric.value, label: rawMetric.label });
+      if (isRecord(rawMetric) && typeof rawMetric.label === 'string') {
+        const valStr = typeof rawMetric.value === 'string'
+          ? rawMetric.value
+          : (rawMetric.value != null ? String(rawMetric.value) : '');
+        if (valStr.length > 0) {
+          const hasPersistentId = typeof rawMetric.id === 'string' && rawMetric.id.length > 0;
+          if (!hasPersistentId) diagnostics.push({
+            code: 'UNPERSISTED_ABOUT_CAPACITY_METRIC_ID', sectionKey: 'about.capacity', path: `${path}.id`,
+            message: 'The metric has no persistent ID. Inline persistence remains blocked for this item.',
+          });
+          metrics.push({ id: hasPersistentId ? rawMetric.id as string : `unpersisted-about-capacity-metric-${index + 1}`, value: valStr, label: rawMetric.label });
+        }
       }
     }
   }

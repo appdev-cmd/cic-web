@@ -56,6 +56,12 @@ export function updateAtPath(config: Record<string, PageBuilderConfigValue>, pat
       }
     }
     cursor[lastPart] = value;
+    if (lastPart === 'value' && typeof cursor === 'object' && !Array.isArray(cursor) && 'val' in cursor) {
+      (cursor as Record<string, unknown>).val = value;
+    }
+    if (lastPart === 'val' && typeof cursor === 'object' && !Array.isArray(cursor) && 'value' in cursor) {
+      (cursor as Record<string, unknown>).value = value;
+    }
   }
   return next;
 }
