@@ -482,7 +482,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'milestones', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'milestones' }))} className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 relative z-10">
                         {displayedMilestones.map((item, index) => {
                           const itemPath = createCollectionItemPath('milestones', item.id ?? `ms-${index}`);
-                          return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} key={item.id ? `ms-${item.id}-${index}` : `timeline-ms-${index}`} className="relative flex flex-col items-center text-center group">
+                          return <div key={`timeline-item-${item.id ?? index}`} {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} className="relative flex flex-col items-center text-center group">
                             {/* Dot */}
                             <div className={`hidden md:flex w-3 h-3 rounded-full bg-orange-500 ring-[6px] ring-white mb-6 relative z-10 items-center justify-center -translate-y-1/2 mt-[28px] ${renderPolicy.motionEnabled ? 'group-hover:scale-150 group-hover:bg-orange-600 transition-all duration-300' : ''}`}>
                               <div className={`absolute inset-0 rounded-full bg-orange-500 opacity-50 ${renderPolicy.motionEnabled ? 'animate-ping' : ''}`}></div>
@@ -572,15 +572,23 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Giá trị cốt lõi</h3>
                             <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'coreValues', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'coreValues' }))} className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 w-full">
                               {displayedCoreValues.map((item, index) => {
-                                const itemPath = createCollectionItemPath('coreValues', item.id ?? `cv-${index}`);
-                                return <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id ?? `cv-${index}`, collectionPath: 'coreValues' }))} key={item.id ? `cv-${item.id}-${index}` : `core-val-${index}`} className="flex items-center gap-3">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></div>
-                                  <span 
-                                    {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id ?? `cv-${index}`, collectionPath: 'coreValues' }))} 
-                                    data-page-builder-config-path={JSON.stringify(['coreValues', index, 'value'])}
-                                    className="text-slate-600 leading-relaxed text-sm md:text-base"
-                                  >{item.value}</span>
-                                </div>;
+                                const itemId = (typeof item === 'object' && item?.id) ? item.id : `cv-${index}`;
+                                const itemPath = createCollectionItemPath('coreValues', itemId);
+                                const valueText = typeof item === 'string' ? item : (item?.value ?? '');
+                                return (
+                                  <div 
+                                    key={`core-val-${itemId}-${index}`}
+                                    {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId, collectionPath: 'coreValues' }))} 
+                                    className="flex items-center gap-3"
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></div>
+                                    <span 
+                                      {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: `${itemPath}.value`, semantic: 'text', ownership: 'embedded', editable: true, itemId, collectionPath: 'coreValues' }))} 
+                                      data-page-builder-config-path={JSON.stringify(['coreValues', index, 'value'])}
+                                      className="text-slate-600 leading-relaxed text-sm md:text-base"
+                                    >{valueText}</span>
+                                  </div>
+                                );
                               })}
                             </div>
                           </div>

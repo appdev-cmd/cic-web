@@ -205,7 +205,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
     if (onTextChange) node.classList.add('cursor-pointer', 'transition-[outline,box-shadow]');
     node.style.outline = onTextChange 
       ? (section.id === selectedId 
-          ? (section.sectionKey === 'home.hero' ? '' : '2px solid rgb(249 115 22 / .78)') 
+          ? (['home.hero', 'about.hero'].includes(section.sectionKey) ? '' : '2px solid rgb(249 115 22 / .78)') 
           : issueIds.has(section.id) ? '1px solid rgb(239 68 68 / .8)' : '') 
       : '';
     node.style.outlineOffset = '-2px';
@@ -238,7 +238,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
 
     if (section.id === selectedId && onTextChange) {
       const productionHeight = node.getBoundingClientRect().height;
-      const isHero = section.sectionKey === 'home.hero';
+      const isHero = section.sectionKey === 'home.hero' || section.sectionKey === 'about.hero';
       node.style.position = 'relative';
       node.style.height = isHero ? `${productionHeight}px` : 'auto';
       node.style.minHeight = `${productionHeight}px`;
@@ -267,6 +267,11 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         toolbar.appendChild(button);
         actionCleanups.push(() => button.removeEventListener('click', click));
       };
+
+      if (section.sectionKey === 'about.hero' && onEditMedia) {
+        const bgId = typeof section.config.backgroundImageId === 'string' ? section.config.backgroundImageId : '';
+        addButton('🖼️ Đổi ảnh nền', () => onEditMedia(section.id, ['backgroundImageId'], bgId));
+      }
 
       if (section.sectionKey === 'home.hero' && Array.isArray(section.config.slides)) {
         const slides = section.config.slides;
@@ -404,7 +409,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       const draftLayer = node.ownerDocument.createElement('div');
       draftLayer.dataset.pageBuilderAction = 'draft-layer';
       draftLayer.style.cssText = isHero
-        ? `position:absolute;z-index:2147483646;left:50%;bottom:${viewport === 'mobile' ? '14px' : '60px'};transform:translateX(-50%);max-width:100%;background:transparent;color:#fff;font-family:system-ui;pointer-events:auto;`
+        ? `position:absolute;z-index:2147483646;left:50%;bottom:${viewport === 'mobile' ? '14px' : (section.sectionKey === 'home.hero' ? '60px' : '16px')};transform:translateX(-50%);max-width:100%;background:transparent;color:#fff;font-family:system-ui;pointer-events:auto;`
         : 'position:relative;z-index:2147483646;margin:0;background:transparent;color:#334155;font-family:system-ui;';
 
       const surfaceHeader = node.ownerDocument.createElement('div');
@@ -713,6 +718,10 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         (section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') ? 'ecosystem' : 
         (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') ? 'partner' : 
         section.references?.[0]?.entityType;
+
+      if (toolbar.children.length === 0 && !showFullCollectionInventory) {
+        draftLayer.style.display = 'none';
+      }
 
       const collectionAnchor = collectionType ? node.querySelector<HTMLElement>(`[data-page-collection~="${collectionType}"]`) : null;
       if (collectionAnchor) collectionAnchor.parentElement?.insertBefore(draftLayer, collectionAnchor);
@@ -1395,12 +1404,12 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       const editLabel = fieldKey === 'title' ? 'Tiêu đề' : fieldKey === 'subtitle' || fieldKey === 'description' ? 'Mô tả' : fieldKey === 'badge' || fieldKey === 'eyebrow' ? 'Nhãn' : 'Bấm để sửa trực tiếp';
       node.title = editLabel;
       node.style.cursor = 'text';
-      node.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
+      node.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
       node.style.outlineOffset = '3px';
       node.style.borderRadius = '3px';
 
       const showOutline = () => { node.style.outline = '2px solid rgb(249 115 22 / .82)'; };
-      const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)'; };
+      const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)'; };
 
       const onBlur = () => {
         const nextValue = normalizeText(node.textContent ?? '');
@@ -1454,7 +1463,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           if (onEditMedia) {
             node.title = 'Bấm để thay ảnh';
             node.style.cursor = 'pointer';
-            node.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
+            node.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
             node.style.outlineOffset = '3px';
             const editImage = (event: MouseEvent) => {
               event.preventDefault();
@@ -1494,7 +1503,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         if (onEditMedia) {
           imageNode.title = 'Bấm để thay ảnh';
           imageNode.style.cursor = 'pointer';
-          imageNode.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
+          imageNode.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
           imageNode.style.outlineOffset = '3px';
           const editImage = (event: MouseEvent) => { 
             event.preventDefault(); 
@@ -1565,10 +1574,10 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       if (!onEditCta) return;
       node.dataset.pageBuilderCtaEdit = key;
       node.title = 'Bấm để sửa CTA';
-      node.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
+      node.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)';
       node.style.outlineOffset = '3px';
       const showOutline = () => { node.style.outline = '2px solid rgb(249 115 22 / .82)'; };
-      const hideOutline = () => { node.style.outline = selectedSection.sectionKey === 'home.hero' ? 'none' : '1px dashed rgb(249 115 22 / 0.65)'; };
+      const hideOutline = () => { node.style.outline = ['home.hero', 'about.hero'].includes(selectedSection.sectionKey) ? 'none' : '1px dashed rgb(249 115 22 / 0.65)'; };
       const editCta = (event: MouseEvent) => {
         event.preventDefault(); 
         event.stopPropagation();
