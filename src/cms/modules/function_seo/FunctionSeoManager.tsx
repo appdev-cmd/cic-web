@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useMemo, useState, useTransition } from 'react';
 import {
   CheckCircle2,
