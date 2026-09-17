@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, FileText, X, FolderOpen, CheckCircle2, Edit2, Link as LinkIcon, FileArchive, FileCode } from 'lucide-react';
+import { Upload, FileText, X, FolderOpen, CheckCircle2, Edit2, Link as LinkIcon, FileArchive, FileCode, Loader2 } from 'lucide-react';
 
 interface ProductFileInputProps {
   label: string;
@@ -9,6 +9,7 @@ interface ProductFileInputProps {
   accept?: string;
   onAutoFillName?: (name: string) => void;
   hint?: string;
+  isUploading?: boolean;
 }
 
 export const ProductFileInput: React.FC<ProductFileInputProps> = ({
@@ -19,6 +20,7 @@ export const ProductFileInput: React.FC<ProductFileInputProps> = ({
   accept = '.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z,.tar,.gz,.exe,.msi,.dmg,.pkg,.apk,.txt,.csv',
   onAutoFillName,
   hint,
+  isUploading = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isManualEdit, setIsManualEdit] = useState(false);
@@ -147,6 +149,16 @@ export const ProductFileInput: React.FC<ProductFileInputProps> = ({
             >
               <X className="w-3.5 h-3.5" />
             </button>
+          </div>
+        </div>
+      ) : isUploading ? (
+        /* Uploading state */
+        <div className="flex h-[42px] items-center justify-between px-3 rounded-xl border border-orange-300 bg-orange-50/50 dark:border-orange-900/50 dark:bg-orange-950/20">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Loader2 className="w-4 h-4 text-orange-500 animate-spin shrink-0" />
+            <span className="text-sm text-orange-700 dark:text-orange-300 font-medium truncate">
+              Đang tải tệp lên...
+            </span>
           </div>
         </div>
       ) : (

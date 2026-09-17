@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Save, Search, Send, Star, X, AlertCircle } from 'lucide-react';
+import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
@@ -52,6 +53,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingType, setSubmittingType] = useState<'draft' | 'publish' | null>(null);
   const [formError, setFormError] = useState('');
   const selectedImage = mediaImages.find((asset) => asset.id === image || asset.url === image);
 
@@ -71,6 +73,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
     }
     try {
       setIsSubmitting(true);
+      setSubmittingType(nextPublished ? 'publish' : 'draft');
       await onSave({
         title, alias: alias || slugify(title), other_languages1: otherLanguages1, category_id: categoryId,
         ordering: Number(ordering) || 1, image, tawk_to: tawkTo, file_upload: fileUpload,
@@ -83,6 +86,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
       setFormError(error instanceof Error ? error.message : 'Không thể lưu bài viết. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setIsSubmitting(false);
+      setSubmittingType(null);
     }
   };
 
@@ -93,9 +97,31 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
         <div><p className="text-xs font-bold text-orange-600">TIN TỨC</p><h1 className="font-black dark:text-white">{articleToEdit ? 'Chỉnh sửa tin tức' : 'Thêm tin tức'}</h1></div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={isSubmitting} onClick={() => setPreviewOpen(true)} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 disabled:opacity-50"><Eye className="h-4 w-4" />Xem trước</button>
-        <button type="button" disabled={isSubmitting} onClick={() => void save(false)} className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700 disabled:opacity-50"><Save className="h-4 w-4" />{isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}</button>
-        <button type="button" disabled={isSubmitting} onClick={() => void save(true)} className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white disabled:opacity-50"><Send className="h-4 w-4" />{isSubmitting ? 'Đang lưu...' : 'Xuất bản'}</button>
+        <CmsButton variant="secondary" size="sm" leadingIcon={<Eye className="h-4 w-4" />} disabled={isSubmitting} onClick={() => setPreviewOpen(true)}>
+          Xem trước
+        </CmsButton>
+        <CmsButton
+          variant="secondary"
+          size="sm"
+          leadingIcon={<Save className="h-4 w-4" />}
+          loading={isSubmitting && submittingType === 'draft'}
+          loadingText="Đang lưu..."
+          disabled={isSubmitting}
+          onClick={() => void save(false)}
+        >
+          Lưu nháp
+        </CmsButton>
+        <CmsButton
+          variant="primary"
+          size="sm"
+          leadingIcon={<Send className="h-4 w-4" />}
+          loading={isSubmitting && submittingType === 'publish'}
+          loadingText="Đang xuất bản..."
+          disabled={isSubmitting}
+          onClick={() => void save(true)}
+        >
+          Xuất bản
+        </CmsButton>
       </div>
     </header>
     {formError && (

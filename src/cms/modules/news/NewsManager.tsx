@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Newspaper,
@@ -26,6 +26,8 @@ import { ActivityLogDrawer } from './components/ActivityLogDrawer';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
+import { CmsDataGridFrame, CmsTableSkeletonRows } from '@/shared/ui/cms';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { NewsCategoryManager } from './NewsCategoryManager';
 import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 import type { CmsLocale } from '../../data/CmsDataSource';
@@ -42,6 +44,8 @@ interface NewsManagerProps {
 export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale, capabilities = { create:false,edit:false,delete:false } }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const { showToast } = useCmsToast();
 
   // Articles State
   const [articles, setArticles] = useState<NewsArticle[]>(data?.articles ?? []);
@@ -86,14 +90,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
     updated_time: true,
     actions: true,
   });
-
-  // Toast
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
 
   // Scope Filtered Articles
   const scopeFilteredArticles = useMemo(() => {
@@ -157,7 +153,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
     try {
       await setNewsPlacementAction(workspaceLocale,id,'hot',!target.is_hot);
       showToast(!target.is_hot?'Đã gắn cờ Nổi bật cho bài viết!':'Đã bỏ cờ Nổi bật bài viết!');
-      router.refresh();
+      startTransition(() => { router.refresh(); });
     } catch(error) {
       showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật Hot News.'));
     }
@@ -173,7 +169,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
     try {
       await setNewsPlacementAction(workspaceLocale,id,'home',!target.show_in_homepage);
       showToast(!target.show_in_homepage?'Đã cho phép hiển thị bài viết trên Trang chủ!':'Đã ẩn bài viết khỏi Trang chủ!');
-      router.refresh();
+      startTransition(() => { router.refresh(); });
     } catch(error) {
       showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật Trang chủ.'));
     }
@@ -210,7 +206,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
           : `Đã chuyển ${ids.length} bài viết vào Thùng rác.`
       );
       setTrashTargets(null);
-      router.refresh();
+      startTransition(() => { router.refresh(); });
     } catch (error) {
       showToast(sanitizeCmsErrorMessage(error, 'Không thể chuyển bài viết vào Thùng rác.'));
     } finally {
@@ -232,7 +228,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
       await setNewsPublishedAction(workspaceLocale,selectedIds,published);
       showToast(`Đã chuyển ${selectedIds.length} bài viết sang ${published?'Đã xuất bản':'Bản nháp'}!`);
       setSelectedIds([]);
-      router.refresh();
+      startTransition(() => { router.refresh(); });
     } catch(error) {
       showToast(sanitizeCmsErrorMessage(error, 'Không thể cập nhật trạng thái bài viết.'));
     }
@@ -278,7 +274,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
       showToast(editingArticle ? 'Đã cập nhật bài viết thành công!' : 'Đã thêm bài viết mới thành công!');
       setViewMode('list');
       setEditingArticle(null);
-      router.refresh();
+      startTransition(() => { router.refresh(); });
     } catch(error) {
       const sanitized = sanitizeCmsErrorMessage(error, 'Không thể lưu bài viết. Vui lòng kiểm tra lại thông tin.');
       showToast(sanitized);
@@ -299,13 +295,6 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
 
   return (
     <div className="space-y-6 relative">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4">
-          <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
 
       {viewMode === 'form' ? (
         <NewsFormView
@@ -399,39 +388,60 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
           </div>
 
           {/* DATA TABLE */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="cms-data-table text-left">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="p-3 w-10 text-center">
-                      <CmsSelectionCheckbox
-                        checked={filteredArticles.length > 0 && selectedIds.length === filteredArticles.length}
-                        indeterminate={selectedIds.length > 0 && selectedIds.length < filteredArticles.length}
-                        onChange={handleToggleSelectAll}
-                        label="Chọn tất cả bài viết"
-                      />
-                    </th>
-                    <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
-                    {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
-                    {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả</th>}
-                    <th className="p-3 min-w-[92px] text-center">Nổi bật</th>
-                    <th className="p-3 min-w-[100px] text-center">Trang chủ</th>
-                    {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
-                    {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
-                    {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">Cập nhật</th>}
-                    {columnVisibility.actions && <th className="p-3 w-32 text-right sticky right-0 bg-slate-50 dark:bg-slate-800">Thao tác</th>}
+          <CmsDataGridFrame
+            ariaLabel="Danh sách bài viết tin tức"
+            isLoading={isPending}
+            loadingMode={articles.length === 0 ? 'skeleton' : 'overlay'}
+            skeletonColumns={10}
+            skeletonRows={5}
+            loadingText="Đang cập nhật danh sách..."
+            footer={
+              <CmsPagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalCount={filteredArticles.length}
+                itemLabel="bài viết"
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
+            }
+          >
+            <table className="cms-data-table text-left">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="p-3 w-10 text-center">
+                    <CmsSelectionCheckbox
+                      checked={filteredArticles.length > 0 && selectedIds.length === filteredArticles.length}
+                      indeterminate={selectedIds.length > 0 && selectedIds.length < filteredArticles.length}
+                      onChange={handleToggleSelectAll}
+                      label="Chọn tất cả bài viết"
+                    />
+                  </th>
+                  <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
+                  {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
+                  {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả</th>}
+                  <th className="p-3 min-w-[92px] text-center">Nổi bật</th>
+                  <th className="p-3 min-w-[100px] text-center">Trang chủ</th>
+                  {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
+                  {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
+                  {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">Cập nhật</th>}
+                  {columnVisibility.actions && <th className="p-3 w-32 text-right sticky right-0 bg-slate-50 dark:bg-slate-800">Thao tác</th>}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                {isPending && articles.length === 0 ? (
+                  <CmsTableSkeletonRows columns={10} rows={5} />
+                ) : filteredArticles.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="p-12 text-center text-slate-400">
+                      <Newspaper className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                      <p className="font-semibold">Không tìm thấy bài viết tin tức nào.</p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
-                  {filteredArticles.length === 0 ? (
-                    <tr>
-                      <td colSpan={10} className="p-12 text-center text-slate-400">
-                        <Newspaper className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                        <p className="font-semibold">Không tìm thấy bài viết tin tức nào.</p>
-                      </td>
-                    </tr>
-                  ) : (
+                ) : (
                     paginatedArticles.map((art) => {
                       const isSelected = selectedIds.includes(art.id);
                       return (
@@ -607,9 +617,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                   )}
                 </tbody>
               </table>
-            </div>
-            <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={filteredArticles.length} itemLabel="bài viết" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />
-          </div>
+          </CmsDataGridFrame>
         </>
       )}
 

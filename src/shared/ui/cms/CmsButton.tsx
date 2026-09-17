@@ -1,13 +1,16 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 type CmsButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 type CmsButtonSize = 'sm' | 'md';
 
-interface CmsButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface CmsButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: CmsButtonVariant;
   size?: CmsButtonSize;
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
+  loading?: boolean;
+  loadingText?: string;
 }
 
 const variantClasses: Record<CmsButtonVariant, string> = {
@@ -28,52 +31,101 @@ export const CmsButton = React.forwardRef<HTMLButtonElement, CmsButtonProps>(fun
     size = 'md',
     leadingIcon,
     trailingIcon,
+    loading = false,
+    loadingText,
+    disabled = false,
     className = '',
     children,
     type = 'button',
+    onClick,
     ...props
   },
   ref
 ) {
+  const isButtonDisabled = disabled || loading;
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isButtonDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onClick?.(e);
+  };
+
+  const displayedLeadingIcon = loading ? (
+    <Loader2 className="animate-spin size-4 shrink-0" />
+  ) : leadingIcon;
+
   return (
     <button
       ref={ref}
       type={type}
-      className={`cursor-pointer inline-flex shrink-0 items-center justify-center whitespace-nowrap border font-semibold leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      disabled={isButtonDisabled}
+      aria-busy={loading}
+      onClick={handleClick}
+      className={`cursor-pointer inline-flex shrink-0 items-center justify-center whitespace-nowrap border font-semibold leading-none transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
-      {leadingIcon && <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">{leadingIcon}</span>}
-      {children && <span className="inline-flex min-w-0 items-center">{children}</span>}
-      {trailingIcon && <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">{trailingIcon}</span>}
+      {displayedLeadingIcon && (
+        <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">
+          {displayedLeadingIcon}
+        </span>
+      )}
+      {(children || (loading && loadingText)) && (
+        <span className="inline-flex min-w-0 items-center">
+          {loading && loadingText ? loadingText : children}
+        </span>
+      )}
+      {!loading && trailingIcon && (
+        <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">
+          {trailingIcon}
+        </span>
+      )}
     </button>
   );
 });
 
-interface CmsIconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label'> {
+export interface CmsIconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label'> {
   'aria-label'?: string;
   label?: string;
   icon?: React.ReactNode;
   variant?: 'default' | 'danger';
   size?: 'sm' | 'md';
+  loading?: boolean;
 }
 
 export const CmsIconButton = React.forwardRef<HTMLButtonElement, CmsIconButtonProps>(function CmsIconButton(
-  { icon, label, children, variant = 'default', size = 'md', className = '', type = 'button', ...props },
+  { icon, label, children, variant = 'default', size = 'md', loading = false, disabled = false, className = '', type = 'button', onClick, ...props },
   ref
 ) {
+  const isButtonDisabled = disabled || loading;
+
   const color = variant === 'danger'
     ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40'
     : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white';
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isButtonDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onClick?.(e);
+  };
 
   return (
     <button
       ref={ref}
       type={type}
+      disabled={isButtonDisabled}
+      aria-busy={loading}
       aria-label={props['aria-label'] ?? label}
-      className={`cursor-pointer inline-flex shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4 ${size === 'sm' ? 'size-8' : 'size-9'} ${color} ${className}`}
+      onClick={handleClick}
+      className={`cursor-pointer inline-flex shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:pointer-events-none disabled:opacity-60 [&>svg]:size-4 ${size === 'sm' ? 'size-8' : 'size-9'} ${color} ${className}`}
       {...props}
     >
-      {icon ?? children}
+      {loading ? <Loader2 className="animate-spin size-4 shrink-0" /> : (icon ?? children)}
     </button>
   );
 });

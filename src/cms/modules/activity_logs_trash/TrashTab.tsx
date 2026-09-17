@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Clock, Eye, Lock, RotateCcw, Search, Trash2 } from 'lucide-react';
 import type { TrashItemViewModel, TrashListPage, TrashListQuery } from '@/features/trash/types';
 import { CmsDataGridFrame } from '@/shared/ui/cms/CmsDataGridFrame';
+import { CmsTableSkeletonRows } from '@/shared/ui/cms/CmsTableSkeleton';
 import { CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
@@ -108,10 +109,14 @@ export const TrashTab: React.FC<TrashTabProps> = ({
         ]}
       />
 
-      <div className="relative" aria-busy={isLoading}>
-        {isLoading && <div className="pointer-events-none absolute inset-0 z-30 rounded-2xl bg-white/55 backdrop-blur-[1px] dark:bg-slate-950/45"><span className="sr-only">Đang tải dữ liệu</span></div>}
+      <div>
         <CmsDataGridFrame
           ariaLabel="Danh sách mục trong Thùng rác"
+          isLoading={isLoading}
+          loadingMode={page.items.length === 0 ? 'skeleton' : 'overlay'}
+          skeletonColumns={7}
+          skeletonRows={5}
+          loadingText="Đang tải thùng rác..."
           refreshKey={`${query.page}:${query.pageSize}:${page.total}`}
           footer={<CmsPagination currentPage={query.page} pageSize={query.pageSize} totalCount={page.total} itemLabel="mục đã xóa" onPageChange={(next) => { setSelectedItemIds([]); onQueryChange({ ...query, page: next }); }} onPageSizeChange={(size) => { setSelectedItemIds([]); onQueryChange({ ...query, pageSize: size, page: 1 }); }} />}
         >
@@ -130,7 +135,9 @@ export const TrashTab: React.FC<TrashTabProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {page.items.length === 0 ? (
+              {isLoading && page.items.length === 0 ? (
+                <CmsTableSkeletonRows columns={7} rows={5} />
+              ) : page.items.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-slate-500 dark:text-slate-400">Thùng rác trống hoặc không tìm thấy mục phù hợp.</td></tr>
               ) : page.items.map((item) => {
                 const selected = selectedItemIds.includes(item.id);

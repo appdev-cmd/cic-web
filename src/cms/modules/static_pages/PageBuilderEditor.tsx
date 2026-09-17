@@ -280,24 +280,27 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
       [items[index], items[target]] = [items[target], items[index]];
     }
     if (section && (section.sectionKey === 'about.awards' || section.sectionKey === 'about.partners') && section.config.syncWithHome !== false) {
-      recordHistory(`Cập nhật ${path}`);
-      setWorkingPage((current) => ({
-        ...current,
-        draft: {
-          ...current.draft,
-          sections: current.draft.sections.map((s) => {
-            if (s.id !== sectionId) return s;
-            const updatedConfig = updateConfigByPath(s.config, [path], items);
-            return {
-              ...s,
-              config: {
-                ...updatedConfig,
-                syncWithHome: false,
-              },
-            };
-          }),
-        },
-      }));
+      setWorkingPage((current) => {
+        setPast((itemsHistory) => [...itemsHistory.slice(-49), deepClone(current)]);
+        setFuture([]);
+        return {
+          ...current,
+          draft: {
+            ...current.draft,
+            sections: current.draft.sections.map((s) => {
+              if (s.id !== sectionId) return s;
+              const updatedConfig = updateAtPath(s.config, [path], items);
+              return {
+                ...s,
+                config: {
+                  ...updatedConfig,
+                  syncWithHome: false,
+                },
+              };
+            }),
+          },
+        };
+      });
       return;
     }
     updateSectionConfig(sectionId, [path], items);
@@ -379,9 +382,36 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     setActiveHeroSlide(target);
   };
 
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
   const runValidAction = (action: (value: PageBuilderPage) => void) => {
     setShowValidation(true);
     if (issueCount === 0) action(workingPage);
+  };
+
+  const handleSaveDraft = async () => {
+    setShowValidation(true);
+    if (issueCount === 0) {
+      setIsSavingDraft(true);
+      try {
+        await onSaveDraft(workingPage);
+      } finally {
+        setIsSavingDraft(false);
+      }
+    }
+  };
+
+  const handlePublish = async () => {
+    setShowValidation(true);
+    if (issueCount === 0) {
+      setIsPublishing(true);
+      try {
+        await onPublish(workingPage);
+      } finally {
+        setIsPublishing(false);
+      }
+    }
   };
 
   const selectedSection = workingPage.draft.sections.find((item) => item.id === selectedSectionId) ?? workingPage.draft.sections[0];
@@ -398,7 +428,9 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
             <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">{([['desktop', Monitor, 'Desktop'], ['tablet', Tablet, 'Tablet'], ['mobile', Smartphone, 'Mobile']] as const).map(([value, Icon, label]) => <button key={value} type="button" title={label} aria-label={label} onClick={() => setViewport(value)} className={`rounded-md p-2 ${viewport === value ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}><Icon className="h-4 w-4" /></button>)}</div>
             <div className="flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900"><button type="button" onClick={undo} disabled={past.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hoàn tác" title="Hoàn tác"><Undo2 className="h-4 w-4" /></button><button type="button" onClick={redo} disabled={future.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Làm lại" title="Làm lại"><Redo2 className="h-4 w-4" /></button></div>
             <button type="button" onClick={() => { setShowHistory((value) => !value); setIsExpanded(false); }} className={`rounded-lg border p-2 ${showHistory ? 'border-orange-300 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`} aria-label="Lịch sử phiên bản" title="Lịch sử phiên bản"><History className="h-4 w-4" /></button>
-            <CmsButton variant="secondary" leadingIcon={<Save />} onClick={() => runValidAction(onSaveDraft)}>Lưu bản nháp</CmsButton><CmsButton variant="secondary" leadingIcon={<Eye />} onClick={() => runValidAction(onPreview)}>Xem trước</CmsButton><CmsButton leadingIcon={<Send />} onClick={() => runValidAction(onPublish)}>Xuất bản</CmsButton>
+            <CmsButton variant="secondary" leadingIcon={<Save />} loading={isSavingDraft} loadingText="Đang lưu..." disabled={isSavingDraft || isPublishing} onClick={handleSaveDraft}>Lưu bản nháp</CmsButton>
+            <CmsButton variant="secondary" leadingIcon={<Eye />} disabled={isSavingDraft || isPublishing} onClick={() => runValidAction(onPreview)}>Xem trước</CmsButton>
+            <CmsButton leadingIcon={<Send />} loading={isPublishing} loadingText="Đang xuất bản..." disabled={isSavingDraft || isPublishing} onClick={handlePublish}>Xuất bản</CmsButton>
           </div>
         </div>
       </div>

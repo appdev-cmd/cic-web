@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Package,
@@ -32,6 +32,8 @@ import type { ProductsModuleData } from '../../data/CatalogDataSource';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { CmsDataGridFrame, CmsTableSkeletonRows } from '@/shared/ui/cms';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 import { ProductsToolbar } from './ProductsToolbar';
 
@@ -116,13 +118,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const [productToDuplicate, setProductToDuplicate] = useState<ProductItem | null>(null);
   const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
 
-  // Toast message
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
+  const [isPending, startTransition] = useTransition();
+  const { showToast } = useCmsToast();
 
   const persist = async (operation: Promise<unknown>, fallbackMsg = 'Không thể cập nhật dữ liệu sản phẩm.') => {
     try {
@@ -293,7 +290,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
           : `Đã đưa ${ids.length} sản phẩm vào Thùng rác.`
       );
       setTrashTargets(null);
-      router.refresh();
+      startTransition(() => { router.refresh(); });
     } catch {
       // Handled and toasted in persist
     } finally {
@@ -452,13 +449,6 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
 
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-200">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[100] px-4 py-3 bg-slate-900 text-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-4">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
 
       {viewMode === 'form' ? (
         <React.Suspense
@@ -603,78 +593,99 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
       />
 
       {/* 4. MAIN DATA TABLE */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="cms-data-table text-left w-full">
-            <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
-              <tr>
-                {/* Checkbox Sticky Left */}
-                <th className="py-3 px-3 w-10 sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                  <CmsSelectionCheckbox
-                    checked={
-                      paginatedProducts.length > 0 &&
-                      paginatedProducts.every((product) => selectedIds.includes(product.id))
-                    }
-                    indeterminate={
-                      selectedIds.some((id) => paginatedProducts.some((product) => product.id === id)) &&
-                      !paginatedProducts.every((product) => selectedIds.includes(product.id))
-                    }
-                    onChange={handleSelectAllOnPage}
-                    label="Chọn tất cả sản phẩm trên trang"
-                  />
+      <CmsDataGridFrame
+        ariaLabel="Danh sách sản phẩm"
+        isLoading={isPending}
+        loadingMode={products.length === 0 ? 'skeleton' : 'overlay'}
+        skeletonColumns={10}
+        skeletonRows={5}
+        loadingText="Đang cập nhật danh sách..."
+        footer={
+          <CmsPagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalCount={filteredProducts.length}
+            itemLabel="sản phẩm"
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+          />
+        }
+      >
+        <table className="cms-data-table text-left w-full">
+          <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+            <tr>
+              {/* Checkbox Sticky Left */}
+              <th className="py-3 px-3 w-10 sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
+                <CmsSelectionCheckbox
+                  checked={
+                    paginatedProducts.length > 0 &&
+                    paginatedProducts.every((product) => selectedIds.includes(product.id))
+                  }
+                  indeterminate={
+                    selectedIds.some((id) => paginatedProducts.some((product) => product.id === id)) &&
+                    !paginatedProducts.every((product) => selectedIds.includes(product.id))
+                  }
+                  onChange={handleSelectAllOnPage}
+                  label="Chọn tất cả sản phẩm trên trang"
+                />
+              </th>
+
+              {/* Tên sản phẩm & Nhận diện (Sticky Left) */}
+              {columnVisibility.product && (
+                <th className="py-3 px-4 min-w-[280px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
+                  Sản phẩm
                 </th>
+              )}
 
-                {/* Tên sản phẩm & Nhận diện (Sticky Left) */}
-                {columnVisibility.product && (
-                  <th className="py-3 px-4 min-w-[280px] sticky left-10 z-20 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-800">
-                    Sản phẩm
-                  </th>
-                )}
+              {/* Biệt danh / Mã */}
+              {columnVisibility.code && <th className="py-3 px-4 min-w-[130px]">Biệt danh</th>}
 
-                {/* Biệt danh / Mã */}
-                {columnVisibility.code && <th className="py-3 px-4 min-w-[130px]">Biệt danh</th>}
+              {/* Lĩnh vực */}
+              {columnVisibility.category && <th className="py-3 px-4 min-w-[160px]">Lĩnh vực</th>}
 
-                {/* Lĩnh vực */}
-                {columnVisibility.category && <th className="py-3 px-4 min-w-[160px]">Lĩnh vực</th>}
+              {/* Hãng sản xuất */}
+              {columnVisibility.brand && <th className="py-3 px-4 min-w-[150px]">Hãng sản xuất</th>}
 
-                {/* Hãng sản xuất */}
-                {columnVisibility.brand && <th className="py-3 px-4 min-w-[150px]">Hãng sản xuất</th>}
+              {/* Loại sản phẩm */}
+              {columnVisibility.product_type && <th className="py-3 px-4 min-w-[140px]">Loại sản phẩm</th>}
 
-                {/* Loại sản phẩm */}
-                {columnVisibility.product_type && <th className="py-3 px-4 min-w-[140px]">Loại sản phẩm</th>}
+              {/* Ứng dụng */}
+              {columnVisibility.application && <th className="py-3 px-4 min-w-[160px]">Ứng dụng</th>}
 
-                {/* Ứng dụng */}
-                {columnVisibility.application && <th className="py-3 px-4 min-w-[160px]">Ứng dụng</th>}
+              {/* Giá */}
+              {columnVisibility.price && <th className="py-3 px-4 min-w-[120px]">Giá</th>}
 
-                {/* Giá */}
-                {columnVisibility.price && <th className="py-3 px-4 min-w-[120px]">Giá</th>}
+              {/* Thứ tự */}
+              {columnVisibility.ordering && <th className="py-3 px-3 min-w-[70px] text-center">Thứ tự</th>}
 
-                {/* Thứ tự */}
-                {columnVisibility.ordering && <th className="py-3 px-3 min-w-[80px] text-center">Thứ tự</th>}
+              {/* Nổi bật */}
+              {columnVisibility.is_hot && <th className="py-3 px-3 min-w-[80px] text-center">Nổi bật</th>}
 
-                {/* Sản phẩm tiêu biểu */}
-                {columnVisibility.is_hot && <th className="py-3 px-3 min-w-[100px] text-center">Tiêu biểu</th>}
+              {/* Teamview */}
+              {columnVisibility.teamview && <th className="py-3 px-3 min-w-[90px] text-center">Teamview</th>}
 
-                {/* Link TeamViewer */}
-                {columnVisibility.teamview && <th className="py-3 px-3 min-w-[110px] text-center">TeamViewer</th>}
+              {/* Trạng thái */}
+              {columnVisibility.editorial_status && (
+                <th className="py-3 px-4 min-w-[120px] text-center">Trạng thái</th>
+              )}
 
-                {/* Trạng thái */}
-                {columnVisibility.editorial_status && (
-                  <th className="py-3 px-4 min-w-[120px] text-center">Trạng thái</th>
-                )}
+              {/* Thời gian cập nhật */}
+              {columnVisibility.updated_time && <th className="py-3 px-4 min-w-[130px]">Cập nhật</th>}
 
-                {/* Thời gian cập nhật */}
-                {columnVisibility.updated_time && <th className="py-3 px-4 min-w-[130px]">Cập nhật</th>}
+              {/* Actions (Sticky Right) */}
+              <th className="py-3 px-4 w-28 text-center sticky right-0 z-20 bg-slate-50 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-800">
+                Thao tác
+              </th>
+            </tr>
+          </thead>
 
-                {/* Actions (Sticky Right) */}
-                <th className="py-3 px-4 w-28 text-center sticky right-0 z-20 bg-slate-50 dark:bg-slate-800 border-l border-slate-200 dark:border-slate-800">
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {paginatedProducts.length > 0 ? (
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {isPending && products.length === 0 ? (
+              <CmsTableSkeletonRows columns={10} rows={5} />
+            ) : paginatedProducts.length > 0 ? (
                 paginatedProducts.map((p) => {
                   const isSelected = selectedIds.includes(p.id);
                   const prodName = p.name || p.title || 'Chưa đặt tên';
@@ -924,21 +935,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
               )}
             </tbody>
           </table>
-        </div>
-
-        {/* 5. PAGINATION FOOTER */}
-        <CmsPagination
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalCount={filteredProducts.length}
-          itemLabel="sản phẩm"
-          onPageChange={setCurrentPage}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setCurrentPage(1);
-          }}
-        />
-      </div>
+      </CmsDataGridFrame>
 
       {/* AUXILIARY MODALS & DRAWERS */}
       <ColumnSettingModal

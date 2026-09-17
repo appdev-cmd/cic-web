@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle } from 'lucide-react';
+import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
@@ -65,6 +66,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [downloads, setDownloads] = useState<LegacyDownload[]>(Array.from({ length: 6 }, (_, index) => ({ name: product?.[`file_name${index + 1}` as keyof ProductItem] as string || '', file: product?.[`file_download${index + 1}` as keyof ProductItem] as string || '', link: product?.[`link_download${index + 1}` as keyof ProductItem] as string || '' })));
   const [mediaTarget, setMediaTarget] = useState<'image' | 'icon' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState<'draft' | 'publish' | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => { if (!manualAlias) setAlias(slugify(name)); }, [name, manualAlias]);
@@ -95,11 +97,13 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     }
     try {
       setIsSubmitting(true);
+      setSubmittingAction(action);
       await onSave(payload(), action);
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Không thể lưu sản phẩm. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setIsSubmitting(false);
+      setSubmittingAction(null);
     }
   };
   const updateDownload = (index: number, field: keyof LegacyDownload, value: string) => setDownloads((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
@@ -117,33 +121,37 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
+          <CmsButton
+            variant="secondary"
+            size="sm"
             disabled={isSubmitting}
             onClick={() => onOpenPreview({ ...(product || {}), ...payload() } as ProductItem)}
-            className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 disabled:opacity-50"
+            leadingIcon={<Eye className="h-4 w-4" />}
           >
-            <Eye className="h-4 w-4" />
             Xem trước
-          </button>
-          <button
-            type="button"
+          </CmsButton>
+          <CmsButton
+            variant="secondary"
+            size="sm"
             disabled={isSubmitting}
+            loading={isSubmitting && submittingAction === 'draft'}
+            loadingText="Đang lưu..."
             onClick={() => void save('draft')}
-            className="flex items-center gap-2 rounded-xl bg-slate-800 px-3.5 py-2.5 text-xs font-bold text-white dark:bg-slate-700 disabled:opacity-50"
+            leadingIcon={<Save className="h-4 w-4" />}
           >
-            <Save className="h-4 w-4" />
-            {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
-          </button>
-          <button
-            type="button"
+            Lưu nháp
+          </CmsButton>
+          <CmsButton
+            variant="primary"
+            size="sm"
             disabled={isSubmitting}
+            loading={isSubmitting && submittingAction === 'publish'}
+            loadingText="Đang xuất bản..."
             onClick={() => void save('publish')}
-            className="flex items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2.5 text-xs font-bold text-white disabled:opacity-50"
+            leadingIcon={<Send className="h-4 w-4" />}
           >
-            <Send className="h-4 w-4" />
-            {isSubmitting ? 'Đang lưu...' : 'Xuất bản'}
-          </button>
+            Xuất bản
+          </CmsButton>
         </div>
       </header>
 

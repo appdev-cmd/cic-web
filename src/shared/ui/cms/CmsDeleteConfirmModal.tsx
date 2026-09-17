@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Loader2, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { CmsButton } from './CmsButton';
 
 export interface CmsDeleteConfirmModalItem {
@@ -48,14 +48,21 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
     'Dữ liệu sẽ được chuyển vào Thùng rác. Bạn có thể khôi phục lại từ phân hệ Thùng rác khi cần thiết.';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !isPending) {
+          onClose();
+        }
+      }}
+    >
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 relative">
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
           disabled={isPending}
-          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer disabled:pointer-events-none"
+          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50"
         >
           <X className="size-4" />
         </button>
@@ -101,8 +108,9 @@ export const CmsDeleteConfirmModal: React.FC<CmsDeleteConfirmModalProps> = ({
             size="sm"
             variant="danger"
             onClick={onConfirm}
-            disabled={isPending}
-            leadingIcon={isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
+            loading={isPending}
+            loadingText="Đang xóa..."
+            leadingIcon={<Trash2 className="size-3.5" />}
           >
             {confirmLabel}
           </CmsButton>

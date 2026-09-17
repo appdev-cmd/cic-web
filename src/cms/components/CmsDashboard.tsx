@@ -20,6 +20,8 @@ import type { CmsSettingsData } from '@/features/system-settings/domain/model';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
 import { CmsWorkspaceLocaleProvider } from '../context/CmsWorkspaceLocaleContext';
+import { CmsToastProvider } from '../context/CmsToastContext';
+import { CmsRouteProgressBar, startCmsProgressBar, stopCmsProgressBar } from './ui/CmsRouteProgressBar';
 import { ApplicationLoadingState } from '@/shared/ui/application';
 
 const getProductSettingsDataType = (path: string): MasterDataType => {
@@ -243,6 +245,14 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
     }
   }, [isDarkMode]);
 
+  useEffect(() => {
+    if (navigationPending) {
+      startCmsProgressBar();
+    } else {
+      stopCmsProgressBar();
+    }
+  }, [navigationPending]);
+
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -333,8 +343,10 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   };
 
   return (
-    <CmsWorkspaceLocaleProvider locale={workspaceLocale}>
-    <div className={`cms-shell min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+    <CmsToastProvider>
+      <CmsWorkspaceLocaleProvider locale={workspaceLocale}>
+        <CmsRouteProgressBar />
+        <div className={`cms-shell min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* 1. HEADER */}
       <CmsHeader
         user={currentUser}
@@ -420,9 +432,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
               </div>
             )}
           >
-          {navigationPending ? (
-            <ApplicationLoadingState label="Đang chuyển trang…" />
-          ) : moduleContent ? (
+          {moduleContent ? (
             moduleContent
           ) : activeModule === 'search' ? (
             <CmsGlobalSearchPage
@@ -555,7 +565,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
           setTimeout(() => setToastMessage(null), 4000);
         }}
       />
-    </div>
-    </CmsWorkspaceLocaleProvider>
+      </div>
+      </CmsWorkspaceLocaleProvider>
+    </CmsToastProvider>
   );
 };

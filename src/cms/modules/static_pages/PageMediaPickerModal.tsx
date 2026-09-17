@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Image as ImageIcon, Search, Upload, X } from 'lucide-react';
+import { Check, Image as ImageIcon, Loader2, Search, Upload, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
 import type { CmsLocale } from '../../data/CmsDataSource';
@@ -69,6 +69,7 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
   const [query, setQuery] = useState('');
   const [images,setImages]=useState<CmsMediaPickerItem[]>([]);
   const [uploadError, setUploadError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   const dialogRef=useDialogA11y(true,onClose);
   useEffect(()=>{let active=true;void getMediaPickerItemsAction(locale).then((items)=>{if(active)setImages(items);}).catch(()=>{if(active)setUploadError('Không thể tải Thư viện Media.');});return()=>{active=false;};},[locale]);
   const allImages = images;
@@ -88,8 +89,24 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
     if (!isImage) return setUploadError('Vui lòng chọn đúng định dạng ảnh.');
     if (file.size > 10 * 1024 * 1024) return setUploadError('Ảnh không được vượt quá 10 MB.');
 
-    try { const form=new FormData();form.set('file',file);form.set('locale',locale);form.set('title',file.name.replace(/\.[^.]+$/,''));form.set('altText','');const created=await uploadMediaAction(form);const live=await getMediaPickerItemsAction(locale);setImages(live);setSelectedId(created.id);setUploadError(''); }
-    catch(error){setUploadError(error instanceof Error?error.message:'Không thể tải ảnh lên.');}
+    setIsUploading(true);
+    setUploadError('');
+    try {
+      const form = new FormData();
+      form.set('file', file);
+      form.set('locale', locale);
+      form.set('title', file.name.replace(/\.[^.]+$/, ''));
+      form.set('altText', '');
+      const created = await uploadMediaAction(form);
+      const live = await getMediaPickerItemsAction(locale);
+      setImages(live);
+      setSelectedId(created.id);
+      setUploadError('');
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -102,10 +119,26 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
         </div>
         <div className="border-b border-slate-200 p-4 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row">
-            <label className="flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-700 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-orange-500">
-              <Upload className="size-4" />
-              Tải ảnh từ máy
-              <input type="file" accept="image/*,.ico" onChange={handleUpload} className="sr-only" />
+            <label
+              className={`flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-orange-500 ${
+                isUploading
+                  ? 'bg-orange-500/80 cursor-not-allowed pointer-events-none'
+                  : 'bg-orange-600 hover:bg-orange-700'
+              }`}
+            >
+              {isUploading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Upload className="size-4" />
+              )}
+              <span>{isUploading ? 'Đang tải tệp lên...' : 'Tải ảnh từ máy'}</span>
+              <input
+                type="file"
+                accept="image/*,.ico"
+                disabled={isUploading}
+                onChange={handleUpload}
+                className="sr-only"
+              />
             </label>
             <div className="relative flex flex-1 items-center">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">

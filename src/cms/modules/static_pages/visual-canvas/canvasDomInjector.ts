@@ -372,7 +372,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         if (isSync) {
           addButton('🔄 Đang đồng bộ Trang chủ', () => undefined, false, true);
           addButton('Chuyển sang Cấu hình riêng', () => {
-            const nextItems = items.length > 0 ? items : deepClone(getLegacyHomePageContent().awards.items);
+            const nextItems = items.length > 0 ? items : deepClone(getLegacyHomePageContent().awards?.items ?? []);
             onConfigValueChange?.(section.id, ['items'], nextItems as any);
             onConfigValueChange?.(section.id, ['syncWithHome'], false);
           });
@@ -408,7 +408,7 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         if (isSync) {
           addButton('🔄 Đang đồng bộ Trang chủ', () => undefined, false, true);
           addButton('Chuyển sang Cấu hình riêng', () => {
-            const nextItems = items.length > 0 ? items : deepClone(getLegacyHomePageContent().partners.items);
+            const nextItems = items.length > 0 ? items : deepClone(getLegacyHomePageContent().partners?.items ?? []);
             onConfigValueChange?.(section.id, ['items'], nextItems as any);
             onConfigValueChange?.(section.id, ['syncWithHome'], false);
           });
