@@ -609,6 +609,42 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
   - `REMOVE`: `MOCK_CTAS` hard-code và `MOCK_PLACEMENTS` giả lập.
 - **G. Kết luận audit:** Module CTA ở trạng thái `[A]`. Đã hoàn tất audit toàn diện 4 nguồn (React reference, Next.js codebase, Database PostgreSQL thật, schema delta docs). Bảng `cic_ctas` cùng các FK đã tồn tại sẵn trên database thật. **READY_TO_IMPLEMENT**.
 
+### Audit Module Menu (Navigation) — 2026-09-17
+
+- **A. Scope & Surfaces:**
+  - Public Website: Header navigation bar (Desktop) và Navigation Drawer (Mobile) render Menu Chính (`Main Menu`, group_id = 1) kèm dropdown/mega-menu; Footer render 3 cụm điều hướng (Điều hướng - Primary links; Giải pháp - group_id = 2 `Footer`; Dịch vụ - group_id = 5 `Footer_service`).
+  - CMS: Màn hình Quản lý Menu tại `/cms/frontend-menus` (aliases: `/cms/menu`, `/cms/navigation`) gồm quản lý Nhóm menu (Groups) và Mục menu (Items) dạng Cây (Tree View đa cấp) hoặc Bảng (Table View), sửa mục menu bằng slide-over drawer, đổi cấp cha–con, sắp xếp thứ tự, ẩn/hiện, và xem trước (Live Preview simulation 3 thiết bị).
+  - Workspace: Song ngữ VI (`cic_menus_groups`, `cic_menus_items`) và EN (`cic_menus_groups_en`, `cic_menus_items_en`) quản lý hoàn toàn độc lập.
+- **B. UI Reference Map:**
+  - Header Desktop: Fixed top-0, logo bên trái, navigation links ở giữa có hover dropdown (chevron icon), search + language switcher + CTA bên phải.
+  - Header Mobile Drawer: Slide-over drawer từ bên phải, accordion mở rộng submenu, nút gọi CTA tư vấn.
+  - Footer Columns: Cột 2 "Điều hướng" (Primary), Cột 3 "Giải pháp & Dịch vụ" (chia 2 nhóm con Giải pháp từ Group 2 và Dịch vụ từ Group 5).
+  - CMS List/Tree: Switcher Tree View / Table View, Group tabs, search tức thì, action bar (Thêm mục, Thêm nhóm, Xem trước).
+  - CMS Item Editor: Drawer 4 tabs (Nội dung: nhãn, mục cha; Đích liên kết: URL, open in new tab; Giao diện & Icon: Lucide icon name; Phân quyền & Hiển thị: toggle is_visible).
+  - CMS Group Editor: Modal tạo/sửa nhóm (tên, thứ tự, trạng thái).
+  - CMS Preview Modal: Simulation responsive 3 viewport (Desktop 1280px, Tablet 768px, Mobile 390px).
+- **C. Legacy Component Classification:**
+  - `REUSE_PRESENTATION`: `MenuPreviewModal.tsx`, `MenuGroupEditorModal.tsx`.
+  - `EXTRACT_AND_REBUILD`: `MenuManager.tsx`, `MenuTreeEditor.tsx`, `MenuItemEditor.tsx`, `MenuTableView.tsx`.
+  - `REFERENCE_ONLY`: `src/cms/modules/menu/mockData.ts`, `src/web/data/mockData.ts` (`navLinks`), `src/web/features/navigation/navigationData.ts` (fixture).
+- **D. CMS Capability / Functional Map:**
+  - Kế thừa và nâng cấp theo `DE_XUAT_CHUC_NANG_CMS.md` mục 2.4: Chọn nhóm menu theo vị trí, tạo nhiều cấp, sửa tên, liên kết, cách mở (`_self` / `_blank`), biểu tượng Lucide, sắp xếp thứ tự, đổi cấp cha-con (indent/outdent), bật/tắt hiển thị, xem trước.
+- **E. DB Tables & Field Usage:**
+  - `cic_menus_groups` (VI) / `cic_menus_groups_en` (EN): `id` (PK identity), `group_name` (CMS_EDITABLE), `published` (CMS_OPERATIONAL), `ordering` (CMS_OPERATIONAL). Các cột legacy audit (`actflg`, `ctdusr`, `lstmdf`...) xếp vào `LEGACY_UNUSED` cần preserve khi update.
+  - `cic_menus_items` (VI) / `cic_menus_items_en` (EN): `id` (PK identity), `group_id` (FK RELATION), `parent_id` (FK RELATION tự tham chiếu), `name` (CMS_EDITABLE nhãn menu), `link` (CMS_EDITABLE đường dẫn), `target` (CMS_EDITABLE), `ordering` (CMS_OPERATIONAL), `level` (SYSTEM_MANAGED), `published` (CMS_OPERATIONAL), `image`/`icon` (CMS_EDITABLE Lucide icon name). Dữ liệu thực tế: VI có 71 items (37 Main Menu, 10 Footer, 7 Static, 7 Footer Service); EN có 58 items. Tỷ lệ orphan = 0.
+- **F. Runtime Data Authority:**
+  - Hiện trạng: Website Public dùng `mockData.ts` (`navLinks`, `footerPrimaryLinks`); CMS dùng `demoPresentationDataSource.menuByLocale`.
+  - Target: PostgreSQL (`cic_menus_groups*`, `cic_menus_items*`) là Single Source of Truth duy nhất. Không fallback sang mock.
+- **G. Server / Client Boundary:**
+  - Server: DB query với explicit projection, URL normalizer (chuyển URL PHP cũ sang route Next.js), RBAC permission guard, transactional mutations, Audit log writer, revalidation tags (`menu:vi`, `menu:en`).
+  - Client: Menu Tree interaction (expand/collapse), drag/reorder UI, item drawer form, viewport simulation.
+- **H. Dependencies & Cross-cutting:**
+  - Hard dependency: (1) Chuẩn hóa RBAC task `menu` trong `cic_permission_tasks` (thay thế 2 task legacy 6 & 7 với action chuỗi PHP cũ); (2) URL Normalizer chuyển đổi URL legacy PHP (`index.php?module=...`) sang route Next.js hiện đại.
+  - Soft dependency: Tích hợp link picker tra cứu nhanh trang từ Static Pages, Sản phẩm, Dịch vụ, Tin tức, Dự án.
+  - Cross-cutting: Audit logging bắt buộc khi mutation; Không dùng Trash cho Menu (xóa trực tiếp hoặc unpublish).
+- **I. Phân loại Next.js:** `KEEP` visual UI Header/Footer và CMS Tree layout; `REFACTOR` nạp dữ liệu thật từ Server component và repository query; `REPLACE` fixture/mock data bằng DB query; `REMOVE` fake IDs (`item_01`, `grp_${Date.now()}`).
+- **J. Kết luận audit:** Module Menu ở trạng thái `[A]`. Dữ liệu PostgreSQL thật đã có sẵn đầy đủ quan hệ nhóm và cây cha–con. **READY_TO_IMPLEMENT**.
+
 ## Foundation/cross-module
 
 | Status | Foundation | Hard dependency đối với | Ghi chú audit |
