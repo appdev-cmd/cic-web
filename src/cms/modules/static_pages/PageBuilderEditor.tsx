@@ -16,6 +16,7 @@ import {
   Eye,
   FileCode2,
   Flame,
+  Globe,
   Image,
   History,
   Layers,
@@ -67,7 +68,8 @@ interface PageBuilderEditorProps {
 
 function validate(page: PageBuilderPage, entityOptions: PageBuilderEntityOption[]): Record<string, string[]> {
   const issues: Record<string, string[]> = {};
-  if (!page.draft.seo.title.trim()) issues.seo = ['SEO title không được để trống.'];
+  const effectiveSeoTitle = page.draft.seo.title?.trim() || page.name?.trim();
+  if (!effectiveSeoTitle) issues.seo = ['SEO title không được để trống.'];
   page.draft.sections.forEach((section) => {
     const sectionIssues: string[] = [];
     const title = section.config.title;
@@ -93,7 +95,13 @@ function validate(page: PageBuilderPage, entityOptions: PageBuilderEntityOption[
 }
 
 export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBack, onSaveDraft, onPreview, onPublish, entityOptions, mediaImages, workspaceLocale }) => {
-  const [workingPage, setWorkingPage] = useState(() => deepClone(page));
+  const [workingPage, setWorkingPage] = useState(() => {
+    const cloned = deepClone(page);
+    if (!cloned.draft.seo.title?.trim()) {
+      cloned.draft.seo.title = cloned.name ? `${cloned.name} | CIC Technology` : 'CIC Technology';
+    }
+    return cloned;
+  });
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [picker, setPicker] = useState<{ sectionId: string; entityType: PageBuilderEntityType; selectedIds: string[]; excludedIds?: string[]; limit: number; replaceIndex?: number } | null>(null);
@@ -102,6 +110,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
   const [showMobileCanvas, setShowMobileCanvas] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showSeoModal, setShowSeoModal] = useState(false);
   const [ctaPopover, setCtaPopover] = useState<{ sectionId: string; path: Array<string | number>; fallbackLabel: string; anchor: { left: number; top: number } } | null>(null);
   const [videoPopover, setVideoPopover] = useState<{ sectionId: string; path: Array<string | number>; url: string; anchor: { left: number; top: number } } | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
@@ -424,7 +433,19 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
 
   const runValidAction = (action: (value: PageBuilderPage) => void) => {
     setShowValidation(true);
-    if (issueCount === 0) action(workingPage);
+    if (issueCount === 0) {
+      const pageToRun = {
+        ...workingPage,
+        draft: {
+          ...workingPage.draft,
+          seo: {
+            ...workingPage.draft.seo,
+            title: workingPage.draft.seo.title?.trim() || `${workingPage.name} | CIC Technology`,
+          },
+        },
+      };
+      action(pageToRun);
+    }
   };
 
   const handleSaveDraft = async () => {
@@ -432,7 +453,17 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     if (issueCount === 0) {
       setIsSavingDraft(true);
       try {
-        await onSaveDraft(workingPage);
+        const pageToSave = {
+          ...workingPage,
+          draft: {
+            ...workingPage.draft,
+            seo: {
+              ...workingPage.draft.seo,
+              title: workingPage.draft.seo.title?.trim() || `${workingPage.name} | CIC Technology`,
+            },
+          },
+        };
+        await onSaveDraft(pageToSave);
       } finally {
         setIsSavingDraft(false);
       }
@@ -444,7 +475,17 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     if (issueCount === 0) {
       setIsPublishing(true);
       try {
-        await onPublish(workingPage);
+        const pageToPublish = {
+          ...workingPage,
+          draft: {
+            ...workingPage.draft,
+            seo: {
+              ...workingPage.draft.seo,
+              title: workingPage.draft.seo.title?.trim() || `${workingPage.name} | CIC Technology`,
+            },
+          },
+        };
+        await onPublish(pageToPublish);
       } finally {
         setIsPublishing(false);
       }
@@ -464,6 +505,20 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">{([['desktop', Monitor, 'Desktop'], ['tablet', Tablet, 'Tablet'], ['mobile', Smartphone, 'Mobile']] as const).map(([value, Icon, label]) => <button key={value} type="button" title={label} aria-label={label} onClick={() => setViewport(value)} className={`rounded-md p-2 ${viewport === value ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}><Icon className="h-4 w-4" /></button>)}</div>
             <div className="flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900"><button type="button" onClick={undo} disabled={past.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Hoàn tác" title="Hoàn tác"><Undo2 className="h-4 w-4" /></button><button type="button" onClick={redo} disabled={future.length === 0} className="rounded-md p-2 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Làm lại" title="Làm lại"><Redo2 className="h-4 w-4" /></button></div>
+            <button
+              type="button"
+              onClick={() => setShowSeoModal(true)}
+              className={`flex items-center gap-1.5 rounded-lg border p-2 text-xs font-semibold ${
+                showSeoModal
+                  ? 'border-orange-300 bg-orange-50 text-orange-700'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+              }`}
+              aria-label="Cài đặt SEO"
+              title="Cài đặt SEO"
+            >
+              <Globe className="h-4 w-4" />
+              <span className="hidden xl:inline">Cài đặt SEO</span>
+            </button>
             <button type="button" onClick={() => { setShowHistory((value) => !value); setIsExpanded(false); }} className={`rounded-lg border p-2 ${showHistory ? 'border-orange-300 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`} aria-label="Lịch sử phiên bản" title="Lịch sử phiên bản"><History className="h-4 w-4" /></button>
             <CmsButton variant="secondary" leadingIcon={<Save />} loading={isSavingDraft} loadingText="Đang lưu..." disabled={isSavingDraft || isPublishing} onClick={handleSaveDraft}>Lưu bản nháp</CmsButton>
             <CmsButton variant="secondary" leadingIcon={<Eye />} disabled={isSavingDraft || isPublishing} onClick={() => runValidAction(onPreview)}>Xem trước</CmsButton>
@@ -472,7 +527,19 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
         </div>
       </div>
 
-      {showValidation && issueCount > 0 && <div className="shrink-0 border-b border-red-200 bg-red-50 px-5 py-2 text-sm text-red-700"><div className="flex items-center gap-2 font-bold"><AlertCircle className="h-4 w-4" />Có {issueCount} lỗi cần sửa trước khi tiếp tục.</div></div>}
+      {showValidation && issueCount > 0 && (
+        <div className="shrink-0 border-b border-red-200 bg-red-50 px-5 py-2.5 text-sm text-red-700">
+          <div className="flex items-center gap-2 font-bold mb-1">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>Có {issueCount} lỗi cần sửa trước khi tiếp tục:</span>
+          </div>
+          <ul className="list-disc pl-6 space-y-0.5 text-xs text-red-600">
+            {Object.entries(issues).flatMap(([key, msgs]) =>
+              msgs.map((msg, idx) => <li key={`${key}-${idx}`}>{msg}</li>)
+            )}
+          </ul>
+        </div>
+      )}
 
       <div className={`grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 lg:overflow-hidden ${showHistory ? 'lg:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px]' : 'lg:grid-cols-1'}`}>
         <aside className="hidden">
@@ -784,6 +851,46 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
             }
           }}
         />
+      )}
+      {showSeoModal && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4" onClick={() => setShowSeoModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                <Globe className="h-5 w-5 text-orange-600" /> Cài đặt SEO & Đường dẫn
+              </h3>
+              <button type="button" onClick={() => setShowSeoModal(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mt-4 space-y-4">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tiêu đề SEO (SEO Title)</span>
+                <input
+                  value={workingPage.draft.seo.title}
+                  onChange={(e) => setWorkingPage((curr) => ({ ...curr, draft: { ...curr.draft, seo: { ...curr.draft.seo, title: e.target.value } } }))}
+                  placeholder={`${workingPage.name} | CIC Technology`}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 text-slate-900 dark:text-white"
+                />
+              </label>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Mô tả SEO (Meta Description)</span>
+                <textarea
+                  rows={4}
+                  value={workingPage.draft.seo.description}
+                  onChange={(e) => setWorkingPage((curr) => ({ ...curr, draft: { ...curr.draft, seo: { ...curr.draft.seo, description: e.target.value } } }))}
+                  placeholder="Nhập mô tả tóm tắt cho công cụ tìm kiếm..."
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-950 text-slate-900 dark:text-white"
+                />
+              </label>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button type="button" onClick={() => setShowSeoModal(false)} className="rounded-lg bg-orange-600 px-4 py-2 text-xs font-bold text-white hover:bg-orange-500">
+                Hoàn tất
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

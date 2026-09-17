@@ -216,8 +216,8 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
       updatedAt: detail.draft.createdAt,
       publishedAt: detail.draft.publishedAt ?? undefined,
       seo: {
-        title: detail.draft.seoTitle,
-        description: detail.draft.seoDescription,
+        title: detail.draft.seoTitle?.trim() || `${detail.name} | CIC Technology`,
+        description: detail.draft.seoDescription || '',
       },
       sections: detail.draft.sections.map((s) => {
         const refMap = new Map<PageBuilderEntityType, string[]>();
@@ -264,8 +264,8 @@ function toPageBuilderPage(detail: StaticPageFullDetail): PageBuilderPage {
           updatedAt: detail.published.createdAt,
           publishedAt: detail.published.publishedAt ?? undefined,
           seo: {
-            title: detail.published.seoTitle,
-            description: detail.published.seoDescription,
+            title: detail.published.seoTitle?.trim() || `${detail.name} | CIC Technology`,
+            description: detail.published.seoDescription || '',
           },
           sections: detail.published.sections.map((s) => {
             const refMap = new Map<PageBuilderEntityType, string[]>();
