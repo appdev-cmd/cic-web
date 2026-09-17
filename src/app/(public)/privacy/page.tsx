@@ -22,7 +22,7 @@ export default async function PrivacyPage() {
     <PublicLegalPageView
       pageData={pageData}
       defaultTitle="Chính sách bảo mật"
-      categoryTag="Chính sách bảo mật"
+      categoryTag="BẢO VỆ DỮ LIỆU CÁ NHÂN"
     />
   );
 }

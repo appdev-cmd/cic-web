@@ -64,10 +64,10 @@ export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) 
   }
 
   const categoryTag = page.code.includes('privacy')
-    ? 'Chính sách bảo mật'
+    ? 'BẢO VỆ DỮ LIỆU CÁ NHÂN'
     : page.code.includes('terms')
-    ? 'Điều khoản dịch vụ'
-    : 'Pháp lý & Chính sách';
+    ? 'QUY ĐỊNH & PHÁP LÝ'
+    : 'THÔNG TIN CHUẨN';
 
   return (
     <PublicLegalPageView

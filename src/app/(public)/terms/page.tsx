@@ -22,7 +22,7 @@ export default async function TermsPage() {
     <PublicLegalPageView
       pageData={pageData}
       defaultTitle="Điều khoản sử dụng"
-      categoryTag="Điều khoản dịch vụ"
+      categoryTag="QUY ĐỊNH & PHÁP LÝ"
     />
   );
 }
