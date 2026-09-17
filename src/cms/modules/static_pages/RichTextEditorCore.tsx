@@ -341,7 +341,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     link: { addTargetToExternalLinks: true, defaultProtocol: 'https://' },
     htmlSupport: {
       allow: [
-        { name: /^(div|span|p|a|img|table|thead|tbody|tr|th|td|figure|figcaption)$/, attributes: /.*/, classes: /.*/, styles: /.*/ },
+        { name: /.*/, attributes: /.*/, classes: /.*/, styles: /.*/ },
       ],
     },
     placeholder: 'Nhập nội dung tại đây…',
