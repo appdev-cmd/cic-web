@@ -7,6 +7,8 @@ import { findPageBuilderImage } from '../PageMediaPickerModal';
 import { draftSectionSchemas } from '../pageBuilderDraftSchema';
 import { entityTypeLabels, sectionDefinitions } from '../pageBuilderRegistry';
 import { directEditingSectionKeys } from '../visualElementEditingAdapters';
+import { getLegacyHomePageContent } from '../../../../shared/page-content/legacyPageContent';
+import { deepClone } from '../editor/editorUtils';
 import type { 
   PageBuilderConfigValue, 
   PageBuilderEntityOption, 
@@ -183,9 +185,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
     const definition = sectionDefinitions[section.sectionKey];
     const allowsCollectionStructureChanges = 
       section.sectionType === 'hero_carousel' || section.sectionKey === 'home.hero' || 
-      section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || 
+      section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || section.sectionKey === 'about.awards' || 
       section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem' || 
-      section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
+      section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners' || section.sectionKey === 'about.partners';
 
     node.dataset.pageBuilderSectionId = section.id;
     node.dataset.pageBuilderSectionKey = section.sectionKey;
@@ -250,18 +252,18 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         ? `display:flex;align-items:center;gap:${viewport === 'desktop' ? '7px' : '4px'};max-width:min(920px,100%);min-height:${viewport === 'desktop' ? '48px' : '40px'};padding:${viewport === 'desktop' ? '7px 9px' : '4px 5px'};border:1px solid rgba(255,255,255,.24);border-radius:12px;background:rgba(15,23,42,.92);color:#fff;font:600 12px/1.2 system-ui;white-space:nowrap;overflow-x:${viewport === 'desktop' ? 'auto' : 'hidden'};box-shadow:0 12px 32px rgba(15,23,42,.3);backdrop-filter:blur(10px);`
         : 'display:flex;align-items:center;gap:8px;width:100%;min-height:52px;padding:8px 10px;border-bottom:1px solid #e2e8f0;background:#fff;color:#334155;font:600 13px/1.2 system-ui;white-space:nowrap;overflow-x:auto;';
 
-      const addButton = (label: string, handler: () => void, disabled = false) => {
+      const addButton = (label: string, handler: () => void, disabled = false, active = false) => {
         const button = node.ownerDocument.createElement('button');
         button.type = 'button'; 
         button.textContent = label; 
-        button.disabled = disabled;
+        button.disabled = disabled && !active;
         button.style.cssText = isHero
-          ? `min-height:${viewport === 'desktop' ? '34px' : '30px'};border:1px solid ${disabled ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.2)'};border-radius:8px;padding:${viewport === 'desktop' ? '7px 10px' : '5px 7px'};background:${disabled ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.1)'};color:${disabled ? '#64748b' : '#fff'};font:800 ${viewport === 'desktop' ? '12px' : '11px'}/1 system-ui;cursor:${disabled ? 'not-allowed' : 'pointer'};`
-          : `min-height:36px;border:1px solid ${disabled ? '#e2e8f0' : '#cbd5e1'};border-radius:8px;padding:8px 11px;background:${disabled ? '#f8fafc' : '#fff'};color:${disabled ? '#94a3b8' : '#334155'};font:700 12px/1 system-ui;cursor:${disabled ? 'not-allowed' : 'pointer'};`;
+          ? `min-height:${viewport === 'desktop' ? '34px' : '30px'};border:1px solid ${active ? '#f97316' : disabled ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.2)'};border-radius:8px;padding:${viewport === 'desktop' ? '7px 10px' : '5px 7px'};background:${active ? 'rgba(249,115,22,.25)' : disabled ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.1)'};color:${active ? '#fb923c' : disabled ? '#64748b' : '#fff'};font:800 ${viewport === 'desktop' ? '12px' : '11px'}/1 system-ui;cursor:${active || disabled ? 'default' : 'pointer'};`
+          : `min-height:36px;border:1px solid ${active ? '#fb923c' : disabled ? '#e2e8f0' : '#cbd5e1'};border-radius:8px;padding:8px 11px;background:${active ? '#fff7ed' : disabled ? '#f8fafc' : '#fff'};color:${active ? '#ea580c' : disabled ? '#94a3b8' : '#334155'};font:700 12px/1 system-ui;cursor:${active || disabled ? 'default' : 'pointer'};`;
         const click = (event: MouseEvent) => { 
           event.preventDefault(); 
           event.stopPropagation(); 
-          if (!disabled) handler(); 
+          if (!disabled && !active) handler(); 
         };
         button.addEventListener('click', click); 
         toolbar.appendChild(button);
@@ -359,6 +361,28 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         label.style.cssText = 'padding:0 5px;color:#0f172a;';
         toolbar.appendChild(label);
         addButton('+ Thêm', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+      } else if (section.sectionKey === 'about.awards') {
+        const isSync = section.config.syncWithHome !== false;
+        const items = Array.isArray(section.config.items) ? section.config.items : [];
+        const label = node.ownerDocument.createElement('strong');
+        label.textContent = 'Giải thưởng';
+        label.style.cssText = 'padding:0 5px;color:#0f172a;';
+        toolbar.appendChild(label);
+
+        if (isSync) {
+          addButton('🔄 Đang đồng bộ Trang chủ', () => undefined, false, true);
+          addButton('Chuyển sang Cấu hình riêng', () => {
+            const nextItems = items.length > 0 ? items : deepClone(getLegacyHomePageContent().awards.items);
+            onConfigValueChange?.(section.id, ['items'], nextItems as any);
+            onConfigValueChange?.(section.id, ['syncWithHome'], false);
+          });
+        } else {
+          addButton('Chuyển sang Đồng bộ Trang chủ', () => {
+            onConfigValueChange?.(section.id, ['syncWithHome'], true);
+          });
+          addButton(`✏️ Cấu hình riêng (${items.length} mục)`, () => undefined, false, true);
+          addButton('+ Thêm giải thưởng', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+        }
       } else if ((section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') && Array.isArray(section.config.items)) {
         const items = section.config.items;
         const label = node.ownerDocument.createElement('strong');
@@ -373,6 +397,28 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
         label.style.cssText = 'padding:0 5px;color:#0f172a;';
         toolbar.appendChild(label);
         addButton('+ Thêm logo đối tác', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+      } else if (section.sectionKey === 'about.partners') {
+        const isSync = section.config.syncWithHome !== false;
+        const items = Array.isArray(section.config.items) ? section.config.items : [];
+        const label = node.ownerDocument.createElement('strong');
+        label.textContent = 'Logo đối tác';
+        label.style.cssText = 'padding:0 5px;color:#0f172a;';
+        toolbar.appendChild(label);
+
+        if (isSync) {
+          addButton('🔄 Đang đồng bộ Trang chủ', () => undefined, false, true);
+          addButton('Chuyển sang Cấu hình riêng', () => {
+            const nextItems = items.length > 0 ? items : deepClone(getLegacyHomePageContent().partners.items);
+            onConfigValueChange?.(section.id, ['items'], nextItems as any);
+            onConfigValueChange?.(section.id, ['syncWithHome'], false);
+          });
+        } else {
+          addButton('Chuyển sang Đồng bộ Trang chủ', () => {
+            onConfigValueChange?.(section.id, ['syncWithHome'], true);
+          });
+          addButton(`✏️ Cấu hình riêng (${items.length} ảnh)`, () => undefined, false, true);
+          addButton('+ Thêm logo đối tác', () => onCollectionAction?.(section.id, 'items', 'add', items.length));
+        }
       } else if (section.references?.length) {
         section.references.forEach((reference) => {
           const entityLabel = node.ownerDocument.createElement('strong');
@@ -387,10 +433,12 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               isFeatured ? `⚡ Tự động: Nổi bật (${reference.entityIds.length})` : 'Chuyển sang Tự động',
               () => onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'featured', limit }),
               isFeatured,
+              isFeatured,
             );
             addButton(
               !isFeatured ? `⚙️ Chọn thủ công (${reference.entityIds.length})` : 'Chuyển sang Thủ công',
               () => onReferenceSourceChange?.(section.id, reference.entityType, { mode: 'manual', limit }),
+              !isFeatured,
               !isFeatured,
             );
             if (!isFeatured && reference.entityIds.length < limit) {
@@ -596,10 +644,10 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
           const cards = node.ownerDocument.createElement('div'); 
           cards.style.cssText = `display:grid;grid-template-columns:${section.sectionType === 'hero_carousel' ? '1fr' : 'repeat(auto-fit,minmax(240px,1fr))'};gap:12px;`;
           value.forEach((collectionItem, itemIndex) => {
-            const isAward = (section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards') && element.key === 'items';
+            const isAward = (section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || section.sectionKey === 'about.awards') && element.key === 'items';
             const isSlide = (section.sectionType === 'hero_carousel' || section.sectionKey === 'home.hero') && element.key === 'slides';
             const isEcosystem = (section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') && element.key === 'items';
-            const isPartner = (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') && element.key === 'items';
+            const isPartner = (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners' || section.sectionKey === 'about.partners') && element.key === 'items';
             const card = node.ownerDocument.createElement('article');
             card.style.cssText = `position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;overflow:hidden;${isAward ? 'min-height:310px;padding:20px;align-items:center;box-shadow:0 1px 3px rgba(15,23,42,.08);' : ''}${isEcosystem ? 'min-height:430px;padding:8px;background:#f1f5f9;' : ''}${isSlide ? 'min-height:440px;justify-content:flex-end;background:#0f172a;color:#fff;' : isAward || isEcosystem ? '' : 'padding:12px;'}`;
             const dragHandle = node.ownerDocument.createElement('span'); 
@@ -714,9 +762,9 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       }
 
       const collectionType = 
-        (section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards') ? 'award' : 
+        (section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || section.sectionKey === 'about.awards') ? 'award' : 
         (section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem') ? 'ecosystem' : 
-        (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners') ? 'partner' : 
+        (section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners' || section.sectionKey === 'about.partners') ? 'partner' : 
         section.references?.[0]?.entityType;
 
       if (toolbar.children.length === 0 && !showFullCollectionInventory) {
@@ -735,10 +783,11 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
 
       if (collectionAnchor && !showFullCollectionInventory) {
         const reference = section.references?.find((item) => collectionAnchor.matches(`[data-page-collection~="${item.entityType}"]`));
-        const isAwardCollection = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards';
-        const isPartnerCollection = section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners';
+        const isAwardCollection = section.sectionType === 'award_slider' || section.sectionType === 'awards' || section.sectionKey === 'home.awards' || section.sectionKey === 'about.awards';
+        const isPartnerCollection = section.sectionType === 'partner_marquee' || section.sectionType === 'partners' || section.sectionKey === 'home.partners' || section.sectionKey === 'about.partners';
         const isEcosystemCollection = section.sectionType === 'technology_ecosystem' || section.sectionType === 'ecosystem' || section.sectionKey === 'home.ecosystem';
-        const isItemCollection = isAwardCollection || isPartnerCollection || isEcosystemCollection;
+        const isAboutSync = (section.sectionKey === 'about.awards' || section.sectionKey === 'about.partners') && section.config.syncWithHome !== false;
+        const isItemCollection = (isAwardCollection || isPartnerCollection || isEcosystemCollection) && !isAboutSync;
         const isProjectSection = section.sectionKey === 'home.projects' || section.sectionType === 'projects';
         const isEventSection = section.sectionKey === 'home.events' || section.sectionType === 'events';
         const itemContainer = isAwardCollection
@@ -848,7 +897,14 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
             const handle = createCardAction('⠿ Kéo', () => undefined);
             handle.style.cursor = 'grab';
             controls.appendChild(handle);
-            const targetMediaKey = isPartnerCollection ? 'logo' : isAwardCollection ? 'img' : isEcosystemCollection ? 'image' : 'imageId';
+            const itemRecord = (section.config.items[itemIndex] ?? {}) as Record<string, PageBuilderConfigValue>;
+            const targetMediaKey = isPartnerCollection 
+              ? (itemRecord?.imageId !== undefined ? 'imageId' : (itemRecord?.logo !== undefined ? 'logo' : 'imageId'))
+              : isAwardCollection 
+                ? (itemRecord?.imageId !== undefined ? 'imageId' : (itemRecord?.img !== undefined ? 'img' : 'imageId'))
+                : isEcosystemCollection 
+                  ? 'image' 
+                  : 'imageId';
             controls.append(
               createCardAction(isPartnerCollection ? 'Đổi Logo' : 'Đổi ảnh', () => onEditMedia?.(section.id, ['items', itemIndex, targetMediaKey], String(itemRecord[targetMediaKey] ?? itemRecord.imageId ?? itemRecord.logo ?? itemRecord.image ?? itemRecord.img ?? ''))),
               createCardAction('Nhân bản', () => onCollectionAction?.(section.id, 'items', 'duplicate', itemIndex)),
@@ -860,7 +916,6 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
               items.splice(to, 0, moved); 
               onConfigValueChange?.(section.id, ['items'], items);
             });
-            const itemRecord = (section.config.items[itemIndex] ?? {}) as Record<string, PageBuilderConfigValue>;
             if (isAwardCollection) {
               const title = card.querySelector<HTMLElement>('h3, span');
               if (title) {

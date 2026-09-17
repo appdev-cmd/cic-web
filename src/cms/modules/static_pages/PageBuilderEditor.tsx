@@ -237,21 +237,27 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
 
   const updateCollection = (sectionId: string, path: string, action: 'add' | 'duplicate' | 'remove' | 'previous' | 'next', index: number) => {
     const section = workingPage.draft.sections.find((item) => item.id === sectionId);
-    const current = section?.config[path];
-    if (!Array.isArray(current)) return;
+    let current = section?.config[path];
+    if (!Array.isArray(current)) {
+      if (path === 'items' && (section?.sectionKey === 'about.awards' || section?.sectionKey === 'about.partners')) {
+        current = [];
+      } else {
+        return;
+      }
+    }
     const items = [...current];
     if (action === 'add') {
-      const isAwards = section?.sectionType === 'award_slider' || section?.sectionType === 'awards' || section?.sectionKey === 'home.awards';
+      const isAwards = section?.sectionType === 'award_slider' || section?.sectionType === 'awards' || section?.sectionKey === 'home.awards' || section?.sectionKey === 'about.awards';
       const isEcosystem = section?.sectionType === 'technology_ecosystem' || section?.sectionType === 'ecosystem' || section?.sectionKey === 'home.ecosystem';
-      const isPartners = section?.sectionType === 'partner_marquee' || section?.sectionType === 'partners' || section?.sectionKey === 'home.partners';
+      const isPartners = section?.sectionType === 'partner_marquee' || section?.sectionType === 'partners' || section?.sectionKey === 'home.partners' || section?.sectionKey === 'about.partners';
       const defaults: Record<string, PageBuilderConfigValue> = {
         slides: { title: '', subtitle: '', backgroundImageId: '', mobileImageId: '', primaryCtaId: '', secondaryCtaId: '' },
         items: isAwards
-          ? { name: 'Giải thưởng mới', imageId: '' }
+          ? { name: 'Giải thưởng mới', imageId: '', img: '' }
           : isEcosystem
             ? { id: `ecosystem_${items.length + 1}`, title: 'Giải pháp mới', description: 'Nhập mô tả giải pháp.', badge: 'Công nghệ', imageId: '', link: '/products' }
             : isPartners
-              ? { id: `partner_${items.length + 1}`, name: 'Đối tác mới', imageId: '', link: '/' }
+              ? { id: `partner_${items.length + 1}`, name: 'Đối tác mới', imageId: '', logo: '', link: '/' }
             : { value: 0, suffix: '+', label: '' },
         paragraphs: 'Nhập đoạn nội dung mới',
         tickerItems: 'Nhập thông báo mới',
@@ -272,6 +278,27 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
       const target = action === 'previous' ? index - 1 : index + 1;
       if (target < 0 || target >= items.length) return;
       [items[index], items[target]] = [items[target], items[index]];
+    }
+    if (section && (section.sectionKey === 'about.awards' || section.sectionKey === 'about.partners') && section.config.syncWithHome !== false) {
+      recordHistory(`Cập nhật ${path}`);
+      setWorkingPage((current) => ({
+        ...current,
+        draft: {
+          ...current.draft,
+          sections: current.draft.sections.map((s) => {
+            if (s.id !== sectionId) return s;
+            const updatedConfig = updateConfigByPath(s.config, [path], items);
+            return {
+              ...s,
+              config: {
+                ...updatedConfig,
+                syncWithHome: false,
+              },
+            };
+          }),
+        },
+      }));
+      return;
     }
     updateSectionConfig(sectionId, [path], items);
   };

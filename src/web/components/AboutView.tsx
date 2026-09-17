@@ -265,13 +265,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
 
   const displayedPartners = useMemo(() => {
     const syncWithHome = partnersConfig.syncWithHome !== false;
-    const items = Array.isArray(partnersConfig.items) ? partnersConfig.items : [];
-    if (syncWithHome && items.length > 0) {
-      return items.flatMap((item, index) => item && typeof item === 'object' && !Array.isArray(item)
-        ? [{ entityId: typeof item.id === 'string' ? item.id : `partner-${index + 1}`, name: typeof item.name === 'string' ? item.name : '', logo: typeof item.imageId === 'string' ? resolveMediaUrl(item.imageId) : (typeof item.logo === 'string' ? item.logo : ''), link: typeof item.link === 'string' ? item.link : '' }]
-        : []);
+    if (syncWithHome) {
+      return partners.map((partner, index) => ({ ...partner, entityId: `legacy-partner-${index + 1}`, link: '' }));
     }
-    if (!items.length || syncWithHome) {
+    const items = Array.isArray(partnersConfig.items) ? partnersConfig.items : [];
+    if (!items.length) {
       return partners.map((partner, index) => ({ ...partner, entityId: `legacy-partner-${index + 1}`, link: '' }));
     }
     return items.flatMap((item, index) => item && typeof item === 'object' && !Array.isArray(item)
@@ -281,13 +279,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
 
   const displayedAwards = useMemo(() => {
     const syncWithHome = awardsConfig.syncWithHome !== false;
-    const items = Array.isArray(awardsConfig.items) ? awardsConfig.items : [];
-    if (syncWithHome && items.length > 0) {
-      return items.flatMap((item) => item && typeof item === 'object' && !Array.isArray(item) && typeof item.name === 'string'
-        ? [{ name: item.name, img: resolveMediaUrl((item.imageId || item.img || '') as string) }]
-        : []);
+    if (syncWithHome) {
+      return homeAwards;
     }
-    if (!items.length || syncWithHome) {
+    const items = Array.isArray(awardsConfig.items) ? awardsConfig.items : [];
+    if (!items.length) {
       return homeAwards;
     }
     return items.flatMap((item) => item && typeof item === 'object' && !Array.isArray(item) && typeof item.name === 'string'
