@@ -6,6 +6,7 @@ export interface PermissionTask {
   description: string;
   published: boolean;
   ordering: number;
+  listFunction?: string;
 }
 
 export interface PermissionFunction {

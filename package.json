@@ -22,6 +22,7 @@
     "preview:legacy": "vite preview",
     "check:cms-production": "node scripts/check-cms-production.mjs",
     "db:seed-menu": "node scripts/seed-canonical-menu.mjs",
+    "db:seed-permissions": "node scripts/seed-canonical-permissions.mjs",
     "db:apply-audit-foundation": "node scripts/apply-activity-audit-foundation.mjs",
     "db:apply-users-identity": "node scripts/apply-users-identity-hardening.mjs",
     "bootstrap:cms-admin": "node scripts/bootstrap-cms-admin.mjs",

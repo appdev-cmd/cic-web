@@ -31,8 +31,13 @@ export const getCurrentCmsPrincipal = cache(async function getCurrentCmsPrincipa
   const roleIds = activeAssignments.map((assignment) => Number(assignment.role_id));
   let permissions: CmsPermission[] = [];
   if (!isAdministrator && roleIds.length > 0) {
-    const rows = await sql`SELECT rp.action,pt.module FROM cic_role_permissions rp JOIN cic_permission_tasks pt ON pt.id=rp.permission_task_id WHERE rp.role_id IN ${sql(roleIds)} AND rp.allowed=true`;
-    permissions = rows.map((row) => ({ module: normalize(String(row.module)), action: normalize(String(row.action)) }));
+    const rows = await sql`SELECT rp.action,pt.module,pt._task FROM cic_role_permissions rp JOIN cic_permission_tasks pt ON pt.id=rp.permission_task_id WHERE rp.role_id IN ${sql(roleIds)} AND rp.allowed=true`;
+    permissions = rows.flatMap((row) => [
+      { module: normalize(String(row.module)), action: normalize(String(row.action)) },
+      ...(row._task ? [{ module: normalize(String(row._task)), action: normalize(String(row.action)) }] : []),
+      ...(normalize(String(row.module)) === 'roles' ? [{ module: 'permissions', action: normalize(String(row.action)) }] : []),
+      ...(normalize(String(row.module)) === 'permissions' ? [{ module: 'roles', action: normalize(String(row.action)) }] : []),
+    ]);
   }
   return { authUser, legacyUserId: Number(profile.id), email: String(profile.email ?? authUser.email ?? ''), username: String(profile.username ?? ''), fullName: String(profile.full_name ?? profile.username ?? authUser.email ?? ''), roleCodes, permissions, isAdministrator };
 });
