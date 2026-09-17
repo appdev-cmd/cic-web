@@ -48,7 +48,7 @@ import { PageEntityPickerModal } from './PageEntityPickerModal';
 import { PageMediaPickerModal } from './PageMediaPickerModal';
 import { PageBuilderVisualCanvas } from './PageBuilderVisualCanvas';
 import { registerEntityOptions } from '@/shared/page-content/resolveReferenceEntity';
-import { getLegacyAboutPageContent, getLegacyAboutCapacityContent } from '@/shared/page-content/legacyPageContent';
+import { getLegacyAboutPageContent, getLegacyAboutCapacityContent, getLegacyHomePageContent } from '@/shared/page-content/legacyPageContent';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 import { CTA_OPTIONS } from './editor/editorConstants';
 import { deepClone, updateAtPath, valueAtPath, siblingPath } from './editor/editorUtils';
@@ -138,6 +138,43 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     } else if (section.sectionKey === 'about.capacity' && path[0] === 'metrics') {
       if (!Array.isArray(cfg.metrics) || cfg.metrics.length === 0) {
         cfg.metrics = deepClone(getLegacyAboutCapacityContent().metrics) as any;
+      }
+    } else if (section.sectionKey === 'home.partners' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = deepClone(getLegacyHomePageContent().partners?.items ?? []) as any;
+      }
+    } else if (section.sectionKey === 'about.partners' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = deepClone(getLegacyHomePageContent().partners?.items ?? []) as any;
+      }
+    } else if (section.sectionKey === 'about.partners' && path[0] === 'galleryImages') {
+      if (!Array.isArray(cfg.galleryImages) || cfg.galleryImages.length === 0) {
+        cfg.galleryImages = [
+          'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80',
+        ];
+      }
+    } else if (section.sectionKey === 'about.experience' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = [
+          {
+            title: 'Phát triển nguồn nhân lực chất lượng cao',
+            description: 'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
+            imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
+          },
+          {
+            title: 'Đối tác chiến lược với các hãng công nghệ danh tiếng',
+            description: 'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
+            imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
+          },
+          {
+            title: 'Cập nhật xu hướng công nghệ hàng đầu',
+            description: 'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
+            imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+          },
+        ];
       }
     }
     return cfg;

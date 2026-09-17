@@ -123,9 +123,10 @@ interface AboutViewProps {
   bindingRegistry?: ElementBindingRegistry;
   pageSections?: readonly { sectionKey: string; config: Record<string, unknown>; references?: readonly { entityType: string; entityIds: readonly string[] }[] }[];
   resolveMediaUrl?: (id: string) => string;
+  editMode?: boolean;
 }
 
-export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry, pageSections, resolveMediaUrl = (id) => id }: AboutViewProps) => {
+export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry, pageSections, resolveMediaUrl = (id) => id, editMode = false }: AboutViewProps) => {
   const homeAwards = useMemo(getHomeAwards, []);
   const partners = useMemo(getHomePartners, []);
   const configFor = (sectionKey: string) => pageSections?.find((section) => section.sectionKey === sectionKey)?.config ?? {};
@@ -751,7 +752,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     
                     {/* Modern Photo Album (Bento Grid) */}
                     <div className="mt-12 grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[250px] mb-12">
-                      <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
+                      <div 
+                        data-page-builder-media-path={JSON.stringify(['galleryImages', 0])}
+                        data-page-builder-media-id={displayedGalleryImages[0]}
+                        className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group cursor-pointer"
+                      >
                         <img 
                           data-page-builder-media-path={JSON.stringify(['galleryImages', 0])}
                           data-page-builder-media-id={displayedGalleryImages[0]}
@@ -759,9 +764,13 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           alt="Hoạt động đối tác" 
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
-                      <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
+                      <div 
+                        data-page-builder-media-path={JSON.stringify(['galleryImages', 1])}
+                        data-page-builder-media-id={displayedGalleryImages[1]}
+                        className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group cursor-pointer"
+                      >
                         <img 
                           data-page-builder-media-path={JSON.stringify(['galleryImages', 1])}
                           data-page-builder-media-id={displayedGalleryImages[1]}
@@ -769,9 +778,13 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           alt="Hoạt động đối tác" 
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
-                      <div className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group">
+                      <div 
+                        data-page-builder-media-path={JSON.stringify(['galleryImages', 2])}
+                        data-page-builder-media-id={displayedGalleryImages[2]}
+                        className="md:col-span-4 rounded-[10px] overflow-hidden shadow-sm relative group cursor-pointer"
+                      >
                         <img 
                           data-page-builder-media-path={JSON.stringify(['galleryImages', 2])}
                           data-page-builder-media-id={displayedGalleryImages[2]}
@@ -779,9 +792,13 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           alt="Hoạt động đối tác" 
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
-                      <div className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group">
+                      <div 
+                        data-page-builder-media-path={JSON.stringify(['galleryImages', 3])}
+                        data-page-builder-media-id={displayedGalleryImages[3]}
+                        className="md:col-span-8 rounded-[10px] overflow-hidden shadow-sm relative group cursor-pointer"
+                      >
                         <img 
                           data-page-builder-media-path={JSON.stringify(['galleryImages', 3])}
                           data-page-builder-media-id={displayedGalleryImages[3]}
@@ -789,7 +806,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           alt="Hoạt động đối tác" 
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
                     </div>
                   </div>
@@ -1149,7 +1166,11 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       const isEven = idx % 2 === 1;
                       return (
                         <div key={idx} className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center ${isEven ? 'md:flex-row-reverse' : ''}`}>
-                          <div className={`${isEven ? 'order-1 md:order-2' : ''} rounded-[10px] overflow-hidden shadow-md group relative`}>
+                          <div 
+                            data-page-builder-media-path={JSON.stringify(['items', idx, 'imageId'])}
+                            data-page-builder-media-id={item.imageId}
+                            className={`${isEven ? 'order-1 md:order-2' : ''} rounded-[10px] overflow-hidden shadow-md group relative cursor-pointer`}
+                          >
                             <img 
                               data-page-builder-media-path={JSON.stringify(['items', idx, 'imageId'])}
                               data-page-builder-media-id={item.imageId}
@@ -1157,7 +1178,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                               alt={item.title} 
                               className={`w-full h-[260px] md:h-[320px] object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                           </div>
                           <div className={isEven ? 'order-2 md:order-1' : ''}>
                             <h3 
@@ -1180,7 +1201,23 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   
                   {/* Global Technology Partner Network Map Component */}
                   <div className="mx-auto mb-6 w-full md:mb-8">
-                    <GlobalPartnerMap />
+                    <GlobalPartnerMap 
+                      title={textFrom(experienceConfig, 'partnerMapTitle', textFrom(capacityConfig, 'partnerMapTitle', 'Mạng lưới đối tác công nghệ tiêu biểu'))}
+                      subtitle={textFrom(experienceConfig, 'partnerMapSubtitle', textFrom(capacityConfig, 'partnerMapSubtitle', 'Từ Việt Nam, CIC kết nối với các hãng công nghệ hàng đầu trong mạng lưới hợp tác quốc tế.'))}
+                      editMode={editMode}
+                      titleProps={{
+                        'data-page-builder-config-path': JSON.stringify(['partnerMapTitle']),
+                        ...bindElementRuntime<HTMLHeadingElement>(createElementBinding({
+                          sectionKey: 'about.experience', elementPath: 'partnerMapTitle', semantic: 'text', ownership: 'section-config', editable: true,
+                        }), bindingRegistry),
+                      } as any}
+                      subProps={{
+                        'data-page-builder-config-path': JSON.stringify(['partnerMapSubtitle']),
+                        ...bindElementRuntime<HTMLParagraphElement>(createElementBinding({
+                          sectionKey: 'about.experience', elementPath: 'partnerMapSubtitle', semantic: 'text', ownership: 'section-config', editable: true,
+                        }), bindingRegistry),
+                      } as any}
+                    />
                   </div>
 
                   <a

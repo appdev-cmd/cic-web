@@ -15,11 +15,18 @@ function recordArray(value: PageBuilderConfigValue | undefined): Array<Record<st
     : [];
 }
 
+function configValueAtPath(config: Record<string, PageBuilderConfigValue>, path: Array<string | number>): PageBuilderConfigValue | undefined {
+  return path.reduce<PageBuilderConfigValue | undefined>((val, part) => {
+    if (!val || typeof val !== 'object') return undefined;
+    return (val as Record<string | number, PageBuilderConfigValue>)[part];
+  }, config);
+}
+
 export function createEmbeddedTextAdapter(config: EmbeddedTextAdapterConfig): PageBuilderVisualElementEditingAdapter {
   return {
     sectionKey: config.sectionKey,
     resolveInlineTextEdit(sections, binding) {
-      if (binding.sectionKey !== config.sectionKey || binding.semantic !== 'text' || !binding.editable) return null;
+      if (binding.sectionKey !== config.sectionKey || (binding.semantic !== 'text' && binding.semantic !== 'rich-text') || !binding.editable) return null;
       const section = sections.find((candidate) => candidate.sectionKey === config.sectionKey);
       if (!section) return null;
       const segments = binding.elementPath.split('.');
@@ -28,30 +35,45 @@ export function createEmbeddedTextAdapter(config: EmbeddedTextAdapterConfig): Pa
       let contractPath: string;
       if (binding.itemId && binding.collectionPath) {
         const collection = config.collections[binding.collectionPath];
-        if (!collection || binding.itemId.startsWith(collection.transientPrefix)) return null;
+        if (collection && binding.itemId.startsWith(collection.transientPrefix)) return null;
         const items = recordArray(section.config[binding.collectionPath]);
-        const itemIndex = items.findIndex((item) => item[collection.idField] === binding.itemId);
+        let itemIndex = collection
+          ? items.findIndex((item) => item[collection.idField] === binding.itemId)
+          : items.findIndex((item) => item.id === binding.itemId || item.entityId === binding.itemId || item.key === binding.itemId);
+        if (itemIndex < 0) {
+          const possibleIdx = Number(segments[1]);
+          if (Number.isInteger(possibleIdx) && possibleIdx >= 0 && possibleIdx < items.length) {
+            itemIndex = possibleIdx;
+          }
+        }
         const field = segments.at(-1);
         if (itemIndex < 0 || !field) return null;
         rawValue = items[itemIndex][field];
         path = [binding.collectionPath, itemIndex, field];
         contractPath = `${binding.collectionPath}.*.${field}`;
       } else {
-        const field = segments.at(-1);
-        if (!field) return null;
-        rawValue = section.config[field];
-        path = [field];
-        contractPath = field;
+        path = segments.map((seg) => /^\d+$/.test(seg) ? Number(seg) : seg);
+        contractPath = segments.map((seg) => /^\d+$/.test(seg) ? '*' : seg).join('.');
+        rawValue = configValueAtPath(section.config, path);
       }
-      if (typeof rawValue !== 'string') return null;
-      const fieldContract = getEditableFieldContract(config.sectionKey, contractPath);
+      const fieldContract = getEditableFieldContract(config.sectionKey, contractPath) ?? getEditableFieldContract(config.sectionKey, segments.at(-1)!);
       if (!fieldContract) return null;
-      const descriptor = createInlineTextEditDescriptor(binding, fieldContract, rawValue);
+      const editValue = (rawValue !== undefined && rawValue !== null)
+        ? rawValue
+        : (fieldContract.valueKind === 'number' ? 0 : '');
+      if (fieldContract.valueKind === 'number' && typeof editValue !== 'number') return null;
+      if (fieldContract.valueKind === 'string' && typeof editValue !== 'string') return null;
+      const descriptor = createInlineTextEditDescriptor(binding, fieldContract, editValue as string | number);
       return descriptor ? {
         sectionId: section.id,
         path,
         descriptor,
-        accepts: (request) => request.binding.bindingId === binding.bindingId && typeof request.after === 'string',
+        accepts: (request) => {
+          if (request.binding.bindingId !== binding.bindingId) return false;
+          return fieldContract.valueKind === 'number'
+            ? typeof request.after === 'number' && Number.isFinite(request.after)
+            : typeof request.after === 'string';
+        },
       } : null;
     },
   };

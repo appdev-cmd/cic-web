@@ -34,7 +34,7 @@ export const draftSectionSchemas: Record<string, DraftElementDefinition[]> = {
   'about.partners': [booleanField('syncWithHome', 'Đồng bộ từ Trang chủ'), text('title', 'Tiêu đề'), text('subtitle', 'Mô tả', true), text('description', 'Nội dung giới thiệu', true), item('galleryImages', 'Ảnh Bento Grid'), item('items', 'Logo đối tác')],
   'about.organization': [text('title', 'Tiêu đề'), text('subtitle', 'Mô tả phụ', true)],
   'about.capacity': [text('title', 'Tiêu đề'), text('description', 'Mô tả'), item('metrics', 'Chỉ số năng lực')],
-  'about.experience': [text('title', 'Tiêu đề'), item('items', 'Khối kinh nghiệm'), item('categoryKeys', 'Nhóm kinh nghiệm')],
+  'about.experience': [text('title', 'Tiêu đề'), text('partnerMapTitle', 'Tiêu đề mạng lưới đối tác', true), text('partnerMapSubtitle', 'Mô tả mạng lưới đối tác', true), item('items', 'Khối kinh nghiệm'), item('categoryKeys', 'Nhóm kinh nghiệm')],
   'about.software_partners': [text('title', 'Tiêu đề'), reference('partner', 'Đối tác phần mềm')],
   'about.hardware_partners': [text('title', 'Tiêu đề'), reference('partner', 'Đối tác thiết bị')],
   'about.contact_cta': [text('title', 'Tiêu đề'), text('description', 'Mô tả'), text('ctaLabel', 'Nhãn nút', true), text('ctaUrl', 'Đường dẫn', true), { key: 'ctaId', label: 'CTA', kind: 'cta' }],

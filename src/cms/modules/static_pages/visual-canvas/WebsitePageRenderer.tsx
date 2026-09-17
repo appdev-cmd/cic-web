@@ -186,6 +186,7 @@ export function WebsitePage({
         bindingRegistry={bindingRegistry} 
         pageSections={page.draft.sections} 
         resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+        editMode={editMode}
       />
     );
   }
@@ -199,6 +200,7 @@ export function WebsitePage({
         bindingRegistry={bindingRegistry} 
         pageSections={page.draft.sections} 
         resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+        editMode={editMode}
       />
     );
   }
@@ -218,6 +220,7 @@ export function WebsitePage({
         bindingRegistry={bindingRegistry} 
         pageSections={page.draft.sections} 
         resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
+        editMode={editMode}
       />
     );
   }

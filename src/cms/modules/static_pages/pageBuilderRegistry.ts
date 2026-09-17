@@ -325,6 +325,8 @@ export const sectionDefinitions: Record<string, SectionDefinition> = {
       sectionKey: 'about.experience',
       fields: [
         { path: 'title', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'partnerMapTitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
+        { path: 'partnerMapSubtitle', semantic: 'text', ownership: 'section-config', valueKind: 'string', editing: 'enabled' },
         { path: 'items.*.title', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
         { path: 'items.*.description', semantic: 'text', ownership: 'embedded', valueKind: 'string', editing: 'enabled' },
       ],

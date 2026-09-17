@@ -158,18 +158,18 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   if (awardsSec && awardsSec.config) {
     const cfg = awardsSec.config as Record<string, unknown>;
     const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
-    if (rawItems.length > 0) {
-      const items: HomeAwardItemModel[] = rawItems.map((item: Record<string, unknown>) => ({
-        name: typeof item.name === 'string' ? item.name : '',
-        img: normalizeImageUrl(item.img || item.imageId || item.image),
-      }));
-      awards = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : awards.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : awards.title,
-        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : awards.subtitle,
-        items,
-      };
-    }
+    const items: readonly HomeAwardItemModel[] = rawItems.length > 0
+      ? rawItems.map((item: Record<string, unknown>) => ({
+          name: typeof item.name === 'string' ? item.name : '',
+          img: normalizeImageUrl(item.img || item.imageId || item.image),
+        }))
+      : awards.items;
+    awards = {
+      badge: typeof cfg.badge === 'string' ? cfg.badge : awards.badge,
+      title: typeof cfg.title === 'string' ? cfg.title : awards.title,
+      subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : awards.subtitle,
+      items,
+    };
   }
 
   // 5. home.ecosystem
@@ -178,32 +178,32 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   if (ecoSec && ecoSec.config) {
     const cfg = ecoSec.config as Record<string, unknown>;
     const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
-    if (rawItems.length > 0) {
-      const items: HomeEcosystemItemModel[] = rawItems.map((item: Record<string, unknown>, idx: number) => {
-        const desc = typeof item.desc === 'string' && item.desc ? item.desc : (typeof item.description === 'string' ? item.description : '');
-        const badge = typeof item.badge === 'string' && item.badge ? item.badge : (typeof item.tag === 'string' && item.tag ? item.tag : 'Công nghệ');
-        const img = normalizeImageUrl(item.image || item.imageId || item.img);
-        return {
-          id: String(item.id || `eco-${idx + 1}`),
-          title: typeof item.title === 'string' ? item.title : '',
-          desc,
-          tag: badge,
-          badge,
-          link: typeof item.link === 'string' ? item.link : '',
-          image: img,
-          imageId: typeof item.imageId === 'string' ? item.imageId : undefined,
-          view: item.view === 'services' ? ('services' as const) : ('products' as const),
-          activeLink: item.activeLink === 'Dịch vụ' ? ('Dịch vụ' as const) : ('Sản phẩm' as const),
-          serviceId: typeof item.serviceId === 'string' ? item.serviceId : (item.serviceId === null ? null : undefined),
-        };
-      });
-      ecosystem = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : ecosystem.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : ecosystem.title,
-        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : ecosystem.subtitle,
-        items,
-      };
-    }
+    const items: readonly HomeEcosystemItemModel[] = rawItems.length > 0
+      ? rawItems.map((item: Record<string, unknown>, idx: number) => {
+          const desc = typeof item.desc === 'string' && item.desc ? item.desc : (typeof item.description === 'string' ? item.description : '');
+          const badge = typeof item.badge === 'string' && item.badge ? item.badge : (typeof item.tag === 'string' && item.tag ? item.tag : 'Công nghệ');
+          const img = normalizeImageUrl(item.image || item.imageId || item.img);
+          return {
+            id: String(item.id || `eco-${idx + 1}`),
+            title: typeof item.title === 'string' ? item.title : '',
+            desc,
+            tag: badge,
+            badge,
+            link: typeof item.link === 'string' ? item.link : '',
+            image: img,
+            imageId: typeof item.imageId === 'string' ? item.imageId : undefined,
+            view: item.view === 'services' ? ('services' as const) : ('products' as const),
+            activeLink: item.activeLink === 'Dịch vụ' ? ('Dịch vụ' as const) : ('Sản phẩm' as const),
+            serviceId: typeof item.serviceId === 'string' ? item.serviceId : (item.serviceId === null ? null : undefined),
+          };
+        })
+      : ecosystem.items;
+    ecosystem = {
+      badge: typeof cfg.badge === 'string' ? cfg.badge : ecosystem.badge,
+      title: typeof cfg.title === 'string' ? cfg.title : ecosystem.title,
+      subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : ecosystem.subtitle,
+      items,
+    };
   }
 
   // 6. home.projects (real entity query)
@@ -261,15 +261,15 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
           : ['BIM', 'Digital Twins', 'Hạ tầng'],
         size: idx === 0 ? ('full' as const) : ('small' as const),
       }));
-
-      const cfg = (projSec?.config ?? {}) as Record<string, unknown>;
-      projects = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : projects.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : projects.title,
-        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : projects.subtitle,
-        items: mappedProjects,
-      };
+      projects = { ...projects, items: mappedProjects };
     }
+    const projCfg = (projSec?.config ?? {}) as Record<string, unknown>;
+    projects = {
+      badge: typeof projCfg.badge === 'string' ? projCfg.badge : projects.badge,
+      title: typeof projCfg.title === 'string' ? projCfg.title : projects.title,
+      subtitle: typeof projCfg.subtitle === 'string' ? projCfg.subtitle : projects.subtitle,
+      items: projects.items,
+    };
   } catch (err) {
     console.error('Failed to load projects for home page:', err);
   }
@@ -330,18 +330,18 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
           ctaUrl: e.link_dangky || (e.alias ? `/events/${e.alias}` : `/events/${e.id}`),
         };
       });
-
-      const cfg = (eventSec?.config ?? {}) as Record<string, unknown>;
-      events = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : events.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : events.title,
-        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : events.subtitle,
-        ctaLabel: typeof cfg.ctaLabel === 'string' ? cfg.ctaLabel : events.ctaLabel,
-        ctaUrl: typeof cfg.ctaUrl === 'string' ? cfg.ctaUrl : events.ctaUrl,
-        upcomingEvents: mappedEvents,
-        pastEvents: [],
-      };
+      events = { ...events, upcomingEvents: mappedEvents, pastEvents: [] };
     }
+    const eventCfg = (eventSec?.config ?? {}) as Record<string, unknown>;
+    events = {
+      badge: typeof eventCfg.badge === 'string' ? eventCfg.badge : events.badge,
+      title: typeof eventCfg.title === 'string' ? eventCfg.title : events.title,
+      subtitle: typeof eventCfg.subtitle === 'string' ? eventCfg.subtitle : events.subtitle,
+      ctaLabel: typeof eventCfg.ctaLabel === 'string' ? eventCfg.ctaLabel : events.ctaLabel,
+      ctaUrl: typeof eventCfg.ctaUrl === 'string' ? eventCfg.ctaUrl : events.ctaUrl,
+      upcomingEvents: events.upcomingEvents,
+      pastEvents: events.pastEvents,
+    };
   } catch (err) {
     console.error('Failed to load events for home page:', err);
   }
@@ -394,17 +394,17 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
         desc: n.summary || '',
         img: normalizeImageUrl(n.image),
       }));
-
-      const cfg = (newsSec?.config ?? {}) as Record<string, unknown>;
-      news = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : news.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : news.title,
-        subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : news.subtitle,
-        ctaLabel: typeof cfg.ctaLabel === 'string' ? cfg.ctaLabel : news.ctaLabel,
-        ctaUrl: typeof cfg.ctaUrl === 'string' ? cfg.ctaUrl : news.ctaUrl,
-        items: newsItems,
-      };
+      news = { ...news, items: newsItems };
     }
+    const newsCfg = (newsSec?.config ?? {}) as Record<string, unknown>;
+    news = {
+      badge: typeof newsCfg.badge === 'string' ? newsCfg.badge : news.badge,
+      title: typeof newsCfg.title === 'string' ? newsCfg.title : news.title,
+      subtitle: typeof newsCfg.subtitle === 'string' ? newsCfg.subtitle : news.subtitle,
+      ctaLabel: typeof newsCfg.ctaLabel === 'string' ? newsCfg.ctaLabel : news.ctaLabel,
+      ctaUrl: typeof newsCfg.ctaUrl === 'string' ? newsCfg.ctaUrl : news.ctaUrl,
+      items: news.items,
+    };
   } catch (err) {
     console.error('Failed to load news for home page:', err);
   }
@@ -415,17 +415,18 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   if (partnersSec && partnersSec.config) {
     const cfg = partnersSec.config as Record<string, unknown>;
     const rawItems = Array.isArray(cfg.items) ? cfg.items : [];
-    if (rawItems.length > 0) {
-      const items: HomePartnerItemModel[] = rawItems.map((item: Record<string, unknown>) => ({
-        name: typeof item.name === 'string' ? item.name : '',
-        logo: normalizeImageUrl(item.logo || item.imageId || item.image),
-      }));
-      partners = {
-        badge: typeof cfg.badge === 'string' ? cfg.badge : partners.badge,
-        title: typeof cfg.title === 'string' ? cfg.title : partners.title,
-        items,
-      };
-    }
+    const items: readonly HomePartnerItemModel[] = rawItems.length > 0
+      ? rawItems.map((item: Record<string, unknown>) => ({
+          name: typeof item.name === 'string' ? item.name : '',
+          logo: normalizeImageUrl(item.logo || item.imageId || item.image),
+        }))
+      : partners.items;
+    partners = {
+      badge: typeof cfg.badge === 'string' ? cfg.badge : partners.badge,
+      title: typeof cfg.title === 'string' ? cfg.title : partners.title,
+      subtitle: typeof cfg.subtitle === 'string' ? cfg.subtitle : partners.subtitle,
+      items,
+    };
   }
 
   // 10. home.contact_cta

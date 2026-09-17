@@ -6,7 +6,6 @@ import { worldMapPaths } from '../data/worldMapPaths';
 // Keep the overall block shallow while reserving more partner space above the
 // map than below it. The geographic map remains centered within the canvas.
 const CANVAS = { width: 2000, height: 1060, mapX: 340, mapY: 185, mapWidth: 1320, mapHeight: 726 } as const;
-const PARTNER_MAP_EDIT_MODE = false;
 const PARTNER_MAP_LAYOUT_STORAGE_KEY = 'cic-partner-map-layout-v1';
 const UNIFORM_LOGO_BOUNDS = { width: 120, height: 60 } as const;
 type Point = { x: number; y: number };
@@ -235,7 +234,12 @@ const vietnamMaritimeFeatures = [
   'M 815.5 278.1 l 1.2 -0.4 l 0.8 0.8 l -0.9 0.9 l -1.1 -0.2 Z',
 ] as const;
 
-export const CountryPartnerNetwork: React.FC = () => {
+export interface CountryPartnerNetworkProps {
+  isEditable?: boolean;
+}
+
+export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ isEditable = false }) => {
+  const PARTNER_MAP_EDIT_MODE = isEditable;
   const svgRef = useRef<SVGSVGElement>(null);
   const [activePartnerId, setActivePartnerId] = useState<string | null>(null);
   const [activeCountryId, setActiveCountryId] = useState<string | null>(null);

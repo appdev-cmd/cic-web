@@ -33,7 +33,7 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
+            <h2 data-page-builder-config-path={JSON.stringify(['title'])} className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
               {introData?.title ? (
                 introData.title.includes('đồng hành') ? (
                   <>
