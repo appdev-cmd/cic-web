@@ -199,9 +199,19 @@ export async function getSeoHealthMetrics(locale: 'vi' | 'en'): Promise<SeoHealt
   // Also count published articles, products, pages to give accurate health overview
   const [newsCount] = await sql`SELECT count(*)::int as count FROM cic_news WHERE published = true`;
   const [prodCount] = await sql`SELECT count(*)::int as count FROM cic_products WHERE published = true`;
-  const [pageCount] = await sql`SELECT count(*)::int as count FROM cic_content_pages WHERE status = 'published' AND published = true`;
+  const [pageCount] = await sql`SELECT count(*)::int as count FROM cic_content_pages WHERE published_revision_id IS NOT NULL`;
+  const [serviceCount] = await sql`SELECT count(*)::int as count FROM cic_services WHERE published::int = 1`;
+  const [projectCount] = await sql`SELECT count(*)::int as count FROM cic_projects WHERE published = true`;
+  const [eventCount] = await sql`SELECT count(*)::int as count FROM cic_event WHERE published = true`;
 
-  const totalPages = records.length + (newsCount?.count ?? 0) + (prodCount?.count ?? 0) + (pageCount?.count ?? 0);
+  const totalPages =
+    records.length +
+    (newsCount?.count ?? 0) +
+    (prodCount?.count ?? 0) +
+    (pageCount?.count ?? 0) +
+    (serviceCount?.count ?? 0) +
+    (projectCount?.count ?? 0) +
+    (eventCount?.count ?? 0);
 
   const missingDescriptionCount = records.filter((r) => !r.description.trim()).length;
   const missingTitleCount = records.filter((r) => !r.title.trim()).length;
