@@ -500,8 +500,8 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
     }
   };
 
-  const handleSaveDraft = (nextPage: PageBuilderPage) => {
-    startTransition(async () => {
+  const handleSaveDraft = async (nextPage: PageBuilderPage): Promise<void> => {
+    try {
       const input = toSaveDraftInput(nextPage);
       const res = await savePageDraftAction(Number(nextPage.id), input);
       if (!res.success || !res.data) {
@@ -534,11 +534,13 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         )
       );
       showToast('Đã lưu bản nháp vào Database. Website công khai chưa thay đổi.');
-    });
+    } catch (err: any) {
+      showToast(err?.message || 'Có lỗi xảy ra khi lưu bản nháp.', 'error');
+    }
   };
 
-  const handlePublish = (nextPage: PageBuilderPage) => {
-    startTransition(async () => {
+  const handlePublish = async (nextPage: PageBuilderPage): Promise<void> => {
+    try {
       // First save draft if modified, then publish
       const input = toSaveDraftInput(nextPage);
       const saveRes = await savePageDraftAction(Number(nextPage.id), input);
@@ -581,7 +583,9 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
         )
       );
       showToast(`Đã xuất bản thành công! Link công khai: https://cic.com.vn${nextPage.slug}`);
-    });
+    } catch (err: any) {
+      showToast(err?.message || 'Có lỗi xảy ra khi xuất bản trang.', 'error');
+    }
   };
 
   const handleCreateLegal = () => {

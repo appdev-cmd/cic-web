@@ -102,28 +102,8 @@ export const PublicLegalPageView: React.FC<PublicLegalPageViewProps> = ({
         </div>
 
         {/* MAIN ARTICLE BODY */}
-        <article className="bg-white border border-slate-200/90 rounded-[12px] p-6 sm:p-10 lg:p-12 shadow-xs space-y-10 leading-relaxed text-slate-700 prose prose-slate max-w-none">
+        <article className="bg-white border border-slate-200/90 rounded-[12px] p-6 sm:p-10 lg:p-12 shadow-xs leading-relaxed text-slate-700 legal-article-content">
           <div dangerouslySetInnerHTML={{ __html: richTextHtml }} />
-
-          {/* CONTACT ASSISTANCE BOX (Fallback if not embedded in richTextHtml) */}
-          {!richTextHtml.includes('legal-contact-box') && !richTextHtml.includes('Liên hệ giải đáp') && (
-            <div className="mt-10 p-6 sm:p-8 bg-slate-900 text-white rounded-[12px] space-y-3 shadow-md not-prose">
-              <h3 className="text-xs sm:text-sm font-bold text-orange-400 uppercase tracking-wider flex items-center gap-2">
-                <ShieldCheck size={18} /> Liên hệ giải đáp thắc mắc pháp lý
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Mọi thắc mắc hoặc yêu cầu hỗ trợ liên quan đến văn bản chính sách này, quý khách vui lòng liên hệ Ban quản trị CIC:
-              </p>
-              <div className="flex flex-wrap gap-6 pt-2 text-xs sm:text-sm font-medium">
-                <a href="tel:02439761381" className="flex items-center gap-2 text-white hover:text-orange-400 transition-colors">
-                  <Phone size={15} className="text-orange-500" /> Hotline: 024 3976 1381
-                </a>
-                <a href="mailto:info@cic.com.vn" className="flex items-center gap-2 text-white hover:text-orange-400 transition-colors">
-                  <Mail size={15} className="text-orange-500" /> Email: info@cic.com.vn
-                </a>
-              </div>
-            </div>
-          )}
         </article>
 
         {/* FOOTER BACK BUTTON */}

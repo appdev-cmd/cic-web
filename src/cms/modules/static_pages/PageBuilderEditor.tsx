@@ -58,9 +58,9 @@ import { ConfigField } from './editor/ConfigField';
 interface PageBuilderEditorProps {
   page: PageBuilderPage;
   onBack: () => void;
-  onSaveDraft: (page: PageBuilderPage) => void;
+  onSaveDraft: (page: PageBuilderPage) => Promise<void> | void;
   onPreview: (page: PageBuilderPage) => void;
-  onPublish: (page: PageBuilderPage) => void;
+  onPublish: (page: PageBuilderPage) => Promise<void> | void;
   entityOptions: PageBuilderEntityOption[];
   mediaImages: CmsMediaPickerItem[];
   workspaceLocale: CmsLocale;
@@ -910,6 +910,17 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
                 Hoàn tất
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {isPublishing && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs">
+          <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center max-w-sm">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400">
+              <RefreshCw className="h-6 w-6 animate-spin" />
+            </div>
+            <p className="text-base font-bold text-slate-900 dark:text-white">Đang xuất bản trang...</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Hệ thống đang đồng bộ nội dung và xuất bản ra Website công khai. Vui lòng đợi trong giây lát.</p>
           </div>
         </div>
       )}
