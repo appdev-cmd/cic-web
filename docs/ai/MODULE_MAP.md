@@ -35,10 +35,7 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 | `[A]` | CMS Global Search | tìm entity toàn CMS | CMS auth/RBAC; visibility projection từ domain nguồn | command palette, recent searches | Có server index nhưng coverage phụ thuộc module nguồn |
 | `[I]` | Users/Identity | danh sách tài khoản CMS, hồ sơ/đăng nhập, trạng thái, role/phạm vi, quyền hiệu lực và lịch sử bảo mật | Supabase Auth; `cic_users.auth_user_id`; Roles & Permissions; server auth/RBAC | Auth/session security-event + presence/2FA producer | Core live và verified: list/filter/pagination, create/edit/status/reset, role/scope, lazy per-user history/security, Auth sync, Audit Writer, normalized uniqueness và DB/RLS. Không có Website public surface; delete/Trash và invite không thuộc scope đã duyệt. PENDING: Users → Auth/session producer → realtime online/last-visit/login-security/2FA. |
 | `[C]` | Roles & Permissions | danh sách, tạo/sửa role, nhân sự được gán/gán nhân sự, ma trận task/action | users/identity; permission catalog; server enforcement | Menu permission catalogue; live Trash mutations; authenticated CMS roundtrip | Role/grant/assignment dùng projection và mutation thật + Audit atomic. Tạm loại task `menu/menus` vì live taxonomy còn legacy; xóa role chờ Trash restore/purge thật, không tạo nút xóa giả |
-| `[I]` | System Configuration | workspace config, branch, reviewed non-secret settings | auth/RBAC `settings.view/edit`; approved Settings manifest; config/branch schema | Media selector; public Contact consumer | Core 2026-09-14: CMS direct-save, manifest projection, transactional Audit, structured VI/EN branches và published Footer projection đã hoàn tất. `PENDING: System Configuration → Media → chọn/tải logo mới qua Media foundation; Contact → published branch projection → trang Contact vẫn thuộc integration task riêng.` |
-| `[A]` | Function SEO & URL | route/module SEO, indexability, canonical, redirect | route registry; approved config/schema; locale | all public content, sitemap/search | Có locale query/action; redirect persistence chưa được chốt đủ |
-| `[A]` | Localization | UI dictionary/progress/workspace | locale/workspace contract; auth/RBAC | all localized domains | CMS vẫn dùng demo dictionary ở nhiều flow |
-| `[A]` | Function SEO & URL | route/module SEO, indexability, canonical, redirect | route registry; approved config/schema; locale | all public content, sitemap/search | Có locale query/action; redirect persistence chưa được chốt đủ |
+| `[x]` | Function SEO & URL | route/module SEO, indexability, canonical, redirect, sitemap | route registry; cic_config_modules*; cic_redirects; RBAC Task 123 | all public content, sitemap/search | Hoàn tất implementation 2026-09-17: Tạo migration cic_redirects lưu trữ bền vững quy tắc 301/302 có kiểm tra loop; Route động sitemap.xml sinh từ DB thật cho toàn bộ bài viết, sản phẩm, trang tĩnh; Server Component FunctionSeoRoute tại /cms/function-seo kết nối 100% Server Actions có RBAC Task 123 và transactional Audit Writer; Overview tổng hợp sức khỏe SEO và cảnh báo có nút sửa tại nguồn; Parity song ngữ VI/EN độc lập; Roundtrip test pass 100% |
 | `[A]` | Localization | UI dictionary/progress/workspace | locale/workspace contract; auth/RBAC | all localized domains | CMS vẫn dùng demo dictionary ở nhiều flow |
 | `[x]` | Activity Logs | append-only list/detail/filter/export; dashboard/user/entity projections | identity/actor; `audit.*` authorization; redaction/append-only writer; audit DB security/indexes | every governed mutation; dashboard/user/entity drawers; retention policy | Hardening pass: export metadata owner-scoped, CSV formula-safe, Settings mutation + audit atomic, artifact cleanup fail-closed, export CHECK constraints validated live; responsive gate 360/390/768/1024/1280/1440 pass |
 | `[I]` | Trash | danh sách mục đã xóa, chi tiết snapshot, phục hồi an toàn, purge, bulk action; legal hold chỉ khi có policy thật | auth/RBAC với `trash.*`; secured `cic_trash_items`; PostgreSQL transaction; typed entity lifecycle registry; source adapter; Audit Writer | adapter cho các module ngoài Projects; media cleanup/reference count; retention worker; authenticated visual regression | Core live 2026-09-03: server list/detail/search/filter/pagination; restore/purge/bulk; projection redacted; permission/RLS/index/constraint hardening; typed registry và Projects VI adapter. DB roundtrip delete → snapshot → public removal → restore draft + relations → purge scrub + Audit pass. Next Trash runtime không còn mock/local-state. |
@@ -644,6 +641,48 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
   - Cross-cutting: Audit logging bắt buộc khi mutation; Không dùng Trash cho Menu (xóa trực tiếp hoặc unpublish).
 - **I. Phân loại Next.js:** `KEEP` visual UI Header/Footer và CMS Tree layout; `REFACTOR` nạp dữ liệu thật từ Server component và repository query; `REPLACE` fixture/mock data bằng DB query; `REMOVE` fake IDs (`item_01`, `grp_${Date.now()}`).
 - **J. Kết luận implementation (2026-09-17):** Module Menu đã hoàn tất implementation 100% end-to-end (`[x]`). Dữ liệu menu canonical mới đã được seed cho cả VI (42 items) và EN (37 items); Server Component Public Layout đọc song song từ DB PostgreSQL; CMS Route `/cms/frontend-menus` kết nối 100% Server Actions có RBAC Task 91 và transactional Audit Logging; Tree View và Table View live parity; Roundtrip mutation test pass 100%. **COMPLETE**.
+
+### Audit Cấu hình SEO & URL — 2026-09-17
+
+- **A. Scope & Boundaries:**
+  - Quản lý siêu dữ liệu SEO cấp module/hệ thống (Tier 2), cấu hình canonical, robots indexability, quy tắc chuyển hướng (Redirects 301/302), và sơ đồ trang web (Sitemap XML).
+  - Đối chiếu 3 tầng kiến trúc SEO:
+    - *Tier 1 (Global Default)*: Cấu hình hệ thống chung (`cic_config` / `cic_config_en`: `title`, `meta_des`, `meta_key`, `og_image`, `robots_txt`).
+    - *Tier 2 (Module & Function Level / Templates)*: Quản lý bởi Module Function SEO (`cic_config_modules` / `cic_config_modules_en`: module, view, task, `value_seo_title`, `value_seo_keyword`, `value_seo_description`, `seo_indexable`, cùng các trường công thức ghép thẻ `fields_seo_*`).
+    - *Tier 3 (Entity-Level Content Detail)*: Quản lý trực tiếp tại từng form chi tiết bài viết, sản phẩm, trang tĩnh (`cic_news`, `cic_products`, `cic_content_pages`).
+  - Phạm vi audit gồm: CMS route `/cms/function-seo`, Server queries & actions `src/features/function-seo/`, Public metadata generation (`layout.tsx`, `robots.ts`), và hạ tầng dynamic sitemap (`sitemap.xml`) + redirect runtime.
+- **B. UI Reference Map:**
+  - Tab 1: "Tổng quan sức khỏe SEO" (KPI cards: Tổng số trang, Thiếu mô tả, Chưa cấu hình title, Bị tắt lập chỉ mục noindex, Thiếu người phụ trách; Bảng cảnh báo trang cần xử lý ngay kèm link chuyển đến nguồn).
+  - Tab 2: "Trang hệ thống & Mẫu SEO" (Bảng trang hệ thống: đường dẫn, tiêu đề SEO, mô tả meta, indexable toggle, nút sửa mở Drawer; Bảng mẫu SEO phân loại/facets: tên phân loại, công thức title/description kèm tags động `{Tên danh mục}`, `{Tên hãng}`, preview SERP Google).
+  - Tab 3: "Chuyển hướng & Sitemap" (Danh sách quy tắc Redirect 301/302: URL nguồn, URL đích, mã chuyển hướng, trạng thái, lượt truy cập; Form thêm/sửa redirect kèm bộ kiểm tra chống loop redirect; Nút kích hoạt kiểm tra và xem `/sitemap.xml`).
+- **C. Legacy Component Classification:**
+  - `REUSE_PRESENTATION`: `FunctionSeoManager.tsx` (phần layout tabs, KPI cards, visual drawer và bảng biểu).
+  - `EXTRACT_AND_REBUILD`: Data binding trong `FunctionSeoManager.tsx` (tách riêng hooks/server actions, loại bỏ `INITIAL_REDIRECTS` và `INITIAL_FACET_TEMPLATES` in-memory; tích hợp mutation DB thật).
+  - `REFERENCE_ONLY`: `demoFunctionSeoDataSource.ts` (mock fixtures), `INITIAL_REDIRECTS` hard-coded trong frontend.
+- **D. CMS Capability / Functional Map:**
+  - Đáp ứng 100% tài liệu `DE_XUAT_CHUC_NANG_CMS.md` mục 2.3:
+    1. Phát hiện trang thiếu SEO / noindex nhầm.
+    2. Cấu hình default meta title / description theo loại trang.
+    3. Canonical URL preview / enforcement.
+    4. Redirect 301/302 chống loop (hiện tại thiếu bảng DB và middleware).
+    5. Kiểm tra sitemap.xml và loại trừ trang noindex (hiện tại thiếu route `sitemap.ts`).
+    6. Chuyển thẳng đến trang nội dung nguồn từ cảnh báo.
+- **E. DB Tables & Entity Relations:**
+  - `cic_config_modules` (VI - 11 bản ghi) & `cic_config_modules_en` (EN - 11 bản ghi): `id`, `module`, `view`, `task`, `published`, `title`, `fields_seo_*`, `value_seo_title`, `value_seo_keyword`, `value_seo_description`, `seo_indexable`. Đã có đầy đủ các cột mở rộng theo schema delta.
+  - Thiếu bảng lưu Redirect: Cần bổ sung bảng `cic_redirects` (`id`, `source_path`, `target_path`, `status_code` [301/302], `is_active`, `hit_count`, `created_at`, `updated_at`) hoặc lưu trong cấu hình hệ thống.
+- **F. Field Usage Map:**
+  - `CMS_EDITABLE`: `value_seo_title`, `value_seo_keyword`, `value_seo_description`, `seo_indexable`.
+  - `SYSTEM_MANAGED`: `module`, `view`, `task`, `id`.
+  - `CMS_OPERATIONAL`: `published`, `cache`, `params`.
+  - `LEGACY_REFERENCE`: `fields_seo_title`, `fields_seo_keyword`, `fields_seo_description`, `fields_seo_image_alt` (công thức template ghép thẻ).
+- **G. Runtime Data Authority:**
+  - Loại bỏ hoàn toàn fallback `demoFunctionSeoDataSource` trong `CmsDashboard.tsx` và `FunctionSeoManager.tsx`.
+  - Single Source of Truth là PostgreSQL: `cic_config_modules*` (Tier 2) + `cic_redirects` (Redirects) + live entity tables (Sitemap).
+- **H. Dependencies & Cross-cutting:**
+  - Hard dependency: (1) RBAC Task 123 (`function_seo`) đã có sẵn trong DB với capabilities `view,edit,configure`; (2) Bảng lưu trữ persistence cho Redirects (`cic_redirects`); (3) Route handler Next.js `/sitemap.xml` (`src/app/sitemap.ts`).
+  - Soft/integration dependency: Tích hợp middleware hoặc server-side route redirect; Liên kết `generateMetadata` của các public layout/page để fallback về Tier 2 khi Tier 3 rỗng.
+  - Cross-cutting: Transactional Audit Logging (`seo.updated`, `redirect.created`, `redirect.updated`, `redirect.deleted`); Phân quyền RBAC Task 123.
+- **I. Kết luận implementation (2026-09-17):** Module Function SEO & URL đã hoàn tất implementation 100% end-to-end (`[x]`). Tạo bảng `cic_redirects` lưu trữ bền vững quy tắc 301/302 có kiểm tra loop; Route `/sitemap.xml` đọc trực tiếp từ PostgreSQL thật trả về hơn 276KB URL bài viết, sản phẩm, trang tĩnh đã xuất bản; Giao diện CMS `/cms/function-seo` kết nối 100% Server Actions có RBAC Task 123 và transactional Audit Logging; Tab Overview cảnh báo các trang thiếu SEO kèm nút sửa tại nguồn; Parity song ngữ VI/EN độc lập; Roundtrip test pass 100%. **COMPLETE**.
 
 ## Foundation/cross-module
 

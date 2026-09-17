@@ -32,7 +32,14 @@ export async function generateMetadata({ params }: DynamicSlugPageProps): Promis
     };
   }
   const page = (await getPublicStaticPage('vi', slug)) ?? (await getPublicStaticPage('en', slug));
-  if (!page) return { title: 'Trang không tồn tại | CIC Technology' };
+  if (!page) {
+    const { resolveRedirect } = await import('@/features/function-seo/server/queries');
+    const redirectMatch = await resolveRedirect(`/${slug}`);
+    if (redirectMatch) {
+      return { title: 'Đang chuyển hướng... | CIC Technology' };
+    }
+    return { title: 'Trang không tồn tại | CIC Technology' };
+  }
   return {
     title: page.seoTitle || `${page.name} | CIC Technology`,
     description: page.seoDescription || `Thông tin chi tiết về ${page.name} tại CIC Technology.`,
@@ -60,6 +67,12 @@ export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) 
 
   const page = (await getPublicStaticPage('vi', slug)) ?? (await getPublicStaticPage('en', slug));
   if (!page) {
+    const { resolveRedirect } = await import('@/features/function-seo/server/queries');
+    const redirectMatch = await resolveRedirect(`/${slug}`);
+    if (redirectMatch) {
+      const { redirect, RedirectType } = await import('next/navigation');
+      redirect(redirectMatch.targetPath, redirectMatch.statusCode === 301 ? RedirectType.replace : RedirectType.push);
+    }
     notFound();
   }
 

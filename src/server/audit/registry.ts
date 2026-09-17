@@ -89,6 +89,10 @@ export const AUDIT_ACTIONS = {
   EMAIL_TEMPLATE_TRASHED: 'email_template.trashed',
   TRASH_RESTORED: 'trash.restored',
   TRASH_PURGED: 'trash.purged',
+  SEO_CONFIG_UPDATED: 'seo_config.updated',
+  REDIRECT_CREATED: 'redirect.created',
+  REDIRECT_UPDATED: 'redirect.updated',
+  REDIRECT_DELETED: 'redirect.deleted',
 } as const;
 
 export const AUDIT_ENTITY_TYPES = {
@@ -118,6 +122,8 @@ export const AUDIT_ENTITY_TYPES = {
   CUSTOMER_REQUEST: 'customer_request',
   EMAIL_TEMPLATE: 'email_template',
   TRASH_ITEM: 'trash_item',
+  SEO_CONFIG: 'seo_config',
+  REDIRECT: 'redirect',
 } as const;
 
 export const AUDIT_WORKSPACES = ['global', 'vi', 'en'] as const;
@@ -216,4 +222,8 @@ export const auditActionRegistry = {
   [AUDIT_ACTIONS.EMAIL_TEMPLATE_TRASHED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.EMAIL_TEMPLATE },
   [AUDIT_ACTIONS.TRASH_RESTORED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
   [AUDIT_ACTIONS.TRASH_PURGED]: { category: 'config_publish', severity: 'critical', entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM },
+  [AUDIT_ACTIONS.SEO_CONFIG_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.SEO_CONFIG },
+  [AUDIT_ACTIONS.REDIRECT_CREATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.REDIRECT },
+  [AUDIT_ACTIONS.REDIRECT_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.REDIRECT },
+  [AUDIT_ACTIONS.REDIRECT_DELETED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.REDIRECT },
 } as const;

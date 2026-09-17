@@ -235,6 +235,16 @@ export function isStaticPagesCmsPath(path: string): boolean {
   );
 }
 
+export function isFunctionSeoCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return (
+    normalizedPath === '/cms/function-seo' ||
+    normalizedPath === '/cms/seo-modules' ||
+    normalizedPath.startsWith('/cms/function-seo/') ||
+    normalizedPath.startsWith('/cms/seo-modules/')
+  );
+}
+
 export function getCanonicalCmsPath(module: Exclude<CmsModuleKey, 'not_found'>): string {
   return CMS_ROUTES.find((route) => route.module === module)?.canonicalPath ?? '/cms/dashboard';
 }
