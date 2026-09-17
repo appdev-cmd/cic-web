@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { motion } from 'motion/react';
@@ -22,6 +22,8 @@ export function ProductCard({
   onDownload,
   onBuy,
 }: ProductCardProps) {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -33,13 +35,17 @@ export function ProductCard({
       <div className="space-y-3">
         {/* Image on Left (Logo size), Title on Right */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-slate-50 p-0 flex items-center justify-center overflow-hidden rounded-none">
             <img
               src={product.icon || product.img}
               alt={product.name}
               loading="lazy"
+              decoding="async"
+              onLoad={() => setIsLoaded(true)}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
+              className={`w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none transition-opacity duration-200 ${
+                isLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
             />
           </div>
           <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">

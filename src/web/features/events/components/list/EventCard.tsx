@@ -10,6 +10,8 @@ interface EventCardProps {
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -23,11 +25,16 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onSelect }) => {
     >
       <div>
         {/* Thumbnail Image */}
-        <div className="aspect-[16/10] bg-slate-950 rounded-[12px] overflow-hidden relative">
+        <div className="aspect-[16/10] bg-slate-900 rounded-[12px] overflow-hidden relative">
           <img
             src={event.img}
             alt={event.title}
-            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.04]"
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.04] transition-opacity duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           />
 
           {/* Status Indicator Badge in Top-Left */}

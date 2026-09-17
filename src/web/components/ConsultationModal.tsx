@@ -27,6 +27,7 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const consultationNeedsList = [
     'Tư vấn báo giá sản phẩm & giải pháp',
@@ -56,8 +57,10 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validateForm()) return;
 
+    setSubmitError('');
     setIsSubmitting(true);
     try {
       await submitCustomerInteraction({
@@ -66,7 +69,6 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
         values: formData,
         source: { pageType: 'global', pageId: 'consultation-modal', pageUrl: window.location.pathname, pageTitle: document.title, placementKey: 'global.consultation_modal', ctaId: SYSTEM_CTA_IDS.contact, ctaName: 'Liên hệ ngay' },
       });
-      setIsSubmitting(false);
       setIsSuccess(true);
       setFormData({
         name: '',
@@ -75,6 +77,8 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
         consultationNeed: 'Tư vấn báo giá sản phẩm & giải pháp',
         message: ''
       });
+    } catch (err) {
+      setSubmitError('Không thể gửi yêu cầu tư vấn lúc này. Vui lòng kiểm tra lại kết nối hoặc liên hệ hotline.');
     } finally {
       setIsSubmitting(false);
     }
@@ -211,6 +215,13 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                     </div>
                   </div>
 
+                  {/* Error display */}
+                  {submitError && (
+                    <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-[8px] text-xs font-bold text-red-600">
+                      {submitError}
+                    </div>
+                  )}
+
                   {/* Footer Action */}
                   <div className="pt-3 flex justify-end gap-3 border-t border-slate-100">
                     <button
@@ -223,7 +234,8 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-50 rounded-[8px]"
+                      aria-busy={isSubmitting}
+                      className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed rounded-[8px]"
                     >
                       {isSubmitting ? (
                         <>

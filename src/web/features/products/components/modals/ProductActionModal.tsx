@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Check, Download } from 'lucide-react';
+import { X, Check, Download, Loader2 } from 'lucide-react';
 import { Product } from '@shared/types';
 import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
 
@@ -26,6 +26,7 @@ export function ProductActionModal({
   onTabChange,
 }: ProductActionModalProps) {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [downloadFormSubmitted, setDownloadFormSubmitted] = useState(false);
   const [downloadProgress] = useState(0);
@@ -45,6 +46,7 @@ export function ProductActionModal({
 
   const resetStateForTab = (type: ProductModalType) => {
     setFormSubmitted(false);
+    setIsSubmitting(false);
     setSubmitError('');
     setDownloadFormSubmitted(false);
     setFormErrors({});
@@ -82,8 +84,10 @@ export function ProductActionModal({
 
   const handleDownloadFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validateForm()) return;
     setSubmitError('');
+    setIsSubmitting(true);
     try {
       await submitCustomerInteractionAction({
         formId: 'product-download',
@@ -106,13 +110,17 @@ export function ProductActionModal({
       setDownloadFormSubmitted(true);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Không thể gửi yêu cầu tải. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validateForm()) return;
     setSubmitError('');
+    setIsSubmitting(true);
     try {
       await submitCustomerInteractionAction({
         formId: `product-${modalType}`,
@@ -140,6 +148,8 @@ export function ProductActionModal({
       setFormSubmitted(true);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Không thể gửi yêu cầu. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -319,9 +329,18 @@ export function ProductActionModal({
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px]"
+                    disabled={isSubmitting}
+                    aria-busy={isSubmitting}
+                    className="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px] flex items-center justify-center gap-2"
                   >
-                    Bắt đầu tải phần mềm
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin shrink-0" />
+                        <span>Đang gửi yêu cầu...</span>
+                      </>
+                    ) : (
+                      <span>Bắt đầu tải phần mềm</span>
+                    )}
                   </button>
                 </form>
               ) : (
@@ -458,9 +477,18 @@ export function ProductActionModal({
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px]"
+                    disabled={isSubmitting}
+                    aria-busy={isSubmitting}
+                    className="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-orange-600/20 rounded-[8px] flex items-center justify-center gap-2"
                   >
-                    {modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký ngay'}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin shrink-0" />
+                        <span>Đang gửi yêu cầu...</span>
+                      </>
+                    ) : (
+                      <span>{modalType === 'contact' ? 'Gửi yêu cầu báo giá' : 'Đăng ký ngay'}</span>
+                    )}
                   </button>
                 </form>
               )}

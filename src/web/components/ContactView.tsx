@@ -21,7 +21,8 @@ import {
   Layers,
   Sparkles,
   Search,
-  Database
+  Database,
+  Loader2
 } from 'lucide-react';
 import type { ContactPageModel, PageRenderPolicy } from '@shared/page-content/models';
 import { productionRenderPolicy } from '@shared/page-content/models';
@@ -75,6 +76,7 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [successLead, setSuccessLead] = useState<ContactLead | null>(null);
   
   // Load initial captcha
@@ -133,8 +135,10 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
   // Form Submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validateForm()) return;
 
+    setSubmitError('');
     setIsSubmitting(true);
     try {
       const submission = await submitCustomerInteraction({
@@ -154,9 +158,8 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
       };
 
       setSuccessLead(newLead);
-      setIsSubmitting(false);
 
-      // Reset Form fields
+      // Reset Form fields only on success
       setFormData({
         fullName: '',
         email: '',
@@ -166,6 +169,8 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
         captchaAnswer: ''
       });
       generateNewCaptcha();
+    } catch (err) {
+      setSubmitError('Đã xảy ra sự cố khi gửi thông tin liên hệ. Vui lòng thử lại hoặc liên hệ trực tiếp qua hotline.');
     } finally {
       setIsSubmitting(false);
     }
@@ -491,14 +496,32 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
                     )}
                   </div>
 
+                  {/* Error Alert */}
+                  {submitError && (
+                    <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-[8px] text-xs font-bold text-red-600 flex items-center gap-2">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   {/* SUBMIT BUTTON */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
+                    aria-busy={isSubmitting}
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-600/15 disabled:bg-slate-300 disabled:text-slate-400 disabled:cursor-not-allowed rounded-[8px] cursor-pointer"
                   >
-                    {isSubmitting ? 'Đang gửi thông tin...' : 'Gửi yêu cầu ngay'} 
-                    <Send size={15} className="shrink-0" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin shrink-0" />
+                        <span>Đang gửi thông tin...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Gửi yêu cầu ngay</span>
+                        <Send size={15} className="shrink-0" />
+                      </>
+                    )}
                   </button>
 
                 </form>

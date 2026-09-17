@@ -18,22 +18,29 @@ export function NewsCard({
   onSelectNews,
   getTypeSimpleText,
 }: NewsCardProps) {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
   return (
     <motion.div
       key={news.id}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.3, delay: index % 3 * 0.08 }}
+      transition={{ duration: 0.3, delay: (index % 3) * 0.08 }}
       onClick={() => onSelectNews(news.id)}
       className="group cursor-pointer bg-transparent border-0 p-0 transition-all duration-300 shadow-none flex flex-col overflow-hidden rounded-[12px]"
     >
       {/* Card Image */}
-      <div className="w-full h-52 lg:h-56 shrink-0 relative overflow-hidden bg-slate-900 rounded-[14px]">
+      <div className="w-full h-52 lg:h-56 shrink-0 relative overflow-hidden bg-slate-100 rounded-[14px]">
         <img 
           src={news.img} 
           alt={news.title}
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           referrerPolicy="no-referrer"
         />
       </div>

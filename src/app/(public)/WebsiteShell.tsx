@@ -10,6 +10,7 @@ import { ChatbotWidget } from '@/web/components/ChatbotWidget';
 import { Constellation } from '@/web/components/Constellation';
 import { Footer } from '@/web/components/Footer';
 import { Header } from '@/web/components/Header';
+import { PublicRouteProgressBar } from '@/web/components/PublicRouteProgressBar';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 
 export function WebsiteShell({ children, settings }: Readonly<{ children: ReactNode; settings: PublicSystemSettings }>) {
@@ -19,12 +20,18 @@ export function WebsiteShell({ children, settings }: Readonly<{ children: ReactN
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
 
-  const navigate = (href: string) => router.push(href);
+  const navigate = (href: string) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('public-route-start'));
+    }
+    router.push(href);
+  };
   const headerVariant = pathname === '/' ? 'overlay' : 'solid';
   const hotline = settings.values.tel || '024 3976 1381';
 
   return (
     <div className="public-shell min-h-screen bg-white text-slate-900 relative selection:bg-orange-500 selection:text-white">
+      <PublicRouteProgressBar />
       {/* Interactive Background Engine (Chỉ hiển thị tại Trang Chủ) */}
       {pathname === '/' && (
         <div className="fixed inset-0 z-0 pointer-events-none opacity-100">
