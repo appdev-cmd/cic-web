@@ -12,8 +12,17 @@ import { Footer } from '@/web/components/Footer';
 import { Header } from '@/web/components/Header';
 import { PublicRouteProgressBar } from '@/web/components/PublicRouteProgressBar';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
+import type { NavigationDataResult } from '@/web/features/navigation/navigationData';
 
-export function WebsiteShell({ children, settings }: Readonly<{ children: ReactNode; settings: PublicSystemSettings }>) {
+export function WebsiteShell({
+  children,
+  settings,
+  navigation,
+}: Readonly<{
+  children: ReactNode;
+  settings: PublicSystemSettings;
+  navigation?: NavigationDataResult;
+}>) {
   const pathname = usePathname();
   const router = useRouter();
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
@@ -180,9 +189,10 @@ export function WebsiteShell({ children, settings }: Readonly<{ children: ReactN
         onNavigate={navigate}
         onOpenConsultation={() => setIsConsultationOpen(true)}
         settings={settings}
+        navigation={navigation}
       />
       <main className="public-shell-content" data-header-variant={headerVariant}>{children}</main>
-      <Footer onNavigate={navigate} settings={settings} />
+      <Footer onNavigate={navigate} settings={settings} navigation={navigation} />
       <ConsultationModal
         isOpen={isConsultationOpen}
         onClose={() => setIsConsultationOpen(false)}

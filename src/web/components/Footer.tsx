@@ -17,11 +17,12 @@ import {
 } from 'lucide-react';
 import { ZaloIcon } from '@shared/components/Icons';
 import { typeH4, typeButton, typeCaption, typeLabel, typeMeta } from '@shared/components/Typography';
-import { getNavigationData, type FooterNavigationItem, type PublicNavigationView } from '../features/navigation/navigationData';
+import { getNavigationData, type FooterNavigationItem, type NavigationDataResult, type PublicNavigationView } from '../features/navigation/navigationData';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 
 interface FooterProps {
   settings?: PublicSystemSettings;
+  navigation?: NavigationDataResult;
   onNavigate?: (href: string) => void;
   setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'cms') => void;
   setActiveLink?: (link: string) => void;
@@ -34,6 +35,7 @@ interface FooterProps {
 
 export const Footer = ({ 
   settings,
+  navigation,
   onNavigate,
   setCurrentView: setLegacyCurrentView,
   setActiveLink: setLegacyActiveLink,
@@ -43,7 +45,7 @@ export const Footer = ({
   onResetNews,
   onResetEvents
 }: FooterProps) => {
-  const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = getNavigationData();
+  const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = navigation || getNavigationData();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const values = settings?.values ?? {};

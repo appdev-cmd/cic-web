@@ -13,6 +13,7 @@ import { MenuItem } from './types';
 
 interface MenuItemEditorProps {
   item: MenuItem | null;
+  groupId?: string;
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedItem: MenuItem) => void;
@@ -23,6 +24,7 @@ interface MenuItemEditorProps {
 
 export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
   item,
+  groupId,
   isOpen,
   onClose,
   onSave,
@@ -64,11 +66,14 @@ export const MenuItemEditor: React.FC<MenuItemEditorProps> = ({
     e.preventDefault();
     if (!formData.label || !formData.url) return;
 
+    const parentNode = availableParents.find((p) => p.id === formData.parent_id);
+    const resolvedDepth = parentNode ? parentNode.depth + 1 : 0;
+
     const updated: MenuItem = {
       id: item ? item.id : `item_${Date.now()}`,
-      group_id: item ? item.group_id : 'grp_header_main',
+      group_id: item ? item.group_id : (groupId || '1'),
       parent_id: formData.parent_id || null,
-      depth: item ? item.depth : 0,
+      depth: resolvedDepth,
       display_order: item ? item.display_order : 99,
       label: formData.label || '',
       url: formData.url || '/',

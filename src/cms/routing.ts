@@ -214,6 +214,17 @@ export function isCtaCmsPath(path: string): boolean {
   return normalizedPath === '/cms/cta' || normalizedPath.startsWith('/cms/cta/');
 }
 
+export function isMenuCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return (
+    normalizedPath === '/cms/frontend-menus' ||
+    normalizedPath === '/cms/menu' ||
+    normalizedPath === '/cms/navigation' ||
+    normalizedPath.startsWith('/cms/frontend-menus/') ||
+    normalizedPath.startsWith('/cms/menu/')
+  );
+}
+
 export function isStaticPagesCmsPath(path: string): boolean {
   const normalizedPath = normalizeCmsPath(path);
   return (

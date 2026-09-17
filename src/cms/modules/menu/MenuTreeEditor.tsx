@@ -41,8 +41,23 @@ export const MenuTreeEditor: React.FC<MenuTreeEditorProps> = ({
   maxDepth,
   searchKeyword,
 }) => {
-  const [expandedIds, setExpandedIds] = useState<string[]>(['item_02', 'item_03', 'item_03_1', 'item_04', 'item_05']);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>('item_03');
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+  // Auto-expand nodes with children when items change or initially
+  React.useEffect(() => {
+    const parentIds: string[] = [];
+    const collectParentIds = (nodes: MenuItem[]) => {
+      for (const n of nodes) {
+        if (n.children && n.children.length > 0) {
+          parentIds.push(n.id);
+          collectParentIds(n.children);
+        }
+      }
+    };
+    collectParentIds(items);
+    setExpandedIds((prev) => Array.from(new Set([...prev, ...parentIds])));
+  }, [items]);
 
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();

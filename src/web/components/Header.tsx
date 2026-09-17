@@ -13,7 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { typeNav } from '@shared/components/Typography';
-import { getNavigationData } from '../features/navigation/navigationData';
+import { getNavigationData, type NavigationDataResult } from '../features/navigation/navigationData';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 
 interface HeaderProps {
@@ -22,6 +22,7 @@ interface HeaderProps {
   pathname?: string;
   onNavigate?: (href: string) => void;
   settings?: PublicSystemSettings;
+  navigation?: NavigationDataResult;
   currentView?: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search' | 'not-found';
   setCurrentView?: (view: 'home' | 'products' | 'about' | 'services' | 'projects' | 'news' | 'events' | 'contact' | 'privacy' | 'terms' | 'search') => void;
   activeLink?: string;
@@ -45,6 +46,7 @@ export const Header = ({
   pathname,
   onNavigate,
   settings,
+  navigation,
   currentView: legacyCurrentView,
   setCurrentView: setLegacyCurrentView,
   activeLink = '',
@@ -61,7 +63,7 @@ export const Header = ({
   onSearch, 
   onOpenConsultation 
 }: HeaderProps) => {
-  const { headerLinks: navLinks } = getNavigationData();
+  const { headerLinks: navLinks } = navigation || getNavigationData();
   const resolvePublicHref = (href: string) => href.startsWith('/') ? href : `/services/${href.replace(/^\/+/, '')}`;
   const routeSegment = pathname?.split('/').filter(Boolean)[0];
   const viewFromSegment = (segment?: string): Exclude<NonNullable<HeaderProps['currentView']>, 'not-found'> => {

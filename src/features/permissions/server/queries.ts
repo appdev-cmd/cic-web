@@ -14,7 +14,7 @@ export async function getCmsPermissionsData(): Promise<PermissionsGovernanceData
   const [roleRows, permissionRows, taskRows, assignmentRows, userRows] = await Promise.all([
     sql`SELECT id,code,name,description,status,is_protected,updated_at,updated_by FROM cic_roles ORDER BY name`,
     sql`SELECT role_id,permission_task_id,action FROM cic_role_permissions WHERE allowed=true`,
-    sql`SELECT id,module,view,_task,description,published,ordering FROM cic_permission_tasks WHERE published=true AND lower(module) NOT IN ('menu','menus') ORDER BY module,ordering,id`,
+    sql`SELECT id,module,view,_task,description,published,ordering FROM cic_permission_tasks WHERE published=true ORDER BY module,ordering,id`,
     sql`SELECT ur.id,ur.user_id,ur.role_id,ur.assigned_at,ur.assigned_by,u.username,u.email,u.full_name,u.fname,u.lname,u.image FROM cic_user_roles ur JOIN cic_users u ON u.id=ur.user_id WHERE ur.status='active' AND u.account_status='active' AND u.published IS DISTINCT FROM false AND NOT EXISTS (SELECT 1 FROM cic_trash_items ti WHERE ti.entity_type='user' AND ti.entity_id=u.id::text AND ti.status='trashed') ORDER BY ur.assigned_at DESC`,
     sql`SELECT id,username,email,full_name,fname,lname,image,agencies FROM cic_users u WHERE account_status='active' AND published IS DISTINCT FROM false AND NOT EXISTS (SELECT 1 FROM cic_trash_items ti WHERE ti.entity_type='user' AND ti.entity_id=u.id::text AND ti.status='trashed') ORDER BY username`,
   ]);

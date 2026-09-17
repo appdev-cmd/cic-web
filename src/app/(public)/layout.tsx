@@ -3,6 +3,7 @@ import Script from 'next/script';
 import type { ReactNode } from 'react';
 import { WebsiteShell } from './WebsiteShell';
 import { getPublicSystemSettings } from '@/features/system-settings/server/queries';
+import { getNavigationDataFromDb } from '@/features/menu/server/queries';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSystemSettings('vi');
@@ -35,7 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicLayout({ children }: Readonly<{ children: ReactNode }>) {
-  const settings = await getPublicSystemSettings('vi');
+  const [settings, navigation] = await Promise.all([
+    getPublicSystemSettings('vi'),
+    getNavigationDataFromDb('vi'),
+  ]);
   const values = settings.values;
   const gaId = values.google_analytics;
   const gtmId = values.gtm_id;
@@ -92,7 +96,7 @@ export default async function PublicLayout({ children }: Readonly<{ children: Re
         </Script>
       )}
 
-      <WebsiteShell settings={settings}>{children}</WebsiteShell>
+      <WebsiteShell settings={settings} navigation={navigation}>{children}</WebsiteShell>
     </>
   );
 }
