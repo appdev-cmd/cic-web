@@ -59,18 +59,17 @@ export function mapProjectListItem(row: ProjectRow): ProjectListItemViewModel {
 }
 
 export async function listPublishedProjects(): Promise<ProjectListItemViewModel[]> {
-  const client = await getDatabaseClient();
-  const { data, error } = await client
-    .from('cic_projects')
-    .select(
-      'id,title,alias,tagline,summary,image,sector,solution,technologies,customer_name,location,start_year,end_year,is_ongoing,is_featured,ordering'
-    )
-    .eq('published', true)
-    .order('ordering', { ascending: true })
-    .order('id', { ascending: true });
+  const sql = getPostgresClient();
+  const rows = await sql<ProjectRow[]>`
+    SELECT id, title, alias, tagline, summary, image, sector, solution,
+           technologies, customer_name, location, start_year, end_year, is_ongoing,
+           is_featured, ordering
+    FROM cic_projects
+    WHERE published = true
+    ORDER BY ordering ASC, id ASC
+  `;
 
-  if (error) throw new Error('Unable to load projects.');
-  return ((data ?? []) as unknown as ProjectRow[]).map(mapProjectListItem);
+  return rows.map(mapProjectListItem);
 }
 
 export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDetailViewModel | null> {
