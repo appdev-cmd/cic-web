@@ -19,6 +19,12 @@ export async function generateMetadata({ params }: DynamicSlugPageProps): Promis
       description: 'Tìm hiểu về lịch sử hình thành, tầm nhìn sứ mệnh và các cột mốc phát triển của CIC Technology.',
     };
   }
+  if (slug === 'lien-he' || slug === 'contact') {
+    return {
+      title: 'Liên hệ | CIC Technology',
+      description: 'Thông tin liên hệ, trụ sở chính và các chi nhánh của CIC Technology.',
+    };
+  }
   if (slug === 'en') {
     return {
       title: 'CIC Technology — Strategic Technology Partner',
@@ -38,6 +44,14 @@ export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) 
   if (slug === 'gioi-thieu') {
     const { redirect } = await import('next/navigation');
     redirect('/gioi-thieu');
+  }
+  if (slug === 'lien-he') {
+    const { redirect } = await import('next/navigation');
+    redirect('/lien-he');
+  }
+  if (slug === 'contact') {
+    const { redirect } = await import('next/navigation');
+    redirect('/contact');
   }
   if (slug === 'en') {
     const enHomeContent = await getPublishedHomePage('en');

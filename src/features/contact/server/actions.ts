@@ -57,24 +57,48 @@ export async function submitCustomerInteractionAction(payload: unknown) {
   const now = new Date().toISOString();
   const client = await getDatabaseClient();
 
+  const email = typeof values.email === 'string' ? values.email.trim() : '';
+
+  const fullname =
+    typeof values.fullName === 'string' && values.fullName.trim()
+      ? values.fullName.trim()
+      : typeof values.fullname === 'string' && values.fullname.trim()
+      ? values.fullname.trim()
+      : typeof values.name === 'string' && values.name.trim()
+      ? values.name.trim()
+      : null;
+
+  const telephone =
+    typeof values.phone === 'string' && values.phone.trim()
+      ? values.phone.trim()
+      : typeof values.phoneNumber === 'string' && values.phoneNumber.trim()
+      ? values.phoneNumber.trim()
+      : typeof values.telephone === 'string' && values.telephone.trim()
+      ? values.telephone.trim()
+      : null;
+
+  const subject =
+    typeof values.subject === 'string' && values.subject.trim()
+      ? values.subject.trim()
+      : input.formName || 'Yêu cầu liên hệ';
+
+  const message =
+    typeof values.message === 'string' && values.message.trim()
+      ? values.message.trim()
+      : typeof values.note === 'string' && values.note.trim()
+      ? values.note.trim()
+      : typeof values.notes === 'string' && values.notes.trim()
+      ? values.notes.trim()
+      : null;
+
   const { data, error } = await client
     .from('cic_contact')
     .insert({
-      email: typeof values.email === 'string' ? values.email.trim() : '',
-      fullname:
-        typeof values.name === 'string'
-          ? values.name.trim()
-          : typeof values.fullname === 'string'
-          ? values.fullname.trim()
-          : null,
-      telephone:
-        typeof values.phone === 'string'
-          ? values.phone.trim()
-          : typeof values.telephone === 'string'
-          ? values.telephone.trim()
-          : null,
-      subject: input.formName,
-      message: typeof values.message === 'string' ? values.message : null,
+      email,
+      fullname,
+      telephone,
+      subject,
+      message,
       parts_email: JSON.stringify({ formId: input.formId, source: input.source, values }),
       edited_time: now,
       created_time: now,
@@ -102,7 +126,7 @@ export async function submitCustomerInteractionAction(payload: unknown) {
         INSERT INTO cic_customer_request_events (
           request_state_id, event_type, old_value, new_value, actor_id, created_at
         ) VALUES (
-          ${state.id}, 'created', NULL, ${sql.json({ formId: input.formId, source: input.source })}, NULL, now()
+          ${state.id}, 'created', NULL, ${sql.json({ formId: input.formId, source: input.source, subject })}, NULL, now()
         )
       `;
     }
