@@ -6,6 +6,8 @@ import type { PageBuilderConfigValue, PageBuilderSection } from './pageBuilderTy
 import { getEditableFieldContract } from './pageBuilderEditableContracts';
 import type { PageBuilderVisualElementEditingAdapter } from './visualElementEditingAdapterTypes';
 
+import { getLegacyHomePageContent } from '../../../shared/page-content/legacyPageContent';
+
 export interface HomeStatsEditTarget {
   sectionId: string;
   path: Array<string | number>;
@@ -14,8 +16,10 @@ export interface HomeStatsEditTarget {
 
 function itemRecords(section: PageBuilderSection): Array<Record<string, PageBuilderConfigValue>> {
   const items = section.config.items;
-  if (!Array.isArray(items)) return [];
-  return items.filter((item): item is Record<string, PageBuilderConfigValue> => Boolean(item) && typeof item === 'object' && !Array.isArray(item));
+  if (Array.isArray(items) && items.length > 0) {
+    return items.filter((item): item is Record<string, PageBuilderConfigValue> => Boolean(item) && typeof item === 'object' && !Array.isArray(item));
+  }
+  return (getLegacyHomePageContent().stats?.items ?? []) as unknown as Array<Record<string, PageBuilderConfigValue>>;
 }
 
 export function resolveHomeStatsEditTarget(
@@ -27,12 +31,22 @@ export function resolveHomeStatsEditTarget(
   const section = sections.find((candidate) => candidate.sectionKey === 'home.stats');
   if (!section) return null;
   const items = itemRecords(section);
-  const itemIndex = items.findIndex((item) => item.id === binding.itemId);
+  let itemIndex = items.findIndex((item) => item.id === binding.itemId);
+  if (itemIndex < 0) {
+    const match = binding.itemId.match(/(?:stat-|item-)?(\d+)$/);
+    if (match) {
+      const idx = Number(match[1]);
+      if (idx >= 0 && idx < items.length) itemIndex = idx;
+    }
+  }
   if (itemIndex < 0) return null;
   const field = binding.elementPath.split('.').at(-1);
   const item = items[itemIndex];
-  if (field === 'value' && typeof item.value === 'number' && Number.isFinite(item.value)) {
-    const descriptor = createInlineTextEditDescriptor(binding, getEditableFieldContract('home.stats', 'items.*.value')!, item.value, typeof item.suffix === 'string' ? item.suffix : '');
+  if (field === 'value') {
+    const numVal = typeof item.value === 'number' && Number.isFinite(item.value)
+      ? item.value
+      : (typeof item.value === 'string' ? Number((item.value as string).replace(/[^\d.-]/g, '')) || 0 : 0);
+    const descriptor = createInlineTextEditDescriptor(binding, getEditableFieldContract('home.stats', 'items.*.value')!, numVal, typeof item.suffix === 'string' ? item.suffix : '');
     if (!descriptor) return null;
     return {
       sectionId: section.id,
@@ -49,9 +63,15 @@ export function resolveHomeStatsEditTarget(
 
 export function isMatchingHomeStatsCommit(target: HomeStatsEditTarget, request: CommitElementEditRequest): boolean {
   if (target.descriptor.binding.bindingId !== request.binding.bindingId) return false;
-  return target.descriptor.valueKind === 'number'
-    ? typeof request.after === 'number' && Number.isFinite(request.after)
-    : typeof request.after === 'string';
+  if (target.descriptor.valueKind === 'number') {
+    if (typeof request.after === 'number' && Number.isFinite(request.after)) return true;
+    if (typeof request.after === 'string') {
+      const num = Number(request.after.replace(/[^\d.-]/g, ''));
+      return Number.isFinite(num);
+    }
+    return false;
+  }
+  return typeof request.after === 'string';
 }
 
 export const homeStatsElementEditingAdapter: PageBuilderVisualElementEditingAdapter = {

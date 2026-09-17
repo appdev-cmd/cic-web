@@ -136,7 +136,28 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
 
   const seedDefaultCollectionIfEmpty = (section: PageBuilderSection, path: Array<string | number>): Record<string, PageBuilderConfigValue> => {
     const cfg = { ...(section.config || {}) };
-    if (section.sectionKey === 'about.timeline' && path[0] === 'milestones') {
+    if (section.sectionKey === 'home.stats' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = deepClone(getLegacyHomePageContent().stats?.items ?? []) as any;
+      }
+    } else if (section.sectionKey === 'home.awards' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = deepClone(getLegacyHomePageContent().awards?.items ?? []) as any;
+      }
+    } else if (section.sectionKey === 'about.awards' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = deepClone(getLegacyHomePageContent().awards?.items ?? []) as any;
+      }
+    } else if (section.sectionKey === 'about.offerings' && path[0] === 'items') {
+      if (!Array.isArray(cfg.items) || cfg.items.length === 0) {
+        cfg.items = [
+          { title: 'Phần mềm và Giải pháp Kỹ thuật', desc: 'Cung cấp bản quyền và giải pháp phần mềm chuyên ngành Xây dựng, Giao thông, Thủy lợi, Địa kỹ thuật từ các hãng hàng đầu thế giới.' },
+          { title: 'Tư vấn Chuyển đổi số & BIM', desc: 'Tư vấn lộ trình chuyển đổi số, áp dụng Mô hình thông tin công trình (BIM), đào tạo và chuyển giao công nghệ cho doanh nghiệp.' },
+          { title: 'Giải pháp Công nghệ thông minh', desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
+          { title: 'Giải pháp phát phát triển bền vững', desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
+        ];
+      }
+    } else if (section.sectionKey === 'about.timeline' && path[0] === 'milestones') {
       if (!Array.isArray(cfg.milestones) || cfg.milestones.length === 0) {
         cfg.milestones = deepClone(getLegacyAboutPageContent().timeline.milestones) as any;
       }

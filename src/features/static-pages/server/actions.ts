@@ -55,9 +55,13 @@ export async function publishPageAction(
       if (result.slug === '/') {
         revalidatePath('/', 'page');
       }
-      if (result.slug === '/gioi-thieu' || result.slug === '/about') {
+      if (result.slug.startsWith('/gioi-thieu') || result.slug.startsWith('/about')) {
         revalidatePath('/gioi-thieu');
+        revalidatePath('/gioi-thieu/co-cau-to-chuc');
+        revalidatePath('/gioi-thieu/nang-luc-kinh-nghiem');
         revalidatePath('/about');
+        revalidatePath('/about/organization');
+        revalidatePath('/about/capacity-experience');
       }
     }
     return { success: true, data: result };

@@ -14,11 +14,27 @@ export function updateAtPath(config: Record<string, PageBuilderConfigValue>, pat
   if (!path || path.length === 0) return next;
   let cursor: any = next;
   for (let i = 0; i < path.length - 1; i++) {
-    const part = path[i];
+    let part = path[i];
     const nextPart = path[i + 1];
-    if (Array.isArray(cursor) && typeof part === 'number') {
-      while (cursor.length < part) {
-        cursor.push({});
+    if (Array.isArray(cursor)) {
+      if (typeof part === 'string' && !/^\d+$/.test(part)) {
+        const foundIdx = cursor.findIndex((item) => item && typeof item === 'object' && (item.id === part || item.entityId === part || item.key === part));
+        if (foundIdx >= 0) {
+          part = foundIdx;
+        } else {
+          const numMatch = part.match(/\d+$/);
+          if (numMatch) {
+            const parsedIdx = Number(numMatch[0]) - 1;
+            if (parsedIdx >= 0 && parsedIdx < cursor.length) {
+              part = parsedIdx;
+            }
+          }
+        }
+      }
+      if (typeof part === 'number') {
+        while (cursor.length < part) {
+          cursor.push({});
+        }
       }
     }
     if (cursor[part] === undefined || cursor[part] === null || typeof cursor[part] !== 'object') {
@@ -26,11 +42,17 @@ export function updateAtPath(config: Record<string, PageBuilderConfigValue>, pat
     }
     cursor = cursor[part];
   }
-  const lastPart = path[path.length - 1];
+  let lastPart = path[path.length - 1];
   if (cursor && typeof cursor === 'object') {
-    if (Array.isArray(cursor) && typeof lastPart === 'number') {
-      while (cursor.length < lastPart) {
-        cursor.push({});
+    if (Array.isArray(cursor)) {
+      if (typeof lastPart === 'string' && !/^\d+$/.test(lastPart)) {
+        const foundIdx = cursor.findIndex((item) => item && typeof item === 'object' && (item.id === lastPart || item.entityId === lastPart || item.key === lastPart));
+        if (foundIdx >= 0) lastPart = foundIdx;
+      }
+      if (typeof lastPart === 'number') {
+        while (cursor.length < lastPart) {
+          cursor.push({});
+        }
       }
     }
     cursor[lastPart] = value;
@@ -41,6 +63,10 @@ export function updateAtPath(config: Record<string, PageBuilderConfigValue>, pat
 export function valueAtPath(config: Record<string, PageBuilderConfigValue>, path: Array<string | number>) {
   return path.reduce<PageBuilderConfigValue | undefined>((value, part) => {
     if (!value || typeof value !== 'object') return undefined;
+    if (Array.isArray(value) && typeof part === 'string' && !/^\d+$/.test(part)) {
+      const found = value.find((item) => item && typeof item === 'object' && ((item as any).id === part || (item as any).entityId === part || (item as any).key === part));
+      if (found) return found;
+    }
     return (value as Record<string | number, PageBuilderConfigValue>)[part];
   }, config);
 }

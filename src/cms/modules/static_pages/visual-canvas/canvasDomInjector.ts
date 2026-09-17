@@ -57,6 +57,10 @@ export function normalizeText(value: string): string {
 export function configValueAtPath(config: Record<string, PageBuilderConfigValue>, path: Array<string | number>) {
   return path.reduce<PageBuilderConfigValue | undefined>((value, part) => {
     if (!value || typeof value !== 'object') return undefined;
+    if (Array.isArray(value) && typeof part === 'string' && !/^\d+$/.test(part)) {
+      const found = value.find((item) => item && typeof item === 'object' && ((item as any).id === part || (item as any).entityId === part || (item as any).key === part));
+      if (found) return found;
+    }
     return (value as Record<string | number, PageBuilderConfigValue>)[part];
   }, config);
 }
@@ -1353,7 +1357,15 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       if (node.dataset.pageBuilderConfigPath) {
         try { path = JSON.parse(node.dataset.pageBuilderConfigPath) as Array<string | number>; } catch {}
       } else if (node.dataset.veElement && node.dataset.veEditable === 'true') {
-        path = node.dataset.veElement.split('.').map((p) => /^\d+$/.test(p) ? Number(p) : p);
+        const firstBinding = node.dataset.veElement.split(' ')[0];
+        path = firstBinding.split('.').map((p) => /^\d+$/.test(p) ? Number(p) : p);
+      }
+      if (path.length >= 3 && Array.isArray(selectedSection.config[path[0]]) && typeof path[1] === 'string') {
+        const arr = selectedSection.config[path[0]] as any[];
+        const idx = arr.findIndex((item) => item && typeof item === 'object' && (item.id === path[1] || item.entityId === path[1] || item.key === path[1]));
+        if (idx >= 0) {
+          path[1] = idx;
+        }
       }
       const value = configValueAtPath(selectedSection.config, path);
       if (!path.length || (value !== undefined && typeof value !== 'string' && typeof value !== 'number')) return;
@@ -1369,7 +1381,13 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = '1px dashed rgb(249 115 22 / 0.65)'; };
       const initialText = node.textContent?.trim() ?? '';
       const update = () => {
-        const nextVal = typeof value === 'number' ? Number(node.textContent?.trim() ?? 0) : node.textContent?.trim() ?? '';
+        let text = node.textContent?.trim() ?? '';
+        let nextVal: string | number = text;
+        if (typeof value === 'number') {
+          const cleaned = text.replace(/[^\d.-]/g, '');
+          const num = Number(cleaned);
+          nextVal = Number.isFinite(num) ? num : value;
+        }
         if (String(nextVal) === initialText) return;
         if (onConfigValueChange) onConfigValueChange(selectedSection.id, path, nextVal);
         else if (onTextChange && typeof nextVal === 'string') onTextChange(selectedSection.id, path, nextVal);

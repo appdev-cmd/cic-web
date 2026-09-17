@@ -144,7 +144,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     if (Array.isArray(cfg.items) && cfg.items.length > 0) {
       const items: HomeStatModel[] = cfg.items.map((item: Record<string, unknown>, idx: number) => ({
         id: String(item.id || `home-stat-${idx + 1}`),
-        value: typeof item.value === 'number' ? item.value : (Number(item.val) || 0),
+        value: typeof item.value === 'number' ? item.value : (Number(item.value ?? item.val) || 0),
         suffix: typeof item.suffix === 'string' ? item.suffix : undefined,
         label: typeof item.label === 'string' ? item.label : '',
       }));

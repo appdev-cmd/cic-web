@@ -130,8 +130,8 @@ export async function getPublishedAboutPage(
               .filter((m): m is Record<string, unknown> => typeof m === 'object' && m !== null)
               .map((m, idx) => ({
                 id: typeof m.id === 'string' ? m.id : `capacity-metric-${idx + 1}`,
-                value: typeof m.value === 'string' ? m.value : '',
-                label: typeof m.label === 'string' ? m.label : '',
+                value: typeof m.value === 'string' ? m.value : (m.value !== undefined && m.value !== null ? String(m.value) : ''),
+                label: typeof m.label === 'string' ? m.label : (m.label !== undefined && m.label !== null ? String(m.label) : ''),
               }))
           : legacyCapacity.metrics,
       };

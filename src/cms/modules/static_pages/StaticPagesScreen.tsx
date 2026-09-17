@@ -32,6 +32,8 @@ import {
   getCmsPageDetailAction,
   getPageBuilderEntityOptionsAction,
 } from '@/features/static-pages/server/actions';
+import { getLegacyAboutCapacityContent, getLegacyAboutPageContent, getLegacyHomePageContent } from '@/shared/page-content/legacyPageContent';
+import { deepClone } from './editor/editorUtils';
 
 interface StaticPagesScreenProps {
   pagesByLocale: Record<'vi' | 'en', CmsStaticPageListItem[]>;
@@ -58,44 +60,33 @@ const slugify = (value: string) =>
     .replace(/đ/g, 'd')
     .replace(/Đ/g, 'D')
     .toLowerCase()
-    .trim()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/(^-|-$)+/g, '');
 
 const shortSlug = (value: string) =>
   slugify(value).split('-').slice(0, 6).join('-').slice(0, 42).replace(/-$/, '');
 
 const defaultEcosystemItems = [
   {
-    id: 'ai-smart-tech',
-    link: '/products',
-    view: 'products',
-    badge: 'Advanced Technology',
-    title: 'AI & Công nghệ thông minh',
-    imageId: '/banner_hero/dan_dau_chuyen_doi_so.png',
-    activeLink: 'Sản phẩm',
-    description: 'Ứng dụng AI, dữ liệu lớn, IoT và tự động hóa vào các bài toán kỹ thuật phức tạp, giúp tối ưu quy trình và hỗ trợ ra quyết định dựa trên dữ liệu thực tế.',
+    id: 'software-solutions',
+    link: '/solutions',
+    view: 'software',
+    badge: 'Phần mềm chuyên ngành',
+    title: 'Phần mềm và Giải pháp Kỹ thuật',
+    imageId: '/banner_hero/35_nam_thanh_lap_cong_ty_1.jpg',
+    activeLink: 'Giải pháp',
+    description: 'Bộ công cụ phân tích, thiết kế kết cấu, mô phỏng và quản lý dữ liệu kỹ thuật hàng đầu thế giới.',
   },
   {
-    id: 'bim-digital-twins',
-    link: '/services/tu-van-bim',
+    id: 'digital-bim',
+    link: '/services/tu-van-chuyen-doi-so-bim',
     view: 'services',
-    badge: 'BIM & Digital Twins',
-    title: 'BIM & Digital Twins',
-    imageId: '/banner_hero/He_sinh_thai_giai_phap_so.png',
-    serviceId: 'tu-van-bim',
+    badge: 'Chuyển đổi số & BIM',
+    title: 'Tư vấn Chuyển đổi số & BIM',
+    imageId: '/banner_hero/35_nam_thanh_lap_cong_ty_2.jpg',
+    serviceId: 'tu-van-chuyen-doi-so-bim',
     activeLink: 'Dịch vụ',
-    description: 'Đào tạo, tạo lập và thẩm tra mô hình BIM, số hóa công trình từ thiết kế đến vận hành.',
-  },
-  {
-    id: 'licensed-software',
-    link: '/products',
-    view: 'products',
-    badge: 'Phần mềm',
-    title: 'Phần mềm kỹ thuật bản quyền',
-    imageId: '/banner_hero/Phan_mem_ban_quyen_chinh_hang.jpg',
-    activeLink: 'Sản phẩm',
-    description: 'Hệ sinh thái CAD, BIM, kết cấu, hạ tầng và năng lượng do CIC phát triển và phân phối.',
+    description: 'Đồng hành xây dựng chiến lược, quy trình BIM, CDE và đào tạo chuyển giao công nghệ chuẩn quốc tế.',
   },
   {
     id: 'technology-equipment',
@@ -131,10 +122,51 @@ const defaultEcosystemItems = [
   },
 ];
 
+const defaultExperienceItems = [
+  {
+    title: 'Phát triển nguồn nhân lực chất lượng cao',
+    description: 'Chú trọng đào tạo, phát triển nguồn nhân sự chất lượng cao, thu hút nhân sự trẻ, chất lượng, nhiệt huyết và sẵn sàng học hỏi, tiếp cận công nghệ mới.',
+    imageId: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80',
+  },
+  {
+    title: 'Đối tác chiến lược với các hãng công nghệ danh tiếng',
+    description: 'Hợp tác sâu rộng với hơn 100 hãng công nghệ, sản xuất phần mềm, thiết bị danh tiếng trên thế giới. Là partner chính thức tại Việt Nam.',
+    imageId: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80',
+  },
+  {
+    title: 'Cập nhật xu hướng công nghệ hàng đầu',
+    description: 'Đa dạng sản phẩm, dịch vụ về các giải pháp phần mềm, khoa học công nghệ hàng đầu trong các ngành kỹ thuật.',
+    imageId: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
+  },
+];
+
+const defaultOfferingsItems = [
+  { title: 'Phần mềm và Giải pháp Kỹ thuật', desc: 'Cung cấp bản quyền và giải pháp phần mềm chuyên ngành Xây dựng, Giao thông, Thủy lợi, Địa kỹ thuật từ các hãng hàng đầu thế giới.' },
+  { title: 'Tư vấn Chuyển đổi số & BIM', desc: 'Tư vấn lộ trình chuyển đổi số, áp dụng Mô hình thông tin công trình (BIM), đào tạo và chuyển giao công nghệ cho doanh nghiệp.' },
+  { title: 'Giải pháp Công nghệ thông minh', desc: 'Cung cấp và tư vấn ứng dụng các giải pháp công nghệ thông minh, AI, Big Data, IoT vào quản lý vận hành.' },
+  { title: 'Giải pháp phát triển bền vững', desc: 'Tư vấn phát triển bền vững, Net Zero, EPD, ESG cho các doanh nghiệp xây dựng hướng tới tương lai xanh.' },
+];
+
+const defaultGalleryImages = [
+  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80',
+];
+
 function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> | null | undefined): Record<string, any> {
   const cfg = { ...(rawConfig || {}) };
+  if (sectionKey === 'home.stats' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
+    cfg.items = deepClone(getLegacyHomePageContent().stats?.items ?? []);
+  }
   if (sectionKey === 'home.ecosystem' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
     cfg.items = defaultEcosystemItems;
+  }
+  if (sectionKey === 'home.partners' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
+    cfg.items = deepClone(getLegacyHomePageContent().partners?.items ?? []);
+  }
+  if (sectionKey === 'home.awards' && (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0)) {
+    cfg.items = deepClone(getLegacyHomePageContent().awards?.items ?? []);
   }
   if (sectionKey === 'about.hero') {
     if (!cfg.badge) cfg.badge = 'Về chúng tôi';
@@ -157,6 +189,9 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
     if (!cfg.badge) cfg.badge = 'Hành trình 35 năm';
     if (!cfg.title) cfg.title = 'Tiến trình phát triển';
     if (!cfg.description) cfg.description = 'Chặng đường vươn lên trở thành một trong những đơn vị tiên phong trong lĩnh vực công nghệ và tư vấn xây dựng tại Việt Nam.';
+    if (!cfg.milestones || !Array.isArray(cfg.milestones) || cfg.milestones.length === 0) {
+      cfg.milestones = deepClone(getLegacyAboutPageContent().timeline.milestones);
+    }
   }
   if (sectionKey === 'about.strategy') {
     if (!cfg.title) cfg.title = 'Định hướng chiến lược';
@@ -164,22 +199,37 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
     if (!cfg.imageId) cfg.imageId = '/35nam_cic_1.JPG';
     if (!cfg.mission) cfg.mission = 'Đưa công nghệ tiên tiến vào thực tiễn ngành xây dựng.';
     if (!cfg.vision) cfg.vision = 'Trở thành doanh nghiệp công nghệ chuyên sâu hàng đầu.';
+    if (!cfg.coreValues || !Array.isArray(cfg.coreValues) || cfg.coreValues.length === 0) {
+      cfg.coreValues = deepClone(getLegacyAboutPageContent().strategy.coreValues);
+    }
   }
   if (sectionKey === 'about.offerings') {
     if (!cfg.title) cfg.title = 'SẢN PHẨM VÀ DỊCH VỤ CUNG CẤP';
     if (!cfg.subtitle) cfg.subtitle = 'Khẳng định năng lực qua các giải pháp công nghệ cốt lõi';
+    if (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0) {
+      cfg.items = defaultOfferingsItems;
+    }
   }
   if (sectionKey === 'about.awards') {
     if (!cfg.title) cfg.title = 'Thành tựu & Giải thưởng';
     if (!cfg.subtitle) cfg.subtitle = 'Minh chứng cho nỗ lực không ngừng nghỉ';
     if (!cfg.description) cfg.description = 'Hơn 35 năm phát triển, CIC vinh dự nhận nhiều bằng khen, cúp và giải thưởng uy tín từ các cơ quan Nhà nước và hiệp hội chuyên ngành – tiêu biểu như Huân chương Lao động hạng Ba, Bằng khen của Thủ tướng Chính phủ, cùng các giải thưởng công nghệ danh giá như Sao Khuê, Sao Vàng Đất Việt và Vifotec. Đây là minh chứng cho chất lượng sản phẩm và uy tín thương hiệu mà CIC đã bền bỉ xây dựng trong suốt hành trình đồng hành cùng ngành Xây dựng Việt Nam.';
     if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
+    if (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0) {
+      cfg.items = deepClone(getLegacyHomePageContent().awards?.items ?? []);
+    }
   }
   if (sectionKey === 'about.partners') {
     if (!cfg.title) cfg.title = 'Đối tác chiến lược & Khách hàng tiêu biểu';
     if (!cfg.subtitle) cfg.subtitle = 'Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới';
     if (!cfg.description) cfg.description = 'Với mạng lưới khách hàng rộng khắp trên cả nước, CIC hiện là đối tác tin cậy của hơn 1.000 khách hàng tại Việt Nam và là đối tác chính thức của nhiều hãng công nghệ hàng đầu thế giới.';
     if (cfg.syncWithHome === undefined) cfg.syncWithHome = true;
+    if (!cfg.galleryImages || !Array.isArray(cfg.galleryImages) || cfg.galleryImages.length === 0) {
+      cfg.galleryImages = defaultGalleryImages;
+    }
+    if (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0) {
+      cfg.items = deepClone(getLegacyHomePageContent().partners?.items ?? []);
+    }
   }
   if (sectionKey === 'about.organization') {
     if (!cfg.title) cfg.title = 'Cơ cấu tổ chức';
@@ -188,9 +238,15 @@ function enrichSectionConfig(sectionKey: string, rawConfig: Record<string, any> 
   if (sectionKey === 'about.capacity') {
     if (!cfg.title) cfg.title = 'Tiềm lực vững vàng, vươn tầm quốc tế';
     if (!cfg.description) cfg.description = 'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.';
+    if (!cfg.metrics || !Array.isArray(cfg.metrics) || cfg.metrics.length === 0) {
+      cfg.metrics = deepClone(getLegacyAboutCapacityContent().metrics);
+    }
   }
   if (sectionKey === 'about.experience') {
     if (!cfg.title) cfg.title = 'Năng lực & Kinh nghiệm';
+    if (!cfg.items || !Array.isArray(cfg.items) || cfg.items.length === 0) {
+      cfg.items = defaultExperienceItems;
+    }
   }
   if (sectionKey === 'about.contact_cta') {
     if (!cfg.title) cfg.title = 'Hồ sơ năng lực (Profile)';

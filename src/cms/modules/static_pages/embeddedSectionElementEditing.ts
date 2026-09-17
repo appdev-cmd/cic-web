@@ -44,6 +44,12 @@ export function createEmbeddedTextAdapter(config: EmbeddedTextAdapterConfig): Pa
           const possibleIdx = Number(segments[1]);
           if (Number.isInteger(possibleIdx) && possibleIdx >= 0 && possibleIdx < items.length) {
             itemIndex = possibleIdx;
+          } else {
+            const numMatch = binding.itemId.match(/\d+$/);
+            if (numMatch) {
+              const idx = Number(numMatch[0]) - 1;
+              if (idx >= 0 && idx < items.length) itemIndex = idx;
+            }
           }
         }
         const field = segments.at(-1);
@@ -58,11 +64,13 @@ export function createEmbeddedTextAdapter(config: EmbeddedTextAdapterConfig): Pa
       }
       const fieldContract = getEditableFieldContract(config.sectionKey, contractPath) ?? getEditableFieldContract(config.sectionKey, segments.at(-1)!);
       if (!fieldContract) return null;
-      const editValue = (rawValue !== undefined && rawValue !== null)
-        ? rawValue
+      let editValue = (rawValue !== undefined && rawValue !== null)
+        ? (fieldContract.valueKind === 'number' && typeof rawValue === 'string' ? Number(rawValue) || 0 : rawValue)
         : (fieldContract.valueKind === 'number' ? 0 : '');
       if (fieldContract.valueKind === 'number' && typeof editValue !== 'number') return null;
-      if (fieldContract.valueKind === 'string' && typeof editValue !== 'string') return null;
+      if (fieldContract.valueKind === 'string' && typeof editValue !== 'string') {
+        editValue = String(editValue);
+      }
       const descriptor = createInlineTextEditDescriptor(binding, fieldContract, editValue as string | number);
       return descriptor ? {
         sectionId: section.id,

@@ -81,7 +81,10 @@ export const HomeStatsSection: React.FC<HomeStatsSectionProps> = ({
                     value={stat.value}
                     suffix={stat.suffix}
                     motionEnabled={renderPolicy.motionEnabled}
-                    elementProps={bindElement<HTMLSpanElement>([valueBinding, suffixBinding], bindingRegistry)}
+                    elementProps={{
+                      ...bindElement<HTMLSpanElement>([valueBinding, suffixBinding], bindingRegistry),
+                      'data-page-builder-config-path': JSON.stringify(['items', i, 'value']),
+                    } as any}
                   />
                 </div>
                 <div
@@ -94,6 +97,7 @@ export const HomeStatsSection: React.FC<HomeStatsSectionProps> = ({
                     itemId: stat.id,
                     collectionPath: 'items',
                   }), bindingRegistry)}
+                  data-page-builder-config-path={JSON.stringify(['items', i, 'label'])}
                   className={`${typeMeta} text-slate-500`}
                 >
                   {stat.label}
