@@ -142,7 +142,9 @@ const normalizeCmsPath = (path: string) =>
 
 export function isProductCategoryCmsPath(path: string): boolean {
   const normalizedPath = normalizeCmsPath(path);
-  return normalizedPath === '/cms/product-categories' ||
+  return normalizedPath === '/cms/product-settings' ||
+    normalizedPath === '/cms/products/settings' ||
+    normalizedPath === '/cms/product-categories' ||
     normalizedPath === '/cms/products/categories' ||
     normalizedPath === '/cms/product-settings/categories' ||
     normalizedPath.startsWith('/cms/product-settings/categories/');
