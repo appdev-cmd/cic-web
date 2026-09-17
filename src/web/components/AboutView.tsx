@@ -199,21 +199,69 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
     },
   ];
   const displayedExperienceItems = Array.isArray(experienceConfig.items) && experienceConfig.items.length > 0
-    ? (experienceConfig.items as any[]).map((it, idx) => ({
-        title: typeof it?.title === 'string' ? it.title : (defaultExperienceItems[idx]?.title ?? ''),
-        description: typeof it?.description === 'string' ? it.description : (typeof it?.desc === 'string' ? it.desc : (defaultExperienceItems[idx]?.description ?? '')),
-        imageId: typeof it?.imageId === 'string' ? it.imageId : (defaultExperienceItems[idx]?.imageId ?? ''),
-      }))
+    ? (experienceConfig.items as any[])
+        .filter((it) => it != null && typeof it === 'object')
+        .map((it, idx) => ({
+          title: typeof it?.title === 'string' ? it.title : (defaultExperienceItems[idx]?.title ?? ''),
+          description: typeof it?.description === 'string' ? it.description : (typeof it?.desc === 'string' ? it.desc : (defaultExperienceItems[idx]?.description ?? '')),
+          imageId: typeof it?.imageId === 'string' ? it.imageId : (defaultExperienceItems[idx]?.imageId ?? ''),
+        }))
     : defaultExperienceItems;
 
-  const timelineMilestones = Array.isArray(timelineConfig.milestones) ? (timelineConfig.milestones as Array<{ id?: string; year: string; description: string; title?: string }>) : [];
-  const displayedMilestones = timelineMilestones.length > 0 ? timelineMilestones : aboutContent.timeline.milestones;
+  const defaultMilestones = aboutContent?.timeline?.milestones || [];
+  const timelineMilestones = Array.isArray(timelineConfig.milestones)
+    ? (timelineConfig.milestones as Array<{ id?: string; year?: string; description?: string; title?: string } | null | undefined>)
+    : [];
+  const displayedMilestones = useMemo(() => {
+    if (timelineMilestones.length === 0) {
+      return defaultMilestones;
+    }
+    const validConfigItems = timelineMilestones.filter((m): m is { id?: string; year?: string; description?: string; title?: string } => m != null && typeof m === 'object');
+    if (validConfigItems.length === 0) {
+      return defaultMilestones;
+    }
+    if (validConfigItems.length < defaultMilestones.length) {
+      return defaultMilestones.map((fallback, idx) => {
+        const item = timelineMilestones[idx];
+        if (!item || typeof item !== 'object') return fallback;
+        return {
+          id: item.id || fallback.id || `ms-${idx}`,
+          year: (item.year !== undefined && item.year !== null && String(item.year).trim() !== '') ? String(item.year) : fallback.year,
+          description: (item.description !== undefined && item.description !== null && String(item.description).trim() !== '') ? String(item.description) : fallback.description,
+          title: (item as any)?.title || (fallback as any)?.title || '',
+        };
+      });
+    }
+    return validConfigItems.map((item, idx) => {
+      const fallback = defaultMilestones[idx];
+      return {
+        id: item.id || fallback?.id || `ms-${idx}`,
+        year: (item.year !== undefined && item.year !== null && String(item.year).trim() !== '') ? String(item.year) : (fallback?.year ?? ''),
+        description: (item.description !== undefined && item.description !== null && String(item.description).trim() !== '') ? String(item.description) : (fallback?.description ?? ''),
+        title: (item as any)?.title || (fallback as any)?.title || '',
+      };
+    });
+  }, [timelineMilestones, defaultMilestones]);
 
-  const strategyCoreValues = Array.isArray(strategyConfig.coreValues) ? (strategyConfig.coreValues as Array<{ id?: string; value: string }>) : [];
-  const displayedCoreValues = strategyCoreValues.length > 0 ? strategyCoreValues : aboutContent.strategy.coreValues;
+  const defaultCoreValues = aboutContent?.strategy?.coreValues || [];
+  const strategyCoreValues = Array.isArray(strategyConfig.coreValues)
+    ? (strategyConfig.coreValues as Array<{ id?: string; value?: string } | string | null | undefined>)
+    : [];
+  const displayedCoreValues = useMemo(() => {
+    if (strategyCoreValues.length === 0) return defaultCoreValues;
+    const valid = strategyCoreValues.filter((it): it is { id?: string; value?: string } | string => it != null && (typeof it === 'string' || typeof it === 'object'));
+    return valid.length > 0 ? valid : defaultCoreValues;
+  }, [strategyCoreValues, defaultCoreValues]);
 
-  const capacityMetrics = Array.isArray(capacityConfig.metrics) ? (capacityConfig.metrics as Array<{ id?: string; value: string; label: string }>) : [];
-  const displayedMetrics = capacityMetrics.length > 0 ? capacityMetrics : capacityContent.metrics;
+  const defaultMetrics = capacityContent?.metrics || [];
+  const capacityMetrics = Array.isArray(capacityConfig.metrics)
+    ? (capacityConfig.metrics as Array<{ id?: string; value?: string; label?: string } | null | undefined>)
+    : [];
+  const displayedMetrics = useMemo(() => {
+    if (capacityMetrics.length === 0) return defaultMetrics;
+    const valid = capacityMetrics.filter((it): it is { id?: string; value: string; label: string } => it != null && typeof it === 'object' && typeof it.value === 'string');
+    return valid.length > 0 ? valid : defaultMetrics;
+  }, [capacityMetrics, defaultMetrics]);
 
   const displayedPartners = useMemo(() => {
     const syncWithHome = partnersConfig.syncWithHome !== false;
@@ -481,8 +529,10 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       
                       <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'milestones', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'milestones' }))} className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 relative z-10">
                         {displayedMilestones.map((item, index) => {
-                          const itemPath = createCollectionItemPath('milestones', item.id ?? `ms-${index}`);
-                          return <div key={`timeline-item-${item.id ?? index}`} {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} className="relative flex flex-col items-center text-center group">
+                          if (!item || typeof item !== 'object') return null;
+                          const itemId = item.id ?? `ms-${index}`;
+                          const itemPath = createCollectionItemPath('milestones', itemId);
+                          return <div key={`timeline-item-${itemId}-${index}`} {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: itemPath, semantic: 'embedded-item', ownership: 'embedded', editable: false, itemId, collectionPath: 'milestones' }))} className="relative flex flex-col items-center text-center group">
                             {/* Dot */}
                             <div className={`hidden md:flex w-3 h-3 rounded-full bg-orange-500 ring-[6px] ring-white mb-6 relative z-10 items-center justify-center -translate-y-1/2 mt-[28px] ${renderPolicy.motionEnabled ? 'group-hover:scale-150 group-hover:bg-orange-600 transition-all duration-300' : ''}`}>
                               <div className={`absolute inset-0 rounded-full bg-orange-500 opacity-50 ${renderPolicy.motionEnabled ? 'animate-ping' : ''}`}></div>
@@ -491,15 +541,15 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                             {/* Content */}
                             <div className="w-full flex flex-col items-center md:-mt-4">
                               <h3 
-                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} 
+                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.year`, semantic: 'text', ownership: 'embedded', editable: true, itemId, collectionPath: 'milestones' }))} 
                                 data-page-builder-config-path={JSON.stringify(['milestones', index, 'year'])}
                                 className="text-3xl font-black text-slate-900 tracking-tighter mb-2"
-                              >{item.year}</h3>
+                              >{item.year ?? ''}</h3>
                               <p 
-                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId: item.id ?? `ms-${index}`, collectionPath: 'milestones' }))} 
+                                {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: `${itemPath}.description`, semantic: 'text', ownership: 'embedded', editable: true, itemId, collectionPath: 'milestones' }))} 
                                 data-page-builder-config-path={JSON.stringify(['milestones', index, 'description'])}
                                 className="text-slate-600 text-sm leading-relaxed"
-                              >{item.description}</p>
+                              >{item.description ?? ''}</p>
                             </div>
                           </div>;
                         })}
@@ -572,6 +622,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                             <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Giá trị cốt lõi</h3>
                             <div {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.strategy', elementPath: 'coreValues', semantic: 'collection', ownership: 'embedded', editable: false, collectionPath: 'coreValues' }))} className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 w-full">
                               {displayedCoreValues.map((item, index) => {
+                                if (!item) return null;
                                 const itemId = (typeof item === 'object' && item?.id) ? item.id : `cv-${index}`;
                                 const itemPath = createCollectionItemPath('coreValues', itemId);
                                 const valueText = typeof item === 'string' ? item : (item?.value ?? '');
@@ -1069,7 +1120,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-16 w-full"
                   >
                     {displayedMetrics.map((metric, index) => {
-                      const itemPath = createCollectionItemPath('metrics', metric.id ?? `cap-${index}`);
+                      if (!metric || typeof metric !== 'object') return null;
+                      const metricId = metric.id ?? `cap-${index}`;
+                      const itemPath = createCollectionItemPath('metrics', metricId);
                       return <div
                         key={metric.id ? `cap-metric-${metric.id}-${index}` : `cap-metric-${index}`}
                         {...bindElementRuntime<HTMLDivElement>(createElementBinding({

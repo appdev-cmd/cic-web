@@ -20,6 +20,7 @@ import {
   SLOT_KEY_OPTIONS,
 } from './editorConstants';
 import { deepClone, labelFor } from './editorUtils';
+import { getLegacyAboutPageContent } from '@/shared/page-content/legacyPageContent';
 
 export interface ConfigFieldProps {
   fieldKey: string;
@@ -104,8 +105,10 @@ export function ConfigField({
     return <HeroSlidesEditor slides={value as any} path={path} onChange={onChange} onPickImage={onPickImage} mediaImages={mediaImages} onActiveSlideChange={onActiveHeroSlideChange} />;
   }
 
-  if (fieldKey === 'milestones' && Array.isArray(value)) {
-    return <MilestonesEditor milestones={value as any} path={path} onChange={onChange} />;
+  if (fieldKey === 'milestones') {
+    const rawList = Array.isArray(value) ? value : [];
+    const safeMilestones = rawList.length > 0 ? rawList : getLegacyAboutPageContent().timeline.milestones;
+    return <MilestonesEditor milestones={safeMilestones as any} path={path} onChange={onChange} />;
   }
 
   if (fieldKey === 'branches' && Array.isArray(value)) {

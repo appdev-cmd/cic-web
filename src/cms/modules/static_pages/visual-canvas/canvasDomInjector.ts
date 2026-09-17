@@ -1312,8 +1312,10 @@ export function setupCanvasDomEnhancements(params: CanvasDomEnhancerParams): () 
       node.style.borderRadius = '3px';
       const showOutline = () => { node.style.outline = '2px solid rgb(249 115 22 / .82)'; };
       const hideOutline = () => { if (node !== node.ownerDocument.activeElement) node.style.outline = '1px dashed rgb(249 115 22 / 0.65)'; };
+      const initialText = node.textContent?.trim() ?? '';
       const update = () => {
         const nextVal = typeof value === 'number' ? Number(node.textContent?.trim() ?? 0) : node.textContent?.trim() ?? '';
+        if (String(nextVal) === initialText) return;
         if (onConfigValueChange) onConfigValueChange(selectedSection.id, path, nextVal);
         else if (onTextChange && typeof nextVal === 'string') onTextChange(selectedSection.id, path, nextVal);
       };

@@ -16,6 +16,11 @@ export function updateAtPath(config: Record<string, PageBuilderConfigValue>, pat
   for (let i = 0; i < path.length - 1; i++) {
     const part = path[i];
     const nextPart = path[i + 1];
+    if (Array.isArray(cursor) && typeof part === 'number') {
+      while (cursor.length < part) {
+        cursor.push({});
+      }
+    }
     if (cursor[part] === undefined || cursor[part] === null || typeof cursor[part] !== 'object') {
       cursor[part] = typeof nextPart === 'number' ? [] : {};
     }
@@ -23,6 +28,11 @@ export function updateAtPath(config: Record<string, PageBuilderConfigValue>, pat
   }
   const lastPart = path[path.length - 1];
   if (cursor && typeof cursor === 'object') {
+    if (Array.isArray(cursor) && typeof lastPart === 'number') {
+      while (cursor.length < lastPart) {
+        cursor.push({});
+      }
+    }
     cursor[lastPart] = value;
   }
   return next;

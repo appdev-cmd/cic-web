@@ -45,9 +45,10 @@ import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { entityTypeLabels, sectionDefinitions } from './pageBuilderRegistry';
 import { PageEntityPickerModal } from './PageEntityPickerModal';
-import { findPageBuilderImage, PageMediaPickerModal } from './PageMediaPickerModal';
+import { PageMediaPickerModal } from './PageMediaPickerModal';
 import { PageBuilderVisualCanvas } from './PageBuilderVisualCanvas';
 import { registerEntityOptions } from '@/shared/page-content/resolveReferenceEntity';
+import { getLegacyAboutPageContent, getLegacyAboutCapacityContent } from '@/shared/page-content/legacyPageContent';
 import type { PageBuilderConfigValue, PageBuilderEntityOption, PageBuilderEntityType, PageBuilderPage, PageBuilderSection } from './pageBuilderTypes';
 import { CTA_OPTIONS } from './editor/editorConstants';
 import { deepClone, updateAtPath, valueAtPath, siblingPath } from './editor/editorUtils';
@@ -124,11 +125,39 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     return () => document.removeEventListener('pointerdown', close);
   }, [ctaPopover]);
 
+  const seedDefaultCollectionIfEmpty = (section: PageBuilderSection, path: Array<string | number>): Record<string, PageBuilderConfigValue> => {
+    const cfg = { ...(section.config || {}) };
+    if (section.sectionKey === 'about.timeline' && path[0] === 'milestones') {
+      if (!Array.isArray(cfg.milestones) || cfg.milestones.length === 0) {
+        cfg.milestones = deepClone(getLegacyAboutPageContent().timeline.milestones) as any;
+      }
+    } else if (section.sectionKey === 'about.strategy' && path[0] === 'coreValues') {
+      if (!Array.isArray(cfg.coreValues) || cfg.coreValues.length === 0) {
+        cfg.coreValues = deepClone(getLegacyAboutPageContent().strategy.coreValues) as any;
+      }
+    } else if (section.sectionKey === 'about.capacity' && path[0] === 'metrics') {
+      if (!Array.isArray(cfg.metrics) || cfg.metrics.length === 0) {
+        cfg.metrics = deepClone(getLegacyAboutCapacityContent().metrics) as any;
+      }
+    }
+    return cfg;
+  };
+
   const updateSectionConfig = (sectionId: string, path: Array<string | number>, value: PageBuilderConfigValue) => {
     setWorkingPage((current) => {
       setPast((items) => [...items.slice(-49), deepClone(current)]);
       setFuture([]);
-      return { ...current, draft: { ...current.draft, sections: current.draft.sections.map((section) => section.id === sectionId ? { ...section, config: updateAtPath(section.config, path, value) } : section) } };
+      return {
+        ...current,
+        draft: {
+          ...current.draft,
+          sections: current.draft.sections.map((section) => {
+            if (section.id !== sectionId) return section;
+            const seededConfig = seedDefaultCollectionIfEmpty(section, path);
+            return { ...section, config: updateAtPath(seededConfig, path, value) };
+          }),
+        },
+      };
     });
   };
 
@@ -136,7 +165,17 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
     setWorkingPage((current) => {
       setPast((items) => [...items.slice(-49), deepClone(current)]);
       setFuture([]);
-      return { ...current, draft: { ...current.draft, sections: current.draft.sections.map((section) => section.id === sectionId ? { ...section, config: updateAtPath(section.config, path, value) } : section) } };
+      return {
+        ...current,
+        draft: {
+          ...current.draft,
+          sections: current.draft.sections.map((section) => {
+            if (section.id !== sectionId) return section;
+            const seededConfig = seedDefaultCollectionIfEmpty(section, path);
+            return { ...section, config: updateAtPath(seededConfig, path, value) };
+          }),
+        },
+      };
     });
   }, []);
 
@@ -631,7 +670,7 @@ export const PageBuilderEditor: React.FC<PageBuilderEditorProps> = ({ page, onBa
           images={mediaImages}
           returnValue="url"
           onClose={() => setMediaPicker(null)}
-          onConfirm={(mediaUrl) => {
+          onConfirm={(mediaUrl: string) => {
             updateSectionConfig(mediaPicker.sectionId, mediaPicker.path, mediaUrl);
             const lastKey = mediaPicker.path[mediaPicker.path.length - 1];
             if (mediaPicker.path.length >= 3 && mediaPicker.path[0] === 'items') {
