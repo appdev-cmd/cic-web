@@ -24,7 +24,7 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 | `[A]` | Contact/consultation | `/contact`, global consultation | Contacts, CTA, Forms, Customer Requests | form/CTA contract; validated submission; anti-spam/rate limit; persistence | staff assignment, email template/delivery, audit | Có Server Action nhưng end-to-end workflow chưa đủ bằng chứng |
 | `[A]` | Public search | `/search` | Search projection | published read models của các domain được index; visibility/locale | ranking, SEO analytics | Có aggregate query; coverage phụ thuộc module nguồn |
 | `[A]` | Menu/navigation | Header, Footer, route links | Menu | route registry; published menu query; locale | referenced content visibility, SEO redirects | Legacy navigation và Next route semantics đang cùng tồn tại |
-| `[A]` | Legal/static content | `/privacy`, `/terms`, `/chinh-sach-bao-mat`, `/dieu-khoan-su-dung`, `/[slug]` | Static Pages (`cic_content_pages*`, template: `legal_standard`) | public shell; published legal snapshot | SEO, localization, trash for custom pages | Audit chi tiết Module 26 ngày 2026-09-17: DB schema & repository transaction hoàn tất; Privacy đã publish DB; Terms/EN ở draft; Public view & CMS create/edit/publish đã sẵn sàng; READY_TO_IMPLEMENT |
+| `[C]` | Legal/static content | `/privacy`, `/terms`, `/chinh-sach-bao-mat`, `/dieu-khoan-su-dung`, `/[slug]` | Static Pages (`cic_content_pages*`, template: `legal_standard`) | public shell; published legal snapshot | SEO, localization, trash for custom pages | Hoàn tất core implementation 2026-09-17: Seed & publish chuẩn hóa toàn bộ 4 trang hệ thống (Privacy & Terms VI/EN); PublicLegalPageView chuyển hoàn toàn sang Server Component chuẩn UX/SEO parity; Xử lý alias routing 2 chiều; Dynamic [slug] hỗ trợ trang quy chế/nội dung chuẩn mới do admin tạo; Visual Canvas CMS đồng bộ 1:1; Roundtrip test pass 100% |
 | `[A]` | Public widgets | chatbot, floating contact, consultation | Config, CTA/Forms/Requests | public shell; approved config/submission boundary | external webhook/chat provider, audit | Phần lớn vẫn legacy/client-config |
 
 ## CMS/business modules
@@ -299,10 +299,11 @@ Audit ngày 2026-08-31 chuẩn hóa toàn bộ module thành `[A]`. Code Next, q
 - **O. i18n:** `BILINGUAL_CONTENT` (workspace độc lập `vi` và `en`).
 - **P. Implementation Order:** (1) Seed & Xuất bản `terms_of_use` và EN pages -> (2) Hoàn thiện `PublicLegalPageView.tsx` -> (3) Chuẩn hóa route alias -> (4) Kiểm thử CMS create/publish -> public end-to-end.
 - **Q. Acceptance Checklist:**
-  - [ ] Truy cập `/chinh-sach-bao-mat` và `/dieu-khoan-su-dung` lấy 100% dữ liệu từ DB thật.
-  - [ ] Admin tạo được trang pháp lý mới trên CMS, xuất bản hiển thị tại `/[slug]`.
-  - [ ] Quyền hạn và nhật ký hoạt động ghi nhận chuẩn xác.
-- **Kết luận:** **READY_TO_IMPLEMENT**.
+  - [x] Truy cập `/chinh-sach-bao-mat` và `/dieu-khoan-su-dung` lấy 100% dữ liệu từ DB thật (đã bỏ hoàn toàn fallback tĩnh).
+  - [x] Admin tạo được trang pháp lý mới trên CMS, xuất bản hiển thị tại `/[slug]` (xác minh roundtrip test ID 14 -> 200 OK -> teardown sạch sẽ).
+  - [x] Quyền hạn và nhật ký hoạt động ghi nhận chuẩn xác (Task 90 `static_pages` và Audit logging).
+  - [x] Đồng bộ Visual Canvas CMS và Public view 1:1 (bổ sung Contact Assistance Box, Category Badge, Version Shield, Typography chuẩn).
+- **Kết luận:** **[C] Core Complete** (Đã hoàn thành core end-to-end theo đúng surfaces và specs).
 
 
 

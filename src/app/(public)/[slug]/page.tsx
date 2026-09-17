@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: DynamicSlugPageProps): Promis
       description: 'Products, consulting services and engineering technology projects by CIC Technology.',
     };
   }
-  const page = await getPublicStaticPage('vi', slug);
+  const page = (await getPublicStaticPage('vi', slug)) ?? (await getPublicStaticPage('en', slug));
   if (!page) return { title: 'Trang không tồn tại | CIC Technology' };
   return {
     title: page.seoTitle || `${page.name} | CIC Technology`,
@@ -58,16 +58,22 @@ export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) 
     return <HomeRoute initialContent={enHomeContent} />;
   }
 
-  const page = await getPublicStaticPage('vi', slug);
+  const page = (await getPublicStaticPage('vi', slug)) ?? (await getPublicStaticPage('en', slug));
   if (!page) {
     notFound();
   }
+
+  const categoryTag = page.code.includes('privacy')
+    ? 'Chính sách bảo mật'
+    : page.code.includes('terms')
+    ? 'Điều khoản dịch vụ'
+    : 'Pháp lý & Chính sách';
 
   return (
     <PublicLegalPageView
       pageData={page}
       defaultTitle={page.name}
-      categoryTag="Pháp lý & Chính sách"
+      categoryTag={categoryTag}
     />
   );
 }
