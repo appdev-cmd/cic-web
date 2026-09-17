@@ -100,18 +100,13 @@ export async function getCmsSystemSettingsData(): Promise<CmsSettingsData> {
 }
 
 const queryPublicSystemSettings = async (locale: 'vi' | 'en'): Promise<PublicSystemSettings> => {
-  try {
-    const sql = getPostgresClient(); const table = locale === 'en' ? 'cic_config_en' : 'cic_config';
-    const keys = APPROVED_SETTINGS_MANIFEST.filter((item) => item.publicReadable && item.scopes.includes(locale)).map((item) => item.key);
-    const [values, branches] = await Promise.all([
-      sql`SELECT name,value FROM ${sql(table)} WHERE published IS TRUE AND lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
-      sql`SELECT id,workspace,code,name,address,phone,email,fax,working_hours,map_embed_url,map_search_query,is_head_office,published,ordering FROM cic_branches WHERE workspace=${locale} AND published IS TRUE ORDER BY ordering,id`,
-    ]);
-    return { values: Object.fromEntries(values.map((row) => [String(row.name).trim().toLowerCase(), String(row.value ?? '')])), branches: branches.map(mapBranch) };
-  } catch (error) {
-    console.error('[queryPublicSystemSettings] Database error or timeout, using fallback:', error);
-    return { values: {}, branches: [] };
-  }
+  const sql = getPostgresClient(); const table = locale === 'en' ? 'cic_config_en' : 'cic_config';
+  const keys = APPROVED_SETTINGS_MANIFEST.filter((item) => item.publicReadable && item.scopes.includes(locale)).map((item) => item.key);
+  const [values, branches] = await Promise.all([
+    sql`SELECT name,value FROM ${sql(table)} WHERE published IS TRUE AND lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
+    sql`SELECT id,workspace,code,name,address,phone,email,fax,working_hours,map_embed_url,map_search_query,is_head_office,published,ordering FROM cic_branches WHERE workspace=${locale} AND published IS TRUE ORDER BY ordering,id`,
+  ]);
+  return { values: Object.fromEntries(values.map((row) => [String(row.name).trim().toLowerCase(), String(row.value ?? '')])), branches: branches.map(mapBranch) };
 };
 
 /** Request/render-scoped deduplication only; this does not persist data across requests. */

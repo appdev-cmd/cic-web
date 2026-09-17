@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -76,6 +76,9 @@ function PublicRouteProgressBarInner() {
         href.startsWith('mailto:') ||
         href.startsWith('tel:') ||
         href.startsWith('javascript:') ||
+        href.startsWith('blob:') ||
+        href.startsWith('data:') ||
+        target.hasAttribute('download') ||
         target.target === '_blank'
       ) {
         return;
@@ -125,7 +128,7 @@ function PublicRouteProgressBarInner() {
       className="fixed top-0 left-0 right-0 z-[9999] pointer-events-none h-[2.5px] bg-transparent"
     >
       <div
-        className="h-full bg-gradient-to-r from-[#FC5115] via-orange-500 to-amber-500 shadow-[0_0_8px_rgba(252,81,21,0.5)] transition-all duration-200 ease-out"
+        className="h-full bg-gradient-to-r from-[#FC5115] via-orange-500 to-amber-500 shadow-[0_0_8px_rgba(252,81,21,0.5)] transition-all duration-200 ease-out motion-reduce:transition-none"
         style={{
           width: `${progress}%`,
           opacity: isVisible ? 1 : 0,
