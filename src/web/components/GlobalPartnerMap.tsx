@@ -4,12 +4,14 @@
  */
 
 import React from 'react';
-import { CountryPartnerNetwork } from './CountryPartnerNetwork';
+import { CountryPartnerNetwork, type StoredPartnerMapLayout } from './CountryPartnerNetwork';
 
 export interface GlobalPartnerMapProps {
   title?: string;
   subtitle?: string;
   editMode?: boolean;
+  layoutData?: StoredPartnerMapLayout;
+  onLayoutChange?: (layout: StoredPartnerMapLayout) => void;
   titleProps?: React.HTMLAttributes<HTMLHeadingElement>;
   subProps?: React.HTMLAttributes<HTMLParagraphElement>;
 }
@@ -18,6 +20,8 @@ export const GlobalPartnerMap: React.FC<GlobalPartnerMapProps> = ({
   title = 'Mạng lưới đối tác công nghệ tiêu biểu',
   subtitle = 'Từ Việt Nam, CIC kết nối với các hãng công nghệ hàng đầu trong mạng lưới hợp tác quốc tế.',
   editMode = false,
+  layoutData,
+  onLayoutChange,
   titleProps,
   subProps,
 }) => (
@@ -38,7 +42,7 @@ export const GlobalPartnerMap: React.FC<GlobalPartnerMapProps> = ({
       </p>
     </header>
     <div className="w-full min-w-0 overflow-hidden rounded-xl md:rounded-2xl">
-      <CountryPartnerNetwork isEditable={editMode} />
+      <CountryPartnerNetwork isEditable={editMode} layoutData={layoutData} onLayoutChange={onLayoutChange} />
     </div>
   </section>
 );

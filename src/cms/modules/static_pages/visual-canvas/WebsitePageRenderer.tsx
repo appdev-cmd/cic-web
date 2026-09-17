@@ -187,6 +187,7 @@ export function WebsitePage({
         pageSections={page.draft.sections} 
         resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
         editMode={editMode}
+        onConfigValueChange={onConfigValueChange}
       />
     );
   }
@@ -201,6 +202,7 @@ export function WebsitePage({
         pageSections={page.draft.sections} 
         resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
         editMode={editMode}
+        onConfigValueChange={onConfigValueChange}
       />
     );
   }
@@ -221,6 +223,7 @@ export function WebsitePage({
         pageSections={page.draft.sections} 
         resolveMediaUrl={(id) => findPageBuilderImage(id)?.url ?? id} 
         editMode={editMode}
+        onConfigValueChange={onConfigValueChange}
       />
     );
   }

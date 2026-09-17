@@ -70,6 +70,7 @@ import { bindElement as bindElementRuntime, type BoundElementProps } from '@shar
 import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/visual-editing/elementBindingRegistry';
 import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import { GlobalPartnerMap } from './GlobalPartnerMap';
+import type { StoredPartnerMapLayout } from './CountryPartnerNetwork';
 
 function bindElement<T extends Element>(registry: ElementBindingRegistry, binding: ReturnType<typeof createElementBinding>): BoundElementProps<T> {
   return bindElementRuntime<T>(binding, registry);
@@ -121,12 +122,13 @@ interface AboutViewProps {
   aboutContent?: AboutPageModel;
   renderPolicy?: PageRenderPolicy;
   bindingRegistry?: ElementBindingRegistry;
-  pageSections?: readonly { sectionKey: string; config: Record<string, unknown>; references?: readonly { entityType: string; entityIds: readonly string[] }[] }[];
+  pageSections?: readonly { id?: string; sectionKey: string; config: Record<string, unknown>; references?: readonly { entityType: string; entityIds: readonly string[] }[] }[];
   resolveMediaUrl?: (id: string) => string;
   editMode?: boolean;
+  onConfigValueChange?: (sectionId: string, path: Array<string | number>, value: any) => void;
 }
 
-export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry, pageSections, resolveMediaUrl = (id) => id, editMode = false }: AboutViewProps) => {
+export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capacityContent = getLegacyAboutCapacityContent(), aboutContent = getLegacyAboutPageContent(), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry, pageSections, resolveMediaUrl = (id) => id, editMode = false, onConfigValueChange }: AboutViewProps) => {
   const homeAwards = useMemo(getHomeAwards, []);
   const partners = useMemo(getHomePartners, []);
   const configFor = (sectionKey: string) => pageSections?.find((section) => section.sectionKey === sectionKey)?.config ?? {};
@@ -142,6 +144,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
   const capacityConfig = configFor('about.capacity');
   const experienceConfig = configFor('about.experience');
   const ctaConfig = configFor('about.contact_cta');
+  const targetMapSection = pageSections?.find((section) => section.sectionKey === 'about.experience')
+    ?? pageSections?.find((section) => section.sectionKey === 'about.capacity');
+  const savedMapLayout = (experienceConfig.partnerMapLayout ?? capacityConfig.partnerMapLayout) as StoredPartnerMapLayout | undefined;
 
   const [localTab, setLocalTab] = useState<'overview' | 'structure' | 'experience'>(activeTab);
   useEffect(() => {
@@ -1205,6 +1210,12 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       title={textFrom(experienceConfig, 'partnerMapTitle', textFrom(capacityConfig, 'partnerMapTitle', 'Mạng lưới đối tác công nghệ tiêu biểu'))}
                       subtitle={textFrom(experienceConfig, 'partnerMapSubtitle', textFrom(capacityConfig, 'partnerMapSubtitle', 'Từ Việt Nam, CIC kết nối với các hãng công nghệ hàng đầu trong mạng lưới hợp tác quốc tế.'))}
                       editMode={editMode}
+                      layoutData={savedMapLayout}
+                      onLayoutChange={(nextLayout) => {
+                        if (targetMapSection?.id) {
+                          onConfigValueChange?.(targetMapSection.id, ['partnerMapLayout'], nextLayout);
+                        }
+                      }}
                       titleProps={{
                         'data-page-builder-config-path': JSON.stringify(['partnerMapTitle']),
                         ...bindElementRuntime<HTMLHeadingElement>(createElementBinding({

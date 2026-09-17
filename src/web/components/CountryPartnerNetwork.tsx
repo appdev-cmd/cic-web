@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { countryMarkerPositions, countryMarkers, partnerCurveBends, partnerLogoPositions, type NormalizedPoint } from '../data/countryMarkers';
 import { representativePartnerCountries, type RepresentativePartner } from '../data/representativePartners';
 import { worldMapPaths } from '../data/worldMapPaths';
@@ -11,8 +11,9 @@ const UNIFORM_LOGO_BOUNDS = { width: 120, height: 60 } as const;
 type Point = { x: number; y: number };
 type Box = { x: number; y: number; width: number; height: number };
 type Curve = { path: string; samples: Point[]; collisionScore: number };
-type PartnerLayout = Record<string, NormalizedPoint>;
-type CurveBends = Record<string, number>;
+export type PartnerLayout = Record<string, NormalizedPoint>;
+export type CurveBends = Record<string, number>;
+export type StoredPartnerMapLayout = { positions?: PartnerLayout; curveBends?: CurveBends };
 type StoredLayout = { positions: PartnerLayout; curveBends: CurveBends };
 type DragState =
   | { kind: 'logo'; id: string; pointerId: number; offset: Point }
@@ -236,9 +237,15 @@ const vietnamMaritimeFeatures = [
 
 export interface CountryPartnerNetworkProps {
   isEditable?: boolean;
+  layoutData?: StoredPartnerMapLayout;
+  onLayoutChange?: (layout: StoredPartnerMapLayout) => void;
 }
 
-export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ isEditable = false }) => {
+export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({
+  isEditable = false,
+  layoutData,
+  onLayoutChange,
+}) => {
   const PARTNER_MAP_EDIT_MODE = isEditable;
   const svgRef = useRef<SVGSVGElement>(null);
   const [activePartnerId, setActivePartnerId] = useState<string | null>(null);
@@ -246,6 +253,9 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ is
   const [dragging, setDragging] = useState<DragState | null>(null);
   const [exportStatus, setExportStatus] = useState('');
   const [positions, setPositions] = useState<PartnerLayout>(() => {
+    if (layoutData?.positions && Object.keys(layoutData.positions).length > 0) {
+      return layoutData.positions;
+    }
     if (!PARTNER_MAP_EDIT_MODE || typeof window === 'undefined') return defaultPartnerLayout;
     try {
       const saved = JSON.parse(window.localStorage.getItem(PARTNER_MAP_LAYOUT_STORAGE_KEY) ?? '{}') as PartnerLayout | StoredLayout;
@@ -257,6 +267,9 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ is
     }
   });
   const [curveBends, setCurveBends] = useState<CurveBends>(() => {
+    if (layoutData?.curveBends && Object.keys(layoutData.curveBends).length > 0) {
+      return layoutData.curveBends;
+    }
     if (!PARTNER_MAP_EDIT_MODE || typeof window === 'undefined') return defaultCurveBends;
     try {
       const saved = JSON.parse(window.localStorage.getItem(PARTNER_MAP_LAYOUT_STORAGE_KEY) ?? '{}') as Partial<StoredLayout>;
@@ -267,6 +280,17 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ is
   });
   const positionsRef = useRef(positions);
   const curveBendsRef = useRef(curveBends);
+
+  useEffect(() => {
+    if (layoutData?.positions && Object.keys(layoutData.positions).length > 0) {
+      positionsRef.current = layoutData.positions;
+      setPositions(layoutData.positions);
+    }
+    if (layoutData?.curveBends && Object.keys(layoutData.curveBends).length > 0) {
+      curveBendsRef.current = layoutData.curveBends;
+      setCurveBends(layoutData.curveBends);
+    }
+  }, [layoutData]);
 
   const persistLayout = useCallback(() => {
     window.localStorage.setItem(PARTNER_MAP_LAYOUT_STORAGE_KEY, JSON.stringify({ positions: positionsRef.current, curveBends: curveBendsRef.current } satisfies StoredLayout));
@@ -407,8 +431,9 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ is
   const endDrag = useCallback((event: React.PointerEvent<SVGSVGElement>) => {
     if (!PARTNER_MAP_EDIT_MODE || !dragging || event.pointerId !== dragging.pointerId) return;
     persistLayout();
+    onLayoutChange?.({ positions: positionsRef.current, curveBends: curveBendsRef.current });
     setDragging(null);
-  }, [dragging, persistLayout]);
+  }, [dragging, onLayoutChange, persistLayout]);
 
   /*
   const flipSelectedCurve = useCallback(() => {
@@ -428,8 +453,9 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ is
     updatePositions(defaultPartnerLayout);
     curveBendsRef.current = defaultCurveBends;
     setCurveBends(defaultCurveBends);
+    onLayoutChange?.({ positions: defaultPartnerLayout, curveBends: defaultCurveBends });
     setExportStatus('Đã reset');
-  }, [updatePositions]);
+  }, [onLayoutChange, updatePositions]);
 
   const exportLayout = useCallback(async () => {
     const output = JSON.stringify({ positions: positionsRef.current, curveBends: curveBendsRef.current } satisfies StoredLayout, null, 2);
@@ -456,7 +482,14 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({ is
 
   return (
     <div className="relative w-full min-w-0 overflow-hidden touch-pan-y" aria-label="Mạng lưới đối tác tiêu biểu theo quốc gia">
-      {PARTNER_MAP_EDIT_MODE && <div className="relative z-20 mb-2 ml-auto flex w-fit max-w-[calc(100%-0.5rem)] items-center gap-1 rounded-lg bg-slate-950/90 p-1 text-[10px] text-white shadow-md sm:absolute sm:right-2 sm:top-2 sm:mb-0 sm:gap-1.5 sm:p-1.5 sm:text-[11px]"><span className="hidden px-1 text-white/75 md:inline">Kéo đường để uốn</span><button type="button" onClick={resetLayout} className="rounded-md px-2 py-1.5 font-semibold hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">Reset Layout</button><button type="button" onClick={exportLayout} className="rounded-md bg-orange-500 px-2 py-1.5 font-bold text-white hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Export Layout</button>{exportStatus && <span className="px-1 text-white/80" aria-live="polite">{exportStatus}</span>}</div>}
+      {PARTNER_MAP_EDIT_MODE && (
+        <div className="relative z-20 mb-2 ml-auto flex w-fit max-w-[calc(100%-0.5rem)] items-center gap-1 rounded-lg bg-slate-950/90 p-1 text-[10px] text-white shadow-md sm:absolute sm:right-2 sm:top-2 sm:mb-0 sm:gap-1.5 sm:p-1.5 sm:text-[11px]">
+          <span className="hidden px-1 text-emerald-400 font-medium md:inline">● Kéo chỉnh để tự động lưu vào trang</span>
+          <button type="button" onClick={resetLayout} className="rounded-md px-2 py-1.5 font-semibold hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">Reset Bố cục</button>
+          <button type="button" onClick={exportLayout} className="rounded-md bg-slate-800 px-2 py-1.5 font-medium text-slate-300 hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Sao chép JSON</button>
+          {exportStatus && <span className="px-1 text-white/80" aria-live="polite">{exportStatus}</span>}
+        </div>
+      )}
       <svg ref={svgRef} viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`} preserveAspectRatio="xMidYMid meet" className="block h-auto max-w-full w-full" role="img" aria-labelledby="partner-map-title partner-map-desc" onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
         <style>{`
           foreignObject img { width: calc(100% - 4px); height: calc(100% - 4px); }
