@@ -24,6 +24,7 @@ import { getCmsDictionary } from '../i18n/cmsDictionary';
 import { CmsToastProvider } from '../context/CmsToastContext';
 import { CmsRouteProgressBar, startCmsProgressBar, stopCmsProgressBar } from './ui/CmsRouteProgressBar';
 import { ApplicationLoadingState } from '@/shared/ui/application';
+import { updateDashboardItemStatusAction } from '@/features/dashboard/server/actions';
 
 const getProductSettingsDataType = (path: string): MasterDataType => {
   const cleanPath = path.split('?')[0];
@@ -277,6 +278,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         localStorage.setItem('cic_cms_workspace_locale', next);
         localStorage.setItem('cms_workspace_locale', next);
         document.cookie = `cms_workspace_locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
+        window.location.reload();
       } catch {
         // ignore
       }
@@ -310,7 +312,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Lists state
-  const dashboardData = workspaceLocale === 'vi' ? initialDashboardData : undefined;
+  const dashboardData = initialDashboardData;
   const [contacts, setContacts] = useState<ContactMessage[]>(initialDashboardData?.contacts ?? []);
   const [registrations, setRegistrations] = useState<ProductRegistration[]>(initialDashboardData?.productRegistrations ?? []);
   const [pendingItems, setPendingItems] = useState<PendingContent[]>(initialDashboardData?.pendingContents ?? []);
@@ -359,6 +361,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
 
   // Status updates handler
   const handleUpdateStatus = (type: string, id: string, newStatus: string) => {
+    if (type === 'contact' || type === 'registration' || type === 'pending') {
+      void updateDashboardItemStatusAction(type, id, newStatus);
+    }
     if (type === 'contact') {
       setContacts((prev) =>
         prev.map((item) => (item.id === id ? { ...item, status: 'completed' } : item))

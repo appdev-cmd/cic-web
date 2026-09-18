@@ -32,7 +32,7 @@ export async function renderCmsFoundationRoute(module: CmsModuleKey, path = '/cm
   const canViewTrash = can(access, 'trash', 'view');
   const canViewMedia = can(access, 'media', 'view');
 
-  const dashboardData = module === 'dashboard' ? await getCmsDashboardData() : undefined;
+  const dashboardData = module === 'dashboard' ? await getCmsDashboardData(initialWorkspaceLocale) : undefined;
   const searchRecords = module === 'search' ? await getCmsSearchRecords(access.isAdministrator, allowedModules) : [];
   const usersData = module === 'users' && canViewUsers ? await getCmsUsersData() : null;
   const permissionsData = module === 'permissions' && canViewPermissions ? await getCmsPermissionsData() : null;

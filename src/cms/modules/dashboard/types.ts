@@ -16,8 +16,10 @@ export const defaultDashboardPreference: DashboardPreference = {
   timeRange: '7',
   density: 'comfortable',
   widgets: [
-    { id: 'kpi_cards', name: 'Năm chỉ số KPI tổng quan', category: 'KPI', visible: true, order: 1 },
-    { id: 'analytics_charts', name: 'Biểu đồ phân tích lượt truy cập & nội dung', category: 'Analytics', visible: true, order: 2 },
-    { id: 'activity_timeline', name: 'Lịch sử hoạt động gần đây (Audit)', category: 'Activity', visible: true, order: 3 },
+    { id: 'quick_actions', name: 'Công việc hiện tại (Current Work)', category: 'Quick Actions', visible: true, order: 1 },
+    { id: 'kpi_cards', name: 'Năm chỉ số KPI tổng quan', category: 'KPI', visible: true, order: 2 },
+    { id: 'action_required', name: 'Yêu cầu cần xử lý ngay (Hàng đợi)', category: 'Action Required', visible: true, order: 3 },
+    { id: 'analytics_charts', name: 'Biểu đồ phân tích lượt truy cập & nội dung', category: 'Analytics', visible: true, order: 4 },
+    { id: 'activity_timeline', name: 'Lịch sử hoạt động gần đây (Audit)', category: 'Activity', visible: true, order: 5 },
   ],
 };
