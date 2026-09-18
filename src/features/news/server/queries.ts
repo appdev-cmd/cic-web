@@ -92,13 +92,24 @@ export async function listPublishedNews(
   };
 }
 
-export async function listAllPublishedNews(locale: NewsLocale = 'vi') {
+const ALL_NEWS_CACHE_TTL_MS = 180_000;
+const allNewsCache = new Map<NewsLocale, { data: ReturnType<typeof map>[]; expiresAt: number }>();
+
+export async function listAllPublishedNews(locale: NewsLocale = 'vi', limit = 300) {
+  const cached = allNewsCache.get(locale);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
   const t = table(locale),
     sql = getPostgresClient();
   const rows = await sql.unsafe(
-    `SELECT ${listProjection} FROM ${t.news} n LEFT JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC`
+    `SELECT ${listProjection} FROM ${t.news} n LEFT JOIN ${t.category} c ON c.id=n.category_id WHERE n.published=true ORDER BY coalesce(n.start_time, n.created_time) DESC, n.id DESC LIMIT $1`,
+    [limit]
   );
-  return rows.map((row) => map(row as Row));
+  const data = rows.map((row) => map(row as Row));
+  allNewsCache.set(locale, { data, expiresAt: Date.now() + ALL_NEWS_CACHE_TTL_MS });
+  return data;
 }
 
 export async function listPublishedNewsPlacement(locale: NewsLocale, placement: 'hot' | 'home') {

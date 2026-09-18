@@ -5,7 +5,7 @@ import { listPublishedProductCategories } from '@/features/product-categories/se
 import { listPublishedProductTypes } from '@/features/product-types/server/queries';
 import { listPublicProductContacts } from '@/features/sales-owners/server/queries';
 import type { Metadata } from 'next';
-export const dynamic='force-dynamic';
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: 'Sản phẩm & Giải pháp Công nghệ',

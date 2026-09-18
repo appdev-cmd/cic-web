@@ -73,8 +73,57 @@ function mapReferenceRow(row: ReferenceRow, locale: 'vi' | 'en' = 'vi'): Product
   };
 }
 
-/** Public DTO shaped for the established React product presentation. */
+const PRODUCT_CACHE_TTL_MS = 180_000;
+const productReferenceCache = new Map<'vi' | 'en', { data: ProductReference[]; expiresAt: number }>();
+const singleProductCache = new Map<string, { data: ProductReference | null; expiresAt: number }>();
+
+function mapCatalogReferenceRow(row: Partial<ReferenceRow>, locale: 'vi' | 'en' = 'vi'): ProductReference {
+  const applications = Array.isArray(row.application_names)
+    ? row.application_names.map((name) => String(name)).filter(Boolean)
+    : [];
+  const categories = Array.isArray(row.category_names)
+    ? row.category_names.map((name) => String(name)).filter(Boolean)
+    : [];
+
+  const fallbackPrice = locale === 'en' ? 'Contact for Quote' : 'Liên hệ';
+  const fallbackField = locale === 'en' ? 'General' : 'Khác';
+  const fallbackUpdating = locale === 'en' ? 'Updating' : 'Đang cập nhật';
+  const rawSummary = String(row.summary ?? row.description ?? '');
+
+  return {
+    id: Number(row.id),
+    slug: String(row.alias ?? row.id),
+    name: String(row.name ?? ''),
+    price: String(row.price ?? fallbackPrice),
+    description: rawSummary.length > 300 ? `${rawSummary.slice(0, 300).trim()}...` : rawSummary,
+    desc: undefined,
+    field: categories.join(', ') || fallbackField,
+    categories,
+    brand: String(row.manufactory_name ?? fallbackUpdating),
+    app: applications.join(', ') || fallbackUpdating,
+    applications,
+    tags: String(row.tags ?? '').split(',').map((tag) => tag.trim()).filter(Boolean),
+    img: normalizeProductMediaUrl(row.image ?? row.icon),
+    icon: row.icon == null ? undefined : normalizeProductMediaUrl(row.icon),
+    productType: row.product_type_name == null ? undefined : String(row.product_type_name),
+    overviewHtml: undefined,
+    featuresHtml: undefined,
+    videoUrl: extractProductVideoUrl(row.link_video ?? row.video),
+    slides: undefined,
+    relatedProductIds: Array.isArray(row.related_ids) ? row.related_ids.map(Number).filter(Number.isFinite) : [],
+    documents: [],
+    seoTitle: row.seo_title == null ? undefined : String(row.seo_title),
+    seoDescription: row.seo_description == null ? undefined : String(row.seo_description),
+  };
+}
+
+/** Public DTO shaped for the established React product presentation. Optimized for fast catalog listing with memory caching. */
 export async function listPublishedProductsForReference(locale: 'vi' | 'en' = 'vi'): Promise<ProductReference[]> {
+  const cached = productReferenceCache.get(locale);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
   const sql = getPostgresClient();
   const isEn = locale === 'en';
   const pTable = isEn ? sql`cic_products_en` : sql`cic_products`;
@@ -83,42 +132,51 @@ export async function listPublishedProductsForReference(locale: 'vi' | 'en' = 'v
   const catRelTable = isEn ? sql`cic_products_categories_rel_en` : sql`cic_products_categories_rel`;
   const catTable = isEn ? sql`cic_products_categories_en` : sql`cic_products_categories`;
   const appRelTable = isEn ? sql`cic_products_applications_rel_en` : sql`cic_products_applications_rel`;
-  const imgTable = isEn ? sql`cic_products_images_en` : sql`cic_products_images`;
   const relTable = isEn ? sql`cic_products_related_rel_en` : sql`cic_products_related_rel`;
 
   const rows = await sql<ReferenceRow[]>`
-    SELECT p.id,p.name,p.alias,p.price,p.summary,p.description,p.image,p.icon,p.tags,p.seo_title,p.seo_description,
-      coalesce(b.name,p.manufactory_name) manufactory_name,
-      (SELECT array_agg(a.name ORDER BY r.ordering,a.ordering,a.id)
+    SELECT p.id, p.name, p.alias, p.price, 
+      coalesce(p.summary, left(p.description, 300)) as summary,
+      p.image, p.icon, p.tags, p.seo_title, p.seo_description,
+      coalesce(b.name, p.manufactory_name) manufactory_name,
+      (SELECT array_agg(a.name ORDER BY r.ordering, a.ordering, a.id)
        FROM ${appRelTable} r
-       JOIN cic_application a ON a.id=r.application_id AND a.published=true
-       WHERE r.product_id=p.id) application_names,
-      t.name product_type_name,p.video,p.link_video,p.feature_details,
-      p.file_name1,p.file_download1,p.link_download1,p.file_name2,p.file_download2,p.link_download2,
-      p.file_name3,p.file_download3,p.link_download3,p.file_name4,p.file_download4,p.link_download4,
-      p.file_name5,p.file_download5,p.link_download5,p.file_name6,p.file_download6,p.link_download6,
-      (SELECT array_agg(i.image ORDER BY i.ordering,i.id) FROM ${imgTable} i WHERE i.record_id=p.id AND i.image IS NOT NULL AND btrim(i.image)<>'') slides,
-      (SELECT array_agg(r.related_product_id ORDER BY r.ordering,r.related_product_id) FROM ${relTable} r JOIN ${pTable} rp ON rp.id=r.related_product_id AND rp.published=true WHERE r.product_id=p.id) related_ids,
-      (SELECT array_agg(c.name ORDER BY c.ordering,c.id)
+       JOIN cic_application a ON a.id = r.application_id AND a.published = true
+       WHERE r.product_id = p.id) application_names,
+      t.name product_type_name, p.video, p.link_video,
+      (SELECT array_agg(r.related_product_id ORDER BY r.ordering, r.related_product_id) 
+       FROM ${relTable} r 
+       JOIN ${pTable} rp ON rp.id = r.related_product_id AND rp.published = true 
+       WHERE r.product_id = p.id) related_ids,
+      (SELECT array_agg(c.name ORDER BY c.ordering, c.id)
        FROM ${catRelTable} r
-       JOIN ${catTable} c ON c.id=r.category_id AND c.published=true
-       WHERE r.product_id=p.id) category_names
+       JOIN ${catTable} c ON c.id = r.category_id AND c.published = true
+       WHERE r.product_id = p.id) category_names
     FROM ${pTable} p
     LEFT JOIN ${mfgTable} b
       ON b.id = CASE WHEN p.manufactory ~ '^[0-9]+$' THEN p.manufactory::int END
-      AND b.published=true
-    LEFT JOIN ${typeTable} t ON t.id=p.types_id AND t.published=true
-    WHERE p.published=true
-    ORDER BY p.ordering,p.id
+      AND b.published = true
+    LEFT JOIN ${typeTable} t ON t.id = p.types_id AND t.published = true
+    WHERE p.published = true
+    ORDER BY p.ordering, p.id
   `;
-  return rows.map((r) => mapReferenceRow(r, locale));
+  const data = rows.map((r) => mapCatalogReferenceRow(r, locale));
+  productReferenceCache.set(locale, { data, expiresAt: Date.now() + PRODUCT_CACHE_TTL_MS });
+  return data;
 }
 
-/** Direct query single published product by alias/slug for instant performance */
+/** Direct query single published product by alias/slug for instant performance with full HTML content */
 export async function getPublishedProductBySlugForReference(slug: string, locale: 'vi' | 'en' = 'vi'): Promise<ProductReference | null> {
-  const sql = getPostgresClient();
   const trimmed = slug.trim();
   if (!trimmed) return null;
+
+  const cacheKey = `${locale}:${trimmed}`;
+  const cached = singleProductCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
+  const sql = getPostgresClient();
   const isEn = locale === 'en';
   const pTable = isEn ? sql`cic_products_en` : sql`cic_products`;
   const mfgTable = isEn ? sql`cic_manufactories_en` : sql`cic_manufactories`;
@@ -154,5 +212,7 @@ export async function getPublishedProductBySlugForReference(slug: string, locale
     WHERE p.published=true AND (p.alias=${trimmed} OR (p.alias IS NULL AND p.id::text=${trimmed}))
     LIMIT 1
   `;
-  return rows[0] ? mapReferenceRow(rows[0], locale) : null;
+  const data = rows[0] ? mapReferenceRow(rows[0], locale) : null;
+  singleProductCache.set(cacheKey, { data, expiresAt: Date.now() + PRODUCT_CACHE_TTL_MS });
+  return data;
 }

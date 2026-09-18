@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 /**
  * @license
@@ -10,6 +10,7 @@ import { motion } from 'motion/react';
 import { SlidersHorizontal } from 'lucide-react';
 import { Product } from '@shared/types';
 import { useI18n } from '@/shared/i18n';
+import { useRouter } from 'next/navigation';
 import { ProductDetailView } from './ProductDetailView';
 import type { PublicProductContactMap } from '@/features/sales-owners/types';
 import { ProductFilterSidebar } from '../features/products/components/list/ProductFilterSidebar';
@@ -43,7 +44,8 @@ export function ProductsView({
     return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
   }, [previewProduct, products]);
 
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -175,10 +177,16 @@ export function ProductsView({
           product={selectedProduct}
           products={productsData}
           contacts={contactsByProductId[String(selectedProduct.id)]}
-          onBack={() => setSelectedProduct(null)}
+          onBack={() => {
+            if (previewProduct) {
+              router.push(locale === 'en' ? '/en/products' : '/products');
+            } else {
+              setSelectedProduct(null);
+            }
+          }}
           onSelectProduct={(p) => {
-            setSelectedProduct(p);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const slug = (p as any).slug || p.id;
+            router.push(locale === 'en' ? `/en/products/${slug}` : `/products/${slug}`);
           }}
           onContact={triggerContact}
           onDownload={triggerDownload}
@@ -302,8 +310,8 @@ export function ProductsView({
             paginationItems={paginationItems}
             onPageChange={handlePageChange}
             onSelectProduct={(p) => {
-              setSelectedProduct(p);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              const slug = (p as any).slug || p.id;
+              router.push(locale === 'en' ? `/en/products/${slug}` : `/products/${slug}`);
             }}
             onContact={triggerContact}
             onDownload={triggerDownload}
