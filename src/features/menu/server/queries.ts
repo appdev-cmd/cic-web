@@ -104,9 +104,15 @@ export async function getNavigationDataFromDb(workspace: 'vi' | 'en' = 'vi'): Pr
     ? await sql`SELECT id, group_id, parent_id, name, link, target, ordering, level, icon FROM cic_menus_items_en WHERE published = true ORDER BY ordering ASC, id ASC`
     : await sql`SELECT id, group_id, parent_id, name, link, target, ordering, level, icon FROM cic_menus_items WHERE published = true ORDER BY ordering ASC, id ASC`;
 
-  // Header NavLinks
+  // Header NavLinks (Bỏ mục Trang chủ vì đã có logo thương hiệu ở bên trái)
   const headerItems = allItems.filter((i) => String(i.group_id) === String(headerGroup?.id));
-  const headerRoots = headerItems.filter((i) => i.parent_id == null);
+  const headerRoots = headerItems
+    .filter((i) => i.parent_id == null)
+    .filter((root) => {
+      const link = String(root.link || '').trim();
+      const name = String(root.name || '').trim().toLowerCase();
+      return link !== '/' && link !== '/en' && name !== 'trang chủ' && name !== 'home';
+    });
   const headerLinks: NavLink[] = headerRoots.map((root) => {
     const children = headerItems.filter((i) => String(i.parent_id) === String(root.id));
     return {

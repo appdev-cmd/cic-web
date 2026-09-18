@@ -61,11 +61,16 @@ export const Header = ({
   onResetProjects,
   onResetNews,
   onResetEvents,
-  onSearch, 
-  onOpenConsultation 
+  onSearch,
+  onOpenConsultation,
 }: HeaderProps) => {
   const { t, locale } = useI18n();
-  const { headerLinks: navLinks } = navigation || getNavigationData();
+  const rawNavLinks = (navigation || getNavigationData()).headerLinks;
+  const navLinks = rawNavLinks.filter((link) => {
+    const href = link.href?.trim();
+    const name = link.name?.trim().toLowerCase();
+    return href !== '/' && href !== '/en' && name !== 'trang chủ' && name !== 'home';
+  });
   const resolvePublicHref = (href: string) => href.startsWith('/') ? href : `/services/${href.replace(/^\/+/, '')}`;
   const routeSegment = pathname?.split('/').filter(Boolean).find((s) => s !== 'en');
   const viewFromSegment = (segment?: string): Exclude<NonNullable<HeaderProps['currentView']>, 'not-found'> => {
