@@ -32,7 +32,7 @@ import { NewsCategoryManager } from './NewsCategoryManager';
 import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
-import { saveNewsAction, setNewsPlacementAction, setNewsPublishedAction, trashNewsAction } from '@/features/news/server/actions';
+import { getNewsContentAction, saveNewsAction, setNewsPlacementAction, setNewsPublishedAction, trashNewsAction } from '@/features/news/server/actions';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 
@@ -236,15 +236,46 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
     }
   };
 
+  const [loadingContentId, setLoadingContentId] = useState<string | null>(null);
+
+  const ensureArticleContent = async (article: NewsArticle): Promise<NewsArticle> => {
+    if (article.content && article.content.trim().length > 0) return article;
+    try {
+      const fullContent = await getNewsContentAction(workspaceLocale, article.id);
+      const updated = { ...article, content: fullContent };
+      setArticles((prev) => prev.map((a) => a.id === article.id ? updated : a));
+      return updated;
+    } catch {
+      showToast('Không thể tải nội dung chi tiết bài viết.');
+      return article;
+    }
+  };
+
   // Form Handlers
   const handleOpenCreateForm = () => {
     setEditingArticle(null);
     setViewMode('form');
   };
 
-  const handleOpenEditForm = (article: NewsArticle) => {
-    setEditingArticle(article);
-    setViewMode('form');
+  const handleOpenEditForm = async (article: NewsArticle) => {
+    setLoadingContentId(article.id);
+    try {
+      const full = await ensureArticleContent(article);
+      setEditingArticle(full);
+      setViewMode('form');
+    } finally {
+      setLoadingContentId(null);
+    }
+  };
+
+  const handleOpenPreview = async (article: NewsArticle) => {
+    setLoadingContentId(article.id);
+    try {
+      const full = await ensureArticleContent(article);
+      setPreviewArticle(full);
+    } finally {
+      setLoadingContentId(null);
+    }
   };
 
   const handleSaveArticleFromForm = async (formData: Partial<NewsArticle>) => {
@@ -575,20 +606,21 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                             <td className={`p-3 text-right sticky right-0 bg-white dark:bg-slate-900 ${getRowPadding()}`}>
                               <div className="flex items-center justify-end gap-1">
                               <CmsIconButton
-                                onClick={() => setPreviewArticle(art)}
-                                icon={<Eye />}
+                                onClick={() => void handleOpenPreview(art)}
+                                icon={<Eye className={loadingContentId === art.id ? 'animate-spin' : ''} />}
                                 size="sm"
                                 aria-label="Xem trước tin tức"
                                 title="Xem trước"
+                                disabled={loadingContentId === art.id}
                               />
 
                               <CmsIconButton
-                                onClick={() => handleOpenEditForm(art)}
-                                icon={<Edit />}
+                                onClick={() => void handleOpenEditForm(art)}
+                                icon={<Edit className={loadingContentId === art.id ? 'animate-spin' : ''} />}
                                 size="sm"
                                 aria-label="Chỉnh sửa tin tức"
                                 title="Chỉnh sửa toàn bộ"
-                                disabled={!capabilities.edit}
+                                disabled={!capabilities.edit || loadingContentId === art.id}
                               />
 
                               {art.in_trash ? (
