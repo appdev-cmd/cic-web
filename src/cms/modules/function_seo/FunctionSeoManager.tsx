@@ -315,13 +315,15 @@ export const FunctionSeoManager: React.FC<Props> = ({
                   className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900"
                 >
                   {/* Header Bar */}
-                  <button
-                    type="button"
-                    onClick={() => toggle(item.id)}
-                    className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
-                    aria-expanded={expanded}
+                  <div
+                    className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
                   >
-                    <div className="flex min-w-0 items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => toggle(item.id)}
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left cursor-pointer focus:outline-none"
+                      aria-expanded={expanded}
+                    >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
                         <Globe2 className="h-4 w-4" />
                       </span>
@@ -336,7 +338,7 @@ export const FunctionSeoManager: React.FC<Props> = ({
                           {item.title || '(Chưa cấu hình Title)'}
                         </p>
                       </div>
-                    </div>
+                    </button>
 
                     <div className="flex shrink-0 items-center gap-2.5">
                       <button
@@ -354,13 +356,20 @@ export const FunctionSeoManager: React.FC<Props> = ({
                       >
                         {item.indexable ? 'index, follow' : 'noindex'}
                       </button>
-                      {expanded ? (
-                        <ChevronDown className="h-4 w-4 text-slate-400" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-slate-400" />
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => toggle(item.id)}
+                        className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer focus:outline-none"
+                        aria-label={expanded ? 'Thu gọn' : 'Mở rộng'}
+                      >
+                        {expanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
-                  </button>
+                  </div>
 
                   {/* Expanded Body: Tree View */}
                   {expanded && (
