@@ -2,18 +2,24 @@ import 'server-only';
 import postgres, { type Sql } from 'postgres';
 import { getServerEnv } from '@/server/config/env';
 
-let client: Sql | undefined;
+declare global {
+  // eslint-disable-next-line no-var
+  var __postgresClient: Sql | undefined;
+}
+
 export function getPostgresClient(): Sql {
-  if (client) return client;
+  if (globalThis.__postgresClient) return globalThis.__postgresClient;
   const url = getServerEnv().DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is required for PostgreSQL transactions.');
-  client = postgres(url, {
-    max: 5,
+  const client = postgres(url, {
+    max: 10,
     prepare: false,
     ssl: 'require',
     connect_timeout: 10,
-    max_lifetime: 60 * 30,
+    idle_timeout: 20,
+    max_lifetime: 60 * 10,
   });
+  globalThis.__postgresClient = client;
   return client;
 }
 
