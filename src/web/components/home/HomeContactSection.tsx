@@ -74,12 +74,26 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
           >
             <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-8 leading-[1.1] tracking-tighter">
               {contactCta?.title ? (
-                contactCta.title.includes('Tương lai số') ? (
+                /<[a-z][\s\S]*>/i.test(contactCta.title) ? (
+                  <span dangerouslySetInnerHTML={{ __html: contactCta.title }} />
+                ) : contactCta.title.includes('Tương lai số') ? (
                   <>
                     {contactCta.title.split('Tương lai số')[0]}
                     <br /> <span className="text-orange-600">Tương lai số</span>
                   </>
-                ) : contactCta.title
+                ) : contactCta.title.includes('the Digital Future') ? (
+                  <>
+                    {contactCta.title.split('the Digital Future')[0]}
+                    <br /> <span className="text-orange-600">the Digital Future</span>
+                  </>
+                ) : contactCta.title.includes('Digital Future') ? (
+                  <>
+                    {contactCta.title.split('Digital Future')[0]}
+                    <br /> <span className="text-orange-600">Digital Future</span>
+                  </>
+                ) : (
+                  contactCta.title
+                )
               ) : (
                 <>Sẵn sàng kiến tạo <br /> <span className="text-orange-600">Tương lai số</span></>
               )}

@@ -58,44 +58,49 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
         />
         
         {/* Project Tabs and Search */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-          <div className="flex flex-wrap justify-center gap-2">
-            {[
-              { id: 'all', label: 'Tất cả' },
-              { id: 'software', label: 'Phần mềm' },
-              { id: 'equipment', label: 'Thiết bị' },
-              { id: 'services', label: 'Dịch vụ' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveProjectTab(tab.id);
-                  setHoveredProjectIndex(null);
-                }}
-                className={`px-8 py-2.5 rounded-[8px] font-black text-xs uppercase tracking-widest transition-all ${
-                  activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div className="relative flex items-center w-full md:w-auto min-w-[280px]">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Search className="text-slate-400" size={18} />
+        {(() => {
+          const isEn = Boolean(title && /project|featured/i.test(title)) || (typeof window !== 'undefined' && window.location.pathname.startsWith('/en'));
+          return (
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+              <div className="flex flex-wrap justify-center gap-2">
+                {[
+                  { id: 'all', label: isEn ? 'All' : 'Tất cả' },
+                  { id: 'software', label: isEn ? 'Software' : 'Phần mềm' },
+                  { id: 'equipment', label: isEn ? 'Equipment' : 'Thiết bị' },
+                  { id: 'services', label: isEn ? 'Services' : 'Dịch vụ' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveProjectTab(tab.id);
+                      setHoveredProjectIndex(null);
+                    }}
+                    className={`px-8 py-2.5 rounded-[8px] font-black text-xs uppercase tracking-widest transition-all ${
+                      activeProjectTab === tab.id ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="relative flex items-center w-full md:w-auto min-w-[280px]">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                  <Search className="text-slate-400" size={18} />
+                </div>
+                <input
+                  type="text"
+                  placeholder={isEn ? "Search projects..." : "Tìm kiếm dự án..."}
+                  value={projectSearchQuery}
+                  onChange={(e) => {
+                    setProjectSearchQuery(e.target.value);
+                    setHoveredProjectIndex(null);
+                  }}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
             </div>
-            <input
-              type="text"
-              placeholder="Tìm kiếm dự án..."
-              value={projectSearchQuery}
-              onChange={(e) => {
-                setProjectSearchQuery(e.target.value);
-                setHoveredProjectIndex(null);
-              }}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-            />
-          </div>
-        </div>
+          );
+        })()}
 
         {/* 3 Cards Container: Static Grid in PageBuilder, Expanding Accordion on Live Site */}
         <div 
@@ -251,7 +256,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
 
                               {proj.client && (
                                 <p className="text-slate-300 text-xs font-medium mb-2.5 line-clamp-1">
-                                  <span className="text-orange-400 font-bold">Khách hàng:</span> {proj.client}
+                                  <span className="text-orange-400 font-bold">{Boolean(title && /project|featured/i.test(title)) ? 'Client:' : 'Khách hàng:'}</span> {proj.client}
                                 </p>
                               )}
 
@@ -265,7 +270,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                                 </div>
 
                                 <button className="inline-flex items-center gap-1 px-3 py-1 bg-orange-600 hover:bg-orange-500 text-white text-xs font-black uppercase tracking-wider rounded-[8px] shadow-md transition-all shrink-0">
-                                  Chi tiết <ArrowUpRight size={15} />
+                                  {Boolean(title && /project|featured/i.test(title)) ? 'Details' : 'Chi tiết'} <ArrowUpRight size={15} />
                                 </button>
                               </div>
                             </motion.div>
@@ -348,7 +353,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                 className="mb-12 flex items-center gap-3 text-slate-500 font-black uppercase tracking-widest hover:text-orange-600 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-lg px-2 py-1"
                 id="project-detail-close"
               >
-                <ChevronLeft size={24} /> Quay lại danh sách
+                <ChevronLeft size={24} /> {Boolean(title && /project|featured/i.test(title)) ? 'Back to list' : 'Quay lại danh sách'}
               </button>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
                 <motion.div layoutId={`project-${selectedProject.id}`}>
@@ -362,7 +367,11 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                   <div className="text-orange-600 text-sm font-black uppercase tracking-widest mb-4">{selectedProject.location}</div>
                   <h2 id="project-detail-title" className="text-5xl md:text-6xl font-black text-slate-950 mb-8 leading-tight">{selectedProject.name}</h2>
                   <div className="space-y-8 text-lg text-slate-600 leading-relaxed">
-                     <p>Mô tả chi tiết dự án: Dự án triển khai hạ tầng số với quy mô lớn, ứng dụng các giải pháp tiên tiến nhất từ đối tác Bentley Systems và giải pháp AI do CIC phát triển.</p>
+                     <p>
+                       {Boolean(title && /project|featured/i.test(title))
+                         ? 'Project description: Large-scale digital infrastructure project, implementing advanced solutions from global partners and AI innovations developed by CIC.'
+                         : 'Mô tả chi tiết dự án: Dự án triển khai hạ tầng số với quy mô lớn, ứng dụng các giải pháp tiên tiến nhất từ đối tác Bentley Systems và giải pháp AI do CIC phát triển.'}
+                     </p>
                      <div className="flex gap-4">
                        {selectedProject.tags.map((tag: string) => (
                          <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-950 font-black rounded-[8px] uppercase text-xs tracking-widest">{tag}</span>
@@ -370,7 +379,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
                      </div>
                   </div>
                   <button className="mt-12 px-5 py-2 bg-orange-600 text-white rounded-[8px] font-black uppercase tracking-widest shadow-xl hover:bg-white hover:text-orange-600 border-2 border-orange-600 transition-all active:scale-95 btn-modern-interaction">
-                    Tải Portfolio Dự án
+                    {Boolean(title && /project|featured/i.test(title)) ? 'Download Portfolio' : 'Tải Portfolio Dự án'}
                   </button>
                 </motion.div>
               </div>

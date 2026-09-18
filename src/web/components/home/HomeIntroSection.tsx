@@ -35,13 +35,29 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
           >
             <h2 data-page-builder-config-path={JSON.stringify(['title'])} className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
               {introData?.title ? (
-                introData.title.includes('đồng hành') ? (
+                /<[a-z][\s\S]*>/i.test(introData.title) ? (
+                  <span dangerouslySetInnerHTML={{ __html: introData.title }} />
+                ) : introData.title.includes('đồng hành') ? (
                   <>
                     {introData.title.split('đồng hành')[0]}
                     <span className="text-orange-600">đồng hành</span>
                     {introData.title.split('đồng hành')[1]}
                   </>
-                ) : introData.title
+                ) : introData.title.includes('Partnering') ? (
+                  <>
+                    {introData.title.split('Partnering')[0]}
+                    <span className="text-orange-600">Partnering</span>
+                    {introData.title.split('Partnering')[1]}
+                  </>
+                ) : introData.title.includes('partnering') ? (
+                  <>
+                    {introData.title.split('partnering')[0]}
+                    <span className="text-orange-600">partnering</span>
+                    {introData.title.split('partnering')[1]}
+                  </>
+                ) : (
+                  introData.title
+                )
               ) : (
                 <>Hơn 35 năm <span className="text-orange-600">đồng hành</span><br className="hidden md:block" /> cùng kỹ thuật Việt Nam</>
               )}

@@ -16,6 +16,10 @@ export function formatHeroHeading(rawTitle?: string): string {
     'Hệ sinh thái giải pháp số': { main: 'Hệ sinh thái', highlight: 'giải pháp số' },
     'Dẫn đầu chuyển đổi số': { main: 'Dẫn đầu', highlight: 'chuyển đổi số' },
     'Phần mềm bản quyền chính hãng': { main: 'Phần mềm bản quyền', highlight: 'chính hãng' },
+    'Strategic Technology Partner': { main: 'Strategic Technology', highlight: 'Partner' },
+    'Digital Solutions Ecosystem': { main: 'Digital Solutions', highlight: 'Ecosystem' },
+    'Leading Digital Transformation': { main: 'Leading', highlight: 'Digital Transformation' },
+    'Genuine Licensed Software': { main: 'Genuine', highlight: 'Licensed Software' },
   };
 
   if (knownPresets[trimmed]) {
@@ -29,9 +33,10 @@ export function formatHeroHeading(rawTitle?: string): string {
   }
 
   const words = trimmed.split(/\s+/);
-  if (words.length >= 4) {
-    const main = words.slice(0, words.length - 2).join(' ');
-    const highlight = words.slice(words.length - 2).join(' ');
+  if (words.length >= 3) {
+    const highlightCount = words.length >= 4 ? 2 : 1;
+    const main = words.slice(0, words.length - highlightCount).join(' ');
+    const highlight = words.slice(words.length - highlightCount).join(' ');
     return `${main} <br /><span class="text-orange-600 whitespace-nowrap">${highlight}</span>`;
   }
 
