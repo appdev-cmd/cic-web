@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Search,
   Plus,
   Bell,
   Sun,
@@ -11,7 +10,6 @@ import {
   LogOut,
   Globe,
   Menu,
-  X,
   Newspaper,
   Package,
   Sparkles,
@@ -29,7 +27,7 @@ interface CmsHeaderProps {
   onToggleTheme: () => void;
   workspaceLocale: CmsLocale;
   onToggleWorkspaceLocale: () => void;
-  onOpenCommandPalette: () => void;
+  onOpenCommandPalette?: () => void;
   onQuickAction: (type: 'product' | 'news' | 'service' | 'event') => void;
   onToggleMobileSidebar: () => void;
   onSwitchToWebsite?: () => void;
@@ -82,23 +80,27 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 h-15 w-full overflow-visible bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors px-3 sm:px-4 lg:px-6 flex items-center justify-between shadow-xs">
-      {/* Left: Mobile Menu Toggle + Logo */}
+    <header className="sticky top-0 z-40 h-15 w-full overflow-visible bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors px-3 sm:px-4 lg:px-6 flex items-center justify-between shadow-xs">
+      {/* Left: Mobile Menu Toggle + Logo + Live Status */}
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleMobileSidebar}
-          className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none"
+          className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none cursor-pointer"
           title="Mở Menu Admin"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={onSwitchToWebsite}>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={onSwitchToWebsite}>
           <img src="/LOGO - 1990-08.png" alt="CIC Logo" className="h-9 w-auto object-contain shrink-0" />
-          <div className="hidden sm:flex flex-col">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
               <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">
                 CIC CMS
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live System
               </span>
             </div>
             <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline-block">
@@ -108,42 +110,19 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         </div>
       </div>
 
-      {/* Middle: Global Search Input with Ctrl+K */}
-      <div className="hidden sm:flex items-center flex-1 max-w-[220px] md:max-w-xs lg:max-w-lg mx-2 sm:mx-4 lg:mx-6">
-        <button
-          onClick={onOpenCommandPalette}
-          className="w-full flex items-center justify-between pl-2.5 sm:pl-3 pr-2 py-1.5 sm:py-2 bg-slate-50/90 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/90 hover:border-orange-400/80 dark:border-slate-700/80 dark:hover:border-orange-500/60 rounded-xl text-xs text-slate-400 transition-all duration-200 cursor-pointer group shadow-xs hover:shadow-md hover:shadow-orange-500/5"
-          title="Mở Tìm kiếm toàn hệ thống (Ctrl + K hoặc /)"
-        >
-          <div className="flex items-center gap-2 sm:gap-2.5 text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors min-w-0">
-            <div className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors duration-200 shrink-0">
-              <Search className="w-3.5 h-3.5" />
-            </div>
-            <span className="font-normal text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 truncate text-left">
-              <span className="lg:hidden">{tHeader.quickSearchShort}</span>
-              <span className="hidden lg:inline">
-                {tHeader.searchPlaceholder}
-              </span>
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-1.5 shrink-0 pl-2">
-            <kbd className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-2xs group-hover:border-orange-300 dark:group-hover:border-orange-700/50 transition-colors">
-              <span className="text-[11px] font-sans">⌘</span>K
-            </kbd>
-          </div>
-        </button>
-      </div>
-
-      {/* Right Controls: Quick Action, Notifs, Lang, Theme, User */}
-      <div className="flex min-w-0 items-center gap-1 sm:gap-2 lg:gap-3">
-        {/* Mobile Search trigger (< sm) */}
-        <button
-          onClick={onOpenCommandPalette}
-          className="sm:hidden flex items-center justify-center w-8.5 h-8.5 rounded-lg text-slate-900 dark:text-slate-200 hover:text-white dark:hover:text-white bg-slate-100/80 dark:bg-slate-800 hover:bg-orange-500 dark:hover:bg-orange-600 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
-          title="Tìm kiếm toàn hệ thống"
-        >
-          <Search className="w-4 h-4" />
-        </button>
+      {/* Right Controls: Live Website link, Quick Action, Lang Segmented Pill, Notifs, Theme, User */}
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
+        {/* Direct Link to Live Website */}
+        {onSwitchToWebsite && (
+          <button
+            onClick={onSwitchToWebsite}
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-colors cursor-pointer"
+            title="Mở giao diện Website công khai"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Xem Website</span>
+          </button>
+        )}
 
         {/* Quick + New Dropdown */}
         <div className="relative">
@@ -210,6 +189,40 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               </button>
             </div>
           )}
+        </div>
+
+        {/* Workspace locale segmented control (VI | EN) */}
+        <div 
+          className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-xs font-semibold"
+          title="Chuyển vùng dữ liệu CMS (Tiếng Việt / English)"
+        >
+          <div className="hidden sm:flex items-center pl-1.5 pr-1 text-slate-400 dark:text-slate-500">
+            <Globe className="w-3.5 h-3.5" />
+          </div>
+          <button
+            type="button"
+            onClick={() => workspaceLocale !== 'vi' && onToggleWorkspaceLocale()}
+            className={`px-2 py-1 rounded-md transition-all cursor-pointer text-xs ${
+              workspaceLocale === 'vi'
+                ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs font-bold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+            aria-label="Vùng dữ liệu Tiếng Việt"
+          >
+            VI
+          </button>
+          <button
+            type="button"
+            onClick={() => workspaceLocale !== 'en' && onToggleWorkspaceLocale()}
+            className={`px-2 py-1 rounded-md transition-all cursor-pointer text-xs ${
+              workspaceLocale === 'en'
+                ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs font-bold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+            aria-label="Vùng dữ liệu English"
+          >
+            EN
+          </button>
         </div>
 
         {/* Notifications Dropdown */}
@@ -292,17 +305,6 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
           )}
         </div>
 
-        {/* Workspace locale switch. UI language is a separate user preference. */}
-        <button
-          onClick={onToggleWorkspaceLocale}
-          className="hidden sm:flex px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors items-center gap-1 cursor-pointer"
-          title="Chuyển vùng dữ liệu CMS"
-          aria-label={`Vùng dữ liệu hiện tại: ${workspaceLocale === 'vi' ? 'Tiếng Việt' : 'English'}`}
-        >
-          <Globe className="w-3.5 h-3.5 text-slate-500" />
-          <span>{workspaceLocale.toUpperCase()}</span>
-        </button>
-
         {/* Theme Toggle Light/Dark */}
         <button
           onClick={onToggleTheme}
@@ -316,6 +318,9 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
             <Moon className="w-5 h-5 text-slate-600 hover:text-slate-900 duration-200" />
           )}
         </button>
+
+        {/* Subtle Vertical Divider */}
+        <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block mx-0.5" />
 
         {/* User Menu Avatar */}
         <div className="relative">

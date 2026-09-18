@@ -40,10 +40,10 @@
       - [Vai trò \& quyền](#vai-trò--quyền)
       - [Cấu hình hệ thống](#cấu-hình-hệ-thống)
       - [SEO \& URL](#seo--url)
-      - [Ngôn ngữ giao diện](#ngôn-ngữ-giao-diện)
+      - [Ngôn ngữ giao diện (Đã loại bỏ / Deprecated)](#ngôn-ngữ-giao-diện)
       - [Nhật ký hoạt động](#nhật-ký-hoạt-động)
       - [Thùng rác](#thùng-rác)
-    - [2.7. Tìm kiếm toàn cục](#27-tìm-kiếm-toàn-cục)
+    - [2.7. Tìm kiếm toàn cục (Đã loại bỏ / Deprecated)](#27-tìm-kiếm-toàn-cục)
 
 ## 1. CMS mới mở rộng những gì?
 
@@ -78,17 +78,17 @@ CMS mới không làm lại toàn bộ nghiệp vụ của CMS cũ. Hệ thống
 | **Địa chỉ liên hệ** | Có module riêng lưu địa chỉ và thông tin liên hệ doanh nghiệp | Không còn module Địa chỉ liên hệ riêng. Danh sách trụ sở và chi nhánh chuyển vào Cấu hình hệ thống; Trang Liên hệ và Footer cùng sử dụng nguồn dữ liệu này. | **Tổ chức lại**; không tiếp tục module Địa chỉ liên hệ riêng và không nhập lặp địa chỉ trong Page Builder |
 | **Cấu hình Enjicad** | Có module riêng chứa cả cấu hình chung, nội dung giới thiệu, hình ảnh, SEO và các thông tin dành riêng cho Enjicad | Không còn module Cấu hình Enjicad riêng. Dữ liệu còn sử dụng được chuyển theo mục đích sang Cấu hình hệ thống, Trang nội dung, Sản phẩm hoặc Dịch vụ, Media và SEO & URL. | **Tách theo mục đích / bỏ module riêng**; không hiểu là xóa toàn bộ dữ liệu |
 | **SEO** | Đã có SEO chung, SEO theo module và SEO riêng trên Tin tức, Sản phẩm, Sự kiện, Trang tĩnh | Kế thừa SEO chung, SEO theo module và SEO từng nội dung; tập trung việc kiểm tra trang còn thiếu thông tin, quản lý địa chỉ chính thức, chuyển đường dẫn cũ và sitemap tại SEO & URL. | **Kế thừa + tập trung + mở rộng** |
-| **Ngôn ngữ giao diện** | Đã quản lý câu chữ tiếng Việt/Anh riêng cho frontend và backend | Kế thừa câu chữ tiếng Việt và tiếng Anh hiện có; tách rõ câu chữ dùng cho Website và CMS, đồng thời bổ sung lọc nội dung còn thiếu bản dịch. | **Kế thừa + nâng cấp** |
+| **Ngôn ngữ giao diện** | Đã quản lý câu chữ tiếng Việt/Anh riêng cho frontend và backend | Đã loại bỏ khỏi menu CMS. Đã chuyển sang kiến trúc Type-Safe i18n Dictionaries mã nguồn và phân luồng Dual Database Tables (`_en`) tương ứng, không duy trì màn hình chỉnh string qua CMS. | **Đã loại bỏ (Deprecated)** |
 | **Nhật ký hoạt động** | Một số module lưu người tạo hoặc người sửa, nhưng không có nhật ký thống nhất cho toàn CMS | Thêm chức năng ghi và tra cứu hoạt động trên toàn CMS: ai thực hiện, thời gian, dữ liệu bị tác động, kết quả và nội dung trước–sau khi thay đổi. | **Thêm mới** |
 | **Thùng rác** | Không có nơi tập trung để kiểm tra và phục hồi dữ liệu đã xóa | Thêm nơi tập trung nội dung đã xóa để xem người xóa, thời điểm và dữ liệu liên quan; cho phép phục hồi về trạng thái an toàn hoặc xác nhận xóa vĩnh viễn. | **Thêm mới** |
-| **Tìm kiếm toàn cục** | Người dùng phải mở từng module để tìm dữ liệu | Thêm một ô tìm kiếm chung cho Tin tức, Sản phẩm, Dịch vụ, Dự án, Yêu cầu khách hàng và các dữ liệu được hỗ trợ; kết quả mở thẳng tới đúng màn quản lý mà người dùng có quyền truy cập. | **Thêm mới** |
+| **Tìm kiếm toàn cục** | Người dùng phải mở từng module để tìm dữ liệu | Đã loại bỏ theo yêu cầu tinh gọn giao diện và tối ưu trải nghiệm CMS; người dùng thao tác tìm kiếm và lọc dữ liệu trực tiếp trong từng module chuyên biệt có ngữ cảnh rõ ràng. | **Đã loại bỏ (Deprecated)** |
 
 **Nhìn nhanh thay đổi**
 
-- **Kế thừa và nâng cấp:** Tin tức · Danh mục tin tức · Sự kiện · Dịch vụ · Sản phẩm · Danh mục sản phẩm · Hãng sản xuất · Lĩnh vực ứng dụng · Loại sản phẩm · Người phụ trách kinh doanh · Menu · Người dùng · Cấu hình hệ thống · SEO & URL · Ngôn ngữ giao diện.
+- **Kế thừa và nâng cấp:** Tin tức · Danh mục tin tức · Sự kiện · Dịch vụ · Sản phẩm · Danh mục sản phẩm · Hãng sản xuất · Lĩnh vực ứng dụng · Loại sản phẩm · Người phụ trách kinh doanh · Menu · Người dùng · Cấu hình hệ thống · SEO & URL.
 - **Tổ chức lại / thay thế:** Trang nội dung · Thư viện media · CTA và Biểu mẫu Hệ thống · Yêu cầu khách hàng · Mẫu email · Vai trò & quyền.
-- **Thêm mới:** Dashboard · Dự án · Chức năng quản trị CTA · Chức năng quản trị Biểu mẫu · Nhật ký hoạt động · Thùng rác · Tìm kiếm toàn cục.
-- **Không tiếp tục dưới dạng module riêng:** Block · Banner · Slideshow · Thư viện ảnh cũ · Danh sách Liên hệ Website · Danh sách đăng ký sản phẩm · Email theo hành động sản phẩm · Địa chỉ liên hệ · Cấu hình Enjicad · quyền Task trực tiếp.
+- **Thêm mới:** Dashboard · Dự án · Chức năng quản trị CTA · Chức năng quản trị Biểu mẫu · Nhật ký hoạt động · Thùng rác.
+- **Không tiếp tục dưới dạng module riêng / Đã loại bỏ:** Block · Banner · Slideshow · Thư viện ảnh cũ · Danh sách Liên hệ Website · Danh sách đăng ký sản phẩm · Email theo hành động sản phẩm · Địa chỉ liên hệ · Cấu hình Enjicad · quyền Task trực tiếp · Ngôn ngữ giao diện (chuyển sang i18n Dictionaries & Dual DB) · Tìm kiếm toàn cục (tập trung tìm kiếm theo từng module).
 
 **Ví dụ Trang chủ — trước và sau**
 

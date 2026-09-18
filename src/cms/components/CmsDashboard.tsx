@@ -317,6 +317,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   const activeModule = resolveCmsModule(activePath);
 
   // Global Keyboard Shortcuts (Ctrl+K / Cmd+K and '/' key)
+  // Global Search / Command Palette shortcut disabled per UX simplification
+  /*
   useEffect(() => {
     const handleGlobalShortcuts = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -338,6 +340,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
     window.addEventListener('keydown', handleGlobalShortcuts);
     return () => window.removeEventListener('keydown', handleGlobalShortcuts);
   }, [isCommandPaletteOpen]);
+  */
 
   useEffect(() => {
     if (!isCommandPaletteOpen || paletteLoadAttempted.current) return;
@@ -384,7 +387,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
         workspaceLocale={workspaceLocale}
         onToggleWorkspaceLocale={handleToggleWorkspaceLocale}
-        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onQuickAction={(type) => {
           const actionConfig: Record<'product' | 'news' | 'service' | 'event', { path: string; title: string; label: string }> = {
             product: { path: '/cms/products', title: 'Quản lý Sản phẩm', label: 'Sản phẩm' },
@@ -548,9 +550,9 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         <CmsFooter />
       </div>
 
-      {/* COMMAND PALETTE MODAL */}
+      {/* COMMAND PALETTE MODAL (Disabled per requirement) */}
       <CmsCommandPalette
-        isOpen={isCommandPaletteOpen}
+        isOpen={false}
         onClose={() => setIsCommandPaletteOpen(false)}
         userRole={userRole}
         workspaceLocale={workspaceLocale}

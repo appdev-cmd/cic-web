@@ -499,12 +499,6 @@ export const cmsMenuGroupsMock: CmsMenuGroup[] = [
         path: '/cms/function-seo',
       },
       {
-        id: 'menu_translation_strings',
-        title: 'Ngôn ngữ giao diện',
-        iconName: 'Sparkles',
-        path: '/cms/translation-strings',
-      },
-      {
         id: 'menu_activity_logs',
         title: 'Nhật ký hoạt động',
         iconName: 'History',

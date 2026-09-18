@@ -38,7 +38,6 @@ export const cmsMenuGroups: CmsMenuGroup[] = [
     { id: 'menu_permissions', title: 'Vai trò & quyền', iconName: 'ShieldAlert', path: path('permissions') },
     { id: 'menu_system_settings', title: 'Cấu hình hệ thống', iconName: 'Settings', path: path('settings') },
     { id: 'menu_function_seo', title: 'SEO & URL', iconName: 'Search', path: path('function_seo') },
-    { id: 'menu_translation_strings', title: 'Ngôn ngữ giao diện', iconName: 'Sparkles', path: path('localization') },
     { id: 'menu_activity_logs', title: 'Nhật ký hoạt động', iconName: 'History', path: path('activity_logs') },
     { id: 'menu_trash', title: 'Thùng rác', iconName: 'RotateCcw', path: path('trash') },
   ] },
