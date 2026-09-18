@@ -44,11 +44,24 @@ function formatDate(date: Date | string | null | undefined): string {
   return `${day}/${month}/${year}`;
 }
 
+const homePageCache: { vi?: { data: HomePageModel; exp: number }; en?: { data: HomePageModel; exp: number } } = {};
+
+export function invalidateHomePageCache() {
+  delete homePageCache.vi;
+  delete homePageCache.en;
+}
+
 /**
  * Loads published Home page content from PostgreSQL and aggregates
  * real entity records from cic_projects, cic_event, and cic_news.
  */
 export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promise<HomePageModel> {
+  const now = Date.now();
+  const cached = homePageCache[workspace];
+  if (cached && cached.exp > now) {
+    return cached.data;
+  }
+
   const publishedRev = await getPublicPublishedPage(workspace, 'home');
   const legacy = getLegacyHomePageContent(workspace);
 
@@ -66,6 +79,163 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   for (const s of publishedRev.sections) {
     sectionMap.set(s.sectionKey, s);
   }
+
+  // Concurrent resolver functions to avoid sequential database waterfall
+  const resolveHotNews = async (): Promise<string[]> => {
+    const heroSec = sectionMap.get('home.hero');
+    const cfg = (heroSec?.config ?? {}) as Record<string, unknown>;
+    const rawMarquee = Array.isArray(cfg.marqueeTexts) && cfg.marqueeTexts.length > 0
+      ? cfg.marqueeTexts
+      : (Array.isArray(cfg.tickerItems) && cfg.tickerItems.length > 0 ? cfg.tickerItems : []);
+    const marqueeTexts = rawMarquee.map((t: unknown) => String(t)).filter((t: string) => t.trim().length > 0);
+    if (marqueeTexts.length > 0) return marqueeTexts;
+    try {
+      let hotNewsRows = await sql`
+        SELECT title
+        FROM ${newsTable}
+        WHERE published = true AND is_hot = true
+        ORDER BY coalesce(start_time, created_time) DESC
+        LIMIT 6
+      `;
+      if (hotNewsRows.length === 0) {
+        hotNewsRows = await sql`
+          SELECT title
+          FROM ${newsTable}
+          WHERE published = true
+          ORDER BY coalesce(start_time, created_time) DESC
+          LIMIT 6
+        `;
+      }
+      return hotNewsRows.map((r: any) => String(r.title).trim()).filter(Boolean);
+    } catch (tickerErr) {
+      console.warn('[homeResolver] Failed to load hot news ticker from news table:', tickerErr);
+      return [];
+    }
+  };
+
+  const resolveProjects = async (): Promise<any[]> => {
+    const projSec = sectionMap.get('home.projects');
+    try {
+      const projectRefs = projSec?.references?.filter((r) => r.entityType === 'project') ?? [];
+      if (projectRefs.length > 0) {
+        const entityIds = projectRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
+        if (entityIds.length > 0) {
+          const rows = await sql`
+            SELECT * FROM ${projTable}
+            WHERE id IN ${sql(entityIds)} AND published = true
+          `;
+          const map = new Map(rows.map((r) => [Number(r.id), r]));
+          const ordered = entityIds.map((id) => map.get(id)).filter(Boolean);
+          if (ordered.length > 0) return ordered;
+        }
+      }
+      let rows = await sql`
+        SELECT * FROM ${projTable}
+        WHERE published = true AND is_featured = true
+        ORDER BY ordering, id
+        LIMIT 4
+      `;
+      if (rows.length === 0) {
+        rows = await sql`
+          SELECT * FROM ${projTable}
+          WHERE published = true
+          ORDER BY ordering, id
+          LIMIT 4
+        `;
+      }
+      return rows;
+    } catch (err) {
+      console.error('Failed to load projects for home page:', err);
+      return [];
+    }
+  };
+
+  const resolveEvents = async (): Promise<any[]> => {
+    const eventSec = sectionMap.get('home.events');
+    try {
+      const eventRefs = eventSec?.references?.filter((r) => r.entityType === 'event') ?? [];
+      if (eventRefs.length > 0) {
+        const entityIds = eventRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
+        if (entityIds.length > 0) {
+          const rows = await sql`
+            SELECT id, title, alias, image, summary, time_event, place, link_dangky
+            FROM ${eventTable}
+            WHERE id IN ${sql(entityIds)} AND published = true
+          `;
+          const map = new Map(rows.map((r) => [Number(r.id), r]));
+          const ordered = entityIds.map((id) => map.get(id)).filter(Boolean);
+          if (ordered.length > 0) return ordered;
+        }
+      }
+      let rows = await sql`
+        SELECT id, title, alias, image, summary, time_event, place, link_dangky
+        FROM ${eventTable}
+        WHERE published = true AND (show_in_homepage = true OR is_hot = true)
+        ORDER BY coalesce(time_event, created_time) DESC
+        LIMIT 4
+      `;
+      if (rows.length === 0) {
+        rows = await sql`
+          SELECT id, title, alias, image, summary, time_event, place, link_dangky
+          FROM ${eventTable}
+          WHERE published = true
+          ORDER BY coalesce(time_event, created_time) DESC
+          LIMIT 4
+        `;
+      }
+      return rows;
+    } catch (err) {
+      console.error('Failed to load events for home page:', err);
+      return [];
+    }
+  };
+
+  const resolveNews = async (): Promise<any[]> => {
+    const newsSec = sectionMap.get('home.news');
+    try {
+      const newsRefs = newsSec?.references?.filter((r) => r.entityType === 'news') ?? [];
+      if (newsRefs.length > 0) {
+        const entityIds = newsRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
+        if (entityIds.length > 0) {
+          const rows = await sql`
+            SELECT id, title, alias, image, summary, category_name, start_time, created_time
+            FROM ${newsTable}
+            WHERE id IN ${sql(entityIds)} AND published = true
+          `;
+          const map = new Map(rows.map((r) => [Number(r.id), r]));
+          const ordered = entityIds.map((id) => map.get(id)).filter(Boolean);
+          if (ordered.length > 0) return ordered;
+        }
+      }
+      let rows = await sql`
+        SELECT id, title, alias, image, summary, category_name, start_time, created_time
+        FROM ${newsTable}
+        WHERE published = true AND (show_in_homepage = true OR is_hot = true)
+        ORDER BY coalesce(start_time, created_time) DESC
+        LIMIT 4
+      `;
+      if (rows.length === 0) {
+        rows = await sql`
+          SELECT id, title, alias, image, summary, category_name, start_time, created_time
+          FROM ${newsTable}
+          WHERE published = true
+          ORDER BY coalesce(start_time, created_time) DESC
+          LIMIT 4
+        `;
+      }
+      return rows;
+    } catch (err) {
+      console.error('Failed to load news for home page:', err);
+      return [];
+    }
+  };
+
+  const [resolvedMarquee, projectRows, eventRows, rawNews] = await Promise.all([
+    resolveHotNews(),
+    resolveProjects(),
+    resolveEvents(),
+    resolveNews(),
+  ]);
 
   // 1. home.hero
   let hero: HomeHeroModel = legacy.hero ?? { slides: [] };
@@ -86,41 +256,10 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       };
     });
 
-    const rawMarquee = Array.isArray(cfg.marqueeTexts) && cfg.marqueeTexts.length > 0
-      ? cfg.marqueeTexts
-      : (Array.isArray(cfg.tickerItems) && cfg.tickerItems.length > 0 ? cfg.tickerItems : []);
-    let marqueeTexts = rawMarquee.map((t: unknown) => String(t)).filter((t: string) => t.trim().length > 0);
-
-    if (marqueeTexts.length === 0) {
-      try {
-        let hotNewsRows = await sql`
-          SELECT title
-          FROM ${newsTable}
-          WHERE published = true AND is_hot = true
-          ORDER BY coalesce(start_time, created_time) DESC
-          LIMIT 6
-        `;
-        if (hotNewsRows.length === 0) {
-          hotNewsRows = await sql`
-            SELECT title
-            FROM ${newsTable}
-            WHERE published = true
-            ORDER BY coalesce(start_time, created_time) DESC
-            LIMIT 6
-          `;
-        }
-        if (hotNewsRows.length > 0) {
-          marqueeTexts = hotNewsRows.map((r: any) => String(r.title).trim()).filter(Boolean);
-        }
-      } catch (tickerErr) {
-        console.warn('[homeResolver] Failed to load hot news ticker from news table:', tickerErr);
-      }
-    }
-
     hero = {
       badge: typeof cfg.badge === 'string' ? cfg.badge : undefined,
       slides: slides.length > 0 ? slides : (legacy.hero?.slides ?? []),
-      marqueeTexts: marqueeTexts.length > 0 ? marqueeTexts : legacy.hero?.marqueeTexts,
+      marqueeTexts: resolvedMarquee.length > 0 ? resolvedMarquee : legacy.hero?.marqueeTexts,
     };
   }
 
@@ -217,209 +356,93 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
   // 6. home.projects (real entity query)
   let projects: HomeProjectsModel = legacy.projects;
   const projSec = sectionMap.get('home.projects');
-  try {
-    const projectRefs = projSec?.references?.filter((r) => r.entityType === 'project') ?? [];
-    let projectRows: any[] = [];
-
-    if (projectRefs.length > 0) {
-      const entityIds = projectRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
-      if (entityIds.length > 0) {
-        projectRows = await sql`
-          SELECT * FROM ${projTable}
-          WHERE id IN ${sql(entityIds)} AND published = true
-        `;
-        // preserve order
-        const map = new Map(projectRows.map((r) => [Number(r.id), r]));
-        projectRows = entityIds.map((id) => map.get(id)).filter(Boolean);
-      }
-    }
-
-    if (projectRows.length === 0) {
-      projectRows = await sql`
-        SELECT * FROM ${projTable}
-        WHERE published = true AND is_featured = true
-        ORDER BY ordering, id
-        LIMIT 4
-      `;
-      if (projectRows.length === 0) {
-        projectRows = await sql`
-          SELECT * FROM ${projTable}
-          WHERE published = true
-          ORDER BY ordering, id
-          LIMIT 4
-        `;
-      }
-    }
-
-    if (projectRows.length > 0) {
-      const mappedProjects: HomeProjectModel[] = projectRows.map((p, idx) => ({
-        id: Number(p.id),
-        entityId: `cic-project-${p.id}`,
-        type: 'services' as const,
-        name: p.title || '',
-        short: p.title || '',
-        service: p.solution || (isEn ? 'Technical Consulting' : 'Tư vấn kỹ thuật'),
-        client: p.customer_name ? `${p.customer_name}${p.location ? ` · ${p.location}` : ''}` : (p.location || ''),
-        category: p.solution || p.sector || (isEn ? 'Flagship Project' : 'Dự án trọng điểm'),
-        description: p.summary || p.tagline || '',
-        img: normalizeImageUrl(p.image),
-        location: p.location || '',
-        tags: typeof p.technologies === 'string'
-          ? p.technologies.split(',').map((t: string) => t.trim()).filter(Boolean)
-          : (isEn ? ['BIM', 'Digital Twins', 'Infrastructure'] : ['BIM', 'Digital Twins', 'Hạ tầng']),
-        size: idx === 0 ? ('full' as const) : ('small' as const),
-      }));
-      projects = { ...projects, items: mappedProjects };
-    }
-    const projCfg = (projSec?.config ?? {}) as Record<string, unknown>;
-    projects = {
-      badge: typeof projCfg.badge === 'string' ? projCfg.badge : projects.badge,
-      title: typeof projCfg.title === 'string' ? projCfg.title : projects.title,
-      subtitle: typeof projCfg.subtitle === 'string' ? projCfg.subtitle : projects.subtitle,
-      items: projects.items,
-    };
-  } catch (err) {
-    console.error('Failed to load projects for home page:', err);
+  if (projectRows.length > 0) {
+    const mappedProjects: HomeProjectModel[] = projectRows.map((p, idx) => ({
+      id: Number(p.id),
+      entityId: `cic-project-${p.id}`,
+      type: 'services' as const,
+      name: p.title || '',
+      short: p.title || '',
+      service: p.solution || (isEn ? 'Technical Consulting' : 'Tư vấn kỹ thuật'),
+      client: p.customer_name ? `${p.customer_name}${p.location ? ` · ${p.location}` : ''}` : (p.location || ''),
+      category: p.solution || p.sector || (isEn ? 'Flagship Project' : 'Dự án trọng điểm'),
+      description: p.summary || p.tagline || '',
+      img: normalizeImageUrl(p.image),
+      location: p.location || '',
+      tags: typeof p.technologies === 'string'
+        ? p.technologies.split(',').map((t: string) => t.trim()).filter(Boolean)
+        : (isEn ? ['BIM', 'Digital Twins', 'Infrastructure'] : ['BIM', 'Digital Twins', 'Hạ tầng']),
+      size: idx === 0 ? ('full' as const) : ('small' as const),
+    }));
+    projects = { ...projects, items: mappedProjects };
   }
+  const projCfg = (projSec?.config ?? {}) as Record<string, unknown>;
+  projects = {
+    badge: typeof projCfg.badge === 'string' ? projCfg.badge : projects.badge,
+    title: typeof projCfg.title === 'string' ? projCfg.title : projects.title,
+    subtitle: typeof projCfg.subtitle === 'string' ? projCfg.subtitle : projects.subtitle,
+    items: projects.items,
+  };
 
   // 7. home.events (real entity query)
   let events: HomeEventsModel = legacy.events ?? { upcomingEvents: [], pastEvents: [] };
   const eventSec = sectionMap.get('home.events');
-  try {
-    const eventRefs = eventSec?.references?.filter((r) => r.entityType === 'event') ?? [];
-    let eventRows: any[] = [];
-
-    if (eventRefs.length > 0) {
-      const entityIds = eventRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
-      if (entityIds.length > 0) {
-        eventRows = await sql`
-          SELECT id, title, alias, image, summary, time_event, place, link_dangky
-          FROM ${eventTable}
-          WHERE id IN ${sql(entityIds)} AND published = true
-        `;
-        // preserve order of references from Page Builder
-        const map = new Map(eventRows.map((r) => [Number(r.id), r]));
-        eventRows = entityIds.map((id) => map.get(id)).filter(Boolean);
-      }
-    }
-
-    if (eventRows.length === 0) {
-      eventRows = await sql`
-        SELECT id, title, alias, image, summary, time_event, place, link_dangky
-        FROM ${eventTable}
-        WHERE published = true AND (show_in_homepage = true OR is_hot = true)
-        ORDER BY coalesce(time_event, created_time) DESC
-        LIMIT 4
-      `;
-      if (eventRows.length === 0) {
-        eventRows = await sql`
-          SELECT id, title, alias, image, summary, time_event, place, link_dangky
-          FROM ${eventTable}
-          WHERE published = true
-          ORDER BY coalesce(time_event, created_time) DESC
-          LIMIT 4
-        `;
-      }
-    }
-
-    if (eventRows.length > 0) {
-      const mappedEvents: HomeEventItemModel[] = eventRows.map((e) => {
-        const isPast = e.time_event ? new Date(e.time_event).getTime() < Date.now() : false;
-        return {
-          id: Number(e.id),
-          title: e.title || '',
-          date: formatDate(e.time_event),
-          time: '08:30 - 16:30',
-          loc: e.place || (isEn ? 'CIC Technology Convention Center' : 'Trung tâm Hội thảo CIC'),
-          attendees: isPast ? (isEn ? '300+ Attendees' : '300+ Khách mời') : (isEn ? '500+ Attendees' : '500+ Khách mời'),
-          isPast,
-          img: normalizeImageUrl(e.image),
-          desc: e.summary || '',
-          ctaUrl: e.link_dangky || (e.alias ? (isEn ? `/en/events/${e.alias}` : `/events/${e.alias}`) : (isEn ? `/en/events/${e.id}` : `/events/${e.id}`)),
-        };
-      });
-      events = { ...events, upcomingEvents: mappedEvents, pastEvents: [] };
-    }
-    const eventCfg = (eventSec?.config ?? {}) as Record<string, unknown>;
-    events = {
-      badge: typeof eventCfg.badge === 'string' ? eventCfg.badge : events.badge,
-      title: typeof eventCfg.title === 'string' ? eventCfg.title : events.title,
-      subtitle: typeof eventCfg.subtitle === 'string' ? eventCfg.subtitle : events.subtitle,
-      ctaLabel: typeof eventCfg.ctaLabel === 'string' ? eventCfg.ctaLabel : (isEn ? 'Explore Events' : 'Xem sự kiện'),
-      ctaUrl: typeof eventCfg.ctaUrl === 'string' ? eventCfg.ctaUrl : (isEn ? '/en/events' : '/events'),
-      upcomingEvents: events.upcomingEvents,
-      pastEvents: events.pastEvents,
-    };
-  } catch (err) {
-    console.error('Failed to load events for home page:', err);
+  if (eventRows.length > 0) {
+    const mappedEvents: HomeEventItemModel[] = eventRows.map((e) => {
+      const isPast = e.time_event ? new Date(e.time_event).getTime() < Date.now() : false;
+      return {
+        id: Number(e.id),
+        title: e.title || '',
+        date: formatDate(e.time_event),
+        time: '08:30 - 16:30',
+        loc: e.place || (isEn ? 'CIC Technology Convention Center' : 'Trung tâm Hội thảo CIC'),
+        attendees: isPast ? (isEn ? '300+ Attendees' : '300+ Khách mời') : (isEn ? '500+ Attendees' : '500+ Khách mời'),
+        isPast,
+        img: normalizeImageUrl(e.image),
+        desc: e.summary || '',
+        ctaUrl: e.link_dangky || (e.alias ? (isEn ? `/en/events/${e.alias}` : `/events/${e.alias}`) : (isEn ? `/en/events/${e.id}` : `/events/${e.id}`)),
+      };
+    });
+    events = { ...events, upcomingEvents: mappedEvents, pastEvents: [] };
   }
+  const eventCfg = (eventSec?.config ?? {}) as Record<string, unknown>;
+  events = {
+    badge: typeof eventCfg.badge === 'string' ? eventCfg.badge : events.badge,
+    title: typeof eventCfg.title === 'string' ? eventCfg.title : events.title,
+    subtitle: typeof eventCfg.subtitle === 'string' ? eventCfg.subtitle : events.subtitle,
+    ctaLabel: typeof eventCfg.ctaLabel === 'string' ? eventCfg.ctaLabel : (isEn ? 'Explore Events' : 'Xem sự kiện'),
+    ctaUrl: typeof eventCfg.ctaUrl === 'string' ? eventCfg.ctaUrl : (isEn ? '/en/events' : '/events'),
+    upcomingEvents: events.upcomingEvents,
+    pastEvents: events.pastEvents,
+  };
 
   // 8. home.news (real entity query)
   let news: HomeNewsModel = legacy.news ?? { items: [] };
   const newsSec = sectionMap.get('home.news');
-  try {
-    const newsRefs = newsSec?.references?.filter((r) => r.entityType === 'news') ?? [];
-    let rawNews: any[] = [];
-
-    if (newsRefs.length > 0) {
-      const entityIds = newsRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
-      if (entityIds.length > 0) {
-        rawNews = await sql`
-          SELECT id, title, alias, image, summary, category_name, start_time, created_time
-          FROM ${newsTable}
-          WHERE id IN ${sql(entityIds)} AND published = true
-        `;
-        const map = new Map(rawNews.map((r) => [Number(r.id), r]));
-        rawNews = entityIds.map((id) => map.get(id)).filter(Boolean);
-      }
-    }
-
-    if (rawNews.length === 0) {
-      rawNews = await sql`
-        SELECT id, title, alias, image, summary, category_name, start_time, created_time
-        FROM ${newsTable}
-        WHERE published = true AND (show_in_homepage = true OR is_hot = true)
-        ORDER BY coalesce(start_time, created_time) DESC
-        LIMIT 4
-      `;
-      if (rawNews.length === 0) {
-        rawNews = await sql`
-          SELECT id, title, alias, image, summary, category_name, start_time, created_time
-          FROM ${newsTable}
-          WHERE published = true
-          ORDER BY coalesce(start_time, created_time) DESC
-          LIMIT 4
-        `;
-      }
-    }
-
-    if (rawNews.length > 0) {
-      const mappedNews: HomeNewsItemModel[] = rawNews.map((n) => ({
-        id: Number(n.id),
-        title: n.title || '',
-        category: n.category_name || (isEn ? 'Technology News' : 'Tin tức công nghệ'),
-        date: formatDate(n.start_time || n.created_time),
-        readTime: isEn ? '5 min read' : '5 phút đọc',
-        author: isEn ? 'CIC Editorial Team' : 'Ban biên tập CIC',
-        desc: n.summary || '',
-        img: normalizeImageUrl(n.image),
-        featured: false,
-        slug: n.alias ? String(n.alias) : undefined,
-      }));
-      news = { ...news, items: mappedNews };
-    }
-    const newsCfg = (newsSec?.config ?? {}) as Record<string, unknown>;
-    news = {
-      badge: typeof newsCfg.badge === 'string' ? newsCfg.badge : news.badge,
-      title: typeof newsCfg.title === 'string' ? newsCfg.title : news.title,
-      subtitle: typeof newsCfg.subtitle === 'string' ? newsCfg.subtitle : news.subtitle,
-      ctaLabel: typeof newsCfg.ctaLabel === 'string' ? newsCfg.ctaLabel : news.ctaLabel,
-      ctaUrl: typeof newsCfg.ctaUrl === 'string' ? newsCfg.ctaUrl : news.ctaUrl,
-      items: news.items,
-    };
-  } catch (err) {
-    console.error('Failed to load news for home page:', err);
+  if (rawNews.length > 0) {
+    const mappedNews: HomeNewsItemModel[] = rawNews.map((n) => ({
+      id: Number(n.id),
+      title: n.title || '',
+      category: n.category_name || (isEn ? 'Technology News' : 'Tin tức công nghệ'),
+      date: formatDate(n.start_time || n.created_time),
+      readTime: isEn ? '5 min read' : '5 phút đọc',
+      author: isEn ? 'CIC Editorial Team' : 'Ban biên tập CIC',
+      desc: n.summary || '',
+      img: normalizeImageUrl(n.image),
+      featured: false,
+      slug: n.alias ? String(n.alias) : undefined,
+    }));
+    news = { ...news, items: mappedNews };
   }
+  const newsCfg = (newsSec?.config ?? {}) as Record<string, unknown>;
+  news = {
+    badge: typeof newsCfg.badge === 'string' ? newsCfg.badge : news.badge,
+    title: typeof newsCfg.title === 'string' ? newsCfg.title : news.title,
+    subtitle: typeof newsCfg.subtitle === 'string' ? newsCfg.subtitle : news.subtitle,
+    ctaLabel: typeof newsCfg.ctaLabel === 'string' ? newsCfg.ctaLabel : news.ctaLabel,
+    ctaUrl: typeof newsCfg.ctaUrl === 'string' ? newsCfg.ctaUrl : news.ctaUrl,
+    items: news.items,
+  };
 
   // 9. home.partners
   let partners: HomePartnersModel = legacy.partners ?? { items: [] };
@@ -460,7 +483,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     };
   }
 
-  return {
+  const result: HomePageModel = {
     hero,
     intro,
     stats,
@@ -472,4 +495,6 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     partners,
     contactCta,
   };
+  homePageCache[workspace] = { data: result, exp: now + 30_000 };
+  return result;
 }

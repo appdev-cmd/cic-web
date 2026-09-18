@@ -5,6 +5,7 @@ import { getPostgresClient, withTransaction } from '@/server/db/postgres';
 import { requireMenuPermission } from '../permissions';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
 import { writeAuditEvent } from '@/server/audit/writer';
+import { invalidateNavigationCache } from './queries';
 import type { MenuGroupDto, MenuItemDto, ReorderMenuItemInput, SaveMenuGroupInput, SaveMenuItemInput } from '../domain/types';
 
 export interface ActionResult<T = unknown> {
@@ -138,6 +139,7 @@ export async function saveMenuItemAction(
       });
     }
 
+    invalidateNavigationCache();
     revalidatePath('/cms/frontend-menus');
     revalidatePath('/cms/menu');
     revalidatePath('/');
@@ -177,6 +179,7 @@ export async function deleteMenuItemAction(
       result: 'success',
     });
 
+    invalidateNavigationCache();
     revalidatePath('/cms/frontend-menus');
     revalidatePath('/cms/menu');
     revalidatePath('/');
@@ -243,6 +246,7 @@ export async function reorderMenuItemsAction(
       );
     });
 
+    invalidateNavigationCache();
     revalidatePath('/cms/frontend-menus');
     revalidatePath('/cms/menu');
     revalidatePath('/');

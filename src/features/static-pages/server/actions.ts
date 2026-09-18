@@ -8,6 +8,7 @@ import {
   createLegalPageRecord,
   getCmsPageDetail,
 } from './repository';
+import { invalidateHomePageCache } from './homeResolver';
 import { getPostgresClient } from '@/server/db/postgres';
 import type { PageBuilderEntityOption } from '@/cms/modules/static_pages/pageBuilderTypes';
 import type { CreateLegalPageInput, SaveDraftInput } from '../types';
@@ -49,6 +50,7 @@ export async function publishPageAction(
     const result = await publishPageRecord(pageId, actor);
 
     // Revalidate CMS and public website paths
+    invalidateHomePageCache();
     revalidatePath('/cms/static-pages');
     if (result.slug) {
       revalidatePath(result.slug);

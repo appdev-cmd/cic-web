@@ -76,7 +76,20 @@ export async function getMenuItemsByGroup(groupId: number | string, workspace: '
   }));
 }
 
+const navCache: { vi?: { data: NavigationDataResult; exp: number }; en?: { data: NavigationDataResult; exp: number } } = {};
+
+export function invalidateNavigationCache() {
+  delete navCache.vi;
+  delete navCache.en;
+}
+
 export async function getNavigationDataFromDb(workspace: 'vi' | 'en' = 'vi'): Promise<NavigationDataResult> {
+  const now = Date.now();
+  const cached = navCache[workspace];
+  if (cached && cached.exp > now) {
+    return cached.data;
+  }
+
   const sql = getPostgresClient();
   const isEn = workspace === 'en';
 
@@ -131,10 +144,12 @@ export async function getNavigationDataFromDb(workspace: 'vi' | 'en' = 'vi'): Pr
     .filter((i) => String(i.group_id) === String(footerServiceGroup?.id))
     .map(mapToFooterItem);
 
-  return {
+  const result: NavigationDataResult = {
     headerLinks,
     footerPrimaryLinks: footerPrimaryItems,
     footerSolutionLinks: footerSolutionItems,
     footerServiceLinks: footerServiceItems,
   };
+  navCache[workspace] = { data: result, exp: now + 60_000 };
+  return result;
 }

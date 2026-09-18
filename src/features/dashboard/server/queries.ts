@@ -207,8 +207,8 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     })),
   ].sort((a, b) => b.created_time.localeCompare(a.created_time)).slice(0, 6);
 
-  const mapActionType = (actionCode: string): ActivityLog['activity_type'] => {
-    const code = actionCode.toLowerCase();
+  const mapActionType = (actionCode?: string | null): ActivityLog['activity_type'] => {
+    const code = (actionCode || '').toLowerCase();
     if (code.includes('create')) return 'create';
     if (code.includes('delete') || code.includes('trash') || code.includes('purge')) return 'delete';
     if (code.includes('publish') || code.includes('status')) return 'publish';

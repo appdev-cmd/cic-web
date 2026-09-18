@@ -99,14 +99,28 @@ export async function getCmsSystemSettingsData(): Promise<CmsSettingsData> {
   return { workspaces: SCOPE_DEFS.map((scope) => { const values = new Map(rowsByScope[scope.locale].map((row) => [String(row.name).trim().toLowerCase(), row])); return { scope, settings: APPROVED_SETTINGS_MANIFEST.filter((item) => item.scopes.includes(scope.locale)).map((item) => ({ key: item.key, label: labels[item.key] ?? item.key, description: descriptions[item.key] ?? `Cấu hình ${labels[item.key] ?? item.key}.`, group: item.group, type: item.type, value: String(values.get(item.key)?.value ?? ''), publicReadable: item.publicReadable, maxLength: item.validation.maxLength })), branches: scope.locale === 'enjicad' ? [] : branches.filter((row) => row.workspace === scope.locale).map(mapBranch) }; }) };
 }
 
+const settingsCache: { vi?: { data: PublicSystemSettings; exp: number }; en?: { data: PublicSystemSettings; exp: number } } = {};
+
+export function invalidatePublicSystemSettingsCache() {
+  delete settingsCache.vi;
+  delete settingsCache.en;
+}
+
 const queryPublicSystemSettings = async (locale: 'vi' | 'en'): Promise<PublicSystemSettings> => {
+  const now = Date.now();
+  const cached = settingsCache[locale];
+  if (cached && cached.exp > now) {
+    return cached.data;
+  }
   const sql = getPostgresClient(); const table = locale === 'en' ? 'cic_config_en' : 'cic_config';
   const keys = APPROVED_SETTINGS_MANIFEST.filter((item) => item.publicReadable && item.scopes.includes(locale)).map((item) => item.key);
   const [values, branches] = await Promise.all([
     sql`SELECT name,value FROM ${sql(table)} WHERE published IS TRUE AND lower(btrim(name)) IN ${sql(keys)} ORDER BY ordering NULLS LAST,id`,
     sql`SELECT id,workspace,code,name,address,phone,email,fax,working_hours,map_embed_url,map_search_query,is_head_office,published,ordering FROM cic_branches WHERE workspace=${locale} AND published IS TRUE ORDER BY ordering,id`,
   ]);
-  return { values: Object.fromEntries(values.map((row) => [String(row.name).trim().toLowerCase(), String(row.value ?? '')])), branches: branches.map(mapBranch) };
+  const result: PublicSystemSettings = { values: Object.fromEntries(values.map((row) => [String(row.name).trim().toLowerCase(), String(row.value ?? '')])), branches: branches.map(mapBranch) };
+  settingsCache[locale] = { data: result, exp: now + 60_000 };
+  return result;
 };
 
 /** Request/render-scoped deduplication only; this does not persist data across requests. */
