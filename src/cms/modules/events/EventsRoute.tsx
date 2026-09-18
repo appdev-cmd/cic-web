@@ -13,14 +13,19 @@ export async function EventsRoute() {
     );
   }
 
-  const [vi, en] = await Promise.all([
-    getCmsEvents('vi'),
-    getCmsEvents('en'),
-  ]);
+  const cookieStore = await (await import('next/headers')).cookies();
+  const rawLocale = cookieStore.get('cms_workspace_locale')?.value;
+  const activeLocale = rawLocale === 'en' ? 'en' : 'vi';
+
+  const activeData = await getCmsEvents(activeLocale);
+  const emptyFallback = { events: [], relatedProducts: [], relatedArticles: [], activityLogs: [] };
 
   return (
     <EventsScreen
-      data={{ vi, en }}
+      data={{
+        vi: activeLocale === 'vi' ? activeData : emptyFallback,
+        en: activeLocale === 'en' ? activeData : emptyFallback,
+      }}
       capabilities={{
         create: can(principal, 'events', 'create'),
         edit: can(principal, 'events', 'edit'),

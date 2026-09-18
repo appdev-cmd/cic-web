@@ -10,6 +10,11 @@ export async function refreshSupabaseSession(request: NextRequest) {
   const env = getServerEnv();
   let response = NextResponse.next({ request });
 
+  const hasAuthCookie = request.cookies.getAll().some((c) => c.name.startsWith('sb-'));
+  if (!hasAuthCookie) {
+    return response;
+  }
+
   const client = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
