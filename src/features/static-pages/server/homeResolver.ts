@@ -50,13 +50,18 @@ function formatDate(date: Date | string | null | undefined): string {
  */
 export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promise<HomePageModel> {
   const publishedRev = await getPublicPublishedPage(workspace, 'home');
-  const legacy = getLegacyHomePageContent();
+  const legacy = getLegacyHomePageContent(workspace);
 
   if (!publishedRev || !publishedRev.sections || publishedRev.sections.length === 0) {
     return legacy;
   }
 
   const sql = getPostgresClient();
+  const isEn = workspace === 'en';
+  const newsTable = isEn ? sql`cic_news_en` : sql`cic_news`;
+  const projTable = isEn ? sql`cic_projects_en` : sql`cic_projects`;
+  const eventTable = isEn ? sql`cic_event_en` : sql`cic_event`;
+
   const sectionMap = new Map<string, typeof publishedRev.sections[0]>();
   for (const s of publishedRev.sections) {
     sectionMap.set(s.sectionKey, s);
@@ -90,7 +95,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       try {
         let hotNewsRows = await sql`
           SELECT title
-          FROM cic_news
+          FROM ${newsTable}
           WHERE published = true AND is_hot = true
           ORDER BY coalesce(start_time, created_time) DESC
           LIMIT 6
@@ -98,7 +103,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
         if (hotNewsRows.length === 0) {
           hotNewsRows = await sql`
             SELECT title
-            FROM cic_news
+            FROM ${newsTable}
             WHERE published = true
             ORDER BY coalesce(start_time, created_time) DESC
             LIMIT 6
@@ -108,7 +113,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
           marqueeTexts = hotNewsRows.map((r: any) => String(r.title).trim()).filter(Boolean);
         }
       } catch (tickerErr) {
-        console.warn('[homeResolver] Failed to load hot news ticker from cic_news:', tickerErr);
+        console.warn('[homeResolver] Failed to load hot news ticker from news table:', tickerErr);
       }
     }
 
@@ -220,7 +225,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       const entityIds = projectRefs.map((r) => Number(r.entityId)).filter((n) => !isNaN(n));
       if (entityIds.length > 0) {
         projectRows = await sql`
-          SELECT * FROM cic_projects
+          SELECT * FROM ${projTable}
           WHERE id IN ${sql(entityIds)} AND published = true
         `;
         // preserve order
@@ -231,14 +236,14 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
 
     if (projectRows.length === 0) {
       projectRows = await sql`
-        SELECT * FROM cic_projects
+        SELECT * FROM ${projTable}
         WHERE published = true AND is_featured = true
         ORDER BY ordering, id
         LIMIT 4
       `;
       if (projectRows.length === 0) {
         projectRows = await sql`
-          SELECT * FROM cic_projects
+          SELECT * FROM ${projTable}
           WHERE published = true
           ORDER BY ordering, id
           LIMIT 4
@@ -253,15 +258,15 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
         type: 'services' as const,
         name: p.title || '',
         short: p.title || '',
-        service: p.solution || 'Tư vấn kỹ thuật',
+        service: p.solution || (isEn ? 'Technical Consulting' : 'Tư vấn kỹ thuật'),
         client: p.customer_name ? `${p.customer_name}${p.location ? ` · ${p.location}` : ''}` : (p.location || ''),
-        category: p.solution || p.sector || 'Dự án trọng điểm',
+        category: p.solution || p.sector || (isEn ? 'Flagship Project' : 'Dự án trọng điểm'),
         description: p.summary || p.tagline || '',
         img: normalizeImageUrl(p.image),
         location: p.location || '',
         tags: typeof p.technologies === 'string'
           ? p.technologies.split(',').map((t: string) => t.trim()).filter(Boolean)
-          : ['BIM', 'Digital Twins', 'Hạ tầng'],
+          : (isEn ? ['BIM', 'Digital Twins', 'Infrastructure'] : ['BIM', 'Digital Twins', 'Hạ tầng']),
         size: idx === 0 ? ('full' as const) : ('small' as const),
       }));
       projects = { ...projects, items: mappedProjects };
@@ -289,7 +294,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       if (entityIds.length > 0) {
         eventRows = await sql`
           SELECT id, title, alias, image, summary, time_event, place, link_dangky
-          FROM cic_event
+          FROM ${eventTable}
           WHERE id IN ${sql(entityIds)} AND published = true
         `;
         // preserve order of references from Page Builder
@@ -301,7 +306,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     if (eventRows.length === 0) {
       eventRows = await sql`
         SELECT id, title, alias, image, summary, time_event, place, link_dangky
-        FROM cic_event
+        FROM ${eventTable}
         WHERE published = true AND (show_in_homepage = true OR is_hot = true)
         ORDER BY coalesce(time_event, created_time) DESC
         LIMIT 4
@@ -309,7 +314,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       if (eventRows.length === 0) {
         eventRows = await sql`
           SELECT id, title, alias, image, summary, time_event, place, link_dangky
-          FROM cic_event
+          FROM ${eventTable}
           WHERE published = true
           ORDER BY coalesce(time_event, created_time) DESC
           LIMIT 4
@@ -325,12 +330,12 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
           title: e.title || '',
           date: formatDate(e.time_event),
           time: '08:30 - 16:30',
-          loc: e.place || 'Trung tâm Hội thảo CIC',
-          attendees: isPast ? '300+ Khách mời' : '500+ Khách mời',
+          loc: e.place || (isEn ? 'CIC Technology Convention Center' : 'Trung tâm Hội thảo CIC'),
+          attendees: isPast ? (isEn ? '300+ Attendees' : '300+ Khách mời') : (isEn ? '500+ Attendees' : '500+ Khách mời'),
           isPast,
           img: normalizeImageUrl(e.image),
           desc: e.summary || '',
-          ctaUrl: e.link_dangky || (e.alias ? `/events/${e.alias}` : `/events/${e.id}`),
+          ctaUrl: e.link_dangky || (e.alias ? (isEn ? `/en/events/${e.alias}` : `/events/${e.alias}`) : (isEn ? `/en/events/${e.id}` : `/events/${e.id}`)),
         };
       });
       events = { ...events, upcomingEvents: mappedEvents, pastEvents: [] };
@@ -340,8 +345,8 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       badge: typeof eventCfg.badge === 'string' ? eventCfg.badge : events.badge,
       title: typeof eventCfg.title === 'string' ? eventCfg.title : events.title,
       subtitle: typeof eventCfg.subtitle === 'string' ? eventCfg.subtitle : events.subtitle,
-      ctaLabel: typeof eventCfg.ctaLabel === 'string' ? eventCfg.ctaLabel : events.ctaLabel,
-      ctaUrl: typeof eventCfg.ctaUrl === 'string' ? eventCfg.ctaUrl : events.ctaUrl,
+      ctaLabel: typeof eventCfg.ctaLabel === 'string' ? eventCfg.ctaLabel : (isEn ? 'Explore Events' : 'Xem sự kiện'),
+      ctaUrl: typeof eventCfg.ctaUrl === 'string' ? eventCfg.ctaUrl : (isEn ? '/en/events' : '/events'),
       upcomingEvents: events.upcomingEvents,
       pastEvents: events.pastEvents,
     };
@@ -361,7 +366,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       if (entityIds.length > 0) {
         rawNews = await sql`
           SELECT id, title, alias, image, summary, category_name, start_time, created_time
-          FROM cic_news
+          FROM ${newsTable}
           WHERE id IN ${sql(entityIds)} AND published = true
         `;
         const map = new Map(rawNews.map((r) => [Number(r.id), r]));
@@ -372,7 +377,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     if (rawNews.length === 0) {
       rawNews = await sql`
         SELECT id, title, alias, image, summary, category_name, start_time, created_time
-        FROM cic_news
+        FROM ${newsTable}
         WHERE published = true AND (show_in_homepage = true OR is_hot = true)
         ORDER BY coalesce(start_time, created_time) DESC
         LIMIT 4
@@ -380,7 +385,7 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       if (rawNews.length === 0) {
         rawNews = await sql`
           SELECT id, title, alias, image, summary, category_name, start_time, created_time
-          FROM cic_news
+          FROM ${newsTable}
           WHERE published = true
           ORDER BY coalesce(start_time, created_time) DESC
           LIMIT 4
@@ -389,15 +394,19 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
     }
 
     if (rawNews.length > 0) {
-      const newsItems: HomeNewsItemModel[] = rawNews.map((n) => ({
+      const mappedNews: HomeNewsItemModel[] = rawNews.map((n) => ({
         id: Number(n.id),
-        category: n.category_name?.toLowerCase().includes('công ty') ? 'company' : 'specialty',
         title: n.title || '',
+        category: n.category_name || (isEn ? 'Technology News' : 'Tin tức công nghệ'),
         date: formatDate(n.start_time || n.created_time),
+        readTime: isEn ? '5 min read' : '5 phút đọc',
+        author: isEn ? 'CIC Editorial Team' : 'Ban biên tập CIC',
         desc: n.summary || '',
         img: normalizeImageUrl(n.image),
+        featured: false,
+        slug: n.alias ? String(n.alias) : undefined,
       }));
-      news = { ...news, items: newsItems };
+      news = { ...news, items: mappedNews };
     }
     const newsCfg = (newsSec?.config ?? {}) as Record<string, unknown>;
     news = {

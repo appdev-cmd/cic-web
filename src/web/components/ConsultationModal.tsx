@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Phone, Mail, User, MessageSquare, CheckCircle2, HelpCircle } from 'lucide-react';
 import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
 import { SYSTEM_CTA_IDS, SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
+import { useI18n } from '@/shared/i18n';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -16,11 +17,29 @@ interface ConsultationModalProps {
 }
 
 export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }: ConsultationModalProps) => {
+  const { t, locale } = useI18n();
+
+  const consultationNeedsList = locale === 'en' ? [
+    'Product & Solution Pricing Consultation',
+    'Download Software & Request Trial',
+    'Purchase Software License / Equipment',
+    'Digital Transformation & BIM Consultation',
+    'Training & Technical Support',
+    'Other Inquiry',
+  ] : [
+    'Tư vấn báo giá sản phẩm & giải pháp',
+    'Tải phần mềm & dùng thử',
+    'Đăng ký mua bản quyền / thiết bị',
+    'Tư vấn chuyển đổi số & BIM',
+    'Đào tạo & Hỗ trợ kỹ thuật',
+    'Nhu cầu khác',
+  ];
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
-    consultationNeed: 'Tư vấn báo giá sản phẩm & giải pháp',
+    consultationNeed: consultationNeedsList[0],
     message: ''
   });
 
@@ -29,27 +48,18 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  const consultationNeedsList = [
-    'Tư vấn báo giá sản phẩm & giải pháp',
-    'Tải phần mềm & dùng thử',
-    'Đăng ký mua bản quyền / thiết bị',
-    'Tư vấn chuyển đổi số & BIM',
-    'Đào tạo & Hỗ trợ kỹ thuật',
-    'Nhu cầu khác'
-  ];
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) {
-      newErrors.name = 'Vui lòng nhập họ và tên của bạn';
+      newErrors.name = locale === 'en' ? 'Please enter your full name' : 'Vui lòng nhập họ và tên của bạn';
     }
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại liên hệ';
+      newErrors.phone = locale === 'en' ? 'Please enter your phone number' : 'Vui lòng nhập số điện thoại liên hệ';
     } else if (!/^[0-9+.\s]{8,15}$/.test(formData.phone.trim())) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = locale === 'en' ? 'Invalid phone number' : 'Số điện thoại không hợp lệ';
     }
     if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = 'Địa chỉ email không hợp lệ';
+      newErrors.email = locale === 'en' ? 'Invalid email address' : 'Địa chỉ email không hợp lệ';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -65,20 +75,28 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
     try {
       await submitCustomerInteraction({
         formId: SYSTEM_FORM_IDS.homeConsultation,
-        formName: 'Đăng ký tư vấn',
+        formName: locale === 'en' ? 'Consultation Request' : 'Đăng ký tư vấn',
         values: formData,
-        source: { pageType: 'global', pageId: 'consultation-modal', pageUrl: window.location.pathname, pageTitle: document.title, placementKey: 'global.consultation_modal', ctaId: SYSTEM_CTA_IDS.contact, ctaName: 'Liên hệ ngay' },
+        source: {
+          pageType: 'global',
+          pageId: 'consultation-modal',
+          pageUrl: typeof window !== 'undefined' ? window.location.pathname : '/',
+          pageTitle: typeof document !== 'undefined' ? document.title : 'CIC',
+          placementKey: 'global.consultation_modal',
+          ctaId: SYSTEM_CTA_IDS.contact,
+          ctaName: locale === 'en' ? 'Contact Now' : 'Liên hệ ngay'
+        },
       });
       setIsSuccess(true);
       setFormData({
         name: '',
         phone: '',
         email: '',
-        consultationNeed: 'Tư vấn báo giá sản phẩm & giải pháp',
+        consultationNeed: consultationNeedsList[0],
         message: ''
       });
     } catch (err) {
-      setSubmitError('Không thể gửi yêu cầu tư vấn lúc này. Vui lòng kiểm tra lại kết nối hoặc liên hệ hotline.');
+      setSubmitError(t.contact.errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -102,190 +120,193 @@ export const ConsultationModal = ({ isOpen, onClose, hotline = '024 3976 1381' }
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-100 overflow-hidden z-10 rounded-[10px] my-auto flex flex-col max-h-[90vh]"
+            transition={{ type: 'spring', duration: 0.5 }}
+            className="relative w-full max-w-xl bg-white border border-slate-200 shadow-2xl overflow-hidden z-10 my-8 rounded-[12px]"
           >
-            {/* Design accents */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-600 to-amber-500 shrink-0" />
-            
-            {/* Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 bg-slate-50/50 shrink-0">
-              <div>
-                <span className="text-[10px] font-black tracking-widest text-orange-600 uppercase">CIC - KẾT NỐI CHUYÊN GIA</span>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mt-0.5">
-                  ĐĂNG KÝ TƯ VẤN GIẢI PHÁP
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors rounded-[8px] focus:outline-none cursor-pointer"
-              >
-                <X size={20} />
-              </button>
-            </div>
+            {/* Top decorative line */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500" />
 
-            {/* Content Body */}
-            <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar flex-1">
-              {!isSuccess ? (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Vui lòng cung cấp đầy đủ thông tin bên dưới. Đội ngũ kỹ sư và chuyên gia tư vấn giàu kinh nghiệm của CIC sẽ chủ động liên hệ hỗ trợ bạn trong vòng 15 phút làm việc.
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+              title={t.common.close}
+            >
+              <X size={20} />
+            </button>
+
+            <div className="p-6 md:p-8">
+              {isSuccess ? (
+                <div className="py-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                    <CheckCircle2 size={36} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    {t.contact.successTitle}
+                  </h3>
+                  <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                    {t.contact.successMessage}
                   </p>
-
-                  {/* Full Name */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Họ tên <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Nhập họ và tên"
-                        className={`w-full bg-slate-50 border ${
-                          errors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
-                      />
-                    </div>
-                    {errors.name && (
-                      <p className="text-xs text-red-500 font-bold">{errors.name}</p>
-                    )}
-                  </div>
-
-                  {/* Phone Number */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Số điện thoại <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                      <input
-                        type="text"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="Nhập số điện thoại"
-                        className={`w-full bg-slate-50 border ${
-                          errors.phone ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
-                      />
-                    </div>
-                    {errors.phone && (
-                      <p className="text-xs text-red-500 font-bold">{errors.phone}</p>
-                    )}
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Email
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="Nhập email liên hệ"
-                        className={`w-full bg-slate-50 border ${
-                          errors.email ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-orange-600'
-                        } pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium`}
-                      />
-                    </div>
-                    {errors.email && (
-                      <p className="text-xs text-red-500 font-bold">{errors.email}</p>
-                    )}
-                  </div>
-
-                  {/* Ghi chú */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                      Ghi chú
-                    </label>
-                    <div className="relative">
-                      <MessageSquare className="absolute left-3 top-3 text-slate-400" size={16} />
-                      <textarea
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        placeholder="Mô tả nhu cầu của bạn..."
-                        rows={3}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white rounded-[8px] transition-all font-medium resize-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Error display */}
-                  {submitError && (
-                    <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-[8px] text-xs font-bold text-red-600">
-                      {submitError}
-                    </div>
-                  )}
-
-                  {/* Footer Action */}
-                  <div className="pt-3 flex justify-end gap-3 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="px-5 py-2.5 text-xs font-black text-slate-500 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 transition-all uppercase tracking-wider rounded-[8px]"
-                    >
-                      Đóng lại
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      aria-busy={isSubmitting}
-                      className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed rounded-[8px]"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Đang gửi yêu cầu...
-                        </>
-                      ) : (
-                        <>
-                          Gửi yêu cầu tư vấn
-                          <Send size={14} />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="py-8 text-center space-y-4"
-                >
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-[8px] mb-2 border border-green-200">
-                    <CheckCircle2 size={36} className="stroke-[1.5]" />
-                  </div>
-                  <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight">
-                    GỬI YÊU CẦU THÀNH CÔNG!
-                  </h4>
-                  <div className="max-w-md mx-auto text-sm text-slate-500 space-y-2 leading-relaxed">
-                    <p>
-                      Xin chân thành cảm ơn quý khách hàng đã tin tưởng lựa chọn Công ty Cổ phần Công nghệ và Tư vấn CIC.
-                    </p>
-                    <p className="font-bold text-orange-600">
-                      Chuyên gia của chúng tôi sẽ liên hệ trực tiếp với bạn qua số điện thoại đã cung cấp trong vòng tối đa 15 phút.
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      Hotline hỗ trợ khẩn cấp 24/7: <a href={`tel:${hotline.replace(/\D/g, '')}`} className="font-black hover:underline text-slate-600">{hotline}</a>
-                    </p>
-                  </div>
-                  <div className="pt-6">
+                  <div className="pt-4">
                     <button
                       onClick={() => {
                         setIsSuccess(false);
                         onClose();
                       }}
-                      className="px-8 py-3 bg-slate-950 text-white text-xs font-black uppercase tracking-wider transition-all hover:bg-orange-600 rounded-[8px]"
+                      className="px-6 py-2.5 bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-lg hover:bg-orange-700 transition-all shadow-md cursor-pointer"
                     >
-                      Xác nhận & Quay lại
+                      {t.common.close}
                     </button>
                   </div>
-                </motion.div>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 space-y-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-600 text-xs font-black uppercase tracking-wider rounded-[6px]">
+                      <HelpCircle size={14} />
+                      {t.header.consultationCta}
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                      {t.contact.modalConsultationTitle}
+                    </h2>
+                    <p className="text-xs text-slate-500 font-medium">
+                      {t.contact.modalConsultationSubtitle}
+                    </p>
+                  </div>
+
+                  {submitError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
+                      {submitError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Name */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          {t.contact.nameLabel} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <User size={16} />
+                          </div>
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder={t.contact.namePlaceholder}
+                            className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
+                              errors.name ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500'
+                            }`}
+                          />
+                        </div>
+                        {errors.name && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.name}</p>}
+                      </div>
+
+                      {/* Phone */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          {t.contact.phoneLabel} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <Phone size={16} />
+                          </div>
+                          <input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            placeholder={t.contact.phonePlaceholder}
+                            className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
+                              errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500'
+                            }`}
+                          />
+                        </div>
+                        {errors.phone && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.phone}</p>}
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        {t.contact.emailLabel}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <Mail size={16} />
+                        </div>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder={t.contact.emailPlaceholder}
+                          className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-1 ${
+                            errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500'
+                          }`}
+                        />
+                      </div>
+                      {errors.email && <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.email}</p>}
+                    </div>
+
+                    {/* Needs */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        {t.contact.serviceInterestLabel}
+                      </label>
+                      <select
+                        value={formData.consultationNeed}
+                        onChange={(e) => setFormData({ ...formData, consultationNeed: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-white"
+                      >
+                        {consultationNeedsList.map((need, idx) => (
+                          <option key={idx} value={need}>{need}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Message */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        {t.contact.messageLabel}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute top-2.5 left-3 pointer-events-none text-slate-400">
+                          <MessageSquare size={16} />
+                        </div>
+                        <textarea
+                          rows={3}
+                          value={formData.message}
+                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          placeholder={t.contact.messagePlaceholder}
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                        <Phone size={14} className="text-orange-600" />
+                        <span>Hotline: <strong className="text-slate-800">{hotline}</strong></span>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full sm:w-auto px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all shadow-md shadow-orange-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      >
+                        {isSubmitting ? (
+                          <span>{t.contact.submittingButton}</span>
+                        ) : (
+                          <>
+                            <Send size={14} />
+                            <span>{t.contact.submitButton}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </>
               )}
             </div>
           </motion.div>

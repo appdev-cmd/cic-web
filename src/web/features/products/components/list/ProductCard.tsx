@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { PhoneCall, Download, ShoppingCart, ChevronRight } from 'lucide-react';
 import { Product } from '@shared/types';
+import { useI18n } from '@/shared/i18n';
 
 interface ProductCardProps {
   product: Product;
@@ -23,6 +24,7 @@ export function ProductCard({
   onBuy,
 }: ProductCardProps) {
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const { t } = useI18n();
 
   return (
     <motion.div
@@ -55,9 +57,9 @@ export function ProductCard({
 
         {/* Price Section */}
         <div className="flex items-baseline gap-2 pt-0.5">
-          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">Giá bán:</span>
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">{t.products.priceLabel}:</span>
           <span className="text-sm sm:text-base font-extrabold text-orange-600 tracking-tight">
-            {product.price === 'Liên hệ' ? 'Liên hệ' : product.price}
+            {product.price === 'Liên hệ' || product.price === 'Contact for Quote' ? t.products.priceContact : product.price}
           </span>
         </div>
 
@@ -81,7 +83,7 @@ export function ProductCard({
               title="Liên hệ tư vấn"
             >
               <PhoneCall size={13.5} className="text-slate-600 shrink-0" />
-              <span className="truncate">Tư vấn</span>
+              <span className="truncate">{t.products.btnConsult}</span>
             </button>
 
             {/* 2. Trắng viền cam: Tải về */}
@@ -95,7 +97,7 @@ export function ProductCard({
               title="Tải bộ cài & tài liệu"
             >
               <Download size={13.5} className="text-orange-600 shrink-0" />
-              <span className="truncate">Tải về</span>
+              <span className="truncate">{t.products.btnDownload}</span>
             </button>
 
             {/* 3. Full cam: Mua ngay */}
@@ -109,7 +111,7 @@ export function ProductCard({
               title="Đăng ký mua bản quyền / sản phẩm"
             >
               <ShoppingCart size={13.5} className="text-white shrink-0" />
-              <span className="truncate">Mua ngay</span>
+              <span className="truncate">{t.products.btnBuy}</span>
             </button>
           </div>
         </div>

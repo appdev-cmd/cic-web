@@ -32,6 +32,7 @@ import { elementBindingRegistry, type ElementBindingRegistry } from '@shared/vis
 import { createCollectionItemPath, createElementBinding } from '@shared/visual-editing/elementBindingTypes';
 import { submitCustomerInteraction } from '../services/customerInteractionSubmission';
 import { SYSTEM_FORM_IDS } from '../../shared/customerInteractionContract';
+import { useI18n } from '@/shared/i18n';
 
 function bindElement<T extends Element>(registry: ElementBindingRegistry, binding: ReturnType<typeof createElementBinding>): BoundElementProps<T> {
   return bindElementRuntime<T>(binding, registry);
@@ -54,7 +55,9 @@ interface ContactViewProps {
   bindingRegistry?: ElementBindingRegistry;
 }
 
-export const ContactView = ({ onNavigateHome, content = getPublicContactContentFromConfiguration('vi'), renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: ContactViewProps) => {
+export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy = productionRenderPolicy, bindingRegistry = elementBindingRegistry }: ContactViewProps) => {
+  const { t, locale } = useI18n();
+  const content = propContent ?? getPublicContactContentFromConfiguration(locale);
   // Navigation & Page State
   const [activeBranch, setActiveBranch] = useState(content.branches.branches[0]?.id ?? '');
   useEffect(() => {
@@ -103,29 +106,29 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
   // Validation
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (!formData.fullName.trim()) errors.fullName = 'Họ tên không được để trống';
+    if (!formData.fullName.trim()) errors.fullName = locale === 'en' ? 'Full name is required' : 'Họ tên không được để trống';
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
-      errors.email = 'Địa chỉ email không được để trống';
+      errors.email = locale === 'en' ? 'Email address is required' : 'Địa chỉ email không được để trống';
     } else if (!emailRegex.test(formData.email)) {
-      errors.email = 'Email không đúng định dạng';
+      errors.email = locale === 'en' ? 'Invalid email format' : 'Email không đúng định dạng';
     }
 
     const phoneRegex = /^(0|84)[3|5|7|8|9][0-9]{8}$/;
     if (!formData.phone.trim()) {
-      errors.phone = 'Số điện thoại không được để trống';
+      errors.phone = locale === 'en' ? 'Phone number is required' : 'Số điện thoại không được để trống';
     } else if (!phoneRegex.test(formData.phone.replace(/\s+/g, ''))) {
-      errors.phone = 'Số điện thoại không đúng định dạng';
+      errors.phone = locale === 'en' ? 'Invalid phone number format' : 'Số điện thoại không đúng định dạng';
     }
 
     if (!formData.subject.trim()) {
-      errors.subject = 'Vui lòng nhập tiêu đề';
+      errors.subject = locale === 'en' ? 'Please enter inquiry subject' : 'Vui lòng nhập tiêu đề';
     }
 
     // Captcha validation
     if (!formData.captchaAnswer || parseInt(formData.captchaAnswer) !== captcha.answer) {
-      errors.captchaAnswer = 'Mã bảo mật chưa chính xác';
+      errors.captchaAnswer = t.contact.captchaError;
     }
 
     setFormErrors(errors);
@@ -170,7 +173,7 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
       });
       generateNewCaptcha();
     } catch (err) {
-      setSubmitError('Đã xảy ra sự cố khi gửi thông tin liên hệ. Vui lòng thử lại hoặc liên hệ trực tiếp qua hotline.');
+      setSubmitError(t.contact.errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -186,10 +189,10 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
         <div data-page-builder-section-key="contact.header" className="border-b border-slate-200 pb-8 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-950">
-              Kết nối chuyên gia CIC
+              {t.contact.pageTitle}
             </h1>
             <p className="text-slate-500 mt-2 max-w-2xl font-medium">
-              Văn phòng hỗ trợ khách hàng của CIC phủ sóng toàn quốc, sẵn sàng phục vụ 24/7 và giải quyết mọi khúc mắc về giải pháp phần mềm, chuyển đổi số.
+              {t.contact.pageSubtitle}
             </p>
           </div>
         </div>
@@ -514,7 +517,7 @@ export const ContactView = ({ onNavigateHome, content = getPublicContactContentF
                     {isSubmitting ? (
                       <>
                         <Loader2 size={16} className="animate-spin shrink-0" />
-                        <span>Đang gửi thông tin...</span>
+                        <span>{t.contact.submittingButton}</span>
                       </>
                     ) : (
                       <>

@@ -13,15 +13,20 @@ import { Header } from '@/web/components/Header';
 import { PublicRouteProgressBar } from '@/web/components/PublicRouteProgressBar';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 import type { NavigationDataResult } from '@/web/features/navigation/navigationData';
+import { I18nProvider, type Locale } from '@/shared/i18n';
 
 export function WebsiteShell({
   children,
-  settings,
-  navigation,
+  settings: initialSettings,
+  navigation: initialNavigation,
+  settingsMap,
+  navigationMap,
 }: Readonly<{
   children: ReactNode;
-  settings: PublicSystemSettings;
+  settings?: PublicSystemSettings;
   navigation?: NavigationDataResult;
+  settingsMap?: { vi: PublicSystemSettings; en: PublicSystemSettings };
+  navigationMap?: { vi: NavigationDataResult; en: NavigationDataResult };
 }>) {
   const pathname = usePathname();
   const router = useRouter();
@@ -29,20 +34,25 @@ export function WebsiteShell({
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
 
+  const locale: Locale = pathname?.startsWith('/en') ? 'en' : 'vi';
+  const settings = (locale === 'en' ? settingsMap?.en : settingsMap?.vi) ?? initialSettings ?? settingsMap?.vi!;
+  const navigation = (locale === 'en' ? navigationMap?.en : navigationMap?.vi) ?? initialNavigation ?? navigationMap?.vi;
+
   const navigate = (href: string) => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('public-route-start'));
     }
     router.push(href);
   };
-  const headerVariant = pathname === '/' ? 'overlay' : 'solid';
-  const hotline = settings.values.tel || '024 3976 1381';
+  const headerVariant = pathname === '/' || pathname === '/en' ? 'overlay' : 'solid';
+  const hotline = settings?.values?.tel || '024 3976 1381';
 
   return (
-    <div className="public-shell min-h-screen bg-white text-slate-900 relative selection:bg-orange-500 selection:text-white">
-      <PublicRouteProgressBar />
-      {/* Interactive Background Engine (Chỉ hiển thị tại Trang Chủ) */}
-      {pathname === '/' && (
+    <I18nProvider locale={locale}>
+      <div className="public-shell min-h-screen bg-white text-slate-900 relative selection:bg-orange-500 selection:text-white">
+        <PublicRouteProgressBar />
+        {/* Interactive Background Engine (Chỉ hiển thị tại Trang Chủ) */}
+        {(pathname === '/' || pathname === '/en') && (
         <div className="fixed inset-0 z-0 pointer-events-none opacity-100">
           <Constellation 
             density={16000} 
@@ -68,28 +78,28 @@ export function WebsiteShell({
                 { 
                   id: 'chatbot',
                   icon: <Bot size={24} className="text-white" />, 
-                  label: 'Trợ lý AI CIC Technology', 
+                  label: locale === 'en' ? 'CIC Technology AI Assistant' : 'Trợ lý AI CIC Technology', 
                   color: 'bg-slate-900 hover:bg-slate-800 border-2 border-orange-500 shadow-orange-500/30', 
                   onClick: () => setIsChatbotOpen(prev => !prev)
                 },
                 { 
                   id: 'hotline',
                   icon: <Phone size={22} className="animate-pulse text-white" />, 
-                  label: `Hotline: ${hotline}`,
+                  label: `${locale === 'en' ? 'Hotline' : 'Hotline'}: ${hotline}`,
                   color: 'bg-orange-600 hover:bg-orange-500 shadow-orange-600/20', 
                   link: `tel:${hotline.replace(/\D/g, '')}`
                 },
                 { 
                   id: 'zalo',
                   icon: <ZaloIcon size={24} />, 
-                  label: 'Zalo: 024 3976 1381 / OA CIC', 
+                  label: locale === 'en' ? 'Zalo Support: 024 3976 1381 / OA CIC' : 'Zalo: 024 3976 1381 / OA CIC', 
                   color: 'bg-[#0068FF] hover:bg-[#0052cc] shadow-blue-500/20', 
                   link: 'https://zalo.me/1727624419140352798' 
                 },
                 { 
                   id: 'fb',
                   icon: <Facebook size={22} className="text-white" />, 
-                  label: 'Fanpage Facebook CIC', 
+                  label: locale === 'en' ? 'CIC Facebook Official' : 'Fanpage Facebook CIC', 
                   color: 'bg-[#1877F2] hover:bg-[#1566d2] shadow-blue-600/20', 
                   link: settings.values.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN'
                 },
@@ -159,7 +169,7 @@ export function WebsiteShell({
                 <X className="w-6 h-6 text-orange-600 transition-colors" />
               </motion.div>
               <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3 py-1.5 bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap border border-slate-700/50">
-                Thu gọn tiện ích
+                {locale === 'en' ? 'Collapse shortcuts' : 'Thu gọn tiện ích'}
               </span>
             </div>
           ) : (
@@ -176,7 +186,7 @@ export function WebsiteShell({
 
               {/* Tooltip */}
               <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3.5 py-2 bg-white/95 backdrop-blur-md text-slate-900 text-xs font-bold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap border border-slate-200">
-                Mở tiện ích & AI Chatbot
+                {locale === 'en' ? 'Open shortcuts & AI Assistant' : 'Mở tiện ích & AI Chatbot'}
               </span>
             </div>
           )}
@@ -205,13 +215,14 @@ export function WebsiteShell({
         onClose={() => setIsChatbotOpen(false)}
         onOpenConsultation={() => setIsConsultationOpen(true)}
         onNavigateView={(view) => {
-          navigate(`/${view}`);
+          navigate(locale === 'en' ? `/en/${view}` : `/${view}`);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         hotline={hotline}
         email={settings.values.public_email || settings.values.admin_email || 'info@cic.com.vn'}
-        address={settings.branches.find((b) => b.isHeadOffice)?.address || settings.values.address || 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội'}
+        address={settings.branches.find((b) => b.isHeadOffice)?.address || settings.values.address || (locale === 'en' ? '4th Floor, VG Building, 235 Nguyen Trai, Thanh Xuan, Hanoi, Vietnam' : 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội')}
       />
-    </div>
+      </div>
+    </I18nProvider>
   );
 }

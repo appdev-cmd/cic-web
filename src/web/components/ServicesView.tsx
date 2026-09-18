@@ -34,6 +34,7 @@ import type { ServiceDetail } from '../features/services/types';
 import { getProductsData } from '../features/products/productsData';
 import { Product } from '@shared/types';
 import { submitCustomerInteractionAction } from '@/features/contact/server/actions';
+import { useI18n } from '@/shared/i18n';
 import { Loader2 } from 'lucide-react';
 
 interface ServicesViewProps {
@@ -99,6 +100,7 @@ const getServiceExcerpt = (service: ServiceDetail): string => {
 };
 
 export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewService, services, products, onNavigateToService, onNavigateToList }: ServicesViewProps) => {
+  const { t, locale } = useI18n();
   const servicesData = useMemo(() => {
     const source = services ?? getServicesData().services;
     return previewService ? [previewService, ...source.filter((item) => item.id !== previewService.id)] : source;
@@ -187,7 +189,7 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullname || !formData.phone) {
-      setSubmitError("Vui lòng điền họ tên và số điện thoại liên hệ.");
+      setSubmitError(locale === 'en' ? 'Please provide your full name and phone number.' : 'Vui lòng điền họ tên và số điện thoại liên hệ.');
       return;
     }
     setIsSubmitting(true);

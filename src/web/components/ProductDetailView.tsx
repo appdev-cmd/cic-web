@@ -29,6 +29,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import { Product } from '@shared/types';
+import { useI18n } from '@/shared/i18n';
 import type { PublicProductContacts, PublicSalesContact } from '@/features/sales-owners/types';
 
 interface ProductDetailViewProps {
@@ -60,6 +61,7 @@ function CollapsibleContent({
   maxHeight?: number;
   key?: React.Key;
 }) {
+  const { t } = useI18n();
   const [isExpanded, setIsExpanded] = useState(false);
   const [shouldShowButton, setShouldShowButton] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -121,12 +123,12 @@ function CollapsibleContent({
           >
             {isExpanded ? (
               <>
-                <span>Rút gọn nội dung</span>
+                <span>{t.products.collapseContent}</span>
                 <ChevronUp size={16} />
               </>
             ) : (
               <>
-                <span>Xem thêm nội dung</span>
+                <span>{t.products.readMoreContent}</span>
                 <ChevronDown size={16} />
               </>
             )}
@@ -138,11 +140,12 @@ function CollapsibleContent({
 }
 
 function ContactGroup({ label, contacts, accent = false }: { label: string; contacts: readonly PublicSalesContact[]; accent?: boolean }) {
+  const { t } = useI18n();
   if (contacts.length === 0) return null;
   return <div className="space-y-2.5">
     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-600"><span className="h-1.5 w-1.5 bg-orange-600" />{label}</div>
     <div className="space-y-2 border border-slate-200/60 bg-slate-50 p-3 text-xs">
-      {contacts.map((contact, index) => <div key={contact.id} className={`flex min-w-0 flex-wrap items-center justify-between gap-2 ${index < contacts.length - 1 ? 'border-b border-slate-200/40 pb-1.5' : ''}`}><span className="min-w-0 break-words font-bold text-slate-700">{contact.name}</span>{contact.phone ? <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className={`font-bold hover:text-orange-700 hover:underline ${accent ? 'text-orange-600' : 'text-slate-900'}`}>{contact.phone}</a> : <span className="font-medium text-slate-400">Chưa có số điện thoại</span>}</div>)}
+      {contacts.map((contact, index) => <div key={contact.id} className={`flex min-w-0 flex-wrap items-center justify-between gap-2 ${index < contacts.length - 1 ? 'border-b border-slate-200/40 pb-1.5' : ''}`}><span className="min-w-0 break-words font-bold text-slate-700">{contact.name}</span>{contact.phone ? <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className={`font-bold hover:text-orange-700 hover:underline ${accent ? 'text-orange-600' : 'text-slate-900'}`}>{contact.phone}</a> : <span className="font-medium text-slate-400">{t.products.noPhone}</span>}</div>)}
     </div>
   </div>;
 }
@@ -157,6 +160,7 @@ export function ProductDetailView({
   onSelectProduct,
   contacts
 }: ProductDetailViewProps) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'video' | 'documents'>('overview');
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -209,7 +213,7 @@ export function ProductDetailView({
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 mb-8 shadow-sm cursor-pointer rounded-lg"
         >
           <ChevronLeft size={16} />
-          Quay lại danh sách
+          {t.products.btnBack}
         </button>
 
         {/* Product Brief Layout (Grid) */}
@@ -291,7 +295,7 @@ export function ProductDetailView({
             {/* Price */}
             <div className="bg-white border border-slate-200 p-4 inline-flex flex-col gap-1 min-w-[200px] rounded-xl shadow-sm">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                {isEquipment ? 'Giá bán' : 'Giá bán bản quyền'}
+                {isEquipment ? t.products.priceLabel : t.products.priceLicenseLabel}
               </span>
               <span className="text-2xl font-extrabold text-orange-600 tracking-tight">
                 {product.price}
@@ -306,7 +310,7 @@ export function ProductDetailView({
             {/* Product tags are the public classification authority. */}
             {product.tags && product.tags.length > 0 && (
               <div className="space-y-2 border-t border-slate-200 pt-4">
-                <span className="block text-xs font-bold uppercase tracking-wider text-slate-500">Thông tin phân loại:</span>
+                <span className="block text-xs font-bold uppercase tracking-wider text-slate-500">{t.products.classificationInfo}:</span>
                 <div className="flex flex-wrap gap-2">
                   {product.tags.map((tag) => (
                     <span key={tag} className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
@@ -342,7 +346,7 @@ export function ProductDetailView({
                 onClick={() => onBuy(product)}
                 className="w-full py-2.5 bg-white hover:bg-slate-100 border-2 border-slate-200 hover:border-orange-600 text-slate-950 hover:text-orange-600 font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 cursor-pointer btn-modern-interaction rounded-lg"
               >
-                Đăng ký mua
+                {t.products.btnBuy}
               </button>
             </div>
 
@@ -358,10 +362,10 @@ export function ProductDetailView({
             {/* Tabs Header */}
             <div className="flex border-b border-slate-200 overflow-x-auto gap-1">
               {[
-                { id: 'overview', label: 'Tổng quan' },
-                { id: 'features', label: 'Chi tiết tính năng' },
-                { id: 'video', label: 'Video sản phẩm' },
-                { id: 'documents', label: 'Tải bộ cài & HDSD' }
+                { id: 'overview', label: t.products.overviewTab },
+                { id: 'features', label: t.products.featuresTab },
+                { id: 'video', label: t.products.videosTab },
+                { id: 'documents', label: t.products.documentsTab }
               ].map((tab) => (
                 <button
                   key={tab.id}

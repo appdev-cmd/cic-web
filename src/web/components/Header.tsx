@@ -15,6 +15,7 @@ import {
 import { typeNav } from '@shared/components/Typography';
 import { getNavigationData, type NavigationDataResult } from '../features/navigation/navigationData';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
+import { useI18n } from '@/shared/i18n';
 
 interface HeaderProps {
   embedded?: boolean;
@@ -63,9 +64,10 @@ export const Header = ({
   onSearch, 
   onOpenConsultation 
 }: HeaderProps) => {
+  const { t, locale } = useI18n();
   const { headerLinks: navLinks } = navigation || getNavigationData();
   const resolvePublicHref = (href: string) => href.startsWith('/') ? href : `/services/${href.replace(/^\/+/, '')}`;
-  const routeSegment = pathname?.split('/').filter(Boolean)[0];
+  const routeSegment = pathname?.split('/').filter(Boolean).find((s) => s !== 'en');
   const viewFromSegment = (segment?: string): Exclude<NonNullable<HeaderProps['currentView']>, 'not-found'> => {
     if (!segment) return 'home';
     if (segment === 'about' || segment === 'gioi-thieu') return 'about';
@@ -135,6 +137,19 @@ export const Header = ({
   // Header should be styled as white/dark-text if we are in solid page views OR if we scrolled down on homepage
   const isHeaderWhite = isScrolled || isSolidView;
 
+  const switchLanguage = (targetLang: 'vi' | 'en') => {
+    if (targetLang === locale) return;
+    const current = pathname || '/';
+    if (targetLang === 'en') {
+      if (current === '/') navigateTo('/en');
+      else if (!current.startsWith('/en')) navigateTo(`/en${current}`);
+    } else {
+      if (current === '/en') navigateTo('/');
+      else if (current.startsWith('/en/')) navigateTo(current.replace(/^\/en/, ''));
+      else navigateTo(current);
+    }
+  };
+
   return (
     <>
       <header 
@@ -147,14 +162,14 @@ export const Header = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex items-center justify-between h-full gap-3">
           <div className="flex items-center gap-2 h-full">
             <a 
-              href="/"
+              href={locale === 'en' ? '/en' : '/'}
               onClick={(e) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 setCurrentView('home');
                 setActiveLink('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                navigateTo('/');
+                navigateTo(locale === 'en' ? '/en' : '/');
               }}
               className="flex items-center group h-full"
             >
@@ -173,89 +188,89 @@ export const Header = ({
           <nav className="hidden lg:flex items-center justify-center gap-3 xl:gap-6 min-w-0">
             {navLinks.map((link) => {
               const hasDropdown = !!link.dropdown;
-              const isActive = (currentView === 'products' && link.name === 'Sản phẩm') || 
-                               (currentView === 'about' && link.name === 'Giới thiệu') || 
-                               (currentView === 'services' && link.name === 'Dịch vụ') || 
-                               (currentView === 'projects' && link.name === 'Dự án') || 
-                               (currentView === 'news' && link.name === 'Tin tức') || 
-                               (currentView === 'events' && link.name === 'Sự kiện') ||
-                               (currentView === 'contact' && link.name === 'Liên hệ') ||
-                               (currentView === 'home' && activeLink === link.name);
+              const linkView = viewFromSegment(link.href.replace(/^\/en/, '').split('/').filter(Boolean)[0]);
+              const isActive = (currentView === linkView && linkView !== 'home') || 
+                               (currentView === 'home' && (activeLink === link.name || link.href === '/' || link.href === '/en'));
               return (
-                <div key={link.name} className="relative group py-1">
-                  <a 
+                <div 
+                  key={link.name} 
+                  className="relative group py-2"
+                >
+                  <a
                     href={resolvePublicHref(link.href)}
                     onClick={(e) => {
                       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                       navigateTo(resolvePublicHref(link.href));
-                      if (link.name === 'Sản phẩm') {
+                      if (linkView === 'products') {
                         e.preventDefault();
                         setCurrentView('products');
-                        setActiveLink('Sản phẩm');
+                        setActiveLink(link.name);
                         if (onResetProducts) onResetProducts();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } else if (link.name === 'Giới thiệu') {
+                      } else if (linkView === 'about') {
                         e.preventDefault();
                         setCurrentView('about');
                         setAboutSubTab('overview');
-                        setActiveLink('Giới thiệu');
+                        setActiveLink(link.name);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } else if (link.name === 'Dịch vụ') {
+                      } else if (linkView === 'services') {
                         e.preventDefault();
                         setCurrentView('services');
-                        setActiveLink('Dịch vụ');
+                        setActiveLink(link.name);
                         if (onSelectService) onSelectService(null);
                         if (onResetServices) onResetServices();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } else if (link.name === 'Dự án') {
+                      } else if (linkView === 'projects') {
                         e.preventDefault();
                         setCurrentView('projects');
-                        setActiveLink('Dự án');
+                        setActiveLink(link.name);
                         if (onSelectProject) onSelectProject(null);
                         if (onResetProjects) onResetProjects();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } else if (link.name === 'Tin tức') {
+                      } else if (linkView === 'news') {
                         e.preventDefault();
                         setCurrentView('news');
-                        setActiveLink('Tin tức');
+                        setActiveLink(link.name);
                         if (onSelectNewsCategory) onSelectNewsCategory('all');
                         if (onResetNews) onResetNews();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } else if (link.name === 'Sự kiện') {
+                      } else if (linkView === 'events') {
                         e.preventDefault();
                         setCurrentView('events');
-                        setActiveLink('Sự kiện');
+                        setActiveLink(link.name);
                         if (onResetEvents) onResetEvents();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } else if (link.name === 'Liên hệ') {
+                      } else if (linkView === 'contact') {
                         e.preventDefault();
                         setCurrentView('contact');
-                        setActiveLink('Liên hệ');
+                        setActiveLink(link.name);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       } else {
                         setCurrentView('home');
                         setActiveLink(link.name);
                       }
                     }}
-                    className={`${typeNav} transition-all flex items-center gap-1 uppercase ${
+                    className={`flex items-center gap-1.5 ${typeNav} transition-all duration-200 cursor-pointer py-1 ${
                       isActive 
-                        ? 'text-orange-600' 
-                        : isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white/90 hover:text-white'
+                        ? 'text-orange-600 font-bold border-b-2 border-orange-600 pb-0.5' 
+                        : isHeaderWhite 
+                          ? 'text-slate-800 hover:text-orange-600 font-medium' 
+                          : 'text-white/90 hover:text-white font-medium'
                     }`}
                   >
-                    {link.name}
+                    <span>{link.name}</span>
                     {hasDropdown && (
                       <ChevronDown 
                         size={14} 
-                        className="transition-transform duration-300 group-hover:rotate-180 opacity-75" 
+                        className="transition-transform duration-300 group-hover:rotate-180 opacity-70 group-hover:opacity-100" 
                       />
                     )}
                   </a>
-                  <div className={`absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full ${isActive ? 'w-full' : ''}`}></div>
-                  
+
+                  {/* Dropdown Menu */}
                   {hasDropdown && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50 w-max min-w-[170px] max-w-[90vw]">
-                      <div className="bg-white border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[10px] py-2 text-slate-800">
+                    <div className="absolute top-full left-0 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                      <div className="bg-white rounded-[8px] shadow-2xl border border-slate-100 py-3 px-2 min-w-[240px] flex flex-col gap-1">
                         {link.dropdown?.map((subItem) => (
                           <a
                             key={subItem.name}
@@ -263,40 +278,24 @@ export const Header = ({
                             onClick={(e) => {
                               if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                               navigateTo(resolvePublicHref(subItem.href));
-                              if (link.name === 'Giới thiệu') {
+                              if (linkView === 'about') {
                                 e.preventDefault();
                                 setCurrentView('about');
-                                setActiveLink('Giới thiệu');
-                                if (subItem.name === 'Cơ cấu tổ chức') {
+                                setActiveLink(link.name);
+                                if (subItem.name.includes('cấu') || subItem.name.includes('Structure')) {
                                   setAboutSubTab('structure');
-                                } else if (subItem.name === 'Năng lực và Kinh nghiệm') {
+                                } else if (subItem.name.includes('lực') || subItem.name.includes('Experience')) {
                                   setAboutSubTab('experience');
                                 } else {
                                   setAboutSubTab('overview');
                                 }
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                              } else if (link.name === 'Dịch vụ') {
+                              } else if (linkView === 'services') {
                                 e.preventDefault();
                                 setCurrentView('services');
-                                setActiveLink('Dịch vụ');
-                                if (onSelectService) onSelectService(subItem.href);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              } else if (link.name === 'Tin tức') {
-                                e.preventDefault();
-                                setCurrentView('news');
-                                setActiveLink('Tin tức');
-                                if (onSelectNewsCategory) {
-                                  if (subItem.name === 'Tin công ty') onSelectNewsCategory('company');
-                                  else if (subItem.name === 'Tin chuyên ngành') onSelectNewsCategory('specialty');
-                                  else if (subItem.name === 'Hợp tác quốc tế' || subItem.name === 'Hợp tác Quốc tế' || subItem.name === 'Tin hợp tác quốc tế' || subItem.name === 'Tin hợp tác Quốc tế') onSelectNewsCategory('international');
-                                  else if (subItem.name === 'Tin tuyển dụng') onSelectNewsCategory('recruitment');
-                                  else if (subItem.name === 'Tin khuyến mại') onSelectNewsCategory('promotion');
-                                  else if (subItem.name === 'Quan hệ cổ đông') onSelectNewsCategory('shareholder');
-                                }
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              } else {
-                                setCurrentView('home');
                                 setActiveLink(link.name);
+                                onSelectService?.(subItem.name);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
                               }
                             }}
                             className="block px-4 py-2 text-[15px] font-normal text-slate-800 hover:text-orange-600 hover:bg-slate-50 transition-all text-left whitespace-nowrap rounded-[8px]"
@@ -318,18 +317,26 @@ export const Header = ({
               isHeaderWhite ? 'bg-slate-100 border-slate-200' : 'bg-white/10 border-white/20'
             }`}>
               <button 
-                className={`px-3 py-1 text-[10px] font-black rounded-[8px] transition-all ${
-                  isHeaderWhite 
+                type="button"
+                onClick={() => switchLanguage('vi')}
+                className={`px-3 py-1 text-[10px] font-black rounded-[8px] transition-all cursor-pointer ${
+                  locale === 'vi' 
                     ? 'bg-orange-600 text-white shadow-sm' 
-                    : 'bg-orange-600 text-white shadow-[0_0_15px_rgba(234,88,12,0.4)]'
+                    : (isHeaderWhite ? 'text-slate-400 hover:text-slate-600' : 'text-white/50 hover:text-white')
                 }`}
+                title={t.header.viLanguage}
               >
                 VN
               </button>
               <button 
-                className={`px-3 py-1 text-[10px] font-black rounded-[8px] transition-all ${
-                  isHeaderWhite ? 'text-slate-400 hover:text-slate-600' : 'text-white/40 hover:text-white'
+                type="button"
+                onClick={() => switchLanguage('en')}
+                className={`px-3 py-1 text-[10px] font-black rounded-[8px] transition-all cursor-pointer ${
+                  locale === 'en'
+                    ? 'bg-orange-600 text-white shadow-sm' 
+                    : (isHeaderWhite ? 'text-slate-400 hover:text-slate-600' : 'text-white/50 hover:text-white')
                 }`}
+                title={t.header.enLanguage}
               >
                 EN
               </button>
@@ -338,7 +345,7 @@ export const Header = ({
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`p-2 rounded-[8px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${isHeaderWhite ? 'text-slate-600 hover:text-orange-600' : 'text-white hover:text-orange-400'}`}
-              title="Tìm kiếm"
+              title={t.common.search}
             >
               <Search size={20} />
             </button>
@@ -346,12 +353,12 @@ export const Header = ({
               onClick={onOpenConsultation}
               className="hidden xl:inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-bold tracking-wide transition-all active:scale-95 shadow-sm shadow-orange-600/20 btn-modern-interaction cursor-pointer"
             >
-              Tư vấn ngay
+              {t.header.consultationCta}
             </button>
             <button 
               className="lg:hidden min-h-11 min-w-11 inline-flex items-center justify-center p-2 text-white rounded-[8px]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
+              aria-label={mobileMenuOpen ? t.common.close : t.header.menuAria}
             >
               {mobileMenuOpen ? (
                 <X size={24} className="text-slate-900" />
@@ -387,8 +394,8 @@ export const Header = ({
                       handleGlobalSearch();
                     }
                   }}
-                  placeholder="Nhập từ khóa tìm kiếm sản phẩm, dịch vụ, dự án, tin tức..."
-                  aria-label="Tìm kiếm"
+                  placeholder={t.header.searchPlaceholder}
+                  aria-label={t.common.search}
                   className={`w-full border px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] font-bold transition-colors ${
                     !isHeaderWhite
                       ? 'bg-slate-900 border-slate-700 text-white'
@@ -400,7 +407,7 @@ export const Header = ({
                   onClick={handleGlobalSearch}
                   className="px-4 sm:px-6 py-2 sm:py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs tracking-wider transition-colors shrink-0 rounded-[8px]"
                 >
-                  Tìm kiếm
+                  {t.common.search}
                 </button>
                 <button
                   onClick={() => setIsSearchOpen(false)}
@@ -409,7 +416,7 @@ export const Header = ({
                       ? 'text-slate-400 hover:text-white hover:bg-slate-800'
                       : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                   }`}
-                  title="Đóng tìm kiếm"
+                  title={t.common.close}
                 >
                   <X size={20} />
                 </button>
@@ -613,6 +620,34 @@ export const Header = ({
 
               {/* Drawer Bottom Actions */}
               <div className="pt-4 border-t border-slate-800 shrink-0 flex flex-col gap-3">
+                {/* Mobile Language Switcher */}
+                <div className="flex items-center justify-center gap-2 p-1 bg-slate-900 border border-slate-800 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      switchLanguage('vi');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${
+                      locale === 'vi' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Tiếng Việt (VN)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      switchLanguage('en');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${
+                      locale === 'en' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    English (EN)
+                  </button>
+                </div>
+
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
@@ -620,10 +655,10 @@ export const Header = ({
                   }}
                   className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold text-center uppercase tracking-wider text-xs transition-all active:scale-[0.98] rounded-[8px] shadow-lg shadow-orange-600/20 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
                 >
-                  Tư vấn ngay
+                  {t.header.consultationCta}
                 </button>
                 <div className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-2">
-                  <span>Hotline: <strong className="text-slate-200">024 3976 1381</strong></span>
+                  <span>{t.common.hotline}: <strong className="text-slate-200">{settings?.values?.tel || '024 3976 1381'}</strong></span>
                 </div>
               </div>
             </motion.div>

@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Clock } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsCardProps {
   news: PublicNewsItem;
@@ -19,6 +20,7 @@ export function NewsCard({
   getTypeSimpleText,
 }: NewsCardProps) {
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const { t } = useI18n();
 
   return (
     <motion.div
@@ -63,7 +65,7 @@ export function NewsCard({
         </p>
 
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-black uppercase tracking-wider text-[#FC5115] pr-2">
-          <span>Đọc tiếp</span>
+          <span>{t.news.readMore}</span>
           <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform duration-300 shrink-0" />
         </div>
       </div>

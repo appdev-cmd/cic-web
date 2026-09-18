@@ -1,0 +1,26 @@
+import type { ServicesDictionary } from '../../types';
+
+export const viServices: ServicesDictionary = {
+  catalogTitle: 'Dịch vụ Tư vấn & Triển khai',
+  catalogSubtitle: 'Cung cấp giải pháp tư vấn toàn diện: chuyển đổi số, BIM, mô phỏng kết cấu và chuyển giao công nghệ cho doanh nghiệp.',
+  consultationTitle: 'Đăng ký tư vấn giải pháp',
+  consultationSubtitle: 'Kết nối cùng chuyên gia hàng đầu để nhận lộ trình triển khai tối ưu nhất cho dự án của bạn.',
+  processTitle: 'Quy trình thực hiện chuyên nghiệp',
+  processSubtitle: 'Các bước chuẩn hóa đảm bảo chất lượng, tiến độ và giá trị gia tăng tối đa.',
+  relatedProducts: 'Giải pháp phần mềm liên quan',
+  relatedServices: 'Dịch vụ liên quan khác',
+  serviceDetail: 'Chi tiết dịch vụ',
+  requestServiceCta: 'Đăng ký nhận tư vấn',
+  searchPlaceholder: 'Tìm kiếm dịch vụ...',
+  backToList: 'Quay lại danh sách dịch vụ',
+  formNameLabel: 'Họ và tên',
+  formPhoneLabel: 'Số điện thoại',
+  formEmailLabel: 'Email liên hệ',
+  formServiceLabel: 'Dịch vụ quan tâm',
+  formNoteLabel: 'Nội dung cần tư vấn',
+  formSubmitBtn: 'Gửi yêu cầu tư vấn',
+  formSuccess: 'Yêu cầu tư vấn đã được gửi thành công!',
+  formError: 'Không thể gửi yêu cầu lúc này. Vui lòng thử lại.',
+  overview: 'Tổng quan dịch vụ',
+  workflow: 'Quy trình thực hiện',
+};

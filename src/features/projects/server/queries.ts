@@ -29,15 +29,16 @@ type ProjectRow = {
 export function formatProjectPeriod(
   startYear: number | null,
   endYear: number | null,
-  isOngoing: boolean
+  isOngoing: boolean,
+  locale: 'vi' | 'en' = 'vi'
 ): string {
   if (!startYear) return '—';
-  if (isOngoing) return `${startYear} - Hiện tại`;
+  if (isOngoing) return locale === 'en' ? `${startYear} - Present` : `${startYear} - Hiện tại`;
   if (endYear && endYear !== startYear) return `${startYear} - ${endYear}`;
   return String(startYear);
 }
 
-export function mapProjectListItem(row: ProjectRow): ProjectListItemViewModel {
+export function mapProjectListItem(row: ProjectRow, locale: 'vi' | 'en' = 'vi'): ProjectListItemViewModel {
   return {
     id: String(row.id),
     title: row.title,
@@ -54,32 +55,40 @@ export function mapProjectListItem(row: ProjectRow): ProjectListItemViewModel {
     endYear: row.end_year ?? null,
     isOngoing: Boolean(row.is_ongoing),
     isFeatured: Boolean(row.is_featured),
-    timeDisplay: formatProjectPeriod(row.start_year, row.end_year, Boolean(row.is_ongoing)),
+    timeDisplay: formatProjectPeriod(row.start_year, row.end_year, Boolean(row.is_ongoing), locale),
   };
 }
 
-export async function listPublishedProjects(): Promise<ProjectListItemViewModel[]> {
+export async function listPublishedProjects(locale: 'vi' | 'en' = 'vi'): Promise<ProjectListItemViewModel[]> {
   const sql = getPostgresClient();
+  const isEn = locale === 'en';
+  const table = isEn ? sql`cic_projects_en` : sql`cic_projects`;
+
   const rows = await sql<ProjectRow[]>`
     SELECT id, title, alias, tagline, summary, image, sector, solution,
            technologies, customer_name, location, start_year, end_year, is_ongoing,
            is_featured, ordering
-    FROM cic_projects
+    FROM ${table}
     WHERE published = true
     ORDER BY ordering ASC, id ASC
   `;
 
-  return rows.map(mapProjectListItem);
+  return rows.map((r) => mapProjectListItem(r, locale));
 }
 
-export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDetailViewModel | null> {
+export async function getPublishedProjectBySlug(slug: string, locale: 'vi' | 'en' = 'vi'): Promise<ProjectDetailViewModel | null> {
   const sql = getPostgresClient();
+  const isEn = locale === 'en';
+  const table = isEn ? sql`cic_projects_en` : sql`cic_projects`;
+  const prodTable = isEn ? sql`cic_products_en` : sql`cic_products`;
+  const mfgTable = isEn ? sql`cic_manufactories_en` : sql`cic_manufactories`;
+  const serviceTable = isEn ? sql`cic_services_en` : sql`cic_services`;
 
   const [row] = await sql<ProjectRow[]>`
     SELECT id, title, alias, tagline, summary, content, image, sector, solution,
            technologies, customer_name, location, start_year, end_year, is_ongoing,
            is_featured, ordering, seo_title, seo_keyword, seo_description
-    FROM cic_projects
+    FROM ${table}
     WHERE published = true AND alias = ${slug}
     LIMIT 1
   `;
@@ -93,8 +102,8 @@ export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDe
     sql`
       SELECT p.id, p.name as label, p.image, m.name as brand, a.name as application
       FROM cic_projects_products_rel r
-      JOIN cic_products p ON p.id = r.product_id
-      LEFT JOIN cic_manufactories m ON m.id::text = p.manufactory
+      JOIN ${prodTable} p ON p.id = r.product_id
+      LEFT JOIN ${mfgTable} m ON m.id::text = p.manufactory
       LEFT JOIN cic_products_applications_rel par ON par.product_id = p.id
       LEFT JOIN cic_application a ON a.id = par.application_id
       WHERE r.project_id = ${projectId} AND p.published = true
@@ -103,19 +112,21 @@ export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDe
     sql`
       SELECT s.id, s.title as label, s.alias, s.image, s.summary
       FROM cic_projects_services_rel r
-      JOIN cic_services s ON s.id = r.service_id
+      JOIN ${serviceTable} s ON s.id = r.service_id
       WHERE r.project_id = ${projectId} AND s.published::text IN ('1', 'true')
       ORDER BY r.ordering ASC, s.id ASC
     `,
     sql<ProjectRow[]>`
       SELECT id, title, alias, tagline, summary, image, sector, solution,
              technologies, customer_name, location, start_year, end_year, is_ongoing, is_featured
-      FROM cic_projects
+      FROM ${table}
       WHERE published = true AND id != ${projectId}
       ORDER BY (CASE WHEN sector = ${row.sector} THEN 0 ELSE 1 END), ordering ASC, id ASC
       LIMIT 3
     `,
   ]);
+
+  const serviceSubLabel = locale === 'en' ? 'CIC Consulting Service' : 'Dịch vụ CIC';
 
   const relatedLinks: ProjectRelationLink[] = [
     ...productRows.map((p: any) => ({
@@ -129,12 +140,12 @@ export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDe
       id: s.alias || String(s.id),
       label: s.label,
       view: 'services' as const,
-      subLabel: 'Dịch vụ CIC',
+      subLabel: serviceSubLabel,
       image: s.image,
     })),
   ];
 
-  const baseItem = mapProjectListItem(row);
+  const baseItem = mapProjectListItem(row, locale);
 
   return {
     ...baseItem,
@@ -143,7 +154,7 @@ export async function getPublishedProjectBySlug(slug: string): Promise<ProjectDe
     seoKeyword: row.seo_keyword ?? null,
     seoDescription: row.seo_description ?? row.summary,
     relatedLinks,
-    relatedProjects: relatedProjectRows.map(mapProjectListItem),
+    relatedProjects: relatedProjectRows.map((p) => mapProjectListItem(p, locale)),
   };
 }
 

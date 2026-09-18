@@ -19,6 +19,7 @@ import { ZaloIcon } from '@shared/components/Icons';
 import { typeH4, typeButton, typeCaption, typeLabel, typeMeta } from '@shared/components/Typography';
 import { getNavigationData, type FooterNavigationItem, type NavigationDataResult, type PublicNavigationView } from '../features/navigation/navigationData';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
+import { useI18n } from '@/shared/i18n';
 
 interface FooterProps {
   settings?: PublicSystemSettings;
@@ -45,6 +46,7 @@ export const Footer = ({
   onResetNews,
   onResetEvents
 }: FooterProps) => {
+  const { t, locale } = useI18n();
   const { footerPrimaryLinks, footerSolutionLinks, footerServiceLinks } = navigation || getNavigationData();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
@@ -99,14 +101,14 @@ export const Footer = ({
             </p>
             {values.tax_id && (
               <p className="text-xs text-slate-400 mb-3">
-                Mã số thuế: <span className="text-white font-mono">{values.tax_id}</span>
+                {t.footer.taxCodeLabel} <span className="text-white font-mono">{values.tax_id}</span>
               </p>
             )}
             <div className="mb-8">
-              <h4 className={`${typeCaption} text-white/60 mb-4`}>Đăng ký để nhận bản tin công nghệ mới nhất từ CIC</h4>
+              <h4 className={`${typeCaption} text-white/60 mb-4`}>{t.footer.newsletterTitle}</h4>
               {newsletterSubscribed ? (
                 <div className="bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 px-4 py-2.5 rounded-[8px] text-xs font-bold flex items-center gap-2">
-                  <span>✓</span> Đăng ký nhận bản tin thành công! Cảm ơn bạn.
+                  <span>✓</span> {t.footer.newsletterSuccess}
                 </div>
               ) : (
                 <form className="relative flex flex-col sm:flex-row gap-2" onSubmit={handleNewsletterSubmit}>
@@ -115,10 +117,10 @@ export const Footer = ({
                     required
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="Nhập email liên hệ" 
+                    placeholder={t.footer.newsletterPlaceholder} 
                     className="min-w-0 flex-1 bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 rounded-[8px] transition-all"
                   />
-                  <button type="submit" className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction cursor-pointer`}>Đăng ký</button>
+                  <button type="submit" className={`px-5 py-2.5 bg-orange-600 text-white ${typeButton} rounded-lg hover:bg-orange-700 transition-all btn-modern-interaction cursor-pointer`}>{t.footer.newsletterButton}</button>
                 </form>
               )}
             </div>
@@ -131,7 +133,7 @@ export const Footer = ({
                   <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
                 </a>
               ) : (
-                <span aria-label="LinkedIn chưa được cấu hình" aria-disabled="true" title="LinkedIn chưa được cấu hình" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center text-white/50 shadow-lg group cursor-not-allowed">
+                <span aria-label="LinkedIn" aria-disabled="true" className="w-12 h-12 rounded-[8px] border border-white/10 flex items-center justify-center text-white/50 shadow-lg group cursor-not-allowed">
                   <Linkedin size={20} className="group-hover:scale-110 transition-transform" />
                 </span>
               )}
@@ -149,7 +151,7 @@ export const Footer = ({
 
           {/* Navigation Menu */}
           <div className="lg:col-span-2">
-            <h3 className={`${typeLabel} text-white mb-8`}>Điều hướng</h3>
+            <h3 className={`${typeLabel} text-white mb-8`}>{t.footer.navigationTitle}</h3>
             <ul className="space-y-4 text-sm font-semibold">
               {footerPrimaryLinks.map((item) => (
                 <li key={item.label}>
@@ -160,16 +162,16 @@ export const Footer = ({
           </div>
 
           <div className="lg:col-span-3">
-            <h3 className={`${typeLabel} text-white mb-8`}>Giải pháp & Dịch vụ</h3>
+            <h3 className={`${typeLabel} text-white mb-8`}>{t.footer.solutionsAndServicesTitle}</h3>
             <div className="grid grid-cols-1 gap-6">
               <div>
-                <h4 className={`${typeMeta} text-white/60 mb-4`}>Giải pháp</h4>
+                <h4 className={`${typeMeta} text-white/60 mb-4`}>{t.footer.solutionsTitle}</h4>
                 <ul className="space-y-3 text-xs font-bold">
                   {footerSolutionLinks.map((item) => <li key={item.label}><a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all">{item.label}</a></li>)}
                 </ul>
               </div>
               <div>
-                <h4 className={`${typeMeta} text-white/60 mb-4`}>Dịch vụ</h4>
+                <h4 className={`${typeMeta} text-white/60 mb-4`}>{t.footer.servicesTitle}</h4>
                 <ul className="space-y-3 text-xs font-bold">
                   {footerServiceLinks.map((item) => <li key={item.label}><a href={item.href} onClick={(event) => handleNavigation(event, item)} className="hover:text-orange-600 transition-all">{item.label}</a></li>)}
                 </ul>
@@ -181,10 +183,10 @@ export const Footer = ({
           <div className="lg:col-span-3 space-y-10">
             <div>
               <h3 className={`${typeLabel} text-white mb-6 flex items-center gap-2`}>
-                <MapPin size={18} className="text-orange-600" /> Trụ sở chính
+                <MapPin size={18} className="text-orange-600" /> {t.footer.headOfficeTitle}
               </h3>
               <div className={`${typeCaption} space-y-4 text-slate-400`}>
-                <p className="leading-relaxed">{headOffice?.address || 'Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam'}</p>
+                <p className="leading-relaxed">{headOffice?.address || (locale === 'en' ? '4th Floor, VG Building, 235 Nguyen Trai, Thanh Xuan, Hanoi, Vietnam' : 'Tầng 4, Tòa nhà VG Building, Số 235 Nguyễn Trãi, Phường Khương Đình, Thành phố Hà Nội, Việt Nam')}</p>
                 <div className="flex flex-col gap-2">
                   <a href={`tel:${(headOffice?.phone || values.tel || '02439761381').replace(/\D/g, '')}`} className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold">
                     <Phone size={14} className="text-orange-600" /> {headOffice?.phone || values.tel || '024 3976 1381'}
@@ -226,45 +228,47 @@ export const Footer = ({
                 dangerouslySetInnerHTML={{ __html: values.footer_bottom }}
               />
             ) : (
-              <p>© {new Date().getFullYear()} CIC TECHNOLOGY. ALL RIGHTS RESERVED.</p>
+              <p>{t.footer.copyright}</p>
             )}
             {values.bct_badge_url && (
               <a href={values.bct_badge_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-orange-400 hover:underline">
-                <span>Chứng nhận Bộ Công Thương</span>
+                <span>{locale === 'en' ? 'Ministry of Industry & Trade Certified' : 'Chứng nhận Bộ Công Thương'}</span>
                 <ExternalLink size={12} />
               </a>
             )}
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-10">
             <a 
-              href="/privacy"
+              href={locale === 'en' ? '/en/privacy' : '/privacy'}
               onClick={(e) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 setLegacyCurrentView?.('privacy');
                 setLegacyActiveLink?.('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                if (onNavigate) onNavigate('/privacy');
-                else window.location.assign('/privacy');
+                const target = locale === 'en' ? '/en/privacy' : '/privacy';
+                if (onNavigate) onNavigate(target);
+                else window.location.assign(target);
               }} 
-              className="hover:text-white transition-all cursor-pointer"
+              className="hover:text-white transition-all cursor-pointer uppercase"
             >
-              CHÍNH SÁCH BẢO MẬT
+              {t.footer.privacyPolicy}
             </a>
             <a 
-              href="/terms"
+              href={locale === 'en' ? '/en/terms' : '/terms'}
               onClick={(e) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
                 setLegacyCurrentView?.('terms');
                 setLegacyActiveLink?.('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                if (onNavigate) onNavigate('/terms');
-                else window.location.assign('/terms');
+                const target = locale === 'en' ? '/en/terms' : '/terms';
+                if (onNavigate) onNavigate(target);
+                else window.location.assign(target);
               }}
-              className="hover:text-white transition-all cursor-pointer"
+              className="hover:text-white transition-all cursor-pointer uppercase"
             >
-              ĐIỀU KHOẢN SỬ DỤNG
+              {t.footer.termsOfUse}
             </a>
           </div>
         </div>

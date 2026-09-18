@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Search, X, Check, SlidersHorizontal, Layers, Box, FileText, Tag, ChevronUp, ChevronDown } from 'lucide-react';
 import { Product } from '@shared/types';
+import { useI18n } from '@/shared/i18n';
 
 interface ProductFilterSidebarProps {
   search: string;
@@ -54,6 +55,7 @@ export function ProductFilterSidebar({
   isMobileFilterOpen,
   getProductType,
 }: ProductFilterSidebarProps) {
+  const { t } = useI18n();
   // Accordion open/close states
   const [isFieldsOpen, setIsFieldsOpen] = useState(true);
   const [isBrandsOpen, setIsBrandsOpen] = useState(true);
@@ -82,18 +84,18 @@ export function ProductFilterSidebar({
       <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-5">
         <span className="flex items-center gap-2 font-bold uppercase tracking-wider text-sm text-slate-900">
           <SlidersHorizontal size={16} className="text-orange-600" />
-          Bộ lọc tìm kiếm
+          {t.products.filterTitle}
         </span>
         {activeFiltersCount > 0 && (
           <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-[8px]">
-            Đã chọn {activeFiltersCount}
+            {t.products.filterSelected} {activeFiltersCount}
           </span>
         )}
       </div>
 
       {/* Compact Search Input */}
       <div className="mb-5">
-        <label className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-1.5">Từ khóa</label>
+        <label className="block text-sm font-bold text-slate-800 uppercase tracking-wider mb-1.5">{t.products.filterKeyword}</label>
         <div className="relative flex items-center">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
             <Search size={15} className="text-slate-400" />
@@ -102,7 +104,7 @@ export function ProductFilterSidebar({
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Nhập tên sản phẩm..."
+            placeholder={t.products.filterKeywordPlaceholder}
             className="w-full bg-slate-50 border border-slate-200 focus:border-orange-600 focus:bg-white focus:outline-none px-3 py-1.5 pl-8 pr-8 text-sm font-medium text-slate-800 transition-all placeholder:text-slate-400 rounded-[8px]"
           />
           {search && (
@@ -184,7 +186,7 @@ export function ProductFilterSidebar({
                 onClick={() => setIsFieldsExpanded(!isFieldsExpanded)}
                 className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
               >
-                {isFieldsExpanded ? 'Thu gọn ▲' : `Xem thêm (${fields.length - 10}) ▼`}
+                {isFieldsExpanded ? `${t.products.filterShowLess} ▲` : `${t.products.filterShowMore} (${fields.length - 10}) ▼`}
               </button>
             )}
           </motion.div>
@@ -257,7 +259,7 @@ export function ProductFilterSidebar({
                 onClick={() => setIsBrandsExpanded(!isBrandsExpanded)}
                 className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
               >
-                {isBrandsExpanded ? 'Thu gọn ▲' : `Xem thêm (${brands.length - 10}) ▼`}
+                {isBrandsExpanded ? 'Thu gọn ▲' : `${t.products.filterShowMore} (${brands.length - 10}) ▼`}
               </button>
             )}
           </motion.div>
@@ -332,7 +334,7 @@ export function ProductFilterSidebar({
                 onClick={() => setIsAppsExpanded(!isAppsExpanded)}
                 className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors pt-1 px-2.5 flex items-center gap-1"
               >
-                {isAppsExpanded ? 'Thu gọn ▲' : `Xem thêm (${apps.length - 10}) ▼`}
+                {isAppsExpanded ? 'Thu gọn ▲' : `${t.products.filterShowMore} (${apps.length - 10}) ▼`}
               </button>
             )}
           </motion.div>

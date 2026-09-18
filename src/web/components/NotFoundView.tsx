@@ -1,4 +1,7 @@
+'use client';
+
 import { History, Home, Search, ShieldQuestion } from 'lucide-react';
+import { useI18n } from '@/shared/i18n';
 
 export interface NotFoundContent {
   title: string;
@@ -8,13 +11,6 @@ export interface NotFoundContent {
   ctaUrl: string;
 }
 
-export const defaultNotFoundContent: NotFoundContent = {
-  title: 'Không tìm thấy trang',
-  description: 'Đường dẫn bạn truy cập không tồn tại, đã được thay đổi hoặc tạm thời không khả dụng.',
-  ctaLabel: 'Về trang chủ',
-  ctaUrl: '/',
-};
-
 interface NotFoundViewProps {
   content?: Partial<NotFoundContent>;
   onNavigateHome?: () => void;
@@ -23,11 +19,20 @@ interface NotFoundViewProps {
 }
 
 export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = false }: NotFoundViewProps) {
-  const value = { ...defaultNotFoundContent, ...content };
+  const { t, locale } = useI18n();
+
+  const defaultContent: NotFoundContent = {
+    title: t.errors.notFoundTitle,
+    description: t.errors.notFoundDescription,
+    ctaLabel: t.errors.backToHomeButton,
+    ctaUrl: locale === 'en' ? '/en' : '/',
+  };
+
+  const value = { ...defaultContent, ...content };
 
   const handlePrimaryAction = () => {
     if (embedded) return;
-    if (value.ctaUrl === '/' && onNavigateHome) {
+    if ((value.ctaUrl === '/' || value.ctaUrl === '/en') && onNavigateHome) {
       onNavigateHome();
       return;
     }
@@ -49,7 +54,7 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
           <div className="order-2 text-center lg:order-1 lg:text-left">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-orange-700">
               <ShieldQuestion className="h-4 w-4" />
-              Lỗi 404
+              {t.errors.notFoundCode}
             </div>
 
             <h1 id="not-found-title" className={`${embedded ? 'text-3xl' : 'text-4xl sm:text-5xl lg:text-6xl'} font-black tracking-[-0.04em] text-slate-950`}>
@@ -63,7 +68,7 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
               <button
                 type="button"
                 onClick={handlePrimaryAction}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-600/20 transition hover:-translate-y-0.5 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-600/20 transition hover:-translate-y-0.5 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 cursor-pointer"
               >
                 <Home className="h-4 w-4" />
                 {value.ctaLabel}
@@ -72,10 +77,10 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
                 <button
                   type="button"
                   onClick={onGoBack || (() => window.history.back())}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 cursor-pointer"
                 >
                   <History className="h-4 w-4" />
-                  Quay lại trang trước
+                  {t.errors.backToPreviousButton}
                 </button>
               )}
             </div>
@@ -83,7 +88,7 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
             {!embedded && (
               <p className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400 lg:justify-start">
                 <Search className="h-3.5 w-3.5" />
-                Bạn có thể kiểm tra lại đường dẫn hoặc trở về Trang chủ để tiếp tục.
+                {t.errors.checkUrlNotice}
               </p>
             )}
           </div>
@@ -98,7 +103,7 @@ export function NotFoundView({ content, onNavigateHome, onGoBack, embedded = fal
                 <div className="absolute left-[10%] top-[22%] h-3 w-3 rounded-full bg-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.65)]" />
                 <div className="absolute bottom-[18%] right-[13%] h-2.5 w-2.5 rounded-full bg-slate-800" />
                 <div className="relative select-none text-[clamp(6rem,20vw,11rem)] font-black leading-none tracking-[-0.1em] text-slate-950">
-                  4<span className="text-orange-600">0</span>4
+                  404
                 </div>
               </div>
             )}

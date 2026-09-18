@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Search, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import type { ProjectListItemViewModel } from '@/features/projects/types';
+import { useI18n } from '@/shared/i18n';
+import { Building2 } from 'lucide-react';
 
 interface ProjectsRuntimeViewProps {
   projects: ProjectListItemViewModel[];
@@ -12,10 +14,12 @@ interface ProjectsRuntimeViewProps {
 }
 
 export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRuntimeViewProps) {
+  const { t, locale } = useI18n();
+  const allLabel = t.projects.filterAll;
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSector, setSelectedSector] = useState('Tất cả');
-  const [selectedSolution, setSelectedSolution] = useState('Tất cả');
-  const [selectedCustomer, setSelectedCustomer] = useState('Tất cả');
+  const [selectedSector, setSelectedSector] = useState('ALL');
+  const [selectedSolution, setSelectedSolution] = useState('ALL');
+  const [selectedCustomer, setSelectedCustomer] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -26,24 +30,24 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
 
   // Extract unique filter items
   const sectors = useMemo(
-    () => ['Tất cả', ...(Array.from(new Set(projects.map((p) => p.sector).filter(Boolean))) as string[])],
+    () => ['ALL', ...(Array.from(new Set(projects.map((p) => p.sector).filter(Boolean))) as string[])],
     [projects]
   );
   const solutions = useMemo(
-    () => ['Tất cả', ...(Array.from(new Set(projects.map((p) => p.solution).filter(Boolean))) as string[])],
+    () => ['ALL', ...(Array.from(new Set(projects.map((p) => p.solution).filter(Boolean))) as string[])],
     [projects]
   );
   const customers = useMemo(
-    () => ['Tất cả', ...(Array.from(new Set(projects.map((p) => p.customerName).filter(Boolean))) as string[])],
+    () => ['ALL', ...(Array.from(new Set(projects.map((p) => p.customerName).filter(Boolean))) as string[])],
     [projects]
   );
 
   // Filter projects logic
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      const matchesSector = selectedSector === 'Tất cả' || project.sector === selectedSector;
-      const matchesSolution = selectedSolution === 'Tất cả' || project.solution === selectedSolution;
-      const matchesCustomer = selectedCustomer === 'Tất cả' || project.customerName === selectedCustomer;
+      const matchesSector = selectedSector === 'ALL' || project.sector === selectedSector;
+      const matchesSolution = selectedSolution === 'ALL' || project.solution === selectedSolution;
+      const matchesCustomer = selectedCustomer === 'ALL' || project.customerName === selectedCustomer;
       const query = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !query ||
@@ -64,9 +68,9 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
 
   const resetFilters = () => {
     setSearchQuery('');
-    setSelectedSector('Tất cả');
-    setSelectedSolution('Tất cả');
-    setSelectedCustomer('Tất cả');
+    setSelectedSector('ALL');
+    setSelectedSolution('ALL');
+    setSelectedCustomer('ALL');
   };
 
   return (
@@ -79,7 +83,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
               Dự Án Thực Tế
             </h1>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-              Minh chứng năng lực triển khai thực tế của CIC qua hàng loạt công trình trọng điểm quốc gia
+              {t.projects.catalogSubtitle}
             </p>
           </div>
 
@@ -91,7 +95,7 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
                 const isActive = selectedSector === sec;
                 return (
                   <button
-                    key={sec}
+                    key={sec === 'ALL' ? t.projects.filterAll : sec}
                     onClick={() => setSelectedSector(sec)}
                     className={`shrink-0 px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-[8px] cursor-pointer ${
                       isActive

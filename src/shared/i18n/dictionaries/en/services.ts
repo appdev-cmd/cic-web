@@ -1,0 +1,26 @@
+import type { ServicesDictionary } from '../../types';
+
+export const enServices: ServicesDictionary = {
+  catalogTitle: 'Consulting & Implementation Services',
+  catalogSubtitle: 'Delivering end-to-end consulting: digital transformation, BIM implementation, structural simulation, and technology transfer.',
+  consultationTitle: 'Request Strategic Consultation',
+  consultationSubtitle: 'Collaborate with industry-leading experts to optimize execution roadmaps and technology outcomes.',
+  processTitle: 'Standardized Implementation Process',
+  processSubtitle: 'Rigorous engineering methodologies ensuring superior quality, scheduled milestones, and sustained value.',
+  relatedProducts: 'Related Software Solutions',
+  relatedServices: 'Other Related Services',
+  serviceDetail: 'Service Details',
+  requestServiceCta: 'Book Advisory Session',
+  searchPlaceholder: 'Search consulting services...',
+  backToList: 'Back to Services List',
+  formNameLabel: 'Full Name',
+  formPhoneLabel: 'Phone Number',
+  formEmailLabel: 'Email Address',
+  formServiceLabel: 'Service of Interest',
+  formNoteLabel: 'Inquiry & Requirements',
+  formSubmitBtn: 'Submit Inquiry',
+  formSuccess: 'Consultation request submitted successfully!',
+  formError: 'Failed to submit request at this moment. Please try again.',
+  overview: 'Service Overview',
+  workflow: 'Execution Methodology',
+};

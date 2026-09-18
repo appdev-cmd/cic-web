@@ -1,0 +1,25 @@
+import type { HomeDictionary } from '../../types';
+
+export const viHome: HomeDictionary = {
+  heroTagline: 'Tiên phong Chuyển đổi số Xây dựng & Hạ tầng',
+  heroHeadline: 'Giải pháp Công nghệ Kỹ thuật & Tư vấn Toàn diện',
+  heroSubheadline: 'Hơn 30 năm đồng hành cùng sự phát triển bền vững của ngành xây dựng, giao thông, kiến trúc và địa kỹ thuật tại Việt Nam.',
+  heroExploreCta: 'Khám phá giải pháp',
+  heroContactCta: 'Liên hệ tư vấn',
+  statsClients: 'Khách hàng tin cậy',
+  statsYears: 'Năm kinh nghiệm',
+  statsProjects: 'Dự án trọng điểm',
+  statsExperts: 'Chuyên gia công nghệ',
+  featuredSolutionsTitle: 'Giải pháp Công nghệ Tiêu biểu',
+  featuredSolutionsSubtitle: 'Cung cấp hệ thống giải pháp phần mềm bản quyền hàng đầu thế giới cho ngành xây dựng và kỹ thuật.',
+  featuredServicesTitle: 'Dịch vụ Tư vấn Chuyên sâu',
+  featuredServicesSubtitle: 'Đội ngũ chuyên gia dày dặn kinh nghiệm mang đến dịch vụ tư vấn kỹ thuật chính xác và hiệu quả.',
+  featuredProjectsTitle: 'Dự án Tiêu biểu',
+  featuredProjectsSubtitle: 'Những công trình tiêu biểu ứng dụng thành công công nghệ và giải pháp của CIC.',
+  latestNewsTitle: 'Tin tức & Sự kiện',
+  latestNewsSubtitle: 'Cập nhật thông tin công nghệ mới nhất, sự kiện hội thảo và tin hoạt động chuyên ngành.',
+  partnersTitle: 'Đối tác Quốc tế Hàng đầu',
+  partnersSubtitle: 'CIC tự hào là đại diện chính thức và đối tác chiến lược của các hãng phần mềm kỹ thuật danh tiếng trên thế giới.',
+  awardsTitle: 'Giải thưởng & Chứng nhận',
+  awardsSubtitle: 'Ghi nhận cho năng lực chuyên môn và đóng góp tích cực vào sự phát triển công nghệ nước nhà.',
+};

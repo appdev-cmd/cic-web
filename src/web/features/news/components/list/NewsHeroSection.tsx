@@ -3,6 +3,7 @@
 import React from 'react';
 import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import type { PublicNewsItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 interface NewsHeroSectionProps {
   highlightedNews: PublicNewsItem[];
@@ -15,6 +16,7 @@ export function NewsHeroSection({
   onSelectNews,
   getTypeSimpleText,
 }: NewsHeroSectionProps) {
+  const { t } = useI18n();
   if (highlightedNews.length === 0) return null;
 
   const mainStory = highlightedNews[0];
@@ -38,7 +40,7 @@ export function NewsHeroSection({
         <div className="relative z-10 p-6 lg:p-10 space-y-3">
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 bg-[#FC5115] text-white text-[10px] font-black uppercase tracking-wider rounded-[8px]">
-              Tin Nổi Bật
+              {t.news.featuredPosts}
             </span>
             <span className="text-xs text-slate-300 font-semibold flex items-center gap-1">
               <Clock size={13} className="text-[#FC5115]" /> {mainStory.date}
@@ -54,7 +56,7 @@ export function NewsHeroSection({
           </p>
 
           <div className="pt-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#FC5115] pr-2">
-            <span>Đọc tiếp</span>
+            <span>{t.news.readMore}</span>
             <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform duration-300 shrink-0" />
           </div>
         </div>
@@ -63,7 +65,7 @@ export function NewsHeroSection({
       {/* SECONDARY SIDE HIGHLIGHTS (5 cols - 3 larger stacked cards closer together) */}
       <div className="lg:col-span-5 flex flex-col justify-between space-y-2.5">
         <div className="text-xs font-black uppercase tracking-widest text-slate-400 pb-2 border-b border-slate-200 flex items-center justify-between">
-          <span className="text-slate-900 font-extrabold text-sm uppercase tracking-tight">Nội dung đáng chú ý</span>
+          <span className="text-slate-900 font-extrabold text-sm uppercase tracking-tight">{t.news.latestPosts}</span>
           <TrendingUp size={16} className="text-[#FC5115]" />
         </div>
 

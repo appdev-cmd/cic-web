@@ -9,6 +9,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { SlidersHorizontal } from 'lucide-react';
 import { Product } from '@shared/types';
+import { useI18n } from '@/shared/i18n';
 import { ProductDetailView } from './ProductDetailView';
 import type { PublicProductContactMap } from '@/features/sales-owners/types';
 import { ProductFilterSidebar } from '../features/products/components/list/ProductFilterSidebar';
@@ -42,6 +43,7 @@ export function ProductsView({
     return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
   }, [previewProduct, products]);
 
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -210,7 +212,7 @@ export function ProductsView({
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl md:text-5xl font-bold uppercase text-[#444] tracking-tighter mb-4"
           >
-            Hệ thống <span className="text-orange-600">Sản phẩm & Giải pháp</span>
+            <span className="text-orange-600">{t.products.catalogTitle}</span>
           </motion.h1>
           <div className="w-20 h-1 bg-orange-600 mx-auto mb-6" />
           <motion.p
@@ -219,7 +221,7 @@ export function ProductsView({
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-slate-600 max-w-2xl mx-auto font-medium text-sm md:text-base leading-relaxed"
           >
-            Khám phá danh mục phần mềm bản quyền thay thế, mô phỏng chuyên sâu và các dòng thiết bị quan trắc thông minh hàng đầu phục vụ chuyển đổi số kỹ thuật tại Việt Nam.
+            {t.products.catalogSubtitle}
           </motion.p>
         </div>
 
@@ -232,7 +234,7 @@ export function ProductsView({
               className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-800 text-xs font-bold uppercase tracking-wider transition-all hover:border-orange-600 hover:text-orange-600 rounded-[8px]"
             >
               <SlidersHorizontal size={14} className="text-orange-600" />
-              {isMobileFilterOpen ? 'Đóng bộ lọc' : 'Bộ lọc tìm kiếm'}
+              {isMobileFilterOpen ? t.products.filterMobileClose : t.products.filterMobileOpen}
               {activeFiltersCount > 0 && (
                 <span className="px-2 py-0.5 bg-orange-600 text-white text-[10px] font-bold rounded-[8px]">
                   {activeFiltersCount}

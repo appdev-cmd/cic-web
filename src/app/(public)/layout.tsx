@@ -36,11 +36,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicLayout({ children }: Readonly<{ children: ReactNode }>) {
-  const [settings, navigation] = await Promise.all([
+  const [settingsVi, settingsEn, navigationVi, navigationEn] = await Promise.all([
     getPublicSystemSettings('vi'),
+    getPublicSystemSettings('en'),
     getNavigationDataFromDb('vi'),
+    getNavigationDataFromDb('en'),
   ]);
-  const values = settings.values;
+  const values = settingsVi.values;
   const gaId = values.google_analytics;
   const gtmId = values.gtm_id;
   const metaPixelId = values.meta_pixel_id;
@@ -96,7 +98,12 @@ export default async function PublicLayout({ children }: Readonly<{ children: Re
         </Script>
       )}
 
-      <WebsiteShell settings={settings} navigation={navigation}>{children}</WebsiteShell>
+      <WebsiteShell
+        settingsMap={{ vi: settingsVi, en: settingsEn }}
+        navigationMap={{ vi: navigationVi, en: navigationEn }}
+      >
+        {children}
+      </WebsiteShell>
     </>
   );
 }

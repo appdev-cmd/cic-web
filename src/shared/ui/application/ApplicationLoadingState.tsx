@@ -5,7 +5,7 @@ export interface ApplicationLoadingStateProps {
 
 /** Lightweight server-renderable fallback; feature-specific skeletons remain feature-owned. */
 export function ApplicationLoadingState({
-  label = 'Đang tải…',
+  label = 'Loading...',
   className = '',
 }: Readonly<ApplicationLoadingStateProps>) {
   return (

@@ -1,0 +1,25 @@
+import type { HomeDictionary } from '../../types';
+
+export const enHome: HomeDictionary = {
+  heroTagline: 'Pioneering Digital Transformation in Construction & Infrastructure',
+  heroHeadline: 'Comprehensive Engineering Software & Consulting Solutions',
+  heroSubheadline: 'Over 30 years empowering sustainable development across construction, transportation, architecture, and geotechnical engineering in Vietnam.',
+  heroExploreCta: 'Explore Solutions',
+  heroContactCta: 'Get Consultation',
+  statsClients: 'Trusted Clients',
+  statsYears: 'Years Experience',
+  statsProjects: 'Major Projects',
+  statsExperts: 'Tech Specialists',
+  featuredSolutionsTitle: 'Featured Engineering Software Solutions',
+  featuredSolutionsSubtitle: 'Delivering world-class licensed software solutions for design, modeling, analysis, and construction management.',
+  featuredServicesTitle: 'Specialized Consulting Services',
+  featuredServicesSubtitle: 'Experienced multidisciplinary engineering teams providing accurate, compliant, and cost-effective technical solutions.',
+  featuredProjectsTitle: 'Key Case Studies & Projects',
+  featuredProjectsSubtitle: 'Signature national and regional projects successfully empowered by CIC engineering technology.',
+  latestNewsTitle: 'Latest News & Events',
+  latestNewsSubtitle: 'Stay informed with upcoming webinars, technical updates, and industry insights.',
+  partnersTitle: 'Leading Global Technology Partners',
+  partnersSubtitle: 'CIC is proud to be the certified representative and authorized partner of premier software innovators worldwide.',
+  awardsTitle: 'Accreditations & Industry Awards',
+  awardsSubtitle: 'Recognized for technical excellence and persistent contributions to engineering digital transformation.',
+};

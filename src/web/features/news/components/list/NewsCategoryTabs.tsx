@@ -12,6 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import type { PublicNewsCategoryItem } from '../../types';
+import { useI18n } from '@/shared/i18n';
 
 export type NewsCategoryTabId = string;
 
@@ -27,6 +28,18 @@ export function getCategoryIcon(alias: string, name?: string) {
   if (a.includes('co-dong') || a.includes('investor') || a.includes('shareholder') || n.includes('cổ đông')) return Landmark;
   return Newspaper;
 }
+
+const EN_FALLBACK_CATEGORIES: PublicNewsCategoryItem[] = [
+  { id: '7', name: 'Company News', alias: 'tin-cong-ty', ordering: 1 },
+  { id: '8', name: 'Technical Insights', alias: 'tin-chuyen-nganh', ordering: 2 },
+  { id: '9', name: 'Promotions', alias: 'tin-khuyen-mai', ordering: 3 },
+  { id: '10', name: 'Careers', alias: 'tin-tuyen-dung', ordering: 4 },
+  { id: '11', name: 'Investor Relations', alias: 'quan-he-co-dong', ordering: 5 },
+  { id: '12', name: 'Announcements', alias: 'thong-bao-co-dong', parentId: '11', ordering: 6 },
+  { id: '15', name: 'Annual Reports', alias: 'bao-cao-thuong-nien', parentId: '11', ordering: 7 },
+  { id: '13', name: 'Corporate Charter', alias: 'dieu-le-cong-ty', parentId: '11', ordering: 8 },
+  { id: '14', name: 'Financial Reports', alias: 'bao-cao-tai-chinh', parentId: '11', ordering: 9 },
+];
 
 const FALLBACK_CATEGORIES: PublicNewsCategoryItem[] = [
   { id: '7', name: 'Tin công ty', alias: 'tin-cong-ty', ordering: 1 },
@@ -55,8 +68,9 @@ export function NewsCategoryTabs({
   shareholderDocType,
   onSelectShareholderDocType,
 }: NewsCategoryTabsProps) {
+  const { t, locale } = useI18n();
   const effectiveCategories = useMemo(() => {
-    return categories.length > 0 ? categories : FALLBACK_CATEGORIES;
+    return categories.length > 0 ? categories : (locale === 'en' ? EN_FALLBACK_CATEGORIES : FALLBACK_CATEGORIES);
   }, [categories]);
 
   // Top level categories (no parentId)
@@ -106,7 +120,7 @@ export function NewsCategoryTabs({
               activeCategory === 'all' ? 'text-white' : 'text-orange-500 group-hover:text-orange-600'
             }`}
           />
-          <span>Tất cả</span>
+          <span>{t.news.filterAll}</span>
         </button>
 
         {/* Dynamic categories from database */}
