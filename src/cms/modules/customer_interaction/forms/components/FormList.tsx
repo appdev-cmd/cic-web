@@ -17,6 +17,7 @@ import { CmsPagination } from '../../../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionCheckbox';
 
 interface FormListProps {
+  workspaceLocale?: 'vi' | 'en';
   forms: FormItem[];
   selectedFormIds: string[];
   onToggleSelectAll: (pageIds?: string[]) => void;
@@ -30,6 +31,7 @@ interface FormListProps {
 }
 
 export const FormList: React.FC<FormListProps> = ({
+  workspaceLocale = 'vi',
   forms,
   selectedFormIds,
   onToggleSelectAll,
@@ -79,13 +81,13 @@ export const FormList: React.FC<FormListProps> = ({
                   label="Chọn tất cả biểu mẫu trên trang"
                 />
               </th>
-              <th className="p-3 min-w-[200px]">Tên quản trị</th>
-              <th className="p-3 min-w-[150px]">Tiêu đề</th>
-              <th className="p-3 min-w-[100px]">Trường</th>
-              <th className="p-3 min-w-[120px]">Thống kê</th>
-              <th className="p-3 min-w-[120px]">Trạng thái</th>
-              <th className="p-3 min-w-[100px]">Ngày tạo</th>
-              <th className="p-3 w-28 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">Thao tác</th>
+              <th className="p-3 min-w-[200px]">{workspaceLocale === "en" ? "Admin Name" : "Tên quản trị"}</th>
+              <th className="p-3 min-w-[150px]">{workspaceLocale === "en" ? "Display Title" : "Tiêu đề"}</th>
+              <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Fields" : "Trường"}</th>
+              <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Analytics" : "Thống kê"}</th>
+              <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Status" : "Trạng thái"}</th>
+              <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Created" : "Ngày tạo"}</th>
+              <th className="p-3 w-28 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">{workspaceLocale === "en" ? "Actions" : "Thao tác"}</th>
             </tr>
           </thead>
 
@@ -238,7 +240,7 @@ export const FormList: React.FC<FormListProps> = ({
           <p className="text-xs mt-1">Hãy tạo biểu mẫu mới để bắt đầu</p>
         </div>
       )}
-      {forms.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={forms.length} itemLabel="biểu mẫu" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
+      {forms.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={forms.length} itemLabel={workspaceLocale === "en" ? "forms" : "biểu mẫu"} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
     </div>
   );
 };

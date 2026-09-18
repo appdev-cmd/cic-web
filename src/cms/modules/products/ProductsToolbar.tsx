@@ -1,9 +1,12 @@
 import React from 'react';
 import { Search, X, RotateCcw } from 'lucide-react';
 import type { ProductCategory, ProductBrand } from './types';
+import type { CmsLocale } from '../../data/CmsDataSource';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 
 export interface ProductsToolbarProps {
+  workspaceLocale?: CmsLocale;
   searchQuery: string;
   onSearchChange: (value: string) => void;
   selectedCategory: string;
@@ -39,7 +42,9 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
   applications,
   isFilterActive,
   onResetFilters,
+  workspaceLocale = 'vi',
 }) => {
+  const dict = getCmsDictionary(workspaceLocale);
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
       <div className="flex flex-wrap items-center gap-2.5">
@@ -52,7 +57,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Tìm theo Tên, SKU, Hãng..."
+            placeholder={dict.modules.products.toolbar.searchPlaceholder}
             className="w-full h-9.5 pl-9 pr-8 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
           />
           {searchQuery && (
@@ -60,7 +65,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
               type="button"
               onClick={() => onSearchChange('')}
               className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-              title="Xóa tìm kiếm"
+              title={dict.modules.products.toolbar.clearSearch}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -75,7 +80,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
             className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             title="Lọc theo Lĩnh vực"
           >
-            <option value="all">Tất cả Lĩnh vực</option>
+            <option value="all">{dict.modules.products.toolbar.allCategories}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -92,7 +97,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
             className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             title="Lọc theo Hãng sản xuất"
           >
-            <option value="all">Tất cả Hãng sản xuất</option>
+            <option value="all">{dict.modules.products.toolbar.allBrands}</option>
             {brands.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
@@ -109,7 +114,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
             className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             title="Lọc theo Loại sản phẩm"
           >
-            <option value="all">Tất cả Loại sản phẩm</option>
+            <option value="all">{dict.modules.products.toolbar.allProductTypes}</option>
             {productTypes
               .filter((t) => t.status === 'active')
               .map((t) => (
@@ -128,7 +133,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
             className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             title="Lọc theo Ứng dụng"
           >
-            <option value="all">Tất cả Ứng dụng</option>
+            <option value="all">{dict.modules.products.toolbar.allApplications}</option>
             {applications
               .filter((a) => a.status === 'active')
               .map((a) => (
@@ -154,7 +159,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
             title="Đặt lại tất cả bộ lọc và tìm kiếm"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            <span>Đặt lại</span>
+            <span>{dict.modules.products.toolbar.resetFilters}</span>
           </button>
         </div>
       </div>

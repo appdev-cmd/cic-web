@@ -27,6 +27,7 @@ import {
 import { CmsBulkActionBar } from "../../components/ui/CmsBulkActionBar";
 import { CmsButton, CmsIconButton } from "../../components/ui/CmsButton";
 import { CmsPageHeader } from "../../components/ui/CmsPageHeader";
+import { getCmsDictionary } from "@/cms/i18n/cmsDictionary";
 import { CmsPagination } from "../../components/ui/CmsPagination";
 import { CmsSelectionCheckbox } from "../../components/ui/CmsSelectionCheckbox";
 import { useDialogA11y } from "../activity_logs_trash/useDialogA11y";
@@ -53,6 +54,7 @@ export function ProductTypesManager({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const dict = getCmsDictionary(locale);
   const items = data[locale];
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
@@ -142,7 +144,7 @@ export function ProductTypesManager({
                 setQuery(e.target.value);
                 setPage(1);
               }}
-              placeholder="Tìm theo tên hoặc tên hiệu..."
+              placeholder={dict.modules.productTaxonomies.types.searchPlaceholder}
               className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-base outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 sm:text-sm"
             />
           </label>
@@ -156,9 +158,9 @@ export function ProductTypesManager({
               }}
               className="min-h-11 min-w-44 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Đang sử dụng</option>
-              <option value="inactive">Ngừng sử dụng</option>
+              <option value="all">{dict.modules.productTaxonomies.types.statusAll}</option>
+              <option value="active">{dict.modules.productTaxonomies.types.statusActive}</option>
+              <option value="inactive">{dict.modules.productTaxonomies.types.statusInactive}</option>
             </select>
             <button
               type="button"
@@ -177,13 +179,13 @@ export function ProductTypesManager({
         </div>
         <CmsBulkActionBar
           selectedCount={selected.length}
-          itemLabel="loại sản phẩm"
+          itemLabel={dict.modules.productTaxonomies.types.itemUnit}
           onClear={() => setSelected([])}
           actions={
             capabilities.edit
               ? [
                   {
-                    label: "Ngừng sử dụng",
+                    label: dict.modules.productTaxonomies.types.bulkDeactivate,
                     icon: PauseCircle,
                     onClick: () =>
                       mutate(
@@ -219,9 +221,9 @@ export function ProductTypesManager({
                   />
                 </th>
                 <th className="p-4">Tên và tên hiệu</th>
-                <th className="p-4">Thứ tự</th>
+                <th className="p-4">{dict.modules.productTaxonomies.types.columns.ordering}</th>
                 <th className="p-4">Sử dụng</th>
-                <th className="p-4">Trạng thái</th>
+                <th className="p-4">{dict.modules.productTaxonomies.types.columns.status}</th>
                 <th className="w-28 p-4 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -296,7 +298,7 @@ export function ProductTypesManager({
                     colSpan={6}
                     className="p-12 text-center text-sm text-slate-500"
                   >
-                    Không tìm thấy loại sản phẩm phù hợp.
+                    {dict.modules.productTaxonomies.types.emptyText}
                   </td>
                 </tr>
               )}
@@ -307,7 +309,7 @@ export function ProductTypesManager({
           currentPage={page}
           pageSize={pageSize}
           totalCount={filtered.length}
-          itemLabel="loại sản phẩm"
+          itemLabel={dict.modules.productTaxonomies.types.itemUnit}
           onPageChange={setPage}
           onPageSizeChange={(size) => {
             setPageSize(size);

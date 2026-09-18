@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import {
   updateFunctionSeo,
   saveRedirect,
@@ -63,6 +64,7 @@ export const FunctionSeoManager: React.FC<Props> = ({
 }) => {
   const contextLocale = useCmsWorkspaceLocale();
   const activeLocale: 'vi' | 'en' = (contextLocale || propLocale || 'vi') === 'en' ? 'en' : 'vi';
+  const dict = getCmsDictionary(activeLocale);
 
   const currentRecords = useMemo(() => {
     if (initialData) return initialData[activeLocale] ?? [];
@@ -221,11 +223,11 @@ export const FunctionSeoManager: React.FC<Props> = ({
 
       <CmsPageHeader
         icon={<SearchCheck />}
-        title="SEO & URL"
-        description="Kiểm soát khả năng hiển thị trên công cụ tìm kiếm, template SEO và vòng đời URL của website."
+        title={dict.modules.system.seo.title}
+        description={dict.modules.system.seo.description}
         meta={
           <span className="rounded-md bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-            {activeLocale.toUpperCase()} · {records.length} module hệ thống
+            {activeLocale.toUpperCase()} · {records.length} {dict.modules.system.seo.itemUnit}
           </span>
         }
       />
@@ -235,9 +237,9 @@ export const FunctionSeoManager: React.FC<Props> = ({
         value={activeSection}
         onChange={(value) => setActiveSection(value as typeof activeSection)}
         items={[
-          { id: 'overview', label: 'Tổng quan sức khỏe', icon: ListChecks },
-          { id: 'templates', label: 'Trang hệ thống & Mẫu SEO', icon: FileText },
-          { id: 'redirects', label: 'Chuyển hướng (301/302) & Sitemap', icon: Link2 },
+          { id: 'overview', label: dict.modules.system.seo.tabs.overview, icon: ListChecks },
+          { id: 'templates', label: dict.modules.system.seo.tabs.templates, icon: FileText },
+          { id: 'redirects', label: dict.modules.system.seo.tabs.redirects, icon: Link2 },
         ]}
       />
 

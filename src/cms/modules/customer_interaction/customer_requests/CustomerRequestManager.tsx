@@ -32,6 +32,7 @@ import { RequestQuickNotesModal } from './components/RequestQuickNotesModal';
 import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../shared/constants/statusTypes';
 import type { PriorityLevel, RequestStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import { MOCK_STAFF_MEMBERS } from '../../contacts/mockData';
@@ -57,6 +58,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 }) => {
   const initialRequests = serverData?.requests ?? data?.requests ?? [];
   const initialTotalCount = serverData?.totalCount ?? initialRequests.length;
+  const dict = getCmsDictionary(workspaceLocale);
   const [requests, setRequests] = useState<CustomerRequest[]>(initialRequests);
   const [totalCount, setTotalCount] = useState<number>(initialTotalCount);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -878,11 +880,11 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
           {/* Header */}
           <CmsPageHeader
             icon={<MessageSquareText />}
-            title="Yêu cầu khách hàng"
-            description="Quản lý, phân loại và xử lý yêu cầu tiếp nhận từ các biểu mẫu tương tác"
+            title={dict.modules.customerEngagement.requests.title}
+            description={dict.modules.customerEngagement.requests.description}
             meta={
               <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-                {totalCount} yêu cầu
+                {totalCount} {dict.modules.customerEngagement.requests.itemUnit}
               </span>
             }
           />
@@ -929,6 +931,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
           {/* Multi-condition Filter Panel */}
           <RequestFilterBar
+            workspaceLocale={workspaceLocale}
             filter={filter}
             onFilterChange={(newFilter) => {
               setCurrentPage(1);
@@ -948,7 +951,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
           {selectedRequestIds.length > 0 && (
             <CmsBulkActionBar
               selectedCount={selectedRequestIds.length}
-              itemLabel="yêu cầu"
+              itemLabel={dict.modules.customerEngagement.requests.itemUnit}
               onClear={() => setSelectedRequestIds([])}
               actions={[
                 ...(capabilities.edit
@@ -983,6 +986,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
               </div>
             )}
             <RequestList
+            workspaceLocale={workspaceLocale}
               requests={filteredRequests}
               selectedRequestIds={selectedRequestIds}
               totalCount={totalCount}

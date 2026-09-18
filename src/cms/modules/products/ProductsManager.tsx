@@ -29,6 +29,7 @@ import {
 import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { ProductsModuleData } from '../../data/CatalogDataSource';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import { ColumnSettingModal, ColumnVisibility, defaultColumnVisibility } from './ColumnSettingModal';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
@@ -70,6 +71,7 @@ const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
 
 export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspaceLocale, capabilities = { create: false, edit: false, delete: false } }) => {
   const router = useRouter();
+  const dict = getCmsDictionary(workspaceLocale);
   // Main Products List State
   const [products, setProducts] = useState<CmsProductListItem[]>(() =>
     (data?.products ?? []).map((item) => ({
@@ -492,11 +494,11 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
       {/* 1. TOP MODULE HEADER CARD */}
       <CmsPageHeader
         icon={<Package />}
-        title="Sản phẩm"
-        description="Quản lý danh mục sản phẩm, cấu hình giá, phân loại theo hãng, lĩnh vực, ứng dụng và trạng thái xuất bản."
+        title={dict.modules.products.title}
+        description={dict.modules.products.description}
         meta={
           <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-            {products.length} sản phẩm
+            {products.length} {dict.modules.products.itemUnit}
           </span>
         }
         actions={
@@ -509,7 +511,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
             size="sm"
             leadingIcon={<Plus />}
           >
-            Thêm sản phẩm
+            {dict.modules.products.createButton}
           </CmsButton>
         }
       />
@@ -525,22 +527,22 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         items={[
           {
             id: 'all',
-            label: 'Tất cả sản phẩm',
+            label: dict.modules.products.tabs.all,
             count: products.length,
           },
           {
             id: 'published',
-            label: 'Đã xuất bản',
+            label: dict.modules.products.tabs.published,
             count: products.filter((p) => p.editorial_status === 'published').length,
           },
           {
             id: 'draft',
-            label: 'Bản nháp',
+            label: dict.modules.products.tabs.draft,
             count: products.filter((p) => p.editorial_status === 'draft').length,
           },
           {
             id: 'is_hot',
-            label: 'Sản phẩm tiêu biểu',
+            label: dict.modules.products.tabs.featured,
             count: products.filter((p) => p.is_hot).length,
           },
         ]}
@@ -569,7 +571,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
       {/* BULK ACTIONS BAR (Visible when checkboxes are checked) */}
       <CmsBulkActionBar
         selectedCount={selectedIds.length}
-        itemLabel="sản phẩm"
+        itemLabel={dict.modules.products.itemUnit}
         onClear={() => setSelectedIds([])}
         actions={[
           {
@@ -641,22 +643,22 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
               )}
 
               {/* Biệt danh / Mã */}
-              {columnVisibility.code && <th className="py-3 px-4 min-w-[130px]">Biệt danh</th>}
+              {columnVisibility.code && <th className="py-3 px-4 min-w-[130px]">{dict.modules.products.columns.code}</th>}
 
               {/* Lĩnh vực */}
-              {columnVisibility.category && <th className="py-3 px-4 min-w-[160px]">Lĩnh vực</th>}
+              {columnVisibility.category && <th className="py-3 px-4 min-w-[160px]">{dict.modules.products.columns.category}</th>}
 
               {/* Hãng sản xuất */}
-              {columnVisibility.brand && <th className="py-3 px-4 min-w-[150px]">Hãng sản xuất</th>}
+              {columnVisibility.brand && <th className="py-3 px-4 min-w-[150px]">{dict.modules.products.columns.brand}</th>}
 
               {/* Loại sản phẩm */}
-              {columnVisibility.product_type && <th className="py-3 px-4 min-w-[140px]">Loại sản phẩm</th>}
+              {columnVisibility.product_type && <th className="py-3 px-4 min-w-[140px]">{dict.modules.products.columns.productType}</th>}
 
               {/* Ứng dụng */}
-              {columnVisibility.application && <th className="py-3 px-4 min-w-[160px]">Ứng dụng</th>}
+              {columnVisibility.application && <th className="py-3 px-4 min-w-[160px]">{dict.modules.products.columns.application}</th>}
 
               {/* Giá */}
-              {columnVisibility.price && <th className="py-3 px-4 min-w-[120px]">Giá</th>}
+              {columnVisibility.price && <th className="py-3 px-4 min-w-[120px]">{dict.modules.products.columns.price}</th>}
 
               {/* Thứ tự */}
               {columnVisibility.ordering && <th className="py-3 px-3 min-w-[70px] text-center">Thứ tự</th>}
@@ -929,7 +931,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
               ) : (
                 <tr>
                   <td colSpan={14} className="py-12 text-center text-slate-400 text-xs italic">
-                    Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
+                    {dict.modules.products.emptyText}
                   </td>
                 </tr>
               )}

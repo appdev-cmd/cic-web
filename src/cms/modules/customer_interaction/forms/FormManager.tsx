@@ -15,6 +15,7 @@ import { FormPreviewModal } from './components/FormPreviewModal';
 import { FormSubmissionsModal } from './components/FormSubmissionsModal';
 import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import type { CmsLocale } from '../../../data/CmsDataSource';
@@ -38,6 +39,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
   onRefresh,
   capabilities = { create: true, edit: true, delete: true },
 }) => {
+  const dict = getCmsDictionary(workspaceLocale);
   const [forms, setForms] = useState<FormItem[]>(data?.forms ?? []);
   const [selectedFormIds, setSelectedFormIds] = useState<string[]>([]);
 
@@ -440,12 +442,13 @@ export const FormManager: React.FC<FormManagerProps> = ({
       {/* Header */}
       <CmsPageHeader
         icon={<FileCheck2 />}
-        title="Quản lý Biểu mẫu"
-        description="Quản lý biểu mẫu thu thập thông tin khách hàng"
+        title={dict.modules.customerEngagement.forms.title}
+        description={dict.modules.customerEngagement.forms.description}
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{forms.length} {dict.modules.customerEngagement.forms.itemUnit}</span>}
         actions={
           capabilities.create ? (
             <CmsButton variant="primary" size="sm" onClick={handleCreateNew} leadingIcon={<Plus />}>
-              Tạo biểu mẫu mới
+              {dict.modules.customerEngagement.forms.createButton}
             </CmsButton>
           ) : undefined
         }
@@ -461,7 +464,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên, mã, tiêu đề..."
+              placeholder={dict.modules.customerEngagement.forms.searchPlaceholder}
               value={filter.searchQuery}
               onChange={(e) => setFilter({ ...filter, searchQuery: e.target.value })}
               className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-orange-500 transition-colors"
@@ -485,7 +488,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
               onChange={(e) => handleStatusFilterChange(e.target.value)}
               className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
-              <option value="">Tất cả Trạng thái</option>
+              <option value="">{dict.modules.customerEngagement.forms.statusAll}</option>
               {FORM_STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
@@ -548,7 +551,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
       {/* Bulk Actions */}
       <CmsBulkActionBar
         selectedCount={selectedFormIds.length}
-        itemLabel="biểu mẫu"
+        itemLabel={dict.modules.customerEngagement.forms.itemUnit}
         onClear={() => setSelectedFormIds([])}
         actions={[
           ...(capabilities.delete
@@ -565,6 +568,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
 
       {/* Form List */}
       <FormList
+          workspaceLocale={workspaceLocale}
         forms={filteredForms}
         selectedFormIds={selectedFormIds}
         onToggleSelectAll={handleToggleSelectAll}

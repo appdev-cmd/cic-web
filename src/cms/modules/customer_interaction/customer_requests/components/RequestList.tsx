@@ -24,6 +24,7 @@ import { CmsPagination } from '../../../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionCheckbox';
 
 interface RequestListProps {
+  workspaceLocale?: 'vi' | 'en';
   requests: CustomerRequest[];
   selectedRequestIds: string[];
   totalCount?: number;
@@ -41,6 +42,7 @@ interface RequestListProps {
 }
 
 export const RequestList: React.FC<RequestListProps> = ({
+  workspaceLocale = 'vi',
   requests,
   selectedRequestIds,
   totalCount: controlledTotalCount,
@@ -166,15 +168,15 @@ export const RequestList: React.FC<RequestListProps> = ({
                   label="Chọn tất cả yêu cầu trên trang"
                 />
               </th>
-              <th className="p-3 min-w-[170px]">Khách hàng</th>
-              <th className="p-3 min-w-[110px]">Điện thoại</th>
-              <th className="p-3 min-w-[130px]">Biểu mẫu & CTA</th>
-              <th className="p-3 min-w-[130px]">Trang gửi</th>
-              <th className="p-3 min-w-[110px]">Ngày gửi</th>
-              <th className="p-3 min-w-[160px]">Người phụ trách</th>
-              <th className="p-3 min-w-[160px]">Ghi chú</th>
-              <th className="p-3 min-w-[110px]">Trạng thái</th>
-              <th className="p-3 w-32 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">Thao tác</th>
+              <th className="p-3 min-w-[170px]">{workspaceLocale === "en" ? "Customer" : "Khách hàng"}</th>
+              <th className="p-3 min-w-[110px]">{workspaceLocale === "en" ? "Phone" : "Điện thoại"}</th>
+              <th className="p-3 min-w-[130px]">{workspaceLocale === "en" ? "Form & CTA" : "Biểu mẫu & CTA"}</th>
+              <th className="p-3 min-w-[130px]">{workspaceLocale === "en" ? "Source Page" : "Trang gửi"}</th>
+              <th className="p-3 min-w-[110px]">{workspaceLocale === "en" ? "Submitted At" : "Ngày gửi"}</th>
+              <th className="p-3 min-w-[160px]">{workspaceLocale === "en" ? "Assignee" : "Người phụ trách"}</th>
+              <th className="p-3 min-w-[160px]">{workspaceLocale === "en" ? "Notes" : "Ghi chú"}</th>
+              <th className="p-3 min-w-[110px]">{workspaceLocale === "en" ? "Status" : "Trạng thái"}</th>
+              <th className="p-3 w-32 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">{workspaceLocale === "en" ? "Actions" : "Thao tác"}</th>
             </tr>
           </thead>
 
@@ -399,7 +401,7 @@ export const RequestList: React.FC<RequestListProps> = ({
           currentPage={currentPage}
           pageSize={pageSize}
           totalCount={totalCount}
-          itemLabel="yêu cầu"
+          itemLabel={workspaceLocale === "en" ? "requests" : "yêu cầu"}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
         />

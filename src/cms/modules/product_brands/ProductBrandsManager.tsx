@@ -30,6 +30,7 @@ import {
 import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
@@ -65,6 +66,7 @@ export function ProductBrandsManager({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const dict = getCmsDictionary(locale);
   const items = data[locale];
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'inactive'>('all');
@@ -167,7 +169,7 @@ export function ProductBrandsManager({
                 setQuery(event.target.value);
                 setPage(1);
               }}
-              placeholder="Tìm theo tên hoặc tên hiệu..."
+              placeholder={dict.modules.productTaxonomies.brands.searchPlaceholder}
               className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-base outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 sm:text-xs"
             />
           </label>
@@ -204,13 +206,13 @@ export function ProductBrandsManager({
 
         <CmsBulkActionBar
           selectedCount={selectedIds.length}
-          itemLabel="hãng"
+          itemLabel={dict.modules.productTaxonomies.brands.itemUnit}
           onClear={() => setSelectedIds([])}
           actions={
             capabilities.edit
               ? [
                   {
-                    label: 'Ngừng sử dụng',
+                    label: dict.modules.productTaxonomies.brands.bulkDeactivate,
                     icon: Archive,
                     onClick: () =>
                       runMutation(
@@ -240,8 +242,8 @@ export function ProductBrandsManager({
                 <th className="sticky left-10 z-20 min-w-[280px] border-r border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800">
                   Tên và tên hiệu
                 </th>
-                <th className="min-w-28 p-3">Thứ tự</th>
-                <th className="min-w-32 p-3">Trạng thái</th>
+                <th className="min-w-28 p-3">{dict.modules.productTaxonomies.brands.columns.ordering}</th>
+                <th className="min-w-32 p-3">{dict.modules.productTaxonomies.brands.columns.status}</th>
                 <th className="sticky right-0 z-20 w-24 border-l border-slate-200 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800">
                   Thao tác
                 </th>
@@ -334,7 +336,7 @@ export function ProductBrandsManager({
           currentPage={page}
           pageSize={pageSize}
           totalCount={filteredItems.length}
-          itemLabel="hãng"
+          itemLabel={dict.modules.productTaxonomies.brands.itemUnit}
           pageSizeOptions={[10, 20, 50, 100]}
           onPageChange={setPage}
           onPageSizeChange={(nextSize) => {

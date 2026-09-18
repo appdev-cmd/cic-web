@@ -6,6 +6,7 @@ import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 
 type CategoryTableProps = {
+  locale?: 'vi' | 'en';
   categories: readonly ProductCategoryItem[];
   selectedIds: readonly string[];
   allVisibleSelected: boolean;
@@ -24,6 +25,7 @@ type CategoryTableProps = {
 };
 
 export function CategoryTable({
+  locale = "vi",
   categories,
   selectedIds,
   allVisibleSelected,
@@ -54,10 +56,10 @@ export function CategoryTable({
                   label="Chọn trang này"
                 />
               </th>
-              <th className="sticky left-10 z-20 min-w-[280px] bg-slate-50 p-3 dark:bg-slate-800">Tên và mã nhận diện</th>
-              <th className="p-3">Thứ tự</th>
-              <th className="p-3">Trạng thái</th>
-              <th className="sticky right-0 z-20 bg-slate-50 p-3 text-center dark:bg-slate-800">Thao tác</th>
+              <th className="sticky left-10 z-20 min-w-[280px] bg-slate-50 p-3 dark:bg-slate-800">{locale === "en" ? "Name & Code Identifier" : "Tên và mã nhận diện"}</th>
+              <th className="p-3">{locale === "en" ? "Order" : "Thứ tự"}</th>
+              <th className="p-3">{locale === "en" ? "Status" : "Trạng thái"}</th>
+              <th className="sticky right-0 z-20 bg-slate-50 p-3 text-center dark:bg-slate-800">{locale === "en" ? "Actions" : "Thao tác"}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -97,7 +99,7 @@ export function CategoryTable({
             {!categories.length && (
               <tr>
                 <td colSpan={5} className="p-12 text-center text-xs italic text-slate-400">
-                  Không tìm thấy danh mục phù hợp.
+                  {locale === "en" ? "No product categories found." : "Không tìm thấy danh mục phù hợp."}
                 </td>
               </tr>
             )}
@@ -108,7 +110,7 @@ export function CategoryTable({
         currentPage={page}
         pageSize={pageSize}
         totalCount={totalCount}
-        itemLabel="danh mục"
+        itemLabel={locale === "en" ? "categories" : "danh mục"}
         pageSizeOptions={[10, 20, 50, 100]}
         onPageChange={onPageChange}
         onPageSizeChange={onPageSizeChange}

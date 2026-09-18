@@ -8,11 +8,15 @@ import { RolesOverviewTab } from './RolesOverviewTab';
 import { RoleEditorModal } from './RoleEditorModal';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { assignCmsRoleAction, createCmsRoleAction, deleteCmsRoleAction, revokeCmsRoleAssignmentAction, updateCmsRoleAction, updateCmsRoleStatusAction } from '@/features/permissions/server/actions';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 
 export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData; capabilities: { create: boolean; edit: boolean; delete: boolean } }> = ({ data, capabilities }) => {
   const router = useRouter();
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const dict = getCmsDictionary(workspaceLocale);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roles = data.roles;
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -70,7 +74,7 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData; c
   const activeCount = roles.filter((role) => role.status === 'active').length;
   return <div className="space-y-5 animate-in fade-in duration-200" aria-busy={isMutating}>
     {toastMsg && <div role="status" aria-live="polite" className="fixed inset-x-3 top-20 z-50 mx-auto flex max-w-md items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-2xl sm:inset-x-auto sm:right-6 sm:mx-0"><CheckCircle2 className="size-4 shrink-0 text-emerald-400" /><span className="min-w-0 break-words">{toastMsg}</span></div>}
-    <CmsPageHeader icon={<Shield />} title="Vai trò và quyền" description="Quản lý vai trò và các thao tác được phép trong từng chức năng CMS." meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{activeCount} vai trò hoạt động</span>} actions={capabilities.create ? <CmsButton onClick={openCreate} variant="primary" size="sm" leadingIcon={<Shield />}>Thêm vai trò</CmsButton> : undefined} />
+    <CmsPageHeader icon={<Shield />} title={dict.modules.system.permissions.title} description={dict.modules.system.permissions.description} meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{activeCount} {dict.modules.system.permissions.itemUnit}</span>} actions={capabilities.create ? <CmsButton onClick={openCreate} variant="primary" size="sm" leadingIcon={<Shield />}>{dict.modules.system.permissions.createButton}</CmsButton> : undefined} />
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"><span><strong className="text-slate-950 dark:text-white">{roles.length}</strong> tổng vai trò</span><span><strong className="text-slate-950 dark:text-white">{activeCount}</strong> đang hoạt động</span><span><strong className="text-slate-950 dark:text-white">{data.assignments.length}</strong> lượt gán nhân sự</span></div>
     <RolesOverviewTab roles={roles} assignments={data.assignments} users={data.users} onAssignRole={assignRole} onRevokeAssignment={revokeAssignment} onOpenCreate={openCreate} onOpenEdit={openEdit} onToggleRoleStatus={toggleStatus} onDeleteRole={setRoleToDelete} canCreate={capabilities.create} canEdit={capabilities.edit} canDelete={capabilities.delete} isMutating={isMutating} />
     <RoleEditorModal key={roleToEdit?.id ?? 'create'} isOpen={isEditorOpen} onClose={() => setIsEditorOpen(false)} onSaveRole={saveRole} roleToEdit={roleToEdit} existingRoles={roles} permissionTasks={data.tasks} isSaving={isMutating} />

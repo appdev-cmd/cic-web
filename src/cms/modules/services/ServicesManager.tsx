@@ -34,6 +34,7 @@ import {
   EditorialStatus,
 } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import type { ServicesModuleData } from '../../data/EditorialContentDataSource';
 import { ServiceFormView } from './ServiceFormView';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
@@ -73,6 +74,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
   capabilities = { create: true, edit: true, delete: true },
 }) => {
   const router = useRouter();
+  const dict = getCmsDictionary(workspaceLocale);
   const [services, setServices] = useState<ServiceItem[]>(() =>
     (data?.services ?? []).map((item) => ({
       ...item,
@@ -296,9 +298,9 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
       {/* Header & Main Actions */}
       <CmsPageHeader
         icon={<Layers />}
-        title="Dịch vụ"
-        description="Quản lý nội dung, hình ảnh, SEO và trạng thái xuất bản dịch vụ."
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{filteredServices.length} dịch vụ</span>}
+        title={dict.modules.services.title}
+        description={dict.modules.services.description}
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{filteredServices.length} {dict.modules.services.itemUnit}</span>}
         actions={<CmsButton
           onClick={handleCreateNew}
           disabled={!capabilities.create}
@@ -306,7 +308,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
           size="sm"
           leadingIcon={<Plus />}
         >
-          Thêm dịch vụ
+          {dict.modules.services.createButton}
         </CmsButton>}
       />
 
@@ -320,7 +322,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Tìm theo tên hoặc tóm tắt..."
+              placeholder={dict.modules.services.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -354,9 +356,9 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
               className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
               title="Lọc theo Trạng thái nội dung"
             >
-              <option value="all">Tất cả trạng thái nội dung</option>
-              <option value="draft">Bản nháp</option>
-              <option value="published">Đã xuất bản</option>
+              <option value="all">{dict.modules.services.statusAll}</option>
+              <option value="draft">{dict.modules.services.statusDraft}</option>
+              <option value="published">{dict.modules.services.statusPublished}</option>
             </select>
           </div>
 
@@ -374,7 +376,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
               title="Đặt lại tất cả bộ lọc và tìm kiếm"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span>Đặt lại</span>
+              <span>{dict.common.reset}</span>
             </button>
           </div>
         </div>
@@ -383,11 +385,11 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
       {/* Bulk Actions Bar if items selected */}
       <CmsBulkActionBar
         selectedCount={selectedIds.length}
-        itemLabel="dịch vụ"
+        itemLabel={dict.modules.services.itemUnit}
         onClear={() => setSelectedIds([])}
         actions={[
           {
-            label: 'Xuất bản',
+            label: dict.common.publish,
             icon: FileCheck,
             variant: 'primary',
             onClick: async () => {
@@ -403,7 +405,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             },
           },
           {
-            label: 'Chuyển bản nháp',
+            label: dict.common.revertDraft,
             icon: RotateCcw,
             onClick: async () => {
               if (!capabilities.edit) {
@@ -418,7 +420,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             },
           },
           {
-            label: 'Xóa',
+            label: dict.common.delete,
             icon: Trash2,
             variant: 'danger',
             onClick: () => {
@@ -442,15 +444,15 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="p-3 w-10 text-center sticky left-0 bg-slate-50 dark:bg-slate-800 z-10">
-                  <CmsSelectionCheckbox checked={allPageSelected} indeterminate={hasSomePageSelected} onChange={handleSelectAll} label="Chọn tất cả dịch vụ trên trang" />
+                  <CmsSelectionCheckbox checked={allPageSelected} indeterminate={hasSomePageSelected} onChange={handleSelectAll} label={dict.common.selectAll} />
                 </th>
                 <th className="p-3 min-w-[280px] sticky left-10 bg-slate-50 dark:bg-slate-800 z-10">
-                  Dịch vụ
+                  {dict.modules.services.columns.service}
                 </th>
-                <th className="p-3 min-w-[130px]">Trạng thái xuất bản</th>
-                <th className="p-3 min-w-[130px]">Cập nhật</th>
+                <th className="p-3 min-w-[130px]">{dict.modules.services.columns.status}</th>
+                <th className="p-3 min-w-[130px]">{dict.modules.services.columns.updated}</th>
                 <th className="p-3 w-28 text-right sticky right-0 bg-slate-50 dark:bg-slate-800 z-10">
-                  Thao tác
+                  {dict.modules.services.columns.actions}
                 </th>
               </tr>
             </thead>
@@ -458,7 +460,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
               {paginatedServices.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-12 text-slate-400">
-                    Không tìm thấy dịch vụ phù hợp với điều kiện lọc.
+                    {dict.modules.services.emptyText}
                   </td>
                 </tr>
               ) : (

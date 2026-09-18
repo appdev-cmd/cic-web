@@ -4,6 +4,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import type { CategoryStatusFilter } from './useCategoryListState';
 
 type CategoryToolbarProps = {
+  locale?: 'vi' | 'en';
   query: string;
   status: CategoryStatusFilter;
   selectedCount: number;
@@ -16,6 +17,7 @@ type CategoryToolbarProps = {
 };
 
 export function CategoryToolbar({
+  locale = "vi",
   query,
   status,
   selectedCount,
@@ -35,7 +37,7 @@ export function CategoryToolbar({
           <input
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Tìm theo tên, mã hoặc mô tả..."
+            placeholder={locale === "en" ? "Search by name, code, or description..." : "Tìm theo tên, mã hoặc mô tả..."}
             className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 text-base outline-none focus:border-orange-500 sm:text-xs dark:border-slate-700 dark:bg-slate-800"
           />
         </label>
@@ -62,9 +64,9 @@ export function CategoryToolbar({
       </div>
       <CmsBulkActionBar
         selectedCount={selectedCount}
-        itemLabel="danh mục"
+        itemLabel={locale === "en" ? "categories" : "danh mục"}
         onClear={onClearSelection}
-        actions={canEdit ? [{ label: 'Ngừng sử dụng', icon: Archive, onClick: onBulkDeactivate }] : []}
+        actions={canEdit ? [{ label: locale === "en" ? "Deactivate Selected" : "Ngừng sử dụng", icon: Archive, onClick: onBulkDeactivate }] : []}
       />
     </section>
   );

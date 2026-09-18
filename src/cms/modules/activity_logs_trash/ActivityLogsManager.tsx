@@ -16,10 +16,14 @@ import { AuditTab } from './AuditTab';
 import { EventDetailDrawer } from './EventDetailDrawer';
 import { ExportJobsDrawer } from './ExportJobsDrawer';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { createAuditExportAction, getAuditExportDownloadUrlAction, getAuditLogsPageAction } from '@/features/activity-logs/server/actions';
 
 export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabilities: { export: boolean } }> = ({ data, capabilities }) => {
   // State lists
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const dict = getCmsDictionary(workspaceLocale);
   const [auditLogs, setAuditLogs] = useState<AuditEvent[]>(data.auditLogs);
   const [auditTotal, setAuditTotal] = useState(data.auditTotal);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,9 +79,9 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabili
 
       <CmsPageHeader
         icon={<Shield />}
-        title="Nhật ký hoạt động"
-        description="Theo dõi các thao tác quản trị, thay đổi quyền và hoạt động xuất bản trong hệ thống."
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{auditTotal} bản ghi</span>}
+        title={dict.modules.system.logs.title}
+        description={dict.modules.system.logs.description}
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{auditTotal} {dict.modules.system.logs.itemUnit}</span>}
       />
 
       {/* AUDIT LOGS TAB VIEW */}

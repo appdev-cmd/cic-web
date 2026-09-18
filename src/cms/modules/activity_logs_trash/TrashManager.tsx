@@ -14,6 +14,8 @@ import { TrashItemDetailDrawer } from './TrashItemDetailDrawer';
 import { RestoreConflictModal } from './RestoreConflictModal';
 import { PermanentDeleteModal } from './PermanentDeleteModal';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 
 type Toast = { text: string; tone: 'success' | 'error' };
 
@@ -21,6 +23,8 @@ export const TrashManager: React.FC<{
   data: TrashListPage;
   capabilities: { restore: boolean; purge: boolean };
 }> = ({ data, capabilities }) => {
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const dict = getCmsDictionary(workspaceLocale);
   const [pageData, setPageData] = useState(data);
   const [query, setQuery] = useState<TrashListQuery>(data.query);
   const [selectedTrashItem, setSelectedTrashItem] = useState<TrashItemViewModel | null>(null);

@@ -20,6 +20,8 @@ import type { UsersGovernanceData } from '../../data/GovernanceDataSource';
 import { CicUserFormModal } from './CicUserFormModal';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { bulkDeleteCmsUsersAction, bulkUpdateCmsUserStatusAction, createCmsUserAction, deleteCmsUserAction, getCmsUserActivityAction, sendCmsPasswordResetAction, updateCmsUserAction, updateCmsUserStatusAction } from '@/features/users/server/actions';
@@ -51,6 +53,8 @@ const userColumns: ReadonlyArray<{ id: UserColumnId; label: string; defaultVisib
 
 export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities: { create: boolean; edit: boolean; delete: boolean; currentUserId: string } }> = ({ data, capabilities }) => {
   const router = useRouter();
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const dict = getCmsDictionary(workspaceLocale);
   // Main Users State
   const [users, setUsers] = useState<CicUser[]>(data.users);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

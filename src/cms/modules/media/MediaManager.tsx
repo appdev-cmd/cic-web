@@ -27,6 +27,7 @@ import { UploadQueueDrawer } from './UploadQueueDrawer';
 import { ReplaceArchiveModal } from './ReplaceArchiveModal';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { createMediaFolderAction, deleteMediaAlbumAction, refreshMediaAction, replaceMediaAssetAction, saveMediaAlbumAction, trashMediaAssetsAction, updateMediaMetadataAction, uploadMediaAction } from '@/features/media/server/actions';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { useDialogA11y } from '../activity_logs_trash/useDialogA11y';
@@ -45,6 +46,7 @@ interface MediaManagerProps {
 
 export const MediaManager: React.FC<MediaManagerProps> = ({ data, workspaceLocale, capabilities }) => {
   // Main State
+  const dict = getCmsDictionary(workspaceLocale);
   const [assets, setAssets] = useState<MediaAsset[]>(data?.assets ?? []);
   const [albums, setAlbums] = useState<MediaAlbum[]>(data?.albums ?? []);
   const [folders, setFolders] = useState<MediaFolder[]>(data?.folders ?? []);

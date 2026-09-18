@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { EventItem, EditorialStatus } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import type { EventsModuleData } from '../../data/EditorialContentDataSource';
 import { EventsFormView } from './EventsFormView';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
@@ -96,6 +97,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
   capabilities = { create: true, edit: true, delete: true },
 }) => {
   const router = useRouter();
+  const dict = getCmsDictionary(workspaceLocale);
   // Main Data States
   const [events, setEvents] = useState<EventItem[]>(() =>
     (data?.events ?? []).map((item) => ({
@@ -449,9 +451,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
           {/* HEADER CARD */}
       <CmsPageHeader
         icon={<CalendarDays />}
-        title="Sự kiện và hội thảo"
-        description="Quản lý sự kiện, hội thảo chuyên đề, khóa đào tạo và chương trình trực tuyến."
-        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{events.length} sự kiện</span>}
+        title={dict.modules.events.title}
+        description={dict.modules.events.description}
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{events.length} {dict.modules.events.itemUnit}</span>}
         actions={<>
           <CmsButton
             onClick={handleCreateNew}
@@ -460,7 +462,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
             size="sm"
             leadingIcon={<Plus />}
           >
-            Thêm sự kiện
+            {dict.modules.events.createButton}
           </CmsButton>
         </>}
       />
@@ -475,7 +477,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm sự kiện theo tiêu đề..."
+              placeholder={dict.modules.events.searchPlaceholder}
               value={searchTitle}
               onChange={(e) => { setSearchTitle(e.target.value); setCurrentPage(1); }}
               className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
@@ -489,9 +491,9 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
               onChange={(e) => { setEditorialFilter(e.target.value); setCurrentPage(1); }}
               className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
             >
-              <option value="all">Trạng thái: Tất cả</option>
-              <option value="draft">Bản nháp</option>
-              <option value="published">Đã xuất bản</option>
+              <option value="all">{dict.modules.events.editorialAll}</option>
+              <option value="draft">{dict.modules.events.editorialDraft}</option>
+              <option value="published">{dict.modules.events.editorialPublished}</option>
             </select>
           </div>
 
@@ -502,18 +504,18 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
               onChange={(e) => { setEventStatusFilter(e.target.value); setCurrentPage(1); }}
               className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-800 outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200"
             >
-              <option value="all">Trạng thái diễn ra: Tất cả</option>
-              <option value="upcoming">Sắp diễn ra</option>
-              <option value="ongoing">Đang diễn ra</option>
-              <option value="ended">Đã kết thúc</option>
+              <option value="all">{dict.modules.events.progressAll}</option>
+              <option value="upcoming">{dict.modules.events.progressUpcoming}</option>
+              <option value="ongoing">{dict.modules.events.progressOngoing}</option>
+              <option value="ended">{dict.modules.events.progressEnded}</option>
             </select>
           </div>
-          <div className="flex justify-end md:col-span-1"><button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button></div>
+          <div className="flex justify-end md:col-span-1"><button type="button" disabled={!searchTitle && editorialFilter === 'all' && eventStatusFilter === 'all'} onClick={() => { setSearchTitle(''); setEditorialFilter('all'); setEventStatusFilter('all'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />{dict.common.reset}</button></div>
         </div>
 
-        <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel="sự kiện" onClear={() => setSelectedIds([])} actions={[
-          { label: 'Xuất bản', onClick: () => handleBatchChangeEditorialStatus('published'), icon: Eye, variant: 'primary' },
-          { label: 'Xóa', onClick: handleOpenBatchDelete, icon: Trash2, variant: 'danger' },
+        <CmsBulkActionBar selectedCount={selectedIds.length} itemLabel={dict.modules.events.itemUnit} onClear={() => setSelectedIds([])} actions={[
+          { label: dict.common.publish, onClick: () => handleBatchChangeEditorialStatus('published'), icon: Eye, variant: 'primary' },
+          { label: dict.common.delete, onClick: handleOpenBatchDelete, icon: Trash2, variant: 'danger' },
         ]} />
       </div>
 
@@ -524,14 +526,14 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
             <thead>
               <tr className="bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 <th className="py-3 px-4 w-10 text-center">
-                  <CmsSelectionCheckbox checked={allPageSelected} indeterminate={hasSomePageSelected} onChange={handleSelectAll} label="Chọn tất cả sự kiện trên trang" />
+                  <CmsSelectionCheckbox checked={allPageSelected} indeterminate={hasSomePageSelected} onChange={handleSelectAll} label={dict.common.selectAll} />
                 </th>
-                {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">Tiêu đề sự kiện</th>}
-                {columnVisibility.time_event && <th className="py-3 px-4 w-40">Thời gian sự kiện</th>}
-                {columnVisibility.place && <th className="py-3 px-4 min-w-[180px]">Địa điểm</th>}
-                {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">Trạng thái</th>}
-                {columnVisibility.progress_status && <th className="py-3 px-4 w-40 text-center">Trạng thái diễn ra</th>}
-                <th className="py-3 px-4 w-28 text-center">Thao tác</th>
+                {columnVisibility.title && <th className="py-3 px-4 min-w-[260px]">{dict.modules.events.columns.title}</th>}
+                {columnVisibility.time_event && <th className="py-3 px-4 w-40">{dict.modules.events.columns.time}</th>}
+                {columnVisibility.place && <th className="py-3 px-4 min-w-[180px]">{dict.modules.events.columns.place}</th>}
+                {columnVisibility.editorial_status && <th className="py-3 px-4 w-32 text-center">{dict.modules.events.columns.status}</th>}
+                {columnVisibility.progress_status && <th className="py-3 px-4 w-40 text-center">{dict.modules.events.columns.progress}</th>}
+                <th className="py-3 px-4 w-28 text-center">{dict.modules.events.columns.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">

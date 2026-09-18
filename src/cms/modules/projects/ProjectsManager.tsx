@@ -20,6 +20,8 @@ import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
 
 import { useRouter } from 'next/navigation';
+import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 
 interface Props {
   workspaceLocale?: 'vi' | 'en';
@@ -33,6 +35,7 @@ export const ProjectsManager: React.FC<Props> = ({
   capabilities = { create: true, edit: true, delete: true },
 }) => {
   const router = useRouter();
+  const workspaceLocale = useCmsWorkspaceLocale();
   const [projects, setProjects] = useState<CmsProject[]>(() => data?.projects || []);
   const [productOptions, setProductOptions] = useState<ProjectRelationOption[]>(() => data?.productOptions || []);
   const [serviceOptions, setServiceOptions] = useState<ProjectRelationOption[]>(() => data?.serviceOptions || []);
@@ -78,6 +81,7 @@ export const ProjectsManager: React.FC<Props> = ({
   const [featured, setFeatured] = useState('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const dict = getCmsDictionary(workspaceLocale);
   const [pageSize, setPageSize] = useState(10);
   const [toast, setToast] = useState('');
 
@@ -233,11 +237,11 @@ export const ProjectsManager: React.FC<Props> = ({
         <>
           <CmsPageHeader
         icon={<BriefcaseBusiness />}
-        title="Dự án"
-        description="Quản lý dự án hiển thị trên website, nội dung chi tiết và dữ liệu phân loại."
+        title={dict.modules.projects.title}
+        description={dict.modules.projects.description}
         meta={
           <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">
-            {projects.length} dự án
+            {projects.length} {dict.modules.projects.itemUnit}
           </span>
         }
         actions={
@@ -247,7 +251,7 @@ export const ProjectsManager: React.FC<Props> = ({
             leadingIcon={<Plus />}
             onClick={() => setEditing(null)}
           >
-            Thêm dự án
+            {dict.modules.projects.createButton}
           </CmsButton>
         }
       />
@@ -264,7 +268,7 @@ export const ProjectsManager: React.FC<Props> = ({
                 setQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Tìm tên dự án, khách hàng..."
+              placeholder={dict.modules.projects.searchPlaceholder}
               className="w-full h-9.5 pl-9 pr-8 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
             />
             {query && (
@@ -291,9 +295,9 @@ export const ProjectsManager: React.FC<Props> = ({
               }}
               className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="published">Đã xuất bản</option>
-              <option value="draft">Bản nháp</option>
+              <option value="all">{dict.common.allStatus}</option>
+              <option value="published">{dict.common.published}</option>
+              <option value="draft">{dict.common.draft}</option>
             </select>
           </div>
 
@@ -306,7 +310,7 @@ export const ProjectsManager: React.FC<Props> = ({
               }}
               className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             >
-              <option value="all">Tất cả lĩnh vực</option>
+              <option value="all">{workspaceLocale === 'en' ? 'All Sectors' : 'Tất cả lĩnh vực'}</option>
               {sectors.map((item) => (
                 <option key={item}>{item}</option>
               ))}
@@ -322,9 +326,9 @@ export const ProjectsManager: React.FC<Props> = ({
               }}
               className="w-full h-9.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-900 transition-colors cursor-pointer truncate"
             >
-              <option value="all">Tất cả hiển thị</option>
-              <option value="yes">Dự án nổi bật</option>
-              <option value="no">Không nổi bật</option>
+              <option value="all">{workspaceLocale === 'en' ? 'All Featured' : 'Tất cả hiển thị'}</option>
+              <option value="yes">{workspaceLocale === 'en' ? 'Featured Only' : 'Dự án nổi bật'}</option>
+              <option value="no">{workspaceLocale === 'en' ? 'Standard Only' : 'Không nổi bật'}</option>
             </select>
           </div>
 
@@ -341,7 +345,7 @@ export const ProjectsManager: React.FC<Props> = ({
               title="Đặt lại tất cả bộ lọc và tìm kiếm"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span>Đặt lại</span>
+              <span>{dict.common.reset}</span>
             </button>
           </div>
         </div>
@@ -350,22 +354,22 @@ export const ProjectsManager: React.FC<Props> = ({
       {/* Bulk Actions Bar */}
       <CmsBulkActionBar
         selectedCount={selectedIds.length}
-        itemLabel="dự án"
+        itemLabel={dict.modules.projects.itemUnit}
         onClear={() => setSelectedIds([])}
         actions={[
           {
-            label: 'Xuất bản',
+            label: dict.common.publish,
             icon: CheckCircle2,
             variant: 'primary',
             onClick: () => updateSelected({ published: true }, 'Đã xuất bản các dự án đã chọn.'),
           },
           {
-            label: 'Chuyển bản nháp',
+            label: dict.common.revertDraft,
             icon: RotateCcw,
             onClick: () => updateSelected({ published: false }, 'Đã chuyển các dự án về bản nháp.'),
           },
           {
-            label: 'Xóa',
+            label: dict.common.delete,
             icon: Trash2,
             variant: 'danger',
             onClick: () => {
@@ -394,15 +398,15 @@ export const ProjectsManager: React.FC<Props> = ({
                           : Array.from(new Set([...current, ...pageIds]))
                       )
                     }
-                    label="Chọn tất cả dự án trên trang"
+                    label={dict.common.selectAll}
                   />
                 </th>
-                <th className="min-w-[220px] max-w-[320px] px-4 py-3">Dự án</th>
-                <th className="min-w-[180px] px-4 py-3">Lĩnh vực / Giải pháp</th>
-                <th className="min-w-[180px] px-4 py-3">Khách hàng</th>
-                <th className="min-w-[130px] px-4 py-3">Thời gian</th>
-                <th className="min-w-[130px] px-4 py-3">Trạng thái</th>
-                <th className="w-24 px-4 py-3 text-center">Thao tác</th>
+                <th className="min-w-[220px] max-w-[320px] px-4 py-3">{dict.modules.projects.columns.project}</th>
+                <th className="min-w-[180px] px-4 py-3">{workspaceLocale === 'en' ? 'Sector / Solution' : 'Lĩnh vực / Giải pháp'}</th>
+                <th className="min-w-[180px] px-4 py-3">{workspaceLocale === 'en' ? 'Client' : 'Khách hàng'}</th>
+                <th className="min-w-[130px] px-4 py-3">{workspaceLocale === 'en' ? 'Timeline' : 'Thời gian'}</th>
+                <th className="min-w-[130px] px-4 py-3">{dict.modules.projects.columns.status}</th>
+                <th className="w-24 px-4 py-3 text-center">{dict.modules.projects.columns.actions}</th>
               </tr>
             </thead>
             <tbody>

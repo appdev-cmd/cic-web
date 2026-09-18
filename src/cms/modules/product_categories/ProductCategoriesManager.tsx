@@ -16,6 +16,7 @@ import type {
 } from '@/features/product-categories/types';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CategoryDeleteDialog } from './CategoryDeleteDialog';
 import { CategoryFormDrawer, type CategoryFormValues } from './CategoryFormDrawer';
 import { CategoryTable } from './CategoryTable';
@@ -44,6 +45,7 @@ export function ProductCategoriesManager({
   const [editingCategory, setEditingCategory] = useState<ProductCategoryItem | null | undefined>();
   const [deletingCategory, setDeletingCategory] = useState<ProductCategoryItem | null>(null);
   const [message, setMessage] = useState('');
+  const dict = getCmsDictionary(locale);
   const categories = data[locale];
   const list = useCategoryListState(categories);
 

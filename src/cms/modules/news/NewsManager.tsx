@@ -31,6 +31,7 @@ import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { NewsCategoryManager } from './NewsCategoryManager';
 import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 import type { CmsLocale } from '../../data/CmsDataSource';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { saveNewsAction, setNewsPlacementAction, setNewsPublishedAction, trashNewsAction } from '@/features/news/server/actions';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
 import { sanitizeCmsErrorMessage } from '@/shared/ui/cms/errorUtils';
@@ -43,6 +44,7 @@ interface NewsManagerProps {
 
 export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale, capabilities = { create:false,edit:false,delete:false } }) => {
   const router = useRouter();
+  const dict = getCmsDictionary(workspaceLocale);
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const { showToast } = useCmsToast();
@@ -323,10 +325,10 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
           {/* HEADER BAR */}
           <CmsPageHeader
             icon={<Newspaper />}
-            title="Tin tức"
-            description="Tạo, biên tập, lưu nháp và xuất bản bài viết công khai."
-            meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{articles.filter((article) => !article.in_trash).length} tin bài</span>}
-            actions={capabilities.create?<CmsButton onClick={handleOpenCreateForm} variant="primary" size="sm" leadingIcon={<Plus />}>Thêm tin tức</CmsButton>:undefined}
+            title={dict.modules.news.title}
+            description={dict.modules.news.description}
+            meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{articles.filter((article) => !article.in_trash).length} {dict.modules.news.itemUnit}</span>}
+            actions={capabilities.create?<CmsButton onClick={handleOpenCreateForm} variant="primary" size="sm" leadingIcon={<Plus />}>{dict.modules.news.createButton}</CmsButton>:undefined}
           />
 
           {/* SEARCH & FILTERS TOOLBAR */}
@@ -338,7 +340,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                 </div>
                 <input
                   type="text"
-                  placeholder="Tìm kiếm theo tiêu đề, alias, từ khóa tag..."
+                  placeholder={dict.modules.news.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
@@ -351,7 +353,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none"
                 >
-                  <option value="ALL">-- Tất cả Danh mục --</option>
+                  <option value="ALL">{dict.modules.news.allCategories}</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -367,11 +369,11 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none"
                 >
                   <option value="ALL">-- Tất cả trạng thái --</option>
-                  <option value="draft">Bản nháp (Draft)</option>
-                  <option value="published">Đã xuất bản (Published)</option>
+                  <option value="draft">{dict.modules.news.draftStatus}</option>
+                  <option value="published">{dict.modules.news.publishedStatus}</option>
                 </select>
               </div>
-              <div className="flex justify-end md:col-span-2"><button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && statusFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setStatusFilter('ALL'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />Đặt lại</button></div>
+              <div className="flex justify-end md:col-span-2"><button type="button" disabled={!searchQuery && selectedCategory === 'ALL' && statusFilter === 'ALL'} onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); setStatusFilter('ALL'); setCurrentPage(1); }} className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"><RotateCcw className="h-3.5 w-3.5" />{dict.common.reset}</button></div>
             </div>
 
             {/* BULK ACTIONS BAR */}
@@ -389,12 +391,12 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
 
           {/* DATA TABLE */}
           <CmsDataGridFrame
-            ariaLabel="Danh sách bài viết tin tức"
+            ariaLabel={workspaceLocale === 'en' ? 'News articles list' : 'Danh sách bài viết tin tức'}
             isLoading={isPending}
             loadingMode={articles.length === 0 ? 'skeleton' : 'overlay'}
             skeletonColumns={10}
             skeletonRows={5}
-            loadingText="Đang cập nhật danh sách..."
+            loadingText={dict.common.updatingList}
             footer={
               <CmsPagination
                 currentPage={currentPage}
@@ -417,18 +419,18 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                       checked={filteredArticles.length > 0 && selectedIds.length === filteredArticles.length}
                       indeterminate={selectedIds.length > 0 && selectedIds.length < filteredArticles.length}
                       onChange={handleToggleSelectAll}
-                      label="Chọn tất cả bài viết"
+                      label={dict.common.selectAll}
                     />
                   </th>
-                  <th className="p-3 min-w-[280px]">Bài viết & Cảnh báo</th>
-                  {columnVisibility.category && <th className="p-3 min-w-[140px]">Danh mục</th>}
-                  {columnVisibility.author && <th className="p-3 min-w-[140px]">Tác giả</th>}
-                  <th className="p-3 min-w-[92px] text-center">Nổi bật</th>
-                  <th className="p-3 min-w-[100px] text-center">Trang chủ</th>
-                  {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">Trạng thái</th>}
-                  {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">Xuất bản / Lịch</th>}
-                  {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">Cập nhật</th>}
-                  {columnVisibility.actions && <th className="p-3 w-32 text-right sticky right-0 bg-slate-50 dark:bg-slate-800">Thao tác</th>}
+                  <th className="p-3 min-w-[280px]">{dict.modules.news.columns.articleAndAlerts}</th>
+                  {columnVisibility.category && <th className="p-3 min-w-[140px]">{dict.modules.news.columns.category}</th>}
+                  {columnVisibility.author && <th className="p-3 min-w-[140px]">{dict.modules.news.columns.author}</th>}
+                  <th className="p-3 min-w-[92px] text-center">{dict.modules.news.columns.featured}</th>
+                  <th className="p-3 min-w-[100px] text-center">{dict.modules.news.columns.home}</th>
+                  {columnVisibility.status && <th className="p-3 min-w-[120px] text-center">{dict.modules.news.columns.status}</th>}
+                  {columnVisibility.publish_time && <th className="p-3 min-w-[140px]">{dict.modules.news.columns.publishedSchedule}</th>}
+                  {columnVisibility.updated_time && <th className="p-3 min-w-[120px]">{dict.modules.news.columns.updated}</th>}
+                  {columnVisibility.actions && <th className="p-3 w-32 text-right sticky right-0 bg-slate-50 dark:bg-slate-800">{dict.modules.news.columns.actions}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
@@ -438,7 +440,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
                   <tr>
                     <td colSpan={10} className="p-12 text-center text-slate-400">
                       <Newspaper className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                      <p className="font-semibold">Không tìm thấy bài viết tin tức nào.</p>
+                      <p className="font-semibold">{dict.modules.news.emptyText}</p>
                     </td>
                   </tr>
                 ) : (

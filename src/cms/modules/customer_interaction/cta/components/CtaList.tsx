@@ -17,6 +17,7 @@ import { CmsPagination } from '../../../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../../../components/ui/CmsSelectionCheckbox';
 
 interface CtaListProps {
+  workspaceLocale?: 'vi' | 'en';
   ctas: CtaItem[];
   selectedCtaIds: string[];
   onToggleSelectAll: (pageIds?: string[]) => void;
@@ -30,6 +31,7 @@ interface CtaListProps {
 }
 
 export const CtaList: React.FC<CtaListProps> = ({
+  workspaceLocale = 'vi',
   ctas,
   selectedCtaIds,
   onToggleSelectAll,
@@ -90,13 +92,13 @@ export const CtaList: React.FC<CtaListProps> = ({
                   label="Chọn tất cả CTA trên trang"
                 />
               </th>
-              <th className="p-3 min-w-[200px]">Tên quản trị</th>
-              <th className="p-3 min-w-[150px]">Nội dung</th>
-              <th className="p-3 min-w-[100px]">Hành động</th>
-              <th className="p-3 min-w-[120px]">Thống kê</th>
-              <th className="p-3 min-w-[120px]">Trạng thái</th>
-              <th className="p-3 min-w-[100px]">Ngày tạo</th>
-              <th className="p-3 w-28 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">Thao tác</th>
+              <th className="p-3 min-w-[200px]">{workspaceLocale === "en" ? "Admin Name" : "Tên quản trị"}</th>
+              <th className="p-3 min-w-[150px]">{workspaceLocale === "en" ? "Content / Label" : "Nội dung"}</th>
+              <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Action Type" : "Hành động"}</th>
+              <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Analytics" : "Thống kê"}</th>
+              <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Status" : "Trạng thái"}</th>
+              <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Created" : "Ngày tạo"}</th>
+              <th className="p-3 w-28 text-right sticky right-0 bg-slate-50/90 dark:bg-slate-850 z-10">{workspaceLocale === "en" ? "Actions" : "Thao tác"}</th>
             </tr>
           </thead>
 
@@ -246,7 +248,7 @@ export const CtaList: React.FC<CtaListProps> = ({
           <p className="text-xs mt-1">Hãy tạo CTA mới để bắt đầu</p>
         </div>
       )}
-      {ctas.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={ctas.length} itemLabel="CTA" onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
+      {ctas.length > 0 && <CmsPagination currentPage={currentPage} pageSize={pageSize} totalCount={ctas.length} itemLabel={workspaceLocale === "en" ? "CTAs" : "CTA"} onPageChange={setCurrentPage} onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }} />}
     </div>
   );
 };

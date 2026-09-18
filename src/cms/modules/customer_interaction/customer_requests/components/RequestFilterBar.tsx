@@ -9,6 +9,7 @@ export interface RequestFilterOption {
 }
 
 export interface RequestFilterBarProps {
+  workspaceLocale?: 'vi' | 'en';
   filter: RequestFilterState;
   onFilterChange: (newFilter: RequestFilterState) => void;
   onResetFilters: () => void;
@@ -21,6 +22,7 @@ export interface RequestFilterBarProps {
 }
 
 export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
+  workspaceLocale = 'vi',
   filter,
   onFilterChange,
   onResetFilters,
@@ -42,7 +44,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
           </div>
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên, email, sđt, công ty, nội dung, mã yêu cầu..."
+            placeholder={workspaceLocale === "en" ? "Search by name, email, phone, company, message, code..." : "Tìm kiếm theo tên, email, sđt, công ty, nội dung, mã yêu cầu..."}
             value={filter.searchQuery}
             onChange={(e) => {
               onFilterChange({ ...filter, searchQuery: e.target.value });
@@ -66,7 +68,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300">
             <Calendar className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-            <span className="text-[11px] text-slate-400">Từ:</span>
+            <span className="text-[11px] text-slate-400">{workspaceLocale === "en" ? "From:" : "Từ:"}</span>
             <input
               type="date"
               value={filter.dateFrom || ''}
@@ -79,7 +81,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
 
           <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300">
             <Calendar className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-            <span className="text-[11px] text-slate-400">Đến:</span>
+            <span className="text-[11px] text-slate-400">{workspaceLocale === "en" ? "To:" : "Đến:"}</span>
             <input
               type="date"
               value={filter.dateTo || ''}
@@ -98,7 +100,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
             title="Xuất file CSV danh sách yêu cầu đang lọc"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>Xuất CSV ({totalCount})</span>
+            <span>{workspaceLocale === "en" ? `Export CSV (${totalCount})` : `Xuất CSV (${totalCount})`}</span>
           </button>
 
           {/* Reset Filters Button */}
@@ -110,7 +112,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
               title="Xóa tất cả điều kiện lọc"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Xóa bộ lọc</span>
+              <span>{workspaceLocale === "en" ? "Reset filters" : "Xóa bộ lọc"}</span>
             </button>
           )}
         </div>
@@ -121,7 +123,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
         {/* Form Filter */}
         <div>
           <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
-            Biểu mẫu
+            {workspaceLocale === "en" ? "Form" : "Biểu mẫu"}
           </label>
           <select
             value={filter.formId || ''}
@@ -130,7 +132,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
             }}
             className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
           >
-            <option value="">Tất cả Biểu mẫu</option>
+            <option value="">{workspaceLocale === "en" ? "All Forms" : "Tất cả Biểu mẫu"}</option>
             {formOptions.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name}
@@ -151,7 +153,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
             }}
             className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
           >
-            <option value="">Tất cả CTA</option>
+            <option value="">{workspaceLocale === "en" ? "All CTAs" : "Tất cả CTA"}</option>
             {ctaOptions.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -163,7 +165,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
         {/* Status Filter */}
         <div>
           <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
-            Trạng thái
+            {workspaceLocale === "en" ? "Status" : "Trạng thái"}
           </label>
           <select
             value={filter.status || ''}
@@ -172,7 +174,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
             }}
             className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
           >
-            <option value="">Tất cả Trạng thái</option>
+            <option value="">{workspaceLocale === "en" ? "All Statuses" : "Tất cả Trạng thái"}</option>
             {REQUEST_STATUSES.map((status) => (
               <option key={status.value} value={status.value}>
                 {status.label}
@@ -184,7 +186,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
         {/* Assignee Filter */}
         <div>
           <label className="block text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
-            Người phụ trách
+            {workspaceLocale === "en" ? "Assignee" : "Người phụ trách"}
           </label>
           <select
             value={filter.assignedUserId || ''}
@@ -193,7 +195,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
             }}
             className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer truncate"
           >
-            <option value="">Tất cả Người phụ trách</option>
+            <option value="">{workspaceLocale === "en" ? "All Staff" : "Tất cả Người phụ trách"}</option>
             <option value="unassigned">Chưa phân công</option>
             {assigneeOptions.map((a) => (
               <option key={a.id} value={a.id}>

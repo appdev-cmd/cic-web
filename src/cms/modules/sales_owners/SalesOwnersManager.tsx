@@ -28,6 +28,7 @@ import {
 import { CmsBulkActionBar } from "@/cms/components/ui/CmsBulkActionBar";
 import { CmsButton, CmsIconButton } from "@/cms/components/ui/CmsButton";
 import { CmsPageHeader } from "@/cms/components/ui/CmsPageHeader";
+import { getCmsDictionary } from "@/cms/i18n/cmsDictionary";
 import { CmsPagination } from "@/cms/components/ui/CmsPagination";
 import { CmsSelectionCheckbox } from "@/cms/components/ui/CmsSelectionCheckbox";
 import { useDialogA11y } from "@/cms/modules/activity_logs_trash/useDialogA11y";
@@ -61,6 +62,7 @@ export function SalesOwnersManager({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const dict = getCmsDictionary(locale);
   const { items, products } = data[locale];
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
@@ -145,8 +147,9 @@ export function SalesOwnersManager({
       )}
       <CmsPageHeader
         icon={<FolderTree />}
-        title="Người phụ trách kinh doanh"
-        description="Quản lý người phụ trách kinh doanh sản phẩm."
+        title={dict.modules.productTaxonomies.salesStaff.title}
+        description={dict.modules.productTaxonomies.salesStaff.description}
+        meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{items.length} {dict.modules.productTaxonomies.salesStaff.itemUnit}</span>}
         actions={
           capabilities.create ? (
             <CmsButton
@@ -155,7 +158,7 @@ export function SalesOwnersManager({
               leadingIcon={<Plus />}
               onClick={() => setEditing(null)}
             >
-              Thêm người phụ trách
+              {dict.modules.productTaxonomies.salesStaff.createButton}
             </CmsButton>
           ) : undefined
         }
@@ -185,9 +188,9 @@ export function SalesOwnersManager({
               }}
               className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm dark:border-slate-700 dark:bg-slate-800"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Đang sử dụng</option>
-              <option value="inactive">Ngừng sử dụng</option>
+              <option value="all">{dict.modules.productTaxonomies.salesStaff.statusAll}</option>
+              <option value="active">{dict.modules.productTaxonomies.salesStaff.statusActive}</option>
+              <option value="inactive">{dict.modules.productTaxonomies.salesStaff.statusInactive}</option>
             </select>
             <select
               aria-label="Lọc theo sản phẩm"
@@ -266,9 +269,9 @@ export function SalesOwnersManager({
                   />
                 </th>
                 <th className="p-4">Tên nhân viên</th>
-                <th className="p-4">Thứ tự</th>
+                <th className="p-4">{dict.modules.productTaxonomies.salesStaff.columns.ordering}</th>
                 <th className="p-4">Số điện thoại / Skype / Zalo</th>
-                <th className="p-4">Trạng thái</th>
+                <th className="p-4">{dict.modules.productTaxonomies.salesStaff.columns.status}</th>
                 <th className="p-4">Ngày tạo / ID</th>
                 <th className="w-28 p-4 text-right">Thao tác</th>
               </tr>

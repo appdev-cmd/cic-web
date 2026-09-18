@@ -16,6 +16,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
@@ -416,6 +417,7 @@ function toSaveDraftInput(page: PageBuilderPage): SaveDraftInput {
 
 export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesScreenProps) {
   const workspaceLocale = useCmsWorkspaceLocale();
+  const dict = getCmsDictionary(workspaceLocale);
   const [pages, setPages] = useState<CmsStaticPageListItem[]>(() => pagesByLocale[workspaceLocale] ?? []);
   const [editingPage, setEditingPage] = useState<PageBuilderPage | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
@@ -652,11 +654,11 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
 
       <CmsPageHeader
         icon={<FileText />}
-        title="Trang nội dung"
-        description="Quản lý các trang thiết kế riêng và tạo trang mới theo mẫu nội dung chuẩn."
+        title={dict.modules.staticPages.title}
+        description={dict.modules.staticPages.description}
         meta={
           <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-            {pages.length} Page · {workspaceLocale.toUpperCase()}
+            {pages.length} {dict.modules.staticPages.itemUnit} · {workspaceLocale.toUpperCase()}
           </span>
         }
         actions={
@@ -691,7 +693,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
                 setQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Tìm theo tên, code hoặc đường dẫn..."
+              placeholder={workspaceLocale === 'en' ? 'Search by name, code or path...' : 'Tìm theo tên, code hoặc đường dẫn...'}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs font-medium outline-none focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
@@ -704,9 +706,9 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
             }}
             className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium outline-none focus:border-orange-500 md:col-span-3 dark:border-slate-700 dark:bg-slate-800"
           >
-            <option value="all">Trạng thái: Tất cả</option>
-            <option value="has_draft">Có thay đổi bản nháp</option>
-            <option value="published">Đã xuất bản</option>
+            <option value="all">{dict.common.allStatus}</option>
+            <option value="has_draft">{workspaceLocale === 'en' ? 'Draft Changes' : 'Có thay đổi bản nháp'}</option>
+            <option value="published">{dict.common.published}</option>
           </select>
 
           <div className="flex justify-end md:col-span-3">
@@ -721,7 +723,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
               className="flex h-9 w-24 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Đặt lại
+              {dict.common.reset}
             </button>
           </div>
         </div>
@@ -733,11 +735,11 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
             <thead>
               <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-500">
                 <th className="p-3">Page</th>
-                <th className="p-3">Code / đường dẫn</th>
-                <th className="p-3">Section</th>
+                <th className="p-3">{workspaceLocale === 'en' ? 'Code / Slug' : 'Code / đường dẫn'}</th>
+                <th className="p-3">{workspaceLocale === 'en' ? 'Sections' : 'Section'}</th>
                 <th className="p-3">Draft</th>
                 <th className="p-3">Published</th>
-                <th className="p-3 text-right">Thao tác</th>
+                <th className="p-3 text-right">{dict.common.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -769,7 +771,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
 
         {filteredPages.length === 0 && (
           <div className="py-12 text-center text-sm text-slate-500">
-            Không tìm thấy Page phù hợp.
+            {dict.modules.staticPages.emptyText}
           </div>
         )}
 

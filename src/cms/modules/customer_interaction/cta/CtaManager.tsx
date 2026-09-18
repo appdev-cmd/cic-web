@@ -16,6 +16,7 @@ import { CtaUsedByModal } from './components/CtaUsedByModal';
 import { CTA_STATUSES, CTA_STATUS_LABELS, CtaStatus } from '../shared/constants/statusTypes';
 import { ACTION_TYPES } from '../shared/constants/actionTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import type { CmsLocale } from '../../../data/CmsDataSource';
@@ -43,6 +44,7 @@ export const CtaManager: React.FC<CtaManagerProps> = ({
   const canEdit = capabilities?.edit ?? true;
   const canDelete = capabilities?.delete ?? true;
 
+  const dict = getCmsDictionary(workspaceLocale);
   const [ctas, setCtas] = useState<CtaItem[]>(data?.ctas ?? []);
   const [selectedCtaIds, setSelectedCtaIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<CtaFilterState>({
@@ -500,7 +502,7 @@ export const CtaManager: React.FC<CtaManagerProps> = ({
               onChange={(e) => handleStatusFilterChange(e.target.value)}
               className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
             >
-              <option value="">Tất cả Trạng thái</option>
+              <option value="">{dict.modules.customerEngagement.cta.statusAll}</option>
               {CTA_STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
@@ -577,7 +579,7 @@ export const CtaManager: React.FC<CtaManagerProps> = ({
       {/* Bulk Actions */}
       <CmsBulkActionBar
         selectedCount={selectedCtaIds.length}
-        itemLabel="CTA"
+        itemLabel={dict.modules.customerEngagement.cta.itemUnit}
         onClear={() => setSelectedCtaIds([])}
         actions={[
           {
@@ -602,6 +604,7 @@ export const CtaManager: React.FC<CtaManagerProps> = ({
 
       {/* CTA List */}
       <CtaList
+          workspaceLocale={workspaceLocale}
         ctas={filteredCtas}
         selectedCtaIds={selectedCtaIds}
         onToggleSelectAll={handleToggleSelectAll}

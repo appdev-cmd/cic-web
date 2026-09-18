@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
+import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
@@ -43,6 +44,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
   const canEdit = capabilities ? capabilities.edit : true;
   const canDelete = capabilities ? capabilities.delete : true;
 
+  const dict = getCmsDictionary(workspaceLocale);
   const [templates, setTemplates] = useState<EmailTemplate[]>(initialTemplates || data?.templates || []);
   const [view, setView] = useState<'list' | 'form'>('list');
   const [editing, setEditing] = useState<EmailTemplate | null>(null);
@@ -326,7 +328,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
             onChange={(e) => setEvent(e.target.value)}
             className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 md:col-span-3"
           >
-            <option value="all">Tất cả sự kiện</option>
+            <option value="all">{dict.modules.customerEngagement.emailTemplates.eventAll}</option>
             {EMAIL_EVENTS.map((item) => (
               <option value={item.value} key={item.value}>
                 {workspaceLocale === 'vi' ? item.label : item.labelEn}
@@ -392,9 +394,9 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                 <th className="min-w-[300px] p-3">Tên mẫu</th>
                 <th className="w-48 p-3">Sự kiện</th>
                 <th className="w-28 p-3">Đối tượng</th>
-                <th className="w-32 p-3">Trạng thái</th>
+                <th className="w-32 p-3">{workspaceLocale === "en" ? "Status" : "Trạng thái"}</th>
                 <th className="w-24 p-3">Phiên bản</th>
-                <th className="w-40 p-3 text-right">Thao tác</th>
+                <th className="w-40 p-3 text-right">{workspaceLocale === "en" ? "Actions" : "Thao tác"}</th>
               </tr>
             </thead>
             <tbody>
@@ -527,7 +529,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
           currentPage={currentPage}
           pageSize={pageSize}
           totalCount={rows.length}
-          itemLabel="mẫu email"
+          itemLabel={dict.modules.customerEngagement.emailTemplates.itemUnit}
           onPageChange={setCurrentPage}
           onPageSizeChange={(size) => {
             setPageSize(size);
