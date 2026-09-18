@@ -3,6 +3,9 @@ import { getPostgresClient } from '@/server/db/postgres';
 import { createSupabaseAdminClient } from '@/server/supabase/admin';
 import { MEDIA_BUCKET } from '@/features/media/constants';
 
+const MEDIA_CACHE_TTL_MS = 1800_000; // 30 mins
+const signedUrlCache = new Map<string, { url: string; mimeType: string | null; expiresAt: number }>();
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(
@@ -15,6 +18,16 @@ export async function GET(
 
     if (!decodedId) {
       return NextResponse.json({ error: 'Asset ID or path is required' }, { status: 400 });
+    }
+
+    const cached = signedUrlCache.get(decodedId);
+    if (cached && cached.expiresAt > Date.now()) {
+      const response = NextResponse.redirect(cached.url, 307);
+      response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+      if (cached.mimeType) {
+        response.headers.set('Content-Type', cached.mimeType);
+      }
+      return response;
     }
 
     let storagePath: string | null = null;
@@ -47,6 +60,8 @@ export async function GET(
     if (error || !data?.signedUrl) {
       return NextResponse.json({ error: 'Unable to sign media URL' }, { status: 500 });
     }
+
+    signedUrlCache.set(decodedId, { url: data.signedUrl, mimeType, expiresAt: Date.now() + MEDIA_CACHE_TTL_MS });
 
     const response = NextResponse.redirect(data.signedUrl, 307);
     response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');

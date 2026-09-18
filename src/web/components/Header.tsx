@@ -250,12 +250,12 @@ export const Header = ({
                         setActiveLink(link.name);
                       }
                     }}
-                    className={`flex items-center gap-1.5 ${typeNav} transition-all duration-200 cursor-pointer py-1 ${
+                    className={`flex items-center gap-1.5 text-xs xl:text-sm font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer py-1 ${
                       isActive 
-                        ? 'text-orange-600 font-bold border-b-2 border-orange-600 pb-0.5' 
+                        ? 'text-orange-600 border-b-2 border-orange-600 pb-0.5' 
                         : isHeaderWhite 
-                          ? 'text-slate-800 hover:text-orange-600 font-medium' 
-                          : 'text-white/90 hover:text-white font-medium'
+                          ? 'text-slate-800 hover:text-orange-600' 
+                          : 'text-white/90 hover:text-white'
                     }`}
                   >
                     <span>{link.name}</span>
@@ -487,7 +487,7 @@ export const Header = ({
                       }`}>
                         <a
                           href={resolvePublicHref(link.href)}
-                          className="text-base font-semibold transition-colors flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded"
+                          className="text-sm font-bold uppercase tracking-wider transition-colors flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded"
                           onClick={(e) => {
                             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                             navigateTo(resolvePublicHref(link.href));
