@@ -20,6 +20,7 @@ import type { CmsSettingsData } from '@/features/system-settings/domain/model';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
 import type { MasterDataType } from '../modules/product_settings/types';
 import { CmsWorkspaceLocaleProvider } from '../context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '../i18n/cmsDictionary';
 import { CmsToastProvider } from '../context/CmsToastContext';
 import { CmsRouteProgressBar, startCmsProgressBar, stopCmsProgressBar } from './ui/CmsRouteProgressBar';
 import { ApplicationLoadingState } from '@/shared/ui/application';
@@ -254,6 +255,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   }, [navigationPending]);
 
   const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
+  const cmsDict = getCmsDictionary(workspaceLocale);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const activePath = initialPath;

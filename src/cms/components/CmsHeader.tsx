@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { CmsUser, NotificationItem } from '../types';
 import type { CmsLocale } from '../data/CmsDataSource';
+import { getCmsDictionary } from '../i18n/cmsDictionary';
 
 interface CmsHeaderProps {
   user: CmsUser;
@@ -57,6 +58,8 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
 
+  const dict = getCmsDictionary(workspaceLocale);
+  const tHeader = dict.header;
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   const markAllRead = () => {
@@ -99,7 +102,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               </span>
             </div>
             <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline-block">
-              Hệ thống Quản trị Nội dung
+              {tHeader.cmsSubtitle}
             </span>
           </div>
         </div>
@@ -117,9 +120,9 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               <Search className="w-3.5 h-3.5" />
             </div>
             <span className="font-normal text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 truncate text-left">
-              <span className="lg:hidden">Tìm kiếm CMS...</span>
+              <span className="lg:hidden">{tHeader.quickSearchShort}</span>
               <span className="hidden lg:inline">
-                Tìm kiếm toàn bộ CMS <span className="text-slate-400 dark:text-slate-500 font-light text-[11px]">(sản phẩm, tin tức, leads...)</span>
+                {tHeader.searchPlaceholder}
               </span>
             </span>
           </div>
@@ -153,7 +156,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Tạo mới</span>
+            <span className="hidden sm:inline">{tHeader.quickAction}</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-80" />
           </button>
 
@@ -163,7 +166,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               onMouseLeave={() => setIsQuickActionOpen(false)}
             >
               <div className="px-3 py-1 font-semibold text-slate-400 dark:text-slate-500 uppercase text-[10px]">
-                Tạo mới nhanh
+                {tHeader.quickAction}
               </div>
               <button
                 onClick={() => {
@@ -173,7 +176,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                 className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
                 <Package className="w-4 h-4 text-orange-500" />
-                <span>Sản phẩm mới</span>
+                <span>{tHeader.newProduct}</span>
               </button>
               <button
                 onClick={() => {
@@ -183,7 +186,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                 className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
                 <Newspaper className="w-4 h-4 text-blue-500" />
-                <span>Tin tức mới</span>
+                <span>{tHeader.newNews}</span>
               </button>
               <button
                 onClick={() => {
@@ -193,7 +196,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                 className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
                 <Sparkles className="w-4 h-4 text-emerald-500" />
-                <span>Dịch vụ mới</span>
+                <span>{tHeader.newService}</span>
               </button>
               <button
                 onClick={() => {
@@ -203,7 +206,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                 className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 flex items-center gap-2 cursor-pointer transition-colors"
               >
                 <Calendar className="w-4 h-4 text-amber-500" />
-                <span>Sự kiện mới</span>
+                <span>{tHeader.newEvent}</span>
               </button>
             </div>
           )}
@@ -232,14 +235,14 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
             <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-2 z-50 text-xs">
               <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between">
                 <span className="font-bold text-slate-900 dark:text-white text-sm">
-                  Thông báo hệ thống ({unreadCount})
+                  {tHeader.notifications} ({unreadCount})
                 </span>
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
                     className="text-orange-600 dark:text-orange-400 hover:underline text-[11px] font-medium"
                   >
-                    Đánh dấu đã đọc
+                    {tHeader.markAllRead}
                   </button>
                 )}
               </div>
@@ -247,7 +250,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
               <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
                 {notifications.length === 0 && (
                   <p className="px-4 py-8 text-center text-[11px] text-slate-500 dark:text-slate-400">
-                    Chưa có thông báo.
+                    {tHeader.noNotifications}
                   </p>
                 )}
                 {notifications.map((item) => (
@@ -384,7 +387,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                   className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl flex items-center gap-2.5 cursor-pointer font-medium transition-colors"
                 >
                   <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                  <span>Tài khoản của tôi</span>
+                  <span>{tHeader.myAccount}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -394,7 +397,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                   className="w-full px-3 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl flex items-center gap-2.5 cursor-pointer font-medium transition-colors"
                 >
                   <KeyRound className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                  <span>Đổi mật khẩu</span>
+                  <span>{tHeader.changePassword}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -445,7 +448,7 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
                   className="w-full px-3 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl flex items-center gap-2.5 cursor-pointer font-medium transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Đăng xuất</span>
+                  <span>{tHeader.logout}</span>
                 </button>
               </div>
             </div>

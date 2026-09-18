@@ -1,17 +1,21 @@
 import React from 'react';
+import type { CmsLocale } from '../../data/CmsDataSource';
 import { AlertTriangle, X, RotateCcw } from 'lucide-react';
 
 interface ResetLayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirmReset: () => void;
+  workspaceLocale?: CmsLocale;
 }
 
 export const ResetLayoutModal: React.FC<ResetLayoutModalProps> = ({
   isOpen,
   onClose,
   onConfirmReset,
+  workspaceLocale = 'vi',
 }) => {
+  const isEn = workspaceLocale === 'en';
   if (!isOpen) return null;
 
   return (
@@ -30,19 +34,19 @@ export const ResetLayoutModal: React.FC<ResetLayoutModalProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              Đặt lại cấu hình Bố cục Mặc định?
+              {isEn ? 'Reset Layout to Default Settings?' : 'Đặt lại cấu hình Bố cục Mặc định?'}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Thao tác này sẽ khôi phục tất cả các Widget, mật độ hiển thị và thứ tự về trạng thái chuẩn ban đầu.
+              {isEn ? 'This action restores all widgets, density, and ordering back to standard initial layout.' : 'Thao tác này sẽ khôi phục tất cả các Widget, mật độ hiển thị và thứ tự về trạng thái chuẩn ban đầu.'}
             </p>
           </div>
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 space-y-1">
-          <p className="font-semibold text-amber-600 dark:text-amber-400">Lưu ý nghiệp vụ:</p>
+          <p className="font-semibold text-amber-600 dark:text-amber-400">{isEn ? 'Notice:' : 'Lưu ý nghiệp vụ:'}</p>
           <ul className="list-disc list-inside space-y-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-            <li>Tất cả tùy chỉnh cá nhân về ẩn/hiện widget sẽ bị thay thế.</li>
-            <li>Dữ liệu hệ thống và quyền truy cập của bạn không bị ảnh hưởng.</li>
+            <li>{isEn ? 'All personal widget visibility and order customizations will be reset.' : 'Tất cả tùy chỉnh cá nhân về ẩn/hiện widget sẽ bị thay thế.'}</li>
+            <li>{isEn ? 'System data and user permissions are completely unaffected.' : 'Dữ liệu hệ thống và quyền truy cập của bạn không bị ảnh hưởng.'}</li>
           </ul>
         </div>
 
@@ -61,7 +65,7 @@ export const ResetLayoutModal: React.FC<ResetLayoutModalProps> = ({
             className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-sm"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Xác nhận Đặt lại</span>
+            <span>{isEn ? 'Confirm Reset' : 'Xác nhận Đặt lại'}</span>
           </button>
         </div>
       </div>

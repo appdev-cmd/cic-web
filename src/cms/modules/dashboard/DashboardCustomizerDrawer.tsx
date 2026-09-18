@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { DashboardPreference, WidgetConfig } from './types';
+import type { CmsLocale } from '../../data/CmsDataSource';
 
 interface DashboardCustomizerDrawerProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface DashboardCustomizerDrawerProps {
   preference: DashboardPreference;
   onSavePreference: (newPref: DashboardPreference) => void;
   onOpenResetModal: () => void;
+  workspaceLocale?: CmsLocale;
 }
 
 export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps> = ({
@@ -28,7 +30,9 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
   preference,
   onSavePreference,
   onOpenResetModal,
+  workspaceLocale = 'vi',
 }) => {
+  const isEn = workspaceLocale === 'en';
   const [tempPref, setTempPref] = useState<DashboardPreference>(preference);
 
   useEffect(() => {
@@ -92,10 +96,10 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  Tùy chỉnh Bố cục Dashboard
+                  {isEn ? 'Customize Dashboard Layout' : 'Tùy chỉnh Bố cục Dashboard'}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Cá nhân hóa Widget, mật độ hiển thị & phạm vi
+                  {isEn ? 'Personalize widgets, density & display range' : 'Cá nhân hóa Widget, mật độ hiển thị & phạm vi'}
                 </p>
               </div>
             </div>
@@ -114,10 +118,10 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                   <Layout className="w-4 h-4 text-orange-500" />
-                  <span>Danh sách Widget hiển thị</span>
+                  <span>{isEn ? 'Active Widgets' : 'Danh sách Widget hiển thị'}</span>
                 </h3>
                 <span className="text-[11px] text-slate-400">
-                  {tempPref.widgets.filter((w) => w.visible).length}/{tempPref.widgets.length} Bật
+                  {tempPref.widgets.filter((w) => w.visible).length}/{tempPref.widgets.length} {isEn ? 'Enabled' : 'Bật'}
                 </span>
               </div>
 
@@ -153,7 +157,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
                           {widget.name}
                         </p>
                         <span className="text-[10px] text-slate-400 font-medium">
-                          Phân loại: {widget.category}
+                          {isEn ? 'Category' : 'Phân loại'}: {widget.category}
                         </span>
                       </div>
                     </div>
@@ -164,7 +168,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
                         onClick={() => moveWidget(widget.id, 'up')}
                         disabled={idx === 0}
                         className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                        title="Di chuyển lên"
+                        title={isEn ? 'Move Up' : 'Di chuyển lên'}
                       >
                         <ArrowUp className="w-3.5 h-3.5" />
                       </button>
@@ -172,7 +176,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
                         onClick={() => moveWidget(widget.id, 'down')}
                         disabled={idx === sortedWidgets.length - 1}
                         className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                        title="Di chuyển xuống"
+                        title={isEn ? 'Move Down' : 'Di chuyển xuống'}
                       >
                         <ArrowDown className="w-3.5 h-3.5" />
                       </button>
@@ -186,7 +190,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
             <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                 <Grid className="w-4 h-4 text-purple-500" />
-                <span>Mật độ hiển thị Task Rows</span>
+                <span>{isEn ? 'Task Row Display Density' : 'Mật độ hiển thị Task Rows'}</span>
               </h3>
 
               <div className="grid grid-cols-2 gap-3">
@@ -202,7 +206,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
                 >
                   <span className="text-xs font-bold block">Comfortable</span>
                   <span className="text-[10px] text-slate-400 block mt-0.5">
-                    Thoải mái (Spacious padding)
+                    {isEn ? 'Spacious padding' : 'Thoải mái (Spacious padding)'}
                   </span>
                 </button>
 
@@ -218,7 +222,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
                 >
                   <span className="text-xs font-bold block">Compact</span>
                   <span className="text-[10px] text-slate-400 block mt-0.5">
-                    Thu gọn (Tối ưu không gian)
+                    {isEn ? 'Compact spacing' : 'Thu gọn (Tối ưu không gian)'}
                   </span>
                 </button>
               </div>
@@ -231,7 +235,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
                 className="w-full py-2.5 px-3 rounded-xl border border-amber-300 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center justify-center gap-2 hover:bg-amber-100 transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Đặt lại Cấu hình Bố cục Mặc định</span>
+                <span>{isEn ? 'Reset to Default Layout' : 'Đặt lại Cấu hình Bố cục Mặc định'}</span>
               </button>
             </div>
           </div>
@@ -249,7 +253,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
               className="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-orange-600/20 cursor-pointer"
             >
               <Check className="w-4 h-4" />
-              <span>Lưu Cấu hình</span>
+              <span>{isEn ? 'Save Layout' : 'Lưu Cấu hình'}</span>
             </button>
           </div>
         </div>

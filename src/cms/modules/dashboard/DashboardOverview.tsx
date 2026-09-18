@@ -32,6 +32,7 @@ import {
 } from 'recharts';
 
 import type { CmsDashboardData, CmsLocale } from '../../data/CmsDataSource';
+import { getCmsDictionary } from '../../i18n/cmsDictionary';
 
 import {
   ContactMessage,
@@ -61,6 +62,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onNavigate,
   onOpenDrawerItem,
 }) => {
+  const dict = getCmsDictionary(workspaceLocale);
+  const t = dict.dashboard;
   // Preference state
   const [preference, setPreference] = useState<DashboardPreference>(defaultDashboardPreference);
 
@@ -117,7 +120,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             className="ml-2 text-orange-400 hover:underline flex items-center gap-1 font-bold cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Ẩn</span>
+            <span>{workspaceLocale === 'en' ? 'Dismiss' : 'Ẩn'}</span>
           </button>
         </div>
       )}
@@ -125,8 +128,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* 1. PAGE HEADER */}
       <CmsPageHeader
         icon={<LayoutDashboard />}
-        title="Tổng quan vận hành"
-        description="Trung tâm giám sát thông số thời gian thực, tiếp nhận yêu cầu tư vấn và theo dõi nhật ký hoạt động CIC Technology"
+        title={t.pageTitle}
+        description={t.pageDescription}
         showStatus={true}
         actions={
           <button
@@ -134,7 +137,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-xs active:scale-95"
           >
             <Sliders className="w-4 h-4 text-orange-500" />
-            <span>Tùy chỉnh giao diện</span>
+            <span>{t.customizeLayout}</span>
           </button>
         }
       />
@@ -143,10 +146,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {!data ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">
           <Globe className="mx-auto h-8 w-8 text-slate-400" />
-          <h2 className="mt-3 text-base font-bold text-slate-900 dark:text-white">Chưa có dữ liệu Dashboard cho English</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Workspace EN là dataset độc lập và không sử dụng dữ liệu VI để thay thế.
-          </p>
+          <h2 className="mt-3 text-base font-bold text-slate-900 dark:text-white">{t.noDataEn}</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t.noDataEnDesc}</p>
         </div>
       ) : sortedWidgetIds.map((widgetId) => {
         if (!isWidgetVisible(widgetId)) return null;
@@ -159,7 +160,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               .map((item) => ({
                 id: item.id,
                 title: item.title,
-                meta: `${item.author_name} · Bản nháp`,
+                meta: `${item.author_name} · ${t.draft}`,
                 time: item.created_time,
                 icon: item.content_type === 'product' ? Package : item.content_type === 'news' ? Newspaper : FileText,
                 tone: 'slate',
@@ -171,7 +172,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               .map((item) => ({
                 id: item.id,
                 title: item.subject,
-                meta: `${item.sender_name} · ${item.status === 'unread' ? 'Chưa đọc' : 'Đang xử lý'}`,
+                meta: `${item.sender_name} · ${item.status === 'unread' ? t.unread : t.processing}`,
                 time: item.created_time,
                 icon: MessageSquare,
                 tone: item.status === 'unread' ? 'red' : 'orange',
@@ -203,11 +204,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="rounded-xl bg-orange-500/10 p-2 text-orange-600"><Clock className="h-4 w-4" /></div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Công việc hiện tại</h3>
-                    <p className="text-[11px] text-slate-400">Bản nháp và yêu cầu khách hàng cần tiếp tục xử lý</p>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t.currentWork}</h3>
+                    <p className="text-[11px] text-slate-400">{t.currentWorkSubtitle}</p>
                   </div>
                 </div>
-                <span className="shrink-0 rounded-lg bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-700 dark:bg-orange-950/30 dark:text-orange-300">{currentWork.length} việc gần nhất</span>
+                <span className="shrink-0 rounded-lg bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-700 dark:bg-orange-950/30 dark:text-orange-300">{currentWork.length} {t.recentItems}</span>
               </div>
 
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -229,7 +230,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </button>
                   );
                 })}
-                {currentWork.length === 0 && <p className="col-span-full rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500 dark:border-slate-700">Hiện không có công việc nào cần tiếp tục xử lý.</p>}
+                {currentWork.length === 0 && <p className="col-span-full rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500 dark:border-slate-700">{t.noCurrentWork}</p>}
               </div>
             </div>
           );
@@ -245,7 +246,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs hover:border-orange-500/50 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Sản phẩm</span>
+                  <span>{t.kpiProducts}</span>
                   <div className="p-1.5 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
                     <Package className="w-4 h-4" />
                   </div>
@@ -254,7 +255,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.published_products}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Đang hoạt động</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{t.kpiActive}</p>
                 </div>
               </div>
 
@@ -264,7 +265,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs hover:border-orange-500/50 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Tin tức</span>
+                  <span>{t.kpiNews}</span>
                   <div className="p-1.5 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
                     <Newspaper className="w-4 h-4" />
                   </div>
@@ -273,7 +274,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.published_news}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Đã xuất bản</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{t.kpiPublished}</p>
                 </div>
               </div>
 
@@ -283,7 +284,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs hover:border-purple-500/50 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Trang nội dung</span>
+                  <span>{t.kpiStaticPages}</span>
                   <div className="p-1.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
                     <FileText className="w-4 h-4" />
                   </div>
@@ -292,7 +293,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.static_pages}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Đang hoạt động</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{t.kpiActive}</p>
                 </div>
               </div>
 
@@ -302,7 +303,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs hover:border-emerald-500/50 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Sự kiện</span>
+                  <span>{t.kpiEvents}</span>
                   <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
                     <CalendarDays className="w-4 h-4" />
                   </div>
@@ -311,7 +312,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {data.kpi.upcoming_events}
                   </span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Sắp diễn ra</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{t.kpiUpcoming}</p>
                 </div>
               </div>
 
@@ -321,7 +322,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 className="bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 rounded-2xl p-4 shadow-xs hover:border-red-500 transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden group"
               >
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-medium">
-                  <span>Yêu cầu khách hàng</span>
+                  <span>{t.kpiCustomerRequests}</span>
                   <div className="p-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform">
                     <MessageSquare className="w-4 h-4" />
                   </div>
@@ -332,10 +333,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       {data.kpi.unprocessed_contacts + data.kpi.unprocessed_registrations}
                     </span>
                     <span className="px-1.5 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 text-[10px] font-bold rounded animate-pulse">
-                      Chưa xử lý!
+                      {t.kpiActionRequired}
                     </span>
                   </div>
-                  <p className="text-[11px] text-red-500 font-semibold mt-0.5">Yêu cầu đang chờ xử lý</p>
+                  <p className="text-[11px] text-red-500 font-semibold mt-0.5">{t.kpiRequestsPending}</p>
                 </div>
               </div>
             </div>
@@ -358,17 +359,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <MessageSquare className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                        Yêu cầu khách hàng
-                      </h3>
-                      <p className="text-[11px] text-slate-400">Các yêu cầu mới nhất cần tiếp nhận và xử lý</p>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-sm">{t.customerRequests}</h3>
+                      <p className="text-[11px] text-slate-400">{t.customerRequestsSubtitle}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => onNavigate('/cms/customer-requests', 'Yêu cầu khách hàng')}
                     className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                   >
-                    <span>Xem tất cả</span>
+                    <span>{t.viewAll}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -420,7 +419,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     onClick={() => onNavigate('/cms/news', 'Quản lý Tin tức')}
                     className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                   >
-                    <span>Xem tất cả</span>
+                    <span>{t.viewAll}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

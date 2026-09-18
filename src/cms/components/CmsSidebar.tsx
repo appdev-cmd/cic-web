@@ -50,6 +50,8 @@ import {
   MessageSquareText,
 } from 'lucide-react';
 import { CmsMenuGroup } from '../types';
+import { useCmsWorkspaceLocale } from '../context/CmsWorkspaceLocaleContext';
+import { getCmsDictionary } from '../i18n/cmsDictionary';
 
 interface CmsSidebarProps {
   isCollapsed: boolean;
@@ -118,6 +120,8 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   isMobileOpen,
   onCloseMobile,
 }) => {
+  const workspaceLocale = useCmsWorkspaceLocale();
+  const dict = getCmsDictionary(workspaceLocale);
   const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>(() =>
     menuGroups.map((group) => group.id)
   );
@@ -242,7 +246,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                   onClick={() => toggleGroup(group.id)}
                   className="w-full px-2 py-1 text-left text-[11px] font-semibold leading-4 text-slate-400 dark:text-slate-500 uppercase tracking-wide flex items-center justify-between hover:text-slate-500 dark:hover:text-slate-400 transition-colors group cursor-pointer"
                 >
-                  <span className="truncate">{group.groupTitle}</span>
+                  <span className="truncate">{dict.menu.groups[group.id] || group.groupTitle}</span>
                   <ChevronDown
                     className={`w-3 h-3 transition-transform duration-200 ${
                       isGroupOpen ? 'transform rotate-0' : 'transform -rotate-90'
