@@ -208,6 +208,7 @@ export interface CmsDashboardProps {
   moduleContent?: ReactNode;
   navigationPending?: boolean;
   moduleAccess?: Partial<Record<CmsModuleKey, boolean>>;
+  initialWorkspaceLocale?: CmsLocale;
 }
 
 function GuardedModule({ authorized, ready, message, children }: Readonly<{ authorized: boolean; ready: boolean; message: string; children: ReactNode }>) {
@@ -216,7 +217,7 @@ function GuardedModule({ authorized, ready, message, children }: Readonly<{ auth
   return children;
 }
 
-export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent, navigationPending = false, moduleAccess = {} }) => {
+export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent, navigationPending = false, moduleAccess = {}, initialWorkspaceLocale }) => {
   // Theme & Layout States (Persisted & Synced)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -254,7 +255,33 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
     }
   }, [navigationPending]);
 
-  const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>('vi');
+  const [workspaceLocale, setWorkspaceLocale] = useState<CmsLocale>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('cic_cms_workspace_locale') || localStorage.getItem('cms_workspace_locale');
+        if (saved === 'en' || saved === 'vi') return saved;
+        const match = document.cookie.match(/(?:^|;\s*)cms_workspace_locale=(en|vi)/);
+        if (match) return match[1] as CmsLocale;
+      } catch {
+        // ignore
+      }
+    }
+    return initialWorkspaceLocale ?? 'vi';
+  });
+
+  const handleToggleWorkspaceLocale = () => {
+    const next: CmsLocale = workspaceLocale === 'vi' ? 'en' : 'vi';
+    setWorkspaceLocale(next);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('cic_cms_workspace_locale', next);
+        localStorage.setItem('cms_workspace_locale', next);
+        document.cookie = `cms_workspace_locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
+      } catch {
+        // ignore
+      }
+    }
+  };
   const cmsDict = getCmsDictionary(workspaceLocale);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -266,8 +293,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
     .sort((left, right) => (right.path?.length ?? 0) - (left.path?.length ?? 0))
     .find((item) => item.path && (normalizedActivePath === item.path || normalizedActivePath.startsWith(`${item.path}/`)));
   const currentPageTitle = initialPath.includes('/brands') || initialPath.includes('/manufacturers')
-    ? 'Hãng sản xuất'
-    : matchedMenuItem?.title ?? (resolveCmsModule(activePath) === 'dashboard' ? 'Tổng quan CMS' : 'CMS');
+    ? (workspaceLocale === 'en' ? 'Manufacturers' : 'Hãng sản xuất')
+    : (matchedMenuItem ? (cmsDict.menu.items[matchedMenuItem.id] || matchedMenuItem.title) : (resolveCmsModule(activePath) === 'dashboard' ? (workspaceLocale === 'en' ? 'Dashboard Overview' : 'Tổng quan CMS') : 'CMS'));
 
   // Command Palette & Right Drawer
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -356,7 +383,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
         workspaceLocale={workspaceLocale}
-        onToggleWorkspaceLocale={() => setWorkspaceLocale(workspaceLocale === 'vi' ? 'en' : 'vi')}
+        onToggleWorkspaceLocale={handleToggleWorkspaceLocale}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onQuickAction={(type) => {
           const actionConfig: Record<'product' | 'news' | 'service' | 'event', { path: string; title: string; label: string }> = {
@@ -421,7 +448,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
 
           {/* Breadcrumb & Page Title */}
           <CmsBreadcrumb
-            items={activeModule === 'dashboard' ? [{ label: 'Tổng quan' }] : [{ label: 'Tổng quan' }, { label: currentPageTitle }]}
+            items={activeModule === 'dashboard' ? [{ label: cmsDict.menu.items.menu_dashboard || 'Tổng quan' }] : [{ label: cmsDict.menu.items.menu_dashboard || 'Tổng quan' }, { label: currentPageTitle }]}
             pageTitle={currentPageTitle}
             hideHeaderBar
           />

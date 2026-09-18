@@ -1,4 +1,6 @@
 import { CmsShellClient } from './CmsShellClient';
+import { cookies } from 'next/headers';
+import type { CmsLocale } from '@/cms/data/CmsDataSource';
 import { requireCmsPageAccess } from '@/server/auth/page-guards';
 import { getCmsDashboardData } from '@/features/dashboard/server/queries';
 import { getCmsSearchRecords } from '@/features/cms-search/server/queries';
@@ -16,6 +18,9 @@ import { getPermittedCmsMenuGroups } from '@/cms/config/navigation';
 import type { ReactNode } from 'react';
 
 export async function renderCmsFoundationRoute(module: CmsModuleKey, path = '/cms/dashboard', moduleContent?: ReactNode) {
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get('cms_workspace_locale')?.value;
+  const initialWorkspaceLocale: CmsLocale = rawLocale === 'en' ? 'en' : 'vi';
   const access = await requireCmsPageAccess();
   const userRole: CmsUser['role'] = access.roleCodes.includes('superadmin') ? 'superadmin' : access.roleCodes.includes('admin') ? 'admin' : 'viewer';
   const allowedModules = access.isAdministrator ? null : [...new Set(access.permissions.filter((item) => item.action === 'view').map((item) => item.module))];
@@ -32,10 +37,10 @@ export async function renderCmsFoundationRoute(module: CmsModuleKey, path = '/cm
   const usersData = module === 'users' && canViewUsers ? await getCmsUsersData() : null;
   const permissionsData = module === 'permissions' && canViewPermissions ? await getCmsPermissionsData() : null;
   const settingsData = module === 'settings' && canViewSettings ? await getCmsSystemSettingsData() : null;
-  const functionSeoData = module === 'function_seo' ? await getFunctionSeoData('vi') : [];
+  const functionSeoData = module === 'function_seo' ? await getFunctionSeoData(initialWorkspaceLocale) : [];
   const activityData = module === 'activity_logs' && canViewAudit ? await getCmsActivityLogsData() : null;
   const trashData = module === 'trash' && canViewTrash ? await getCmsTrashPage(initialTrashQuery) : null;
-  const mediaData = module === 'media' && canViewMedia ? await getCmsMediaData('vi') : null;
+  const mediaData = module === 'media' && canViewMedia ? await getCmsMediaData(initialWorkspaceLocale) : null;
 
   const currentUser = { id: String(access.legacyUserId), username: access.username, full_name: access.fullName, email: access.email, role: userRole, status: 'active' as const };
   const menuGroups = getPermittedCmsMenuGroups(allowedModules);
@@ -61,5 +66,6 @@ export async function renderCmsFoundationRoute(module: CmsModuleKey, path = '/cm
     mediaData={mediaData}
     mediaCapabilities={{ create: can(access,'media','create'), edit: can(access,'media','edit'), delete: can(access,'media','delete'), replace: can(access,'media','replace') }}
     moduleContent={moduleContent}
+    initialWorkspaceLocale={initialWorkspaceLocale}
   />;
 }

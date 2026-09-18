@@ -66,6 +66,13 @@ export interface CmsDictionary {
     roleEditor: string;
     roleViewer: string;
   };
+  sidebar: {
+    filterPlaceholder: string;
+    expandTitle: string;
+    collapseTitle: string;
+    systemStatusOnline: string;
+    cmsFooterTitle: string;
+  };
   menu: {
     groups: Record<string, string>;
     items: Record<string, string>;
@@ -138,13 +145,22 @@ export const viCmsDictionary: CmsDictionary = {
     roleEditor: 'Biên tập viên',
     roleViewer: 'Người xem',
   },
+  sidebar: {
+    filterPlaceholder: 'Lọc menu...',
+    expandTitle: 'Mở rộng sidebar (248px)',
+    collapseTitle: 'Thu gọn sidebar (72px)',
+    systemStatusOnline: 'Trạng thái hệ thống online',
+    cmsFooterTitle: 'Hệ thống quản trị nội dung',
+  },
   menu: {
     groups: {
       grp_tong_quan: 'TỔNG QUAN',
       grp_noi_dung: 'NỘI DUNG',
       grp_san_pham: 'SẢN PHẨM',
       grp_website: 'WEBSITE',
+      grp_tuong_tac_khach_hang: 'TƯƠNG TÁC KHÁCH HÀNG',
       grp_khach_hang: 'TƯƠNG TÁC KHÁCH HÀNG',
+      grp_quan_tri_he_thong: 'QUẢN TRỊ HỆ THỐNG',
       grp_he_thong: 'HỆ THỐNG',
     },
     items: {
@@ -161,16 +177,23 @@ export const viCmsDictionary: CmsDictionary = {
       menu_product_applications: 'Lĩnh vực ứng dụng',
       menu_product_types: 'Loại sản phẩm',
       menu_product_sales_staff: 'Người phụ trách kinh doanh',
-      menu_navigation: 'Menu điều hướng',
-      menu_media: 'Thư viện Media',
-      menu_system_config: 'Cấu hình hệ thống',
-      menu_function_seo: 'Cấu hình SEO & URL',
+      menu_navigation: 'Menu',
+      menu_media_library: 'Thư viện media',
+      menu_media: 'Thư viện media',
+      menu_cta: 'CTA',
+      menu_forms: 'Biểu mẫu',
       menu_customer_requests: 'Yêu cầu khách hàng',
-      menu_email_templates: 'Mẫu email thông báo',
-      menu_cic_users: 'Quản lý người dùng',
-      menu_permission_management: 'Phân quyền & Vai trò',
+      menu_email_templates: 'Mẫu email',
+      menu_users: 'Người dùng',
+      menu_cic_users: 'Người dùng',
+      menu_permissions: 'Vai trò & quyền',
+      menu_permission_management: 'Vai trò & quyền',
+      menu_system_settings: 'Cấu hình hệ thống',
+      menu_system_config: 'Cấu hình hệ thống',
+      menu_function_seo: 'SEO & URL',
+      menu_translation_strings: 'Ngôn ngữ giao diện',
       menu_activity_logs: 'Nhật ký hoạt động',
-      menu_trash: 'Thùng rác hệ thống',
+      menu_trash: 'Thùng rác',
     },
   },
 };
@@ -241,14 +264,23 @@ export const enCmsDictionary: CmsDictionary = {
     roleEditor: 'Editor',
     roleViewer: 'Viewer',
   },
+  sidebar: {
+    filterPlaceholder: 'Filter menu...',
+    expandTitle: 'Expand sidebar (248px)',
+    collapseTitle: 'Collapse sidebar (72px)',
+    systemStatusOnline: 'System Status: Online',
+    cmsFooterTitle: 'Content Management System',
+  },
   menu: {
     groups: {
       grp_tong_quan: 'OVERVIEW',
       grp_noi_dung: 'CONTENT',
       grp_san_pham: 'PRODUCTS',
       grp_website: 'WEBSITE',
+      grp_tuong_tac_khach_hang: 'CUSTOMER ENGAGEMENT',
       grp_khach_hang: 'CUSTOMER ENGAGEMENT',
-      grp_he_thong: 'SYSTEM',
+      grp_quan_tri_he_thong: 'SYSTEM ADMINISTRATION',
+      grp_he_thong: 'SYSTEM ADMINISTRATION',
     },
     items: {
       menu_dashboard: 'Overview',
@@ -264,16 +296,23 @@ export const enCmsDictionary: CmsDictionary = {
       menu_product_applications: 'Applications',
       menu_product_types: 'Product Types',
       menu_product_sales_staff: 'Sales Owners',
-      menu_navigation: 'Navigation Menus',
+      menu_navigation: 'Menu',
+      menu_media_library: 'Media Library',
       menu_media: 'Media Library',
-      menu_system_config: 'System Settings',
-      menu_function_seo: 'SEO & URL Settings',
+      menu_cta: 'CTA',
+      menu_forms: 'Forms',
       menu_customer_requests: 'Customer Requests',
       menu_email_templates: 'Email Templates',
-      menu_cic_users: 'User Management',
-      menu_permission_management: 'Permissions & Roles',
+      menu_users: 'Users',
+      menu_cic_users: 'Users',
+      menu_permissions: 'Roles & Permissions',
+      menu_permission_management: 'Roles & Permissions',
+      menu_system_settings: 'System Settings',
+      menu_system_config: 'System Settings',
+      menu_function_seo: 'SEO & URL',
+      menu_translation_strings: 'Localization',
       menu_activity_logs: 'Activity Logs',
-      menu_trash: 'System Trash',
+      menu_trash: 'Trash',
     },
   },
 };

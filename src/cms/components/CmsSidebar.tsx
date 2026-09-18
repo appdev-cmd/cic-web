@@ -146,9 +146,10 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   ) => {
     if (!isCollapsed) return;
     const rect = target.getBoundingClientRect();
+    const itemTitle = dict.menu.items[item.id] || item.title;
     setCollapsedMenuTooltip({
       id: item.id,
-      title: item.title,
+      title: itemTitle,
       badgeCount: item.badgeCount,
       top: rect.top + rect.height / 2,
       left: rect.right + 10,
@@ -193,7 +194,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Lọc menu..."
+              placeholder={dict.sidebar.filterPlaceholder}
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               className="w-full pl-8 pr-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-[13px] leading-5 rounded-md border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
@@ -208,7 +209,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         <button
           onClick={onToggleCollapse}
           className="hidden lg:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          title={isCollapsed ? 'Mở rộng sidebar (248px)' : 'Thu gọn sidebar (72px)'}
+          title={isCollapsed ? dict.sidebar.expandTitle : dict.sidebar.collapseTitle}
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -310,7 +311,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                             </span>
 
                             {!isCollapsed && (
-                              <span className="truncate flex-1 text-left">{item.title}</span>
+                              <span className="truncate flex-1 text-left">{dict.menu.items[item.id] || item.title}</span>
                             )}
 
                             {!isCollapsed && item.badgeCount !== undefined && (
@@ -330,7 +331,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                               type="button"
                               onClick={(e) => toggleSubItem(item.id, e)}
                               className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0"
-                              title={isSubExpanded ? 'Thu gọn' : 'Mở rộng'}
+                              title={isSubExpanded ? (workspaceLocale === 'en' ? 'Collapse' : 'Thu gọn') : (workspaceLocale === 'en' ? 'Expand' : 'Mở rộng')}
                             >
                               <ChevronDown
                                 className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -368,7 +369,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
                                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
                                     }`}
                                   >
-                                    <span className="truncate">{child.title}</span>
+                                    <span className="truncate">{dict.menu.items[child.id] || child.title}</span>
                                     {child.badgeCount && (
                                       <span className="px-1.5 py-0.2 bg-orange-500/10 text-orange-600 text-[10px] font-bold rounded">
                                         {child.badgeCount}
@@ -394,13 +395,13 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-semibold text-slate-800 dark:text-slate-200">Super Admin</span>
-            <span className="text-[10px] text-slate-400">Hệ thống quản trị nội dung</span>
+            <span className="text-[10px] text-slate-400">{dict.sidebar.cmsFooterTitle}</span>
           </div>
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title="Trạng thái hệ thống online" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title={dict.sidebar.systemStatusOnline} />
         </div>
       ) : (
         <div className="p-2 border-t border-slate-200 dark:border-slate-800 flex justify-center">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title="Online" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title={dict.sidebar.systemStatusOnline} />
         </div>
       )}
     </div>
