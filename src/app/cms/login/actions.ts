@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createSupabaseServerClient } from '@/server/supabase/server';
+import { invalidateAllAuthCaches } from '@/server/auth/guards';
 
 const loginSchema = z.object({ email: z.string().trim().email(), password: z.string().min(1), returnTo: z.string().optional() });
 const safeCmsReturnTo = (value: string | undefined) => value?.startsWith('/cms') && !value.startsWith('//') ? value : '/cms';
@@ -16,6 +17,7 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function logoutAction() {
+  invalidateAllAuthCaches();
   const client = await createSupabaseServerClient();
   const { error } = await client.auth.signOut();
   if (error) redirect('/cms/login?error=logout');

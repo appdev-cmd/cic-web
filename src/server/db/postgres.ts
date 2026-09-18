@@ -12,11 +12,11 @@ export function getPostgresClient(): Sql {
   const url = getServerEnv().DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is required for PostgreSQL transactions.');
   const client = postgres(url, {
-    max: 10,
+    max: 20,
     prepare: false,
     ssl: 'require',
     connect_timeout: 10,
-    idle_timeout: 20,
+    idle_timeout: 30,
     max_lifetime: 60 * 10,
   });
   globalThis.__postgresClient = client;

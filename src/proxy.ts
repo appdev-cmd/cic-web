@@ -1,9 +1,13 @@
-import type { NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
 import { refreshSupabaseSession } from '@/server/supabase/proxy';
 
 export async function proxy(request: NextRequest) {
-  return refreshSupabaseSession(request);
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith('/cms') || pathname.startsWith('/auth') || pathname.startsWith('/api/auth')) {
+    return refreshSupabaseSession(request);
+  }
+  return NextResponse.next();
 }
 
 export const config = {

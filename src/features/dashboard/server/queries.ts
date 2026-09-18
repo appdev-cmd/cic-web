@@ -11,7 +11,19 @@ import type {
   TrafficStat,
 } from '@/cms/types';
 
+const dashboardCache = new Map<string, { data: CmsDashboardData; expiresAt: number }>();
+const DASHBOARD_CACHE_TTL_MS = 20_000;
+
+export function invalidateCmsDashboardCache(): void {
+  dashboardCache.clear();
+}
+
 export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<CmsDashboardData> {
+  const cached = dashboardCache.get(locale);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.data;
+  }
+
   const sql = getPostgresClient();
   const isEn = locale === 'en';
 
@@ -21,12 +33,7 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
   const cTable = isEn ? 'cic_contact_en' : 'cic_contact';
 
   const [
-    kpiProducts,
-    kpiNews,
-    kpiPages,
-    kpiEvents,
-    kpiContacts,
-    kpiRegistrations,
+    kpiRow,
     recentContacts,
     recentRegistrations,
     pendingNews,
@@ -34,20 +41,23 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     recentLogs,
     weeklyStats,
   ] = await Promise.all([
-    // KPI 1: Published Products
-    sql.unsafe<[{ count: number }]>(`SELECT count(*)::int as count FROM ${pTable} WHERE published = true`),
-    // KPI 2: Published News
-    sql.unsafe<[{ count: number }]>(`SELECT count(*)::int as count FROM ${nTable} WHERE published = true`),
-    // KPI 3: Static Pages
-    isEn
-      ? sql<[{ count: number }]>`SELECT count(*)::int as count FROM cic_content_pages WHERE workspace = 'en'`
-      : sql<[{ count: number }]>`SELECT count(*)::int as count FROM cic_content_pages WHERE workspace = 'vi' OR workspace IS NULL`,
-    // KPI 4: Upcoming Events
-    sql.unsafe<[{ count: number }]>(`SELECT count(*)::int as count FROM ${eTable} WHERE published = true AND time_event >= now()`),
-    // KPI 5: Unprocessed Contacts
-    sql.unsafe<[{ count: number }]>(`SELECT count(*)::int as count FROM ${cTable} WHERE published = false`),
-    // KPI 6: Unprocessed Product Registrations
-    sql<[{ count: number }]>`SELECT count(*)::int as count FROM cic_product_contact WHERE published = false`,
+    // All KPIs combined into a single query to eliminate connection pool starvation
+    sql.unsafe<[{
+      published_products: number;
+      published_news: number;
+      static_pages: number;
+      upcoming_events: number;
+      unprocessed_contacts: number;
+      unprocessed_registrations: number;
+    }]>(`
+      SELECT
+        (SELECT count(*)::int FROM ${pTable} WHERE published = true) AS published_products,
+        (SELECT count(*)::int FROM ${nTable} WHERE published = true) AS published_news,
+        (SELECT count(*)::int FROM cic_content_pages WHERE ${isEn ? "workspace = 'en'" : "workspace = 'vi' OR workspace IS NULL"}) AS static_pages,
+        (SELECT count(*)::int FROM ${eTable} WHERE published = true AND time_event >= now()) AS upcoming_events,
+        (SELECT count(*)::int FROM ${cTable} WHERE published = false) AS unprocessed_contacts,
+        (SELECT count(*)::int FROM cic_product_contact WHERE published = false) AS unprocessed_registrations
+    `),
 
     // Contacts: 10 most recent
     sql.unsafe<Array<{
@@ -156,13 +166,14 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     return isNaN(date.getTime()) ? String(d) : date.toISOString().replace('T', ' ').substring(0, 19);
   };
 
+  const kpiData = kpiRow[0];
   const kpi: KpiStats = {
-    published_products: kpiProducts[0]?.count ?? 0,
-    published_news: kpiNews[0]?.count ?? 0,
-    static_pages: kpiPages[0]?.count ?? 0,
-    upcoming_events: kpiEvents[0]?.count ?? 0,
-    unprocessed_contacts: kpiContacts[0]?.count ?? 0,
-    unprocessed_registrations: kpiRegistrations[0]?.count ?? 0,
+    published_products: kpiData?.published_products ?? 0,
+    published_news: kpiData?.published_news ?? 0,
+    static_pages: kpiData?.static_pages ?? 0,
+    upcoming_events: kpiData?.upcoming_events ?? 0,
+    unprocessed_contacts: kpiData?.unprocessed_contacts ?? 0,
+    unprocessed_registrations: kpiData?.unprocessed_registrations ?? 0,
   };
 
   const contacts: ContactMessage[] = recentContacts.map((item) => ({
@@ -254,7 +265,7 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     return result;
   };
 
-  return {
+  const result: CmsDashboardData = {
     kpi,
     contacts,
     productRegistrations,
@@ -264,4 +275,11 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     traffic30Days: generateTraffic(30),
     weeklyContent,
   };
+
+  dashboardCache.set(locale, {
+    data: result,
+    expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS,
+  });
+
+  return result;
 }

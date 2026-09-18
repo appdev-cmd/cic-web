@@ -4,6 +4,7 @@ import { requireCmsAccess } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
 import { revalidatePath } from 'next/cache';
 import { writeAuditEvent } from '@/server/audit/writer';
+import { invalidateCmsDashboardCache } from './queries';
 
 export async function updateDashboardItemStatusAction(
   type: 'contact' | 'registration' | 'pending',
@@ -110,6 +111,7 @@ export async function updateDashboardItemStatusAction(
       }
     }
 
+    invalidateCmsDashboardCache();
     revalidatePath('/cms/dashboard');
     return { success: true };
   } catch (err: unknown) {

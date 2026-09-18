@@ -5,20 +5,79 @@ import { getDatabaseClient } from '@/server/db/foundation';
 import { getPostgresClient } from '@/server/db/postgres';
 import { AppError } from '@/server/errors';
 
+import { cookies } from 'next/headers';
+
 export type CmsPermission = Readonly<{ module: string; action: string }>;
 export type CmsPrincipal = Readonly<{ authUser: User; legacyUserId: number; email: string; username: string; fullName: string; roleCodes: readonly string[]; permissions: readonly CmsPermission[]; isAdministrator: boolean }>;
 const normalize = (value: string) => value.trim().toLowerCase();
 
+const userAuthCache = new Map<string, { user: User; expiresAt: number }>();
+const USER_CACHE_TTL_MS = 30_000;
+
+export function invalidateAllAuthCaches(): void {
+  userAuthCache.clear();
+  principalCache.clear();
+}
+
 export const requireAuthenticatedUser = cache(async function requireAuthenticatedUser() {
+  const cookieStore = await cookies();
+  const authKey = cookieStore
+    .getAll()
+    .filter((c) => c.name.startsWith('sb-'))
+    .map((c) => `${c.name}=${c.value}`)
+    .join(';');
+
+  if (authKey) {
+    const cached = userAuthCache.get(authKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.user;
+    }
+  }
+
   const client = await getDatabaseClient();
   const { data, error } = await client.auth.getUser();
   if (error || !data.user) throw new AppError('Authentication required.', 'UNAUTHENTICATED', error);
+
+  if (authKey) {
+    userAuthCache.set(authKey, {
+      user: data.user,
+      expiresAt: Date.now() + USER_CACHE_TTL_MS,
+    });
+  }
+
   return data.user;
 });
+
+type CachedPrincipalData = Readonly<{
+  legacyUserId: number;
+  email: string;
+  username: string;
+  fullName: string;
+  roleCodes: readonly string[];
+  permissions: readonly CmsPermission[];
+  isAdministrator: boolean;
+}>;
+
+const principalCache = new Map<string, { data: CachedPrincipalData; expiresAt: number }>();
+const PRINCIPAL_CACHE_TTL_MS = 30_000;
+
+export function invalidateCmsPrincipalCache(authUserId?: string): void {
+  if (authUserId) {
+    principalCache.delete(authUserId);
+  } else {
+    principalCache.clear();
+  }
+}
 
 /** Resolves the request session to the active CMS profile and effective RBAC projection. */
 export const getCurrentCmsPrincipal = cache(async function getCurrentCmsPrincipal(): Promise<CmsPrincipal> {
   const authUser = await requireAuthenticatedUser();
+
+  const cached = principalCache.get(authUser.id);
+  if (cached && Date.now() < cached.expiresAt) {
+    return { authUser, ...cached.data };
+  }
+
   // Profile and RBAC projections are trusted server reads so legacy table RLS
   // cannot prevent resolving an already authenticated identity.
   const sql = getPostgresClient();
@@ -39,7 +98,23 @@ export const getCurrentCmsPrincipal = cache(async function getCurrentCmsPrincipa
       ...(normalize(String(row.module)) === 'permissions' ? [{ module: 'roles', action: normalize(String(row.action)) }] : []),
     ]);
   }
-  return { authUser, legacyUserId: Number(profile.id), email: String(profile.email ?? authUser.email ?? ''), username: String(profile.username ?? ''), fullName: String(profile.full_name ?? profile.username ?? authUser.email ?? ''), roleCodes, permissions, isAdministrator };
+
+  const principalData: CachedPrincipalData = {
+    legacyUserId: Number(profile.id),
+    email: String(profile.email ?? authUser.email ?? ''),
+    username: String(profile.username ?? ''),
+    fullName: String(profile.full_name ?? profile.username ?? authUser.email ?? ''),
+    roleCodes,
+    permissions,
+    isAdministrator,
+  };
+
+  principalCache.set(authUser.id, {
+    data: principalData,
+    expiresAt: Date.now() + PRINCIPAL_CACHE_TTL_MS,
+  });
+
+  return { authUser, ...principalData };
 });
 
 export const requireCmsAccess = getCurrentCmsPrincipal;
