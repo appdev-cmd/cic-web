@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Image as ImageIcon, Loader2, Search, Upload, X } from 'lucide-react';
+import { Check, Image as ImageIcon, Loader2, Search, Trash2, Upload, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import type { CmsMediaPickerItem } from '../../data/MediaPickerDataSource';
 import type { CmsLocale } from '../../data/CmsDataSource';
@@ -67,11 +67,33 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
   locale = 'vi',
 }) => {
   const [query, setQuery] = useState('');
-  const [images,setImages]=useState<CmsMediaPickerItem[]>([]);
+  const [images, setImages] = useState<CmsMediaPickerItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [uploadError, setUploadError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const dialogRef=useDialogA11y(true,onClose);
-  useEffect(()=>{let active=true;void getMediaPickerItemsAction(locale).then((items)=>{if(active)setImages(items);}).catch(()=>{if(active)setUploadError('Không thể tải Thư viện Media.');});return()=>{active=false;};},[locale]);
+  const dialogRef = useDialogA11y(true, onClose);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    void getMediaPickerItemsAction(locale)
+      .then((items) => {
+        if (active) {
+          setImages(items);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setUploadError('Không thể tải Thư viện Media.');
+          setIsLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [locale]);
+
   const allImages = images;
   const initialAsset = images.find((asset) => asset.id === currentId || asset.url === currentId);
   const [selectedId, setSelectedId] = useState(initialAsset?.id ?? legacyMockImageAliases[currentId] ?? currentId);
@@ -150,16 +172,72 @@ export const PageMediaPickerModal: React.FC<PageMediaPickerModalProps> = ({
           {uploadError && <p className="mt-2 text-xs font-semibold text-red-600" role="alert">{uploadError}</p>}
         </div>
         <div className="grid min-h-0 flex-1 grid-cols-2 gap-3 overflow-y-auto p-4 sm:grid-cols-3 lg:grid-cols-4">
-          {options.map((asset) => {
-            const selected = selectedId === asset.id;
-            return <button key={asset.id} type="button" onClick={() => setSelectedId(asset.id)} className={`overflow-hidden rounded-xl border-2 text-left ${selected ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-200 dark:border-slate-700'}`}>
-              <span className="relative block aspect-[4/3] bg-slate-100"><img src={asset.thumbnail_url ?? asset.url} alt={asset.title} className="h-full w-full object-cover" />{selected && <span className="absolute right-2 top-2 rounded-full bg-orange-600 p-1 text-white"><Check className="h-4 w-4" /></span>}</span>
-              <span className="block p-3"><span className="block truncate text-sm font-semibold text-slate-900 dark:text-white">{asset.title}</span><span className="mt-1 flex items-center gap-1 truncate text-[11px] text-slate-500"><ImageIcon className="h-3 w-3" />{asset.filename}</span></span>
-            </button>;
-          })}
-          {options.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-500">Không tìm thấy ảnh phù hợp.</p>}
+          {isLoading ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-500 dark:text-slate-400">
+              <Loader2 className="size-8 animate-spin text-orange-600 mb-3" />
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Đang tải thư viện ảnh...</p>
+              <p className="text-xs text-slate-400 mt-1">Vui lòng chờ trong giây lát</p>
+            </div>
+          ) : options.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-slate-500 dark:text-slate-400">
+              <ImageIcon className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-2" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Không tìm thấy ảnh phù hợp.</p>
+              <p className="text-xs text-slate-400 mt-1">Thử đổi từ khóa tìm kiếm hoặc tải ảnh mới từ máy tính.</p>
+            </div>
+          ) : (
+            options.map((asset) => {
+              const selected = selectedId === asset.id;
+              return (
+                <button
+                  key={asset.id}
+                  type="button"
+                  onClick={() => setSelectedId(asset.id)}
+                  className={`overflow-hidden rounded-xl border-2 text-left transition-all ${
+                    selected ? 'border-orange-500 ring-2 ring-orange-100 dark:ring-orange-950/50' : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+                  }`}
+                >
+                  <span className="relative block aspect-[4/3] bg-slate-100 dark:bg-slate-800">
+                    <img src={asset.thumbnail_url ?? asset.url} alt={asset.title} className="h-full w-full object-cover" />
+                    {selected && <span className="absolute right-2 top-2 rounded-full bg-orange-600 p-1 text-white shadow-sm"><Check className="h-4 w-4" /></span>}
+                  </span>
+                  <span className="block p-3">
+                    <span className="block truncate text-sm font-semibold text-slate-900 dark:text-white">{asset.title}</span>
+                    <span className="mt-1 flex items-center gap-1 truncate text-[11px] text-slate-500"><ImageIcon className="h-3 w-3" />{asset.filename}</span>
+                  </span>
+                </button>
+              );
+            })
+          )}
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-slate-800 sm:flex-row sm:justify-end"><CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton><CmsButton disabled={!selectedAsset} onClick={() => { if (selectedAsset) onConfirm(getSelectedMediaValue(selectedAsset, returnValue)); onClose(); }}>Dùng ảnh đã chọn</CmsButton></div>
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-3.5 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            {Boolean(currentId) && (
+              <button
+                type="button"
+                onClick={() => {
+                  onConfirm('');
+                  onClose();
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl border border-red-200 dark:border-red-900/50 transition cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Gỡ bỏ ảnh đang dùng</span>
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <CmsButton variant="secondary" onClick={onClose}>Hủy</CmsButton>
+            <CmsButton
+              disabled={!selectedAsset}
+              onClick={() => {
+                if (selectedAsset) onConfirm(getSelectedMediaValue(selectedAsset, returnValue));
+                onClose();
+              }}
+            >
+              Dùng ảnh đã chọn
+            </CmsButton>
+          </div>
+        </div>
       </div>
     </div>
   );

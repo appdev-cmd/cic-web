@@ -14,6 +14,7 @@ import {
   ExternalLink,
   ShieldCheck,
   LockKeyhole,
+  Trash2,
 } from 'lucide-react';
 import type {
   CmsSettingsData,
@@ -314,6 +315,19 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                               <FileImage className="w-4 h-4" />
                               <span className="hidden sm:inline">Chọn Media</span>
                             </button>
+
+                            {currentValue ? (
+                              <button
+                                type="button"
+                                onClick={() => onChangeValue(item.key, '')}
+                                disabled={!capabilities.edit || pending}
+                                title="Gỡ bỏ / Không dùng ảnh này"
+                                className="px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-bold text-xs rounded-xl border border-red-200 dark:border-red-900/40 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 transition"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Xóa ảnh</span>
+                              </button>
+                            ) : null}
                           </div>
                         </div>
                       ) : item.type === 'html' ? (

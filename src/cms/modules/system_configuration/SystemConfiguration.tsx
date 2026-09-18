@@ -347,33 +347,38 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
         </div>
       )}
 
-      {/* MOBILE / TABLET FLOATING STICKY BOTTOM ACTION BAR */}
+      {/* FLOATING STICKY BOTTOM ACTION BAR */}
       {totalModifications > 0 && (
         <aside
           aria-label="Thanh tác vụ lưu thay đổi"
-          className="fixed bottom-4 inset-x-4 z-50 rounded-2xl bg-slate-900/95 text-white p-3.5 shadow-2xl backdrop-blur-md flex items-center justify-between border border-slate-800 animate-in slide-in-from-bottom-5 duration-300"
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-lg rounded-2xl bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100 p-2.5 px-4 shadow-xl shadow-slate-900/10 dark:shadow-black/40 backdrop-blur-md flex items-center justify-between border border-slate-200/90 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-3 duration-200"
         >
-          <div className="flex items-center gap-3">
-            <span className="flex h-3 w-3 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-2.5 w-2.5 relative shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500" />
             </span>
-            <div>
-              <div className="text-xs font-bold">
-                {totalModifications} thay đổi chưa lưu
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                  Thay đổi chưa lưu
+                </span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-400 border border-orange-200/80 dark:border-orange-800/60">
+                  {totalModifications}
+                </span>
               </div>
-              <div className="text-[11px] text-slate-400 hidden sm:block">
-                Lưu trực tiếp vào PostgreSQL cho Scope {workspace.scope.name}
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate hidden sm:block">
+                Lưu vào Scope {workspace.scope.name}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={handleReset}
               disabled={pending}
-              className="min-h-11 px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer disabled:opacity-50"
             >
               Hủy
             </button>
@@ -382,14 +387,14 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
               type="button"
               onClick={handleSave}
               disabled={!capabilities.edit || pending}
-              className="min-h-11 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-orange-600/30 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-600/20 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {pending ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
               ) : (
-                <Save className="w-4 h-4" />
+                <Save className="w-3.5 h-3.5" />
               )}
-              <span>{pending ? 'Đang lưu...' : 'Lưu trực tiếp'}</span>
+              <span>{pending ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
             </button>
           </div>
         </aside>
