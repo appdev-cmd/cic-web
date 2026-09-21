@@ -300,14 +300,18 @@ export interface SitemapUrlEntry {
 
 export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlEntry[]> {
   const sql = getPostgresClient();
-  const entries: SitemapUrlEntry[] = [];
+  const rawEntries: SitemapUrlEntry[] = [];
   const base = baseUrl.replace(/\/+$/, '');
 
-  // 1. Static System Pages from cic_config_modules (where indexable)
-  const systemRecords = await getFunctionSeoData('vi');
-  for (const item of systemRecords) {
-    if (item.indexable && !item.path.includes('[')) {
-      entries.push({
+  // 1. Static System Pages from cic_config_modules (VI & EN)
+  const [systemRecordsVi, systemRecordsEn] = await Promise.all([
+    getFunctionSeoData('vi').catch(() => []),
+    getFunctionSeoData('en').catch(() => []),
+  ]);
+
+  for (const item of systemRecordsVi) {
+    if (item.indexable && !item.path.includes('[') && item.path !== '/search' && !item.path.endsWith('/search')) {
+      rawEntries.push({
         url: `${base}${item.path}`,
         lastModified: new Date(),
         changeFrequency: item.path === '/' ? 'daily' : 'weekly',
@@ -316,16 +320,30 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     }
   }
 
-  // 2. Published Static Pages
+  for (const item of systemRecordsEn) {
+    if (item.indexable && !item.path.includes('[') && item.path !== '/en/search' && !item.path.endsWith('/search')) {
+      rawEntries.push({
+        url: `${base}${item.path}`,
+        lastModified: new Date(),
+        changeFrequency: item.path === '/en' ? 'daily' : 'weekly',
+        priority: item.path === '/en' ? 0.9 : 0.7,
+      });
+    }
+  }
+
+  // 2. Published Static Pages (exclude test pages)
   const pages = await sql<{ slug: string; code: string; updated_at: Date }[]>`
     SELECT slug, code, updated_at 
     FROM cic_content_pages 
-    WHERE published_revision_id IS NOT NULL AND slug IS NOT NULL AND slug != ''
+    WHERE published_revision_id IS NOT NULL 
+      AND slug IS NOT NULL AND slug != ''
+      AND lower(btrim(code)) NOT LIKE '%test%'
+      AND lower(btrim(slug, '/')) != 'test'
   `;
   for (const p of pages) {
     if (p.code !== 'home') {
       const path = p.slug.startsWith('/') ? p.slug : `/${p.slug}`;
-      entries.push({
+      rawEntries.push({
         url: `${base}${path}`,
         lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
         changeFrequency: 'weekly',
@@ -334,15 +352,35 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     }
   }
 
-  // 3. Published Products
-  const products = await sql<{ alias: string; edited_time: Date | null; created_time: Date | null }[]>`
-    SELECT alias, edited_time, created_time 
-    FROM cic_products 
-    WHERE published = true AND alias IS NOT NULL AND alias != '' 
-    LIMIT 1000
-  `;
-  for (const prod of products) {
-    entries.push({
+  // Common static EN routes
+  const staticEnPaths = ['/en/about', '/en/contact', '/en/privacy', '/en/terms'];
+  for (const path of staticEnPaths) {
+    rawEntries.push({
+      url: `${base}${path}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    });
+  }
+
+  // 3. Published Products (VI & EN)
+  const [productsVi, productsEn] = await Promise.all([
+    sql<{ alias: string; edited_time: Date | null; created_time: Date | null }[]>`
+      SELECT alias, edited_time, created_time 
+      FROM cic_products 
+      WHERE published = true AND alias IS NOT NULL AND alias != '' 
+      LIMIT 10000
+    `,
+    sql<{ alias: string; edited_time: Date | null; created_time: Date | null }[]>`
+      SELECT alias, edited_time, created_time 
+      FROM cic_products_en 
+      WHERE published = true AND alias IS NOT NULL AND alias != '' 
+      LIMIT 10000
+    `.catch(() => []),
+  ]);
+
+  for (const prod of productsVi) {
+    rawEntries.push({
       url: `${base}/products/${prod.alias}`,
       lastModified: prod.edited_time ? new Date(prod.edited_time) : prod.created_time ? new Date(prod.created_time) : new Date(),
       changeFrequency: 'weekly',
@@ -350,15 +388,33 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     });
   }
 
-  // 4. Published News
-  const news = await sql<{ alias: string; updated_time: Date | null; created_time: Date | null }[]>`
-    SELECT alias, updated_time, created_time 
-    FROM cic_news 
-    WHERE published = true AND alias IS NOT NULL AND alias != '' 
-    LIMIT 1000
-  `;
-  for (const n of news) {
-    entries.push({
+  for (const prod of productsEn) {
+    rawEntries.push({
+      url: `${base}/en/products/${prod.alias}`,
+      lastModified: prod.edited_time ? new Date(prod.edited_time) : prod.created_time ? new Date(prod.created_time) : new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    });
+  }
+
+  // 4. Published News (VI & EN)
+  const [newsVi, newsEn] = await Promise.all([
+    sql<{ alias: string; updated_time: Date | null; created_time: Date | null }[]>`
+      SELECT alias, updated_time, created_time 
+      FROM cic_news 
+      WHERE published = true AND alias IS NOT NULL AND alias != '' 
+      LIMIT 10000
+    `,
+    sql<{ alias: string; updated_time: Date | null; created_time: Date | null }[]>`
+      SELECT alias, updated_time, created_time 
+      FROM cic_news_en 
+      WHERE published = true AND alias IS NOT NULL AND alias != '' 
+      LIMIT 10000
+    `.catch(() => []),
+  ]);
+
+  for (const n of newsVi) {
+    rawEntries.push({
       url: `${base}/news/${n.alias}`,
       lastModified: n.updated_time ? new Date(n.updated_time) : n.created_time ? new Date(n.created_time) : new Date(),
       changeFrequency: 'weekly',
@@ -366,35 +422,58 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     });
   }
 
-  // 5. Published Services
+  for (const n of newsEn) {
+    rawEntries.push({
+      url: `${base}/en/news/${n.alias}`,
+      lastModified: n.updated_time ? new Date(n.updated_time) : n.created_time ? new Date(n.created_time) : new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    });
+  }
+
+  // 5. Published Services (VI & EN)
   const services = await sql<{ alias: string; created_time: Date | null }[]>`
     SELECT alias, created_time 
     FROM cic_services 
     WHERE published::int = 1 AND alias IS NOT NULL AND alias != '' 
-    LIMIT 500
+    LIMIT 1000
   `;
   for (const s of services) {
-    entries.push({
+    const lm = s.created_time ? new Date(s.created_time) : new Date();
+    rawEntries.push({
       url: `${base}/services/${s.alias}`,
-      lastModified: s.created_time ? new Date(s.created_time) : new Date(),
+      lastModified: lm,
       changeFrequency: 'weekly',
       priority: 0.7,
     });
+    rawEntries.push({
+      url: `${base}/en/services/${s.alias}`,
+      lastModified: lm,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    });
   }
 
-  // 6. Published Projects
+  // 6. Published Projects (VI & EN)
   const projects = await sql<{ alias: string; created_time: Date | null }[]>`
     SELECT alias, created_time 
     FROM cic_projects 
     WHERE published = true AND alias IS NOT NULL AND alias != '' 
-    LIMIT 500
+    LIMIT 1000
   `;
   for (const proj of projects) {
-    entries.push({
+    const lm = proj.created_time ? new Date(proj.created_time) : new Date();
+    rawEntries.push({
       url: `${base}/projects/${proj.alias}`,
-      lastModified: proj.created_time ? new Date(proj.created_time) : new Date(),
+      lastModified: lm,
       changeFrequency: 'monthly',
       priority: 0.6,
+    });
+    rawEntries.push({
+      url: `${base}/en/projects/${proj.alias}`,
+      lastModified: lm,
+      changeFrequency: 'monthly',
+      priority: 0.5,
     });
   }
 
@@ -403,10 +482,10 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     SELECT alias, updated_time, created_time 
     FROM cic_event 
     WHERE published = true AND alias IS NOT NULL AND alias != '' 
-    LIMIT 500
+    LIMIT 1000
   `;
   for (const ev of events) {
-    entries.push({
+    rawEntries.push({
       url: `${base}/events/${ev.alias}`,
       lastModified: ev.updated_time ? new Date(ev.updated_time) : ev.created_time ? new Date(ev.created_time) : new Date(),
       changeFrequency: 'weekly',
@@ -414,5 +493,15 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     });
   }
 
-  return entries;
+  // Deduplicate URLs
+  const seen = new Set<string>();
+  const deduplicated: SitemapUrlEntry[] = [];
+  for (const entry of rawEntries) {
+    if (!seen.has(entry.url)) {
+      seen.add(entry.url);
+      deduplicated.push(entry);
+    }
+  }
+
+  return deduplicated;
 }

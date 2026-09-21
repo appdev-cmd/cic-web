@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
@@ -14,6 +15,11 @@ export const metadata: Metadata = {
   description: 'CIC Technology — Nhà cung cấp bản quyền phần mềm, thiết bị khoa học kỹ thuật và dịch vụ tư vấn BIM / Chuyển đổi số hàng đầu Việt Nam.',
   alternates: {
     canonical: './',
+    languages: {
+      'vi-VN': CANONICAL_SITE_URL,
+      'en-US': `${CANONICAL_SITE_URL}/en`,
+      'x-default': CANONICAL_SITE_URL,
+    },
   },
   robots: {
     index: true,
@@ -53,9 +59,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const headersList = await headers();
+  const locale = headersList.get('x-locale') || 'vi';
+
   return (
-    <html lang="vi" data-scroll-behavior="smooth">
+    <html lang={locale} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );
