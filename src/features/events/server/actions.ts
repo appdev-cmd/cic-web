@@ -1,9 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { requirePermission } from '@/server/auth/guards';
 import { z } from 'zod';
 import { eventInputSchema } from '../schemas/eventInput';
+import { escapeHtml } from '@/lib/email/tokens';
+import { checkRateLimit, getClientIp } from '@/server/auth/rate-limit';
 import {
   saveEvent,
   setEventsPublished,
@@ -75,7 +78,7 @@ export async function trashEventsAction(localeRaw: unknown, idsRaw: unknown) {
   return { ok: true, count: results.length };
 }
 
-export const eventRegistrationInputSchema = z.object({
+const eventRegistrationInputSchema = z.object({
   eventId: z.union([z.string(), z.number()]),
   eventTitle: z.string().min(1),
   eventTime: z.string().optional(),
@@ -93,6 +96,13 @@ export const eventRegistrationInputSchema = z.object({
 export type EventRegistrationPayload = z.infer<typeof eventRegistrationInputSchema>;
 
 export async function registerEventAction(payload: unknown) {
+  const headersList = await headers();
+  const ip = getClientIp(headersList);
+  const rateLimit = checkRateLimit(`event-reg:${ip}`, { maxRequests: 10, windowSeconds: 60 });
+  if (!rateLimit.success) {
+    throw new Error('Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.');
+  }
+
   const input = eventRegistrationInputSchema.parse(payload);
   const now = new Date().toISOString();
   const { getDatabaseClient } = await import('@/server/db/foundation');
@@ -169,23 +179,32 @@ export async function registerEventAction(payload: unknown) {
   // Send Emails
   try {
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'nampt@cic.com.vn';
+    const safeTitle = escapeHtml(input.eventTitle);
+    const safeFullName = escapeHtml(input.fullName);
+    const safeCompany = escapeHtml(input.company || 'Chưa cung cấp');
+    const safePosition = escapeHtml(input.position || 'Chưa cung cấp');
+    const safeEmail = escapeHtml(input.email);
+    const safePhone = escapeHtml(input.phone);
+    const safeNote = escapeHtml(input.note || 'Không có ghi chú');
+    const safeTime = input.eventTime ? escapeHtml(input.eventTime) : '';
+    const safeLocation = input.eventLocation ? escapeHtml(input.eventLocation) : '';
 
     // 1. Admin notification
     await sendEmail({
       to: adminEmail,
-      subject: `[Sự kiện] Đăng ký mới: ${input.fullName} tham dự "${input.eventTitle}"`,
+      subject: `[Sự kiện] Đăng ký mới: ${safeFullName} tham dự "${safeTitle}"`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
           <h3 style="color: #ea580c; margin-top: 0;">Thông báo: Đăng ký tham dự sự kiện mới</h3>
           <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 150px;"><strong>Sự kiện:</strong></td><td style="padding: 8px 0; color: #1e293b;"><strong>${input.eventTitle}</strong></td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Họ và tên:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.fullName}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Công ty/Đơn vị:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.company || 'Chưa cung cấp'}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Chức vụ:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.position || 'Chưa cung cấp'}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${input.email}">${input.email}</a></td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số điện thoại:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.phone}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 150px;"><strong>Sự kiện:</strong></td><td style="padding: 8px 0; color: #1e293b;"><strong>${safeTitle}</strong></td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Họ và tên:</strong></td><td style="padding: 8px 0; color: #1e293b;"><strong>${safeFullName}</strong></td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Công ty/Đơn vị:</strong></td><td style="padding: 8px 0; color: #1e293b;">${safeCompany}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Chức vụ:</strong></td><td style="padding: 8px 0; color: #1e293b;">${safePosition}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}">${safeEmail}</a></td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số điện thoại:</strong></td><td style="padding: 8px 0; color: #1e293b;">${safePhone}</td></tr>
             <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số vé đăng ký:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.attendeesCount} người</td></tr>
-            <tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;"><strong>Ghi chú:</strong></td><td style="padding: 8px 0; color: #1e293b; white-space: pre-wrap;">${input.note || 'Không có ghi chú'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;"><strong>Ghi chú:</strong></td><td style="padding: 8px 0; color: #1e293b; white-space: pre-wrap;">${safeNote}</td></tr>
           </table>
           <p style="font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; margin: 0;">Đã lưu vào danh sách Yêu cầu khách hàng CMS.</p>
         </div>
@@ -196,16 +215,16 @@ export async function registerEventAction(payload: unknown) {
     if (input.email) {
       await sendEmail({
         to: input.email,
-        subject: `[CIC Technology] Xác nhận đăng ký tham dự sự kiện "${input.eventTitle}"`,
+        subject: `[CIC Technology] Xác nhận đăng ký tham dự sự kiện "${safeTitle}"`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
             <h2 style="color: #ea580c; margin-top: 0; font-size: 20px;">CIC Technology & Consultancy</h2>
-            <p>Kính gửi <strong>${input.fullName}</strong>,</p>
+            <p>Kính gửi <strong>${safeFullName}</strong>,</p>
             <p>Cảm ơn Quý khách đã quan tâm và đăng ký tham gia sự kiện do <strong>CIC Technology</strong> tổ chức.</p>
             <div style="background: #fff7ed; border-left: 4px solid #ea580c; padding: 16px; margin: 20px 0; border-radius: 4px;">
-              <p style="margin: 0 0 6px 0; font-size: 15px; color: #9a3412;"><strong>SỰ KIỆN: ${input.eventTitle}</strong></p>
-              ${input.eventTime ? `<p style="margin: 0 0 6px 0; font-size: 14px; color: #431407;"><strong>Thời gian:</strong> ${input.eventTime}</p>` : ''}
-              ${input.eventLocation ? `<p style="margin: 0 0 6px 0; font-size: 14px; color: #431407;"><strong>Địa điểm:</strong> ${input.eventLocation}</p>` : ''}
+              <p style="margin: 0 0 6px 0; font-size: 15px; color: #9a3412;"><strong>SỰ KIỆN: ${safeTitle}</strong></p>
+              ${safeTime ? `<p style="margin: 0 0 6px 0; font-size: 14px; color: #431407;"><strong>Thời gian:</strong> ${safeTime}</p>` : ''}
+              ${safeLocation ? `<p style="margin: 0 0 6px 0; font-size: 14px; color: #431407;"><strong>Địa điểm:</strong> ${safeLocation}</p>` : ''}
               <p style="margin: 0; font-size: 14px; color: #431407;"><strong>Số người tham dự:</strong> ${input.attendeesCount} người</p>
             </div>
             <p style="font-size: 14px; color: #334155; line-height: 1.6;">Ban tổ chức sẽ liên hệ lại với Quý khách trước ngày diễn ra sự kiện để gửi thông tin tham dự chi tiết hoặc liên kết phòng họp trực tuyến.</p>
