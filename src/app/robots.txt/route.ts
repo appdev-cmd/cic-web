@@ -8,6 +8,9 @@ export async function GET() {
     const settings = await getPublicSystemSettings('vi');
     let robotsContent = settings.values.robots_txt?.trim();
     if (robotsContent) {
+      if (!robotsContent.includes('/cms/')) {
+        robotsContent += `\nDisallow: /cms/\nDisallow: /api/`;
+      }
       if (!robotsContent.toLowerCase().includes('sitemap:')) {
         robotsContent += `\n\nSitemap: ${CANONICAL_SITE_URL}/sitemap.xml\n`;
       }
