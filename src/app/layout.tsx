@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import './globals.css';
 
+import { OrganizationJsonLd } from '@/features/seo/components';
 import { CANONICAL_SITE_URL } from '@/lib/seo/siteUrl';
 
 export const metadata: Metadata = {
@@ -65,7 +66,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>
+        <OrganizationJsonLd />
+        {children}
+      </body>
     </html>
   );
 }

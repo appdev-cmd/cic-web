@@ -5,6 +5,7 @@ import { listPublishedProductApplications } from '@/features/product-application
 import { listPublishedProductCategories } from '@/features/product-categories/server/queries';
 import { listPublishedProductTypes } from '@/features/product-types/server/queries';
 import { listPublicProductContacts } from '@/features/sales-owners/server/queries';
+import { BreadcrumbJsonLd, ProductJsonLd } from '@/features/seo/components';
 import { ProductsView } from '@/web/components/ProductsView';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const product = await getPublishedProductBySlugForReference(slug, 'en');
   if (!product) return {};
   return {
-    title: product.seoTitle || `${product.name} | CIC Technology`,
+    title: product.seoTitle || product.name,
     description: product.seoDescription || product.description,
     alternates: {
       canonical: `/en/products/${slug}`,
@@ -36,13 +37,29 @@ export default async function EnProductDetailPage({ params }: { params: Promise<
   if (!product) notFound();
 
   return (
-    <ProductsView
-      products={products}
-      previewProduct={product}
-      contactsByProductId={contactsByProductId}
-      categoryOptions={categories.map((item) => item.name)}
-      applicationOptions={applications.map((item) => item.name)}
-      productTypeOptions={productTypes.map((item) => item.name)}
-    />
+    <>
+      <ProductJsonLd
+        name={product.name}
+        description={product.description}
+        image={product.img}
+        brand={product.brand}
+        url={`/en/products/${slug}`}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/en' },
+          { name: 'Products', url: '/en/products' },
+          { name: product.name },
+        ]}
+      />
+      <ProductsView
+        products={products}
+        previewProduct={product}
+        contactsByProductId={contactsByProductId}
+        categoryOptions={categories.map((item) => item.name)}
+        applicationOptions={applications.map((item) => item.name)}
+        productTypeOptions={productTypes.map((item) => item.name)}
+      />
+    </>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPublishedNewsBySlug, listPublishedNews } from '@/features/news/server/queries';
 import { listPublishedProductsForReference } from '@/features/products/server/queries';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/features/seo/components';
 import { NewsRuntimeView } from '@/web/components/NewsRuntimeView';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const item = await getPublishedNewsBySlug(slug, 'en');
   if (!item) return {};
   return {
-    title: item.seoTitle || `${item.title} | CIC Technology`,
+    title: item.seoTitle || item.title,
     description: item.seoDescription || item.summary || undefined,
     keywords: item.seoKeyword || undefined,
     alternates: {
@@ -31,5 +32,23 @@ export default async function EnNewsDetailPage({ params }: { params: Promise<{ s
   ]);
 
   const items = [item, ...news.items.filter((entry) => entry.id !== item.id)];
-  return <NewsRuntimeView items={items} products={products} initialSlug={slug} />;
+  return (
+    <>
+      <ArticleJsonLd
+        headline={item.title}
+        description={item.summary}
+        image={item.image}
+        datePublished={item.date}
+        url={`/en/news/${slug}`}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/en' },
+          { name: 'News', url: '/en/news' },
+          { name: item.title },
+        ]}
+      />
+      <NewsRuntimeView items={items} products={products} initialSlug={slug} />
+    </>
+  );
 }
