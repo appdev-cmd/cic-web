@@ -9,6 +9,17 @@ const map=(r:Row):ProductViewModel=>({id:String(r.id),title:String(r.name??''),s
 export async function listPublishedProducts(options:{categoryAlias?:string;search?:string}={}){const sql=getPostgresClient(),category=options.categoryAlias?.trim()||null,search=options.search?.trim()||null;const rows=await sql`SELECT p.id,p.name,p.alias,p.summary,p.description,p.image,p.published,p.ordering,(SELECT string_agg(c.name,', ' ORDER BY c.ordering,c.id) FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id AND c.published=true WHERE r.product_id=p.id) category_name FROM cic_products p WHERE p.published=true AND (${category}::text IS NULL OR EXISTS(SELECT 1 FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id WHERE r.product_id=p.id AND c.published=true AND c.alias=${category})) AND (${search}::text IS NULL OR p.name ILIKE '%'||${search}||'%' OR p.summary ILIKE '%'||${search}||'%') ORDER BY p.ordering,p.id`;return rows.map(r=>map(r as Row));}
 export async function getPublishedProductBySlug(slug:string){const sql=getPostgresClient();const[row]=await sql`SELECT p.id,p.name,p.alias,p.summary,p.description,p.image,p.published,p.ordering,(SELECT string_agg(c.name,', ' ORDER BY c.ordering,c.id) FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id AND c.published=true WHERE r.product_id=p.id) category_name FROM cic_products p WHERE p.published=true AND p.alias=${slug} LIMIT 1`;return row?map(row as Row):null;}
 
+export async function getPublishedProductById(id: number): Promise<{ id: number; alias: string; name: string } | null> {
+  const sql = getPostgresClient();
+  const [row] = await sql<{ id: number; alias: string; name: string }[]>`
+    SELECT id, alias, name 
+    FROM cic_products 
+    WHERE published = true AND id = ${id} 
+    LIMIT 1
+  `;
+  return row ?? null;
+}
+
 type ReferenceRow = {
   id: unknown; name: unknown; alias: unknown; price: unknown; summary: unknown; description: unknown;
   image: unknown; icon: unknown; manufactory_name: unknown; application_names: unknown;

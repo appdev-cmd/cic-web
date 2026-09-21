@@ -1,9 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { getPublicSitemapUrls } from '@/features/function-seo/server/queries';
 
+import { CANONICAL_SITE_URL } from '@/lib/seo/siteUrl';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cic.com.vn';
-  const entries = await getPublicSitemapUrls(baseUrl);
+  const entries = await getPublicSitemapUrls(CANONICAL_SITE_URL);
 
   return entries.map((entry) => ({
     url: entry.url,
