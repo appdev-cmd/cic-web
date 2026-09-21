@@ -7,3 +7,13 @@ export function buildCanonicalUrl(path: string = ''): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${CANONICAL_SITE_URL}${normalizedPath}`;
 }
+
+/**
+ * Strips legacy hardcoded brand suffixes (e.g., "| CIC", "| CIC Technology", "| CIC Consulting")
+ * from database titles so the Next.js layout metadata template can append the canonical suffix cleanly without duplication.
+ */
+export function cleanSeoTitle(title?: string | null): string {
+  if (!title) return '';
+  return title.replace(/\s*\|\s*CIC(\s*(Technology|Consulting))?$/i, '').trim();
+}
+

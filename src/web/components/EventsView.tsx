@@ -33,27 +33,29 @@ export const EventsView: React.FC<EventsViewProps> = ({
     [previewEvent, sourceEvents]
   );
 
+  const initialFoundEvent = useMemo(() => {
+    if (!initialEventId) return null;
+    return eventsData.find((e) => e.id === initialEventId) ?? null;
+  }, [initialEventId, eventsData]);
+
   // Navigation & views state
-  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  const [registerEvent, setRegisterEvent] = useState<EventItem | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(() => initialFoundEvent);
+  const [registerEvent, setRegisterEvent] = useState<EventItem | null>(() => (initialIsRegistering ? initialFoundEvent : null));
 
   // Countdown timer for hero & detail view
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   // Handle initial event selection / registration view routing
   useEffect(() => {
-    if (initialEventId) {
-      const found = eventsData.find((e) => e.id === initialEventId);
-      if (found) {
-        if (initialIsRegistering) {
-          setRegisterEvent(found);
-          setSelectedEvent(found);
-        } else {
-          setSelectedEvent(found);
-        }
+    if (initialFoundEvent) {
+      if (initialIsRegistering) {
+        setRegisterEvent(initialFoundEvent);
+        setSelectedEvent(initialFoundEvent);
+      } else {
+        setSelectedEvent(initialFoundEvent);
       }
     }
-  }, [initialEventId, initialIsRegistering, eventsData]);
+  }, [initialFoundEvent, initialIsRegistering]);
 
   // Hero Event: Ưu tiên sự kiện sắp diễn ra (upcoming/ongoing) và mới nhất
   const heroEvent = useMemo(() => {

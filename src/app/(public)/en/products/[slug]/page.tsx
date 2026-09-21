@@ -10,12 +10,14 @@ import { ProductsView } from '@/web/components/ProductsView';
 
 export const dynamic = 'force-dynamic';
 
+import { cleanSeoTitle } from '@/lib/seo/siteUrl';
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const slug = (await params).slug;
   const product = await getPublishedProductBySlugForReference(slug, 'en');
   if (!product) return {};
   return {
-    title: product.seoTitle || product.name,
+    title: cleanSeoTitle(product.seoTitle || product.name),
     description: product.seoDescription || product.description,
     alternates: {
       canonical: `/en/products/${slug}`,

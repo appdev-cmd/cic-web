@@ -135,6 +135,8 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
                     (e.target as HTMLImageElement).src = 'https://img.youtube.com/vi/hdLFK_09-tU/hqdefault.jpg';
                   }}
                   alt="Video giới thiệu CIC" 
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover scale-[1.18] group-hover:scale-[1.25] transition-transform duration-500 ease-out origin-center"
                 />
                 <div className="absolute inset-0 bg-transparent group-hover:bg-slate-950/15 transition-all flex items-center justify-center">

@@ -101,8 +101,10 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
             <motion.img 
               key={activeSlideIndex}
               src={currentHeroSlide.img} 
-              alt="Slide" 
+              alt={currentHeroSlide?.title ? currentHeroSlide.title.replace(/<[^>]*>/g, '').trim() : "CIC Technology Hero Slide"} 
               fetchPriority={activeSlideIndex === 0 ? "high" : "auto"}
+              loading={activeSlideIndex === 0 ? "eager" : "lazy"}
+              decoding="async"
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}

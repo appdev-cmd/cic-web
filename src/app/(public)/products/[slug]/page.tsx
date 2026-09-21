@@ -10,10 +10,12 @@ import { ProductsView } from '@/web/components/ProductsView';
 
 export const dynamic = 'force-dynamic';
 
+import { cleanSeoTitle } from '@/lib/seo/siteUrl';
+
 export async function generateMetadata({ params }: PageProps<'/products/[slug]'>) {
   const slug = (await params).slug;
   const product = await getPublishedProductBySlugForReference(slug);
-  return product ? { title: product.seoTitle || product.name, description: product.seoDescription || product.description } : {};
+  return product ? { title: cleanSeoTitle(product.seoTitle || product.name), description: product.seoDescription || product.description } : {};
 }
 
 export default async function ProductPage({ params }: PageProps<'/products/[slug]'>) {

@@ -342,6 +342,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
             data-page-builder-media-id={textFrom(heroConfig, 'backgroundImageId', '')}
             src={resolveMediaUrl(textFrom(heroConfig, 'backgroundImageId', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80'))}
             alt="CIC Technology Banner"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="w-full h-full object-cover opacity-75 scale-105 filter brightness-105 contrast-105"
           />
           <video 
@@ -349,6 +352,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
             loop={renderPolicy.motionEnabled}
             muted 
             playsInline 
+            preload="none"
             className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen scale-105"
             src="https://cdn.pixabay.com/video/2020/01/31/31755-388274351_large.mp4" 
           />
@@ -439,7 +443,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
             <div className="w-[240px] sm:w-[340px] md:w-[420px] lg:w-[480px] max-w-[70vw] aspect-square opacity-[0.04]">
               <img 
                 src="/logo CIC-12.png" 
-                alt="" 
+                alt="Watermark CIC Technology" 
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-contain filter grayscale contrast-125" 
               />
             </div>
@@ -454,7 +460,9 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
               <div className="w-[240px] sm:w-[340px] md:w-[420px] lg:w-[480px] max-w-[70vw] aspect-square opacity-[0.045] transition-opacity duration-300">
                 <img 
                   src="/logo CIC-12.png" 
-                  alt="" 
+                  alt="Watermark CIC Technology" 
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-contain filter grayscale contrast-125" 
                 />
               </div>
@@ -586,7 +594,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                       {/* Left: Illustration */}
                       <div className="relative aspect-[4/5] rounded-[10px] overflow-hidden shadow-sm group hidden lg:block">
-                        <img data-page-builder-media-path={JSON.stringify(['imageId'])} data-page-builder-media-id={textFrom(strategyConfig, 'imageId', '')} src={resolveMediaUrl(textFrom(strategyConfig, 'imageId', '/35nam_cic_1.JPG'))} alt="Định hướng chiến lược" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
+                        <img data-page-builder-media-path={JSON.stringify(['imageId'])} data-page-builder-media-id={textFrom(strategyConfig, 'imageId', '')} src={resolveMediaUrl(textFrom(strategyConfig, 'imageId', '/35nam_cic_1.JPG'))} alt="Định hướng chiến lược" loading="lazy" decoding="async" className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
                       </div>
 
@@ -774,6 +782,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           data-page-builder-media-id={displayedGalleryImages[0]}
                           src={resolveMediaUrl(displayedGalleryImages[0])} 
                           alt="Hoạt động đối tác" 
+                          loading="lazy"
+                          decoding="async"
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -788,6 +798,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           data-page-builder-media-id={displayedGalleryImages[1]}
                           src={resolveMediaUrl(displayedGalleryImages[1])} 
                           alt="Hoạt động đối tác" 
+                          loading="lazy"
+                          decoding="async"
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -802,6 +814,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           data-page-builder-media-id={displayedGalleryImages[2]}
                           src={resolveMediaUrl(displayedGalleryImages[2])} 
                           alt="Hoạt động đối tác" 
+                          loading="lazy"
+                          decoding="async"
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -816,6 +830,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           data-page-builder-media-id={displayedGalleryImages[3]}
                           src={resolveMediaUrl(displayedGalleryImages[3])} 
                           alt="Hoạt động đối tác" 
+                          loading="lazy"
+                          decoding="async"
                           className={`w-full h-full object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -843,6 +859,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                           {partner.logo ? <img
                             src={partner.logo} 
                             alt={partner.name} 
+                            loading="lazy"
+                            decoding="async"
                             className="max-h-12 md:max-h-14 w-full object-contain grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500" 
                           /> : <span className="whitespace-normal text-center text-sm font-bold capitalize text-slate-700">{partner.name}</span>}
                         </motion.div>
@@ -1188,6 +1206,8 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                               data-page-builder-media-id={item.imageId}
                               src={resolveMediaUrl(item.imageId)} 
                               alt={item.title} 
+                              loading="lazy"
+                              decoding="async"
                               className={`w-full h-[260px] md:h-[320px] object-cover rounded-[10px] ${renderPolicy.motionEnabled ? 'group-hover:scale-105 transition-transform duration-500' : ''}`} 
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
