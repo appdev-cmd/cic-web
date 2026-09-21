@@ -353,3 +353,254 @@ export async function deleteForms(ids: Array<string | number>, actor: CmsPrincip
 
   return { count };
 }
+
+export interface DynamicFormSubmissionPayload {
+  formId: string | number;
+  sourceType?: string;
+  sourceId?: string;
+  sourcePath?: string;
+  ctaId?: string | number;
+  placementKey?: string;
+  values: Record<string, any>;
+}
+
+export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): Promise<{
+  success: boolean;
+  submissionId: string;
+  successMessage?: string;
+  redirectUrl?: string | null;
+}> {
+  const formIdNum = Number(payload.formId);
+  if (!Number.isSafeInteger(formIdNum) || formIdNum <= 0) {
+    throw new Error('ID biểu mẫu không hợp lệ.');
+  }
+
+  const { dispatchTemplatedEmail } = await import('@/lib/email/dispatcher');
+  const { sendEmail } = await import('@/lib/email/transporter');
+
+  const { submissionId, form, customerEmail, customerName, customerPhone, formattedValues } = await withTransaction(
+    async (sql) => {
+      // 1. Get form configuration
+      const [formRow] = await sql`
+        SELECT 
+          id, workspace, code, title, admin_name, current_version,
+          create_customer_request, send_admin_email, admin_emails,
+          admin_email_template_id, send_confirmation_email,
+          confirmation_email_template_id, success_message, redirect_url
+        FROM cic_forms
+        WHERE id = ${formIdNum} AND deleted_at IS NULL AND status = 'active'
+        LIMIT 1
+      `;
+      if (!formRow) {
+        throw new Error('Biểu mẫu không tồn tại hoặc đã ngừng tiếp nhận.');
+      }
+
+      // 2. Get form fields to resolve roles
+      const fields = await sql`
+        SELECT id, field_key, role_type, label
+        FROM cic_form_fields
+        WHERE form_id = ${formIdNum}
+        ORDER BY position ASC
+      `;
+
+      // Identify special roles
+      let emailVal = '';
+      let nameVal = '';
+      let phoneVal = '';
+      const formattedMap: Record<string, string> = {};
+
+      for (const f of fields) {
+        const key = f.field_key;
+        const val = payload.values[key];
+        const stringVal = typeof val === 'string' ? val.trim() : val !== undefined && val !== null ? JSON.stringify(val) : '';
+        if (stringVal) {
+          formattedMap[f.label || key] = stringVal;
+        }
+
+        if (f.role_type === 'email' || key === 'email') {
+          if (!emailVal && stringVal) emailVal = stringVal;
+        } else if (f.role_type === 'customer_name' || key === 'fullName' || key === 'fullname' || key === 'name') {
+          if (!nameVal && stringVal) nameVal = stringVal;
+        } else if (f.role_type === 'phone' || key === 'phone' || key === 'telephone') {
+          if (!phoneVal && stringVal) phoneVal = stringVal;
+        }
+      }
+
+      // 3. Insert submission record
+      const [subRow] = await sql`
+        INSERT INTO cic_form_submissions (
+          form_id,
+          form_version,
+          source_type,
+          source_id,
+          source_path,
+          cta_id,
+          placement_key,
+          submitted_at
+        ) VALUES (
+          ${formIdNum},
+          ${formRow.current_version || 1},
+          ${payload.sourceType || 'website'},
+          ${payload.sourceId || null},
+          ${payload.sourcePath || null},
+          ${payload.ctaId ? Number(payload.ctaId) : null},
+          ${payload.placementKey || null},
+          now()
+        )
+        RETURNING id
+      `;
+
+      const subId = String(subRow.id);
+
+      // 4. Insert submission values
+      for (const f of fields) {
+        const key = f.field_key;
+        const rawVal = payload.values[key];
+        if (rawVal === undefined || rawVal === null) continue;
+
+        const valText = typeof rawVal === 'string' ? rawVal : typeof rawVal === 'number' || typeof rawVal === 'boolean' ? String(rawVal) : null;
+        const valJson = typeof rawVal === 'object' ? sql.json(rawVal) : null;
+
+        await sql`
+          INSERT INTO cic_form_submission_values (
+            submission_id,
+            field_id,
+            field_key,
+            value_text,
+            value_json
+          ) VALUES (
+            ${subRow.id},
+            ${f.id},
+            ${key},
+            ${valText},
+            ${valJson}
+          )
+        `;
+      }
+
+      // 5. Create customer request state if enabled
+      if (formRow.create_customer_request) {
+        const [state] = await sql`
+          INSERT INTO cic_customer_request_states (
+            workspace, source_type, source_id, status, priority, tags, created_at, updated_at
+          ) VALUES (
+            ${formRow.workspace}, 'form_submission', ${subRow.id}, 'new', 'medium', ${sql.array([formRow.code || 'form'])}, now(), now()
+          )
+          ON CONFLICT (workspace, source_type, source_id) DO NOTHING
+          RETURNING id
+        `;
+
+        if (state?.id) {
+          await sql`
+            INSERT INTO cic_customer_request_events (
+              request_state_id, event_type, old_value, new_value, actor_id, created_at
+            ) VALUES (
+              ${state.id}, 'created', NULL, ${sql.json({
+                formId: formIdNum,
+                formCode: formRow.code,
+                formTitle: formRow.title,
+                name: nameVal,
+                email: emailVal,
+                phone: phoneVal,
+              })}, NULL, now()
+            )
+          `;
+        }
+      }
+
+      return {
+        submissionId: subId,
+        form: formRow,
+        customerEmail: emailVal,
+        customerName: nameVal || 'Khách hàng',
+        customerPhone: phoneVal,
+        formattedValues: formattedMap,
+      };
+    }
+  );
+
+  // 6. Send notification emails asynchronously
+  try {
+    // Admin notification
+    if (form.send_admin_email) {
+      const adminRecipients = Array.isArray(form.admin_emails) && form.admin_emails.length > 0
+        ? form.admin_emails
+        : [process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'nampt@cic.com.vn'];
+
+      if (form.admin_email_template_id) {
+        await dispatchTemplatedEmail({
+          workspace: form.workspace,
+          templateId: form.admin_email_template_id,
+          audience: 'internal',
+          to: adminRecipients,
+          variables: {
+            '{{customer.full_name}}': customerName,
+            '{{customer.email}}': customerEmail,
+            '{{customer.phone}}': customerPhone,
+            '{{form.title}}': form.title,
+            ...formattedValues,
+          },
+        });
+      } else {
+        const tableRows = Object.entries(formattedValues)
+          .map(([lbl, v]) => `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;"><strong>${lbl}:</strong></td><td style="padding: 8px 0; color: #1e293b;">${v}</td></tr>`)
+          .join('');
+
+        await sendEmail({
+          to: adminRecipients,
+          subject: `[Biểu mẫu] Lượt gửi mới: ${form.title} - ${customerName}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+              <h3 style="color: #ea580c; margin-top: 0;">Thông báo: Lượt gửi biểu mẫu mới</h3>
+              <p>Biểu mẫu: <strong>${form.title}</strong></p>
+              <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">${tableRows}</table>
+              <p style="font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; margin: 0;">Đã lưu vào hệ thống Yêu cầu khách hàng CMS.</p>
+            </div>
+          `,
+        });
+      }
+    }
+
+    // Customer confirmation email
+    if (form.send_confirmation_email && customerEmail && customerEmail.includes('@')) {
+      if (form.confirmation_email_template_id) {
+        await dispatchTemplatedEmail({
+          workspace: form.workspace,
+          templateId: form.confirmation_email_template_id,
+          audience: 'customer',
+          to: customerEmail,
+          variables: {
+            '{{customer.full_name}}': customerName,
+            '{{customer.email}}': customerEmail,
+            '{{form.title}}': form.title,
+            ...formattedValues,
+          },
+        });
+      } else {
+        await sendEmail({
+          to: customerEmail,
+          subject: `[CIC Technology] Tiếp nhận biểu mẫu: ${form.title}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+              <h3 style="color: #ea580c; margin-top: 0;">CIC Technology & Consultancy</h3>
+              <p>Kính gửi <strong>${customerName}</strong>,</p>
+              <p>Cảm ơn Quý khách đã gửi thông tin qua biểu mẫu <strong>${form.title}</strong> của CIC Technology.</p>
+              <p>${form.success_message || 'Chúng tôi đã tiếp nhận thông tin và sẽ liên hệ phản hồi sớm nhất có thể.'}</p>
+              <p style="font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 20px;">Trân trọng,<br/><strong>CIC Technology</strong></p>
+            </div>
+          `,
+        });
+      }
+    }
+  } catch (emailErr) {
+    console.error('[submitDynamicForm] Error sending emails:', emailErr);
+  }
+
+  return {
+    success: true,
+    submissionId,
+    successMessage: form.success_message || 'Gửi biểu mẫu thành công!',
+    redirectUrl: form.redirect_url || null,
+  };
+}
+

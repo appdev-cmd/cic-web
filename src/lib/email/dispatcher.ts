@@ -1,10 +1,11 @@
-import { getEmailTemplateForEvent } from '@/features/email-templates/server/queries';
+import { getEmailTemplateForEvent, getActiveEmailTemplateContent } from '@/features/email-templates/server/queries';
 import { interpolateTokens } from './tokens';
 import { sendEmail, SendMailResult } from './transporter';
 
 export interface DispatchEmailOptions {
   workspace?: 'vi' | 'en';
-  eventKey: string;
+  eventKey?: string;
+  templateId?: string | number;
   audience?: 'customer' | 'internal';
   to: string | string[];
   variables: Record<string, string | number | undefined | null>;
@@ -17,6 +18,7 @@ export interface DispatchEmailOptions {
 export async function dispatchTemplatedEmail({
   workspace = 'vi',
   eventKey,
+  templateId,
   audience = 'customer',
   to,
   variables,
@@ -26,7 +28,14 @@ export async function dispatchTemplatedEmail({
   replyTo,
 }: DispatchEmailOptions): Promise<SendMailResult & { templateUsed?: boolean; templateId?: string }> {
   try {
-    const tmpl = await getEmailTemplateForEvent(workspace, eventKey, audience);
+    let tmpl: { subject: string; content: string; templateId: string } | null = null;
+
+    if (templateId) {
+      tmpl = await getActiveEmailTemplateContent(templateId);
+    }
+    if (!tmpl && eventKey) {
+      tmpl = await getEmailTemplateForEvent(workspace, eventKey, audience);
+    }
 
     let rawSubject = tmpl?.subject || fallbackSubject || `[CIC] Thông báo`;
     let rawContent = tmpl?.content || fallbackContent || `Nội dung thông báo từ CIC`;

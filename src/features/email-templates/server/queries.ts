@@ -170,6 +170,32 @@ export async function getEmailTemplateForEvent(
   };
 }
 
+export async function getActiveEmailTemplateContent(
+  templateId: string | number
+): Promise<{ subject: string; content: string; templateId: string } | null> {
+  if (!isValidEmailTemplateId(templateId)) return null;
+  const sql = getPostgresClient();
+  const idStr = String(templateId);
+
+  const [row] = await sql`
+    SELECT 
+      t.id::text as "templateId",
+      v.subject,
+      v.content
+    FROM cic_email_templates t
+    JOIN cic_email_template_versions v ON v.id = COALESCE(t.active_version_id, t.draft_version_id)
+    WHERE t.id = ${idStr}::bigint AND t.deleted_at IS NULL
+    LIMIT 1
+  `;
+
+  if (!row) return null;
+  return {
+    templateId: String(row.templateId),
+    subject: row.subject || '',
+    content: row.content || '',
+  };
+}
+
 interface FormUsageRow {
   id: string;
   admin_name: string | null;

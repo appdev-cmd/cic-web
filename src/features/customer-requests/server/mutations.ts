@@ -286,6 +286,39 @@ export async function reassignCustomerRequests(
       `;
     }
 
+    // Send email notification to newly assigned staff member
+    if (targetUserId) {
+      try {
+        const [targetUser] = await sql`
+          SELECT email, full_name, username 
+          FROM cic_users 
+          WHERE id = ${targetUserId}
+        `;
+        if (targetUser?.email) {
+          const { sendEmail } = await import('@/lib/email/transporter');
+          await sendEmail({
+            to: targetUser.email,
+            subject: `[CIC CRM] Bạn vừa được phân công phụ trách ${unifiedIds.length} yêu cầu khách hàng mới`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <h3 style="color: #ea580c; margin-top: 0;">Thông báo phân công yêu cầu khách hàng</h3>
+                <p>Xin chào <strong>${targetUser.full_name || targetUser.username}</strong>,</p>
+                <p>Bạn vừa được phân công phụ trách <strong>${unifiedIds.length} yêu cầu</strong> khách hàng mới trên hệ thống CMS.</p>
+                ${reason.trim() ? `<p><strong>Lý do chuyển giao:</strong> ${reason.trim()}</p>` : ''}
+                <p>Danh sách mã yêu cầu: <code>${unifiedIds.join(', ')}</code></p>
+                <p style="margin-top: 20px;">
+                  <a href="${process.env.APP_URL || 'http://localhost:3000'}/cms/customer-requests" style="background: #ea580c; color: #fff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Xem trên CMS</a>
+                </p>
+                <p style="font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 24px;">Hệ thống Quản lý Yêu cầu Khách hàng CIC Technology</p>
+              </div>
+            `,
+          });
+        }
+      } catch (emailErr) {
+        console.error('[reassignCustomerRequests] Error sending notification email to staff:', emailErr);
+      }
+    }
+
     return { success: true, updatedCount: unifiedIds.length };
   });
 }

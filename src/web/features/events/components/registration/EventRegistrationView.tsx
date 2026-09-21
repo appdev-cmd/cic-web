@@ -4,6 +4,8 @@ import { ArrowLeft, Calendar, Clock, MapPin, Phone, Mail, User, Building, Briefc
 import type { EventItem, EventRegistration } from '@shared/types';
 import { getStatusBadgeStyle, getStatusLabel } from '../eventUtils';
 import { EventTicketSuccess } from './EventTicketSuccess';
+import { registerEventAction } from '@/features/events/server/actions';
+
 
 interface EventRegistrationViewProps {
   event: EventItem;
@@ -57,16 +59,21 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setSubmitError(null);
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const mockResult: EventRegistration = {
+    try {
+      const result = await registerEventAction({
         eventId: event.id,
         eventTitle: event.title,
+        eventTime: `${event.date} • ${event.time}`,
+        eventLocation: event.location,
         fullName: formData.fullName,
         company: formData.company,
         position: formData.position,
@@ -75,11 +82,9 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
         attendeesCount: formData.attendeesCount,
         note: formData.note,
         consent: formData.consent,
-        registeredAt: new Date().toISOString(),
-      };
+      });
 
-      setRegistrationResult(mockResult);
-      setIsSubmitting(false);
+      setRegistrationResult(result);
       setFormData({
         fullName: '',
         company: '',
@@ -90,8 +95,14 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
         note: '',
         consent: false,
       });
-    }, 1200);
+    } catch (err: any) {
+      console.error('Lỗi khi đăng ký sự kiện:', err);
+      setSubmitError(err?.message || 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <motion.div
@@ -328,6 +339,13 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
                 <p className="text-[10px] font-bold text-red-500 pl-7">{formErrors.consent}</p>
               )}
             </div>
+
+            {/* Error Message */}
+            {submitError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-[8px] text-xs font-semibold text-red-600">
+                {submitError}
+              </div>
+            )}
 
             {/* Submit Button */}
             <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
