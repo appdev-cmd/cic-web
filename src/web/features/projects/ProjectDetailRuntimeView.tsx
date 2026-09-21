@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { ProjectDetailViewModel } from '@/features/projects/types';
 import { ConsultationModal } from '@/web/components/ConsultationModal';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface ProjectDetailRuntimeViewProps {
   project: ProjectDetailViewModel;
@@ -137,7 +138,7 @@ export function ProjectDetailRuntimeView({
               {project.content ? (
                 <div
                   className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-img:rounded-[10px] prose-img:border prose-img:border-slate-200"
-                  dangerouslySetInnerHTML={{ __html: project.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(project.content) }}
                 />
               ) : (
                 project.summary && (

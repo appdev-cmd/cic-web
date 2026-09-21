@@ -1,3 +1,5 @@
+import { sanitizeHtmlContent } from './sanitize';
+
 /** Canonical origin for legacy CIC uploads and HTML content. */
 export const CIC_ORIGIN = 'https://www.cic.com.vn';
 
@@ -9,7 +11,7 @@ export function normalizeMediaUrl(value: string | null | undefined): string {
   return `${CIC_ORIGIN}/${raw.replace(/^\/+/, '')}`;
 }
 
-/** Resolve legacy relative image URLs while preserving all other HTML. */
+/** Resolve legacy relative image URLs and sanitize dynamic HTML content. */
 export function normalizeHtmlContent(html: string | null | undefined): string {
   if (!html) return '';
   let headingIndex = 0;
@@ -20,5 +22,5 @@ export function normalizeHtmlContent(html: string | null | undefined): string {
     headingIndex += 1;
     return attrs.includes('id=') ? `<h${level}${attrs}>` : `<h${level}${attrs} id="article-heading-${headingIndex}">`;
   });
-  return normalized;
+  return sanitizeHtmlContent(normalized);
 }

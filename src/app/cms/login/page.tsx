@@ -10,6 +10,7 @@ const messages: Record<string, string> = {
   validation: 'Vui lòng nhập email và mật khẩu hợp lệ.',
   expired: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.',
   logout: 'Không thể kết thúc phiên đăng nhập. Vui lòng thử lại.',
+  rate_limited: 'Quá nhiều yêu cầu đăng nhập không thành công. Vui lòng thử lại sau ít phút.',
 };
 interface LoginSearchParams { error?: string; returnTo?: string; }
 

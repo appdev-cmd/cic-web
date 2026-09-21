@@ -32,6 +32,16 @@ const safeFilename = (name: string) =>
     .replace(/-+/g, '-')
     .slice(-180) || 'editor-image';
 
+function isDangerousSvg(svgContent: string): boolean {
+  const lower = svgContent.toLowerCase();
+  if (/<script[\s>]/i.test(lower) || /<\/script>/i.test(lower)) return true;
+  if (/<foreignobject[\s>]/i.test(lower)) return true;
+  if (/<(iframe|embed|object)[\s>]/i.test(lower)) return true;
+  if (/\bon\w+\s*=/i.test(lower)) return true;
+  if (/(href|xlink:href)\s*=\s*["']?\s*javascript:/i.test(lower)) return true;
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentCmsPrincipal().catch(() => null);
@@ -65,6 +75,16 @@ export async function POST(req: NextRequest) {
         { error: { message: 'Kích thước tệp không hợp lệ (tối đa 100 MB).' } },
         { status: 400 }
       );
+    }
+
+    if (mime === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+      const text = await file.text();
+      if (isDangerousSvg(text)) {
+        return NextResponse.json(
+          { error: { message: 'Tệp SVG chứa nội dung hoặc mã kịch bản không an toàn.' } },
+          { status: 400 }
+        );
+      }
     }
 
     const storagePath = `editor/${new Date().toISOString().slice(0, 7)}/${randomUUID()}-${safeFilename(file.name)}`;

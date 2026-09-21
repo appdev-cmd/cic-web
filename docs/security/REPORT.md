@@ -59,3 +59,22 @@ A full-scope, source-grounded security audit was conducted on the `cic-web` repo
 ### 4. Input Sanitization & Anti-Automation (SEC-003, SEC-004, SEC-005)
 - **Problem**: Public forms allow unauthenticated submission without rate limits and inject raw strings into outgoing emails; media route allows direct storage path queries.
 - **Action**: Add HTML entity escaping on all email template variables, integrate rate limiting on public form and login endpoints, and constrain media queries strictly to active database records.
+
+---
+
+## Remediation Status: 100% COMPLETE
+
+All 9 confirmed security findings have been implemented, patched, and verified:
+
+| Finding ID | Title | Status | Remediation Summary |
+| :--- | :--- | :---: | :--- |
+| **SEC-001** | Stored XSS via Rich Text HTML | **RESOLVED** | Implemented `sanitizeHtmlContent` with `sanitize-html` across all rich-text rendering surfaces. |
+| **SEC-002** | Git-Tracked DB Dumps & PyCache | **RESOLVED** | Removed `.sql` and `.pyc` from git index; configured `.gitignore`; verified repository hygiene baseline. |
+| **SEC-003** | Email HTML Injection | **RESOLVED** | Implemented `escapeHtml` utility and applied to dynamic form and contact notification templates. |
+| **SEC-004** | Missing Rate Limiting on Auth/Forms | **RESOLVED** | Implemented in-memory sliding-window rate limiter on `/cms/login`, `/api/forms/submit`, and contact actions. |
+| **SEC-005** | Media Direct Path Bypass | **RESOLVED** | Removed direct path bypass shortcut; enforced strict DB lookup with `deleted_at IS NULL`. |
+| **SEC-006** | Missing Content-Security-Policy | **RESOLVED** | Configured CSP header baseline in `next.config.ts` covering scripts, styles, frames, and images. |
+| **SEC-007** | Vertical Privilege Escalation | **RESOLVED** | Implemented `assertRoleAssignmentPrivilege` preventing non-admins from modifying admin roles/passwords. |
+| **SEC-008** | Stale User Principal Cache | **RESOLVED** | Immediate cache invalidation in `refresh()` and role update actions via `invalidateCmsPrincipalCache`. |
+| **SEC-009** | Malicious SVG Upload & Delivery | **RESOLVED** | Added SVG payload security validation on upload; enforced `Content-Disposition: attachment` & CSP sandbox. |
+

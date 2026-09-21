@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, 
@@ -46,11 +47,12 @@ interface ProductDetailViewProps {
 const cleanProductHtml = (htmlString: string): string => {
   if (!htmlString) return '';
 
-  return htmlString
+  const cleaned = htmlString
     .replace(/font-family\s*:\s*[^;\"]+;?/gi, '')
     .replace(/font-size\s*:\s*[^;\"]+;?/gi, '')
     .replace(/line-height\s*:\s*[^;\"]+;?/gi, '')
     .replace(/(<font\b[^>]*?)\s+face=(['\"])[^'\"]*\2/gi, '$1');
+  return sanitizeHtmlContent(cleaned);
 };
 
 function CollapsibleContent({ 

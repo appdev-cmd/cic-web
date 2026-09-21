@@ -1,13 +1,23 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { contactInputSchema } from '../schemas/contactInput';
 import { getDatabaseClient } from '@/server/db/foundation';
 import { getPostgresClient } from '@/server/db/postgres';
 import { customerInteractionInputSchema } from '../schemas/customerInteractionInput';
 import { sendEmail } from '@/lib/email/transporter';
+import { escapeHtml } from '@/lib/email/tokens';
+import { checkRateLimit, getClientIp } from '@/server/auth/rate-limit';
 
 
 export async function submitContactAction(payload: unknown) {
+  const headersList = await headers();
+  const ip = getClientIp(headersList);
+  const rateLimit = checkRateLimit(`contact:${ip}`, { maxRequests: 10, windowSeconds: 60 });
+  if (!rateLimit.success) {
+    throw new Error('Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.');
+  }
+
   const input = contactInputSchema.parse(payload);
   const client = await getDatabaseClient();
   const now = new Date().toISOString();
@@ -53,8 +63,11 @@ export async function submitContactAction(payload: unknown) {
   // Send automatic email notifications
   try {
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'nampt@cic.com.vn';
-    const customerName = input.fullname || 'Khách hàng';
-    const contactSubject = input.subject || 'Yêu cầu liên hệ mới';
+    const customerName = escapeHtml(input.fullname || 'Khách hàng');
+    const contactSubject = escapeHtml(input.subject || 'Yêu cầu liên hệ mới');
+    const safeEmail = escapeHtml(input.email);
+    const safeTelephone = escapeHtml(input.telephone || 'Chưa cung cấp');
+    const safeMessage = escapeHtml(input.message || 'Không có nội dung tin nhắn');
 
     // 1. Send notification to admin
     await sendEmail({
@@ -66,10 +79,10 @@ export async function submitContactAction(payload: unknown) {
           <p>Hệ thống vừa tiếp nhận một yêu cầu liên hệ mới từ khách hàng qua form liên hệ hệ thống:</p>
           <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
             <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;"><strong>Họ và tên:</strong></td><td style="padding: 8px 0; color: #1e293b;"><strong>${customerName}</strong></td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${input.email}">${input.email}</a></td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số điện thoại:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.telephone || 'Chưa cung cấp'}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}">${safeEmail}</a></td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số điện thoại:</strong></td><td style="padding: 8px 0; color: #1e293b;">${safeTelephone}</td></tr>
             <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Tiêu đề:</strong></td><td style="padding: 8px 0; color: #1e293b;">${contactSubject}</td></tr>
-            <tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;"><strong>Nội dung:</strong></td><td style="padding: 8px 0; color: #1e293b; white-space: pre-wrap;">${input.message || 'Không có nội dung tin nhắn'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;"><strong>Nội dung:</strong></td><td style="padding: 8px 0; color: #1e293b; white-space: pre-wrap;">${safeMessage}</td></tr>
           </table>
           <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px;">Yêu cầu này đã được đồng bộ vào hệ thống quản lý CMS Yêu cầu khách hàng.</p>
         </div>
@@ -104,6 +117,13 @@ export async function submitContactAction(payload: unknown) {
 }
 
 export async function submitCustomerInteractionAction(payload: unknown) {
+  const headersList = await headers();
+  const ip = getClientIp(headersList);
+  const rateLimit = checkRateLimit(`interaction:${ip}`, { maxRequests: 10, windowSeconds: 60 });
+  if (!rateLimit.success) {
+    throw new Error('Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.');
+  }
+
   const input = customerInteractionInputSchema.parse(payload);
   const values = input.values;
   const now = new Date().toISOString();
@@ -189,23 +209,27 @@ export async function submitCustomerInteractionAction(payload: unknown) {
   // Send automatic email notifications for customer interaction
   try {
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'nampt@cic.com.vn';
-    const customerName = fullname || 'Khách hàng';
-    const formTitle = input.formName || 'Đăng ký tư vấn';
+    const customerName = escapeHtml(fullname || 'Khách hàng');
+    const formTitle = escapeHtml(input.formName || 'Đăng ký tư vấn');
+    const safeEmail = escapeHtml(email || 'Chưa cung cấp');
+    const safeTelephone = escapeHtml(telephone || 'Chưa cung cấp');
+    const safeSource = escapeHtml(input.source || 'Trang web');
+    const safeMessage = escapeHtml(message || 'Không có ghi chú thêm');
 
     // 1. Send notification to admin
     await sendEmail({
       to: adminEmail,
-      subject: `[CIC Web] ${formTitle}: ${customerName} (${email || telephone || 'N/A'})`,
+      subject: `[CIC Web] ${formTitle}: ${customerName} (${safeEmail || safeTelephone || 'N/A'})`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
           <h3 style="color: #ea580c; margin-top: 0;">Thông báo: ${formTitle} mới từ Website</h3>
           <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
             <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;"><strong>Biểu mẫu:</strong></td><td style="padding: 8px 0; color: #1e293b;"><strong>${formTitle}</strong></td></tr>
             <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Khách hàng:</strong></td><td style="padding: 8px 0; color: #1e293b;"><strong>${customerName}</strong></td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${email}">${email || 'Chưa cung cấp'}</a></td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số điện thoại:</strong></td><td style="padding: 8px 0; color: #1e293b;">${telephone || 'Chưa cung cấp'}</td></tr>
-            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Nguồn phát sinh:</strong></td><td style="padding: 8px 0; color: #1e293b;">${input.source || 'Trang web'}</td></tr>
-            <tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;"><strong>Nội dung / Ghi chú:</strong></td><td style="padding: 8px 0; color: #1e293b; white-space: pre-wrap;">${message || 'Không có ghi chú thêm'}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 8px 0; color: #1e293b;"><a href="mailto:${safeEmail}">${safeEmail}</a></td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Số điện thoại:</strong></td><td style="padding: 8px 0; color: #1e293b;">${safeTelephone}</td></tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;"><strong>Nguồn phát sinh:</strong></td><td style="padding: 8px 0; color: #1e293b;">${safeSource}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b; vertical-align: top;"><strong>Nội dung / Ghi chú:</strong></td><td style="padding: 8px 0; color: #1e293b; white-space: pre-wrap;">${safeMessage}</td></tr>
           </table>
           <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px;">Đã tự động lưu vào hệ thống Yêu cầu khách hàng (Customer Requests).</p>
         </div>

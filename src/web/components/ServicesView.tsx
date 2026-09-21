@@ -49,6 +49,8 @@ interface ServicesViewProps {
   onNavigateToList?: () => void;
 }
 
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+
 const cleanCmsHtml = (htmlString: string): string => {
   if (!htmlString) return '';
   let cleaned = htmlString;
@@ -77,7 +79,7 @@ const cleanCmsHtml = (htmlString: string): string => {
     .replace(/src="\/upload_images\//g, 'src="https://www.cic.com.vn/upload_images/')
     .replace(/<img\b(?![^>]*\breferrerpolicy=)/gi, '<img referrerpolicy="no-referrer"');
 
-  return cleaned;
+  return sanitizeHtmlContent(cleaned);
 };
 
 const getServiceExcerpt = (service: ServiceDetail): string => {

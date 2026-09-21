@@ -1,10 +1,13 @@
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+
 export const cleanEventHtml = (html: string) => {
   if (!html) return '';
-  return html
+  const cleaned = html
     // Prefix any relative /upload_images URLs to https://www.cic.com.vn/upload_images
     .replace(/src="\/upload_images\//g, 'src="https://www.cic.com.vn/upload_images/')
     // Ensure referrerpolicy="no-referrer" on all img tags
     .replace(/<img\b(?![^>]*\breferrerpolicy=)/gi, '<img referrerpolicy="no-referrer"');
+  return sanitizeHtmlContent(cleaned);
 };
 
 export const getDaysRemaining = (isoDateStr: string) => {

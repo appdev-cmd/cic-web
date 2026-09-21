@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CalendarDays, Download, Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { PublicSitePreviewFooter, PublicSitePreviewHeader } from '../../../components/PublicSitePreviewChrome';
 import { ResponsiveWebsitePreviewFrame } from '../../../components/ResponsiveWebsitePreviewFrame';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 import type { NewsArticle } from '../types';
 
 interface Props { isOpen: boolean; article: NewsArticle | null; onClose: () => void }
@@ -34,8 +35,8 @@ export const ArticlePreviewModal: React.FC<Props> = ({ isOpen, article, onClose 
               <h1 className="text-3xl font-black leading-tight sm:text-4xl">{article.title}</h1>
               {article.summary && <p className="mt-5 border-l-4 border-orange-500 pl-4 text-base leading-7 text-slate-600">{article.summary}</p>}
               {article.image && <img src={article.image} alt={article.title} className="mt-7 aspect-video w-full rounded-2xl object-cover" />}
-              <div className="ck-content mt-8 leading-7" dangerouslySetInnerHTML={{ __html: article.content }} />
-              {article.video && <div className="mt-8 aspect-video overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full" dangerouslySetInnerHTML={{ __html: article.video }} />}
+              <div className="ck-content mt-8 leading-7" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(article.content) }} />
+              {article.video && <div className="mt-8 aspect-video overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(article.video) }} />}
               {article.file_upload && <a href={article.file_upload} className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm font-bold text-white"><Download className="size-4" />Tải tài liệu đính kèm</a>}
               {article.tags?.length > 0 && <div className="mt-8 flex flex-wrap gap-2">{article.tags.map((tag) => <span key={tag} className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">#{tag}</span>)}</div>}
             </article>

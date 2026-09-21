@@ -22,10 +22,15 @@ export async function GET(
 
     const cached = signedUrlCache.get(decodedId);
     if (cached && cached.expiresAt > Date.now()) {
+      const isSvg = cached.mimeType === 'image/svg+xml' || decodedId.toLowerCase().endsWith('.svg');
       const response = NextResponse.redirect(cached.url, 307);
       response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
       if (cached.mimeType) {
         response.headers.set('Content-Type', cached.mimeType);
+      }
+      if (isSvg) {
+        response.headers.set('Content-Disposition', 'attachment');
+        response.headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
       }
       return response;
     }
@@ -33,29 +38,28 @@ export async function GET(
     let storagePath: string | null = null;
     let mimeType: string | null = null;
 
-    if (decodedId.includes('/')) {
-      storagePath = decodedId;
-    } else {
-      const sql = getPostgresClient();
-      const rows = await sql<{ storage_path: string; mime_type: string | null }[]>`
-        SELECT storage_path, mime_type
-        FROM cic_media_assets
-        WHERE id = ${decodedId} AND deleted_at IS NULL
-        LIMIT 1
-      `;
-      if (rows.length > 0) {
-        storagePath = rows[0].storage_path;
-        mimeType = rows[0].mime_type;
-      }
+    // Strict lookup against cic_media_assets, always requiring deleted_at IS NULL.
+    // Prohibits direct path bypassing to avoid exposing soft-deleted or uncatalogued assets.
+    const sql = getPostgresClient();
+    const rows = await sql<{ storage_path: string; mime_type: string | null }[]>`
+      SELECT storage_path, mime_type
+      FROM cic_media_assets
+      WHERE (id::text = ${decodedId} OR storage_path = ${decodedId}) AND deleted_at IS NULL
+      LIMIT 1
+    `;
+    if (rows.length > 0) {
+      storagePath = rows[0].storage_path;
+      mimeType = rows[0].mime_type;
     }
 
     if (!storagePath) {
       return NextResponse.json({ error: 'Media asset not found' }, { status: 404 });
     }
 
+    const isSvg = mimeType === 'image/svg+xml' || storagePath.toLowerCase().endsWith('.svg');
     const { data, error } = await createSupabaseAdminClient()
       .storage.from(MEDIA_BUCKET)
-      .createSignedUrl(storagePath, 43200);
+      .createSignedUrl(storagePath, 43200, isSvg ? { download: true } : undefined);
 
     if (error || !data?.signedUrl) {
       return NextResponse.json({ error: 'Unable to sign media URL' }, { status: 500 });
@@ -67,6 +71,10 @@ export async function GET(
     response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
     if (mimeType) {
       response.headers.set('Content-Type', mimeType);
+    }
+    if (isSvg) {
+      response.headers.set('Content-Disposition', 'attachment');
+      response.headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
     }
     return response;
   } catch (error) {

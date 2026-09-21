@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 import { submitDynamicForm } from '@/features/forms/server/mutations';
+import { checkRateLimit, getClientIp } from '@/server/auth/rate-limit';
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req.headers);
+    const rateLimit = checkRateLimit(`form-submit:${ip}`, { maxRequests: 10, windowSeconds: 60 });
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { success: false, error: 'Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.' },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     if (!body?.formId || !body?.values) {
       return NextResponse.json(

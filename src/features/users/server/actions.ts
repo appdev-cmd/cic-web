@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { User } from '@supabase/supabase-js';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
 import { writeAuditEvent } from '@/server/audit/writer';
-import { requirePermission } from '@/server/auth/guards';
+import { requirePermission, invalidateCmsPrincipalCache } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
 import { createSupabaseAdminClient } from '@/server/supabase/admin';
 import { accountStatusSchema, createUserInputSchema, updateUserInputSchema } from '../schemas/userInput';
@@ -12,7 +12,10 @@ import { createUserRecord, trashUserRecord, updateUserRecord, updateUserStatuses
 import { getCmsUserActivity } from './queries';
 
 const idSchema=z.coerce.number().int().positive();
-const refresh=()=>revalidatePath('/cms','layout');
+const refresh=(authUserId?: string)=>{
+  invalidateCmsPrincipalCache(authUserId);
+  revalidatePath('/cms','layout');
+};
 const banDuration=(status:string)=>status==='active'?'none':'876000h';
 
 export async function getCmsUserActivityAction(id:string){return getCmsUserActivity(idSchema.parse(id));}
@@ -44,13 +47,15 @@ export async function createCmsUserAction(payload:unknown){
 
 export async function updateCmsUserAction(id:string,payload:unknown){
   const actor=await requirePermission('users','edit'); const input=updateUserInputSchema.parse(payload); const numericId=idSchema.parse(id);
+  let updatedAuthUserId: string | undefined;
   await updateUserRecord(numericId,input,actor,async(target)=>{
     const {admin,user}=await findAuthUser(target);
+    updatedAuthUserId = user.id;
     const {error}=await admin.auth.admin.updateUserById(user.id,{email:input.email,password:input.password,user_metadata:{...user.user_metadata,username:input.username,full_name:`${input.lname} ${input.fname}`.trim()},app_metadata:{...user.app_metadata,cms_profile:true,legacy_user_id:numericId},ban_duration:banDuration(input.status)});
     if(error)throw new Error('Không thể đồng bộ tài khoản xác thực; thay đổi hồ sơ đã được hoàn tác.');
     return user.id;
   });
-  refresh();return{id};
+  refresh(updatedAuthUserId);return{id};
 }
 
 async function syncStatuses(targets:readonly AuthSyncTarget[],status:string){

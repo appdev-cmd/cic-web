@@ -4,6 +4,7 @@ import type { CmsPrincipal } from '@/server/auth/guards';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
 import { writeAuditEvent } from '@/server/audit/writer';
 import { withTransaction } from '@/server/db/postgres';
+import { AppError } from '@/server/errors';
 import type { CreateUserInput, UpdateUserInput } from '../schemas/userInput';
 import { moveUserToTrash } from '@/features/trash/server/adapters/user';
 
@@ -51,9 +52,30 @@ async function assertUserNotTrashed(sql: Sql, userId: number) {
 
 const changedFields = (before: Record<string, unknown>, after: Record<string, unknown>) => Object.keys(after).filter((key) => JSON.stringify(before[key] ?? null) !== JSON.stringify(after[key] ?? null));
 
+async function assertRoleAssignmentPrivilege(sql: Sql, actor: CmsPrincipal, targetUserId: number | null, nextRoleId: number, updatingPassword = false) {
+  if (actor.isAdministrator) return;
+
+  const [targetRole] = await sql`SELECT code FROM cic_roles WHERE id=${nextRoleId} AND status='active'`;
+  if (targetRole && ['admin', 'superadmin'].includes(String(targetRole.code).trim().toLowerCase())) {
+    throw new AppError('Chỉ Quản trị viên cấp cao mới có quyền gán vai trò Quản trị.', 'FORBIDDEN');
+  }
+
+  if (targetUserId != null) {
+    const [targetAdmin] = await sql`SELECT 1 FROM cic_user_roles ur JOIN cic_roles r ON r.id=ur.role_id WHERE ur.user_id=${targetUserId} AND ur.status='active' AND r.status='active' AND lower(r.code) IN ('admin','superadmin') LIMIT 1`;
+    if (targetAdmin) {
+      throw new AppError('Chỉ Quản trị viên cấp cao mới có quyền chỉnh sửa tài khoản Quản trị.', 'FORBIDDEN');
+    }
+
+    if (updatingPassword && targetUserId !== actor.legacyUserId) {
+      throw new AppError('Không có quyền thay đổi mật khẩu của tài khoản khác.', 'FORBIDDEN');
+    }
+  }
+}
+
 export async function createUserRecord(input: CreateUserInput, authUserId: string, actor: CmsPrincipal) {
   return withTransaction(async (sql) => {
     await validateRelations(sql, input); await assertUniqueIdentity(sql, input);
+    await assertRoleAssignmentPrivilege(sql, actor, null, input.roleId, Boolean(input.password));
     const [{ next_ordering }] = await sql`SELECT coalesce(max(ordering),0)+1 AS next_ordering FROM cic_users`;
     const [created] = await sql`INSERT INTO cic_users (auth_user_id,username,email,fname,lname,full_name,phone,address,summary,image,account_status,published,ordering,agencies,created_time,updated_time,password_changed_at) VALUES (${authUserId},${input.username},${input.email},${input.fname},${input.lname},${displayName(input)},${input.phone},${input.address},${input.summary},${input.avatar},${input.status},${input.status==='active'},${Number(next_ordering)},${csv(input.agencies)},now(),now(),now()) RETURNING id`;
     const id = Number(created.id);
@@ -68,6 +90,7 @@ export async function updateUserRecord(id: number, input: UpdateUserInput, actor
   return withTransaction(async (sql) => {
     await assertUserNotTrashed(sql, id);
     await validateRelations(sql, input);
+    await assertRoleAssignmentPrivilege(sql, actor, id, input.roleId, Boolean(input.password));
     const [current] = await sql`SELECT id,auth_user_id,email,username,full_name,fname,lname,phone,address,summary,image,account_status,agencies FROM cic_users WHERE id=${id} FOR UPDATE`;
     if (!current) throw new Error('Không tìm thấy tài khoản.');
     await assertUniqueIdentity(sql, input, id); await assertNotLastAdministrator(sql, id, input.status);
@@ -90,7 +113,13 @@ export async function updateUserStatuses(ids:number[],status:UpdateUserInput['st
     for (const id of uniqueIds) await assertUserNotTrashed(sql, id);
     const rows=await sql`SELECT id,auth_user_id,email,username,full_name,account_status FROM cic_users WHERE id IN ${sql(uniqueIds)} FOR UPDATE`;
     if(rows.length!==uniqueIds.length) throw new Error('Một hoặc nhiều tài khoản không còn tồn tại.');
-    for(const row of rows) await assertNotLastAdministrator(sql,Number(row.id),status);
+    for(const row of rows) {
+      if (!actor.isAdministrator) {
+        const [isAdmin] = await sql`SELECT 1 FROM cic_user_roles ur JOIN cic_roles r ON r.id=ur.role_id WHERE ur.user_id=${Number(row.id)} AND ur.status='active' AND r.status='active' AND lower(r.code) IN ('admin','superadmin') LIMIT 1`;
+        if (isAdmin) throw new AppError('Chỉ Quản trị viên cấp cao mới có quyền thay đổi trạng thái của tài khoản Quản trị.', 'FORBIDDEN');
+      }
+      await assertNotLastAdministrator(sql,Number(row.id),status);
+    }
     await sql`UPDATE cic_users SET account_status=${status},published=${status==='active'},updated_time=now() WHERE id IN ${sql(uniqueIds)}`;
     await syncAuth(rows.map((row)=>({id:Number(row.id),authUserId:row.auth_user_id?String(row.auth_user_id):null,email:String(row.email??''),username:String(row.username??''),fullName:String(row.full_name??''),status:String(row.account_status??'')})));
     for(const row of rows) if(row.account_status!==status){

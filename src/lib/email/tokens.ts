@@ -1,4 +1,17 @@
 /**
+ * Utility to escape HTML special characters to prevent HTML injection in emails.
+ */
+export function escapeHtml(text: unknown): string {
+  if (text === null || text === undefined) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
  * Utility to replace tokens in email subject and content.
  * Supports both modern {{variable.name}} and legacy {name} tokens.
  */

@@ -377,6 +377,7 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
 
   const { dispatchTemplatedEmail } = await import('@/lib/email/dispatcher');
   const { sendEmail } = await import('@/lib/email/transporter');
+  const { escapeHtml } = await import('@/lib/email/tokens');
 
   const { submissionId, form, customerEmail, customerName, customerPhone, formattedValues } = await withTransaction(
     async (sql) => {
@@ -543,7 +544,7 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
         });
       } else {
         const tableRows = Object.entries(formattedValues)
-          .map(([lbl, v]) => `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;"><strong>${lbl}:</strong></td><td style="padding: 8px 0; color: #1e293b;">${v}</td></tr>`)
+          .map(([lbl, v]) => `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;"><strong>${escapeHtml(lbl)}:</strong></td><td style="padding: 8px 0; color: #1e293b;">${escapeHtml(v)}</td></tr>`)
           .join('');
 
         await sendEmail({
@@ -552,7 +553,7 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
               <h3 style="color: #ea580c; margin-top: 0;">Thông báo: Lượt gửi biểu mẫu mới</h3>
-              <p>Biểu mẫu: <strong>${form.title}</strong></p>
+              <p>Biểu mẫu: <strong>${escapeHtml(form.title)}</strong></p>
               <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">${tableRows}</table>
               <p style="font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; margin: 0;">Đã lưu vào hệ thống Yêu cầu khách hàng CMS.</p>
             </div>
@@ -583,9 +584,9 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
               <h3 style="color: #ea580c; margin-top: 0;">CIC Technology & Consultancy</h3>
-              <p>Kính gửi <strong>${customerName}</strong>,</p>
-              <p>Cảm ơn Quý khách đã gửi thông tin qua biểu mẫu <strong>${form.title}</strong> của CIC Technology.</p>
-              <p>${form.success_message || 'Chúng tôi đã tiếp nhận thông tin và sẽ liên hệ phản hồi sớm nhất có thể.'}</p>
+              <p>Kính gửi <strong>${escapeHtml(customerName)}</strong>,</p>
+              <p>Cảm ơn Quý khách đã gửi thông tin qua biểu mẫu <strong>${escapeHtml(form.title)}</strong> của CIC Technology.</p>
+              <p>${escapeHtml(form.success_message) || 'Chúng tôi đã tiếp nhận thông tin và sẽ liên hệ phản hồi sớm nhất có thể.'}</p>
               <p style="font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 20px;">Trân trọng,<br/><strong>CIC Technology</strong></p>
             </div>
           `,

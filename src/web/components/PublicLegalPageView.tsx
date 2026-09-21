@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Calendar, Clock, ShieldCheck, Phone, Mail, ArrowLeft } from 'lucide-react';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 import type { StaticPagePublicResult } from '@/features/static-pages/types';
 
 interface PublicLegalPageViewProps {
@@ -103,7 +104,7 @@ export const PublicLegalPageView: React.FC<PublicLegalPageViewProps> = ({
 
         {/* MAIN ARTICLE BODY */}
         <article className="bg-white border border-slate-200/90 rounded-[12px] p-6 sm:p-10 lg:p-12 shadow-xs leading-relaxed text-slate-700 legal-article-content">
-          <div dangerouslySetInnerHTML={{ __html: richTextHtml }} />
+          <div dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(richTextHtml) }} />
         </article>
 
         {/* FOOTER BACK BUTTON */}
