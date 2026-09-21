@@ -11,47 +11,74 @@ export function escapeHtml(text: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
+export interface InterpolateTokenOptions {
+  /**
+   * Whether the target template is HTML.
+   * When true (or auto-detected from template markup), variable values are HTML-escaped by default to prevent injection.
+   * Explicit raw tokens (e.g. {{{token}}}) bypass escaping.
+   */
+  isHtml?: boolean;
+}
+
 /**
  * Utility to replace tokens in email subject and content.
  * Supports both modern {{variable.name}} and legacy {name} tokens.
+ * By default, escapes variable values when interpolating into HTML templates.
  */
-export function interpolateTokens(text: string, values: Record<string, string | number | undefined | null>): string {
+export function interpolateTokens(
+  text: string,
+  values: Record<string, string | number | undefined | null>,
+  options?: InterpolateTokenOptions
+): string {
   if (!text) return '';
+
+  const isHtml = options?.isHtml ?? /<[a-z][\s\S]*>/i.test(text);
 
   // 1. First map common legacy PHP tokens to modern names if not already present
   const mappedValues: Record<string, string> = {};
   for (const [key, val] of Object.entries(values)) {
     if (val !== undefined && val !== null) {
-      mappedValues[key] = String(val);
+      const strVal = String(val);
+      mappedValues[key] = strVal;
       // If key is {{customer.full_name}}, also support {name}
       if (key === '{{customer.full_name}}') {
-        mappedValues['{name}'] = String(val);
+        mappedValues['{name}'] = strVal;
       }
       if (key === '{{product.name}}') {
-        mappedValues['{name1}'] = String(val);
+        mappedValues['{name1}'] = strVal;
       }
       if (key === '{{document.download_url}}' || key === '{{product.public_url}}') {
-        mappedValues['{link1}'] = String(val);
+        mappedValues['{link1}'] = strVal;
       }
     }
   }
 
+  const resolveVal = (token: string, fullToken: string, isRaw: boolean): string | undefined => {
+    let raw: string | undefined;
+    if (mappedValues[fullToken] !== undefined) raw = mappedValues[fullToken];
+    else if (mappedValues[token] !== undefined) raw = mappedValues[token];
+    if (raw === undefined) return undefined;
+    return isHtml && !isRaw ? escapeHtml(raw) : raw;
+  };
+
   let result = text;
 
-  // Replace {{token}}
-  result = result.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (match, token) => {
-    const fullToken = `{{${token}}}`;
-    if (mappedValues[fullToken] !== undefined) return mappedValues[fullToken];
-    if (mappedValues[token] !== undefined) return mappedValues[token];
-    return match; // leave untouched if not provided
+  // 1. Replace {{{raw_token}}} (explicit unescaped HTML)
+  result = result.replace(/\{\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}\}/g, (match, token) => {
+    const resolved = resolveVal(token, `{{${token}}}`, true);
+    return resolved !== undefined ? resolved : match;
   });
 
-  // Replace legacy {token}
+  // 2. Replace {{token}} (HTML-escaped if isHtml)
+  result = result.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (match, token) => {
+    const resolved = resolveVal(token, `{{${token}}}`, false);
+    return resolved !== undefined ? resolved : match;
+  });
+
+  // 3. Replace legacy {token} (HTML-escaped if isHtml)
   result = result.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, token) => {
-    const fullToken = `{${token}}`;
-    if (mappedValues[fullToken] !== undefined) return mappedValues[fullToken];
-    if (mappedValues[token] !== undefined) return mappedValues[token];
-    return match;
+    const resolved = resolveVal(token, `{${token}}`, false);
+    return resolved !== undefined ? resolved : match;
   });
 
   return result;

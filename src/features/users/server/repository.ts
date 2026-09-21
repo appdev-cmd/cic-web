@@ -52,6 +52,19 @@ async function assertUserNotTrashed(sql: Sql, userId: number) {
 
 const changedFields = (before: Record<string, unknown>, after: Record<string, unknown>) => Object.keys(after).filter((key) => JSON.stringify(before[key] ?? null) !== JSON.stringify(after[key] ?? null));
 
+export async function assertActorCanManageTargetUser(sql: Sql, actor: CmsPrincipal, targetUserId: number, actionName: string) {
+  if (actor.isAdministrator) return;
+  const [targetAdmin] = await sql`
+    SELECT 1 FROM cic_user_roles ur 
+    JOIN cic_roles r ON r.id=ur.role_id 
+    WHERE ur.user_id=${targetUserId} AND ur.status='active' AND r.status='active' AND lower(r.code) IN ('admin','superadmin') 
+    LIMIT 1
+  `;
+  if (targetAdmin) {
+    throw new AppError(`Chỉ Quản trị viên cấp cao mới có quyền ${actionName} tài khoản Quản trị.`, 'FORBIDDEN');
+  }
+}
+
 async function assertRoleAssignmentPrivilege(sql: Sql, actor: CmsPrincipal, targetUserId: number | null, nextRoleId: number, updatingPassword = false) {
   if (actor.isAdministrator) return;
 
@@ -61,10 +74,7 @@ async function assertRoleAssignmentPrivilege(sql: Sql, actor: CmsPrincipal, targ
   }
 
   if (targetUserId != null) {
-    const [targetAdmin] = await sql`SELECT 1 FROM cic_user_roles ur JOIN cic_roles r ON r.id=ur.role_id WHERE ur.user_id=${targetUserId} AND ur.status='active' AND r.status='active' AND lower(r.code) IN ('admin','superadmin') LIMIT 1`;
-    if (targetAdmin) {
-      throw new AppError('Chỉ Quản trị viên cấp cao mới có quyền chỉnh sửa tài khoản Quản trị.', 'FORBIDDEN');
-    }
+    await assertActorCanManageTargetUser(sql, actor, targetUserId, 'chỉnh sửa');
 
     if (updatingPassword && targetUserId !== actor.legacyUserId) {
       throw new AppError('Không có quyền thay đổi mật khẩu của tài khoản khác.', 'FORBIDDEN');
@@ -114,10 +124,7 @@ export async function updateUserStatuses(ids:number[],status:UpdateUserInput['st
     const rows=await sql`SELECT id,auth_user_id,email,username,full_name,account_status FROM cic_users WHERE id IN ${sql(uniqueIds)} FOR UPDATE`;
     if(rows.length!==uniqueIds.length) throw new Error('Một hoặc nhiều tài khoản không còn tồn tại.');
     for(const row of rows) {
-      if (!actor.isAdministrator) {
-        const [isAdmin] = await sql`SELECT 1 FROM cic_user_roles ur JOIN cic_roles r ON r.id=ur.role_id WHERE ur.user_id=${Number(row.id)} AND ur.status='active' AND r.status='active' AND lower(r.code) IN ('admin','superadmin') LIMIT 1`;
-        if (isAdmin) throw new AppError('Chỉ Quản trị viên cấp cao mới có quyền thay đổi trạng thái của tài khoản Quản trị.', 'FORBIDDEN');
-      }
+      await assertActorCanManageTargetUser(sql, actor, Number(row.id), 'thay đổi trạng thái');
       await assertNotLastAdministrator(sql,Number(row.id),status);
     }
     await sql`UPDATE cic_users SET account_status=${status},published=${status==='active'},updated_time=now() WHERE id IN ${sql(uniqueIds)}`;
@@ -133,6 +140,7 @@ export async function trashUserRecord(id: number, actor: CmsPrincipal) {
   return withTransaction(async (sql) => {
     if (id === actor.legacyUserId) throw new Error('Không thể xóa tài khoản đang đăng nhập.');
     await assertUserNotTrashed(sql, id);
+    await assertActorCanManageTargetUser(sql, actor, id, 'xóa');
     await assertNotLastAdministrator(sql, id, 'deactivated');
     const [before] = await sql`SELECT id,auth_user_id,email,username,full_name,account_status FROM cic_users WHERE id=${id} FOR UPDATE`;
     if (!before) throw new Error('Không tìm thấy tài khoản.');

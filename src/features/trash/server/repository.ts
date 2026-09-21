@@ -1,8 +1,10 @@
 import 'server-only';
 import type { CmsPrincipal } from '@/server/auth/guards';
+import { invalidateCmsPrincipalCache } from '@/server/auth/guards';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
 import { writeAuditEvent } from '@/server/audit/writer';
 import { getPostgresClient, withTransaction } from '@/server/db/postgres';
+import { AppError } from '@/server/errors';
 import type { TrashRestoreMode } from '../types';
 import { getTrashEntityAdapter } from './registry';
 
@@ -47,6 +49,18 @@ export async function restoreTrashRecord(id: string, mode: TrashRestoreMode, act
   try {
     return await withTransaction(async (sql) => {
       const row = await lockedTrashItem(id, sql);
+      if (row.entity_type === 'user') {
+        const targetUserId = Number(row.entity_id);
+        const [targetAdmin] = await sql`
+          SELECT 1 FROM cic_user_roles ur 
+          JOIN cic_roles r ON r.id=ur.role_id 
+          WHERE ur.user_id=${targetUserId} AND ur.status='active' AND r.status='active' AND lower(r.code) IN ('admin','superadmin') 
+          LIMIT 1
+        `;
+        if (targetAdmin && !actor.isAdministrator) {
+          throw new AppError('Chỉ Quản trị viên cấp cao mới có quyền phục hồi tài khoản Quản trị.', 'FORBIDDEN');
+        }
+      }
       const adapter = getTrashEntityAdapter(row.entity_type);
       if (adapter.module !== row.module || adapter.workspace !== row.workspace) throw new Error('Trash adapter không khớp source contract.');
       const snapshot = adapter.parseSnapshot(row.payload_snapshot);
@@ -56,6 +70,9 @@ export async function restoreTrashRecord(id: string, mode: TrashRestoreMode, act
         SET status='restored',restore_state=${result.restoredState},restored_by=${actor.legacyUserId},restored_at=now()
         WHERE id=${id}
       `;
+      if (row.entity_type === 'user' || row.entity_type === 'role') {
+        invalidateCmsPrincipalCache();
+      }
       await writeAuditEvent(actor, {
         action: AUDIT_ACTIONS.TRASH_RESTORED, entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM,
         entityId: id, entityTitle: result.title, module: row.module, workspace: row.workspace,
@@ -86,6 +103,9 @@ export async function purgeTrashRecord(id: string, reason: string, actor: CmsPri
         SET status='purged',payload_snapshot='{}'::jsonb,purged_by=${actor.legacyUserId},purged_at=now(),purge_reason=${reason}
         WHERE id=${id}
       `;
+      if (row.entity_type === 'user' || row.entity_type === 'role') {
+        invalidateCmsPrincipalCache();
+      }
       await writeAuditEvent(actor, {
         action: AUDIT_ACTIONS.TRASH_PURGED, entityType: AUDIT_ENTITY_TYPES.TRASH_ITEM,
         entityId: id, entityTitle: row.title_snapshot, module: row.module, workspace: row.workspace,

@@ -17,6 +17,7 @@ import {
   TEMPLATE_STATUSES,
 } from './types';
 import type { EmailUsageItem } from '@/features/email-templates/types';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface Props {
   workspaceLocale: 'vi' | 'en';
@@ -560,7 +561,7 @@ export const EmailTemplatesManager: React.FC<Props> = ({
               {/<[a-z][\s\S]*>/i.test(previewing.content) ? (
                 <div
                   className="prose prose-sm max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: renderSample(previewing.content) }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(renderSample(previewing.content)) }}
                 />
               ) : (
                 <div className="whitespace-pre-wrap font-sans">{renderSample(previewing.content)}</div>

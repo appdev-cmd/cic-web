@@ -19,6 +19,7 @@ import type { ElementBindingRegistry } from '../../../../shared/visual-editing/e
 import { findPageBuilderImage } from '../PageMediaPickerModal';
 import type { PageBuilderConfigValue, PageBuilderPage, PageBuilderSection } from '../pageBuilderTypes';
 import { RichTextEditor } from '../RichTextEditor';
+import { sanitizeHtmlContent } from '../../../../shared/lib/sanitize';
 
 const noop = () => undefined;
 
@@ -189,7 +190,7 @@ export function LegalPage({
                 ) : (
                   <div
                     className="legal-article-content text-slate-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: section.config.richTextHtml }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(section.config.richTextHtml) }}
                   />
                 )
               ) : (

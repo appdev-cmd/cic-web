@@ -40,11 +40,9 @@ export async function dispatchTemplatedEmail({
     let rawSubject = tmpl?.subject || fallbackSubject || `[CIC] Thông báo`;
     let rawContent = tmpl?.content || fallbackContent || `Nội dung thông báo từ CIC`;
 
-    const subject = interpolateTokens(rawSubject, variables);
-    const content = interpolateTokens(rawContent, variables);
-
-    // If content contains HTML tags, send as html, otherwise text with linebreaks
-    const isHtml = /<[a-z][\s\S]*>/i.test(content);
+    const subject = interpolateTokens(rawSubject, variables, { isHtml: false });
+    const isHtml = /<[a-z][\s\S]*>/i.test(rawContent);
+    const content = interpolateTokens(rawContent, variables, { isHtml });
 
     const result = await sendEmail({
       to,

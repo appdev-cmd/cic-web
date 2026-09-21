@@ -13,6 +13,7 @@ import {
   SAMPLE_VALUES,
   VARIABLE_GROUPS,
 } from './types';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface Props {
   templateToEdit: EmailTemplate | null;
@@ -346,7 +347,7 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
               {/<[a-z][\s\S]*>/i.test(content) ? (
                 <div
                   className="prose prose-sm max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: renderSample(content) }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(renderSample(content)) }}
                 />
               ) : (
                 <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-800 dark:text-slate-200">

@@ -8,7 +8,7 @@ import { requirePermission, invalidateCmsPrincipalCache } from '@/server/auth/gu
 import { getPostgresClient } from '@/server/db/postgres';
 import { createSupabaseAdminClient } from '@/server/supabase/admin';
 import { accountStatusSchema, createUserInputSchema, updateUserInputSchema } from '../schemas/userInput';
-import { createUserRecord, trashUserRecord, updateUserRecord, updateUserStatuses, type AuthSyncTarget } from './repository';
+import { assertActorCanManageTargetUser, createUserRecord, trashUserRecord, updateUserRecord, updateUserStatuses, type AuthSyncTarget } from './repository';
 import { getCmsUserActivity } from './queries';
 
 const idSchema=z.coerce.number().int().positive();
@@ -75,7 +75,10 @@ export async function bulkUpdateCmsUserStatusAction(ids:string[],status:unknown)
 }
 
 export async function sendCmsPasswordResetAction(id:string){
-  const actor=await requirePermission('users','edit'); const numericId=idSchema.parse(id); const {admin,user}=await findAuthUser({authUserId:null,email:await getUserEmail(numericId)});
+  const actor=await requirePermission('users','edit'); const numericId=idSchema.parse(id);
+  const sql=getPostgresClient();
+  await assertActorCanManageTargetUser(sql, actor, numericId, 'khôi phục mật khẩu của');
+  const {admin,user}=await findAuthUser({authUserId:null,email:await getUserEmail(numericId)});
   const {error}=await admin.auth.resetPasswordForEmail(user.email!);if(error)throw new Error('Không thể gửi email khôi phục mật khẩu.');
   await writeAuditEvent(actor,{action:AUDIT_ACTIONS.USER_PASSWORD_RESET_REQUESTED,entityType:AUDIT_ENTITY_TYPES.USER,entityId:String(numericId),entityTitle:String(user.user_metadata?.username??`Tài khoản ${numericId}`),module:'users',workspace:'global',result:'success',metadata:{delivery:'email'}});refresh();
 }
@@ -88,6 +91,7 @@ async function getUserEmail(id:number){
 async function trashOneUser(id:number,actor:Awaited<ReturnType<typeof requirePermission>>){
   if(id===actor.legacyUserId)throw new Error('Không thể xóa tài khoản đang đăng nhập.');
   const sql=getPostgresClient();
+  await assertActorCanManageTargetUser(sql, actor, id, 'xóa');
   const [target]=await sql`SELECT id,auth_user_id,email,username,full_name,account_status FROM cic_users WHERE id=${id}`;
   if(!target)throw new Error('Không tìm thấy tài khoản.');
   const {admin,user}=await findAuthUser({authUserId:target.auth_user_id?String(target.auth_user_id):null,email:String(target.email??'')});

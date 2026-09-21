@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, Users, Bell } from 'lucide-react';
 import { typeBadge, typeBodyLead, typeButton, typeHero } from '@shared/components/Typography';
 import type { HomeHeroSlideModel } from '@shared/page-content/models';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 export function formatHeroHeading(rawTitle?: string): string {
   if (!rawTitle) return '';
-  if (/<[a-z][\s\S]*>/i.test(rawTitle)) return rawTitle;
+  if (/<[a-z][\s\S]*>/i.test(rawTitle)) return sanitizeHtmlContent(rawTitle);
 
   const trimmed = rawTitle.trim();
   const knownPresets: Record<string, { main: string; highlight: string }> = {
@@ -133,7 +134,7 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
           
           <h1 
             className={`${typeHero} text-white mb-4`}
-            dangerouslySetInnerHTML={{ __html: formatHeroHeading(currentHeroSlide?.title) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(formatHeroHeading(currentHeroSlide?.title)) }}
           />
           
           <p className={`${typeBodyLead} text-slate-300 mb-8 max-w-xl`}>

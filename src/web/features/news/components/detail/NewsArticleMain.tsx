@@ -13,6 +13,7 @@ import type {
   PromotionNewsItem,
   ShareholderNewsItem,
 } from '../../types';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface NewsArticleMainProps {
   article: PublicNewsItem;
@@ -146,7 +147,7 @@ export function NewsArticleMain({
       {/* RICH DETAILED ARTICLE TEXT WITH CKEDITOR HTML & MARKDOWN SUPPORT */}
       <div className="prose max-w-none text-slate-700 text-xs md:text-sm leading-relaxed space-y-4">
         {/<[a-z][\s\S]*>/i.test(article.contentMarkdown) ? (
-          <div className="ck-content" dangerouslySetInnerHTML={{ __html: article.contentMarkdown }} />
+          <div className="ck-content" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(article.contentMarkdown) }} />
         ) : (() => {
           type ContentBlock = {
             type: 'h3' | 'h4' | 'ol' | 'ul' | 'quote' | 'p';

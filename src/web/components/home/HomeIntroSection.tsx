@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { ArrowRight, ArrowUpRight, Play } from 'lucide-react';
 import { typeH2, typeProse } from '@shared/components/Typography';
 import type { HomeIntroModel } from '@shared/page-content/models';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 export interface HomeIntroSectionProps {
   introData?: HomeIntroModel;
@@ -36,7 +37,7 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
             <h2 data-page-builder-config-path={JSON.stringify(['title'])} className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
               {introData?.title ? (
                 /<[a-z][\s\S]*>/i.test(introData.title) ? (
-                  <span dangerouslySetInnerHTML={{ __html: introData.title }} />
+                  <span dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(introData.title) }} />
                 ) : introData.title.includes('đồng hành') ? (
                   <>
                     {introData.title.split('đồng hành')[0]}

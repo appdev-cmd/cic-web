@@ -10,6 +10,7 @@ import { ProductFileInput } from '../products/ProductFileInput';
 import type { NewsArticle, NewsCategory, RelatedProductItem } from './types';
 import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 import type { CmsLocale } from '../../data/CmsDataSource';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface NewsFormViewProps {
   articleToEdit: NewsArticle | null;
@@ -148,6 +149,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
       </aside>
     </div>
     {mediaPickerOpen && <PageMediaPickerModal currentId={image} images={mediaImages} locale={locale} returnValue="url" onClose={() => setMediaPickerOpen(false)} onConfirm={setImage} />}
-    {previewOpen && <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/65 p-4" role="dialog" aria-modal="true" aria-label="Xem trước tin tức"><div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900"><div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><h2 className="font-black dark:text-white">Xem trước bài viết</h2><button type="button" onClick={() => setPreviewOpen(false)} aria-label="Đóng"><X className="h-5 w-5" /></button></div><article className="p-6"><h1 className="text-3xl font-black dark:text-white">{title || 'Chưa có tiêu đề'}</h1><p className="mt-3 text-slate-500">{summary}</p><div className="ck-content mt-6" dangerouslySetInnerHTML={{ __html: content }} /></article></div></div>}
+    {previewOpen && <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/65 p-4" role="dialog" aria-modal="true" aria-label="Xem trước tin tức"><div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900"><div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><h2 className="font-black dark:text-white">Xem trước bài viết</h2><button type="button" onClick={() => setPreviewOpen(false)} aria-label="Đóng"><X className="h-5 w-5" /></button></div><article className="p-6"><h1 className="text-3xl font-black dark:text-white">{title || 'Chưa có tiêu đề'}</h1><p className="mt-3 text-slate-500">{summary}</p><div className="ck-content mt-6" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(content) }} /></article></div></div>}
   </div>;
 };

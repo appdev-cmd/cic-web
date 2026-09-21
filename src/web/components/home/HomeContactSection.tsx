@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Mail, ShieldCheck } from 'lucide-react';
 import { submitCustomerInteraction } from '../../services/customerInteractionSubmission';
 import { SYSTEM_FORM_IDS } from '../../../shared/customerInteractionContract';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface HomeContactSectionProps {
   contactCta?: {
@@ -75,7 +76,7 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
             <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-8 leading-[1.1] tracking-tighter">
               {contactCta?.title ? (
                 /<[a-z][\s\S]*>/i.test(contactCta.title) ? (
-                  <span dangerouslySetInnerHTML={{ __html: contactCta.title }} />
+                  <span dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(contactCta.title) }} />
                 ) : contactCta.title.includes('Tương lai số') ? (
                   <>
                     {contactCta.title.split('Tương lai số')[0]}

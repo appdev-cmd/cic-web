@@ -5,6 +5,7 @@ import type { PageBuilderConfigValue } from '../pageBuilderTypes';
 import { findPageBuilderImage } from '../PageMediaPickerModal';
 import { formatHeroHeading } from '../../../../web/components/HomeView';
 import { CTA_OPTIONS } from './editorConstants';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface HeroSlidesEditorProps {
   slides: Array<{
@@ -205,11 +206,11 @@ export function HeroSlidesEditor({
             </span>
             <h4 
               className="text-base font-bold leading-snug line-clamp-2"
-              dangerouslySetInnerHTML={{ __html: formatHeroHeading(currentSlide.title) || '(Chưa nhập tiêu đề slide)' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(formatHeroHeading(currentSlide.title)) || '(Chưa nhập tiêu đề slide)' }}
             />
             <p 
               className="text-xs text-slate-300 line-clamp-2"
-              dangerouslySetInnerHTML={{ __html: currentSlide.subtitle || '(Chưa nhập mô tả phụ)' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(currentSlide.subtitle) || '(Chưa nhập mô tả phụ)' }}
             />
           </div>
         </div>

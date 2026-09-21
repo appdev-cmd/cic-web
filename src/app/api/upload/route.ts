@@ -4,6 +4,7 @@ import { getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { createSupabaseAdminClient } from '@/server/supabase/admin';
 import { MEDIA_BUCKET, MEDIA_MAX_FILE_BYTES } from '@/features/media/constants';
 import { createMediaAsset } from '@/features/media/server/repository';
+import { assertSafeSvgFile } from '@/shared/lib/svg-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,16 +32,6 @@ const safeFilename = (name: string) =>
     .replace(/[^a-zA-Z0-9._-]+/g, '-')
     .replace(/-+/g, '-')
     .slice(-180) || 'editor-image';
-
-function isDangerousSvg(svgContent: string): boolean {
-  const lower = svgContent.toLowerCase();
-  if (/<script[\s>]/i.test(lower) || /<\/script>/i.test(lower)) return true;
-  if (/<foreignobject[\s>]/i.test(lower)) return true;
-  if (/<(iframe|embed|object)[\s>]/i.test(lower)) return true;
-  if (/\bon\w+\s*=/i.test(lower)) return true;
-  if (/(href|xlink:href)\s*=\s*["']?\s*javascript:/i.test(lower)) return true;
-  return false;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,14 +68,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (mime === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
-      const text = await file.text();
-      if (isDangerousSvg(text)) {
-        return NextResponse.json(
-          { error: { message: 'Tệp SVG chứa nội dung hoặc mã kịch bản không an toàn.' } },
-          { status: 400 }
-        );
-      }
+    try {
+      await assertSafeSvgFile(file);
+    } catch (svgErr) {
+      return NextResponse.json(
+        { error: { message: svgErr instanceof Error ? svgErr.message : 'Tệp SVG chứa nội dung không an toàn.' } },
+        { status: 400 }
+      );
     }
 
     const storagePath = `editor/${new Date().toISOString().slice(0, 7)}/${randomUUID()}-${safeFilename(file.name)}`;

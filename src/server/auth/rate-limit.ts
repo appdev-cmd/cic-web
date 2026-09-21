@@ -1,4 +1,5 @@
 import 'server-only';
+import { isIP } from 'node:net';
 
 interface RateLimitRecord {
   timestamps: number[];
@@ -81,17 +82,32 @@ export function checkRateLimit(
 
 /**
  * Helper to extract client IP from incoming Headers.
+ * Validates IP format (IPv4 / IPv6) to prevent spoofing and header injection.
+ * Prioritizes trusted edge headers (Cloudflare CF-Connecting-IP, then X-Real-IP)
+ * before falling back to validated entries from X-Forwarded-For.
  */
 export function getClientIp(headersList: { get(name: string): string | null }): string {
+  // 1. Cloudflare connecting IP (validated by Cloudflare edge proxy)
+  const cfConnectingIp = headersList.get('cf-connecting-ip')?.trim();
+  if (cfConnectingIp && isIP(cfConnectingIp) !== 0) {
+    return cfConnectingIp;
+  }
+
+  // 2. Direct upstream proxy single client IP (e.g. Nginx $remote_addr)
+  const realIp = headersList.get('x-real-ip')?.trim();
+  if (realIp && isIP(realIp) !== 0) {
+    return realIp;
+  }
+
+  // 3. Fallback to X-Forwarded-For: validate IP format
   const forwarded = headersList.get('x-forwarded-for');
   if (forwarded) {
-    const first = forwarded.split(',')[0].trim();
-    if (first) return first;
+    const parts = forwarded.split(',').map((p) => p.trim()).filter((p) => isIP(p) !== 0);
+    if (parts.length > 0) {
+      return parts[0];
+    }
   }
-  const realIp = headersList.get('x-real-ip');
-  if (realIp) return realIp.trim();
-  const cfConnectingIp = headersList.get('cf-connecting-ip');
-  if (cfConnectingIp) return cfConnectingIp.trim();
+
   return '127.0.0.1';
 }
 

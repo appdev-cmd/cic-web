@@ -20,6 +20,7 @@ import { typeH4, typeButton, typeCaption, typeLabel, typeMeta } from '@shared/co
 import { getNavigationData, type FooterNavigationItem, type NavigationDataResult, type PublicNavigationView } from '../features/navigation/navigationData';
 import type { PublicSystemSettings } from '@/features/system-settings/domain/model';
 import { useI18n } from '@/shared/i18n';
+import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
 
 interface FooterProps {
   settings?: PublicSystemSettings;
@@ -225,7 +226,7 @@ export const Footer = ({
             {values.footer_bottom ? (
               <div
                 className="[&_a]:text-orange-400 [&_a]:hover:underline inline [&_p]:inline [&_p]:m-0"
-                dangerouslySetInnerHTML={{ __html: values.footer_bottom }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(values.footer_bottom) }}
               />
             ) : (
               <p>{t.footer.copyright}</p>

@@ -9,11 +9,22 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pat
   const segments = (await params).path;
   const target = path.resolve(/* turbopackIgnore: true */ IMAGE_ROOT, segments.join(path.sep));
   if (target !== IMAGE_ROOT && !target.startsWith(`${IMAGE_ROOT}${path.sep}`)) return new NextResponse('Not found', { status: 404 });
-  const type = contentTypes[path.extname(target).toLowerCase()];
+  const ext = path.extname(target).toLowerCase();
+  const type = contentTypes[ext];
   if (!type) return new NextResponse('Not found', { status: 404 });
   try {
     const body = await readFile(target);
-    return new NextResponse(body, { headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800', 'X-Content-Type-Options': 'nosniff' } });
+    const isSvg = type === 'image/svg+xml' || ext === '.svg';
+    const headers: Record<string, string> = {
+      'Content-Type': type,
+      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+      'X-Content-Type-Options': 'nosniff',
+    };
+    if (isSvg) {
+      headers['Content-Disposition'] = 'attachment';
+      headers['Content-Security-Policy'] = "default-src 'none'; sandbox";
+    }
+    return new NextResponse(body, { headers });
   } catch {
     return new NextResponse('Not found', { status: 404 });
   }

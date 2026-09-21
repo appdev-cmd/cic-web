@@ -7,6 +7,7 @@ import { MEDIA_BUCKET, MEDIA_MAX_FILE_BYTES, type MediaLocale, type MediaType } 
 import { mediaAlbumInputSchema, mediaFolderInputSchema, mediaIdSchema, mediaMetadataPatchSchema, mediaReplaceRegistrationSchema, mediaUploadRegistrationSchema } from '../schemas/mediaInput';
 import { createMediaAsset, createMediaFolder, deleteMediaAlbum, replaceMediaAsset, saveMediaAlbum, trashMediaAssets, updateMediaMetadata } from './repository';
 import { getCmsMediaData, getCmsMediaPickerItems } from './queries';
+import { assertSafeSvgFile } from '@/shared/lib/svg-security';
 
 const allowedMime=new Set(['image/jpeg','image/png','image/webp','image/avif','image/gif','image/svg+xml','image/x-icon','image/vnd.microsoft.icon','video/mp4','video/webm','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
 const resolveMime=(file:File):string=>{if(file.name.toLowerCase().endsWith('.ico')&&(!file.type||file.type==='application/octet-stream')){return 'image/x-icon';}return file.type;};
@@ -18,6 +19,7 @@ async function uploadFile(file:File,locale:MediaLocale) {
   const mime=resolveMime(file);
   if(!allowedMime.has(mime))throw new Error('Định dạng tệp không được hỗ trợ.');
   if(file.size<=0||file.size>MEDIA_MAX_FILE_BYTES)throw new Error('Tệp phải có dung lượng từ 1 byte đến 100 MiB.');
+  await assertSafeSvgFile(file);
   const path=`${locale}/${new Date().toISOString().slice(0,7)}/${randomUUID()}-${safeFilename(file.name)}`;
   const {error}=await createSupabaseAdminClient().storage.from(MEDIA_BUCKET).upload(path,file,{contentType:mime,upsert:false,cacheControl:'3600'});
   if(error)throw new Error(`Không thể tải tệp lên kho Media: ${error.message}`); return {path,mime};
