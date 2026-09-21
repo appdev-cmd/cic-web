@@ -72,7 +72,7 @@ export const EventRegistrationView: React.FC<EventRegistrationViewProps> = ({
       const result = await registerEventAction({
         eventId: event.id,
         eventTitle: event.title,
-        eventTime: `${event.date} • ${event.time}`,
+        eventTime: (event as any).time ? `${event.date} • ${(event as any).time}` : event.date,
         eventLocation: event.location,
         fullName: formData.fullName,
         company: formData.company,
