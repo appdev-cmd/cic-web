@@ -1,0 +1,776 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.001.xss.dangerously_set_inner_html",
+    "title": "Stored XSS via Unsanitized Rich Text HTML Rendering in Public and CMS Views",
+    "description": "Multiple React components across public routes and CMS preview modals render stored HTML strings directly into the DOM using dangerouslySetInnerHTML without sanitizing script tags, inline event handlers, or malicious iframe/svg elements. Helper functions cleanCmsHtml, cleanEventHtml, cleanProductHtml, and normalizeHtmlContent only modify CSS styles or URL prefixes, providing no defensive HTML sanitization.",
+    "root_cause": "Rich text HTML content stored in PostgreSQL database columns (content, overviewHtml, longDesc, htmlContent, video) is rendered directly into the DOM via dangerouslySetInnerHTML without passing through an HTML sanitization library (such as DOMPurify or sanitize-html).",
+    "intended_behavior": "All dynamic HTML strings rendered via dangerouslySetInnerHTML must be strictly sanitized to allow only safe formatting elements and strip all executable script tags, event handlers (onload, onerror), and javascript: protocol URIs.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/server/db/postgres.ts",
+        "line": 26,
+        "scope": "withTransaction",
+        "description": "PostgreSQL queries retrieve stored HTML content from tables cic_projects, cic_products, cic_services, cic_events, and cic_news."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/shared/lib/content.ts",
+        "line": 13,
+        "scope": "normalizeHtmlContent",
+        "description": "HTML content is transformed solely by regex replacing image URLs and adding heading IDs, preserving all scripts and event handlers intact."
+      },
+      {
+        "kind": "sink",
+        "file": "src/web/features/projects/ProjectDetailRuntimeView.tsx",
+        "line": 140,
+        "scope": "ProjectDetailRuntimeView",
+        "description": "Raw unescaped project HTML is injected directly into the DOM via dangerouslySetInnerHTML."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/web/features/projects/ProjectDetailRuntimeView.tsx",
+        "line": 140,
+        "description": "dangerouslySetInnerHTML={{ __html: project.content }} renders raw project HTML without sanitization."
+      },
+      {
+        "file": "src/web/components/LegacyHtml.tsx",
+        "line": 5,
+        "description": "dangerouslySetInnerHTML={{ __html: normalizeHtmlContent(html) }} renders raw HTML with only media URL normalization."
+      },
+      {
+        "file": "src/web/features/events/components/detail/EventDetailView.tsx",
+        "line": 130,
+        "description": "dangerouslySetInnerHTML={{ __html: cleanEventHtml(event.longDesc) }} renders event details without script stripping."
+      },
+      {
+        "file": "src/cms/modules/news/components/ArticlePreviewModal.tsx",
+        "line": 38,
+        "description": "dangerouslySetInnerHTML={{ __html: article.video }} renders unvalidated video iframe/script markup in CMS preview modal."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "data_state",
+        "description": "A content record in the database contains an HTML payload such as <img src=x onerror=alert(document.cookie)> or an unauthorized iframe."
+      },
+      {
+        "kind": "user_interaction",
+        "description": "A visitor or authenticated CMS user navigates to the affected public page or opens the article preview modal."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An attacker with editor privileges or database access stores an active XSS payload in a project, event, or news content field.",
+      "payloads": [
+        "<img src=\"x\" onerror=\"alert(document.domain)\">",
+        "<iframe src=\"javascript:alert(window.origin)\"></iframe>"
+      ],
+      "instructions": [
+        "Store the payload inside cic_projects.content or an article video field.",
+        "Request the corresponding public project URL or trigger the CMS preview modal.",
+        "Observe the unescaped payload being mounted in the browser DOM and executing in the page origin."
+      ],
+      "observed_result": "The browser parses and executes the injected script tag or onerror handler within the application origin without CSP restrictions."
+    },
+    "remediation": {
+      "strategy": "Introduce an allowlist-based HTML sanitization utility (using sanitize-html or isomorphic DOMPurify) and sanitize all rich text before rendering via dangerouslySetInnerHTML.",
+      "code_changes": [
+        {
+          "file_name": "src/shared/lib/content.ts",
+          "fixed_code": "import sanitizeHtml from 'sanitize-html';\n\nexport function sanitizeRichText(html: string): string {\n  return sanitizeHtml(html, {\n    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2']),\n    allowedAttributes: {\n      ...sanitizeHtml.defaults.allowedAttributes,\n      img: ['src', 'alt', 'width', 'height', 'loading', 'referrerpolicy'],\n    },\n  });\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Multiple components render unescaped HTML by default across core public pages."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Stored XSS allows session hijacking, DOM manipulation, and credential theft."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by source inspection of all dangerouslySetInnerHTML call sites and regex-only cleaners."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.002.supply_chain.tracked_database_dump",
+    "title": "Production Database Dumps and Compiled Bytecode Tracked in Git Repository",
+    "description": "Production database dumps (cic14005_cic_fs.sql measuring 68.7 MB and export_data.sql measuring 51.6 MB) containing production table structures, customer addresses, emails, phone numbers, and historical data, along with compiled Python bytecode (*.pyc), are actively tracked in the Git repository.",
+    "root_cause": "ETL migration dumps were committed directly into the git repository instead of being stored in secure external object storage or excluded via .gitignore.",
+    "intended_behavior": "All database dumps, exports, and generated bytecode must be untracked, excluded in .gitignore, and verified by scripts/check-repository-security.mjs to prevent confidential data disclosure.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "scripts/check-repository-security.mjs",
+        "line": 12,
+        "scope": "forbiddenTrackedArtifacts",
+        "description": "Security check lists db_migrate/cic14005_cic_fs.sql and db_migrate/export_data.sql as forbidden artifacts."
+      },
+      {
+        "kind": "propagation",
+        "file": "package.json",
+        "line": 17,
+        "scope": "check:repository-security",
+        "description": "Repository security audit script checks git ls-files for sensitive SQL dumps."
+      },
+      {
+        "kind": "sink",
+        "file": "db_migrate/cic14005_cic_fs.sql",
+        "line": 1,
+        "scope": "git-index",
+        "description": "Production SQL database dump is tracked in git index, exposing production data to anyone with repository read access."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "scripts/check-repository-security.mjs",
+        "line": 54,
+        "description": "npm run check:repository-security fails with exit code 1 due to tracked SQL dumps and .pyc files."
+      },
+      {
+        "file": "db_migrate/cic14005_cic_fs.sql",
+        "line": 1,
+        "description": "68.7 MB phpMyAdmin MySQL dump tracked in git containing production tables and contact data."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authorization_role",
+        "description": "Any user or CI runner with read/clone access to the git repository can inspect tracked repository artifacts."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An adversary with repository read access clones the git tree and extracts sensitive production data from tracked SQL files.",
+      "payloads": [
+        "git ls-files -- db_migrate/*.sql",
+        "head -n 50 db_migrate/cic14005_cic_fs.sql"
+      ],
+      "instructions": [
+        "Clone the repository or run git ls-files db_migrate/.",
+        "Observe that cic14005_cic_fs.sql and export_data.sql are tracked in git.",
+        "Inspect the contents to find production database schemas, user emails, and addresses."
+      ],
+      "observed_result": "Production SQL dumps totaling >120MB and compiled .pyc files are tracked in the Git index."
+    },
+    "remediation": {
+      "strategy": "Untrack all database dumps and bytecode files using git rm --cached and add patterns to .gitignore.",
+      "code_changes": [
+        {
+          "file_name": ".gitignore",
+          "fixed_code": "db_migrate/*.sql\ndb_migrate/__pycache__/\n*.pyc\n"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Files are already committed and tracked in the active git branch."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Exposes complete historical production database contents and customer PII."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Directly verified via git ls-files and failing check-repository-security test."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.003.email.html_phishing_injection",
+    "title": "Unsanitized User Form Inputs Interpolated Directly into HTML Notification Emails",
+    "description": "Public form submissions via /api/forms/submit and the contact action submitContactAction take arbitrary user-provided field values and string-interpolate them directly into raw HTML email bodies without HTML entity encoding. An unauthenticated attacker can submit malicious HTML tags (links, forms, images, iframes) that are sent in official emails to administrators and customer confirmation inboxes.",
+    "root_cause": "User input from req.json() values or formData is embedded directly into template literal HTML strings (e.g., tableRows and email templates) without encoding special HTML characters (&, <, >, \", ').",
+    "intended_behavior": "All dynamic user-supplied strings must be HTML-escaped before being inserted into email HTML bodies.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/api/forms/submit/route.ts",
+        "line": 6,
+        "scope": "POST",
+        "description": "Unauthenticated client submits arbitrary form values via POST /api/forms/submit."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/features/forms/server/mutations.ts",
+        "line": 414,
+        "scope": "submitDynamicForm",
+        "description": "Values from payload are copied into formattedMap without HTML sanitization."
+      },
+      {
+        "kind": "sink",
+        "file": "src/features/forms/server/mutations.ts",
+        "line": 546,
+        "scope": "submitDynamicForm",
+        "description": "Formatted values are joined into tableRows HTML string and sent via sendEmail."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/features/forms/server/mutations.ts",
+        "line": 546,
+        "description": "Object.entries(formattedValues).map(([lbl, v]) => `<tr><td>${v}</td></tr>`) directly embeds v into HTML."
+      },
+      {
+        "file": "src/features/contact/server/actions.ts",
+        "line": 68,
+        "description": "submitContactAction directly places customerName, input.email, and input.message into HTML email template."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authentication_level",
+        "description": "Unauthenticated public access to /api/forms/submit or submitContactAction."
+      },
+      {
+        "kind": "environmental_dependency",
+        "description": "SMTP notifications are enabled on the server to send admin or customer emails."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An unauthenticated attacker sends a POST request with HTML payload in form fields.",
+      "payloads": [
+        "{\"formId\":\"1\",\"values\":{\"name\":\"<a href='https://phishing.site'>Khách hàng CIC</a>\"}}"
+      ],
+      "instructions": [
+        "Send POST to /api/forms/submit with payload containing HTML anchor or image tag.",
+        "Observe the generated outgoing email notification delivered to administrative email.",
+        "Inspect email HTML source and verify the unescaped anchor tag is rendered."
+      ],
+      "observed_result": "HTML markup is rendered directly inside email client without entity escaping."
+    },
+    "remediation": {
+      "strategy": "Add an escapeHtml utility function and sanitize all user-provided variables before inserting them into email HTML templates.",
+      "code_changes": [
+        {
+          "file_name": "src/lib/email/tokens.ts",
+          "fixed_code": "export function escapeHtml(text: string): string {\n  return text.replace(/[&<>'\"/]/g, (c) => ({\n    '&': '&amp;',\n    '<': '&lt;',\n    '>': '&gt;',\n    \"'\": '&#39;',\n    '\"': '&quot;',\n    '/': '&#x2F;',\n  }[c] || c));\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Public form endpoints accept unauthenticated input and immediately deliver email notifications."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Facilitates phishing and credential harvesting originating from trusted company email domains."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by code review of string interpolation in submitDynamicForm and submitContactAction."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.004.resource.missing_rate_limiting",
+    "title": "Missing Rate Limiting and Anti-Automation on Authentication and Public Submission Endpoints",
+    "description": "The CMS login action (/cms/login) and public data ingestion endpoints (/api/forms/submit and submitContactAction) lack rate limiting, request throttling, IP reputation filtering, or CAPTCHA mechanisms. This enables credential stuffing attacks against CMS staff accounts and email bombing / SMTP quota exhaustion via automated submission bots.",
+    "root_cause": "Next.js proxy and API handlers do not implement an in-memory or Redis-backed rate limiter on state-changing or authentication endpoints.",
+    "intended_behavior": "CMS login attempts should be restricted to a maximum threshold (e.g. 5 attempts per minute per IP), and public submission endpoints should enforce reasonable rate limits and bot defense (e.g. honeypot / Turnstile / IP rate limiting).",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/cms/login/actions.ts",
+        "line": 9,
+        "scope": "loginAction",
+        "description": "Client submits credentials directly to loginAction without prior rate check."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/cms/login/actions.ts",
+        "line": 14,
+        "scope": "loginAction",
+        "description": "Calls Supabase signInWithPassword on every request regardless of failure frequency."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/cms/login/actions.ts",
+        "line": 15,
+        "scope": "loginAction",
+        "description": "Redirects back to login on error without recording attempt count or enforcing backoff."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/cms/login/actions.ts",
+        "line": 9,
+        "description": "loginAction performs no rate limiting or lockout checks before invoking signInWithPassword."
+      },
+      {
+        "file": "src/app/api/forms/submit/route.ts",
+        "line": 4,
+        "description": "POST /api/forms/submit accepts unlimited rapid submissions and dispatches SMTP emails on each call."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "network_routing",
+        "description": "Direct HTTP access to /cms/login and /api/forms/submit without an intermediate WAF rate limiting rule."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An attacker uses a scripted bot to send rapid authentication attempts or form submissions.",
+      "payloads": [
+        "for i in {1..100}; do curl -X POST https://target/api/forms/submit -d '...'; done"
+      ],
+      "instructions": [
+        "Send 20 consecutive invalid login attempts to /cms/login in 5 seconds.",
+        "Observe that all 20 requests are processed with no delay, backoff, or 429 response."
+      ],
+      "observed_result": "No rate limit or IP throttling is applied; all requests execute against Supabase Auth."
+    },
+    "remediation": {
+      "strategy": "Implement sliding-window in-memory or Redis rate limiting on /cms/login and public form endpoints, combined with honeypot fields.",
+      "code_changes": [
+        {
+          "file_name": "src/server/auth/rate-limit.ts",
+          "fixed_code": "const attempts = new Map<string, number[]>();\nexport function checkRateLimit(key: string, limit = 5, windowMs = 60000): boolean {\n  const now = Date.now();\n  const timestamps = (attempts.get(key) || []).filter(t => now - t < windowMs);\n  if (timestamps.length >= limit) return false;\n  timestamps.push(now);\n  attempts.set(key, timestamps);\n  return true;\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "Publicly exposed routes with no rate limiting are trivially targetable by bots."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Can lead to account takeover via brute force or SMTP quota exhaustion."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by complete absence of rate-limiting logic in login actions and form routes."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.005.media.storage_path_bypass",
+    "title": "Arbitrary Media Storage Path Resolution Bypassing Soft-Delete Protection",
+    "description": "The media streaming endpoint /api/media/[id] checks whether decodedId contains a slash (/), and if so, directly sets storagePath = decodedId without verifying record existence or soft-deletion in the database. This allows unauthenticated users to request 12-hour signed URLs for any object in the storage bucket or access media assets that were soft-deleted (deleted_at IS NOT NULL).",
+    "root_cause": "An unchecked shortcut in /api/media/[id]/route.ts sets storagePath to decodedId when it contains a slash, skipping the database lookup and soft-delete verification.",
+    "intended_behavior": "All media requests should resolve storage paths exclusively through the database (cic_media_assets) and ensure deleted_at IS NULL, rejecting direct unverified storage paths.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/api/media/[id]/route.ts",
+        "line": 16,
+        "scope": "GET",
+        "description": "Unauthenticated GET request arrives with id parameter containing slashes."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/api/media/[id]/route.ts",
+        "line": 36,
+        "scope": "GET",
+        "description": "decodedId.includes('/') branches directly to storagePath = decodedId without database query."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/api/media/[id]/route.ts",
+        "line": 58,
+        "scope": "GET",
+        "description": "createSignedUrl(storagePath, 43200) generates a 12-hour valid signed URL for the unchecked storage path."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/api/media/[id]/route.ts",
+        "line": 36,
+        "description": "if (decodedId.includes('/')) { storagePath = decodedId; } bypasses database verification."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "data_state",
+        "description": "A media file exists in the Supabase media bucket but its record in cic_media_assets is soft-deleted."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An attacker knows or guesses the storage path of a deleted file (e.g. editor/2026-09/...).",
+      "payloads": [
+        "/api/media/editor%2F2026-09%2Fdeleted-document.pdf"
+      ],
+      "instructions": [
+        "Send GET request to /api/media/[encoded_path].",
+        "Observe that the server returns HTTP 307 redirecting to a valid Supabase signed URL.",
+        "Observe that no database check was performed to verify deleted_at IS NULL."
+      ],
+      "observed_result": "A signed URL with 43200s TTL is created and returned for the soft-deleted file."
+    },
+    "remediation": {
+      "strategy": "Query cic_media_assets to verify asset existence and ensure deleted_at IS NULL even when the input contains slashes.",
+      "code_changes": [
+        {
+          "file_name": "src/app/api/media/[id]/route.ts",
+          "fixed_code": "const rows = await sql`SELECT storage_path, mime_type FROM cic_media_assets WHERE (id = ${decodedId} OR storage_path = ${decodedId}) AND deleted_at IS NULL LIMIT 1`;"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "The slash check is triggered directly on any URL-encoded path."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Bypasses access controls on soft-deleted or uncataloged storage objects."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by inspection of lines 36-38 in src/app/api/media/[id]/route.ts."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.006.headers.missing_content_security_policy",
+    "title": "Missing Content-Security-Policy (CSP) in HTTP Security Headers Configuration",
+    "description": "The application configures security headers in next.config.ts including X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Strict-Transport-Security, and Permissions-Policy, but entirely omits Content-Security-Policy. Without CSP, the browser cannot restrict unauthorized script execution, mitigating inline XSS or limiting third-party resource exfiltration.",
+    "root_cause": "Content-Security-Policy header definition is absent from the headers() list in next.config.ts.",
+    "intended_behavior": "The application should configure a robust Content-Security-Policy header restricting script-src, object-src, frame-ancestors, and style-src to authorized origins.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "next.config.ts",
+        "line": 16,
+        "scope": "headers",
+        "description": "HTTP security headers configuration for all routes /(.*)."
+      },
+      {
+        "kind": "propagation",
+        "file": "next.config.ts",
+        "line": 20,
+        "scope": "headers",
+        "description": "Headers array includes nosniff, SAMEORIGIN, HSTS, and Permissions-Policy."
+      },
+      {
+        "kind": "sink",
+        "file": "next.config.ts",
+        "line": 28,
+        "scope": "headers",
+        "description": "Content-Security-Policy header is missing from response headers."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "next.config.ts",
+        "line": 16,
+        "description": "next.config.ts headers() method defines 5 security headers but lacks Content-Security-Policy."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "system_configuration",
+        "description": "Next.js HTTP header configuration is active in production environment."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An attacker inspects HTTP headers to determine browser defense-in-depth posture.",
+      "payloads": [
+        "curl -I https://localhost:3000/"
+      ],
+      "instructions": [
+        "Send GET request to the homepage.",
+        "Inspect response headers.",
+        "Verify absence of Content-Security-Policy header."
+      ],
+      "observed_result": "HTTP response headers do not include Content-Security-Policy."
+    },
+    "remediation": {
+      "strategy": "Add a Content-Security-Policy header in next.config.ts with directives restricting script-src, object-src, and frame-src.",
+      "code_changes": [
+        {
+          "file_name": "next.config.ts",
+          "fixed_code": "{ key: 'Content-Security-Policy', value: \"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-src 'self' https://www.youtube.com;\" }"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "high",
+        "reason": "All responses emitted by the server lack the CSP header."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Lacks defense-in-depth against client-side injection and unauthorized external scripts."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Directly verified via inspection of next.config.ts."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.007.rbac.vertical_privilege_escalation",
+    "title": "Vertical Privilege Escalation via User Role Mutation in CMS User Management",
+    "description": "In the CMS user management action updateCmsUserAction, authorization is guarded only by requirePermission('users', 'edit'). The repository function updateUserRecord replaces the target user's role with input.roleId without checking whether the actor has an administrator role, whether the target account is an administrator, or whether the new role grants higher privileges than the actor holds. A non-admin user granted 'users:edit' can elevate themselves or another account to admin/superadmin or change an administrator's password.",
+    "root_cause": "updateUserRecord blindly executes replacePrimaryRole(sql, id, input.roleId, actor.legacyUserId) without enforcing privilege hierarchy checks between actor and target role.",
+    "intended_behavior": "Non-administrator actors must not be permitted to assign administrator roles, edit accounts holding administrator roles, or reset administrator passwords.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/features/users/server/actions.ts",
+        "line": 46,
+        "scope": "updateCmsUserAction",
+        "description": "Actor with 'users:edit' permission invokes updateCmsUserAction with payload containing admin roleId and new password."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/features/users/server/repository.ts",
+        "line": 67,
+        "scope": "updateUserRecord",
+        "description": "updateUserRecord validates only unique identity and non-empty relations without checking role hierarchy."
+      },
+      {
+        "kind": "sink",
+        "file": "src/features/users/server/repository.ts",
+        "line": 78,
+        "scope": "updateUserRecord",
+        "description": "replacePrimaryRole assigns the new role (such as superadmin) to the user."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/features/users/server/repository.ts",
+        "line": 78,
+        "description": "replacePrimaryRole(sql, id, input.roleId, actor.legacyUserId) executes without verifying actor's own role against input.roleId."
+      },
+      {
+        "file": "src/features/users/server/actions.ts",
+        "line": 49,
+        "description": "admin.auth.admin.updateUserById modifies password and metadata without verifying that actor has permission to reset this user's password."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authorization_role",
+        "description": "A CMS user holds a role with 'users:edit' permission but is not a member of the administrator role."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An editor with users:edit privileges sends an update payload specifying roleId=1 (Admin).",
+      "payloads": [
+        "{\"roleId\": 1, \"password\": \"NewAdminPass123!\"}"
+      ],
+      "instructions": [
+        "Authenticate as a staff user with users:edit permission.",
+        "Invoke updateCmsUserAction on self or another user with payload assigning roleId=1.",
+        "Observe that the role is updated to Admin in cic_user_roles and password is updated in Supabase auth."
+      ],
+      "observed_result": "The staff account is upgraded to full Administrator without administrative oversight."
+    },
+    "remediation": {
+      "strategy": "Enforce hierarchy checks in updateUserRecord: require actor.isAdministrator if the target user or assigned roleId is admin/superadmin.",
+      "code_changes": [
+        {
+          "file_name": "src/features/users/server/repository.ts",
+          "fixed_code": "if (!actor.isAdministrator) {\n  const [targetRole] = await sql`SELECT code FROM cic_roles WHERE id=${input.roleId}`;\n  if (['admin', 'superadmin'].includes(String(targetRole?.code).toLowerCase())) {\n    throw new Error('Chỉ Quản trị viên cấp cao mới có quyền gán vai trò Quản trị.');\n  }\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Requires the attacker to hold an account with users:edit permission."
+      },
+      "impact": {
+        "score": "high",
+        "reason": "Full vertical privilege escalation to Superadministrator."
+      },
+      "overall_severity": "high"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by tracing updateUserRecord in src/features/users/server/repository.ts."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.008.auth.stale_principal_cache",
+    "title": "Stale In-Memory Principal Cache Retaining Elevated Privileges Post Status or Role Revocation",
+    "description": "The authentication guards implement an in-memory principalCache with a 30-second TTL. When user management actions update a user's status (deactivated, suspended) or modify their roles, the functions do not invoke invalidateCmsPrincipalCache(authUserId). Consequently, a revoked or demoted user continues to possess active administrator privileges for up to 30 seconds.",
+    "root_cause": "updateCmsUserStatusAction, bulkUpdateCmsUserStatusAction, and updateUserRecord do not trigger invalidateCmsPrincipalCache().",
+    "intended_behavior": "Any state or role change on a CMS user must immediately invalidate the corresponding entry in principalCache.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/features/users/server/actions.ts",
+        "line": 62,
+        "scope": "updateCmsUserStatusAction",
+        "description": "Admin updates user status to 'deactivated'."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/features/users/server/actions.ts",
+        "line": 64,
+        "scope": "updateCmsUserStatusAction",
+        "description": "Only revalidatePath is called; invalidateCmsPrincipalCache is omitted."
+      },
+      {
+        "kind": "sink",
+        "file": "src/server/auth/guards.ts",
+        "line": 76,
+        "scope": "getCurrentCmsPrincipal",
+        "description": "Subsequent requests within 30s continue to return cached active principal data from memory."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/server/auth/guards.ts",
+        "line": 64,
+        "description": "invalidateCmsPrincipalCache exists but is never imported or called in features/users/server/actions.ts."
+      },
+      {
+        "file": "src/features/users/server/actions.ts",
+        "line": 15,
+        "description": "refresh() only calls revalidatePath('/cms', 'layout') without cache invalidation."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "timing_dependency",
+        "description": "User performs actions within 30 seconds after their account was suspended or demoted."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "A user whose account was just deactivated continues issuing authenticated requests.",
+      "payloads": [
+        "POST /api/cms/customer-requests/bulk-delete"
+      ],
+      "instructions": [
+        "Admin deactivates account ID 5.",
+        "Account ID 5 immediately sends a CMS action within 10 seconds.",
+        "Observe that the action succeeds because principalCache.get(authUser.id) returns cached active data."
+      ],
+      "observed_result": "The suspended account continues executing authorized actions during the TTL window."
+    },
+    "remediation": {
+      "strategy": "Call invalidateCmsPrincipalCache() upon status or role updates.",
+      "code_changes": [
+        {
+          "file_name": "src/features/users/server/actions.ts",
+          "fixed_code": "import { invalidateCmsPrincipalCache } from '@/server/auth/guards';\n// Inside update actions:\ninvalidateCmsPrincipalCache();"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Occurs naturally during account suspensions or immediate privilege revocations."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Window of exposure is bounded by 30-second TTL."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by verifying imports and call sites of invalidateCmsPrincipalCache."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "sec.009.upload.unrestricted_svg_execution",
+    "title": "Unrestricted SVG Vector Upload Enabling Stored Script Execution in Media Storage",
+    "description": "The media upload endpoint /api/upload allows image/svg+xml in allowedMime without sanitizing XML content or stripping <script> tags and onload handlers. When resolved via /api/media/[id], the file is served via signed URL with Content-Type: image/svg+xml without Content-Disposition: attachment, allowing arbitrary script execution when opened directly in a browser.",
+    "root_cause": "Upload route accepts SVG files without XML sanitization and media resolver does not force download disposition on vector formats.",
+    "intended_behavior": "SVG uploads should either be sanitized (removing all script/foreignObject/event attributes) or served with Content-Disposition: attachment to prevent inline execution.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "src/app/api/upload/route.ts",
+        "line": 16,
+        "scope": "allowedMime",
+        "description": "'image/svg+xml' is included in the allowed MIME set."
+      },
+      {
+        "kind": "propagation",
+        "file": "src/app/api/upload/route.ts",
+        "line": 74,
+        "scope": "POST",
+        "description": "Uploads raw unsanitized SVG buffer to Supabase storage."
+      },
+      {
+        "kind": "sink",
+        "file": "src/app/api/media/[id]/route.ts",
+        "line": 69,
+        "scope": "GET",
+        "description": "Redirects to signed URL with Content-Type: image/svg+xml without forcing attachment."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "src/app/api/upload/route.ts",
+        "line": 16,
+        "description": "allowedMime includes 'image/svg+xml' without any XML parsing or tag validation."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "authorization_role",
+        "description": "An authenticated CMS user uploads a vector SVG file."
+      },
+      {
+        "kind": "user_interaction",
+        "description": "A victim visits the uploaded SVG media link directly in their browser."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "An authenticated user uploads an SVG image containing an embedded JavaScript payload.",
+      "payloads": [
+        "<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(document.domain)</script></svg>"
+      ],
+      "instructions": [
+        "Upload the SVG payload to /api/upload.",
+        "Obtain the generated media URL /api/media/[id].",
+        "Open the media URL in a browser.",
+        "Observe the alert dialog firing when the SVG is rendered inline."
+      ],
+      "observed_result": "The JavaScript payload embedded inside the SVG executes in the browser context."
+    },
+    "remediation": {
+      "strategy": "Sanitize SVG files upon upload using an XML DOM sanitizer, or force Content-Disposition: attachment when redirecting to SVG assets.",
+      "code_changes": [
+        {
+          "file_name": "src/app/api/media/[id]/route.ts",
+          "fixed_code": "if (mimeType === 'image/svg+xml') {\n  response.headers.set('Content-Disposition', 'attachment');\n}"
+        }
+      ]
+    },
+    "severity": {
+      "likelihood": {
+        "score": "medium",
+        "reason": "Requires authenticated CMS access to upload media files."
+      },
+      "impact": {
+        "score": "medium",
+        "reason": "Allows execution of script in the browser when viewing vector assets."
+      },
+      "overall_severity": "medium"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Confirmed by inspecting allowedMime set in src/app/api/upload/route.ts."
+    }
+  }
+]

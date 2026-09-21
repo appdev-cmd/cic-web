@@ -1,0 +1,40 @@
+{
+  "run_id": "sec-audit-cic-20260921-01",
+  "repo": "appdev-cmd/cic-web",
+  "target": "d:/Workspace/CIC/old_page/cic-web",
+  "source_ref": "09558726befab0f1d2eec2562ba4f036ed82fe56",
+  "profile": "standard",
+  "scope_paths": [
+    "src/app",
+    "src/cms",
+    "src/features",
+    "src/lib",
+    "src/server",
+    "src/shared",
+    "src/web",
+    "scripts",
+    "db_migrate",
+    "next.config.ts"
+  ],
+  "budget": null,
+  "execution_policy": "sandboxed-source-and-local-only",
+  "selected_companion_files": [
+    "WEB-PROTOCOL-AND-AUTH.md",
+    "CLIENT-SIDE.md",
+    "DATA-ISOLATION-AND-LIFECYCLE.md",
+    "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md",
+    "SUPPLY-CHAIN-AND-RELEASE.md",
+    "CLOUD-AND-DEPLOYMENT.md"
+  ],
+  "prior_run_paths": [],
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "coverage-ledger.json": "parent",
+    "findings.json": "parent",
+    "REPORT.md": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent"
+  },
+  "run_status": "complete"
+}

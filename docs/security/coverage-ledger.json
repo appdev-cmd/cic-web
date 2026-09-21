@@ -1,0 +1,421 @@
+[
+  {
+    "coverage_id": "HTTP%2FAPI%3APublicMedia::Client-to-Storage::media::DATA-ISOLATION-AND-LIFECYCLE.md%23Multi-tenant%20and%20record%20isolation",
+    "canonical_refs": {
+      "surface": "HTTP/API:PublicMedia",
+      "boundary": "Client-to-Storage",
+      "subsystem": "media",
+      "attack_class": "DATA-ISOLATION-AND-LIFECYCLE.md#Multi-tenant and record isolation"
+    },
+    "surface": "HTTP/API:PublicMedia",
+    "boundary": "Client-to-Storage",
+    "subsystem": "media",
+    "attack_class": "DATA-ISOLATION-AND-LIFECYCLE.md#Multi-tenant and record isolation",
+    "starting_paths": [
+      "src/app/api/media/[id]/route.ts"
+    ],
+    "ordinary_attack_class_block": "DATA-ISOLATION-AND-LIFECYCLE.md#Multi-tenant and record isolation",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-media-iso",
+    "reviewed_paths": [
+      "src/app/api/media/[id]/route.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-media-iso",
+        "reviewed_paths": [
+          "src/app/api/media/[id]/route.ts"
+        ],
+        "invariant": "Storage path resolution must verify non-deleted status in the database.",
+        "method": "source",
+        "result": "Lines 36-38 resolve storagePath directly from decodedId when slashes are present, bypassing database deleted_at check.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.005.media.storage_path_bypass"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "HTTP%2FAPI%3APublicSubmission::Client-to-Notification::forms::WEB-PROTOCOL-AND-AUTH.md%23Input%20handling%20and%20parser%20boundaries",
+    "canonical_refs": {
+      "surface": "HTTP/API:PublicSubmission",
+      "boundary": "Client-to-Notification",
+      "subsystem": "forms",
+      "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Input handling and parser boundaries"
+    },
+    "surface": "HTTP/API:PublicSubmission",
+    "boundary": "Client-to-Notification",
+    "subsystem": "forms",
+    "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Input handling and parser boundaries",
+    "starting_paths": [
+      "src/app/api/forms/submit/route.ts",
+      "src/features/forms/server/mutations.ts"
+    ],
+    "ordinary_attack_class_block": "WEB-PROTOCOL-AND-AUTH.md#Input handling and parser boundaries",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-forms-input",
+    "reviewed_paths": [
+      "src/app/api/forms/submit/route.ts",
+      "src/features/forms/server/mutations.ts",
+      "src/lib/email/dispatcher.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-forms-input",
+        "reviewed_paths": [
+          "src/app/api/forms/submit/route.ts",
+          "src/features/forms/server/mutations.ts",
+          "src/lib/email/dispatcher.ts"
+        ],
+        "invariant": "User input interpolated into email HTML must be HTML-entity encoded.",
+        "method": "source",
+        "result": "Lines 546 in mutations.ts embeds raw user form values into tableRows without HTML escaping.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.003.email.html_phishing_injection"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "HTTP%2FAPI%3APublicSubmission::Client-to-Server::forms::RESOURCE-EXHAUSTION-AND-AVAILABILITY.md%23Rate%20limits%20and%20concurrency",
+    "canonical_refs": {
+      "surface": "HTTP/API:PublicSubmission",
+      "boundary": "Client-to-Server",
+      "subsystem": "forms",
+      "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Rate limits and concurrency"
+    },
+    "surface": "HTTP/API:PublicSubmission",
+    "boundary": "Client-to-Server",
+    "subsystem": "forms",
+    "attack_class": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Rate limits and concurrency",
+    "starting_paths": [
+      "src/app/api/forms/submit/route.ts",
+      "src/app/cms/login/actions.ts"
+    ],
+    "ordinary_attack_class_block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Rate limits and concurrency",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-rate-limits",
+    "reviewed_paths": [
+      "src/app/api/forms/submit/route.ts",
+      "src/app/cms/login/actions.ts",
+      "src/features/contact/server/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-rate-limits",
+        "reviewed_paths": [
+          "src/app/api/forms/submit/route.ts",
+          "src/app/cms/login/actions.ts",
+          "src/features/contact/server/actions.ts"
+        ],
+        "invariant": "Authentication and public submission routes must enforce request rate limits.",
+        "method": "source",
+        "result": "No rate limiting or anti-automation throttling is applied on loginAction or submitDynamicForm.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.004.resource.missing_rate_limiting"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "HTTP%2FAPI%3AUpload::Client-to-Storage::media::CLIENT-SIDE.md%23DOM%20and%20client%20execution%20boundaries",
+    "canonical_refs": {
+      "surface": "HTTP/API:Upload",
+      "boundary": "Client-to-Storage",
+      "subsystem": "media",
+      "attack_class": "CLIENT-SIDE.md#DOM and client execution boundaries"
+    },
+    "surface": "HTTP/API:Upload",
+    "boundary": "Client-to-Storage",
+    "subsystem": "media",
+    "attack_class": "CLIENT-SIDE.md#DOM and client execution boundaries",
+    "starting_paths": [
+      "src/app/api/upload/route.ts"
+    ],
+    "ordinary_attack_class_block": "CLIENT-SIDE.md#DOM and client execution boundaries",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-upload-client",
+    "reviewed_paths": [
+      "src/app/api/upload/route.ts",
+      "src/app/api/media/[id]/route.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-upload-client",
+        "reviewed_paths": [
+          "src/app/api/upload/route.ts",
+          "src/app/api/media/[id]/route.ts"
+        ],
+        "invariant": "Uploaded vector graphics must be sanitized or served with attachment disposition.",
+        "method": "source",
+        "result": "Line 16 in upload/route.ts allows image/svg+xml and media resolver serves it without Content-Disposition: attachment.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.009.upload.unrestricted_svg_execution"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "HTTP%2FSSR%3APublicViews::Server-to-Client::content::CLIENT-SIDE.md%23DOM%20and%20client%20execution%20boundaries",
+    "canonical_refs": {
+      "surface": "HTTP/SSR:PublicViews",
+      "boundary": "Server-to-Client",
+      "subsystem": "content",
+      "attack_class": "CLIENT-SIDE.md#DOM and client execution boundaries"
+    },
+    "surface": "HTTP/SSR:PublicViews",
+    "boundary": "Server-to-Client",
+    "subsystem": "content",
+    "attack_class": "CLIENT-SIDE.md#DOM and client execution boundaries",
+    "starting_paths": [
+      "src/web/features/projects/ProjectDetailRuntimeView.tsx",
+      "src/web/components/LegacyHtml.tsx"
+    ],
+    "ordinary_attack_class_block": "CLIENT-SIDE.md#DOM and client execution boundaries",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-xss-views",
+    "reviewed_paths": [
+      "src/web/features/projects/ProjectDetailRuntimeView.tsx",
+      "src/web/components/LegacyHtml.tsx",
+      "src/web/features/events/components/detail/EventDetailView.tsx",
+      "src/web/components/ServicesView.tsx",
+      "src/shared/lib/content.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-xss-views",
+        "reviewed_paths": [
+          "src/web/features/projects/ProjectDetailRuntimeView.tsx",
+          "src/web/components/LegacyHtml.tsx",
+          "src/web/features/events/components/detail/EventDetailView.tsx",
+          "src/web/components/ServicesView.tsx",
+          "src/shared/lib/content.ts"
+        ],
+        "invariant": "HTML strings rendered via dangerouslySetInnerHTML must be sanitized.",
+        "method": "source",
+        "result": "dangerouslySetInnerHTML is passed raw or regex-modified HTML containing no script stripping.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.001.xss.dangerously_set_inner_html"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "HTTP%2FTransport%3AHeaders::Server-to-Browser::infrastructure::CLOUD-AND-DEPLOYMENT.md%23HTTP%20and%20transport%20headers",
+    "canonical_refs": {
+      "surface": "HTTP/Transport:Headers",
+      "boundary": "Server-to-Browser",
+      "subsystem": "infrastructure",
+      "attack_class": "CLOUD-AND-DEPLOYMENT.md#HTTP and transport headers"
+    },
+    "surface": "HTTP/Transport:Headers",
+    "boundary": "Server-to-Browser",
+    "subsystem": "infrastructure",
+    "attack_class": "CLOUD-AND-DEPLOYMENT.md#HTTP and transport headers",
+    "starting_paths": [
+      "next.config.ts"
+    ],
+    "ordinary_attack_class_block": "CLOUD-AND-DEPLOYMENT.md#HTTP and transport headers",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-transport-csp",
+    "reviewed_paths": [
+      "next.config.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-transport-csp",
+        "reviewed_paths": [
+          "next.config.ts"
+        ],
+        "invariant": "HTTP responses must include a Content-Security-Policy header.",
+        "method": "source",
+        "result": "next.config.ts headers() method defines 5 headers but omits Content-Security-Policy.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.006.headers.missing_content_security_policy"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "Repository%3ADataArtifacts::Repository-to-Release::migration::SUPPLY-CHAIN-AND-RELEASE.md%23Repository%20and%20build%20artifact%20hygiene",
+    "canonical_refs": {
+      "surface": "Repository:DataArtifacts",
+      "boundary": "Repository-to-Release",
+      "subsystem": "migration",
+      "attack_class": "SUPPLY-CHAIN-AND-RELEASE.md#Repository and build artifact hygiene"
+    },
+    "surface": "Repository:DataArtifacts",
+    "boundary": "Repository-to-Release",
+    "subsystem": "migration",
+    "attack_class": "SUPPLY-CHAIN-AND-RELEASE.md#Repository and build artifact hygiene",
+    "starting_paths": [
+      "db_migrate",
+      "scripts/check-repository-security.mjs"
+    ],
+    "ordinary_attack_class_block": "SUPPLY-CHAIN-AND-RELEASE.md#Repository and build artifact hygiene",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-repo-hygiene",
+    "reviewed_paths": [
+      "db_migrate/cic14005_cic_fs.sql",
+      "db_migrate/export_data.sql",
+      "scripts/check-repository-security.mjs"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-repo-hygiene",
+        "reviewed_paths": [
+          "db_migrate/cic14005_cic_fs.sql",
+          "db_migrate/export_data.sql",
+          "scripts/check-repository-security.mjs"
+        ],
+        "invariant": "Production database dumps and bytecode must not be tracked in git.",
+        "method": "source",
+        "result": "git ls-files db_migrate/ shows cic14005_cic_fs.sql (68.7MB) and export_data.sql (51.6MB) tracked in git index.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.002.supply_chain.tracked_database_dump"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "ServerAction%3AAuthCache::Memory-to-Authorization::auth::WEB-PROTOCOL-AND-AUTH.md%23Authentication%20and%20session%20state",
+    "canonical_refs": {
+      "surface": "ServerAction:AuthCache",
+      "boundary": "Memory-to-Authorization",
+      "subsystem": "auth",
+      "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Authentication and session state"
+    },
+    "surface": "ServerAction:AuthCache",
+    "boundary": "Memory-to-Authorization",
+    "subsystem": "auth",
+    "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Authentication and session state",
+    "starting_paths": [
+      "src/server/auth/guards.ts",
+      "src/features/users/server/actions.ts"
+    ],
+    "ordinary_attack_class_block": "WEB-PROTOCOL-AND-AUTH.md#Authentication and session state",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-auth-cache",
+    "reviewed_paths": [
+      "src/server/auth/guards.ts",
+      "src/features/users/server/actions.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-auth-cache",
+        "reviewed_paths": [
+          "src/server/auth/guards.ts",
+          "src/features/users/server/actions.ts"
+        ],
+        "invariant": "User status and role updates must immediately evict the in-memory principal cache.",
+        "method": "source",
+        "result": "updateCmsUserStatusAction and bulkUpdateCmsUserStatusAction omit invalidateCmsPrincipalCache().",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.008.auth.stale_principal_cache"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "ServerAction%3AUsers::Server-to-DB::users::WEB-PROTOCOL-AND-AUTH.md%23Authorization%20and%20privilege%20boundaries",
+    "canonical_refs": {
+      "surface": "ServerAction:Users",
+      "boundary": "Server-to-DB",
+      "subsystem": "users",
+      "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Authorization and privilege boundaries"
+    },
+    "surface": "ServerAction:Users",
+    "boundary": "Server-to-DB",
+    "subsystem": "users",
+    "attack_class": "WEB-PROTOCOL-AND-AUTH.md#Authorization and privilege boundaries",
+    "starting_paths": [
+      "src/features/users/server/actions.ts",
+      "src/features/users/server/repository.ts"
+    ],
+    "ordinary_attack_class_block": "WEB-PROTOCOL-AND-AUTH.md#Authorization and privilege boundaries",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-users-privilege",
+    "reviewed_paths": [
+      "src/features/users/server/actions.ts",
+      "src/features/users/server/repository.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-users-privilege",
+        "reviewed_paths": [
+          "src/features/users/server/actions.ts",
+          "src/features/users/server/repository.ts"
+        ],
+        "invariant": "Non-administrator actors must not assign administrator roles or modify administrator accounts.",
+        "method": "source",
+        "result": "updateUserRecord executes replacePrimaryRole without verifying actor's administrative status.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "sec.007.rbac.vertical_privilege_escalation"
+    ],
+    "unresolved": []
+  }
+]
