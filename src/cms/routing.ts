@@ -96,12 +96,6 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
     nestedPrefixes: ['/cms/media/'],
   },
   {
-    module: 'contacts',
-    canonicalPath: '/cms/contact-requests',
-    aliases: ['/cms/contact-messages', '/cms/product-registrations', '/cms/contacts', '/cms/customers'],
-    nestedPrefixes: ['/cms/contact-requests/', '/cms/contact-messages/', '/cms/contacts/'],
-  },
-  {
     module: 'localization',
     canonicalPath: '/cms/translation-strings',
     aliases: ['/cms/translation-progress', '/cms/localization', '/cms/translations'],
@@ -120,8 +114,23 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
   {
     module: 'customer_requests',
     canonicalPath: '/cms/customer-requests',
-    aliases: ['/cms/requests'],
-    nestedPrefixes: ['/cms/customer-requests/', '/cms/customer-requests/detail/', '/cms/requests/', '/cms/requests/detail/'],
+    aliases: [
+      '/cms/requests',
+      '/cms/contacts',
+      '/cms/contact-requests',
+      '/cms/contact-messages',
+      '/cms/product-registrations',
+      '/cms/customers',
+    ],
+    nestedPrefixes: [
+      '/cms/customer-requests/',
+      '/cms/customer-requests/detail/',
+      '/cms/requests/',
+      '/cms/requests/detail/',
+      '/cms/contacts/',
+      '/cms/contact-requests/',
+      '/cms/contact-messages/',
+    ],
   },
 ];
 
@@ -199,8 +208,13 @@ export function isCustomerRequestsCmsPath(path: string): boolean {
   return (
     normalizedPath === '/cms/customer-requests' ||
     normalizedPath === '/cms/requests' ||
+    normalizedPath === '/cms/contacts' ||
+    normalizedPath === '/cms/contact-requests' ||
+    normalizedPath === '/cms/contact-messages' ||
     normalizedPath.startsWith('/cms/customer-requests/') ||
-    normalizedPath.startsWith('/cms/requests/')
+    normalizedPath.startsWith('/cms/requests/') ||
+    normalizedPath.startsWith('/cms/contacts/') ||
+    normalizedPath.startsWith('/cms/contact-requests/')
   );
 }
 
