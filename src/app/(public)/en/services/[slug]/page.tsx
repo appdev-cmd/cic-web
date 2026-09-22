@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPublishedServiceBySlug, getPublishedServiceProducts, listPublishedServices } from '@/features/services/server/queries';
-import { BreadcrumbJsonLd } from '@/features/seo/components';
+import { BreadcrumbJsonLd, ServiceJsonLd } from '@/features/seo/components';
 import { ServicesRuntimeView } from '@/web/features/services/ServicesRuntimeView';
 
 export const dynamic = 'force-dynamic';
 
-const view = (s: any) => ({
+const view = (s: NonNullable<Awaited<ReturnType<typeof getPublishedServiceBySlug>>>) => ({
   id: s.id,
   slug: s.slug,
   title: s.title,
@@ -19,6 +19,7 @@ const view = (s: any) => ({
 });
 
 import { cleanSeoTitle } from '@/lib/seo/siteUrl';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const slug = (await params).slug;
@@ -26,12 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!service) return {};
   const rawTitle = service.seoTitle || service.title;
   return {
-    title: cleanSeoTitle(rawTitle),
-    description: service.seoDescription || service.summary || `Discover professional ${service.title} services provided by CIC Technology.`,
+    ...detailMetadata(cleanSeoTitle(rawTitle), service.seoDescription || service.summary || `Discover professional ${service.title} services provided by CIC Technology.`, `/en/services/${slug}`),
     keywords: service.seoKeywords,
-    alternates: {
-      canonical: `/en/services/${slug}`,
-    },
   };
 }
 
@@ -47,6 +44,7 @@ export default async function EnServiceDetailPage({ params }: { params: Promise<
 
   return (
     <>
+      <ServiceJsonLd name={service.title} description={service.summary} image={service.image} url={`/en/services/${service.slug}`} />
       <BreadcrumbJsonLd
         items={[
           { name: 'Home', url: '/en' },

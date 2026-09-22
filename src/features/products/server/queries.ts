@@ -181,7 +181,14 @@ export async function getPublishedProductBySlugForReference(slug: string, locale
   const trimmed = slug.trim();
   if (!trimmed) return null;
 
-  const cacheKey = `${locale}:${trimmed}`;
+  let decoded = trimmed;
+  try {
+    decoded = decodeURIComponent(trimmed).trim();
+  } catch {
+    decoded = trimmed;
+  }
+
+  const cacheKey = `${locale}:${decoded}`;
   const cached = singleProductCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.data;
@@ -220,7 +227,7 @@ export async function getPublishedProductBySlugForReference(slug: string, locale
       ON b.id = CASE WHEN p.manufactory ~ '^[0-9]+$' THEN p.manufactory::int END
       AND b.published=true
     LEFT JOIN ${typeTable} t ON t.id=p.types_id AND t.published=true
-    WHERE p.published=true AND (p.alias=${trimmed} OR (p.alias IS NULL AND p.id::text=${trimmed}))
+    WHERE p.published=true AND (p.alias=${trimmed} OR p.alias=${decoded} OR (p.alias IS NULL AND (p.id::text=${trimmed} OR p.id::text=${decoded})))
     LIMIT 1
   `;
   const data = rows[0] ? mapReferenceRow(rows[0], locale) : null;

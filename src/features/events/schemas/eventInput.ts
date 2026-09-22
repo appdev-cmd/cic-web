@@ -1,8 +1,11 @@
 import { z } from 'zod';
+import { normalizeEventSlug } from '../domain/slug';
 
 export const eventInputSchema = z.object({
   title: z.string().trim().min(1, 'Tiêu đề sự kiện không được để trống').max(255),
-  alias: z.string().trim().min(1, 'Alias sự kiện không được để trống').max(255),
+  alias: z.string().transform(normalizeEventSlug).pipe(
+    z.string().min(1, 'Alias sự kiện không được để trống').max(255).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  ),
   chuDe: z.string().trim().max(255).default(''),
   place: z.string().trim().max(255).default(''),
   timeEvent: z.string().min(1, 'Thời gian bắt đầu là bắt buộc'),

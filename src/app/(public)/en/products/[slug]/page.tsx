@@ -11,18 +11,13 @@ import { ProductsView } from '@/web/components/ProductsView';
 export const dynamic = 'force-dynamic';
 
 import { cleanSeoTitle } from '@/lib/seo/siteUrl';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const slug = (await params).slug;
   const product = await getPublishedProductBySlugForReference(slug, 'en');
   if (!product) return {};
-  return {
-    title: cleanSeoTitle(product.seoTitle || product.name),
-    description: product.seoDescription || product.description,
-    alternates: {
-      canonical: `/en/products/${slug}`,
-    },
-  };
+  return detailMetadata(cleanSeoTitle(product.seoTitle || product.name), product.seoDescription || product.description, `/en/products/${slug}`);
 }
 
 export default async function EnProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {

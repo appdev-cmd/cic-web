@@ -11,6 +11,12 @@ export interface ArticleJsonLdProps {
   url?: string;
 }
 
+function toIsoDate(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
 export function ArticleJsonLd({
   headline,
   description,
@@ -32,27 +38,18 @@ export function ArticleJsonLd({
       : `${CANONICAL_SITE_URL}${url.startsWith('/') ? url : `/${url}`}`
     : undefined;
 
+  const publishedIso = toIsoDate(datePublished);
+  const modifiedIso = toIsoDate(dateModified);
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline,
     description: description || headline,
     ...(imageUrl ? { image: [imageUrl] } : {}),
-    ...(datePublished ? { datePublished } : {}),
-    dateModified: dateModified || datePublished || new Date().toISOString(),
-    author: {
-      '@type': 'Person',
-      name: authorName || 'Ban Biên Tập CIC',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'CIC Technology',
-      url: CANONICAL_SITE_URL,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${CANONICAL_SITE_URL}/banner_hero/doi_tac_cong_nghe_chien_luoc.png`,
-      },
-    },
+    ...(publishedIso ? { datePublished: publishedIso } : {}),
+    ...(modifiedIso ? { dateModified: modifiedIso } : {}),
+    ...(authorName?.trim() ? { author: { '@type': 'Person', name: authorName.trim() } } : {}),
+    publisher: { '@id': `${CANONICAL_SITE_URL}/#organization` },
     ...(articleUrl ? { mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl } } : {}),
   };
 

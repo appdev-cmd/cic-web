@@ -4,12 +4,14 @@ import { getPublishedNewsBySlug, listPublishedNews } from '@/features/news/serve
 import { listPublishedProductsForReference } from '@/features/products/server/queries';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/features/seo/components';
 import { NewsRuntimeView } from '@/web/components/NewsRuntimeView';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const item = await getPublishedNewsBySlug((await params).slug);
-  return item ? { title: item.seoTitle || item.title, description: item.seoDescription || item.summary || undefined, keywords: item.seoKeyword || undefined } : {};
+  const slug = (await params).slug;
+  const item = await getPublishedNewsBySlug(slug);
+  return item ? { ...detailMetadata(item.seoTitle || item.title, item.seoDescription || item.summary, `/news/${slug}`), keywords: item.seoKeyword || undefined } : {};
 }
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {

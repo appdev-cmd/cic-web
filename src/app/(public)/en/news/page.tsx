@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { listPublishedNews, listPublishedNewsPlacement } from '@/features/news/server/queries';
+import { listPublishedNews } from '@/features/news/server/queries';
 import { listPublishedProductsForReference } from '@/features/products/server/queries';
 import { NewsRuntimeView } from '@/web/components/NewsRuntimeView';
 

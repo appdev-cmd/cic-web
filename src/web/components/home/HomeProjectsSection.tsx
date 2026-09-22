@@ -357,7 +357,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
               </button>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
                 <motion.div layoutId={`project-${selectedProject.id}`}>
-                   <img src={selectedProject.img} className="w-full rounded-[10px] shadow-2xl" alt="" />
+                   <img src={selectedProject.img} className="w-full rounded-[10px] shadow-2xl" alt={selectedProject.name} />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, x: 50 }}

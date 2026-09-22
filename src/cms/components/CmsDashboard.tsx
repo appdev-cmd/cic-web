@@ -429,6 +429,18 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         }}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        user={currentUser}
+        isDarkMode={isDarkMode}
+        onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+        onOpenMyAccount={() => setIsMyAccountOpen(true)}
+        onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+        onSwitchToWebsite={onSwitchToWebsite}
+        onLogout={() => {
+          setToastMessage('Đã đăng xuất thành công khỏi hệ thống quản trị!');
+          setTimeout(() => {
+            if (onLogout) onLogout();
+          }, 800);
+        }}
       />
 
       {/* MAIN CONTENT WRAPPER */}

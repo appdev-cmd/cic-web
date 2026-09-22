@@ -4,6 +4,7 @@ import { getPublishedNewsBySlug, listPublishedNews } from '@/features/news/serve
 import { listPublishedProductsForReference } from '@/features/products/server/queries';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/features/seo/components';
 import { NewsRuntimeView } from '@/web/components/NewsRuntimeView';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,12 +13,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const item = await getPublishedNewsBySlug(slug, 'en');
   if (!item) return {};
   return {
-    title: item.seoTitle || item.title,
-    description: item.seoDescription || item.summary || undefined,
+    ...detailMetadata(item.seoTitle || item.title, item.seoDescription || item.summary, `/en/news/${slug}`),
     keywords: item.seoKeyword || undefined,
-    alternates: {
-      canonical: `/en/news/${slug}`,
-    },
   };
 }
 

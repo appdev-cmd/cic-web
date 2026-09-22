@@ -1,5 +1,4 @@
 import 'server-only';
-import { getDatabaseClient } from '@/server/db/foundation';
 import { getPostgresClient } from '@/server/db/postgres';
 import type { FunctionSeoRecord, SeoFacetLevel, RedirectRule, SeoHealthMetrics, SeoWarningItem } from '../types';
 
@@ -305,15 +304,14 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
 
   // 1. Static System Pages from cic_config_modules (VI & EN)
   const [systemRecordsVi, systemRecordsEn] = await Promise.all([
-    getFunctionSeoData('vi').catch(() => []),
-    getFunctionSeoData('en').catch(() => []),
+    getFunctionSeoData('vi'),
+    getFunctionSeoData('en'),
   ]);
 
   for (const item of systemRecordsVi) {
-    if (item.indexable && !item.path.includes('[') && item.path !== '/search' && !item.path.endsWith('/search')) {
+    if (item.indexable && !item.path.includes('[') && item.path !== '/search' && !item.path.endsWith('/search') && item.path !== '/about' && item.path !== '/products/categories' && item.path !== '/news/categories') {
       rawEntries.push({
         url: `${base}${item.path}`,
-        lastModified: new Date(),
         changeFrequency: item.path === '/' ? 'daily' : 'weekly',
         priority: item.path === '/' ? 1.0 : 0.8,
       });
@@ -321,10 +319,9 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
   }
 
   for (const item of systemRecordsEn) {
-    if (item.indexable && !item.path.includes('[') && item.path !== '/en/search' && !item.path.endsWith('/search')) {
+    if (item.indexable && !item.path.includes('[') && item.path !== '/en/gioi-thieu' && item.path !== '/en/search' && !item.path.endsWith('/search') && item.path !== '/en/products/categories' && item.path !== '/en/news/categories') {
       rawEntries.push({
         url: `${base}${item.path}`,
-        lastModified: new Date(),
         changeFrequency: item.path === '/en' ? 'daily' : 'weekly',
         priority: item.path === '/en' ? 0.9 : 0.7,
       });
@@ -343,9 +340,10 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
   for (const p of pages) {
     if (p.code !== 'home') {
       const path = p.slug.startsWith('/') ? p.slug : `/${p.slug}`;
+      if (path === '/about/organization' || path === '/about/capacity-experience') continue;
       rawEntries.push({
         url: `${base}${path}`,
-        lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+        lastModified: p.updated_at ? new Date(p.updated_at) : undefined,
         changeFrequency: 'weekly',
         priority: 0.7,
       });
@@ -357,7 +355,6 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
   for (const path of staticEnPaths) {
     rawEntries.push({
       url: `${base}${path}`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     });
@@ -369,20 +366,18 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
       SELECT alias, edited_time, created_time 
       FROM cic_products 
       WHERE published = true AND alias IS NOT NULL AND alias != '' 
-      LIMIT 10000
     `,
     sql<{ alias: string; edited_time: Date | null; created_time: Date | null }[]>`
       SELECT alias, edited_time, created_time 
       FROM cic_products_en 
       WHERE published = true AND alias IS NOT NULL AND alias != '' 
-      LIMIT 10000
-    `.catch(() => []),
+    `,
   ]);
 
   for (const prod of productsVi) {
     rawEntries.push({
       url: `${base}/products/${prod.alias}`,
-      lastModified: prod.edited_time ? new Date(prod.edited_time) : prod.created_time ? new Date(prod.created_time) : new Date(),
+      lastModified: prod.edited_time ? new Date(prod.edited_time) : prod.created_time ? new Date(prod.created_time) : undefined,
       changeFrequency: 'weekly',
       priority: 0.8,
     });
@@ -391,7 +386,7 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
   for (const prod of productsEn) {
     rawEntries.push({
       url: `${base}/en/products/${prod.alias}`,
-      lastModified: prod.edited_time ? new Date(prod.edited_time) : prod.created_time ? new Date(prod.created_time) : new Date(),
+      lastModified: prod.edited_time ? new Date(prod.edited_time) : prod.created_time ? new Date(prod.created_time) : undefined,
       changeFrequency: 'weekly',
       priority: 0.7,
     });
@@ -400,23 +395,23 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
   // 4. Published News (VI & EN)
   const [newsVi, newsEn] = await Promise.all([
     sql<{ alias: string; updated_time: Date | null; created_time: Date | null }[]>`
-      SELECT alias, updated_time, created_time 
-      FROM cic_news 
-      WHERE published = true AND alias IS NOT NULL AND alias != '' 
-      LIMIT 10000
+      SELECT n.alias, n.updated_time, n.created_time
+      FROM cic_news n
+      JOIN cic_news_categories c ON c.id = n.category_id AND c.published = true
+      WHERE n.published = true AND n.alias IS NOT NULL AND btrim(n.alias) != ''
     `,
     sql<{ alias: string; updated_time: Date | null; created_time: Date | null }[]>`
-      SELECT alias, updated_time, created_time 
-      FROM cic_news_en 
-      WHERE published = true AND alias IS NOT NULL AND alias != '' 
-      LIMIT 10000
-    `.catch(() => []),
+      SELECT n.alias, n.updated_time, n.created_time
+      FROM cic_news_en n
+      JOIN cic_news_categories_en c ON c.id = n.category_id AND c.published = true
+      WHERE n.published = true AND n.alias IS NOT NULL AND btrim(n.alias) != ''
+    `,
   ]);
 
   for (const n of newsVi) {
     rawEntries.push({
       url: `${base}/news/${n.alias}`,
-      lastModified: n.updated_time ? new Date(n.updated_time) : n.created_time ? new Date(n.created_time) : new Date(),
+      lastModified: n.updated_time ? new Date(n.updated_time) : n.created_time ? new Date(n.created_time) : undefined,
       changeFrequency: 'weekly',
       priority: 0.7,
     });
@@ -425,7 +420,7 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
   for (const n of newsEn) {
     rawEntries.push({
       url: `${base}/en/news/${n.alias}`,
-      lastModified: n.updated_time ? new Date(n.updated_time) : n.created_time ? new Date(n.created_time) : new Date(),
+      lastModified: n.updated_time ? new Date(n.updated_time) : n.created_time ? new Date(n.created_time) : undefined,
       changeFrequency: 'weekly',
       priority: 0.6,
     });
@@ -436,19 +431,24 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     SELECT alias, created_time 
     FROM cic_services 
     WHERE published::int = 1 AND alias IS NOT NULL AND alias != '' 
-    LIMIT 1000
   `;
   for (const s of services) {
-    const lm = s.created_time ? new Date(s.created_time) : new Date();
+    const lm = s.created_time ? new Date(s.created_time) : undefined;
     rawEntries.push({
       url: `${base}/services/${s.alias}`,
       lastModified: lm,
       changeFrequency: 'weekly',
       priority: 0.7,
     });
+  }
+  const servicesEn = await sql<{ alias: string; created_time: Date | null }[]>`
+    SELECT alias, created_time FROM cic_services_en
+    WHERE published::int = 1 AND alias IS NOT NULL AND btrim(alias) != ''
+  `;
+  for (const s of servicesEn) {
     rawEntries.push({
       url: `${base}/en/services/${s.alias}`,
-      lastModified: lm,
+      lastModified: s.created_time ? new Date(s.created_time) : undefined,
       changeFrequency: 'weekly',
       priority: 0.6,
     });
@@ -459,19 +459,24 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     SELECT alias, created_time 
     FROM cic_projects 
     WHERE published = true AND alias IS NOT NULL AND alias != '' 
-    LIMIT 1000
   `;
   for (const proj of projects) {
-    const lm = proj.created_time ? new Date(proj.created_time) : new Date();
+    const lm = proj.created_time ? new Date(proj.created_time) : undefined;
     rawEntries.push({
       url: `${base}/projects/${proj.alias}`,
       lastModified: lm,
       changeFrequency: 'monthly',
       priority: 0.6,
     });
+  }
+  const projectsEn = await sql<{ alias: string; created_time: Date | null }[]>`
+    SELECT alias, created_time FROM cic_projects_en
+    WHERE published = true AND alias IS NOT NULL AND btrim(alias) != ''
+  `;
+  for (const proj of projectsEn) {
     rawEntries.push({
       url: `${base}/en/projects/${proj.alias}`,
-      lastModified: lm,
+      lastModified: proj.created_time ? new Date(proj.created_time) : undefined,
       changeFrequency: 'monthly',
       priority: 0.5,
     });
@@ -482,12 +487,11 @@ export async function getPublicSitemapUrls(baseUrl: string): Promise<SitemapUrlE
     SELECT alias, updated_time, created_time 
     FROM cic_event 
     WHERE published = true AND alias IS NOT NULL AND alias != '' 
-    LIMIT 1000
   `;
   for (const ev of events) {
     rawEntries.push({
       url: `${base}/events/${ev.alias}`,
-      lastModified: ev.updated_time ? new Date(ev.updated_time) : ev.created_time ? new Date(ev.created_time) : new Date(),
+      lastModified: ev.updated_time ? new Date(ev.updated_time) : ev.created_time ? new Date(ev.created_time) : undefined,
       changeFrequency: 'weekly',
       priority: 0.6,
     });

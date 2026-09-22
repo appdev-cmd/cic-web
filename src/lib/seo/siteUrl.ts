@@ -14,6 +14,11 @@ export function buildCanonicalUrl(path: string = ''): string {
  */
 export function cleanSeoTitle(title?: string | null): string {
   if (!title) return '';
-  return title.replace(/\s*\|\s*CIC(\s*(Technology|Consulting))?$/i, '').trim();
+  let result = title.trim();
+  let previous: string;
+  do {
+    previous = result;
+    result = result.replace(/\s*\|\s*CIC(?:\s+(?:Technology|Consulting)(?:\s+Consulting)?)?\s*$/i, '').trim();
+  } while (result && result !== previous);
+  return result || title.trim();
 }
-

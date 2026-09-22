@@ -91,13 +91,19 @@ export async function getPublishedEventBySlug(
 ): Promise<EventItemViewModel | null> {
   const sql = getPostgresClient();
   const table = tables(locale);
+  let decoded = slug;
+  try {
+    decoded = decodeURIComponent(slug);
+  } catch {
+    // Keep raw slug if decoding fails
+  }
 
   const rows = await sql.unsafe(
     `SELECT ${PUBLIC_PROJECTION}
      FROM ${table}
-     WHERE published = true AND (lower(btrim(alias)) = lower(btrim($1)) OR id::text = $1)
+     WHERE published = true AND (lower(btrim(alias)) = lower(btrim($1)) OR lower(btrim(alias)) = lower(btrim($2)) OR id::text = $1)
      LIMIT 1`,
-    [slug]
+    [slug, decoded]
   );
 
   if (!rows.length) return null;

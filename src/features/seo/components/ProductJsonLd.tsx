@@ -31,15 +31,7 @@ export function ProductJsonLd({ name, description, image, sku, brand, url }: Pro
     ...(imageUrl ? { image: imageUrl } : {}),
     ...(sku ? { sku } : {}),
     ...(productUrl ? { url: productUrl } : {}),
-    ...(brand ? { brand: { '@type': 'Brand', name: brand } } : { brand: { '@type': 'Brand', name: 'CIC' } }),
-    offers: {
-      '@type': 'Offer',
-      availability: 'https://schema.org/InStock',
-      price: '0',
-      priceCurrency: 'VND',
-      priceValidUntil: '2026-12-31',
-      url: productUrl,
-    },
+    ...(brand ? { brand: { '@type': 'Brand', name: brand } } : {}),
   };
 
   return <JsonLdScript data={schema} />;

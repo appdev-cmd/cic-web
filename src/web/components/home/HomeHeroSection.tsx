@@ -72,14 +72,6 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
   const currentHeroSlide = heroSlides[activeSlideIndex] ?? defaultHeroSlide ?? heroSlides[0];
 
   useEffect(() => {
-    // Preload hero slide images for instant loading
-    heroSlides.forEach((slide) => {
-      if (slide?.img) {
-        const img = new Image();
-        img.src = slide.img;
-      }
-    });
-
     if (editMode) return undefined;
     if (heroSlides.length <= 1) return undefined;
     const timer = setInterval(() => {
@@ -102,11 +94,12 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
             <motion.img 
               key={activeSlideIndex}
               src={currentHeroSlide.img} 
-              alt={currentHeroSlide?.title ? currentHeroSlide.title.replace(/<[^>]*>/g, '').trim() : "CIC Technology Hero Slide"} 
+              alt=""
+              aria-hidden="true"
               fetchPriority={activeSlideIndex === 0 ? "high" : "auto"}
               loading={activeSlideIndex === 0 ? "eager" : "lazy"}
               decoding="async"
-              initial={{ opacity: 0, scale: 1.05 }}
+              initial={activeSlideIndex === 0 ? false : { opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}

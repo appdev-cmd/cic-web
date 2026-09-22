@@ -16,11 +16,6 @@ export const metadata: Metadata = {
   description: 'CIC Technology — Nhà cung cấp bản quyền phần mềm, thiết bị khoa học kỹ thuật và dịch vụ tư vấn BIM / Chuyển đổi số hàng đầu Việt Nam.',
   alternates: {
     canonical: './',
-    languages: {
-      'vi-VN': CANONICAL_SITE_URL,
-      'en-US': `${CANONICAL_SITE_URL}/en`,
-      'x-default': CANONICAL_SITE_URL,
-    },
   },
   robots: {
     index: true,
@@ -43,8 +38,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/banner_hero/doi_tac_cong_nghe_chien_luoc.png',
-        width: 1200,
-        height: 630,
+        width: 1690,
+        height: 931,
         alt: 'CIC Technology - Đối tác công nghệ chiến lược',
       },
     ],

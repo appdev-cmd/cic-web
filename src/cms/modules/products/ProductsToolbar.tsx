@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, RotateCcw } from 'lucide-react';
+import { Search, X, RotateCcw, Sparkles } from 'lucide-react';
 import type { ProductCategory, ProductBrand } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
@@ -23,6 +23,7 @@ export interface ProductsToolbarProps {
   applications: MasterApplicationItem[];
   isFilterActive: boolean;
   onResetFilters: () => void;
+  onOpenAiCreate?: () => void;
 }
 
 export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
@@ -42,6 +43,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
   applications,
   isFilterActive,
   onResetFilters,
+  onOpenAiCreate,
   workspaceLocale = 'vi',
 }) => {
   const dict = getCmsDictionary(workspaceLocale);
@@ -144,8 +146,19 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
           </select>
         </div>
 
-        {/* Cụm nút thao tác bên phải: Đặt lại */}
+        {/* Cụm nút thao tác bên phải */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
+          {onOpenAiCreate && (
+            <button
+              type="button"
+              onClick={onOpenAiCreate}
+              className="flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 text-xs font-bold transition-all shrink-0 cursor-pointer bg-orange-50/70 hover:bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-900/60 border border-orange-200/80 dark:border-orange-800/60 shadow-2xs active:scale-98"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />
+              <span>✦ Tạo nhanh cùng AI</span>
+            </button>
+          )}
+
           {/* Nút Đặt lại */}
           <button
             type="button"

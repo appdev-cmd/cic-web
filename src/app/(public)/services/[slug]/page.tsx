@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getPublishedServiceBySlug, getPublishedServiceProducts, listPublishedServices } from '@/features/services/server/queries';
-import { BreadcrumbJsonLd } from '@/features/seo/components';
+import { BreadcrumbJsonLd, ServiceJsonLd } from '@/features/seo/components';
 import { ServicesRuntimeView } from '@/web/features/services/ServicesRuntimeView';
 
 export const dynamic = 'force-dynamic';
@@ -18,14 +18,15 @@ const view = (service: NonNullable<Awaited<ReturnType<typeof getPublishedService
 });
 
 import { cleanSeoTitle } from '@/lib/seo/siteUrl';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const service = await getPublishedServiceBySlug((await params).slug, 'vi');
+  const slug = (await params).slug;
+  const service = await getPublishedServiceBySlug(slug, 'vi');
   if (!service) return {};
   const rawTitle = service.seoTitle || service.title;
   return {
-    title: cleanSeoTitle(rawTitle),
-    description: service.seoDescription || service.summary || `Tìm hiểu chi tiết về dịch vụ ${service.title} được cung cấp chuyên nghiệp bởi CIC Technology.`,
+    ...detailMetadata(cleanSeoTitle(rawTitle), service.seoDescription || service.summary || `Tìm hiểu chi tiết về dịch vụ ${service.title} được cung cấp chuyên nghiệp bởi CIC Technology.`, `/services/${slug}`),
     keywords: service.seoKeywords,
   };
 }
@@ -38,6 +39,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      <ServiceJsonLd name={service.title} description={service.summary} image={service.image} url={`/services/${service.slug}`} />
       <BreadcrumbJsonLd
         items={[
           { name: 'Trang chủ', url: '/' },
@@ -53,4 +55,3 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
     </>
   );
 }
-

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getPublishedProjectBySlug } from '@/features/projects/server/queries';
 import { ProjectDetailRuntimeView } from '@/web/features/projects/ProjectDetailRuntimeView';
 import type { Metadata } from 'next';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +16,7 @@ export async function generateMetadata({
   if (!project) return { title: 'Không tìm thấy dự án | CIC Technology' };
 
   return {
-    title: `${project.seoTitle || project.title} | CIC Technology`,
-    description: project.seoDescription || project.summary || undefined,
+    ...detailMetadata(project.seoTitle || project.title, project.seoDescription || project.summary, `/projects/${slug}`),
     keywords: project.seoKeyword || undefined,
   };
 }

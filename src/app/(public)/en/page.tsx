@@ -5,10 +5,11 @@ import { HomeRoute } from '../HomeRoute';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'CIC Technology — Strategic Engineering Technology Partner',
+  title: { absolute: 'CIC Technology — Strategic Engineering Technology Partner' },
   description: 'Licensed engineering software, BIM technologies, digital transformation, and specialized consulting by CIC Technology.',
   alternates: {
     canonical: '/en',
+    languages: { 'vi-VN': '/', 'en-US': '/en', 'x-default': '/' },
   },
 };
 

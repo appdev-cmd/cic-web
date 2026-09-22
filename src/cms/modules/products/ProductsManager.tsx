@@ -42,6 +42,8 @@ const ProductsFormView = React.lazy(() => import('./ProductsFormView').then((m) 
 import { ProductPreviewModal } from './ProductPreviewModal';
 import { ProductActivityDrawer } from './ProductActivityDrawer';
 import { ProductDuplicateModal, DuplicateConfig } from './ProductDuplicateModal';
+import { AiProductSmartDraftModal } from './components/AiProductSmartDraftModal';
+import type { AiProductDraftResult } from '@/features/ai-operator/types';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsTabs } from '../../components/ui/CmsTabs';
@@ -119,6 +121,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const [productForActivity, setProductForActivity] = useState<CmsProductListItem | null>(null);
   const [productToDuplicate, setProductToDuplicate] = useState<ProductItem | null>(null);
   const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiDraftResult, setAiDraftResult] = useState<AiProductDraftResult | null>(null);
 
   const [isPending, startTransition] = useTransition();
   const { showToast } = useCmsToast();
@@ -449,6 +453,12 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     router.refresh();
   };
 
+  const handleDraftGenerated = (result: AiProductDraftResult) => {
+    setSelectedProductForForm(result.productData as unknown as ProductItem);
+    setAiDraftResult(result);
+    setViewMode('form');
+  };
+
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-200">
 
@@ -464,6 +474,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
           <ProductsFormView
             locale={workspaceLocale}
             product={selectedProductForForm}
+            aiDraftResult={aiDraftResult}
             categories={categories}
             brands={brands}
             applications={applications}
@@ -475,6 +486,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
             onCancel={() => {
               setViewMode('list');
               setSelectedProductForForm(null);
+              setAiDraftResult(null);
             }}
             onOpenPreview={(prod) => setProductToPreview(prod)}
           />
@@ -566,6 +578,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         applications={applications}
         isFilterActive={isFilterActive}
         onResetFilters={handleResetFilters}
+        onOpenAiCreate={() => setIsAiModalOpen(true)}
       />
 
       {/* BULK ACTIONS BAR (Visible when checkboxes are checked) */}
@@ -988,6 +1001,13 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         busy={isDeleting}
         onClose={() => setTrashTargets(null)}
         onConfirm={handleConfirmDelete}
+      />
+
+      <AiProductSmartDraftModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        workspaceLocale={workspaceLocale}
+        onDraftGenerated={handleDraftGenerated}
       />
     </div>
   );

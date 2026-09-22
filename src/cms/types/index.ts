@@ -106,3 +106,39 @@ export interface CmsMenuGroup {
   groupTitle: string;
   items: CmsMenuItem[];
 }
+
+export interface WebsiteHealthCheckItem {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'high' | 'medium' | 'low' | 'info';
+  status: 'pass' | 'attention' | 'critical';
+  count?: number;
+  actionLabel?: string;
+  actionPath?: string;
+}
+
+export interface WebsiteHealthSummary {
+  score: number;
+  status: 'HEALTHY' | 'ATTENTION' | 'CRITICAL' | 'UNKNOWN';
+  passedCount: number;
+  attentionCount: number;
+  criticalCount: number;
+  dbLatencyMs: number;
+  items: WebsiteHealthCheckItem[];
+}
+
+export interface PopularContentItem {
+  id: string;
+  title: string;
+  views: number;
+  alias: string;
+  contentType: 'news' | 'product';
+}
+
+export interface OperationsTrendItem {
+  date_label: string;
+  requests_count: number;
+  content_updates_count: number;
+}
+

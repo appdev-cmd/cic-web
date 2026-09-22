@@ -48,8 +48,13 @@ import {
   MousePointer2,
   FileCheck2,
   MessageSquareText,
+  User,
+  KeyRound,
+  LogOut,
+  Sun,
+  Moon,
 } from 'lucide-react';
-import { CmsMenuGroup } from '../types';
+import { CmsMenuGroup, CmsUser } from '../types';
 import { useCmsWorkspaceLocale } from '../context/CmsWorkspaceLocaleContext';
 import { getCmsDictionary } from '../i18n/cmsDictionary';
 
@@ -61,6 +66,13 @@ interface CmsSidebarProps {
   onSelectMenu: (path: string, title: string) => void;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
+  user?: CmsUser;
+  isDarkMode?: boolean;
+  onToggleTheme?: () => void;
+  onOpenMyAccount?: () => void;
+  onOpenChangePassword?: () => void;
+  onSwitchToWebsite?: () => void;
+  onLogout?: () => void;
 }
 
 const renderIcon = (iconName: string, className: string = 'w-4 h-4') => {
@@ -119,12 +131,35 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   onSelectMenu,
   isMobileOpen,
   onCloseMobile,
+  user,
+  isDarkMode = false,
+  onToggleTheme,
+  onOpenMyAccount,
+  onOpenChangePassword,
+  onSwitchToWebsite,
+  onLogout,
 }) => {
   const workspaceLocale = useCmsWorkspaceLocale();
   const dict = getCmsDictionary(workspaceLocale);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [expandedGroupIds, setExpandedGroupIds] = useState<string[]>(() =>
     menuGroups.map((group) => group.id)
   );
+
+  const getRoleDisplayName = (role?: string) => {
+    switch (role) {
+      case 'superadmin':
+        return workspaceLocale === 'en' ? 'Super Administrator' : 'Quản trị viên cấp cao';
+      case 'admin':
+        return workspaceLocale === 'en' ? 'Administrator' : 'Quản trị viên';
+      case 'editor':
+        return workspaceLocale === 'en' ? 'Editor' : 'Biên tập viên';
+      case 'viewer':
+        return workspaceLocale === 'en' ? 'Viewer' : 'Người xem';
+      default:
+        return workspaceLocale === 'en' ? 'Administrator' : 'Quản trị viên';
+    }
+  };
 
   // Nested sub-item expand state
   const [expandedSubItemIds, setExpandedSubItemIds] = useState<string[]>([
@@ -390,20 +425,165 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         })}
       </div>
 
-      {/* Sidebar Footer Info */}
-      {!isCollapsed ? (
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Super Admin</span>
-            <span className="text-[10px] text-slate-400">{dict.sidebar.cmsFooterTitle}</span>
+      {/* Sidebar Footer User Account Menu */}
+      <div className="relative p-2.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/70">
+        <button
+          type="button"
+          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+          className={`w-full flex items-center rounded-xl p-1.5 transition-all text-left cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${
+            isCollapsed ? 'justify-center px-0' : 'gap-2.5'
+          }`}
+          title={user?.full_name || 'Tài khoản quản trị'}
+          aria-label="Tùy chọn tài khoản quản trị"
+        >
+          <div className="relative shrink-0">
+            <img
+              src={user?.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+              alt={user?.full_name || 'Admin'}
+              className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+            />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
           </div>
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title={dict.sidebar.systemStatusOnline} />
-        </div>
-      ) : (
-        <div className="p-2 border-t border-slate-200 dark:border-slate-800 flex justify-center">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500" title={dict.sidebar.systemStatusOnline} />
-        </div>
-      )}
+
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate leading-tight">
+                {user?.full_name || 'Super Admin'}
+              </p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight mt-0.5">
+                {getRoleDisplayName(user?.role)}
+              </p>
+            </div>
+          )}
+
+          {!isCollapsed && (
+            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+          )}
+        </button>
+
+        {/* Popover Account Menu */}
+        {isUserMenuOpen && (
+          <div
+            className={`absolute bottom-full mb-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/90 rounded-2xl shadow-2xl py-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150 ${
+              isCollapsed ? 'left-full ml-3 w-64' : 'left-2 right-2 w-auto'
+            }`}
+            onMouseLeave={() => setIsUserMenuOpen(false)}
+          >
+            {/* Header Info Block */}
+            <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-2.5 bg-slate-50/50 dark:bg-slate-800/30 rounded-t-2xl">
+              <div className="relative shrink-0 mt-0.5">
+                <img
+                  src={user?.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                  alt={user?.full_name || 'Admin'}
+                  className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+                />
+                <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-slate-900 dark:text-white text-xs truncate leading-snug">
+                  {user?.full_name || 'Super Admin'}
+                </p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] truncate leading-snug">
+                  {user?.email || 'admin@cic.com.vn'}
+                </p>
+                <div className="mt-1">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300 border border-orange-200 dark:border-orange-900/60">
+                    {getRoleDisplayName(user?.role)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions Section */}
+            <div className="py-1 px-1 space-y-0.5">
+              {onOpenMyAccount && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onOpenMyAccount();
+                  }}
+                  className="w-full px-2.5 py-1.5 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg flex items-center gap-2 cursor-pointer font-medium transition-colors"
+                >
+                  <User className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  <span>{workspaceLocale === 'en' ? 'My Profile' : 'Hồ sơ cá nhân'}</span>
+                </button>
+              )}
+              {onOpenChangePassword && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onOpenChangePassword();
+                  }}
+                  className="w-full px-2.5 py-1.5 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg flex items-center gap-2 cursor-pointer font-medium transition-colors"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  <span>{workspaceLocale === 'en' ? 'Change Password' : 'Đổi mật khẩu'}</span>
+                </button>
+              )}
+              {onToggleTheme && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onToggleTheme();
+                  }}
+                  className="w-full px-2.5 py-1.5 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg flex items-center justify-between cursor-pointer font-medium transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    {isDarkMode ? (
+                      <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    ) : (
+                      <Moon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                    )}
+                    <span>{isDarkMode ? (workspaceLocale === 'en' ? 'Light Mode' : 'Giao diện sáng') : (workspaceLocale === 'en' ? 'Dark Mode' : 'Giao diện tối')}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">
+                    {isDarkMode ? 'Dark' : 'Light'}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* View Website */}
+            {onSwitchToWebsite && (
+              <div className="py-1 px-1 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onSwitchToWebsite();
+                  }}
+                  className="w-full px-2.5 py-1.5 text-left text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg flex items-center justify-between cursor-pointer font-medium transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{workspaceLocale === 'en' ? 'Visit Public Site' : 'Xem Website'}</span>
+                  </div>
+                  <span className="text-[10px] text-orange-500 font-semibold">↗</span>
+                </button>
+              </div>
+            )}
+
+            {/* Logout */}
+            {onLogout && (
+              <div className="pt-1 pb-0.5 px-1 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="w-full px-2.5 py-1.5 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg flex items-center gap-2 cursor-pointer font-medium transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{workspaceLocale === 'en' ? 'Sign Out' : 'Đăng xuất'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 

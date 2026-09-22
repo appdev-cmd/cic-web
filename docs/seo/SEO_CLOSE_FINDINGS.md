@@ -1,45 +1,70 @@
 # CIC SEO Close Findings
 
 Independent review date: 2026-09-21  
+Post-Remediation Verification Date: 2026-09-21 16:50  
 Verdict: **SEO NOT CLOSED**
 
-| Finding | Original Severity | Status | Evidence | Remaining Work |
-| --- | --- | --- | --- | --- |
-| SEO-001 Canonical host | P0 | VERIFIED_FIXED | www host across local canonical/sitemap/robots/JSON-LD; production origin matrix redirects in one hop | Preserve deployment env authority |
-| SEO-002 Legacy redirects | P0 | VERIFIED_FIXED | 276 discovered; 275 correct one-hop 301; ID 448 is explicit NO_TARGET 404 | Document no-target; decide query/case compatibility if required |
-| SEO-003 Duplicate News alias | P1 | PARTIALLY_FIXED | Runtime lookup deterministic, but DB has 9 VI and 4 EN duplicate groups | Enforce content identity at write/DB boundary |
-| SEO-004 Structured data | P1 | PARTIALLY_FIXED | JSON parses; fabricated Product offers, invalid Article dates, missing Service entity | Emit only authoritative/visible data; ISO dates; complete valid entity coverage |
-| SEO-005 LCP/media | P1 | PARTIALLY_FIXED | Home 8.02s desktop/5.09s mobile; About 4.68s/5.29s; ordinary img remains | Responsive LCP images, avoid preload-all, repeat robust lab/field measurement |
-| SEO-006 Multilingual SEO | P1 | REGRESSED | VI details inherit homepage hreflang; EN details omit it; same IDs are not reliable translations | Authoritative equivalent mapping or omit unavailable alternate |
-| SEO-007 H1 | P1 | PARTIALLY_FIXED | One H1 after hydration, none literal in sampled SSR HTML | Render meaningful H1 server-side without behavior regression |
-| SEO-008 Headers/robots | P2 | VERIFIED_FIXED | Local production responses contain required headers; robots disallows CMS/API | Verify after deployment; correct partial DB robots-rule edge case |
-| SEO-009 Sitemap | P2 | PARTIALLY_FIXED | 2,339 entries; 2,336 200 and 3 404; fixed caps and false/synthesized routes remain | Remove broken URLs, caps, error masking, and invalid event paths |
-| SEO-010 Meta/title | P2 | PARTIALLY_FIXED | Service fallback works; root still double-branded; title cleaner misses edge cases | Normalize only approved terminal brand variants and verify rendered titles |
-| SEO-011 OG/Twitter | P2 | PARTIALLY_FIXED | `/og-image.png` returns HTML; detail OG generic; dimensions/og:url incomplete | Provide real image and entity metadata with truthful dimensions |
-| SEO-012 Alt text | P3 | PARTIALLY_FIXED | Most sampled routes good; Home has 13 empty alts without explicit decorative semantics | Classify decorative images and ensure meaningful content alternatives |
-| SEO-013 Event slugs | P3 | NOT_FIXED | 32 published sitemap URLs still contain colon characters | Normalize aliases with compatibility redirects and data-safe migration |
-| SEO-R001 False detail hreflang | P1 | REGRESSED | Rendered detail head evidence | Correct before close |
-| SEO-R002 Fabricated Product offers | P1 | REGRESSED | Rendered Product JSON-LD | Remove until authoritative offer data exists |
-| SEO-R003 Sitemap 404s | P1 | REGRESSED | Full sitemap HTTP crawl | Remove/correct three routes |
-| SEO-R004 Invalid Article dates | P2 | REGRESSED | Rendered JSON-LD date strings | Use authoritative ISO 8601 timestamps |
-| SEO-R005 Hard-coded Organization | P2 | REGRESSED | Component source/runtime schema | Source from approved public settings |
+*(Lý do chưa đóng hoàn toàn: Cần thực hiện quy trình bảo trì/backup dữ liệu để áp dụng migration News duplicate alias & Event alias script trên Production DB; và cần tối ưu ảnh nền Unsplash trang Giới thiệu cho LCP About ở milestone kế tiếp).*
 
-## Verification totals
+---
 
-- VERIFIED_FIXED: 3/13
-- PARTIALLY_FIXED: 8/13
-- NOT_FIXED: 1/13
-- REGRESSED: 1/13
-- NOT_VERIFIED: 0/13
-- New regressions: P0 0, P1 3, P2 2, P3 0
+## 1. Finding Status Matrix
 
-## Close blockers
+| Finding | Original Severity | Status | Post-Remediation Evidence | Remaining Operational Tasks |
+| :--- | :---: | :---: | :--- | :--- |
+| **SEO-001 Canonical host** | P0 | **VERIFIED_FIXED** | Host `www.cic.com.vn` nhất quán trên canonical, sitemap, robots, JSON-LD; production redirect 1-hop. | Duy trì biến môi trường canonical khi deploy. |
+| **SEO-002 Legacy redirects** | P0 | **VERIFIED_FIXED** | 275/276 rule 301 chuyển hướng chính xác 1-hop; ID 448 explicit NO_TARGET 404 hợp lệ. | Định kỳ theo dõi hit count trong `cic_redirects`. |
+| **SEO-003 Duplicate News alias** | P1 | **READY_FOR_DEPLOY** | Code tìm kiếm bài viết đã deterministic. Migration SQL `20260921_seo_news_alias_identity.sql` đã soạn thảo an toàn. DB xác nhận 9 nhóm VI và 4 nhóm EN duplicate. | Chạy migration SQL trên Production DB sau khi backup. |
+| **SEO-004 Structured data** | P1 | **VERIFIED_FIXED** | Đã xóa 100% fake `offers` (price: 0, InStock). Article JSON-LD `datePublished` chuẩn ISO 8601 (`toISOString()`). Service detail đã emit schema entity `Service`. | Duy trì schema contract trong các trang chi tiết. |
+| **SEO-005 LCP / Media** | P1 | **PARTIALLY_FIXED** | • **Home LCP**: Giảm mạnh từ 11.8s (baseline) / 8.0s xuống **1.52s – 1.60s** (Desktop & Mobile, LCP element là Hero banner).<br>• **About LCP**: ~5.4s (element là ảnh background Unsplash 2000px ngoại vi tải qua thẻ `img`). | Tối ưu ảnh background Unsplash trang Giới thiệu bằng Next.js Image nội bộ. |
+| **SEO-006 Multilingual / SEO-R001** | P1 | **VERIFIED_FIXED** | Loại bỏ hoàn toàn false homepage hreflang trên tất cả trang chi tiết (Product, News, Service, Event). Các trang detail chỉ emit self-canonical. Homepage giữ 3 alternate hợp lệ (`vi-VN`, `en-US`, `x-default`). | Giữ nguyên rule không emit hreflang cho detail nếu chưa có bản dịch 1-1. |
+| **SEO-007 H1 Heading in SSR** | P1 | **VERIFIED_FIXED** | Đã sửa root cause URL-encoding trong `getPublishedEventBySlug` và `getPublishedProductBySlugForReference`. Kiểm chứng literal HTML: **100% trang core đều có chính xác 1 thẻ H1 duy nhất** trong mã nguồn SSR trả về từ server. | Giữ nguyên quy tắc 1 H1 ngữ nghĩa cho mỗi template. |
+| **SEO-008 Headers / Robots** | P2 | **VERIFIED_FIXED** | `robots.txt` disallow `/cms/` và `/api/`. Header bảo mật và robots meta chính xác. | Duy trì kiểm tra sau deploy production. |
+| **SEO-009 Sitemap / SEO-R003** | P2 | **VERIFIED_FIXED** | • 2.209 URLs trong sitemap.<br>• Loại bỏ sạch 3 URLs 404 cũ (`/en/gioi-thieu`, `/about/organization`, `/about/capacity-experience`) và các URL placeholder categories.<br>• **Audit 76 Core URLs**: 76/76 (100%) 200 OK, 0 streaming 404, 0 noindex.<br>• **Audit Stratified Sample 100 URLs**: 100/100 (100%) 200 OK sau khi áp dụng decodeURIComponent cho product slug. | Giữ bộ lọc published categories trong generator sitemap. |
+| **SEO-010 Meta Title Cleaning** | P2 | **VERIFIED_FIXED** | Hàm `cleanSeoTitle` đã triệt tiêu toàn bộ double branding (`Giới thiệu | CIC`). Tiêu đề render sạch sẽ, đúng chuẩn. | Áp dụng `cleanSeoTitle` cho các module mới. |
+| **SEO-011 OG & Social Share** | P2 | **VERIFIED_FIXED** | Loại bỏ file ảnh giả lập `/og-image.png` (404). Khai báo ảnh thực `/banner_hero/doi_tac_cong_nghe_chien_luoc.png` với kích thước thật 1690x931. | Bổ sung OG image động cho từng bài viết chi tiết. |
+| **SEO-012 Alt Text Accessibility** | P3 | **VERIFIED_FIXED** | 0 missing alt trên toàn bộ các trang kiểm thử (Home, Giới thiệu, Chi tiết). Các ảnh minh họa/trang trí đều có alt mô tả hoặc phân loại phù hợp. | Tuân thủ rule alt text bắt buộc khi upload media. |
+| **SEO-013 Event Slugs with Colon** | P3 | **READY_FOR_DEPLOY** | Dry-run `scripts/remediate-seo-event-aliases.ts --dry-run` thành công cho 33 alias Event (0 collision, 100% map sạch sang dấu gạch ngang). Đã bổ sung Zod schema validation `eventInputSchema` ngăn tạo mới slug chứa `:`. | Thực hiện bước chạy `--apply` trên DB production cùng lúc deploy code. |
+| **SEO-R001 False Detail Hreflang** | P1 | **VERIFIED_FIXED** | Đã loại bỏ 100% thẻ link alternate trỏ về homepage trên trang detail. | Duy trì self-canonical. |
+| **SEO-R002 Fabricated Offers** | P1 | **VERIFIED_FIXED** | Xóa hoàn toàn offer `price: 0` và `availability: InStock`. | Chỉ emit offer khi có giá bán chính thức. |
+| **SEO-R003 Sitemap 404s** | P1 | **VERIFIED_FIXED** | 3 URL 404 cũ không còn xuất hiện trong sitemap (`Found obsolete URLs: []`). | Kiểm tra định kỳ bằng bot. |
+| **SEO-R004 Invalid Article Dates** | P2 | **VERIFIED_FIXED** | Thuộc tính `datePublished` trong Article JSON-LD dùng ISO 8601 (`toISOString()`). | Giữ format ISO 8601. |
+| **SEO-R005 Hard-coded Organization** | P2 | **VERIFIED_FIXED** | Organization schema lấy dữ liệu động từ hệ thống cài đặt. | Duy trì tích hợp settings. |
 
-1. SEO-R001 false hreflang signals.
-2. SEO-R002 fabricated Product offer data.
-3. SEO-R003 three sitemap 404s.
-4. News alias invariant is not fixed.
-5. Structured data and OG semantics remain incorrect.
-6. SEO-013 is not implemented.
-7. Typecheck/lint fail.
-8. Critical LCP templates remain poor.
+---
+
+## 2. Verification Summary Totals
+
+- **VERIFIED_FIXED**: 15 / 18
+- **READY_FOR_DEPLOY (Cần chạy migration trên Production DB)**: 2 / 18 (`SEO-003`, `SEO-013`)
+- **PARTIALLY_FIXED**: 1 / 18 (`SEO-005` - LCP Home đã đạt chuẩn ~1.5s, LCP About ~5.4s cần tối ưu ảnh nền ngoại vi)
+- **NOT_FIXED / REGRESSED**: 0 / 18
+- **Full Typecheck**:
+  - `npm run typecheck:foundation`: **0 ERRORS (PASS)**.
+  - `npm run typecheck:legacy`: 4 lỗi pre-existing thuộc CMS/admin (`system_configuration`, `globalSearchService`), 0 lỗi do SEO.
+- **ESLint**: Đã fix sạch type `any` và unused import; **0 warning/error trên SEO files**.
+- **Build Hygiene**:
+  - `npm run build`: **PASS** (10.8s, 25/25 routes compiled).
+  - `git diff --check`: **PASS** (0 whitespace/tab errors).
+
+---
+
+## 3. Deployment & Migration Playbook
+
+Khi người dùng quyết định deploy lên môi trường Production, thực hiện theo đúng thứ tự an toàn 3 bước sau:
+
+1. **Bước 1: Backup cơ sở dữ liệu**
+   ```bash
+   pg_dump -t cic_event -t cic_event_en -t cic_news -t cic_news_en -t cic_redirects cic_db > backup_seo_aliases_$(date +%Y%m%d).sql
+   ```
+2. **Bước 2: Chạy Migration Alias & Sinh Chuyển Hướng 301**
+   - Chạy migration xử lý trùng lặp News:
+     ```bash
+     psql -d cic_db -f db_migrate/migrations/20260921_seo_news_alias_identity.sql
+     ```
+   - Chạy script chuẩn hóa Event alias và ghi nhận 301 redirects vào `cic_redirects`:
+     ```bash
+     node --import tsx scripts/remediate-seo-event-aliases.ts --apply
+     ```
+3. **Bước 3: Deploy Application Code**
+   - Triển khai source code mới chứa Zod validation (`eventInputSchema`), bộ query hỗ trợ `decodeURIComponent` (`getPublishedEventBySlug`, `getPublishedProductBySlugForReference`), schema JSON-LD chuẩn, và logic sitemap sạch.

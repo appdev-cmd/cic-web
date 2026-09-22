@@ -12,7 +12,9 @@ export const metadata: Metadata = {
   },
 };
 
-const view = (s: any) => ({
+import type { ServiceViewModel } from '@/features/services/types';
+
+const view = (s: ServiceViewModel) => ({
   id: s.id,
   slug: s.slug,
   title: s.title,

@@ -1,0 +1,819 @@
+{
+  "totalSampled": 100,
+  "productsSampled": 50,
+  "newsSampled": 50,
+  "passedCount": 99,
+  "failures": [
+    {
+      "url": "https://www.cic.com.vn/products/spraycannon-150-–-thiet-bi-phun-suong-dap-bui",
+      "path": "/products/spraycannon-150-%E2%80%93-thiet-bi-phun-suong-dap-bui",
+      "status": 200,
+      "durationMs": 725,
+      "streaming404": false,
+      "noindex": true,
+      "reason": "Unexpected noindex"
+    }
+  ],
+  "details": [
+    {
+      "url": "https://www.cic.com.vn/products/geostudio",
+      "path": "/products/geostudio",
+      "status": 200,
+      "durationMs": 2695,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/csidetail",
+      "path": "/products/csidetail",
+      "status": 200,
+      "durationMs": 2428,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/autodesk-autocad",
+      "path": "/products/autodesk-autocad",
+      "status": 200,
+      "durationMs": 1100,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/safe",
+      "path": "/products/safe",
+      "status": 200,
+      "durationMs": 1318,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/phan-mem-oilmap",
+      "path": "/products/phan-mem-oilmap",
+      "status": 200,
+      "durationMs": 862,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/phan-mem-oilmap-deep",
+      "path": "/products/phan-mem-oilmap-deep",
+      "status": 200,
+      "durationMs": 910,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/thiet-bi-giam-sat-anh-huong-chan-dong-va",
+      "path": "/products/thiet-bi-giam-sat-anh-huong-chan-dong-va",
+      "status": 200,
+      "durationMs": 1068,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/synergi-plant-quan-ly-rui-ro-nha-may",
+      "path": "/products/synergi-plant-quan-ly-rui-ro-nha-may",
+      "status": 200,
+      "durationMs": 1038,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/safeti-offshore",
+      "path": "/products/safeti-offshore",
+      "status": 200,
+      "durationMs": 775,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/calroads-view",
+      "path": "/products/calroads-view",
+      "status": 200,
+      "durationMs": 811,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/phan-mem-artm-view",
+      "path": "/products/phan-mem-artm-view",
+      "status": 200,
+      "durationMs": 828,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/phan-mem-fets-view",
+      "path": "/products/phan-mem-fets-view",
+      "status": 200,
+      "durationMs": 798,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/phan-mem-bastian",
+      "path": "/products/phan-mem-bastian",
+      "status": 200,
+      "durationMs": 912,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/floori",
+      "path": "/products/floori",
+      "status": 200,
+      "durationMs": 1094,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/he-thong-mo-hinh-hoa-efdc-explorer-eesm",
+      "path": "/products/he-thong-mo-hinh-hoa-efdc-explorer-eesm",
+      "status": 200,
+      "durationMs": 1006,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/delft3d",
+      "path": "/products/delft3d",
+      "status": 200,
+      "durationMs": 989,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/openrail",
+      "path": "/products/openrail",
+      "status": 200,
+      "durationMs": 709,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/thiet-bi-dinh-vi-loi-cap-tdr-ri-407",
+      "path": "/products/thiet-bi-dinh-vi-loi-cap-tdr-ri-407",
+      "status": 200,
+      "durationMs": 819,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/vinasaspro",
+      "path": "/products/vinasaspro",
+      "status": 200,
+      "durationMs": 10432,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/autodesk-revit",
+      "path": "/products/autodesk-revit",
+      "status": 200,
+      "durationMs": 831,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/thiet-bi-kiem-tra-bien-dang-nho-cua-coc",
+      "path": "/products/thiet-bi-kiem-tra-bien-dang-nho-cua-coc",
+      "status": 200,
+      "durationMs": 1018,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/thiet-bi-do-dia-chan-da-kenh-summit-x",
+      "path": "/products/thiet-bi-do-dia-chan-da-kenh-summit-x",
+      "status": 200,
+      "durationMs": 804,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/enscape-3d-render-noi-that",
+      "path": "/products/enscape-3d-render-noi-that",
+      "status": 200,
+      "durationMs": 1245,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/precision-ts2-may-cat-nhom-2-dau-voi-luoi-cat-mat-truoc",
+      "path": "/products/precision-ts2-may-cat-nhom-2-dau-voi-luoi-cat-mat-truoc",
+      "status": 200,
+      "durationMs": 1028,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/sacs-1",
+      "path": "/products/sacs-1",
+      "status": 200,
+      "durationMs": 1068,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/fhc-phan-mem-tinh-toan-thuy-luc-cho-he-thong-phun-nuoc-chua-chay",
+      "path": "/products/fhc-phan-mem-tinh-toan-thuy-luc-cho-he-thong-phun-nuoc-chua-chay",
+      "status": 200,
+      "durationMs": 1660,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/ptv-flows-phan-mem-quan-ly-gaio-thong",
+      "path": "/products/ptv-flows-phan-mem-quan-ly-gaio-thong",
+      "status": 200,
+      "durationMs": 769,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/axstreamphan-mem-thiet-ke-va-phan-tich-may-canh",
+      "path": "/products/axstreamphan-mem-thiet-ke-va-phan-tich-may-canh",
+      "status": 200,
+      "durationMs": 1137,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/spraycannon-150-–-thiet-bi-phun-suong-dap-bui",
+      "path": "/products/spraycannon-150-%E2%80%93-thiet-bi-phun-suong-dap-bui",
+      "status": 200,
+      "durationMs": 725,
+      "streaming404": false,
+      "noindex": true
+    },
+    {
+      "url": "https://www.cic.com.vn/products/he-thong-mobile-mapping-lidar-alphauni-20",
+      "path": "/products/he-thong-mobile-mapping-lidar-alphauni-20",
+      "status": 200,
+      "durationMs": 1071,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/robot-xay-dung",
+      "path": "/products/robot-xay-dung",
+      "status": 200,
+      "durationMs": 1577,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/products/prokon-masonry",
+      "path": "/products/prokon-masonry",
+      "status": 200,
+      "durationMs": 962,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/geostudio",
+      "path": "/en/products/geostudio",
+      "status": 200,
+      "durationMs": 3830,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/enjicad",
+      "path": "/en/products/enjicad",
+      "status": 200,
+      "durationMs": 962,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/idea-statica-steel",
+      "path": "/en/products/idea-statica-steel",
+      "status": 200,
+      "durationMs": 1020,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/csibridge",
+      "path": "/en/products/csibridge",
+      "status": 200,
+      "durationMs": 1266,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/thiet-bi-sieu-am-moi-han-va-kim-loai",
+      "path": "/en/products/thiet-bi-sieu-am-moi-han-va-kim-loai",
+      "status": 200,
+      "durationMs": 805,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/plaxis-3d",
+      "path": "/en/products/plaxis-3d",
+      "status": 200,
+      "durationMs": 1060,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/adapt-abi",
+      "path": "/en/products/adapt-abi",
+      "status": 200,
+      "durationMs": 748,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/co-so-du-lieu-eds",
+      "path": "/en/products/co-so-du-lieu-eds",
+      "status": 200,
+      "durationMs": 718,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/phan-mem-mo-phong-giao-thong-ptv-vissim",
+      "path": "/en/products/phan-mem-mo-phong-giao-thong-ptv-vissim",
+      "status": 200,
+      "durationMs": 942,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/cadprofi",
+      "path": "/en/products/cadprofi",
+      "status": 200,
+      "durationMs": 690,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/phan-mem-dem-xe-trazer",
+      "path": "/en/products/phan-mem-dem-xe-trazer",
+      "status": 200,
+      "durationMs": 718,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/phan-mem-mova",
+      "path": "/en/products/phan-mem-mova",
+      "status": 200,
+      "durationMs": 686,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/phan-mem-cadnasak",
+      "path": "/en/products/phan-mem-cadnasak",
+      "status": 200,
+      "durationMs": 666,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/mike-animation",
+      "path": "/en/products/mike-animation",
+      "status": 200,
+      "durationMs": 704,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/risk-analyst",
+      "path": "/en/products/risk-analyst",
+      "status": 200,
+      "durationMs": 973,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/sobek",
+      "path": "/en/products/sobek",
+      "status": 200,
+      "durationMs": 924,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/fb-multipier",
+      "path": "/en/products/fb-multipier",
+      "status": 200,
+      "durationMs": 957,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/products/dnv-gl-software",
+      "path": "/en/products/dnv-gl-software",
+      "status": 200,
+      "durationMs": 686,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/plaxis-tu-y-tuong-den-qua-trinh-xay-dung",
+      "path": "/news/plaxis-tu-y-tuong-den-qua-trinh-xay-dung",
+      "status": 200,
+      "durationMs": 4436,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/articleky-ket-hop-dong-hoan-thanh-ban-giao-lap-dat-va-huong",
+      "path": "/news/articleky-ket-hop-dong-hoan-thanh-ban-giao-lap-dat-va-huong",
+      "status": 200,
+      "durationMs": 1698,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/bao-cao-tai-chinh-2014",
+      "path": "/news/bao-cao-tai-chinh-2014",
+      "status": 200,
+      "durationMs": 2275,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/thong-bao-moi-hop-dhcd-2018",
+      "path": "/news/thong-bao-moi-hop-dhcd-2018",
+      "status": 200,
+      "durationMs": 1545,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/to-trinh-ve-muc-co-tuc-trich-lap-cac-quy-va-muc-thu-lao--2020",
+      "path": "/news/to-trinh-ve-muc-co-tuc-trich-lap-cac-quy-va-muc-thu-lao--2020",
+      "status": 200,
+      "durationMs": 1660,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/dinh-dang-file-cad-la-gi-co-nhung-dinh-dang-nao-va-su-dung-quan-ly-chung-the-nao",
+      "path": "/news/dinh-dang-file-cad-la-gi-co-nhung-dinh-dang-nao-va-su-dung-quan-ly-chung-the-nao",
+      "status": 200,
+      "durationMs": 1882,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/tinh-nang-moi-trong-idea-statica-v220",
+      "path": "/news/tinh-nang-moi-trong-idea-statica-v220",
+      "status": 200,
+      "durationMs": 2348,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/du-thao-bc-cua-hdqt-2023",
+      "path": "/news/du-thao-bc-cua-hdqt-2023",
+      "status": 200,
+      "durationMs": 1933,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/bao-cao-tai-chinh-nam-2023",
+      "path": "/news/bao-cao-tai-chinh-nam-2023",
+      "status": 200,
+      "durationMs": 1999,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/thong-bao-moi-hop-dai-hoi-co-dong-nam-2025-va-giay-uy-quyen",
+      "path": "/news/thong-bao-moi-hop-dai-hoi-co-dong-nam-2025-va-giay-uy-quyen",
+      "status": 200,
+      "durationMs": 1710,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/xay-dung-40:-tai-sao-day-la-thoi-diem-de-trien-khai-bim-va-xay-dung-ky-thuat-so",
+      "path": "/news/xay-dung-40:-tai-sao-day-la-thoi-diem-de-trien-khai-bim-va-xay-dung-ky-thuat-so",
+      "status": 200,
+      "durationMs": 1921,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cic-trung-thau-cung-cap-phan-mem-phast",
+      "path": "/news/cic-trung-thau-cung-cap-phan-mem-phast",
+      "status": 200,
+      "durationMs": 1685,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cic-cung-cap-bo-phan-mem-mo-phong-chay-va-thoat-nan-pyrosim-–-pathfinder-cho-cong-ty-tnhh-dich-vu-pccc-duc-tam",
+      "path": "/news/cic-cung-cap-bo-phan-mem-mo-phong-chay-va-thoat-nan-pyrosim-%E2%80%93-pathfinder-cho-cong-ty-tnhh-dich-vu-pccc-duc-tam",
+      "status": 200,
+      "durationMs": 1967,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/san-giao-dich-carbon-la-gi-dieu-kien-tham-gia-va-quy-dinh-giao-dich-theo-nghi-dinh-292026nd-cp",
+      "path": "/news/san-giao-dich-carbon-la-gi-dieu-kien-tham-gia-va-quy-dinh-giao-dich-theo-nghi-dinh-292026nd-cp",
+      "status": 200,
+      "durationMs": 2064,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/leapfrog-20261:-nhung-nang-cap-dang-chu-y-cho-mo-hinh-hoa-dia-chat-lap-ke-hoach-khoan-va-uoc-tinh-tai-nguyen",
+      "path": "/news/leapfrog-20261:-nhung-nang-cap-dang-chu-y-cho-mo-hinh-hoa-dia-chat-lap-ke-hoach-khoan-va-uoc-tinh-tai-nguyen",
+      "status": 200,
+      "durationMs": 1672,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/thiet-ke-ket-cau-tam-phuc-vu-thi-cong-bang-idea-statica",
+      "path": "/news/thiet-ke-ket-cau-tam-phuc-vu-thi-cong-bang-idea-statica",
+      "status": 200,
+      "durationMs": 1668,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/enjicad-2026-chinh-thuc-phat-hanh-voi-hang-loat-cong-cu-thong-minh",
+      "path": "/news/enjicad-2026-chinh-thuc-phat-hanh-voi-hang-loat-cong-cu-thong-minh",
+      "status": 200,
+      "durationMs": 2082,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/ung-dung-phan-mem-plaxis-va-geostudio-trong-toi-uu-thiet-ke-dia-ky-thuat-dap-semantok-–-cong-trinh-dap-dai-nhat-dong-nam-a",
+      "path": "/news/ung-dung-phan-mem-plaxis-va-geostudio-trong-toi-uu-thiet-ke-dia-ky-thuat-dap-semantok-%E2%80%93-cong-trinh-dap-dai-nhat-dong-nam-a",
+      "status": 200,
+      "durationMs": 1601,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/phast-va-safeti-911:-nang-cao-kha-nang-phan-tich-rui-ro-va-hau-qua",
+      "path": "/news/phast-va-safeti-911:-nang-cao-kha-nang-phan-tich-rui-ro-va-hau-qua",
+      "status": 200,
+      "durationMs": 1645,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/giam-thieu-phan-bo-dong-chay-khong-dong-deu-trong-bo-ngung-tu-hoi-nuoc-bang-phan-mem-htri-va-cfd",
+      "path": "/news/giam-thieu-phan-bo-dong-chay-khong-dong-deu-trong-bo-ngung-tu-hoi-nuoc-bang-phan-mem-htri-va-cfd",
+      "status": 200,
+      "durationMs": 1826,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/[cap-nhat-version-moi]-idea-statica-v25:-tang-toc-thiet-ke-ket-cau-dap-ung-chuan-toan-cau",
+      "path": "/news/[cap-nhat-version-moi]-idea-statica-v25:-tang-toc-thiet-ke-ket-cau-dap-ung-chuan-toan-cau",
+      "status": 200,
+      "durationMs": 1808,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/chc-navigation-dao-tao-su-dung-may-quet-cam-tay-slam-de-quet-va-xay-dung-ban-do-3d-cho-cic",
+      "path": "/news/chc-navigation-dao-tao-su-dung-may-quet-cam-tay-slam-de-quet-va-xay-dung-ban-do-3d-cho-cic",
+      "status": 200,
+      "durationMs": 1652,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/huong-dan-ap-dung-tcvn-14177-1:2024-va-tcvn-14177-2:2024-trong-quan-ly-thong-tin-cong-trinh-xay-dung-voi-bim",
+      "path": "/news/huong-dan-ap-dung-tcvn-14177-1:2024-va-tcvn-14177-2:2024-trong-quan-ly-thong-tin-cong-trinh-xay-dung-voi-bim",
+      "status": 200,
+      "durationMs": 1708,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/5-dac-diem-noi-bat-cua-phan-mem-fp-facade-trong-thiet-ke-mat-dung",
+      "path": "/news/5-dac-diem-noi-bat-cua-phan-mem-fp-facade-trong-thiet-ke-mat-dung",
+      "status": 200,
+      "durationMs": 1610,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/dot-pha-cung-foxit-phien-ban-moi-2024:-ai-assistant-tich-hop-outlook-va-nhieu-tinh-nang-moi",
+      "path": "/news/dot-pha-cung-foxit-phien-ban-moi-2024:-ai-assistant-tich-hop-outlook-va-nhieu-tinh-nang-moi",
+      "status": 200,
+      "durationMs": 2071,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/phan-mem-phan-tich-on-dinh-mai-doc-geostudio-2024-co-gi-moi",
+      "path": "/news/phan-mem-phan-tich-on-dinh-mai-doc-geostudio-2024-co-gi-moi",
+      "status": 200,
+      "durationMs": 1572,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/nhung-cau-hoi-thuong-gap-faq-khi-su-dung-phan-mem-pytha-3d-cad",
+      "path": "/news/nhung-cau-hoi-thuong-gap-faq-khi-su-dung-phan-mem-pytha-3d-cad",
+      "status": 200,
+      "durationMs": 1917,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cic-ra-mat-chuong-trinh-dao-tao-phan-mem-thiet-ke-va-san-xuat-noi-that-pytha-cad-3d",
+      "path": "/news/cic-ra-mat-chuong-trinh-dao-tao-phan-mem-thiet-ke-va-san-xuat-noi-that-pytha-cad-3d",
+      "status": 200,
+      "durationMs": 1671,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/pipenet-spraysprinkler-–-free-training-webinar",
+      "path": "/news/pipenet-spraysprinkler-%E2%80%93-free-training-webinar",
+      "status": 200,
+      "durationMs": 1632,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/phan-mem-autocost-ho-tro-cac-don-vi-gia-cong-kim-loai-tam-boc-tach-bao-gia",
+      "path": "/news/phan-mem-autocost-ho-tro-cac-don-vi-gia-cong-kim-loai-tam-boc-tach-bao-gia",
+      "status": 200,
+      "durationMs": 1629,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cbam-la-gi-lo-trinh-thuc-hien-co-che-dieu-chinh-bien-gioi-carbon-cbam",
+      "path": "/news/cbam-la-gi-lo-trinh-thuc-hien-co-che-dieu-chinh-bien-gioi-carbon-cbam",
+      "status": 200,
+      "durationMs": 1799,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/tuyen-bo-san-pham-moi-truong-epd-la-gi-loi-ich-va-tien-trinh-thuc-hien-cua-epd",
+      "path": "/news/tuyen-bo-san-pham-moi-truong-epd-la-gi-loi-ich-va-tien-trinh-thuc-hien-cua-epd",
+      "status": 200,
+      "durationMs": 1999,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/to-chuc-thanh-cong-hoi-thao-giai-phap-cong-nghe-giam-phat-thai-khi-nha-kinh-trong-nganh-cong-nghiep-xi-mang-va-thep-tai-viet-nam",
+      "path": "/news/to-chuc-thanh-cong-hoi-thao-giai-phap-cong-nghe-giam-phat-thai-khi-nha-kinh-trong-nganh-cong-nghiep-xi-mang-va-thep-tai-viet-nam",
+      "status": 200,
+      "durationMs": 1951,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cic-phoi-hop-cung-ban-quan-ly-dtxd-dan-dung-amp;-cong-nghiep-tp-da-nang-to-chuc-hoi-thao-nhung-diem-moi-ve-co-che-chinh-sach-ap-dung-bim-va-trien-khai-du-an-thuc-te",
+      "path": "/news/cic-phoi-hop-cung-ban-quan-ly-dtxd-dan-dung-amp;-cong-nghiep-tp-da-nang-to-chuc-hoi-thao-nhung-diem-moi-ve-co-che-chinh-sach-ap-dung-bim-va-trien-khai-du-an-thuc-te",
+      "status": 200,
+      "durationMs": 1616,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cic-trung-thau-goi-thau:-mua-sam-phan-mem-nghien-cuu-khoa-hoc-cong-nghe-thuoc-du-an-tang-cuong-nang-luc-nghien-cuu-va-lam-viec-cho-vien-khoa-hoc-thuy-loi-mien-nam",
+      "path": "/news/cic-trung-thau-goi-thau:-mua-sam-phan-mem-nghien-cuu-khoa-hoc-cong-nghe-thuoc-du-an-tang-cuong-nang-luc-nghien-cuu-va-lam-viec-cho-vien-khoa-hoc-thuy-loi-mien-nam",
+      "status": 200,
+      "durationMs": 1591,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cach-chuyen-ban-ve-cad-sang-pdf",
+      "path": "/news/cach-chuyen-ban-ve-cad-sang-pdf",
+      "status": 200,
+      "durationMs": 1966,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/3-cong-cu-de-lap-mo-hinh-cau-dam-duc-san-mot-cach-hieu-qua-trong-allplan",
+      "path": "/news/3-cong-cu-de-lap-mo-hinh-cau-dam-duc-san-mot-cach-hieu-qua-trong-allplan",
+      "status": 200,
+      "durationMs": 1701,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/tinh-nang-kiem-tra-coc-hang-loat-cua-pet-piletest",
+      "path": "/news/tinh-nang-kiem-tra-coc-hang-loat-cua-pet-piletest",
+      "status": 200,
+      "durationMs": 1754,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/allplan-cung-cap-giai-phap-lam-viec-tu-xa-cho-nganh-xay-dung",
+      "path": "/news/allplan-cung-cap-giai-phap-lam-viec-tu-xa-cho-nganh-xay-dung",
+      "status": 200,
+      "durationMs": 1667,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/tai-sao-nen-chon-allplan-lam-giai-phap-trien-khai-mo-hinh-ban-ve-ki-thuat-trong-xay-dung",
+      "path": "/news/tai-sao-nen-chon-allplan-lam-giai-phap-trien-khai-mo-hinh-ban-ve-ki-thuat-trong-xay-dung",
+      "status": 200,
+      "durationMs": 2649,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/phan-mem-bim-5d-cubicost-tasc-ra-mat-phien-ban-tieng-viet",
+      "path": "/news/phan-mem-bim-5d-cubicost-tasc-ra-mat-phien-ban-tieng-viet",
+      "status": 200,
+      "durationMs": 1608,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/news/cic-hcm-cung-cap-cac-san-pham-phan-mem-cua-hang-csi-cho-cac-cong-ty-rankine-amp;-hill-va-archetype-vn",
+      "path": "/news/cic-hcm-cung-cap-cac-san-pham-phan-mem-cua-hang-csi-cho-cac-cong-ty-rankine-amp;-hill-va-archetype-vn",
+      "status": 200,
+      "durationMs": 2056,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/hoi-thao-ung-dung-phan-mem-quan-ly-rui-ro-toan-suc-khoe",
+      "path": "/en/news/hoi-thao-ung-dung-phan-mem-quan-ly-rui-ro-toan-suc-khoe",
+      "status": 200,
+      "durationMs": 3564,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/hoan-tat-ban-giao-va-huong-dan-su-dung-thiet-bi-kiem-tra-cap",
+      "path": "/en/news/hoan-tat-ban-giao-va-huong-dan-su-dung-thiet-bi-kiem-tra-cap",
+      "status": 200,
+      "durationMs": 1711,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/cic-awarded-third-prize-for-bim-amp;-ai-construction-solutions-at-national-young-scientists-conference-2025",
+      "path": "/en/news/cic-awarded-third-prize-for-bim-amp;-ai-construction-solutions-at-national-young-scientists-conference-2025",
+      "status": 200,
+      "durationMs": 2334,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/pytha-software:-working-with-sandwich-and-using-it-to-make-thick-fake-boxes",
+      "path": "/en/news/pytha-software:-working-with-sandwich-and-using-it-to-make-thick-fake-boxes",
+      "status": 200,
+      "durationMs": 1600,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/real-time-landslide-monitoring:-lessonsthe-sichuan-rescue-operation",
+      "path": "/en/news/real-time-landslide-monitoring:-lessonsthe-sichuan-rescue-operation",
+      "status": 200,
+      "durationMs": 1833,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/hanoi-proactively-applies-bim-to-construction-investment-projects",
+      "path": "/en/news/hanoi-proactively-applies-bim-to-construction-investment-projects",
+      "status": 200,
+      "durationMs": 1716,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/thang-khuyen-mai:-cic-mung-sinh-nhat-lan-thu-23",
+      "path": "/en/news/thang-khuyen-mai:-cic-mung-sinh-nhat-lan-thu-23",
+      "status": 200,
+      "durationMs": 2428,
+      "streaming404": false,
+      "noindex": false
+    },
+    {
+      "url": "https://www.cic.com.vn/en/news/tb-ve-viec-phan-cong-nhiem-vu-doi-voi-cac-thanh-vien-hdqt-nhiem-ki-2017--2021",
+      "path": "/en/news/tb-ve-viec-phan-cong-nhiem-vu-doi-voi-cac-thanh-vien-hdqt-nhiem-ki-2017--2021",
+      "status": 200,
+      "durationMs": 1664,
+      "streaming404": false,
+      "noindex": false
+    }
+  ]
+}

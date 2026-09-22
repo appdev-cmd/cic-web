@@ -4,6 +4,14 @@ import type { ReactNode } from 'react';
 import { WebsiteShell } from './WebsiteShell';
 import { getPublicSystemSettings } from '@/features/system-settings/server/queries';
 import { getNavigationDataFromDb } from '@/features/menu/server/queries';
+import { CANONICAL_SITE_URL, cleanSeoTitle } from '@/lib/seo/siteUrl';
+
+const DEFAULT_SOCIAL_IMAGE = {
+  url: '/banner_hero/doi_tac_cong_nghe_chien_luoc.png',
+  width: 1690,
+  height: 931,
+  alt: 'CIC Technology',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSystemSettings('vi');
@@ -11,9 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const siteName = values.site_name || 'CIC Technology';
   const suffix = values.main_title || 'CIC';
-  const metaTitle = values.title || `${siteName} — Đối tác công nghệ chiến lược`;
+  const metaTitle = cleanSeoTitle(values.title || `${siteName} — Đối tác công nghệ chiến lược`);
   const metaDes = values.meta_des || 'Sản phẩm, dịch vụ tư vấn và dự án công nghệ của CIC Technology.';
-  const ogImage = values.og_image || '/og-image.png';
   const favicon = values.favicon || '/favicon.ico';
 
   return {
@@ -30,7 +37,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: metaTitle,
       description: metaDes,
       siteName,
-      images: ogImage ? [{ url: ogImage }] : undefined,
+      url: CANONICAL_SITE_URL,
+      images: [DEFAULT_SOCIAL_IMAGE],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: metaTitle,
+      description: metaDes,
+      images: [DEFAULT_SOCIAL_IMAGE.url],
     },
   };
 }

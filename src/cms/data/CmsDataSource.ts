@@ -9,6 +9,9 @@ import type {
   ProductRegistration,
   TrafficStat,
   WeeklyContentStat,
+  WebsiteHealthSummary,
+  PopularContentItem,
+  OperationsTrendItem,
 } from '../types';
 import type { AppLocale } from '@/shared/i18n/config';
 
@@ -24,6 +27,11 @@ export interface CmsDashboardData {
   traffic7Days: TrafficStat[];
   traffic30Days: TrafficStat[];
   weeklyContent: WeeklyContentStat[];
+  health?: WebsiteHealthSummary;
+  popularContent?: PopularContentItem[];
+  operationsTrend?: OperationsTrendItem[];
+  totalViews?: number;
+  todayRequestsCount?: number;
 }
 
 export interface CmsDataSource {

@@ -5,6 +5,7 @@ import {
   listPublishedEvents,
 } from '@/features/events/server/queries';
 import { EventsRuntimeView } from '@/web/features/events/EventsRuntimeView';
+import { detailMetadata } from '@/lib/seo/detailMetadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,8 +19,7 @@ export async function generateMetadata({
   if (!event) return {};
 
   return {
-    title: event.seoTitle || event.title,
-    description: event.seoDescription || event.summary,
+    ...detailMetadata(event.seoTitle || event.title, event.seoDescription || event.summary, `/events/${slug}`),
     keywords: event.seoKeyword || undefined,
   };
 }
