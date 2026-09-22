@@ -33,7 +33,7 @@ export async function getCmsProjects(locale: ProjectLocale): Promise<ProjectsMod
              is_featured, published, ordering, seo_title, seo_keyword, seo_description,
              created_time, updated_time
       FROM ${t.p}
-      ORDER BY ordering ASC, id ASC
+      ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering ASC, id DESC
     `),
     sql.unsafe(`SELECT project_id, product_id FROM ${t.pr} ORDER BY ordering ASC`).catch(() => []),
     sql.unsafe(`SELECT project_id, service_id FROM ${t.sr} ORDER BY ordering ASC`).catch(() => []),
@@ -42,8 +42,8 @@ export async function getCmsProjects(locale: ProjectLocale): Promise<ProjectsMod
       FROM ${t.prod} p
       LEFT JOIN cic_manufactories m ON m.id::text = p.manufactory
       LEFT JOIN cic_products_applications_rel par ON par.product_id = p.id
-      LEFT JOIN cic_application a ON a.id = par.application_id
-      WHERE p.published = true
+      LEFT JOIN cic_application a ON a.id = par.application_id AND a.name NOT ILIKE '[Du lieu da bi xoa%'
+      WHERE p.published = true AND p.name NOT ILIKE '[Du lieu da bi xoa%'
       ORDER BY p.ordering ASC, p.id ASC
     `).catch(() => []),
     sql.unsafe(`

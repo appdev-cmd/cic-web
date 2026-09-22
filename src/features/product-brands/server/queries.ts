@@ -31,8 +31,9 @@ export async function getCmsProductBrands(locale: ProductBrandLocale) {
   const rows = await sql.unsafe(
     `SELECT b.id,b.name,b.alias,b.ordering,b.published,b.created_time,b.updated_time,
        (SELECT count(*)::int FROM ${productSource} p
-        WHERE CASE WHEN p.manufactory ~ '^[0-9]+$' THEN p.manufactory::int END=b.id) usage_count
+        WHERE CASE WHEN p.manufactory ~ '^[0-9]+$' THEN p.manufactory::int END=b.id AND p.name NOT ILIKE '[Du lieu da bi xoa%') usage_count
      FROM ${source} b
+     WHERE b.name NOT ILIKE '[Du lieu da bi xoa%'
      ORDER BY b.ordering,b.id`,
   );
   return rows.map((row) => mapCmsBrand(row as Record<string, unknown>));

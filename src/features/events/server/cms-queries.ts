@@ -30,7 +30,7 @@ export async function getCmsEvents(locale: EventLocale) {
       FROM ${t.e} e
       ORDER BY e.ordering ASC, e.time_event DESC, e.id DESC
     `),
-    sql.unsafe(`SELECT id, name, code, image, published FROM ${t.p} ORDER BY name, id`),
+    sql.unsafe(`SELECT id, name, code, image, published FROM ${t.p} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY name, id`),
     sql.unsafe(`SELECT id, title, alias, image, published FROM ${t.n} ORDER BY id DESC LIMIT 50`),
     sql`
       SELECT id, entity_id, entity_title, actor_label, action_code, occurred_at

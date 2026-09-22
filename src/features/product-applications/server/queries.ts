@@ -33,8 +33,8 @@ export async function getCmsProductApplications(locale: ProductApplicationLocale
     `SELECT a.id,a.name,a.alias,a.ordering,a.published,a.created_time,a.updated_time,
        (SELECT count(*)::int FROM ${relations} r WHERE r.application_id=a.id) usage_count
      FROM ${source} a
-     WHERE nullif(btrim(a.alias),'') IS NOT NULL
-     ORDER BY a.ordering,a.id`,
+     WHERE nullif(btrim(a.alias),'') IS NOT NULL AND a.name NOT ILIKE '[Du lieu da bi xoa%'
+     ORDER BY coalesce(a.updated_time, a.created_time) DESC NULLS LAST, a.id DESC`,
   );
   return rows.map((row) => mapCmsApplication(row as Record<string, unknown>));
 }
@@ -55,8 +55,8 @@ export async function listPublishedProductApplications(
   const rows = await sql.unsafe(
     `SELECT id,name,alias,ordering
      FROM ${source}
-     WHERE published=true AND nullif(btrim(alias),'') IS NOT NULL
-     ORDER BY ordering,id`,
+     WHERE published=true AND nullif(btrim(alias),'') IS NOT NULL AND name NOT ILIKE '[Du lieu da bi xoa%'
+     ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering, id`,
   );
   return rows.map((row) => ({
     id: String(row.id),

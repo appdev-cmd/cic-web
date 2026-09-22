@@ -51,6 +51,7 @@ export async function getCicTaxonomyContext(forceRefresh = false): Promise<CicTa
   const applicationsRows = await sql<{ id: number; name: string }[]>`
     SELECT id, name 
     FROM cic_application 
+    WHERE published = true AND name NOT ILIKE '[Du lieu da bi xoa%'
     ORDER BY ordering, name
   `;
 
@@ -98,7 +99,7 @@ export async function findSimilarProductsContext(
   }[]>`
     SELECT id, name, summary, manufactory, category_id, tags
     FROM cic_products
-    WHERE published = true
+    WHERE published = true AND name NOT ILIKE '[Du lieu da bi xoa%'
       AND (
         (${manufactoryId ?? null}::text IS NOT NULL AND manufactory = ${String(manufactoryId)})
         OR name ILIKE '%' || ${cleanKeyword} || '%'

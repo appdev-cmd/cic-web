@@ -132,14 +132,14 @@ export async function getPublishedHomePage(workspace: 'vi' | 'en' = 'vi'): Promi
       let rows = await sql`
         SELECT * FROM ${projTable}
         WHERE published = true AND is_featured = true
-        ORDER BY ordering, id
+        ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering, id
         LIMIT 4
       `;
       if (rows.length === 0) {
         rows = await sql`
           SELECT * FROM ${projTable}
           WHERE published = true
-          ORDER BY ordering, id
+          ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering, id
           LIMIT 4
         `;
       }

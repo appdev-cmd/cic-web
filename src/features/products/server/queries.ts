@@ -6,8 +6,8 @@ import { extractProductVideoUrl, normalizeProductHtml, normalizeProductMediaUrl 
 type ProductReference = Product & { slug: string };
 type Row={id:unknown;name:unknown;alias:unknown;summary:unknown;description:unknown;image:unknown;published:unknown;ordering:unknown;category_name?:unknown};
 const map=(r:Row):ProductViewModel=>({id:String(r.id),title:String(r.name??''),slug:String(r.alias??r.id),summary:r.summary==null?(r.description==null?null:String(r.description)):String(r.summary),image:r.image==null?null:String(r.image),category:r.category_name==null?null:String(r.category_name),published:r.published===true,ordering:Number(r.ordering??0)});
-export async function listPublishedProducts(options:{categoryAlias?:string;search?:string}={}){const sql=getPostgresClient(),category=options.categoryAlias?.trim()||null,search=options.search?.trim()||null;const rows=await sql`SELECT p.id,p.name,p.alias,p.summary,p.description,p.image,p.published,p.ordering,(SELECT string_agg(c.name,', ' ORDER BY c.ordering,c.id) FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id AND c.published=true WHERE r.product_id=p.id) category_name FROM cic_products p WHERE p.published=true AND (${category}::text IS NULL OR EXISTS(SELECT 1 FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id WHERE r.product_id=p.id AND c.published=true AND c.alias=${category})) AND (${search}::text IS NULL OR p.name ILIKE '%'||${search}||'%' OR p.summary ILIKE '%'||${search}||'%') ORDER BY p.ordering,p.id`;return rows.map(r=>map(r as Row));}
-export async function getPublishedProductBySlug(slug:string){const sql=getPostgresClient();const[row]=await sql`SELECT p.id,p.name,p.alias,p.summary,p.description,p.image,p.published,p.ordering,(SELECT string_agg(c.name,', ' ORDER BY c.ordering,c.id) FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id AND c.published=true WHERE r.product_id=p.id) category_name FROM cic_products p WHERE p.published=true AND p.alias=${slug} LIMIT 1`;return row?map(row as Row):null;}
+export async function listPublishedProducts(options:{categoryAlias?:string;search?:string}={}){const sql=getPostgresClient(),category=options.categoryAlias?.trim()||null,search=options.search?.trim()||null;const rows=await sql`SELECT p.id,p.name,p.alias,p.summary,p.description,p.image,p.published,p.ordering,(SELECT string_agg(c.name,', ' ORDER BY c.ordering,c.id) FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id AND c.published=true WHERE r.product_id=p.id) category_name FROM cic_products p WHERE p.published=true AND p.name NOT ILIKE '[Du lieu da bi xoa%' AND (${category}::text IS NULL OR EXISTS(SELECT 1 FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id WHERE r.product_id=p.id AND c.published=true AND c.alias=${category})) AND (${search}::text IS NULL OR p.name ILIKE '%'||${search}||'%' OR p.summary ILIKE '%'||${search}||'%') ORDER BY coalesce(p.edited_time, p.created_time) DESC NULLS LAST, p.id DESC`;return rows.map(r=>map(r as Row));}
+export async function getPublishedProductBySlug(slug:string){const sql=getPostgresClient();const[row]=await sql`SELECT p.id,p.name,p.alias,p.summary,p.description,p.image,p.published,p.ordering,(SELECT string_agg(c.name,', ' ORDER BY c.ordering,c.id) FROM cic_products_categories_rel r JOIN cic_products_categories c ON c.id=r.category_id AND c.published=true WHERE r.product_id=p.id) category_name FROM cic_products p WHERE p.published=true AND p.name NOT ILIKE '[Du lieu da bi xoa%' AND p.alias=${slug} LIMIT 1`;return row?map(row as Row):null;}
 
 export async function getPublishedProductById(id: number): Promise<{ id: number; alias: string; name: string } | null> {
   const sql = getPostgresClient();
@@ -152,12 +152,12 @@ export async function listPublishedProductsForReference(locale: 'vi' | 'en' = 'v
       coalesce(b.name, p.manufactory_name) manufactory_name,
       (SELECT array_agg(a.name ORDER BY r.ordering, a.ordering, a.id)
        FROM ${appRelTable} r
-       JOIN cic_application a ON a.id = r.application_id AND a.published = true
+       JOIN cic_application a ON a.id = r.application_id AND a.published = true AND a.name NOT ILIKE '[Du lieu da bi xoa%'
        WHERE r.product_id = p.id) application_names,
       t.name product_type_name, p.video, p.link_video,
       (SELECT array_agg(r.related_product_id ORDER BY r.ordering, r.related_product_id) 
        FROM ${relTable} r 
-       JOIN ${pTable} rp ON rp.id = r.related_product_id AND rp.published = true 
+       JOIN ${pTable} rp ON rp.id = r.related_product_id AND rp.published = true AND rp.name NOT ILIKE '[Du lieu da bi xoa%'
        WHERE r.product_id = p.id) related_ids,
       (SELECT array_agg(c.name ORDER BY c.ordering, c.id)
        FROM ${catRelTable} r
@@ -168,8 +168,8 @@ export async function listPublishedProductsForReference(locale: 'vi' | 'en' = 'v
       ON b.id = CASE WHEN p.manufactory ~ '^[0-9]+$' THEN p.manufactory::int END
       AND b.published = true
     LEFT JOIN ${typeTable} t ON t.id = p.types_id AND t.published = true
-    WHERE p.published = true
-    ORDER BY p.ordering, p.id
+    WHERE p.published = true AND p.name NOT ILIKE '[Du lieu da bi xoa%'
+    ORDER BY coalesce(p.edited_time, p.created_time) DESC NULLS LAST, p.id DESC
   `;
   const data = rows.map((r) => mapCatalogReferenceRow(r, locale));
   productReferenceCache.set(locale, { data, expiresAt: Date.now() + PRODUCT_CACHE_TTL_MS });
@@ -227,7 +227,7 @@ export async function getPublishedProductBySlugForReference(slug: string, locale
       ON b.id = CASE WHEN p.manufactory ~ '^[0-9]+$' THEN p.manufactory::int END
       AND b.published=true
     LEFT JOIN ${typeTable} t ON t.id=p.types_id AND t.published=true
-    WHERE p.published=true AND (p.alias=${trimmed} OR p.alias=${decoded} OR (p.alias IS NULL AND (p.id::text=${trimmed} OR p.id::text=${decoded})))
+    WHERE p.published=true AND p.name NOT ILIKE '[Du lieu da bi xoa%' AND (p.alias=${trimmed} OR p.alias=${decoded} OR (p.alias IS NULL AND (p.id::text=${trimmed} OR p.id::text=${decoded})))
     LIMIT 1
   `;
   const data = rows[0] ? mapReferenceRow(rows[0], locale) : null;

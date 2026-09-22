@@ -73,10 +73,10 @@ export async function getCmsProducts(locale: ProductLocale): Promise<ProductsMod
   // List projection excludes full HTML and editor-only relations/media.
   const [rows, categories, brands, applications, productTypes] = await Promise.all([
     sql.unsafe(`SELECT p.id,p.name,p.alias,p.code,p.summary,p.image,p.icon,p.price,p.price_old,p.tags,p.is_hot,p.teamview,p.ordering,p.published,p.created_time,p.edited_time,p.manufactory,p.types_id,(SELECT array_agg(category_id ORDER BY category_id) FROM ${x.cr} WHERE product_id=p.id) category_ids,(SELECT array_agg(application_id ORDER BY ordering,application_id) FROM ${x.ar} WHERE product_id=p.id) application_ids FROM ${x.p} p WHERE p.name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY coalesce(p.edited_time, p.created_time) DESC NULLS LAST, p.id DESC`),
-    sql.unsafe(`SELECT id,name,alias FROM ${x.c} ORDER BY ordering,id`),
-    sql.unsafe(`SELECT id,name,image FROM ${x.b} ORDER BY ordering,id`),
-    sql.unsafe(`SELECT id,name,published FROM ${x.a} ORDER BY ordering,id`),
-    sql.unsafe(`SELECT id,name,published FROM ${x.t} ORDER BY ordering,id`),
+    sql.unsafe(`SELECT id,name,alias FROM ${x.c} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY ordering,id`),
+    sql.unsafe(`SELECT id,name,image FROM ${x.b} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY ordering,id`),
+    sql.unsafe(`SELECT id,name,published FROM ${x.a} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering, id`),
+    sql.unsafe(`SELECT id,name,published FROM ${x.t} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY ordering,id`),
   ]);
   return {
     products: rows.map((row) => mapListRow(row as Record<string, unknown>)),

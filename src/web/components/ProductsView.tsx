@@ -40,7 +40,8 @@ export function ProductsView({
   contactsByProductId = {},
 }: ProductsViewProps = {}) {
   const productsData = useMemo(() => {
-    const source = products ?? [];
+    const raw = products ?? [];
+    const source = raw.filter((item) => !item.name?.includes('[Du lieu da bi xoa'));
     return previewProduct ? [previewProduct, ...source.filter((item) => item.id !== previewProduct.id)] : source;
   }, [previewProduct, products]);
 
@@ -83,18 +84,24 @@ export function ProductsView({
     const relatedCategories = productsData.flatMap((product) =>
       product.categories?.length ? product.categories : product.field ? [product.field] : [],
     );
-    return Array.from(new Set(categoryOptions ?? relatedCategories)).filter(Boolean);
+    return Array.from(new Set(categoryOptions ?? relatedCategories))
+      .filter(Boolean)
+      .filter((cat) => !cat.includes('[Du lieu da bi xoa'));
   }, [categoryOptions, productsData]);
 
   const brands = useMemo(() => {
-    return Array.from(new Set(productsData.map((p) => p.brand)));
+    return Array.from(new Set(productsData.map((p) => p.brand)))
+      .filter(Boolean)
+      .filter((b) => !b.includes('[Du lieu da bi xoa'));
   }, [productsData]);
 
   const apps = useMemo(() => {
     const relatedApplications = productsData.flatMap((product) =>
       product.applications?.length ? product.applications : product.app ? [product.app] : [],
     );
-    return Array.from(new Set(applicationOptions ?? relatedApplications)).filter(Boolean);
+    return Array.from(new Set(applicationOptions ?? relatedApplications))
+      .filter(Boolean)
+      .filter((app) => !app.includes('[Du lieu da bi xoa'));
   }, [applicationOptions, productsData]);
 
   // Filter and Sort logic

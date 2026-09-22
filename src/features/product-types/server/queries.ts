@@ -18,8 +18,8 @@ export async function getCmsProductTypes(locale: ProductTypeLocale) {
   const sql = getPostgresClient();
   const source = table(locale); const products = productsTable(locale);
   const rows = await sql.unsafe(`SELECT t.id,t.name,t.alias,t.ordering,t.published,t.created_time,t.updated_time,
-    (SELECT count(*)::int FROM ${products} p WHERE p.types_id=t.id) usage_count
-    FROM ${source} t WHERE nullif(btrim(t.alias),'') IS NOT NULL ORDER BY t.ordering,t.id`);
+    (SELECT count(*)::int FROM ${products} p WHERE p.types_id=t.id AND p.name NOT ILIKE '[Du lieu da bi xoa%') usage_count
+    FROM ${source} t WHERE nullif(btrim(t.alias),'') IS NOT NULL AND t.name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY t.ordering,t.id`);
   return rows.map((row) => mapItem(row as Record<string, unknown>));
 }
 

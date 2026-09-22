@@ -70,7 +70,7 @@ export async function listPublishedProjects(locale: 'vi' | 'en' = 'vi'): Promise
            is_featured, ordering
     FROM ${table}
     WHERE published = true
-    ORDER BY ordering ASC, id ASC
+    ORDER BY coalesce(updated_time, created_time) DESC NULLS LAST, ordering ASC, id DESC
   `;
 
   return rows.map((r) => mapProjectListItem(r, locale));
@@ -105,8 +105,8 @@ export async function getPublishedProjectBySlug(slug: string, locale: 'vi' | 'en
       JOIN ${prodTable} p ON p.id = r.product_id
       LEFT JOIN ${mfgTable} m ON m.id::text = p.manufactory
       LEFT JOIN cic_products_applications_rel par ON par.product_id = p.id
-      LEFT JOIN cic_application a ON a.id = par.application_id
-      WHERE r.project_id = ${projectId} AND p.published = true
+      LEFT JOIN cic_application a ON a.id = par.application_id AND a.name NOT ILIKE '[Du lieu da bi xoa%'
+      WHERE r.project_id = ${projectId} AND p.published = true AND p.name NOT ILIKE '[Du lieu da bi xoa%'
       ORDER BY r.ordering ASC, p.id ASC
     `,
     sql`

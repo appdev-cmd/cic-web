@@ -80,6 +80,7 @@ export function ProductApplicationsManager({
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase(locale === 'en' ? 'en-US' : 'vi-VN');
     return items.filter((item) => {
+      if (item.name?.includes('[Du lieu da bi xoa')) return false;
       const matchesStatus =
         status === 'all' || (status === 'active' ? item.published : !item.published);
       const searchable = `${item.name} ${item.alias}`.toLocaleLowerCase(

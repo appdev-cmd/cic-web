@@ -40,8 +40,8 @@ export async function getCmsNews(locale: NewsLocale) {
   // Omit n.content (11MB payload) from list projection to achieve instant load
   const [rows, categories, products, activity] = await Promise.all([
     sql.unsafe(`SELECT n.id,n.title,n.alias,n.other_languages1,n.category_id,n.summary,n.image,n.video,n.file_upload,n.tags,n.news_related,n.products_related,n.start_time,n.end_time,n.published,n.is_hot,n.is_new,n.show_in_homepage,n.ordering,n.seo_title,n.seo_keyword,n.seo_description,n.tawk_to,n.created_time,n.updated_time,n.author,n.author_last,u.full_name author_name FROM ${t.news} n LEFT JOIN cic_users u ON u.id=coalesce(n.author_last_id,n.author_id) ORDER BY coalesce(n.start_time,n.created_time) DESC,n.id DESC`),
-    sql.unsafe(`SELECT id,name,title,alias,summary,parent_id,ordering,image,published,show_in_homepage,seo_title,seo_keyword,seo_description,created_time,updated_time FROM ${t.category} ORDER BY ordering,id`),
-    sql.unsafe(`SELECT id,name,image,code FROM ${t.product} ORDER BY name,id`),
+    sql.unsafe(`SELECT id,name,title,alias,summary,parent_id,ordering,image,published,show_in_homepage,seo_title,seo_keyword,seo_description,created_time,updated_time FROM ${t.category} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY ordering,id`),
+    sql.unsafe(`SELECT id,name,image,code FROM ${t.product} WHERE name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY name,id`),
     sql`SELECT id,entity_id,actor_label,action_code,occurred_at,after_data FROM cic_activity_logs WHERE entity_type='news' AND workspace=${locale} ORDER BY occurred_at DESC LIMIT 500`,
   ]);
 
