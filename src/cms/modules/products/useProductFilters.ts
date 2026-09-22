@@ -174,6 +174,9 @@ export const useProductFilters = ({
   // Filter Logic
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
+      // 0. Exclude legacy deleted placeholders
+      if (p.name?.includes('[Du lieu da bi xoa') || p.title?.includes('[Du lieu da bi xoa')) return false;
+
       // 1. System View Tab
       if (activeTab === 'published' && p.editorial_status !== 'published') return false;
       if (activeTab === 'draft' && p.editorial_status !== 'draft') return false;

@@ -142,7 +142,7 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     }>>(`
       SELECT id, name, created_time 
       FROM ${pTable} 
-      WHERE published = false 
+      WHERE published = false AND name NOT ILIKE '[Du lieu da bi xoa%'
       ORDER BY created_time DESC 
       LIMIT 5
     `),
