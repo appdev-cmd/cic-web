@@ -1003,12 +1003,13 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         onConfirm={handleConfirmDelete}
       />
 
-      <AiProductSmartDraftModal
+      {/* Tạm thời ẩn AI modal theo yêu cầu - mở lại khi server AI sẵn sàng */}
+      {/* <AiProductSmartDraftModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
         workspaceLocale={workspaceLocale}
         onDraftGenerated={handleDraftGenerated}
-      />
+      /> */}
     </div>
   );
 };

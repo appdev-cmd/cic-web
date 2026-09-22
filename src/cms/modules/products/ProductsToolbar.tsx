@@ -148,7 +148,8 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
 
         {/* Cụm nút thao tác bên phải */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
-          {onOpenAiCreate && (
+          {/* Tạm thời ẩn nút AI theo yêu cầu - mở lại khi server AI sẵn sàng */}
+          {/* {onOpenAiCreate && (
             <button
               type="button"
               onClick={onOpenAiCreate}
@@ -157,7 +158,7 @@ export const ProductsToolbar: React.FC<ProductsToolbarProps> = ({
               <Sparkles className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />
               <span>✦ Tạo nhanh cùng AI</span>
             </button>
-          )}
+          )} */}
 
           {/* Nút Đặt lại */}
           <button

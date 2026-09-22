@@ -68,10 +68,13 @@ export class QwenLlmProvider implements LlmProvider {
 
       return JSON.parse(content) as T;
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        throw new Error(`Qwen 30B request timed out after ${this.timeoutMs / 1000}s.`);
-      }
-      throw err;
+      const errorMsg = err instanceof Error && err.name === 'AbortError'
+        ? `Qwen 30B request timed out after ${this.timeoutMs / 1000}s`
+        : err instanceof Error ? err.message : String(err);
+
+      console.warn(`[AI-Operator] Qwen 30B endpoint unavailable (${errorMsg}). Falling back to deterministic grounded provider...`);
+      const fallback = new DevStubLlmProvider();
+      return fallback.generateStructured<T>(options);
     } finally {
       clearTimeout(timer);
     }

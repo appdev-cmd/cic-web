@@ -35,7 +35,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
 const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300';
 
 export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, product, aiDraftResult, categories, brands, applications: applicationOptions, productTypes, relatedProducts, featuredCount, onSave, onCancel, onOpenPreview }) => {
-  const [formMode, setFormMode] = useState<ProductFormViewMode>(aiDraftResult ? 'needs_attention' : 'all');
+  const [formMode, setFormMode] = useState<ProductFormViewMode>('all');
   const [isDiffOpen, setIsDiffOpen] = useState(false);
   const [aiChanges, setAiChanges] = useState<FieldChangeItem[]>(aiDraftResult?.changes || []);
   const [fieldOrigins, setFieldOrigins] = useState<Record<string, FieldOrigin>>(aiDraftResult?.fieldOrigins || {});
@@ -202,11 +202,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <AiActionsDropdown
+          {/* Tạm thời ẩn AI Actions theo yêu cầu - mở lại khi server AI sẵn sàng */}
+          {/* <AiActionsDropdown
             currentProduct={payload()}
             workspaceLocale={locale}
             onApplyUpdates={handleApplyAiUpdates}
-          />
+          /> */}
           <CmsButton
             variant="secondary"
             size="sm"
@@ -241,8 +242,8 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         </div>
       </header>
 
-      {/* AI Changes Notification Banner */}
-      {aiChanges.length > 0 && !aiBannerDismissed && (
+      {/* Tạm thời ẩn AI Changes Notification Banner và Form View Modes - mở lại khi server AI sẵn sàng */}
+      {/* {aiChanges.length > 0 && !aiBannerDismissed && (
         <div className="rounded-xl border border-orange-200 dark:border-orange-800/80 bg-orange-50/80 dark:bg-orange-950/30 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs animate-in fade-in duration-150">
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 shrink-0">
@@ -282,53 +283,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
-      {/* Form View Modes: [Cần xử lý] | [Đề xuất AI] | [Tất cả] */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-2 text-xs">
-        <div className="flex items-center gap-1.5">
-          <span className="text-slate-400 font-medium mr-1.5">Chế độ xem:</span>
-          <button
-            type="button"
-            onClick={() => setFormMode('needs_attention')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-              formMode === 'needs_attention'
-                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 shadow-2xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <span>Cần xử lý</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-200/70 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200">
-              {aiDraftResult?.needsAttention?.length || (priceOld ? 0 : 1)}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormMode('ai_suggestions')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-              formMode === 'ai_suggestions'
-                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shadow-2xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <span>Đề xuất AI</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-200/70 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200">
-              {aiDraftResult?.suggestedCount || 2}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormMode('all')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-              formMode === 'all'
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            Tất cả trường
-          </button>
-        </div>
-      </div>
+      {/* {formViewModes: [Cần xử lý] | [Đề xuất AI] | [Tất cả]} */}
 
       {formError && (
         <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300" role="alert">
@@ -506,13 +463,14 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     </aside></div>
     {mediaTarget && <PageMediaPickerModal locale={locale} returnValue="url" currentId={mediaTarget === 'image' ? image : icon} onClose={() => setMediaTarget(null)} onConfirm={(mediaUrl) => mediaTarget === 'image' ? setImage(mediaUrl) : setIcon(mediaUrl)} />}
 
-    <AiChangesDiffModal
+    {/* Tạm thời ẩn AI Changes Diff Modal - mở lại khi server AI sẵn sàng */}
+    {/* <AiChangesDiffModal
       isOpen={isDiffOpen}
       onClose={() => setIsDiffOpen(false)}
       changes={aiChanges}
       onRevertField={handleRevertField}
       onRevertAll={handleRevertAll}
-    />
+    /> */}
   </div>
   );
 };
