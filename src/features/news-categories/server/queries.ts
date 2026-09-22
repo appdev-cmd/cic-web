@@ -16,7 +16,7 @@ const mapCms = (row: Record<string, unknown>): NewsCategoryItem => ({
 
 export async function getCmsNewsCategories(locale: NewsCategoryLocale): Promise<NewsCategoryItem[]> {
   const sql = getPostgresClient(), { category, news } = names(locale);
-  const rows = await sql.unsafe(`SELECT c.id,c.name,c.title,c.alias,c.summary,c.parent_id,p.name parent_name,c.level,c.ordering,c.image,c.published,c.show_in_homepage,c.seo_title,c.seo_keyword,c.seo_description,c.created_time,c.updated_time,(SELECT count(*)::int FROM ${news} n WHERE n.category_id=c.id) usage_count,(SELECT count(*)::int FROM ${category} ch WHERE ch.parent_id=c.id) child_count FROM ${category} c LEFT JOIN ${category} p ON p.id=c.parent_id ORDER BY c.ordering,c.id`);
+  const rows = await sql.unsafe(`SELECT c.id,c.name,c.title,c.alias,c.summary,c.parent_id,p.name parent_name,c.level,c.ordering,c.image,c.published,c.show_in_homepage,c.seo_title,c.seo_keyword,c.seo_description,c.created_time,c.updated_time,(SELECT count(*)::int FROM ${news} n WHERE n.category_id=c.id) usage_count,(SELECT count(*)::int FROM ${category} ch WHERE ch.parent_id=c.id) child_count FROM ${category} c LEFT JOIN ${category} p ON p.id=c.parent_id WHERE c.name NOT ILIKE '[Du lieu da bi xoa%' ORDER BY coalesce(c.updated_time, c.created_time) DESC NULLS LAST, c.ordering, c.id`);
   return rows.map((row) => mapCms(row as Record<string, unknown>));
 }
 

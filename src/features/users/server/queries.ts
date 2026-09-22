@@ -12,7 +12,7 @@ export async function getCmsUsersData(): Promise<UsersGovernanceData> {
   await requirePermission('users','view');
   const sql=getPostgresClient();
   const [userRows,roleRows,branchRows,taskRows]=await Promise.all([
-    sql`SELECT id,username,email,fname,lname,full_name,phone,address,summary,image,account_status,agencies,password_changed_at,status_online,created_time,updated_time,last_visit_time,nums_visit FROM cic_users u WHERE NOT EXISTS (SELECT 1 FROM cic_trash_items ti WHERE ti.entity_type='user' AND ti.entity_id=u.id::text AND ti.status='trashed') ORDER BY ordering NULLS LAST,id`,
+    sql`SELECT id,username,email,fname,lname,full_name,phone,address,summary,image,account_status,agencies,password_changed_at,status_online,created_time,updated_time,last_visit_time,nums_visit FROM cic_users u WHERE nullif(btrim(u.username), '') IS NOT NULL AND u.username NOT ILIKE '[Du lieu da bi xoa%' AND NOT EXISTS (SELECT 1 FROM cic_trash_items ti WHERE ti.entity_type='user' AND ti.entity_id=u.id::text AND ti.status='trashed') ORDER BY coalesce(u.updated_time, u.created_time) DESC NULLS LAST, u.ordering NULLS LAST, u.id DESC`,
     sql`SELECT id,code,name,description,status FROM cic_roles WHERE status='active' ORDER BY name`,
     sql`SELECT id,code,name FROM cic_branches WHERE workspace='vi' AND published=true ORDER BY ordering NULLS LAST,id`,
     sql`SELECT id,module,view,_task,description,published,ordering FROM cic_permission_tasks WHERE published=true ORDER BY module,ordering NULLS LAST,id`,

@@ -122,6 +122,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities
   // Filtered Users Calculation
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
+      if (!user.username || !user.username.trim() || user.username.includes('[Du lieu da bi xoa')) return false;
       // Search by username / fullname / email / phone
       const query = searchQuery.toLowerCase().trim();
       const matchSearch =
