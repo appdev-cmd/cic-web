@@ -187,6 +187,22 @@ export async function getFormById(id: string | number): Promise<FormEntity | nul
     ORDER BY position ASC
   `;
 
+  const destRows = await sql<Array<{
+    id: number | string;
+    form_id: number | string;
+    destination_type: string;
+    name: string;
+    is_enabled: boolean;
+    config: any;
+    created_at: string;
+    updated_at: string;
+  }>>`
+    SELECT id, form_id, destination_type, name, is_enabled, config, created_at, updated_at
+    FROM cic_form_destinations
+    WHERE form_id = ${numId} AND deleted_at IS NULL
+    ORDER BY id ASC
+  `;
+
   const subCount = Number(row.submission_count || 0);
 
   return {
@@ -213,6 +229,16 @@ export async function getFormById(id: string | number): Promise<FormEntity | nul
       allowFileDownload: false,
       crmSyncEnabled: false,
     },
+    destinations: destRows.map((d) => ({
+      id: String(d.id),
+      formId: String(d.form_id),
+      destinationType: d.destination_type as any,
+      name: d.name || d.destination_type,
+      isEnabled: d.is_enabled,
+      config: d.config || {},
+      createdAt: new Date(d.created_at).toISOString(),
+      updatedAt: new Date(d.updated_at).toISOString(),
+    })),
     fields: fieldRows.map((f) => ({
       id: String(f.id),
       fieldKey: f.field_key,
@@ -284,12 +310,50 @@ export async function getFormSubmissions(formId: string | number, limit = 50): P
     ORDER BY v.id ASC
   `;
 
+  const deliveryRows = await sql<Array<{
+    id: number;
+    submission_id: number;
+    destination_id: number;
+    destination_type: string;
+    destination_name?: string;
+    status: string;
+    attempt_count: number;
+    last_error: string | null;
+    response_metadata: any;
+    idempotency_key: string | null;
+    last_attempt_at: string | null;
+    delivered_at: string | null;
+    created_at: string;
+    updated_at: string;
+  }>>`
+    SELECT 
+      d.id,
+      d.submission_id,
+      d.destination_id,
+      d.destination_type,
+      d.status,
+      d.attempt_count,
+      d.last_error,
+      d.response_metadata,
+      d.idempotency_key,
+      d.last_attempt_at,
+      d.delivered_at,
+      d.created_at,
+      d.updated_at,
+      COALESCE(dest.name, d.destination_type) AS destination_name
+    FROM cic_form_submission_deliveries d
+    LEFT JOIN cic_form_destinations dest ON dest.id = d.destination_id
+    WHERE d.submission_id IN ${sql(subIds)}
+    ORDER BY d.id ASC
+  `;
+
   const valuesBySub = new Map<number, FormSubmissionDetail['values']>();
   for (const v of valRows) {
-    if (!valuesBySub.has(v.submission_id)) {
-      valuesBySub.set(v.submission_id, []);
+    const vSubId = Number(v.submission_id);
+    if (!valuesBySub.has(vSubId)) {
+      valuesBySub.set(vSubId, []);
     }
-    valuesBySub.get(v.submission_id)!.push({
+    valuesBySub.get(vSubId)!.push({
       fieldKey: v.field_key,
       fieldLabel: v.field_label || v.field_key,
       fieldType: v.field_type || 'text',
@@ -299,9 +363,34 @@ export async function getFormSubmissions(formId: string | number, limit = 50): P
     });
   }
 
+  const deliveriesBySub = new Map<number, FormSubmissionDetail['deliveries']>();
+  for (const d of deliveryRows) {
+    const dSubId = Number(d.submission_id);
+    if (!deliveriesBySub.has(dSubId)) {
+      deliveriesBySub.set(dSubId, []);
+    }
+    deliveriesBySub.get(dSubId)!.push({
+      id: String(d.id),
+      submissionId: String(d.submission_id),
+      destinationId: String(d.destination_id),
+      destinationType: d.destination_type as any,
+      destinationName: d.destination_name,
+      status: d.status as any,
+      attemptCount: d.attempt_count,
+      lastError: d.last_error,
+      responseMetadata: d.response_metadata,
+      idempotencyKey: d.idempotency_key,
+      lastAttemptAt: d.last_attempt_at ? new Date(d.last_attempt_at).toISOString() : null,
+      deliveredAt: d.delivered_at ? new Date(d.delivered_at).toISOString() : null,
+      createdAt: new Date(d.created_at).toISOString(),
+      updatedAt: new Date(d.updated_at).toISOString(),
+    });
+  }
+
   return submissionRows.map((s) => {
     const sId = Number(s.id);
     const vals = valuesBySub.get(sId) || [];
+    const delivs = deliveriesBySub.get(sId) || [];
     const nameVal = vals.find((v) => v.fieldKey === 'full_name' || v.fieldKey === 'name')?.valueText;
     const emailVal = vals.find((v) => v.fieldKey === 'email')?.valueText;
     const phoneVal = vals.find((v) => v.fieldKey === 'phone' || v.fieldKey === 'telephone')?.valueText;
@@ -317,6 +406,7 @@ export async function getFormSubmissions(formId: string | number, limit = 50): P
       placementKey: s.placement_key || undefined,
       submittedAt: new Date(s.submitted_at).toISOString(),
       values: vals,
+      deliveries: delivs,
       customerName: nameVal,
       email: emailVal,
       phone: phoneVal,

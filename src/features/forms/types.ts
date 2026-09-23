@@ -76,6 +76,65 @@ export interface FormSubmitConfig {
   crmSyncEnabled: boolean;
 }
 
+export type FormDestinationType = 'google_sheets' | 'email' | 'webhook';
+
+export interface GoogleSheetsColumnMapping {
+  sheetHeader: string;
+  sourceType: 'field' | 'system';
+  sourceKey: string;
+}
+
+export interface GoogleSheetsDestinationConfig {
+  spreadsheetId: string;
+  sheetName: string;
+  columnMapping: GoogleSheetsColumnMapping[];
+  autoCreateHeaders?: boolean;
+}
+
+export interface EmailDestinationConfig {
+  sendAdminEmail: boolean;
+  adminEmails: string[];
+  adminEmailTemplateId?: string | null;
+  sendConfirmationEmail: boolean;
+  confirmationEmailTemplateId?: string | null;
+}
+
+export interface FormDestinationEntity {
+  id: string;
+  formId: string;
+  destinationType: FormDestinationType;
+  name: string;
+  isEnabled: boolean;
+  config: GoogleSheetsDestinationConfig | EmailDestinationConfig | Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FormDestinationInput {
+  id?: string;
+  destinationType: FormDestinationType;
+  name?: string;
+  isEnabled: boolean;
+  config: GoogleSheetsDestinationConfig | EmailDestinationConfig | Record<string, any>;
+}
+
+export interface FormSubmissionDeliveryEntity {
+  id: string;
+  submissionId: string;
+  destinationId: string;
+  destinationType: FormDestinationType;
+  destinationName?: string;
+  status: 'pending' | 'processing' | 'success' | 'failed';
+  attemptCount: number;
+  lastError?: string | null;
+  responseMetadata?: Record<string, any> | null;
+  idempotencyKey?: string | null;
+  lastAttemptAt?: string | null;
+  deliveredAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface FormEntity {
   id: string;
   workspace: FormWorkspace;
@@ -87,6 +146,7 @@ export interface FormEntity {
   status: FormStatus;
   currentVersion: number;
   submitConfig: FormSubmitConfig;
+  destinations?: FormDestinationEntity[];
   fields: FormFieldDefinition[];
   createdBy?: string;
   createdAt: string;
@@ -106,6 +166,7 @@ export interface CreateFormInput {
   description?: string;
   status?: FormStatus;
   submitConfig: FormSubmitConfig;
+  destinations?: FormDestinationInput[];
   fields: FormFieldDefinition[];
 }
 
@@ -116,6 +177,7 @@ export interface UpdateFormInput {
   status?: FormStatus;
   incrementVersion?: boolean;
   submitConfig: FormSubmitConfig;
+  destinations?: FormDestinationInput[];
   fields: FormFieldDefinition[];
 }
 
@@ -139,6 +201,7 @@ export interface FormSubmissionDetail {
   placementKey?: string;
   submittedAt: string;
   values: FormSubmissionValueItem[];
+  deliveries?: FormSubmissionDeliveryEntity[];
   customerName?: string;
   email?: string;
   phone?: string;

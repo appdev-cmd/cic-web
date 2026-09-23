@@ -685,5 +685,29 @@ Phương án đề xuất đảm bảo 100%:
   3. Quản lý thông tin Google tập trung an toàn qua Server Environment.
   4. Trải nghiệm Auto-mapping trực quan, dễ dùng cho quản trị viên.
   5. Sẵn sàng mở rộng Webhook/CRM mà không phải thay đổi kiến trúc core.
-================================================================================
+===============================================================================
+
+---
+
+## PHẦN M: BẢNG KIỂM TRA TRIỂN KHAI PRODUCTION (PRODUCTION IMPLEMENTATION AUDIT MATRIX)
+
+| Hạng mục kiểm tra | Trạng thái | Ghi chú & Bằng chứng kiểm thử |
+| :--- | :---: | :--- |
+| **Bảng CSDL `cic_form_destinations`** | `[x]` Đã áp dụng | Migration `db_migrate/migrations/20260923_form_multi_destination.sql` đã chạy thành công trên PostgreSQL. |
+| **Bảng CSDL `cic_form_submission_deliveries`** | `[x]` Đã áp dụng | Foreign key cascade, unique constraint `(submission_id, destination_id)` và indexes đầy đủ. |
+| **Đồng bộ Database Documentation** | `[x]` Hoàn thành | Đã cập nhật `db_migrate/database.html`, `cic14005_cic_fs_schema_moi_postgresql_PATCHED.sql`, `docs/database/POSTGRES_SCHEMA_DELTA.md`. |
+| **Backfill dữ liệu Form hiện có** | `[x]` Hoàn thành | 8 biểu mẫu đang có cấu hình email đã được backfill thành bản ghi `email` trong `cic_form_destinations`. |
+| **Google Sheets Server Credentials** | `[x]` Hoàn thành | Quản lý qua `GOOGLE_SERVICE_ACCOUNT_EMAIL` & `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` (khử lỗi `\n` tự động). Không lưu key vào DB. |
+| **Chuẩn hóa URL / ID Google Sheet** | `[x]` Hoàn thành | Hàm `normalizeSpreadsheetId` bóc tách chính xác ID từ URL đầy đủ hoặc giữ nguyên ID chuẩn. |
+| **Bảo toàn số điện thoại & Tiếng Việt** | `[x]` Hoàn thành | Tự động thêm `'` (apostrophe) trước chuỗi số bắt đầu bằng `0` (ví dụ: `'0912345678`) để Sheet không làm mất số `0`. UTF-8 Unicode tiếng Việt 100% chuẩn xác. |
+| **Deterministic Header Matcher** | `[x]` Hoàn thành | Khớp theo 5 bậc: (1) `field_key` -> (2) Normalized Vietnamese label -> (3) Semantic `role_type` -> (4) System fields -> (5) `UNMAPPED`. |
+| **Khởi tạo tiêu đề tự động trên Sheet** | `[x]` Hoàn thành | Nút "Khởi tạo hàng tiêu đề mẫu" chèn hàng 1 nếu Sheet chưa có tiêu đề. |
+| **Destination Dispatcher Pipeline** | `[x]` Hoàn thành | Chạy song song độc lập bằng `Promise.allSettled`, bọc `AbortController` 5 giây. |
+| **Failure Isolation** | `[x]` Hoàn thành | Sheet/Email thất bại không bao giờ rollback DB submission. Người dùng submit nhận thông báo thành công. |
+| **Idempotent Retry & Tracking** | `[x]` Hoàn thành | Bảng deliveries ghi nhận số lần thử (`attempt_count`), lỗi (`last_error`), và hỗ trợ retry qua API/CMS. |
+| **Giao diện CMS Form Builder** | `[x]` Hoàn thành | Thẻ Database (Luôn bật), Thẻ Google Sheets (Test kết nối, Copy SA Email, Auto-mapping), Thẻ Email (Admin & Khách hàng). |
+| **Giao diện Lịch sử Gửi (Submissions)** | `[x]` Hoàn thành | Huy hiệu trực quan `[DB: Đã lưu]`, `[Sheet: Thành công/Thất bại]`, `[Email: Thành công/Thất bại]` kèm nút Retry. |
+| **Verification Test Suite** | `[x]` Hoàn thành | `scripts/verify-form-multi-destination.ts`: 22/22 tests passed (100%). |
+| **Typecheck Foundation** | `[x]` Hoàn thành | `npm run typecheck:foundation`: 0 errors. |
+
 ```

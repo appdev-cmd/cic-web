@@ -58,7 +58,8 @@
     "verify:email-templates": "node --env-file=.env.local --import tsx --conditions=react-server scripts/verify-email-templates.ts",
     "db:apply-system-settings-readiness": "node --env-file=.env.local scripts/apply-system-settings-readiness.mjs",
     "db:apply-system-settings-branch-seed": "node --env-file=.env.local scripts/apply-system-settings-branch-seed.mjs",
-    "verify:system-settings-readiness": "node --env-file=.env.local scripts/verify-system-settings-readiness.mjs"
+    "verify:system-settings-readiness": "node --env-file=.env.local scripts/verify-system-settings-readiness.mjs",
+    "db:apply-form-destinations": "node --env-file=.env.local scripts/apply-form-multi-destination.mjs"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.2.0",
@@ -68,6 +69,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "ckeditor5": "^48.4.0",
     "dotenv": "^17.2.3",
+    "googleapis": "^181.0.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "next": "^16.3.3",

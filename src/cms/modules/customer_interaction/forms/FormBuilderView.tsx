@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Save,
@@ -84,6 +84,15 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
         status: form.status,
         fields: form.fields,
         submitConfig: form.submitConfig,
+        destinations: form.destinations
+          ? form.destinations.map((d) => ({
+              id: d.id,
+              destinationType: d.destinationType,
+              name: d.name,
+              isEnabled: d.isEnabled,
+              config: d.config,
+            }))
+          : [],
       });
       if (form.fields.length > 0) {
         setSelectedFieldId(form.fields[0].id);
@@ -425,6 +434,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
       {/* Tab 3: Submit Actions */}
       {activeTab === 'submit_actions' && (
         <FormSubmitActionsTab
+          formId={form?.id}
           formData={formData}
           setFormData={setFormData}
           emailTemplates={emailTemplates}

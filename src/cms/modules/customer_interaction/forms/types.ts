@@ -62,6 +62,8 @@ export interface FormSubmitConfig {
   crmConfig?: Record<string, any>;
 }
 
+import type { FormDestinationInput, FormDestinationEntity } from '@/features/forms/types';
+
 export interface FormItem extends BaseEntity {
   adminName: string;
   title: string;
@@ -71,6 +73,7 @@ export interface FormItem extends BaseEntity {
   currentVersion: number;
   fields: FormField[];
   submitConfig: FormSubmitConfig;
+  destinations?: FormDestinationEntity[];
   analytics: AnalyticsData;
   stats?: {
     submissions: number;
@@ -87,6 +90,7 @@ export interface FormFormData {
   status: FormStatus;
   fields: FormField[];
   submitConfig: FormSubmitConfig;
+  destinations?: FormDestinationInput[];
 }
 
 export type FormListTabType = 'all' | 'active' | 'draft' | 'archived';

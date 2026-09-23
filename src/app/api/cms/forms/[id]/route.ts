@@ -64,6 +64,7 @@ export async function PUT(
         status: body.status,
         incrementVersion: Boolean(body.incrementVersion),
         submitConfig: body.submitConfig,
+        destinations: body.destinations,
         fields: body.fields,
       },
       principal

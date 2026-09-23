@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
         description: body.description?.trim(),
         status: body.status || 'draft',
         submitConfig: body.submitConfig,
+        destinations: body.destinations,
         fields: body.fields,
       },
       principal

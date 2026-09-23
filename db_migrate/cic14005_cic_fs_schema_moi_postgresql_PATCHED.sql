@@ -3883,6 +3883,39 @@ CREATE TABLE "cic_form_submission_values" (
   CONSTRAINT "uq_cic_form_submission_values_submission_id_field_id" UNIQUE ("submission_id", "field_id")
 );
 
+-- [BẢNG MỚI] Cấu hình các điểm đến ngoại vi cho biểu mẫu (Google Sheets, Email, Webhook...)
+DROP TABLE IF EXISTS "cic_form_destinations" CASCADE;
+CREATE TABLE "cic_form_destinations" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "form_id" bigint NOT NULL REFERENCES cic_forms(id) ON DELETE CASCADE, -- ← — (bảng mới) | Form sở hữu destination.
+  "destination_type" varchar(50) NOT NULL, -- ← — (bảng mới) | Loại điểm đến (google_sheets, email, webhook...).
+  "name" varchar(255) NOT NULL DEFAULT '', -- ← — (bảng mới) | Tên gợi nhớ định danh điểm đến.
+  "is_enabled" boolean NOT NULL DEFAULT true, -- ← — (bảng mới) | Trạng thái bật/tắt điểm đến.
+  "config" jsonb NOT NULL DEFAULT '{}'::jsonb, -- ← — (bảng mới) | Cấu hình riêng biệt của từng loại destination.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  "deleted_at" timestamptz NULL -- ← — (bảng mới) | Soft delete.
+);
+
+-- [BẢNG MỚI] Lịch sử và trạng thái chuyển phát của từng submission đến từng destination
+DROP TABLE IF EXISTS "cic_form_submission_deliveries" CASCADE;
+CREATE TABLE "cic_form_submission_deliveries" (
+  "id" bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- ← — (bảng mới) | Khoá chính tự tăng.
+  "submission_id" bigint NOT NULL REFERENCES cic_form_submissions(id) ON DELETE CASCADE, -- ← — (bảng mới) | Lượt submit biểu mẫu.
+  "destination_id" bigint NOT NULL REFERENCES cic_form_destinations(id) ON DELETE CASCADE, -- ← — (bảng mới) | Điểm đến cụ thể.
+  "destination_type" varchar(50) NOT NULL, -- ← — (bảng mới) | Loại điểm đến (snapshot).
+  "status" varchar(50) NOT NULL DEFAULT 'pending' CHECK ("status" IN ('pending', 'processing', 'success', 'failed')), -- ← — (bảng mới) | Trạng thái chuyển phát.
+  "attempt_count" integer NOT NULL DEFAULT 0, -- ← — (bảng mới) | Số lần đã thử chuyển phát.
+  "last_error" text NULL, -- ← — (bảng mới) | Nội dung lỗi chi tiết lần thử gần nhất.
+  "response_metadata" jsonb NULL, -- ← — (bảng mới) | Dữ liệu phản hồi từ external service (row_id, message_id...).
+  "idempotency_key" varchar(255) NULL, -- ← — (bảng mới) | Khóa chống trùng lặp.
+  "last_attempt_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm thử chuyển phát gần nhất.
+  "delivered_at" timestamptz NULL, -- ← — (bảng mới) | Thời điểm chuyển phát thành công.
+  "created_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm tạo bản ghi.
+  "updated_at" timestamptz NOT NULL DEFAULT now(), -- ← — (bảng mới) | Thời điểm cập nhật.
+  CONSTRAINT "uq_cic_form_submission_deliveries_sub_dest" UNIQUE ("submission_id", "destination_id")
+);
+
 -- [BẢNG MỚI] Trạng thái vận hành hợp nhất cho request từ nhiều nguồn (contact/product_contact/order/form_submission).
 DROP TABLE IF EXISTS "cic_customer_request_states" CASCADE;
 CREATE TABLE "cic_customer_request_states" (
@@ -4277,6 +4310,11 @@ CREATE INDEX IF NOT EXISTS "idx_cic_form_submissions_cta_id" ON "cic_form_submis
 CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_values_submission_id" ON "cic_form_submission_values" ("submission_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_values_field_id" ON "cic_form_submission_values" ("field_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_values_media_asset_id" ON "cic_form_submission_values" ("media_asset_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_destinations_form_id" ON "cic_form_destinations" ("form_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_destinations_active" ON "cic_form_destinations" ("form_id", "destination_type", "is_enabled") WHERE "deleted_at" IS NULL;
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_deliveries_sub" ON "cic_form_submission_deliveries" ("submission_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_deliveries_dest" ON "cic_form_submission_deliveries" ("destination_id");
+CREATE INDEX IF NOT EXISTS "idx_cic_form_submission_deliveries_status" ON "cic_form_submission_deliveries" ("status");
 CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_states_assigned_user_id" ON "cic_customer_request_states" ("assigned_user_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_notes_request_state_id" ON "cic_customer_request_notes" ("request_state_id");
 CREATE INDEX IF NOT EXISTS "idx_cic_customer_request_notes_created_by" ON "cic_customer_request_notes" ("created_by");

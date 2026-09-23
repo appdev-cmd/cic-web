@@ -1,15 +1,105 @@
 import 'server-only';
-import { withTransaction } from '@/server/db/postgres';
+import { withTransaction, getPostgresClient } from '@/server/db/postgres';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/server/audit/registry';
 import { writeAuditEvent } from '@/server/audit/writer';
 import type { CmsPrincipal } from '@/server/auth/guards';
-import type { CreateFormInput, UpdateFormInput, FormStatus, FormEntity } from '../types';
+import type { CreateFormInput, UpdateFormInput, FormStatus, FormEntity, FormDestinationInput, EmailDestinationConfig } from '../types';
 import { getFormById } from './queries';
+import { destinationDispatcher } from './dispatcher';
+import type { DeliveryResult, FormSubmissionFieldContext } from './dispatcher/types';
+import { validateDestinationConfig } from './validation/destination-schemas';
 
 function parseTemplateId(val: string | undefined): number | null {
   if (!val) return null;
   const n = Number(val);
   return Number.isSafeInteger(n) && n > 0 ? n : null;
+}
+
+export async function saveFormDestinations(
+  formId: number,
+  destinations: FormDestinationInput[] | undefined,
+  sql: any
+): Promise<void> {
+  if (!destinations) return;
+
+  const activeIds: number[] = [];
+
+  for (const dest of destinations) {
+    const validatedConfig = validateDestinationConfig(dest.destinationType, dest.config);
+    const destIdNum = dest.id ? Number(dest.id) : null;
+
+    if (destIdNum && Number.isSafeInteger(destIdNum) && destIdNum > 0) {
+      const [updated] = await sql`
+        UPDATE cic_form_destinations
+        SET 
+          destination_type = ${dest.destinationType},
+          name = ${dest.name || ''},
+          is_enabled = ${Boolean(dest.isEnabled)},
+          config = ${sql.json(validatedConfig as any)},
+          updated_at = now(),
+          deleted_at = NULL
+        WHERE id = ${destIdNum} AND form_id = ${formId}
+        RETURNING id
+      `;
+      if (updated?.id) activeIds.push(Number(updated.id));
+    } else {
+      const [inserted] = await sql`
+        INSERT INTO cic_form_destinations (
+          form_id,
+          destination_type,
+          name,
+          is_enabled,
+          config,
+          created_at,
+          updated_at
+        ) VALUES (
+          ${formId},
+          ${dest.destinationType},
+          ${dest.name || ''},
+          ${Boolean(dest.isEnabled)},
+          ${sql.json(validatedConfig as any)},
+          now(),
+          now()
+        )
+        RETURNING id
+      `;
+      if (inserted?.id) activeIds.push(Number(inserted.id));
+    }
+  }
+
+  // Soft delete removed destinations
+  if (activeIds.length > 0) {
+    await sql`
+      UPDATE cic_form_destinations
+      SET deleted_at = now()
+      WHERE form_id = ${formId} AND id NOT IN ${sql(activeIds)} AND deleted_at IS NULL
+    `;
+  } else {
+    await sql`
+      UPDATE cic_form_destinations
+      SET deleted_at = now()
+      WHERE form_id = ${formId} AND deleted_at IS NULL
+    `;
+  }
+
+  // Dual-write sync for Email destination back to cic_forms legacy columns
+  const emailDest = destinations.find((d) => d.destinationType === 'email');
+  if (emailDest) {
+    const cfg = emailDest.config as EmailDestinationConfig;
+    const adminTplId = parseTemplateId(cfg?.adminEmailTemplateId || undefined);
+    const confTplId = parseTemplateId(cfg?.confirmationEmailTemplateId || undefined);
+
+    await sql`
+      UPDATE cic_forms
+      SET 
+        send_admin_email = ${Boolean(emailDest.isEnabled && cfg?.sendAdminEmail)},
+        admin_emails = ${sql.array(cfg?.adminEmails || [])},
+        admin_email_template_id = ${adminTplId},
+        send_confirmation_email = ${Boolean(emailDest.isEnabled && cfg?.sendConfirmationEmail)},
+        confirmation_email_template_id = ${confTplId}
+      WHERE id = ${formId}
+    `;
+  }
 }
 
 export async function createForm(input: CreateFormInput, actor: CmsPrincipal): Promise<FormEntity> {
@@ -112,6 +202,9 @@ export async function createForm(input: CreateFormInput, actor: CmsPrincipal): P
         `;
       }
     }
+
+    // 3.5. Insert form destinations
+    await saveFormDestinations(formId, input.destinations, sql);
 
     // 4. Audit Log
     await writeAuditEvent(
@@ -225,6 +318,9 @@ export async function updateForm(
         `;
       }
     }
+
+    // 2.5. Update form destinations
+    await saveFormDestinations(numId, input.destinations, sql);
 
     // 3. Audit Log
     await writeAuditEvent(
@@ -375,11 +471,7 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
     throw new Error('ID biểu mẫu không hợp lệ.');
   }
 
-  const { dispatchTemplatedEmail } = await import('@/lib/email/dispatcher');
-  const { sendEmail } = await import('@/lib/email/transporter');
-  const { escapeHtml } = await import('@/lib/email/tokens');
-
-  const { submissionId, form, customerEmail, customerName, customerPhone, formattedValues } = await withTransaction(
+  const { submissionId, form, customerEmail, customerName, customerPhone, fieldContexts } = await withTransaction(
     async (sql) => {
       // 1. Get form configuration
       const [formRow] = await sql`
@@ -398,25 +490,30 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
 
       // 2. Get form fields to resolve roles
       const fields = await sql`
-        SELECT id, field_key, role_type, label
+        SELECT id, field_key, role_type, label, field_type
         FROM cic_form_fields
         WHERE form_id = ${formIdNum}
         ORDER BY position ASC
       `;
 
-      // Identify special roles
+      // Identify special roles and build field contexts
       let emailVal = '';
       let nameVal = '';
       let phoneVal = '';
-      const formattedMap: Record<string, string> = {};
+      const contexts: Record<string, FormSubmissionFieldContext> = {};
 
       for (const f of fields) {
         const key = f.field_key;
         const val = payload.values[key];
         const stringVal = typeof val === 'string' ? val.trim() : val !== undefined && val !== null ? JSON.stringify(val) : '';
-        if (stringVal) {
-          formattedMap[f.label || key] = stringVal;
-        }
+
+        contexts[key] = {
+          fieldKey: key,
+          label: f.label || key,
+          fieldType: f.field_type || 'text',
+          roleType: f.role_type || undefined,
+          value: val !== undefined ? val : '',
+        };
 
         if (f.role_type === 'email' || key === 'email') {
           if (!emailVal && stringVal) emailVal = stringVal;
@@ -515,86 +612,33 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
         customerEmail: emailVal,
         customerName: nameVal || 'Khách hàng',
         customerPhone: phoneVal,
-        formattedValues: formattedMap,
+        fieldContexts: contexts,
       };
     }
   );
 
-  // 6. Send notification emails asynchronously
+  // 6. Asynchronously dispatch to all destinations via DestinationDispatcher
   try {
-    // Admin notification
-    if (form.send_admin_email) {
-      const adminRecipients = Array.isArray(form.admin_emails) && form.admin_emails.length > 0
-        ? form.admin_emails
-        : [process.env.ADMIN_NOTIFICATION_EMAIL || process.env.MAIL_FROM_ADDRESS || 'nampt@cic.com.vn'];
-
-      if (form.admin_email_template_id) {
-        await dispatchTemplatedEmail({
-          workspace: form.workspace,
-          templateId: form.admin_email_template_id,
-          audience: 'internal',
-          to: adminRecipients,
-          variables: {
-            '{{customer.full_name}}': customerName,
-            '{{customer.email}}': customerEmail,
-            '{{customer.phone}}': customerPhone,
-            '{{form.title}}': form.title,
-            ...formattedValues,
-          },
-        });
-      } else {
-        const tableRows = Object.entries(formattedValues)
-          .map(([lbl, v]) => `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;"><strong>${escapeHtml(lbl)}:</strong></td><td style="padding: 8px 0; color: #1e293b;">${escapeHtml(v)}</td></tr>`)
-          .join('');
-
-        await sendEmail({
-          to: adminRecipients,
-          subject: `[Biểu mẫu] Lượt gửi mới: ${form.title} - ${customerName}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-              <h3 style="color: #ea580c; margin-top: 0;">Thông báo: Lượt gửi biểu mẫu mới</h3>
-              <p>Biểu mẫu: <strong>${escapeHtml(form.title)}</strong></p>
-              <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">${tableRows}</table>
-              <p style="font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; margin: 0;">Đã lưu vào hệ thống Yêu cầu khách hàng CMS.</p>
-            </div>
-          `,
-        });
-      }
-    }
-
-    // Customer confirmation email
-    if (form.send_confirmation_email && customerEmail && customerEmail.includes('@')) {
-      if (form.confirmation_email_template_id) {
-        await dispatchTemplatedEmail({
-          workspace: form.workspace,
-          templateId: form.confirmation_email_template_id,
-          audience: 'customer',
-          to: customerEmail,
-          variables: {
-            '{{customer.full_name}}': customerName,
-            '{{customer.email}}': customerEmail,
-            '{{form.title}}': form.title,
-            ...formattedValues,
-          },
-        });
-      } else {
-        await sendEmail({
-          to: customerEmail,
-          subject: `[CIC Technology] Tiếp nhận biểu mẫu: ${form.title}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-              <h3 style="color: #ea580c; margin-top: 0;">CIC Technology & Consultancy</h3>
-              <p>Kính gửi <strong>${escapeHtml(customerName)}</strong>,</p>
-              <p>Cảm ơn Quý khách đã gửi thông tin qua biểu mẫu <strong>${escapeHtml(form.title)}</strong> của CIC Technology.</p>
-              <p>${escapeHtml(form.success_message) || 'Chúng tôi đã tiếp nhận thông tin và sẽ liên hệ phản hồi sớm nhất có thể.'}</p>
-              <p style="font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 20px;">Trân trọng,<br/><strong>CIC Technology</strong></p>
-            </div>
-          `,
-        });
-      }
-    }
-  } catch (emailErr) {
-    console.error('[submitDynamicForm] Error sending emails:', emailErr);
+    await destinationDispatcher.dispatchAll({
+      submissionId,
+      formId: formIdNum,
+      formCode: form.code,
+      formTitle: form.title,
+      workspace: form.workspace,
+      submittedAt: new Date(),
+      sourcePath: payload.sourcePath,
+      sourceType: payload.sourceType,
+      ctaId: payload.ctaId ? Number(payload.ctaId) : null,
+      placementKey: payload.placementKey,
+      fields: fieldContexts,
+      customerName,
+      customerEmail,
+      customerPhone,
+      successMessage: form.success_message,
+      redirectUrl: form.redirect_url,
+    });
+  } catch (dispatchErr) {
+    console.error('[submitDynamicForm] Error during destination dispatching:', dispatchErr);
   }
 
   return {
@@ -605,3 +649,38 @@ export async function submitDynamicForm(payload: DynamicFormSubmissionPayload): 
   };
 }
 
+export async function retrySubmissionDelivery(
+  formId: string | number,
+  submissionId: string | number,
+  deliveryId: string | number,
+  actor: CmsPrincipal
+): Promise<DeliveryResult> {
+  const result = await destinationDispatcher.retryDelivery(submissionId, deliveryId);
+
+  const sql = getPostgresClient();
+  const [formRow] = await sql`
+    SELECT workspace, title FROM cic_forms WHERE id = ${Number(formId)}
+  `;
+
+  await writeAuditEvent(
+    actor,
+    {
+      action: AUDIT_ACTIONS.FORM_UPDATED,
+      entityType: AUDIT_ENTITY_TYPES.FORM,
+      entityId: String(formId),
+      entityTitle: formRow?.title ? `${formRow.title} (Delivery #${deliveryId})` : `Thử gửi lại chuyển phát (Delivery #${deliveryId})`,
+      module: 'forms',
+      workspace: (formRow?.workspace as any) || 'vi',
+      result: result.status === 'success' ? 'success' : 'failed',
+      after: {
+        submissionId: String(submissionId),
+        deliveryId: String(deliveryId),
+        destinationType: result.destinationType,
+        status: result.status,
+        lastError: result.lastError,
+      },
+    }
+  );
+
+  return result;
+}

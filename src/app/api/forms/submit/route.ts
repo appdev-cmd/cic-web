@@ -21,6 +21,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Honeypot anti-spam: silently drop bot submissions without polluting database
+    if (body.honeypot || body._hp || body.values?._hp) {
+      return NextResponse.json({
+        success: true,
+        submissionId: 'filtered',
+        successMessage: 'Cảm ơn bạn đã gửi thông tin!',
+      });
+    }
+
     const result = await submitDynamicForm({
       formId: body.formId,
       sourceType: body.sourceType || 'website_form',

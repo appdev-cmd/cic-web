@@ -799,6 +799,47 @@ Không có. `cic_contact*`, `cic_product_contact` và `cic_order*` tiếp tục 
 - CHECK đúng một dạng value theo field type; file upload lưu Media FK, không lưu binary/path tùy ý.
 - Mức độ: **BẮT BUỘC**.
 
+#### `cic_form_destinations`
+
+| Column | Type | Constraint |
+| ------ | ---- | ---------- |
+| `id` | `bigint` identity | PK |
+| `form_id` | `bigint` | NOT NULL, FK → `cic_forms(id)` ON DELETE CASCADE |
+| `destination_type` | `varchar(50)` | NOT NULL, e.g. `'google_sheets'`, `'email'`, `'webhook'` |
+| `name` | `varchar(255)` | NOT NULL DEFAULT `''` |
+| `is_enabled` | `boolean` | NOT NULL DEFAULT `true` |
+| `config` | `jsonb` | NOT NULL DEFAULT `'{}'::jsonb` |
+| `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `deleted_at` | `timestamptz` | NULL |
+
+- Index: (`form_id`), (`form_id`, `destination_type`, `is_enabled`) WHERE `deleted_at` IS NULL.
+- Hỗ trợ 0..N destinations cho 1 Form (không unique theo destination_type để hỗ trợ nhiều Sheet, nhiều Email target).
+- Cấu hình riêng biệt của từng adapter (Google Sheets: spreadsheetId, sheetName, columnMapping; Email: adminEmails, templates...) lưu trong `config JSONB`.
+- Mức độ: **BẮT BUỘC**.
+
+#### `cic_form_submission_deliveries`
+
+| Column | Type | Constraint |
+| ------ | ---- | ---------- |
+| `id` | `bigint` identity | PK |
+| `submission_id` | `bigint` | NOT NULL, FK → `cic_form_submissions(id)` ON DELETE CASCADE |
+| `destination_id` | `bigint` | NOT NULL, FK → `cic_form_destinations(id)` ON DELETE CASCADE |
+| `destination_type` | `varchar(50)` | NOT NULL |
+| `status` | `varchar(50)` | NOT NULL DEFAULT `'pending'`, CHECK `pending`, `processing`, `success`, `failed` |
+| `attempt_count` | `integer` | NOT NULL DEFAULT `0` |
+| `last_error` | `text` | NULL |
+| `response_metadata` | `jsonb` | NULL |
+| `idempotency_key` | `varchar(255)` | NULL |
+| `last_attempt_at` | `timestamptz` | NULL |
+| `delivered_at` | `timestamptz` | NULL |
+| `created_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+| `updated_at` | `timestamptz` | NOT NULL DEFAULT `now()` |
+
+- Unique: (`submission_id`, `destination_id`); index (`submission_id`), (`destination_id`), (`status`).
+- Theo dõi lịch sử và trạng thái chuyển phát của từng submission đến từng destination, hỗ trợ retry thủ công an toàn.
+- Mức độ: **BẮT BUỘC**.
+
 ### Mapping / lưu ý
 
 - `adminName → admin_name`, `currentVersion → current_version`, `fields → cic_form_fields`; submit config map vào các policy/FK trên `cic_forms`.
