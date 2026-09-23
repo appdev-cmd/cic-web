@@ -20,11 +20,11 @@ export async function POST(
       success: result.status === 'success',
       result,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     const norm = normalizeServerError(err);
     if (norm.code === 'UNAUTHENTICATED') return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
     if (norm.code === 'FORBIDDEN') return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
     console.error('[API Retry Delivery Error]', err);
-    return NextResponse.json({ success: false, error: err?.message || 'Lỗi khi gửi lại.' }, { status: 500 });
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Lỗi khi gửi lại.' }, { status: 500 });
   }
 }

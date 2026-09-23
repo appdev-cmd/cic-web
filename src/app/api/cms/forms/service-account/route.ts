@@ -11,7 +11,7 @@ export async function GET() {
 
     const email = getGoogleServiceAccountEmail();
     return NextResponse.json({ email });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Unauthorized' }, { status: 401 });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Unauthorized' }, { status: 401 });
   }
 }

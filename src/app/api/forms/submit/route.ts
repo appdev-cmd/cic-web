@@ -41,10 +41,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API /api/forms/submit Error]', error);
     return NextResponse.json(
-      { success: false, error: error?.message || 'Có lỗi xảy ra khi gửi biểu mẫu.' },
+      { success: false, error: error instanceof Error ? error.message : 'Có lỗi xảy ra khi gửi biểu mẫu.' },
       { status: 500 }
     );
   }

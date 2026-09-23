@@ -37,7 +37,7 @@ export async function POST(
     }
 
     // If headers exist, match with form fields
-    let suggestedMapping: any[] = [];
+    let suggestedMapping: import('@/features/forms/types').GoogleSheetsColumnMapping[] = [];
     if (testResult.headers && testResult.headers.length > 0) {
       const form = await getFormById(id);
       if (form && form.fields) {
@@ -53,11 +53,11 @@ export async function POST(
       headers: testResult.headers || [],
       suggestedMapping,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     const norm = normalizeServerError(err);
     if (norm.code === 'UNAUTHENTICATED') return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
     if (norm.code === 'FORBIDDEN') return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
     console.error('[API Google Sheets Test Error]', err);
-    return NextResponse.json({ success: false, error: err?.message || 'Lỗi kiểm tra kết nối.' }, { status: 500 });
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Lỗi kiểm tra kết nối.' }, { status: 500 });
   }
 }

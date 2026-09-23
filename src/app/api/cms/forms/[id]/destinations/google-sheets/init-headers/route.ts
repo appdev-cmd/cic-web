@@ -32,11 +32,11 @@ export async function POST(
       message: `Đã khởi tạo ${headers.length} cột tiêu đề trên sheet "${sheetName}".`,
       headers,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     const norm = normalizeServerError(err);
     if (norm.code === 'UNAUTHENTICATED') return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
     if (norm.code === 'FORBIDDEN') return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
     console.error('[API Init Sheet Headers Error]', err);
-    return NextResponse.json({ success: false, error: err?.message || 'Lỗi khởi tạo tiêu đề.' }, { status: 500 });
+    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : 'Lỗi khởi tạo tiêu đề.' }, { status: 500 });
   }
 }
