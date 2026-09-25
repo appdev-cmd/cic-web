@@ -1,15 +1,21 @@
+import { config } from 'dotenv';
 import postgres from 'postgres';
+
+// Auto-load .env.local and .env
+config({ path: '.env.local', override: false, quiet: true });
+config({ path: '.env', override: false, quiet: true });
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
-  console.error('ERROR: DATABASE_URL environment variable is not defined.');
-  process.exit(1);
+  console.warn('⚠️ [SEED] DATABASE_URL is not set. Skipping Form & CTA database seeding.');
+  process.exit(0);
 }
 
 const sql = postgres(DATABASE_URL, {
-  max: 10,
+  max: 5,
   prepare: false,
   ssl: 'require',
+  connect_timeout: 10,
 });
 
 // -----------------------------------------------------------------------------
@@ -989,10 +995,20 @@ async function runSeed() {
 }
 
 runSeed()
+  .then(() => {
+    console.log('[SEED] Form & CTA seeding process finished.');
+  })
   .catch((err) => {
-    console.error('SEEDING FAILED:', err);
-    process.exit(1);
+    console.error('⚠️ [SEED] Seeding error:', err.message);
+    if (process.env.REQUIRE_DB_SEED === 'true') {
+      process.exit(1);
+    } else {
+      console.warn('⚠️ [SEED] Non-fatal seed error. Continuing build process.');
+      process.exit(0);
+    }
   })
   .finally(async () => {
-    await sql.end();
+    if (sql) {
+      await sql.end({ timeout: 5 }).catch(() => {});
+    }
   });

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
-    "build": "next build",
+    "build": "node scripts/seed-public-forms-and-ctas.mjs && next build",
+    "db:seed-forms-ctas": "node scripts/seed-public-forms-and-ctas.mjs",
     "start": "next start --hostname 0.0.0.0 --port 3000",
     "lint": "eslint src/app src/server src/shared/components src/shared/i18n src/shared/tokens src/shared/ui src/instrumentation.ts src/proxy.ts scripts/check-foundation-env.ts scripts/check-foundation-boundaries.mjs scripts/check-data-foundation.mjs scripts/check-repository-security.mjs next.config.ts postcss.config.mjs --max-warnings=0",
     "typecheck": "npm run typecheck:foundation && npm run typecheck:legacy",
