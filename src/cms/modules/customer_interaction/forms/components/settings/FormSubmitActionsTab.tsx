@@ -247,32 +247,42 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                 <Database className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-white">Cơ sở dữ liệu hệ thống (Database)</span>
-                <p className="text-[11px] text-slate-500">Mọi lượt gửi đều được lưu trữ vĩnh viễn và bảo vệ toàn vẹn dữ liệu.</p>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">Cơ sở dữ liệu biểu mẫu (Form Submissions)</span>
+                <p className="text-[11px] text-slate-500">Mọi câu trả lời gửi lên đều được lưu trữ vĩnh viễn và bảo vệ toàn vẹn dữ liệu trong biểu mẫu này.</p>
               </div>
             </div>
-            <span className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800">
+            <span className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800 shrink-0">
               Bắt buộc · Luôn bật
             </span>
           </div>
 
-          <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 space-y-2">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.submitConfig.createCustomerRequest}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    submitConfig: { ...formData.submitConfig, createCustomerRequest: e.target.checked },
-                  })
-                }
-                className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500"
-              />
-              <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                Tự động tạo bản ghi <strong>Yêu cầu khách hàng mới (Leads)</strong> trong CMS để phân công xử lý
-              </span>
-            </label>
+          <div className="pt-3 border-t border-slate-200/80 dark:border-slate-700/80">
+            <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.submitConfig.createCustomerRequest}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      submitConfig: { ...formData.submitConfig, createCustomerRequest: e.target.checked },
+                    })
+                  }
+                  className="w-4 h-4 mt-0.5 rounded text-orange-600 focus:ring-orange-500 cursor-pointer"
+                />
+                <div className="space-y-1">
+                  <span className="text-xs text-slate-800 dark:text-slate-200 font-medium block">
+                    Tùy chọn nghiệp vụ CRM: Tự động tạo bản ghi <strong>Yêu cầu khách hàng mới (Leads)</strong>
+                  </span>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Đồng thời chuyển đổi lượt gửi thành một yêu cầu mới trong mục <em>Yêu cầu khách hàng</em> để nhân viên kinh doanh / tư vấn phân công xử lý.
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 italic">
+                    (Bỏ chọn nếu đây là form khảo sát ý kiến, đánh giá nội bộ hoặc biểu mẫu không cần đội ngũ Sales theo dõi xử lý)
+                  </p>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 
