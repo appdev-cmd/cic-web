@@ -1,5 +1,6 @@
 import 'server-only';
 import { getPostgresClient } from '@/server/db/postgres';
+import { getCtaPlacements } from '@/features/customer-interaction/placements';
 import type { CtaEntity, CtaFilterParams, CtaWorkspace } from '../types';
 
 interface RawCtaRow {
@@ -55,8 +56,8 @@ function mapRowToCtaEntity(row: RawCtaRow): CtaEntity {
     createdAt: new Date(row.created_at).toISOString(),
     updatedAt: new Date(row.updated_at).toISOString(),
     deletedAt: row.deleted_at ? new Date(row.deleted_at).toISOString() : null,
-    usedByCount: 0,
-    usedByPages: [],
+    usedByCount: getCtaPlacements(row.code, row.workspace).length,
+    usedByPages: getCtaPlacements(row.code, row.workspace),
     analytics: {
       impressions: 0,
       clicks: 0,

@@ -1,6 +1,6 @@
 // Form Module Types
 
-import { BaseEntity, AnalyticsData } from '../shared/types';
+import { BaseEntity, AnalyticsData, UsageLocation } from '../shared/types';
 import { FieldType, FieldRoleType } from '../shared/constants/fieldTypes';
 import { FormStatus } from '../shared/constants/statusTypes';
 import type { CustomerInteractionGovernance } from '../../../../shared/customerInteractionContract';
@@ -79,6 +79,8 @@ export interface FormItem extends BaseEntity {
     submissions: number;
     conversionRate: number;
   };
+  usedByPages?: UsageLocation[];
+  usedByCount?: number;
   governance: CustomerInteractionGovernance;
 }
 

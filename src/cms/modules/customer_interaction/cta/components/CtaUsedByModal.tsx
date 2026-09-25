@@ -47,32 +47,51 @@ export const CtaUsedByModal: React.FC<CtaUsedByModalProps> = ({
               Chưa có trang nào nhúng nút CTA này.
             </div>
           ) : (
-            <div className="space-y-2">
-              {cta.usedByPages.map((page, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="space-y-0.5">
-                    <span className="font-bold text-slate-900 dark:text-white block">
-                      {page.pageTitle}
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      Vị trí: {page.placementKey}
-                    </span>
-                  </div>
-
-                  <a
-                    href={page.pagePath || '#'}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1 text-[11px] font-semibold text-orange-600 hover:text-orange-500 dark:text-orange-400 cursor-pointer"
+            <div className="space-y-2.5">
+              {cta.usedByPages.map((page, idx) => {
+                const targetUrl = page.pagePath === 'all' ? '/' : (page.pagePath || '#');
+                const isGlobal = page.pagePath === 'all';
+                return (
+                  <div
+                    key={idx}
+                    className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 text-xs"
                   >
-                    <span>Xem trang</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              ))}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {page.pageTitle}
+                        </span>
+                        {isGlobal && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+                            Toàn website
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                        <span>Mã vị trí:</span>
+                        <code className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700/70 font-mono text-[10px] text-slate-700 dark:text-slate-300">
+                          {page.placementKey}
+                        </code>
+                        {!isGlobal && page.pagePath && (
+                          <span className="font-mono text-[10px] text-slate-500">
+                            ({page.pagePath})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <a
+                      href={targetUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[11px] font-semibold text-orange-600 hover:text-orange-500 hover:border-orange-300 dark:text-orange-400 shadow-2xs transition-colors cursor-pointer shrink-0"
+                    >
+                      <span>Xem trang</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

@@ -9,6 +9,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  MapPin,
 } from 'lucide-react';
 import { CtaItem } from '../types';
 import { CTA_STATUS_LABELS } from '../../shared/constants/statusTypes';
@@ -95,6 +96,7 @@ export const CtaList: React.FC<CtaListProps> = ({
               <th className="p-3 min-w-[200px]">{workspaceLocale === "en" ? "Admin Name" : "Tên quản trị"}</th>
               <th className="p-3 min-w-[150px]">{workspaceLocale === "en" ? "Content / Label" : "Nội dung"}</th>
               <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Action Type" : "Hành động"}</th>
+              <th className="p-3 min-w-[210px]">{workspaceLocale === "en" ? "Embedded Locations" : "Vị trí đang dùng"}</th>
               <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Analytics" : "Thống kê"}</th>
               <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Status" : "Trạng thái"}</th>
               <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Created" : "Ngày tạo"}</th>
@@ -151,9 +153,50 @@ export const CtaList: React.FC<CtaListProps> = ({
 
                   {/* Action Type */}
                   <td className="p-3">
-                    <span className="text-[10px] text-slate-600 dark:text-slate-400">
+                    <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
                       {cta.actionConfig.type}
                     </span>
+                  </td>
+
+                  {/* Embedded Locations */}
+                  <td className="p-3">
+                    {cta.usedByPages && cta.usedByPages.length > 0 ? (
+                      <div className="space-y-1">
+                        <div className="flex flex-col gap-1">
+                          {cta.usedByPages.slice(0, 2).map((page, idx) => (
+                            <div
+                              key={idx}
+                              className="inline-flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300"
+                              title={`${page.pageTitle} (${page.placementKey})`}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                              <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[160px]">
+                                {page.pageTitle}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        {cta.usedByPages.length > 2 ? (
+                          <button
+                            type="button"
+                            onClick={() => onOpenUsedBy(cta)}
+                            className="inline-flex items-center gap-1 text-[10px] text-orange-600 dark:text-orange-400 hover:underline font-bold cursor-pointer"
+                          >
+                            <span>+{cta.usedByPages.length - 2} vị trí khác...</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onOpenUsedBy(cta)}
+                            className="text-[10px] text-slate-400 hover:text-orange-500 hover:underline cursor-pointer"
+                          >
+                            Chi tiết vị trí
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">Chưa xác định</span>
+                    )}
                   </td>
 
                   {/* Analytics */}

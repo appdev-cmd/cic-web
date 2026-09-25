@@ -91,6 +91,12 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 1250, clicks: 310, ctr: 24.8 },
+    usedByCount: 3,
+    usedByPages: [
+      { pageId: 'header', pageTitle: 'Header (Modal Đăng ký tư vấn)', pagePath: 'all', placementKey: 'header.consultation_cta' },
+      { pageId: 'floating_bar', pageTitle: 'Thanh công cụ nổi (Modal tư vấn)', pagePath: 'all', placementKey: 'floating.consultation' },
+      { pageId: 'chatbot', pageTitle: 'AI Chatbot (Modal tư vấn)', pagePath: 'all', placementKey: 'chatbot.consultation' },
+    ],
     governance: {
       origin: 'system',
       allowedPlacements: ['fixed_section', 'cta_action'],
@@ -176,6 +182,10 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 840, clicks: 120, ctr: 14.2 },
+    usedByCount: 1,
+    usedByPages: [
+      { pageId: 'home', pageTitle: 'Trang chủ (Khối Liên hệ #contact)', pagePath: '/#contact', placementKey: 'home.contact_section' },
+    ],
     governance: {
       origin: 'system',
       allowedPlacements: ['fixed_section'],
@@ -267,6 +277,10 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 650, clicks: 95, ctr: 14.6 },
+    usedByCount: 1,
+    usedByPages: [
+      { pageId: 'contact', pageTitle: 'Trang Liên hệ Trực tuyến', pagePath: '/lien-he', placementKey: 'contact.page_form' },
+    ],
     governance: {
       origin: 'system',
       allowedPlacements: ['fixed_section'],
@@ -358,6 +372,11 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 980, clicks: 145, ctr: 14.8 },
+    usedByCount: 2,
+    usedByPages: [
+      { pageId: 'products_detail', pageTitle: 'Chi tiết sản phẩm (Modal báo giá)', pagePath: '/products/[slug]', placementKey: 'product.quote_modal' },
+      { pageId: 'products_list', pageTitle: 'Danh mục sản phẩm (Nút báo giá)', pagePath: '/products', placementKey: 'products.card.quote' },
+    ],
     governance: {
       origin: 'system',
       allowedPlacements: ['cta_action', 'fixed_section'],
@@ -450,6 +469,10 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 420, clicks: 65, ctr: 15.5 },
+    usedByCount: 1,
+    usedByPages: [
+      { pageId: 'products_detail', pageTitle: 'Chi tiết sản phẩm (Modal mua bản quyền)', pagePath: '/products/[slug]', placementKey: 'product.buy_modal' },
+    ],
     governance: {
       origin: 'custom',
       allowedPlacements: ['cta_action'],
@@ -540,6 +563,10 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 720, clicks: 110, ctr: 15.3 },
+    usedByCount: 1,
+    usedByPages: [
+      { pageId: 'products_detail', pageTitle: 'Chi tiết sản phẩm (Modal tải dùng thử)', pagePath: '/products/[slug]', placementKey: 'product.trial_modal' },
+    ],
     governance: {
       origin: 'custom',
       allowedPlacements: ['cta_action'],
@@ -637,6 +664,11 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 530, clicks: 88, ctr: 16.6 },
+    usedByCount: 2,
+    usedByPages: [
+      { pageId: 'services', pageTitle: 'Trang Dịch vụ (Modal tư vấn BIM)', pagePath: '/services', placementKey: 'services.page_form' },
+      { pageId: 'services_detail', pageTitle: 'Chi tiết dịch vụ (Tư vấn chuyên sâu)', pagePath: '/services/[slug]', placementKey: 'services.detail_form' },
+    ],
     governance: {
       origin: 'custom',
       allowedPlacements: ['cta_action', 'fixed_section'],
@@ -750,6 +782,10 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 1100, clicks: 230, ctr: 20.9 },
+    usedByCount: 1,
+    usedByPages: [
+      { pageId: 'events_detail', pageTitle: 'Chi tiết Sự kiện (Form đăng ký vé)', pagePath: '/events/[slug]', placementKey: 'event.register_form' },
+    ],
     governance: {
       origin: 'custom',
       allowedPlacements: ['cta_action', 'fixed_section'],
@@ -829,6 +865,10 @@ export const MOCK_FORMS: FormItem[] = [
       crmSyncEnabled: false,
     },
     analytics: { impressions: 380, clicks: 52, ctr: 13.7 },
+    usedByCount: 1,
+    usedByPages: [
+      { pageId: 'news_detail', pageTitle: 'Chi tiết bài viết Tin tức (Khối tư vấn)', pagePath: '/news/[slug]', placementKey: 'news.consultation_form' },
+    ],
     governance: {
       origin: 'custom',
       allowedPlacements: ['cta_action', 'fixed_section'],

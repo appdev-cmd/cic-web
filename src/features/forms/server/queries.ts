@@ -1,5 +1,6 @@
 import 'server-only';
 import { getPostgresClient } from '@/server/db/postgres';
+import { getFormPlacements } from '@/features/customer-interaction/placements';
 import type {
   FormEntity,
   FormFieldDefinition,
@@ -154,6 +155,8 @@ export async function listForms(params: FormFilterParams): Promise<FormEntity[]>
         submissions: subCount,
         conversionRate: subCount > 0 ? 5.0 : 0,
       },
+      usedByCount: getFormPlacements(r.code, r.workspace).length,
+      usedByPages: getFormPlacements(r.code, r.workspace),
     };
   });
 }
@@ -261,6 +264,8 @@ export async function getFormById(id: string | number): Promise<FormEntity | nul
       submissions: subCount,
       conversionRate: subCount > 0 ? 5.0 : 0,
     },
+    usedByCount: getFormPlacements(row.code, row.workspace).length,
+    usedByPages: getFormPlacements(row.code, row.workspace),
   };
 }
 

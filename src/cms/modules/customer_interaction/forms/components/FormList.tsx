@@ -84,6 +84,7 @@ export const FormList: React.FC<FormListProps> = ({
               <th className="p-3 min-w-[200px]">{workspaceLocale === "en" ? "Admin Name" : "Tên quản trị"}</th>
               <th className="p-3 min-w-[150px]">{workspaceLocale === "en" ? "Display Title" : "Tiêu đề"}</th>
               <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Fields" : "Trường"}</th>
+              <th className="p-3 min-w-[210px]">{workspaceLocale === "en" ? "Embedded Locations" : "Vị trí đang dùng"}</th>
               <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Analytics" : "Thống kê"}</th>
               <th className="p-3 min-w-[120px]">{workspaceLocale === "en" ? "Status" : "Trạng thái"}</th>
               <th className="p-3 min-w-[100px]">{workspaceLocale === "en" ? "Created" : "Ngày tạo"}</th>
@@ -146,6 +147,35 @@ export const FormList: React.FC<FormListProps> = ({
                         {form.fields.length} trường
                       </span>
                     </div>
+                  </td>
+
+                  {/* Embedded Locations */}
+                  <td className="p-3">
+                    {form.usedByPages && form.usedByPages.length > 0 ? (
+                      <div className="space-y-1">
+                        <div className="flex flex-col gap-1">
+                          {form.usedByPages.slice(0, 2).map((page, idx) => (
+                            <div
+                              key={idx}
+                              className="inline-flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300"
+                              title={`${page.pageTitle} (${page.placementKey})`}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                              <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[160px]">
+                                {page.pageTitle}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        {form.usedByPages.length > 2 && (
+                          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold block">
+                            +{form.usedByPages.length - 2} vị trí khác...
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">Chưa xác định</span>
+                    )}
                   </td>
 
                   {/* Analytics */}

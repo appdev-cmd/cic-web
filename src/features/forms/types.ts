@@ -1,3 +1,5 @@
+import type { UsageLocation } from '@/cms/modules/customer_interaction/shared/types';
+
 export type FormWorkspace = 'vi' | 'en';
 export type FormStatus = 'draft' | 'active' | 'inactive' | 'archived';
 
@@ -156,6 +158,8 @@ export interface FormEntity {
     submissions: number;
     conversionRate: number;
   };
+  usedByPages?: UsageLocation[];
+  usedByCount?: number;
 }
 
 export interface CreateFormInput {

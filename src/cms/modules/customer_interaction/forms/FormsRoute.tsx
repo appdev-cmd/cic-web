@@ -55,6 +55,8 @@ function mapFormEntityToFormItem(entity: FormEntity): FormItem {
       submissions: entity.stats?.submissions || 0,
       conversionRate: entity.stats?.conversionRate || 0,
     },
+    usedByCount: entity.usedByCount || 0,
+    usedByPages: entity.usedByPages || [],
     governance: {
       origin: entity.isSystem ? 'system' : 'custom',
       allowedPlacements: entity.isSystem ? ['fixed_section', 'cta_action'] : ['rich_text', 'cta_action'],
