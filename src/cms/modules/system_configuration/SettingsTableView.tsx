@@ -15,8 +15,19 @@ const GROUP_LABELS: Record<string, string> = {
   branding: 'Thương hiệu',
   seo: 'SEO mặc định',
   company: 'Doanh nghiệp & liên hệ',
-  footer_social: 'Footer & mạng xã hội',
+  footer_social: 'Chân trang & mạng xã hội',
   measurement: 'Đo lường & tiếp thị',
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  text: 'Văn bản',
+  textarea: 'Đoạn văn',
+  email: 'Email',
+  phone: 'Số điện thoại',
+  url: 'Đường dẫn URL',
+  image: 'Hình ảnh',
+  tracking_id: 'Mã định danh',
+  html: 'Định dạng HTML',
 };
 
 interface SettingsTableViewProps {
@@ -71,7 +82,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
             </div>
             <input
               type="text"
-              placeholder="Tìm kiếm theo Tên cài đặt, Khóa (Key) hoặc Mô tả..."
+              placeholder="Tìm kiếm theo tên cài đặt, mã hoặc mô tả..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -83,7 +94,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
 
           {/* SCOPE SELECTOR */}
           <div className="flex items-center gap-2 shrink-0">
-            <span className="font-bold text-slate-500">Phạm vi:</span>
+            <span className="font-bold text-slate-500">Phân hệ:</span>
             <select
               value={selectedScopeId}
               onChange={(e) => {
@@ -111,7 +122,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
               }}
               className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
-              <option value="all">Tất cả Nhóm Cấu hình</option>
+              <option value="all">Tất cả nhóm cài đặt</option>
               {Object.entries(GROUP_LABELS).map(([gid, title]) => (
                 <option key={gid} value={gid}>
                   {title}
@@ -128,11 +139,11 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
           <table className="cms-data-table text-left w-full text-xs">
             <thead>
               <tr className="bg-slate-100/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
-                <th className="py-3 px-4">Tên Cấu hình & Khóa Key</th>
-                <th className="py-3 px-4">Nhóm</th>
-                <th className="py-3 px-4">Kiểu dữ liệu</th>
-                <th className="py-3 px-4">Website Public</th>
-                <th className="py-3 px-4">Giá trị Hiện hành</th>
+                <th className="py-3 px-4">Tên cài đặt & Mã</th>
+                <th className="py-3 px-4">Nhóm cài đặt</th>
+                <th className="py-3 px-4">Định dạng</th>
+                <th className="py-3 px-4">Hiển thị website</th>
+                <th className="py-3 px-4">Giá trị hiện tại</th>
                 <th className="py-3 px-4 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -163,8 +174,8 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
                       </span>
                     </td>
 
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
-                      {item.type}
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium text-[11px]">
+                      {TYPE_LABELS[item.type] || item.type}
                     </td>
 
                     <td className="py-3 px-4">
@@ -173,7 +184,7 @@ export const SettingsTableView: React.FC<SettingsTableViewProps> = ({
                           <Eye className="w-3.5 h-3.5" /> Có
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-[11px]">Chỉ CMS</span>
+                        <span className="text-slate-400 text-[11px]">Nội bộ CMS</span>
                       )}
                     </td>
 

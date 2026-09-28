@@ -53,12 +53,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between">
           <div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Tên miền & Scope</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Phiên bản & Tên miền</div>
             <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-              {totalScopes} <span className="text-xs font-normal text-slate-400">Phạm vi</span>
+              {totalScopes} <span className="text-xs font-normal text-slate-400">Phân hệ</span>
             </div>
             <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> 3 Bộ dữ liệu độc lập
+              <CheckCircle2 className="w-3.5 h-3.5" /> 3 Phiên bản ngôn ngữ
             </div>
           </div>
           <span className="p-3 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl">
@@ -83,12 +83,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
         <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between">
           <div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Cấu hình Đã thiết lập</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Mục đã điền thông tin</div>
             <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
               {filledSettingsCount} / {totalSettingsCount}
             </div>
             <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Khóa cấu hình chuẩn
+              <CheckCircle2 className="w-3.5 h-3.5" /> Mục cài đặt hệ thống
             </div>
           </div>
           <span className="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
@@ -98,12 +98,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
         <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between">
           <div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Tỷ lệ Hoàn tất</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Độ hoàn thiện thông tin</div>
             <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
               {overallCompletionRate}%
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-              Lưu trực tiếp vào PostgreSQL
+              Đồng bộ trực tiếp trên web
             </div>
           </div>
           <span className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
@@ -118,10 +118,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Layers className="w-5 h-5 text-orange-500" />
-              <span>Phạm vi Cấu hình Hệ thống (Workspaces)</span>
+              <span>Các Phân hệ Website</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Cấu hình được phân tách theo từng ngôn ngữ và phân hệ, lưu trực tiếp và đồng bộ công khai tức thì.
+              Thiết lập thông tin thương hiệu, liên hệ và hiển thị riêng biệt theo từng phiên bản website.
             </p>
           </div>
           <button
@@ -130,7 +130,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             className="self-start sm:self-auto px-3.5 py-2 text-xs font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 rounded-xl border border-orange-200 dark:border-orange-900/50 flex items-center gap-1.5 transition cursor-pointer"
           >
             <TableIcon className="w-4 h-4" />
-            <span>Xem Bảng tổng hợp tất cả cài đặt</span>
+            <span>Xem danh sách chi tiết</span>
           </button>
         </div>
 
@@ -200,7 +200,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                     </div>
 
                     <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                      <span>Số trường cấu hình:</span>
+                      <span>Mục đã thiết lập:</span>
                       <span className="font-bold text-slate-900 dark:text-white">
                         {filledCount} / {totalCount} ({completionPct}%)
                       </span>
@@ -233,7 +233,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                     }}
                     className="flex-1 min-h-10 px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span>Mở bộ cấu hình</span>
+                    <span>Chỉnh sửa thông tin</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
 

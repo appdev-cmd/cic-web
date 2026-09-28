@@ -92,13 +92,13 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
         });
         setMessage({
           type: 'success',
-          text: `Đã lưu thành công ${totalModifications} thay đổi vào PostgreSQL và cập nhật dữ liệu công khai.`,
+          text: `Đã lưu thành công ${totalModifications} thay đổi cài đặt.`,
         });
         router.refresh();
       } catch (error) {
         setMessage({
           type: 'error',
-          text: error instanceof Error ? error.message : 'Không thể lưu cấu hình. Vui lòng kiểm tra dữ liệu và thử lại.',
+          text: error instanceof Error ? error.message : 'Không thể lưu cài đặt. Vui lòng kiểm tra dữ liệu và thử lại.',
         });
       }
     });
@@ -137,15 +137,14 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                MODULE 16 — CẤU HÌNH HỆ THỐNG
+                CÀI ĐẶT HỆ THỐNG
               </span>
-              <span className="text-xs text-slate-400 font-mono">v2.5.0</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-              Cấu hình Hệ thống & Phạm vi Site (System Settings)
+              Cài đặt Website & Hệ thống
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Hợp nhất cấu hình chung, thông tin liên hệ, logo thương hiệu, mạng xã hội và chi nhánh theo từng phân hệ. Lưu trực tiếp vào PostgreSQL.
+              Quản lý thông tin thương hiệu, liên hệ, mạng xã hội, SEO mặc định và thông tin chi nhánh cho từng phân hệ website.
             </p>
           </div>
         </div>
@@ -191,7 +190,7 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span>Overview Tổng quan</span>
+          <span>Tổng quan</span>
         </button>
 
         <button
@@ -204,7 +203,7 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
           }`}
         >
           <Sliders className="w-4 h-4" />
-          <span>Editor Theo Site/Scope</span>
+          <span>Chỉnh sửa thông tin</span>
           {changedKeys.length > 0 && (
             <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-400 text-slate-950 font-bold">
               {changedKeys.length}
@@ -222,7 +221,7 @@ export const SystemConfiguration = ({ websiteData, capabilities }: Props) => {
           }`}
         >
           <TableIcon className="w-4 h-4" />
-          <span>Bảng Cấu hình (Data Table)</span>
+          <span>Danh sách chi tiết</span>
         </button>
 
         <button

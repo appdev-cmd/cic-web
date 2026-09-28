@@ -96,7 +96,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               <Globe className="w-6 h-6" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Phạm vi đang chỉnh sửa (Scope):</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Phân hệ website:</div>
               <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
                 <select
                   value={activeScopeId}
@@ -110,8 +110,8 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                   ))}
                 </select>
 
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  LIVE (PostgreSQL)
+                <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  Trực tuyến
                 </span>
 
                 {changedKeys.length > 0 && (
@@ -148,7 +148,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                 <Save className="w-4 h-4" />
               )}
               <span>
-                {pending ? 'Đang lưu...' : `Lưu trực tiếp${changedKeys.length > 0 ? ` (${changedKeys.length})` : ''}`}
+                {pending ? 'Đang lưu...' : `Lưu thay đổi${changedKeys.length > 0 ? ` (${changedKeys.length})` : ''}`}
               </span>
             </button>
           </div>
@@ -167,7 +167,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               </div>
               <input
                 type="text"
-                placeholder="Lọc cài đặt / key..."
+                placeholder="Tìm kiếm cài đặt..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
@@ -268,14 +268,14 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                             </span>
                           )}
                           {item.publicReadable && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1" title="Dữ liệu được dùng trên website công khai">
-                              <Eye className="w-3 h-3" /> Website Public
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1" title="Dữ liệu hiển thị trực tiếp trên website">
+                              <Eye className="w-3 h-3" /> Hiển thị công khai
                             </span>
                           )}
                         </div>
 
-                        <div className="text-[10px] font-mono text-slate-400 mt-0.5">
-                          {item.key}
+                        <div className="text-[10px] text-slate-400 mt-0.5">
+                          Mã: <code className="font-mono">{item.key}</code>
                         </div>
                       </div>
                     </div>
@@ -382,8 +382,8 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                 </div>
 
                 {workspace.scope.locale === 'enjicad' ? (
-                  <div className="p-6 text-center text-xs text-slate-400 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                    Phân hệ enjiCAD sử dụng thông tin trụ sở đồng bộ từ Tiếng Việt (VI). Vui lòng chuyển sang Scope Tiếng Việt để chỉnh sửa.
+                  <div className="p-6 text-center text-xs text-slate-500 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                    Phân hệ enjiCAD sử dụng thông tin trụ sở đồng bộ từ phiên bản Tiếng Việt. Vui lòng chuyển sang phân hệ Tiếng Việt để chỉnh sửa.
                   </div>
                 ) : branches && onBranchesChange ? (
                   <div className="pt-2">
@@ -408,15 +408,9 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
               <span>{workspace.scope.name}</span>
             </div>
             <p className="text-slate-500 leading-relaxed">
-              Dữ liệu của Scope này được lưu vào bảng PostgreSQL tương ứng (
-              <code className="text-[11px] text-orange-600 font-mono">
-                {workspace.scope.locale === 'vi'
-                  ? 'cic_config'
-                  : workspace.scope.locale === 'en'
-                  ? 'cic_config_en'
-                  : 'cic_config_enjicad'}
-              </code>
-              ).
+              Các cài đặt trong phân hệ này áp dụng trực tiếp cho website{' '}
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{workspace.scope.domain}</span>.
+              Dữ liệu được cập nhật tức thì trên website sau khi bấm lưu.
             </p>
             <a
               href={workspace.scope.domain.startsWith('http') ? workspace.scope.domain : `https://${workspace.scope.domain}`}
@@ -437,7 +431,7 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
                 <span>Trụ sở & Chi nhánh</span>
               </div>
               <p className="text-slate-500 leading-relaxed">
-                Quản lý các địa điểm văn phòng, hotline, email và bản đồ Google Maps nhúng.
+                Quản lý địa chỉ trụ sở chính, các chi nhánh, số hotline và bản đồ chỉ đường.
               </p>
               <button
                 type="button"
@@ -453,10 +447,10 @@ export const SettingsEditorTab: React.FC<SettingsEditorTabProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-2 text-xs">
             <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
               <LockKeyhole className="w-4 h-4 text-slate-500" />
-              <span>Thông tin nhạy cảm</span>
+              <span>Bảo mật hệ thống</span>
             </div>
             <p className="text-slate-500 leading-relaxed">
-              API key, secret tokens, mật khẩu và SMTP credentials chỉ được cấu hình an toàn qua file biến môi trường <code>.env</code> phía máy chủ.
+              Các thông số nhạy cảm (mật khẩu, khóa API, cấu hình máy chủ gửi email) được bảo vệ an toàn tại máy chủ.
             </p>
           </div>
         </div>
