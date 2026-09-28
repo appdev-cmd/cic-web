@@ -120,8 +120,7 @@ export function UserEffectiveAccessSection({ currentRole, selectedAgencies, agen
 export function UserSecuritySection({ user }: { user: CicUser }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <SecurityMetric label="Xác thực 2 yếu tố (2FA)"><span className="text-xs font-bold text-slate-500">Chưa tích hợp</span></SecurityMetric>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SecurityMetric label="Đổi mật khẩu lần cuối"><div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">{user.passwordChangedAt || 'Chưa cập nhật'}</div></SecurityMetric>
         <SecurityMetric label="Số lượt đăng nhập thành công"><div className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">{user.nums_visit || 0} lần</div></SecurityMetric>
       </div>

@@ -11,7 +11,6 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  Smartphone,
   Calendar,
   Image as ImageIcon,
   Edit3,
@@ -40,7 +39,6 @@ export const MyAccountModal: React.FC<MyAccountModalProps> = ({
   const [avatarUrl, setAvatarUrl] = useState(user.user_avatar || '');
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
   const [avatarInput, setAvatarInput] = useState('');
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
 
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -383,32 +381,6 @@ export const MyAccountModal: React.FC<MyAccountModalProps> = ({
                 placeholder="Ghi chú ngắn về chuyên môn, nhiệm vụ phân công..."
               />
             </div>
-          </div>
-
-          {/* Security & 2FA Quick Status */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">
-                  Xác thực 2 yếu tố (2FA / OTP)
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Tăng cường bảo vệ tài khoản khi đăng nhập vào hệ thống quản trị
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={twoFactorEnabled}
-                onChange={(e) => setTwoFactorEnabled(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-600"></div>
-            </label>
           </div>
         </form>
 

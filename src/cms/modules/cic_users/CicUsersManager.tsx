@@ -696,10 +696,9 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 text-xs [overflow-wrap:anywhere]">
               <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
                 <div className="font-bold text-slate-800 dark:text-slate-200">Thông tin tổng quan</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
                   <div>Lần truy cập cuối: <strong className="font-mono">{auditUser.last_visit_time || 'Chưa có'}</strong></div>
                   <div>Lượt ghé thăm: <strong className="font-mono">{auditUser.nums_visit || 0} lần</strong></div>
-                  <div>2FA: <strong>Chưa tích hợp</strong></div>
                   <div>Đổi pass cuối: <strong className="font-mono">{auditUser.passwordChangedAt || 'N/A'}</strong></div>
                 </div>
               </div>

@@ -218,7 +218,7 @@ export const cmsRolesMock: CmsRole[] = [
         createdTime: '2026-07-01 14:00:00',
         createdBy: 'admin_cic',
         status: 'active',
-        changeNote: 'Cập nhật quyền kiểm tra audit log và xác thực 2FA bắt buộc',
+        changeNote: 'Cập nhật quyền kiểm tra audit log và quản trị tài khoản',
         matrix: {
           USERS: { view: 'allowed', create: 'allowed', edit: 'allowed', delete: 'allowed', export: 'allowed' },
           ROLES: { view: 'allowed', create: 'allowed', edit: 'allowed', configure: 'allowed' },
