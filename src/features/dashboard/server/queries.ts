@@ -586,7 +586,7 @@ export async function getDashboardOperationsMetrics(options: DashboardFilterOpti
 
   const isTodayFilter = filterType === 'today';
 
-  const [metricsRows, seriesRows] = await Promise.all([
+  const [metricsRows, seriesRows, popCumulativeRows, popInPeriodRows] = await Promise.all([
     sql.unsafe<[{
       cur_quotes: number;
       prev_quotes: number;
@@ -682,6 +682,34 @@ export async function getDashboardOperationsMetrics(options: DashboardFilterOpti
           ) d
           ORDER BY d.day ASC
         `),
+
+    // 3. Popular news cumulative (Top 5)
+    sql.unsafe<Array<{
+      id: number;
+      title: string;
+      hits: number | null;
+      alias: string;
+    }>>(`
+      SELECT id, title, coalesce(hits, 0)::int as hits, alias
+      FROM ${nTable}
+      WHERE published = true
+      ORDER BY hits DESC NULLS LAST
+      LIMIT 5
+    `),
+
+    // 4. Popular news in period (Top 5)
+    sql.unsafe<Array<{
+      id: number;
+      title: string;
+      hits: number | null;
+      alias: string;
+    }>>(`
+      SELECT id, title, coalesce(hits, 0)::int as hits, alias
+      FROM ${nTable}
+      WHERE published = true AND created_time >= '${startIso}' AND created_time <= '${endIso}'
+      ORDER BY hits DESC NULLS LAST
+      LIMIT 5
+    `),
   ]);
 
   const m = metricsRows[0] || ({} as any);
@@ -792,6 +820,20 @@ export async function getDashboardOperationsMetrics(options: DashboardFilterOpti
       requests: Number(r.requests_count ?? 0),
       contentUpdates: Number(r.content_updates_count ?? 0),
       traffic: Number(r.traffic_count ?? 0),
+    })),
+    popularContentCumulative: popCumulativeRows.map((n) => ({
+      id: String(n.id),
+      title: n.title,
+      views: n.hits ?? 0,
+      alias: n.alias,
+      contentType: 'news' as const,
+    })),
+    popularContentInPeriod: popInPeriodRows.map((n) => ({
+      id: String(n.id),
+      title: n.title,
+      views: n.hits ?? 0,
+      alias: n.alias,
+      contentType: 'news' as const,
     })),
     operationalInsight,
   };

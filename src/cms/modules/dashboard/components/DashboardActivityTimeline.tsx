@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowRight, Shield } from 'lucide-react';
+import { ArrowRight, Clock, UserCheck } from 'lucide-react';
 import type { ActivityLog } from '../../../types';
 import type { CmsLocale } from '../../../data/CmsDataSource';
 
@@ -20,38 +20,104 @@ export const DashboardActivityTimeline: React.FC<DashboardActivityTimelineProps>
 }) => {
   const isEn = workspaceLocale === 'en';
 
-  const getActionBadge = (type: ActivityLog['activity_type']) => {
-    switch (type) {
-      case 'create':
-        return 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60';
-      case 'update':
-        return 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/60';
-      case 'delete':
-        return 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/60';
-      case 'publish':
-        return 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800/60';
-      default:
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+  // Format relative timestamp naturally
+  const formatRelativeTime = (timeStr?: string): string => {
+    if (!timeStr) return '';
+    try {
+      const date = new Date(timeStr);
+      if (isNaN(date.getTime())) return timeStr;
+      const diffMs = Date.now() - date.getTime();
+      const diffMinutes = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMinutes < 1) return isEn ? 'Just now' : 'Vừa xong';
+      if (diffMinutes < 60) return isEn ? `${diffMinutes}m ago` : `${diffMinutes} phút trước`;
+      if (diffHours < 24) return isEn ? `${diffHours}h ago` : `${diffHours} giờ trước`;
+      if (diffDays === 1) return isEn ? 'Yesterday' : 'Hôm qua';
+      if (diffDays < 7) return isEn ? `${diffDays}d ago` : `${diffDays} ngày trước`;
+      return date.toLocaleDateString(isEn ? 'en-US' : 'vi-VN', { day: '2-digit', month: '2-digit' });
+    } catch {
+      return timeStr;
     }
   };
+
+  // Convert technical audit description into natural sentence without technical codes or UUIDs
+  const formatNaturalDescription = (log: ActivityLog): { user: string; text: string } => {
+    const rawUser = log.username || (isEn ? 'Admin' : 'Quản trị viên');
+    const desc = log.description || '';
+
+    // Strip raw UUIDs or technical hash patterns
+    const cleanDesc = desc
+      .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '')
+      .replace(/#[0-9]+/g, '')
+      .trim();
+
+    if (desc.includes('product.status_changed')) {
+      const entity = cleanDesc.split(':')[1]?.trim() || (isEn ? 'product' : 'sản phẩm');
+      return {
+        user: rawUser,
+        text: isEn ? `published product: ${entity}` : `đã duyệt xuất bản sản phẩm: ${entity}`,
+      };
+    }
+
+    if (desc.includes('customer_request.status_changed')) {
+      const entity = cleanDesc.split(':')[1]?.trim() || (isEn ? 'inquiry' : 'yêu cầu khách hàng');
+      return {
+        user: rawUser,
+        text: isEn ? `processed customer request: ${entity}` : `đã xử lý yêu cầu khách hàng: ${entity}`,
+      };
+    }
+
+    if (desc.includes('news.status_changed') || desc.includes('news.publish')) {
+      const entity = cleanDesc.split(':')[1]?.trim() || (isEn ? 'news' : 'bài viết');
+      return {
+        user: rawUser,
+        text: isEn ? `published article: ${entity}` : `đã duyệt bài viết: ${entity}`,
+      };
+    }
+
+    if (desc.includes('create')) {
+      const entity = cleanDesc.split(':')[1]?.trim() || '';
+      return {
+        user: rawUser,
+        text: isEn
+          ? `created new content${entity ? `: ${entity}` : ''}`
+          : `đã tạo nội dung mới${entity ? `: ${entity}` : ''}`,
+      };
+    }
+
+    if (desc.includes('update')) {
+      const entity = cleanDesc.split(':')[1]?.trim() || '';
+      return {
+        user: rawUser,
+        text: isEn
+          ? `updated content${entity ? `: ${entity}` : ''}`
+          : `đã cập nhật nội dung${entity ? `: ${entity}` : ''}`,
+      };
+    }
+
+    // Default cleaned description
+    const formatted = cleanDesc.replace(/^[a-z_]+\.[a-z_]+:\s*/i, '');
+    return {
+      user: rawUser,
+      text: formatted || (isEn ? 'updated website system' : 'cập nhật hệ thống website'),
+    };
+  };
+
+  // Exactly 4 recent items
+  const recentLogs = activityLogs.slice(0, 4);
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="flex items-center justify-between p-4 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
-              {isEn ? 'System Audit Log' : 'Nhật Ký Quản Trị Hệ Thống'}
-            </h3>
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono">
-              Audit
-            </span>
-          </div>
+          <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
+            {isEn ? 'Recent Activity' : 'Hoạt Động Gần Đây'}
+          </h3>
           <p className="text-[11px] text-slate-400 mt-0.5">
-            {isEn
-              ? 'Last 10 administrative actions recorded across CMS'
-              : 'Ghi nhận 10 tác vụ quản trị vừa thực hiện trên toàn hệ thống'}
+            {isEn ? 'Administrative actions recorded in real time' : 'Tác vụ quản trị website thực hiện gần nhất'}
           </p>
         </div>
 
@@ -63,67 +129,44 @@ export const DashboardActivityTimeline: React.FC<DashboardActivityTimelineProps>
               isEn ? 'Activity Logs (Audit)' : 'Nhật ký Hoạt động (Audit Logs)'
             )
           }
-          className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+          className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
         >
-          <span>{isEn ? 'View all logs' : 'Xem toàn bộ nhật ký'}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>{isEn ? 'View all activity logs →' : 'Xem toàn bộ nhật ký →'}</span>
         </button>
       </div>
 
-      {/* Audit Log Rows (Stream with Hairline Dividers - NO DISCONNECTED ORANGE DOTS) */}
+      {/* Activity List: 3-4 natural items without technical jargon or UUIDs */}
       <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
-        {activityLogs.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">
-            {isEn ? 'No recent activity logs.' : 'Chưa có nhật ký hoạt động nào.'}
+        {recentLogs.length === 0 ? (
+          <div className="p-6 text-center text-xs text-slate-400">
+            {isEn ? 'No recent activity recorded.' : 'Chưa có hoạt động quản trị gần đây.'}
           </div>
         ) : (
-          activityLogs.map((log) => {
-            const avatarUrl = log.user_avatar
-              ? log.user_avatar.startsWith('/') || log.user_avatar.startsWith('http')
-                ? log.user_avatar
-                : `/${log.user_avatar}`
-              : null;
+          recentLogs.map((log) => {
+            const { user, text } = formatNaturalDescription(log);
+            const timeAgo = formatRelativeTime(log.created_time);
 
             return (
               <div
                 key={log.id}
                 onClick={() => onOpenDrawerItem('activity', log)}
-                className="py-2.5 px-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                className="py-3 px-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group flex items-center justify-between gap-3 text-xs"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  {/* Avatar or Initial */}
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={log.username}
-                      className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                    />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-[10px] flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
-                      {log.username ? log.username[0].toUpperCase() : 'U'}
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                    <span className="font-semibold text-xs text-slate-900 dark:text-white shrink-0">
-                      {log.username}
-                    </span>
-                    <span
-                      className={`px-1.5 py-0.2 rounded font-mono text-[10px] uppercase font-bold border ${getActionBadge(
-                        log.activity_type
-                      )}`}
-                    >
-                      {log.activity_type}
-                    </span>
-                    <span className="text-xs text-slate-600 dark:text-slate-300 truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                      {log.description}
-                    </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 font-bold text-[10px]">
+                    {user.charAt(0).toUpperCase()}
                   </div>
+
+                  <p className="truncate text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white font-semibold">{user}</strong>{' '}
+                    <span>{text}</span>
+                  </p>
                 </div>
 
-                <span className="text-[11px] font-mono text-slate-400 shrink-0 self-start sm:self-auto">
-                  {log.created_time}
-                </span>
+                <div className="shrink-0 flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+                  <span>·</span>
+                  <span>{timeAgo}</span>
+                </div>
               </div>
             );
           })

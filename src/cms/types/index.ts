@@ -190,6 +190,8 @@ export interface DashboardOperationsMetrics {
     contentUpdates: number;
     traffic: number;
   }>;
+  popularContentInPeriod?: PopularContentItem[];
+  popularContentCumulative?: PopularContentItem[];
   operationalInsight: string;
 }
 
