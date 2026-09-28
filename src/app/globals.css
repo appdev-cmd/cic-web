@@ -269,6 +269,26 @@ html.dark, body.dark, .dark { color-scheme: dark; }
   .cms-shell .cms-list-toolbar-actions > * { flex: 1 1 auto; }
 }
 
+/* CMS Sticky action bars for create/edit form headers and aside panels */
+.cms-sticky-action {
+  position: sticky;
+  top: calc(var(--cms-header-height, 3.75rem) + var(--cms-sticky-gap, 0.75rem));
+  z-index: 30;
+}
+
+@media (max-width: 639px) {
+  .cms-sticky-action {
+    top: var(--cms-header-height, 3.75rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cms-sticky-aside {
+    position: sticky;
+    top: calc(var(--cms-header-height, 3.75rem) + 6.5rem);
+  }
+}
+
 @media (max-width: 767px) {
   .public-shell main { min-width: 0; }
 }

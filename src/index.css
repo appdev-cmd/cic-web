@@ -554,20 +554,20 @@ body.dark ::-webkit-scrollbar-thumb:hover,
 
 .cms-sticky-action {
   position: sticky;
-  top: calc(var(--cms-header-height) + var(--cms-sticky-gap));
+  top: calc(var(--cms-header-height, 3.75rem) + var(--cms-sticky-gap, 0.75rem));
   z-index: 30;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 639px) {
   .cms-sticky-action {
-    position: static;
+    top: var(--cms-header-height, 3.75rem);
   }
 }
 
 @media (min-width: 1024px) {
   .cms-sticky-aside {
     position: sticky;
-    top: calc(var(--cms-header-height) + 6.5rem);
+    top: calc(var(--cms-header-height, 3.75rem) + 6.5rem);
   }
 }
 

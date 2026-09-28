@@ -139,7 +139,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
       )}
 
       {/* Sticky Header Actions */}
-      <div className="cms-sticky-action bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
+      <div className="cms-sticky-action bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <button
             onClick={onBack}

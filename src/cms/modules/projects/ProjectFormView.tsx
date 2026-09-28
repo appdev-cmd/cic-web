@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, BriefcaseBusiness, Eye, FileText, Image, Images, Link2, Save, Search, Upload, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
-import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { SearchableMultiSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import { PageMediaPickerModal } from '../static_pages/PageMediaPickerModal';
@@ -53,7 +52,45 @@ export const ProjectFormView: React.FC<Props> = ({ project, productOptions, serv
   };
 
   return <div className="space-y-6 pb-16">
-    <CmsPageHeader icon={<BriefcaseBusiness />} title={project ? 'Chỉnh sửa dự án' : 'Thêm dự án'} description="Nội dung bài viết dùng Rich Text; các trường filter được quản lý độc lập." actions={<><CmsButton size="sm" variant="secondary" leadingIcon={<ArrowLeft />} disabled={isSubmitting} onClick={onCancel}>Quay lại</CmsButton><CmsButton size="sm" variant="secondary" leadingIcon={<Eye />} disabled={isSubmitting} onClick={() => onPreview({ ...form, technologies: splitLines(technologyInput) })}>Xem trước</CmsButton><CmsButton size="sm" variant="primary" leadingIcon={<Save />} disabled={isSubmitting} onClick={() => void submit()}>{isSubmitting ? 'Đang lưu...' : 'Lưu dự án'}</CmsButton></>} />
+    <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="rounded-xl bg-slate-100 p-2 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 disabled:opacity-50"
+          title="Quay lại danh sách"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <p className="text-xs font-bold text-orange-600">DỰ ÁN</p>
+          <h1 className="font-black text-slate-900 dark:text-white">{project ? 'Chỉnh sửa dự án' : 'Thêm dự án'}</h1>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <CmsButton
+          size="sm"
+          variant="secondary"
+          leadingIcon={<Eye className="h-4 w-4" />}
+          disabled={isSubmitting}
+          onClick={() => onPreview({ ...form, technologies: splitLines(technologyInput) })}
+        >
+          Xem trước
+        </CmsButton>
+        <CmsButton
+          size="sm"
+          variant="primary"
+          leadingIcon={<Save className="h-4 w-4" />}
+          disabled={isSubmitting}
+          loading={isSubmitting}
+          loadingText="Đang lưu..."
+          onClick={() => void submit()}
+        >
+          Lưu dự án
+        </CmsButton>
+      </div>
+    </header>
     {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700 shadow-sm animate-in fade-in">{error}</div>}
     <div className="grid gap-6 xl:grid-cols-3">
       <div className="space-y-6 xl:col-span-2">
