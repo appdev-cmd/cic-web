@@ -17,11 +17,18 @@ async function removeExportArtifacts(storage: AuditExportStorage, paths: string[
   if (error) throw new Error(`Không thể xóa tệp xuất nhật ký: ${error.message}`);
 }
 const csv = (value: unknown) => {
-  const serialized = value && typeof value === 'object' ? JSON.stringify(value) : String(value ?? '');
+  let serialized: string;
+  if (value instanceof Date) {
+    serialized = value.toISOString();
+  } else if (value && typeof value === 'object') {
+    serialized = JSON.stringify(value);
+  } else {
+    serialized = String(value ?? '');
+  }
   const singleLine = serialized.replace(/[\r\n]+/g, ' ');
   // Spreadsheet applications execute cells beginning with these characters.
   // Prefix an apostrophe so exported audit-controlled text remains inert.
-  const safe = /^[=+\-@]/.test(singleLine) ? `'${singleLine}` : singleLine;
+  const safe = /^[=+\-@\t\r]/.test(singleLine) ? `'${singleLine}` : singleLine;
   return `"${safe.replaceAll('"', '""')}"`;
 };
 
@@ -43,9 +50,9 @@ export async function createAuditExportAction(raw: unknown) {
   try {
     const rows = await sql`SELECT occurred_at,actor_label,action_code,category,severity,entity_type,entity_id,entity_title,module,workspace,locale,result,result_message,correlation_id${can(principal,'audit','view_sensitive') ? sql`,ip_address,user_agent,before_data,after_data,redacted_fields` : sql``} FROM cic_activity_logs WHERE occurred_at >= now() - (${days} * interval '1 day') AND (${input.workspace}='global' OR workspace=${input.workspace}) ORDER BY occurred_at DESC LIMIT 50000`;
     const headers = rows.length ? Object.keys(rows[0]) : ['occurred_at','actor_label','action_code','category','severity','entity_type','entity_id','entity_title','module','workspace','locale','result','result_message','correlation_id'];
-    const content = [headers.map(csv).join(','), ...rows.map((row) => headers.map((key) => csv(row[key])).join(','))].join('\r\n');
-    const upload = await storage.upload(path, new TextEncoder().encode(content), { contentType: 'text/csv', upsert: false }); if (upload.error) throw upload.error;
-    await withTransaction(async (tx) => { await tx`UPDATE cic_audit_export_jobs SET status='completed',total_records=${rows.length},file_path=${path},file_size_bytes=${Buffer.byteLength(content)},completed_at=now() WHERE id=${jobId}`; await writeAuditEvent(principal,{ action:AUDIT_ACTIONS.EXPORT_CREATED,entityType:AUDIT_ENTITY_TYPES.AUDIT_EXPORT,entityId:jobId,entityTitle:`Audit export ${jobId}`,module:'audit',workspace:input.workspace,result:'success',metadata:{range:input.range,totalRecords:rows.length} },tx); });
+    const content = '\uFEFF' + [headers.map(csv).join(','), ...rows.map((row) => headers.map((key) => csv(row[key])).join(','))].join('\r\n');
+    const upload = await storage.upload(path, new TextEncoder().encode(content), { contentType: 'text/csv; charset=utf-8', upsert: false }); if (upload.error) throw upload.error;
+    await withTransaction(async (tx) => { await tx`UPDATE cic_audit_export_jobs SET status='completed',total_records=${rows.length},file_path=${path},file_size_bytes=${Buffer.byteLength(content, 'utf8')},completed_at=now() WHERE id=${jobId}`; await writeAuditEvent(principal,{ action:AUDIT_ACTIONS.EXPORT_CREATED,entityType:AUDIT_ENTITY_TYPES.AUDIT_EXPORT,entityId:jobId,entityTitle:`Audit export ${jobId}`,module:'audit',workspace:input.workspace,result:'success',metadata:{range:input.range,totalRecords:rows.length} },tx); });
     revalidatePath('/cms', 'layout'); return { id: jobId };
   } catch (error) { await storage.remove([path]); await sql`UPDATE cic_audit_export_jobs SET status='failed',error_message='Export failed',completed_at=now() WHERE id=${jobId}`; throw error; }
 }

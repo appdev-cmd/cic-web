@@ -411,9 +411,16 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       'Nội dung / Nhu cầu',
     ];
 
+    const sanitizeCsvCell = (val: unknown) => {
+      const serialized = (val ?? '').toString().replace(/[\r\n]+/g, ' ').trim();
+      // Spreadsheet formula injection guard (CSV injection)
+      const safe = /^[=+\-@\t\r]/.test(serialized) ? `'${serialized}` : serialized;
+      return `"${safe.replace(/"/g, '""')}"`;
+    };
+
     const rows = filteredRequests.map((r) => {
       const getVal = (keys: string[], types: string[]) => {
-        const found = r.submissionValues.find(
+        const found = r.submissionValues?.find(
           (v) => keys.includes(v.fieldKey.toLowerCase()) || types.includes(v.fieldType)
         );
         return found?.valueText || '';
@@ -428,7 +435,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       const statusLabel = REQUEST_STATUS_LABELS[r.status] || r.status;
       const priorityLabel = PRIORITY_LABELS[r.priority] || r.priority;
       const tagsStr = (r.tags || []).join('; ');
-      const dateStr = new Date(r.sourceConfig.submittedAt).toLocaleString('vi-VN');
+      const rawDate = r.sourceConfig?.submittedAt || r.createdAt;
+      const dateStr = rawDate && !isNaN(new Date(rawDate).getTime())
+        ? new Date(rawDate).toLocaleString('vi-VN')
+        : '';
 
       return [
         r.id,
@@ -437,18 +447,24 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
         email,
         phone,
         company,
-        r.sourceConfig.formName || '',
-        r.sourceConfig.ctaName || '',
-        r.sourceConfig.pageTitle || '',
+        r.sourceConfig?.formName || '',
+        r.sourceConfig?.ctaName || '',
+        r.sourceConfig?.pageTitle || '',
         statusLabel,
         r.assignedUserName || 'Chưa phân công',
         priorityLabel,
         tagsStr,
         message,
-      ].map((field) => `"${(field || '').toString().replace(/"/g, '""')}"`);
+      ].map(sanitizeCsvCell);
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+    const csvContent =
+      '\uFEFF' +
+      [
+        headers.map(sanitizeCsvCell).join(','),
+        ...rows.map((row) => row.join(',')),
+      ].join('\r\n');
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -940,7 +956,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
             onResetFilters={handleResetFilters}
             onExportCSV={handleExportCSV}
             hasActiveFilters={hasActiveFilters}
-            totalCount={totalCount}
+            totalCount={filteredRequests.length}
             formOptions={formOptions}
             ctaOptions={ctaOptions}
             assigneeOptions={assigneeOptions}
