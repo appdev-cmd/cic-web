@@ -9,7 +9,7 @@ import { listPublicProductContacts } from '@/features/sales-owners/server/querie
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: 'Engineering Software & Technology Solutions | CIC',
+  title: 'Engineering Software & Technology Solutions',
   description: 'Explore our comprehensive portfolio of licensed structural analysis, BIM, geotechnical software, and specialized engineering technologies.',
   alternates: {
     canonical: '/en/products',

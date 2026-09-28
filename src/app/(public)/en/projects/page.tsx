@@ -5,7 +5,7 @@ import { ProjectsRuntimeView } from '@/web/features/projects/ProjectsRuntimeView
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Key Case Studies & Engineering Projects | CIC',
+  title: 'Key Case Studies & Engineering Projects',
   description: 'Explore landmark structural, infrastructure, and BIM engineering projects powered by CIC Technology solutions.',
   alternates: {
     canonical: '/en/projects',

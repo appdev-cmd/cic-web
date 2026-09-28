@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Dự Án Thực Tế | CIC Technology',
+  title: 'Dự Án Thực Tế',
   description:
     'Minh chứng năng lực triển khai thực tế của CIC Technology qua hàng loạt công trình trọng điểm quốc gia.',
 };

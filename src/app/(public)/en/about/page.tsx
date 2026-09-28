@@ -2,12 +2,15 @@ import type { Metadata } from 'next';
 import { getPublishedAboutPage } from '@/features/static-pages/server/aboutResolver';
 import { PublicAboutRoute } from '@/app/(public)/about/PublicAboutRoute';
 
+import { cleanSeoTitle } from '@/lib/seo/siteUrl';
+
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const pageData = await getPublishedAboutPage('en', 'about');
+  const rawTitle = pageData.page.seoTitle || 'About CIC — Strategic Engineering Partner';
   return {
-    title: pageData.page.seoTitle || 'About CIC | Strategic Engineering Partner',
+    title: cleanSeoTitle(rawTitle) || 'About CIC — Strategic Engineering Partner',
     description: pageData.page.seoDescription || 'Learn about CIC journey, corporate leadership, technological capabilities, and strategic vision.',
     alternates: {
       canonical: '/en/about',

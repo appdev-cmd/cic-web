@@ -5,7 +5,7 @@ import { ServicesRuntimeView } from '@/web/features/services/ServicesRuntimeView
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Specialized Engineering Consulting Services | CIC',
+  title: 'Specialized Engineering Consulting Services',
   description: 'Professional engineering advisory, BIM/GIS technology handover, and certified corporate training by CIC experts.',
   alternates: {
     canonical: '/en/services',

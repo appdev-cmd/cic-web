@@ -6,7 +6,7 @@ import { NewsRuntimeView } from '@/web/components/NewsRuntimeView';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Engineering News, Insights & Events | CIC',
+  title: 'Engineering News, Insights & Events',
   description: 'Stay updated with the latest technological developments, BIM seminars, and company highlights from CIC Technology.',
   alternates: {
     canonical: '/en/news',

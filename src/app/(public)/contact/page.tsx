@@ -5,7 +5,7 @@ import type { ContactPageModel } from '@/shared/page-content/models';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Liên hệ | CIC Technology',
+  title: 'Liên hệ & Tư vấn giải pháp',
   description: 'Thông tin liên hệ, trụ sở chính và các chi nhánh của CIC Technology.',
 };
 
