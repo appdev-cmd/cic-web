@@ -293,13 +293,30 @@ async function runComplexWorkflows() {
             sendConfirmationToUser: false,
           },
         },
+        {
+          destinationType: 'google_sheets' as const,
+          name: 'Đồng bộ Google Sheets tự động',
+          isEnabled: true,
+          config: {
+            spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
+            sheetName: 'Trang tính 1',
+            autoCreateHeaders: true,
+            columnMapping: [
+              { sheetHeader: 'Thời gian', sourceType: 'system', sourceKey: 'submitted_at' },
+              { sheetHeader: 'Mã đơn', sourceType: 'system', sourceKey: 'submission_id' },
+              { sheetHeader: 'Họ và tên', sourceType: 'field', sourceKey: 'full_name' },
+              { sheetHeader: 'Email', sourceType: 'field', sourceKey: 'email' },
+              { sheetHeader: 'Số điện thoại', sourceType: 'field', sourceKey: 'phone' },
+            ],
+          },
+        },
       ],
     };
 
     const createdForm = await createForm(formInput, actor);
     assert(createdForm && createdForm.id, 'Tạo Form động thất bại');
     createdFormId = String(createdForm.id);
-    recordTest('Form Multi-Destination', '3.1 Tạo Form Động & Cấu hình Đa đích', 'PASS', `ID: ${createdFormId} | Code: "${createdForm.code}"`);
+    recordTest('Form Multi-Destination', '3.1 Tạo Form Đa Đích (DB + Email + Google Sheets)', 'PASS', `ID: ${createdFormId} | Code: "${createdForm.code}"`);
 
     // 3.2 Khách hàng điền Form thực tế (Simulated Client Submission)
     const submissionPayload = {
@@ -317,32 +334,56 @@ async function runComplexWorkflows() {
     assert(submitResult && submitResult.submissionId, 'Gửi form thất bại');
     recordTest(
       'Form Multi-Destination',
-      '3.2 Điền & Nộp Form Khách Hàng (Customer Submission)',
+      '3.2 Nộp Form & Kích hoạt Đồng thời (DB + Email + Google Sheets)',
       'PASS',
       `Submission ID: ${submitResult.submissionId}`
     );
 
-    // 3.3 Kiểm tra dữ liệu được ghi nhận trong cơ sở dữ liệu
+    // 3.3 Kiểm tra dữ liệu được ghi nhận trong cơ sở dữ liệu (Database Destination)
     const [subRecord] = await sql`
       SELECT field_key, value_text 
       FROM cic_form_submission_values 
       WHERE submission_id = ${submitResult.submissionId} AND field_key = 'full_name'
     `;
     assert(subRecord && subRecord.value_text === 'KS. Đặng Minh Quân', 'Dữ liệu lưu vào DB không khớp');
-    recordTest('Form Multi-Destination', '3.3 Xác thực Lưu Trữ Bản ghi DB', 'PASS', `Họ tên: "${subRecord.value_text}"`);
+    recordTest('Form Multi-Destination', '3.3 Xác thực Lưu Trữ Bản ghi DB (Database)', 'PASS', `Họ tên: "${subRecord.value_text}"`);
 
-    // 3.4 Dọn dẹp Form kiểm thử
+    // 3.4 Kiểm tra Theo dõi Chuyển phát Đồng thời (Email & Google Sheets Deliveries)
+    const deliveries = await sql`
+      SELECT destination_type, status, last_error
+      FROM cic_form_submission_deliveries
+      WHERE submission_id = ${submitResult.submissionId}
+      ORDER BY id ASC
+    `;
+    const emailDelivery = deliveries.find((d: any) => d.destination_type === 'email');
+    const sheetsDelivery = deliveries.find((d: any) => d.destination_type === 'google_sheets');
+
+    assert(emailDelivery, 'Không tìm thấy bản ghi chuyển phát Email');
+    assert(sheetsDelivery, 'Không tìm thấy bản ghi chuyển phát Google Sheets');
+
+    recordTest(
+      'Form Multi-Destination',
+      '3.4 Xác thực Chuyển phát Đồng thời (Email + Google Sheets Parallel Dispatch)',
+      'PASS',
+      `Email: ${emailDelivery.status} | Sheets: ${sheetsDelivery.status} (${sheetsDelivery.lastError || 'OK'})`
+    );
+
+    // 3.5 Dọn dẹp Form kiểm thử
+    await sql`DELETE FROM cic_form_submission_deliveries WHERE submission_id IN (SELECT id FROM cic_form_submissions WHERE form_id = ${createdFormId})`;
     await sql`DELETE FROM cic_form_submission_values WHERE submission_id IN (SELECT id FROM cic_form_submissions WHERE form_id = ${createdFormId})`;
     await sql`DELETE FROM cic_customer_request_events WHERE request_state_id IN (SELECT id FROM cic_customer_request_states WHERE source_type = 'form_submission' AND source_id IN (SELECT id FROM cic_form_submissions WHERE form_id = ${createdFormId}))`;
     await sql`DELETE FROM cic_customer_request_states WHERE source_type = 'form_submission' AND source_id IN (SELECT id FROM cic_form_submissions WHERE form_id = ${createdFormId}))`.catch(() => {});
     await sql`DELETE FROM cic_form_submissions WHERE form_id = ${createdFormId}`;
+    await sql`DELETE FROM cic_form_destinations WHERE form_id = ${createdFormId}`;
     await deleteForms([createdFormId], actor);
-    recordTest('Form Multi-Destination', '3.4 Dọn dẹp Form kiểm thử', 'PASS', 'Đã xóa form và submission test an toàn');
+    recordTest('Form Multi-Destination', '3.5 Dọn dẹp Form kiểm thử', 'PASS', 'Đã xóa form và submission test an toàn');
   } catch (err: any) {
     recordTest('Form Multi-Destination', '3. Workflow Form Multi-Destination', 'FAIL', err.message);
     if (createdFormId) {
+      await sql`DELETE FROM cic_form_submission_deliveries WHERE submission_id IN (SELECT id FROM cic_form_submissions WHERE form_id = ${createdFormId})`.catch(() => {});
       await sql`DELETE FROM cic_form_submission_values WHERE submission_id IN (SELECT id FROM cic_form_submissions WHERE form_id = ${createdFormId})`.catch(() => {});
       await sql`DELETE FROM cic_form_submissions WHERE form_id = ${createdFormId}`.catch(() => {});
+      await sql`DELETE FROM cic_form_destinations WHERE form_id = ${createdFormId}`.catch(() => {});
       await deleteForms([createdFormId], actor).catch(() => {});
     }
   }
