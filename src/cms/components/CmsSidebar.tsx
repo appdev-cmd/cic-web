@@ -73,6 +73,7 @@ interface CmsSidebarProps {
   onOpenChangePassword?: () => void;
   onSwitchToWebsite?: () => void;
   onLogout?: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
 const renderIcon = (iconName: string, className: string = 'w-4 h-4') => {
@@ -138,6 +139,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
   onOpenChangePassword,
   onSwitchToWebsite,
   onLogout,
+  onOpenCommandPalette,
 }) => {
   const workspaceLocale = useCmsWorkspaceLocale();
   const dict = getCmsDictionary(workspaceLocale);
@@ -256,6 +258,37 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Quick Global Search Trigger in Sidebar */}
+      {onOpenCommandPalette && (
+        <div className={`px-2 pt-2 pb-1 shrink-0 ${isCollapsed ? 'flex justify-center' : ''}`}>
+          {isCollapsed ? (
+            <button
+              type="button"
+              onClick={onOpenCommandPalette}
+              className="p-2 rounded-xl text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              title="Tìm kiếm nhanh toàn hệ thống (Ctrl + K)"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenCommandPalette}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/90 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200/70 dark:border-slate-700/60 transition shadow-2xs group cursor-pointer"
+              title="Tìm kiếm nhanh toàn hệ thống (Ctrl + K)"
+            >
+              <div className="flex items-center gap-2 truncate">
+                <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 transition-colors shrink-0" />
+                <span className="truncate">{dict.common?.search || 'Tìm kiếm (Ctrl + K)...'}</span>
+              </div>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded shadow-2xs shrink-0">
+                ⌘K
+              </kbd>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Navigation Links Area */}
       <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4 custom-scrollbar">
