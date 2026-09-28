@@ -1,6 +1,7 @@
 import 'server-only';
 import { getDatabaseClient } from '@/server/db/foundation';
-import type { CmsSearchRecord } from '../types';
+import { getPostgresClient } from '@/server/db/postgres';
+import type { CmsQuickSearchResult, CmsSearchRecord } from '../types';
 
 const text = (value: unknown) => typeof value === 'string' ? value : '';
 type DbRow = Record<string, unknown>;
@@ -8,25 +9,199 @@ const status = (published: unknown) => published === true
   ? { statusText: 'Đã xuất bản', statusColor: 'emerald' as const }
   : { statusText: 'Bản nháp', statusColor: 'slate' as const };
 
+export async function searchCmsQuickJump(
+  query: string,
+  locale: 'vi' | 'en' = 'vi',
+  allowedModules: string[] | null = null,
+  limitPerType: number = 5
+): Promise<CmsQuickSearchResult[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) return [];
+
+  const sql = getPostgresClient();
+  const searchPattern = `%${trimmed}%`;
+  const canAccess = (module: string) => allowedModules === null || allowedModules.includes(module);
+
+  const productTable = locale === 'en' ? 'cic_products_en' : 'cic_products';
+  const newsTable = locale === 'en' ? 'cic_news_en' : 'cic_news';
+  const servicesTable = locale === 'en' ? 'cic_services_en' : 'cic_services';
+  const projectsTable = locale === 'en' ? 'cic_projects_en' : 'cic_projects';
+
+  const results: CmsQuickSearchResult[] = [];
+  const promises: Promise<void>[] = [];
+
+  // 1. Products
+  if (canAccess('products')) {
+    promises.push(
+      sql.unsafe(
+        `SELECT id, name, alias, published FROM ${productTable} WHERE (name ILIKE $1 OR alias ILIKE $1) LIMIT $2`,
+        [searchPattern, limitPerType]
+      ).then((rows) => {
+        for (const r of rows) {
+          results.push({
+            id: `product_${r.id}`,
+            title: String(r.name || `#${r.id}`),
+            subtitle: r.alias ? `/${r.alias}` : undefined,
+            module: 'products',
+            moduleLabel: 'Sản phẩm',
+            statusText: r.published === true || r.published === 1 ? 'Đã xuất bản' : 'Bản nháp',
+            statusColor: r.published === true || r.published === 1 ? 'emerald' : 'slate',
+            path: `/cms/products`,
+            actionType: 'edit',
+          });
+        }
+      }).catch(() => {})
+    );
+  }
+
+  // 2. News
+  if (canAccess('news')) {
+    promises.push(
+      sql.unsafe(
+        `SELECT id, title, alias, published FROM ${newsTable} WHERE (title ILIKE $1 OR alias ILIKE $1) LIMIT $2`,
+        [searchPattern, limitPerType]
+      ).then((rows) => {
+        for (const r of rows) {
+          results.push({
+            id: `news_${r.id}`,
+            title: String(r.title || `#${r.id}`),
+            subtitle: r.alias ? `/${r.alias}` : undefined,
+            module: 'news',
+            moduleLabel: 'Tin tức & Bài viết',
+            statusText: r.published === true || r.published === 1 ? 'Đã xuất bản' : 'Bản nháp',
+            statusColor: r.published === true || r.published === 1 ? 'emerald' : 'slate',
+            path: `/cms/news`,
+            actionType: 'edit',
+          });
+        }
+      }).catch(() => {})
+    );
+  }
+
+  // 3. Services
+  if (canAccess('services')) {
+    promises.push(
+      sql.unsafe(
+        `SELECT id, title, alias, published FROM ${servicesTable} WHERE (title ILIKE $1 OR alias ILIKE $1) LIMIT $2`,
+        [searchPattern, limitPerType]
+      ).then((rows) => {
+        for (const r of rows) {
+          results.push({
+            id: `service_${r.id}`,
+            title: String(r.title || `#${r.id}`),
+            subtitle: r.alias ? `/${r.alias}` : undefined,
+            module: 'services',
+            moduleLabel: 'Dịch vụ',
+            statusText: r.published === true || r.published === 1 ? 'Đã xuất bản' : 'Bản nháp',
+            statusColor: r.published === true || r.published === 1 ? 'emerald' : 'slate',
+            path: `/cms/services`,
+            actionType: 'edit',
+          });
+        }
+      }).catch(() => {})
+    );
+  }
+
+  // 4. Projects
+  if (canAccess('projects')) {
+    promises.push(
+      sql.unsafe(
+        `SELECT id, title, alias, customer_name, published FROM ${projectsTable} WHERE (title ILIKE $1 OR alias ILIKE $1 OR customer_name ILIKE $1) LIMIT $2`,
+        [searchPattern, limitPerType]
+      ).then((rows) => {
+        for (const r of rows) {
+          results.push({
+            id: `project_${r.id}`,
+            title: String(r.title || `#${r.id}`),
+            subtitle: r.customer_name ? `Khách hàng: ${r.customer_name}` : (r.alias ? `/${r.alias}` : undefined),
+            module: 'projects',
+            moduleLabel: 'Dự án tiêu biểu',
+            statusText: r.published === true || r.published === 1 ? 'Đã xuất bản' : 'Bản nháp',
+            statusColor: r.published === true || r.published === 1 ? 'emerald' : 'slate',
+            path: `/cms/projects`,
+            actionType: 'edit',
+          });
+        }
+      }).catch(() => {})
+    );
+  }
+
+  // 5. Contacts / Customer Requests
+  if (canAccess('customer_requests') || canAccess('contacts')) {
+    promises.push(
+      sql`
+        SELECT id, fullname, email, telephone, subject, published
+        FROM cic_contact
+        WHERE (fullname ILIKE ${searchPattern} OR email ILIKE ${searchPattern} OR telephone ILIKE ${searchPattern} OR subject ILIKE ${searchPattern})
+        ORDER BY id DESC
+        LIMIT ${limitPerType}
+      `.then((rows) => {
+        for (const r of rows) {
+          results.push({
+            id: `contact_${r.id}`,
+            title: String(r.subject || r.fullname || r.email || `#${r.id}`),
+            subtitle: `${r.fullname || ''} · ${r.email || ''} · ${r.telephone || ''}`.replace(/^[\s·]+|[\s·]+$/g, ''),
+            module: 'customer_requests',
+            moduleLabel: 'Yêu cầu khách hàng & Leads',
+            statusText: r.published ? 'Đã xử lý' : 'Chưa xử lý',
+            statusColor: r.published ? 'emerald' : 'amber',
+            path: `/cms/contact-requests`,
+            actionType: 'view',
+          });
+        }
+      }).catch(() => {})
+    );
+  }
+
+  // 6. Content Pages
+  if (canAccess('static_pages') || canAccess('pages')) {
+    promises.push(
+      sql`
+        SELECT id, name, slug, workspace, published_revision_id
+        FROM cic_content_pages
+        WHERE (name ILIKE ${searchPattern} OR slug ILIKE ${searchPattern})
+        LIMIT ${limitPerType}
+      `.then((rows) => {
+        for (const r of rows) {
+          results.push({
+            id: `page_${r.id}`,
+            title: String(r.name || r.slug || `#${r.id}`),
+            subtitle: `/${r.slug || ''}`,
+            module: 'static_pages',
+            moduleLabel: 'Trang nội dung',
+            statusText: r.published_revision_id ? 'Đã xuất bản' : 'Bản nháp',
+            statusColor: r.published_revision_id ? 'emerald' : 'slate',
+            path: `/cms/static-pages`,
+            actionType: 'edit',
+          });
+        }
+      }).catch(() => {})
+    );
+  }
+
+  await Promise.all(promises);
+  return results;
+}
+
 export async function getCmsSearchRecords(includeUserRecords: boolean, allowedModules: string[] | null): Promise<CmsSearchRecord[]> {
   const db = await getDatabaseClient();
   const results = await Promise.all([
-    db.from('cic_products').select('id,code,published'),
-    db.from('cic_products_en').select('id,code,published'),
-    db.from('cic_news').select('id,title,alias,summary,category_name,tags,author,published'),
-    db.from('cic_news_en').select('id,title,alias,summary,category_name,tags,author,published'),
-    db.from('cic_event').select('id,title,alias,summary,place,time_event,published'),
-    db.from('cic_event_en').select('id,title,alias,summary,place,time_event,published'),
-    db.from('cic_projects').select('id,title,alias,summary,sector,customer_name,location,technologies,published'),
-    db.from('cic_projects_en').select('id,title,alias,summary,sector,customer_name,location,technologies,published'),
-    db.from('cic_services').select('id,title,alias,summary,published'),
-    db.from('cic_services_en').select('id,title,alias,summary,published'),
-    db.from('cic_content_pages').select('id,workspace,code,name,slug,page_type,published_revision_id'),
-    db.from('cic_contact').select('id,email,fullname,telephone,subject,message,published,created_time').order('created_time', { ascending: false }),
-    db.from('cic_media_assets').select('id,filename,mime_type,workflow_status,created_at').is('deleted_at', null),
-    db.from('cic_ctas').select('id,workspace,code,admin_name,display_text,description,status').is('deleted_at', null),
-    db.from('cic_forms').select('id,workspace,code,admin_name,title,description,status').is('deleted_at', null),
-    db.from('cic_users').select('id,username,full_name,email,phone,account_status,summary').limit(includeUserRecords ? 1000 : 0),
+    db.from('cic_products').select('id,code,name,published').limit(150),
+    db.from('cic_products_en').select('id,code,name,published').limit(150),
+    db.from('cic_news').select('id,title,alias,summary,category_name,tags,author,published').limit(150),
+    db.from('cic_news_en').select('id,title,alias,summary,category_name,tags,author,published').limit(150),
+    db.from('cic_event').select('id,title,alias,summary,place,time_event,published').limit(100),
+    db.from('cic_event_en').select('id,title,alias,summary,place,time_event,published').limit(100),
+    db.from('cic_projects').select('id,title,alias,summary,sector,customer_name,location,technologies,published').limit(100),
+    db.from('cic_projects_en').select('id,title,alias,summary,sector,customer_name,location,technologies,published').limit(100),
+    db.from('cic_services').select('id,title,alias,summary,published').limit(100),
+    db.from('cic_services_en').select('id,title,alias,summary,published').limit(100),
+    db.from('cic_content_pages').select('id,workspace,code,name,slug,page_type,published_revision_id').limit(100),
+    db.from('cic_contact').select('id,email,fullname,telephone,subject,message,published,created_time').order('created_time', { ascending: false }).limit(100),
+    db.from('cic_media_assets').select('id,filename,mime_type,workflow_status,created_at').is('deleted_at', null).limit(100),
+    db.from('cic_ctas').select('id,workspace,code,admin_name,display_text,description,status').is('deleted_at', null).limit(50),
+    db.from('cic_forms').select('id,workspace,code,admin_name,title,description,status').is('deleted_at', null).limit(50),
+    db.from('cic_users').select('id,username,full_name,email,phone,account_status,summary').limit(includeUserRecords ? 100 : 0),
   ]);
   const failed = results.find((result) => result.error);
   if (failed?.error) throw new Error('Unable to load CMS global search index.');

@@ -18,3 +18,16 @@ export interface CmsSearchRecord {
   keywords: string[];
   requiredRole?: string[];
 }
+
+export interface CmsQuickSearchResult {
+  id: string;
+  title: string;
+  subtitle?: string;
+  module: CmsSearchModule;
+  moduleLabel: string;
+  category?: string;
+  statusText?: string;
+  statusColor?: 'emerald' | 'amber' | 'blue' | 'slate' | 'rose' | 'orange';
+  path: string;
+  actionType: 'navigate' | 'edit' | 'open_modal' | 'view';
+}

@@ -15,6 +15,7 @@ import {
   Sparkles,
   Calendar,
   ExternalLink,
+  Search,
 } from 'lucide-react';
 import { CmsUser, NotificationItem } from '../types';
 import type { CmsLocale } from '../data/CmsDataSource';
@@ -110,8 +111,42 @@ export const CmsHeader: React.FC<CmsHeaderProps> = ({
         </div>
       </div>
 
+      {/* Center: Global Search Trigger Button */}
+      {onOpenCommandPalette && (
+        <div className="flex-1 max-w-sm lg:max-w-md mx-2 sm:mx-4 hidden sm:flex items-center">
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-all text-xs cursor-pointer shadow-2xs group"
+            title="Tìm kiếm nhanh hệ thống (Ctrl + K / ⌘K)"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 transition-colors shrink-0" />
+              <span className="truncate text-slate-500 dark:text-slate-400 font-normal">
+                {workspaceLocale === 'en' ? 'Quick search (Ctrl + K)...' : 'Tìm kiếm nhanh (Ctrl + K)...'}
+              </span>
+            </div>
+            <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-md shadow-2xs shrink-0">
+              <span className="text-[10px]">Ctrl</span> K
+            </kbd>
+          </button>
+        </div>
+      )}
+
       {/* Right Controls: Live Website link, Quick Action, Lang Segmented Pill, Notifs, Theme, User */}
       <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
+        {/* Mobile Search Button */}
+        {onOpenCommandPalette && (
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            className="sm:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Tìm kiếm nhanh"
+          >
+            <Search className="w-4.5 h-4.5" />
+          </button>
+        )}
+
         {/* Direct Link to Live Website */}
         {onSwitchToWebsite && (
           <button

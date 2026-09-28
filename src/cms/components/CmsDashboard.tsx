@@ -14,7 +14,6 @@ import { ContactMessage, ProductRegistration, PendingContent, CmsUser, type CmsM
 import { resolveCmsModule, type CmsModuleKey } from '../routing';
 import type { CmsDashboardData, CmsLocale } from '../data/CmsDataSource';
 import type { CmsSearchRecord } from '@/features/cms-search/types';
-import { getCmsSearchRecordsAction } from '@/features/cms-search/server/actions';
 import type { AuditGovernanceData, PermissionsGovernanceData, TrashGovernanceData, UsersGovernanceData } from '../data/GovernanceDataSource';
 import type { CmsSettingsData } from '@/features/system-settings/domain/model';
 import type { FunctionSeoRecord } from '../modules/function_seo/types';
@@ -300,8 +299,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
 
   // Command Palette & Right Drawer
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [paletteRecords, setPaletteRecords] = useState(searchRecords);
-  const paletteLoadAttempted = useRef(searchRecords.length > 0);
   const [drawerItem, setDrawerItem] = useState<DrawerItem | null>(null);
 
   // Filter & Data States
@@ -319,8 +316,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   const activeModule = resolveCmsModule(activePath);
 
   // Global Keyboard Shortcuts (Ctrl+K / Cmd+K and '/' key)
-  // Global Search / Command Palette shortcut disabled per UX simplification
-  /*
   useEffect(() => {
     const handleGlobalShortcuts = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -341,15 +336,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
 
     window.addEventListener('keydown', handleGlobalShortcuts);
     return () => window.removeEventListener('keydown', handleGlobalShortcuts);
-  }, [isCommandPaletteOpen]);
-  */
-
-  useEffect(() => {
-    if (!isCommandPaletteOpen || paletteLoadAttempted.current) return;
-    paletteLoadAttempted.current = true;
-    void getCmsSearchRecordsAction().then(setPaletteRecords).catch(() => {
-      paletteLoadAttempted.current = false;
-    });
   }, [isCommandPaletteOpen]);
 
   const navigateToCmsPath = (path: string, title: string) => {
@@ -567,13 +553,12 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         <CmsFooter />
       </div>
 
-      {/* COMMAND PALETTE MODAL (Disabled per requirement) */}
+      {/* COMMAND PALETTE MODAL */}
       <CmsCommandPalette
-        isOpen={false}
+        isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         userRole={userRole}
         workspaceLocale={workspaceLocale}
-        records={paletteRecords}
         onSelectAction={(path, label) => {
           navigateToCmsPath(path, label);
           setToastMessage(`Đã chuyển sang: ${label}`);

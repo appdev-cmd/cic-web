@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+'use client';
+
+import React, { useState, useEffect, useRef, useMemo, useTransition } from 'react';
 import {
   Search,
   X,
   ArrowRight,
   Clock,
   Trash2,
-  ExternalLink,
   ChevronRight,
   Layers,
   Package,
@@ -19,21 +20,15 @@ import {
   Inbox,
   Command,
   CornerDownLeft,
-  ArrowUp,
-  ArrowDown,
-  Tag,
   Building2,
   FolderTree,
-  Mail,
-  Shield,
-  HelpCircle,
-  LucideIcon,
-  CheckCircle2,
-  ChevronDown,
+  FormInput,
+  Image as ImageIcon,
+  Loader2,
+  type LucideIcon,
 } from 'lucide-react';
 
 import {
-  executeGlobalSearch,
   highlightText,
   getRecentSearches,
   saveRecentSearch,
@@ -41,117 +36,229 @@ import {
   clearAllRecentSearches,
   getRecentVisitedItems,
   saveRecentVisitedItem,
-  SearchResultItem,
-  SearchResultModule,
-  RecentSearchItem,
-  RecentVisitedItem,
+  normalizeVietnamese,
+  type RecentSearchItem,
+  type RecentVisitedItem,
 } from '../services/globalSearchRuntime';
 import type { CmsLocale } from '../data/CmsDataSource';
-import type { CmsSearchRecord } from '@/features/cms-search/types';
+import type { CmsQuickSearchResult, CmsSearchRecord } from '@/features/cms-search/types';
+import { searchCmsQuickJumpAction } from '@/features/cms-search/server/actions';
+
+interface NavigationCommandItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  moduleLabel: string;
+  category: string;
+  path: string;
+  icon: LucideIcon;
+  keywords: string[];
+}
+
+const STATIC_NAVIGATION_COMMANDS: NavigationCommandItem[] = [
+  { id: 'nav_dash', title: 'Bảng điều khiển Tổng quan', subtitle: '/cms/dashboard', moduleLabel: 'Điều hướng', category: 'Chức năng', path: '/cms/dashboard', icon: Layers, keywords: ['dashboard', 'tong quan', 'báo cáo', 'overview'] },
+  { id: 'nav_prod', title: 'Quản lý Sản phẩm', subtitle: '/cms/products', moduleLabel: 'Sản phẩm', category: 'Nội dung', path: '/cms/products', icon: Package, keywords: ['san pham', 'software', 'phan mem', 'products'] },
+  { id: 'nav_prod_brands', title: 'Hãng sản xuất / Thương hiệu', subtitle: '/cms/products/brands', moduleLabel: 'Sản phẩm', category: 'Cấu hình', path: '/cms/products/brands', icon: Building2, keywords: ['hang san xuat', 'brands', 'manufacturers', 'doi tac'] },
+  { id: 'nav_prod_tax', title: 'Danh mục & Cây phân loại', subtitle: '/cms/product-settings', moduleLabel: 'Sản phẩm', category: 'Cấu hình', path: '/cms/product-settings', icon: FolderTree, keywords: ['danh muc', 'taxonomy', 'categories', 'phan loai'] },
+  { id: 'nav_news', title: 'Quản lý Tin tức & Bài viết', subtitle: '/cms/news', moduleLabel: 'Tin tức', category: 'Nội dung', path: '/cms/news', icon: Newspaper, keywords: ['tin tuc', 'bai viet', 'news', 'articles', 'chuyen giao'] },
+  { id: 'nav_events', title: 'Quản lý Sự kiện & Hội thảo', subtitle: '/cms/events', moduleLabel: 'Sự kiện', category: 'Nội dung', path: '/cms/events', icon: Calendar, keywords: ['su kien', 'hoi thao', 'webinar', 'events'] },
+  { id: 'nav_projects', title: 'Quản lý Dự án tiêu biểu', subtitle: '/cms/projects', moduleLabel: 'Dự án', category: 'Nội dung', path: '/cms/projects', icon: Briefcase, keywords: ['du an', 'case study', 'projects', 'cong trinh'] },
+  { id: 'nav_services', title: 'Quản lý Dịch vụ tư vấn', subtitle: '/cms/services', moduleLabel: 'Dịch vụ', category: 'Nội dung', path: '/cms/services', icon: Sparkles, keywords: ['dich vu', 'services', 'tu van', 'giai phap'] },
+  { id: 'nav_static', title: 'Quản lý Trang nội dung', subtitle: '/cms/static-pages', moduleLabel: 'Trang', category: 'Nội dung', path: '/cms/static-pages', icon: FileText, keywords: ['trang tinh', 'static pages', 'pages', 'gioi thieu'] },
+  { id: 'nav_leads', title: 'Yêu cầu khách hàng & Leads', subtitle: '/cms/contact-requests', moduleLabel: 'Khách hàng', category: 'Khách hàng', path: '/cms/contact-requests', icon: Inbox, keywords: ['lien he', 'leads', 'khach hang', 'contacts', 'bao gia'] },
+  { id: 'nav_media', title: 'Thư viện Media & Tệp tin', subtitle: '/cms/media', moduleLabel: 'Media', category: 'Tài nguyên', path: '/cms/media', icon: ImageIcon, keywords: ['media', 'anh', 'tai lieu', 'assets', 'hinh anh'] },
+  { id: 'nav_cta', title: 'Biểu mẫu & CTA Blocks', subtitle: '/cms/cta', moduleLabel: 'Tương tác', category: 'Chuyển đổi', path: '/cms/cta', icon: FormInput, keywords: ['cta', 'forms', 'bieu mau', 'banner'] },
+  { id: 'nav_seo', title: 'Cấu hình SEO & Redirects', subtitle: '/cms/function-seo', moduleLabel: 'Hệ thống', category: 'Kỹ thuật', path: '/cms/function-seo', icon: Search, keywords: ['seo', 'redirect', 'sitemap', 'meta', 'the tag'] },
+  { id: 'nav_users', title: 'Quản trị viên & Phân quyền', subtitle: '/cms/users', moduleLabel: 'Quản trị viên', category: 'Bảo mật', path: '/cms/users', icon: Users, keywords: ['users', 'nguoi dung', 'tai khoan', 'phan quyen', 'permissions'] },
+  { id: 'nav_settings', title: 'Cấu hình Hệ thống & Email SMTP', subtitle: '/cms/settings', moduleLabel: 'Hệ thống', category: 'Kỹ thuật', path: '/cms/settings', icon: Settings, keywords: ['cai dat', 'he thong', 'smtp', 'settings', 'email'] },
+  { id: 'nav_trash', title: 'Thùng rác & Khôi phục', subtitle: '/cms/trash', moduleLabel: 'Hệ thống', category: 'Bảo mật', path: '/cms/trash', icon: Trash2, keywords: ['thung rac', 'khoi phuc', 'trash', 'recycle', 'da xoa'] },
+];
+
+const MODULE_ICONS: Record<string, LucideIcon> = {
+  products: Package,
+  news: Newspaper,
+  services: Sparkles,
+  projects: Briefcase,
+  events: Calendar,
+  customer_requests: Inbox,
+  static_pages: FileText,
+  media: ImageIcon,
+  forms_cta: FormInput,
+  users_permissions: Users,
+  command: Layers,
+};
+
+export interface DisplayItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  path: string;
+  moduleLabel: string;
+  category?: string;
+  statusText?: string;
+  statusColor?: string;
+  icon: LucideIcon;
+  isViewAll?: boolean;
+}
 
 interface CmsCommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectAction: (path: string, label: string, itemData?: any) => void;
+  onSelectAction: (path: string, label: string, itemData?: unknown) => void;
   userRole?: string;
   workspaceLocale?: CmsLocale;
-  onViewAllResults?: (query: string, module?: SearchResultModule | 'all') => void;
-  records: CmsSearchRecord[];
+  onViewAllResults?: (query: string, module?: string) => void;
+  records?: CmsSearchRecord[];
 }
 
 export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
   isOpen,
   onClose,
   onSelectAction,
-  userRole = 'superadmin',
   workspaceLocale = 'vi',
   onViewAllResults,
-  records,
 }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentSearches, setRecentSearches] = useState<RecentSearchItem[]>([]);
   const [recentVisited, setRecentVisited] = useState<RecentVisitedItem[]>([]);
-  const [activeModuleFilter, setActiveModuleFilter] = useState<SearchResultModule | 'all'>('all');
+  const [serverResults, setServerResults] = useState<CmsQuickSearchResult[]>([]);
+  const [isSearching, startSearchingTransition] = useTransition();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load recent searches & visited khi mở modal
+  // Load recent searches & visited on open
   useEffect(() => {
     if (isOpen) {
       setRecentSearches(getRecentSearches());
       setRecentVisited(getRecentVisitedItems());
       setQuery('');
       setSelectedIndex(0);
-      setActiveModuleFilter('all');
+      setServerResults([]);
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
     }
   }, [isOpen]);
 
-  // Shortcut toàn cục: Ctrl+K / Cmd+K hoặc nhấn phím '/'
+  // Debounced server search when query length >= 2
   useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      const isInput = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable;
-
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        if (isOpen) {
-          onClose();
-        } else {
-          // Open handled by parent or shortcut
-        }
-      } else if (e.key === '/' && !isInput && !isOpen) {
-        e.preventDefault();
-        // Trigger open nếu có callback ngoài hoặc mở
-      }
-    };
-
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [isOpen, onClose]);
-
-  // Thực hiện tìm kiếm
-  const searchResults = useMemo(() => {
-    if (!query.trim()) {
-      return { totalResults: 0, groupedResults: [], allFlatResults: [] };
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setServerResults([]);
+      return;
     }
-    return executeGlobalSearch(query, {
-      records,
-      locale: workspaceLocale,
-      userRole,
-      maxResultsPerGroup: 5,
-      moduleFilter: activeModuleFilter,
-    });
-  }, [query, workspaceLocale, userRole, activeModuleFilter, records]);
 
-  // Tạo danh sách phẳng tất cả các items hiển thị để phục vụ điều hướng bằng phím mũi tên
-  const flatSelectableItems = useMemo(() => {
-    const items: Array<{ type: 'result' | 'view_all'; data?: SearchResultItem; module?: SearchResultModule; label?: string }> = [];
-    searchResults.groupedResults.forEach((group) => {
-      group.items.forEach((item) => {
-        items.push({ type: 'result', data: item });
+    const timer = setTimeout(() => {
+      startSearchingTransition(async () => {
+        try {
+          const results = await searchCmsQuickJumpAction(trimmed, workspaceLocale);
+          setServerResults(results);
+        } catch {
+          setServerResults([]);
+        }
       });
-      if (group.totalCount > group.items.length) {
-        items.push({
-          type: 'view_all',
-          module: group.module,
-          label: `Xem tất cả ${group.totalCount} kết quả trong ${group.label}`,
-        });
-      }
-    });
-    return items;
-  }, [searchResults]);
+    }, 200);
 
-  // Reset selected index khi kết quả thay đổi
+    return () => clearTimeout(timer);
+  }, [query, workspaceLocale]);
+
+  // Client-side filtered navigation commands
+  const filteredNavigation = useMemo(() => {
+    const trimmed = query.trim();
+    if (!trimmed) return [];
+    const norm = normalizeVietnamese(trimmed);
+    const tokens = norm.split(/\s+/).filter(Boolean);
+    return STATIC_NAVIGATION_COMMANDS.filter((cmd) => {
+      const candidate = normalizeVietnamese(`${cmd.title} ${cmd.subtitle} ${cmd.keywords.join(' ')}`);
+      return candidate.includes(norm) || tokens.every((token) => candidate.includes(token));
+    });
+  }, [query]);
+
+  // Grouped results for rendering
+  const groupedSections = useMemo(() => {
+    const sections: Array<{ key: string; label: string; icon: LucideIcon; items: DisplayItem[] }> = [];
+
+    // 1. Navigation matches
+    if (filteredNavigation.length > 0) {
+      sections.push({
+        key: 'navigation',
+        label: workspaceLocale === 'en' ? 'Quick Navigation' : 'Chức năng & Điều hướng',
+        icon: Command,
+        items: filteredNavigation.slice(0, 5).map((cmd) => ({
+          id: cmd.id,
+          title: cmd.title,
+          subtitle: cmd.subtitle,
+          path: cmd.path,
+          moduleLabel: cmd.moduleLabel,
+          category: cmd.category,
+          icon: cmd.icon,
+        })),
+      });
+    }
+
+    // 2. Server entity results grouped by module
+    if (serverResults.length > 0) {
+      const moduleMap: Record<string, { label: string; icon: LucideIcon; items: DisplayItem[] }> = {
+        products: { label: workspaceLocale === 'en' ? 'Products' : 'Sản phẩm', icon: Package, items: [] },
+        news: { label: workspaceLocale === 'en' ? 'News & Articles' : 'Tin tức & Bài viết', icon: Newspaper, items: [] },
+        services: { label: workspaceLocale === 'en' ? 'Services' : 'Dịch vụ', icon: Sparkles, items: [] },
+        projects: { label: workspaceLocale === 'en' ? 'Projects' : 'Dự án tiêu biểu', icon: Briefcase, items: [] },
+        customer_requests: { label: workspaceLocale === 'en' ? 'Customer Requests' : 'Khách hàng & Leads', icon: Inbox, items: [] },
+        static_pages: { label: workspaceLocale === 'en' ? 'Content Pages' : 'Trang nội dung', icon: FileText, items: [] },
+      };
+
+      for (const res of serverResults) {
+        const target = moduleMap[res.module];
+        if (target) {
+          target.items.push({
+            id: res.id,
+            title: res.title,
+            subtitle: res.subtitle,
+            path: res.path,
+            moduleLabel: res.moduleLabel,
+            statusText: res.statusText,
+            statusColor: res.statusColor,
+            icon: MODULE_ICONS[res.module] || FileText,
+          });
+        }
+      }
+
+      for (const [key, group] of Object.entries(moduleMap)) {
+        if (group.items.length > 0) {
+          sections.push({ key, label: group.label, icon: group.icon, items: group.items });
+        }
+      }
+    }
+
+    return sections;
+  }, [filteredNavigation, serverResults, workspaceLocale]);
+
+  // Flat list for keyboard navigation
+  const flatSelectableItems = useMemo(() => {
+    const list: DisplayItem[] = [];
+    groupedSections.forEach((sec) => list.push(...sec.items));
+    if (query.trim()) {
+      list.push({
+        id: 'view_all_action',
+        title: workspaceLocale === 'en' ? `View all results for "${query}"` : `Xem tất cả kết quả cho "${query}" trong trang tìm kiếm`,
+        subtitle: '/cms/search',
+        path: `/cms/search?q=${encodeURIComponent(query.trim())}`,
+        moduleLabel: 'Tìm kiếm nâng cao',
+        icon: Search,
+        isViewAll: true,
+      });
+    }
+    return list;
+  }, [groupedSections, query, workspaceLocale]);
+
+  // Reset selected index when items change
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query, activeModuleFilter]);
+  }, [query]);
 
-  // Tự động scroll đến item đang active
+  // Scroll active item into view
   useEffect(() => {
     if (resultsContainerRef.current) {
       const activeElement = resultsContainerRef.current.querySelector('[data-active="true"]');
@@ -163,14 +270,18 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSelectItem = (item: SearchResultItem) => {
-    saveRecentSearch(query);
-    saveRecentVisitedItem({
-      id: item.id,
-      title: item.title,
-      moduleLabel: item.moduleLabel,
-      path: item.path,
-    });
+  const handleSelectItem = (item: DisplayItem) => {
+    if (query.trim()) {
+      saveRecentSearch(query);
+    }
+    if (!item.isViewAll) {
+      saveRecentVisitedItem({
+        id: item.id,
+        title: item.title,
+        moduleLabel: item.moduleLabel,
+        path: item.path,
+      });
+    }
     onSelectAction(item.path, item.title, item);
     onClose();
   };
@@ -192,19 +303,19 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
     setRecentSearches([]);
   };
 
-  const handleViewAll = (module?: SearchResultModule | 'all') => {
-    saveRecentSearch(query);
+  const handleViewAll = () => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    saveRecentSearch(trimmed);
     onClose();
     if (onViewAllResults) {
-      onViewAllResults(query, module);
+      onViewAllResults(trimmed, 'all');
     } else {
-      // Điều hướng đến trang search tổng
-      const targetPath = `/cms/search?q=${encodeURIComponent(query)}${module && module !== 'all' ? `&module=${module}` : ''}`;
-      onSelectAction(targetPath, `Tìm kiếm: "${query}"`);
+      const targetPath = `/cms/search?q=${encodeURIComponent(trimmed)}`;
+      onSelectAction(targetPath, `Tìm kiếm: "${trimmed}"`);
     }
   };
 
-  // Xử lý phím điều hướng bên trong modal
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -222,20 +333,14 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (flatSelectableItems.length > 0 && flatSelectableItems[selectedIndex]) {
-        const active = flatSelectableItems[selectedIndex];
-        if (active.type === 'result' && active.data) {
-          handleSelectItem(active.data);
-        } else if (active.type === 'view_all') {
-          handleViewAll(active.module);
-        }
+        handleSelectItem(flatSelectableItems[selectedIndex]);
       } else if (query.trim()) {
-        handleViewAll('all');
+        handleViewAll();
       }
     }
   };
 
-  // Trợ giúp lấy màu sắc cho badge trạng thái
-  const getStatusBadgeClass = (color?: SearchResultItem['statusColor']) => {
+  const getStatusBadgeClass = (color?: string) => {
     switch (color) {
       case 'emerald':
         return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
@@ -252,7 +357,7 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
     }
   };
 
-  let currentItemCounter = 0;
+  let globalIndexCounter = 0;
 
   return (
     <div
@@ -270,12 +375,12 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
         {/* Search Input Bar */}
         <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-3 bg-slate-50/50 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
           <div className="w-9 h-9 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 border border-orange-500/20">
-            <Search className="w-4.5 h-4.5" />
+            {isSearching ? <Loader2 className="w-4.5 h-4.5 animate-spin" /> : <Search className="w-4.5 h-4.5" />}
           </div>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Tìm kiếm sản phẩm, bài viết, khách hàng, cấu hình, dữ liệu..."
+            placeholder={workspaceLocale === 'en' ? 'Search products, news, services, leads, navigation...' : 'Tìm kiếm sản phẩm, tin tức, dịch vụ, khách hàng, điều hướng...'}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 border-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 font-normal"
@@ -303,22 +408,22 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
           ref={resultsContainerRef}
           className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-4 divide-y divide-slate-100 dark:divide-slate-800/60"
         >
-          {/* KHI CHƯA NHẬP TỪ KHÓA TÌM KIẾM (EMPTY QUERY) */}
+          {/* EMPTY QUERY: RECENT & POPULAR SHORTCUTS */}
           {!query.trim() && (
             <div className="space-y-4 p-1">
-              {/* 1. Recent Searches */}
+              {/* Recent Searches */}
               {recentSearches.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-2">
                     <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
-                      Tìm kiếm gần đây
+                      {workspaceLocale === 'en' ? 'Recent Searches' : 'Tìm kiếm gần đây'}
                     </span>
                     <button
                       onClick={handleClearAllRecent}
                       className="text-[11px] text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                     >
-                      Xóa lịch sử
+                      {workspaceLocale === 'en' ? 'Clear history' : 'Xóa lịch sử'}
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-1.5 px-1">
@@ -328,11 +433,11 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
                         onClick={() => handleSelectRecentSearch(s.query)}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800/80 hover:bg-orange-500 dark:hover:bg-orange-600 text-slate-900 dark:text-slate-200 hover:text-white dark:hover:text-white border border-slate-200/80 dark:border-slate-700/80 transition-colors cursor-pointer group"
                       >
-                        <Search className="w-3 h-3 text-slate-400 group-hover:text-orange-500" />
+                        <Search className="w-3 h-3 text-slate-400 group-hover:text-white" />
                         <span>{s.query}</span>
                         <span
                           onClick={(e) => handleRemoveRecentSearch(e, s.query)}
-                          className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700"
+                          className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 group-hover:text-white"
                         >
                           <X className="w-2.5 h-2.5" />
                         </span>
@@ -342,13 +447,13 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
                 </div>
               )}
 
-              {/* 2. Recently Visited Items */}
+              {/* Recently Visited */}
               {recentVisited.length > 0 && (
                 <div className="space-y-2 pt-2">
                   <div className="px-2">
                     <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                      Đã truy cập gần đây
+                      {workspaceLocale === 'en' ? 'Recently Visited' : 'Đã truy cập gần đây'}
                     </span>
                   </div>
                   <div className="space-y-1">
@@ -381,22 +486,22 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
                 </div>
               )}
 
-              {/* 3. Lối tắt nhanh / Gợi ý chức năng phổ biến */}
+              {/* Popular Navigation Shortcuts */}
               <div className="space-y-2 pt-2">
                 <div className="px-2">
                   <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                     <Command className="w-3.5 h-3.5 text-orange-500" />
-                    Chức năng thường dùng
+                    {workspaceLocale === 'en' ? 'Common Navigation' : 'Chức năng thường dùng'}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {[
-                    { label: 'Hãng sản xuất', sub: 'Quản lý thương hiệu đối tác', path: '/cms/products/brands', icon: Building2 },
-                    { label: 'SEO & URL', sub: 'Template SEO, canonical, redirect và sitemap', path: '/cms/function-seo', icon: Search },
-                    { label: 'Danh mục sản phẩm', sub: 'Cây phân loại taxonomy', path: '/cms/product-settings', icon: FolderTree },
-                    { label: 'Yêu cầu từ khách hàng', sub: 'Leads tư vấn & Báo giá', path: '/cms/customer-requests', icon: Inbox },
                     { label: 'Quản lý Sản phẩm', sub: 'Danh sách phần mềm & thiết bị', path: '/cms/products', icon: Package },
                     { label: 'Tin tức & Bài viết', sub: 'Biên tập bài viết chuyển giao', path: '/cms/news', icon: Newspaper },
+                    { label: 'Dự án tiêu biểu', sub: 'Quản lý hồ sơ công trình & đối tác', path: '/cms/projects', icon: Briefcase },
+                    { label: 'Yêu cầu từ khách hàng', sub: 'Leads tư vấn & Báo giá', path: '/cms/contact-requests', icon: Inbox },
+                    { label: 'Hãng sản xuất', sub: 'Quản lý thương hiệu đối tác', path: '/cms/products/brands', icon: Building2 },
+                    { label: 'Cấu hình SEO & URL', sub: 'Canonical, redirects và sitemap', path: '/cms/function-seo', icon: Search },
                   ].map((act, i) => {
                     const IconComp = act.icon;
                     return (
@@ -427,212 +532,170 @@ export const CmsCommandPalette: React.FC<CmsCommandPaletteProps> = ({
             </div>
           )}
 
-          {/* KHI ĐÃ CÓ TỪ KHÓA TÌM KIẾM (HAS QUERY) */}
+          {/* HAS QUERY: GROUPED RESULTS */}
           {query.trim() && (
-            <>
-              {searchResults.groupedResults.length > 0 ? (
-                <div className="space-y-4 pt-1">
-                  {searchResults.groupedResults.map((group) => {
-                    const GroupIcon = group.icon;
-                    return (
-                      <div key={group.module} className="space-y-1.5 pt-2 first:pt-0">
-                        {/* Group Header */}
-                        <div className="flex items-center justify-between px-2 py-1">
-                          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                            <GroupIcon className="w-3.5 h-3.5 text-orange-500" />
-                            {group.label}
-                            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500">
-                              {group.totalCount}
-                            </span>
+            <div className="space-y-4 pt-1">
+              {groupedSections.length > 0 ? (
+                groupedSections.map((group) => {
+                  const GroupIcon = group.icon;
+                  return (
+                    <div key={group.key} className="space-y-1.5 pt-2 first:pt-0">
+                      {/* Group Header */}
+                      <div className="flex items-center justify-between px-2 py-1">
+                        <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <GroupIcon className="w-3.5 h-3.5 text-orange-500" />
+                          {group.label}
+                          <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500">
+                            {group.items.length}
                           </span>
-                          {group.totalCount > group.items.length && (
-                            <button
-                              onClick={() => handleViewAll(group.module)}
-                              className="text-[11px] font-medium text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
+                        </span>
+                      </div>
+
+                      {/* Group Item List */}
+                      <div className="space-y-1">
+                        {group.items.map((item) => {
+                          const thisIndex = globalIndexCounter++;
+                          const isSelected = selectedIndex === thisIndex;
+                          const ItemIcon = item.icon;
+
+                          return (
+                            <div
+                              key={item.id}
+                              data-active={isSelected ? 'true' : undefined}
+                              onClick={() => handleSelectItem(item)}
+                              className={`w-full px-3 py-2.5 rounded-xl text-left flex items-start justify-between transition-all cursor-pointer group border ${
+                                isSelected
+                                  ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-300 dark:border-orange-500/40 text-orange-950 dark:text-orange-100 shadow-2xs'
+                                  : 'border-transparent hover:bg-slate-100/80 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200'
+                              }`}
                             >
-                              <span>Xem tất cả {group.totalCount}</span>
-                              <ChevronRight className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Group Item List */}
-                        <div className="space-y-1">
-                          {group.items.map((item) => {
-                            const thisIndex = currentItemCounter++;
-                            const isSelected = selectedIndex === thisIndex;
-                            const ItemIcon = item.icon;
-
-                            return (
-                              <div
-                                key={item.id}
-                                data-active={isSelected ? 'true' : undefined}
-                                onClick={() => handleSelectItem(item)}
-                                className={`w-full px-3 py-2.5 rounded-xl text-left flex items-start justify-between transition-all cursor-pointer group border ${
-                                  isSelected
-                                    ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-300 dark:border-orange-500/40 text-orange-950 dark:text-orange-100 shadow-2xs'
-                                    : 'border-transparent hover:bg-slate-100/80 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200'
-                                }`}
-                              >
-                                <div className="flex items-start gap-3 min-w-0 flex-1">
-                                  <div
-                                    className={`p-2 rounded-lg shrink-0 mt-0.5 ${
-                                      isSelected
-                                        ? 'bg-orange-600 text-white'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:text-orange-600'
-                                    }`}
-                                  >
-                                    <ItemIcon className="w-4 h-4" />
-                                  </div>
-
-                                  <div className="min-w-0 flex-1 space-y-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <p className="text-xs sm:text-sm font-semibold truncate leading-tight">
-                                        {highlightText(item.title, query)}
-                                      </p>
-                                      {item.statusText && (
-                                        <span
-                                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStatusBadgeClass(
-                                            item.statusColor
-                                          )}`}
-                                        >
-                                          {item.statusText}
-                                        </span>
-                                      )}
-                                    </div>
-
-                                    {item.subtitle && (
-                                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                                        {highlightText(item.subtitle, query)}
-                                      </p>
-                                    )}
-
-                                    {/* Context Details (SKU, Email, SĐT, Đường dẫn) */}
-                                    <div className="flex items-center gap-2.5 text-[10px] text-slate-400 dark:text-slate-500 flex-wrap">
-                                      <span className="font-mono text-slate-500 dark:text-slate-400 font-medium">
-                                        {item.path}
-                                      </span>
-                                      {item.metadata?.sku && (
-                                        <span>• SKU: <strong className="text-slate-600 dark:text-slate-300">{item.metadata.sku}</strong></span>
-                                      )}
-                                      {item.metadata?.code && (
-                                        <span>• Mã: <strong className="text-slate-600 dark:text-slate-300">{item.metadata.code}</strong></span>
-                                      )}
-                                      {item.metadata?.phone && (
-                                        <span>• SĐT: <strong className="text-slate-600 dark:text-slate-300">{item.metadata.phone}</strong></span>
-                                      )}
-                                      {item.metadata?.email && (
-                                        <span>• Email: <strong className="text-slate-600 dark:text-slate-300">{item.metadata.email}</strong></span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="shrink-0 ml-3 flex items-center self-center gap-1.5">
-                                  {isSelected && (
-                                    <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-950/60 px-1.5 py-0.5 rounded">
-                                      <span>Nhấn</span>
-                                      <CornerDownLeft className="w-2.5 h-2.5" />
-                                    </span>
-                                  )}
-                                  <ChevronRight
-                                    className={`w-4 h-4 transition-transform ${
-                                      isSelected
-                                        ? 'text-orange-600 translate-x-0.5'
-                                        : 'text-slate-400 opacity-0 group-hover:opacity-100'
-                                    }`}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-
-                          {/* Link Xem tất cả kết quả của nhóm này */}
-                          {group.totalCount > group.items.length && (
-                            (() => {
-                              const thisIndex = currentItemCounter++;
-                              const isSelected = selectedIndex === thisIndex;
-                              return (
-                                <button
-                                  data-active={isSelected ? 'true' : undefined}
-                                  onClick={() => handleViewAll(group.module)}
-                                  className={`w-full py-2 px-3 text-xs font-semibold rounded-lg flex items-center justify-between transition-colors cursor-pointer ${
+                              <div className="flex items-start gap-3 min-w-0 flex-1">
+                                <div
+                                  className={`p-2 rounded-lg shrink-0 mt-0.5 ${
                                     isSelected
-                                      ? 'bg-orange-500/10 text-orange-600'
-                                      : 'text-orange-600 dark:text-orange-400 hover:bg-orange-50/50 dark:hover:bg-orange-950/20'
+                                      ? 'bg-orange-500 text-white shadow-xs'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:text-orange-600'
                                   }`}
                                 >
-                                  <span>→ Xem tất cả {group.totalCount} kết quả trong {group.label}</span>
-                                  <ArrowRight className="w-3.5 h-3.5" />
-                                </button>
-                              );
-                            })()
-                          )}
-                        </div>
+                                  <ItemIcon className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-bold truncate">
+                                      {highlightText(item.title, query)}
+                                    </span>
+                                    {item.statusText && (
+                                      <span
+                                        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStatusBadgeClass(
+                                          item.statusColor
+                                        )}`}
+                                      >
+                                        {item.statusText}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item.subtitle && (
+                                    <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                                      {highlightText(item.subtitle, query)}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 ml-2 mt-1">
+                                <span className="text-[10px] text-slate-400 hidden sm:inline">
+                                  {item.moduleLabel}
+                                </span>
+                                <ArrowRight
+                                  className={`w-3.5 h-3.5 transition-transform ${
+                                    isSelected
+                                      ? 'text-orange-600 dark:text-orange-400 translate-x-0.5'
+                                      : 'text-slate-400 opacity-0 group-hover:opacity-100'
+                                  }`}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-
-                  {/* Nút Xem tất cả kết quả toàn bộ hệ thống */}
-                  <div className="pt-3 pb-1 px-1">
-                    <button
-                      onClick={() => handleViewAll('all')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-600 dark:hover:bg-orange-600 text-slate-900 dark:text-slate-200 hover:text-white dark:hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>Xem tất cả {searchResults.totalResults} kết quả trong trang tìm kiếm nâng cao</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
+                    </div>
+                  );
+                })
+              ) : isSearching ? (
+                <div className="py-8 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+                  <span>Đang tìm kiếm dữ liệu...</span>
                 </div>
               ) : (
-                /* Không tìm thấy kết quả */
-                <div className="p-8 sm:p-12 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
-                    <Search className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                      Không tìm thấy kết quả cho "{query}"
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                      Hãy thử tìm với từ khóa chung hơn, không dấu hoặc tìm theo mã sản phẩm, SKU, số điện thoại hoặc email.
-                    </p>
-                  </div>
+                <div className="py-8 text-center text-slate-400 space-y-1">
+                  <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Không tìm thấy kết quả nào cho &quot;{query}&quot;
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                    Thử tìm với từ khóa ngắn hơn, không dấu hoặc xem trong trang tìm kiếm nâng cao.
+                  </p>
                 </div>
               )}
-            </>
+
+              {/* View all in advanced search link */}
+              {query.trim() && (
+                <div className="pt-2">
+                  {(() => {
+                    const thisIndex = globalIndexCounter++;
+                    const isSelected = selectedIndex === thisIndex;
+                    return (
+                      <button
+                        data-active={isSelected ? 'true' : undefined}
+                        onClick={handleViewAll}
+                        className={`w-full p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-orange-50 dark:bg-orange-950/40 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-300'
+                            : 'border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Search className="w-4 h-4 text-orange-500" />
+                          <span>Xem tất cả kết quả cho &quot;{query}&quot; trong trang tìm kiếm</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-400" />
+                      </button>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Modal Footer Controls */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+        {/* Modal Footer / Shortcuts Guide */}
+        <div className="px-3 sm:px-4 py-2 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono shadow-2xs">
                 ↑
               </kbd>
-              <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">
+              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono shadow-2xs">
                 ↓
               </kbd>
-              <span>Điều hướng</span>
+              <span className="hidden sm:inline">Di chuyển</span>
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">
-                ↵
+              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono shadow-2xs flex items-center">
+                <CornerDownLeft className="w-2.5 h-2.5" />
               </kbd>
-              <span>Đi tới bản ghi</span>
+              <span className="hidden sm:inline">Chọn</span>
             </span>
-            <span className="hidden md:flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono shadow-2xs">
                 ESC
               </kbd>
-              <span>Đóng</span>
+              <span className="hidden sm:inline">Đóng</span>
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-medium">
-            <Command className="w-3.5 h-3.5 text-orange-500" />
-            <span>CIC Command Global Search</span>
+
+          <div className="flex items-center gap-1.5 font-medium text-slate-400">
+            <Command className="w-3 h-3 text-orange-500" />
+            <span>CIC Command Search</span>
           </div>
         </div>
       </div>
