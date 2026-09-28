@@ -70,12 +70,12 @@ export async function testGoogleSheetAccess(
   spreadsheetId: string,
   sheetName?: string
 ): Promise<GoogleSheetMetadataResult> {
-  if (!hasGoogleServiceAccountCredentials()) {
-    return {
-      success: false,
-      error: 'Hệ thống chưa được cấu hình tài khoản Google Service Account trên server (thiếu GOOGLE_SERVICE_ACCOUNT_EMAIL hoặc GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY).',
-    };
-  }
+    if (!hasGoogleServiceAccountCredentials()) {
+      return {
+        success: false,
+        error: 'Hệ thống chưa được cấu hình tài khoản Google Service Account trên server (thiếu file JSON credentials hoặc biến GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY).',
+      };
+    }
 
   try {
     const sheets = getGoogleSheetsClient();

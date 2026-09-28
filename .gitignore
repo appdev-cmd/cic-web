@@ -18,3 +18,8 @@ db_migrate/__pycache__/
 
 # Local legacy media files
 images/
+
+# Google Service Account keys and credentials
+ggsheet-*.json
+*serviceaccount*.json
+*credentials*.json
