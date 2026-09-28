@@ -67,7 +67,7 @@ export function CmsDataGridFrame({
     };
   }, [refreshKey]);
 
-  const scrollbarClasses = '[scrollbar-color:#94a3b8_#f1f5f9] [scrollbar-width:thin] dark:[scrollbar-color:#64748b_#1e293b] [&::-webkit-scrollbar]:h-2.5 [&::-webkit-scrollbar-track]:bg-slate-100 dark:[&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-400 hover:[&::-webkit-scrollbar-thumb]:bg-slate-500 dark:[&::-webkit-scrollbar-thumb]:border-slate-800 dark:[&::-webkit-scrollbar-thumb]:bg-slate-500 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-400';
+  const scrollbarClasses = 'cms-scrollbar';
 
   const showSkeleton = isLoading && loadingMode === 'skeleton';
   const showOverlay = isLoading && loadingMode === 'overlay';
@@ -126,7 +126,7 @@ export function CmsDataGridFrame({
           onScroll={(event) => {
             if (tableScrollRef.current) tableScrollRef.current.scrollLeft = event.currentTarget.scrollLeft;
           }}
-          className={`fixed bottom-[env(safe-area-inset-bottom)] z-50 overflow-x-auto border-y border-slate-300 bg-slate-100/95 shadow-[0_-5px_16px_rgba(15,23,42,0.14)] backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 ${scrollbarClasses}`}
+          className={`fixed bottom-[env(safe-area-inset-bottom)] z-50 overflow-x-auto border-t border-slate-200/80 bg-white/80 py-0.5 shadow-sm backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/80 ${scrollbarClasses}`}
           style={{ left: rail.left, width: rail.width }}
         >
           <div style={{ width: rail.contentWidth, height: 1 }} />

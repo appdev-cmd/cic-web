@@ -304,9 +304,146 @@ html.dark, body.dark, .dark { color-scheme: dark; }
 @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .animate-fade-in { animation: fade-in 0.2s ease-out both; }
 
-/* ── Scrollbar hide utility (used in News category tabs) ── */
+/* ── Modern Sleek Custom Scrollbars ── */
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+html,
+body,
+.cms-shell,
+.cms-shell *,
+.cms-scrollbar,
+.custom-scrollbar,
+.scrollbar-thin,
+[role="dialog"],
+[role="dialog"] *,
+[role="region"],
+[data-radix-portal] * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.cms-shell::-webkit-scrollbar,
+.cms-shell *::-webkit-scrollbar,
+.cms-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+.scrollbar-thin::-webkit-scrollbar,
+[role="dialog"]::-webkit-scrollbar,
+[role="dialog"] *::-webkit-scrollbar,
+[role="region"]::-webkit-scrollbar,
+[data-radix-portal] *::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.cms-shell::-webkit-scrollbar-track,
+.cms-shell *::-webkit-scrollbar-track,
+.cms-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track,
+.scrollbar-thin::-webkit-scrollbar-track,
+[role="dialog"]::-webkit-scrollbar-track,
+[role="dialog"] *::-webkit-scrollbar-track,
+[role="region"]::-webkit-scrollbar-track,
+[data-radix-portal] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.cms-shell::-webkit-scrollbar-thumb,
+.cms-shell *::-webkit-scrollbar-thumb,
+.cms-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.scrollbar-thin::-webkit-scrollbar-thumb,
+[role="dialog"]::-webkit-scrollbar-thumb,
+[role="dialog"] *::-webkit-scrollbar-thumb,
+[role="region"]::-webkit-scrollbar-thumb,
+[data-radix-portal] *::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.cms-shell::-webkit-scrollbar-thumb:hover,
+.cms-shell *::-webkit-scrollbar-thumb:hover,
+.cms-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin::-webkit-scrollbar-thumb:hover,
+[role="dialog"]::-webkit-scrollbar-thumb:hover,
+[role="dialog"] *::-webkit-scrollbar-thumb:hover,
+[role="region"]::-webkit-scrollbar-thumb:hover,
+[data-radix-portal] *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.7);
+}
+
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+.cms-shell::-webkit-scrollbar-corner,
+.cms-shell *::-webkit-scrollbar-corner,
+.cms-scrollbar::-webkit-scrollbar-corner,
+.custom-scrollbar::-webkit-scrollbar-corner,
+.scrollbar-thin::-webkit-scrollbar-corner,
+[role="dialog"]::-webkit-scrollbar-corner,
+[role="dialog"] *::-webkit-scrollbar-corner,
+[role="region"]::-webkit-scrollbar-corner,
+[data-radix-portal] *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.dark html,
+.dark body,
+.dark .cms-shell,
+.dark .cms-shell *,
+.dark.cms-shell,
+.dark.cms-shell *,
+.dark .cms-scrollbar,
+.dark .custom-scrollbar,
+.dark .scrollbar-thin,
+.dark [role="dialog"],
+.dark [role="dialog"] *,
+.dark [role="region"],
+.dark [data-radix-portal] * {
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+
+.dark html::-webkit-scrollbar-thumb,
+.dark body::-webkit-scrollbar-thumb,
+.dark .cms-shell::-webkit-scrollbar-thumb,
+.dark .cms-shell *::-webkit-scrollbar-thumb,
+.dark.cms-shell::-webkit-scrollbar-thumb,
+.dark.cms-shell *::-webkit-scrollbar-thumb,
+.dark .cms-scrollbar::-webkit-scrollbar-thumb,
+.dark .custom-scrollbar::-webkit-scrollbar-thumb,
+.dark .scrollbar-thin::-webkit-scrollbar-thumb,
+.dark [role="dialog"]::-webkit-scrollbar-thumb,
+.dark [role="dialog"] *::-webkit-scrollbar-thumb,
+.dark [role="region"]::-webkit-scrollbar-thumb,
+.dark [data-radix-portal] *::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.25);
+}
+
+.dark html::-webkit-scrollbar-thumb:hover,
+.dark body::-webkit-scrollbar-thumb:hover,
+.dark .cms-shell::-webkit-scrollbar-thumb:hover,
+.dark .cms-shell *::-webkit-scrollbar-thumb:hover,
+.dark.cms-shell::-webkit-scrollbar-thumb:hover,
+.dark.cms-shell *::-webkit-scrollbar-thumb:hover,
+.dark .cms-scrollbar::-webkit-scrollbar-thumb:hover,
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+.dark [role="dialog"]::-webkit-scrollbar-thumb:hover,
+.dark [role="dialog"] *::-webkit-scrollbar-thumb:hover,
+.dark [role="region"]::-webkit-scrollbar-thumb:hover,
+.dark [data-radix-portal] *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(203, 213, 225, 0.55);
+}
 
 /* ── CKEditor 5 CMS styling ── */
 .cms-ckeditor {
