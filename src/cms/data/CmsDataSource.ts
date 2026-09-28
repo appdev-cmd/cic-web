@@ -12,6 +12,7 @@ import type {
   WebsiteHealthSummary,
   PopularContentItem,
   OperationsTrendItem,
+  DashboardOperationsMetrics,
 } from '../types';
 import type { AppLocale } from '@/shared/i18n/config';
 
@@ -32,6 +33,7 @@ export interface CmsDashboardData {
   operationsTrend?: OperationsTrendItem[];
   totalViews?: number;
   todayRequestsCount?: number;
+  operationsMetrics?: DashboardOperationsMetrics;
 }
 
 export interface CmsDataSource {

@@ -13,6 +13,9 @@ import type {
   WebsiteHealthCheckItem,
   PopularContentItem,
   OperationsTrendItem,
+  DashboardOperationsMetrics,
+  DashboardTimeFilterType,
+  DashboardMetricDelta,
 } from '@/cms/types';
 
 const dashboardCache = new Map<string, { data: CmsDashboardData; expiresAt: number }>();
@@ -445,6 +448,12 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     return result;
   };
 
+  const operationsMetrics = await getDashboardOperationsMetrics({
+    filterType: '7d',
+    locale,
+    dbLatencyMs,
+  });
+
   const result: CmsDashboardData = {
     kpi,
     contacts,
@@ -459,6 +468,7 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
     operationsTrend,
     totalViews: totalNewsViews,
     todayRequestsCount: leadsToday + contactsToday,
+    operationsMetrics,
   };
 
   dashboardCache.set(locale, {
@@ -467,4 +477,322 @@ export async function getCmsDashboardData(locale: CmsLocale = 'vi'): Promise<Cms
   });
 
   return result;
+}
+
+function computeMetricDelta(current: number, previous: number): DashboardMetricDelta {
+  if (previous === 0) {
+    if (current === 0) {
+      return { current, previous, percentChange: 0, trend: 'neutral', formattedChange: '0%' };
+    }
+    return { current, previous, percentChange: 100, trend: 'up', formattedChange: '+100%' };
+  }
+  const pct = ((current - previous) / previous) * 100;
+  const rounded = Math.round(pct * 10) / 10;
+  return {
+    current,
+    previous,
+    percentChange: rounded,
+    trend: rounded > 0 ? 'up' : rounded < 0 ? 'down' : 'neutral',
+    formattedChange: rounded > 0 ? `+${rounded}%` : `${rounded}%`,
+  };
+}
+
+function formatDisplayDate(d: Date): string {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+export interface DashboardFilterOptions {
+  filterType: DashboardTimeFilterType;
+  fromDate?: string;
+  toDate?: string;
+  locale?: CmsLocale;
+  dbLatencyMs?: number;
+}
+
+export async function getDashboardOperationsMetrics(options: DashboardFilterOptions): Promise<DashboardOperationsMetrics> {
+  const sql = getPostgresClient();
+  const filterType = options.filterType || '7d';
+  const locale = options.locale || 'vi';
+  const isEn = locale === 'en';
+
+  const pTable = isEn ? 'cic_products_en' : 'cic_products';
+  const nTable = isEn ? 'cic_news_en' : 'cic_news';
+  const eTable = isEn ? 'cic_event_en' : 'cic_event';
+  const cTable = isEn ? 'cic_contact_en' : 'cic_contact';
+
+  const now = new Date();
+  let startTime: Date;
+  let endTime: Date;
+  let prevStartTime: Date;
+  let prevEndTime: Date;
+  let filterLabel = '';
+
+  if (filterType === 'today') {
+    startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    prevStartTime = new Date(startTime.getTime() - 24 * 60 * 60 * 1000);
+    prevEndTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
+    filterLabel = isEn ? 'Today' : 'Hôm nay';
+  } else if (filterType === '30d') {
+    endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    startTime = new Date(endTime.getTime() - 29 * 24 * 60 * 60 * 1000);
+    startTime.setHours(0, 0, 0, 0);
+    prevEndTime = new Date(startTime.getTime() - 1);
+    prevStartTime = new Date(prevEndTime.getTime() - 29 * 24 * 60 * 60 * 1000);
+    prevStartTime.setHours(0, 0, 0, 0);
+    filterLabel = isEn ? 'Past 30 Days' : '30 ngày qua';
+  } else if (filterType === 'month') {
+    startTime = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const dayOfMonth = now.getDate();
+    prevStartTime = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+    const maxDayInPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+    prevEndTime = new Date(now.getFullYear(), now.getMonth() - 1, Math.min(dayOfMonth, maxDayInPrevMonth), 23, 59, 59, 999);
+    filterLabel = isEn ? 'This Month' : 'Tháng này';
+  } else if (filterType === 'custom' && options.fromDate && options.toDate) {
+    const [sy, sm, sd] = options.fromDate.split('-').map(Number);
+    const [ey, em, ed] = options.toDate.split('-').map(Number);
+    startTime = new Date(sy, sm - 1, sd, 0, 0, 0, 0);
+    endTime = new Date(ey, em - 1, ed, 23, 59, 59, 999);
+    if (startTime.getTime() > endTime.getTime()) {
+      const temp = startTime;
+      startTime = endTime;
+      endTime = temp;
+    }
+    const durationMs = Math.max(24 * 60 * 60 * 1000, endTime.getTime() - startTime.getTime() + 1);
+    prevEndTime = new Date(startTime.getTime() - 1);
+    prevStartTime = new Date(prevEndTime.getTime() - durationMs + 1);
+    filterLabel = isEn ? 'Custom Range' : 'Tùy chọn';
+  } else {
+    // 7d default
+    endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    startTime = new Date(endTime.getTime() - 6 * 24 * 60 * 60 * 1000);
+    startTime.setHours(0, 0, 0, 0);
+    prevEndTime = new Date(startTime.getTime() - 1);
+    prevStartTime = new Date(prevEndTime.getTime() - 6 * 24 * 60 * 60 * 1000);
+    prevStartTime.setHours(0, 0, 0, 0);
+    filterLabel = isEn ? 'Past 7 Days' : '7 ngày qua';
+  }
+
+  const startIso = startTime.toISOString();
+  const endIso = endTime.toISOString();
+  const prevStartIso = prevStartTime.toISOString();
+  const prevEndIso = prevEndTime.toISOString();
+
+  const totalDays = Math.min(60, Math.max(0, Math.round((endTime.getTime() - startTime.getTime()) / (24 * 60 * 60 * 1000))));
+
+  const isTodayFilter = filterType === 'today';
+
+  const [metricsRows, seriesRows] = await Promise.all([
+    sql.unsafe<[{
+      cur_quotes: number;
+      prev_quotes: number;
+      cur_contacts: number;
+      prev_contacts: number;
+      cur_news: number;
+      prev_news: number;
+      cur_prods: number;
+      prev_prods: number;
+      cur_events: number;
+      prev_events: number;
+      cur_activities: number;
+      prev_activities: number;
+      cumulative_hits: string | null;
+      cur_unproc_quotes: number;
+      prev_unproc_quotes: number;
+      cur_unproc_contacts: number;
+      prev_unproc_contacts: number;
+      total_unproc_quotes: number;
+      total_unproc_contacts: number;
+      prod_missing_img: number;
+      prod_missing_seo: number;
+      news_missing_seo: number;
+    }]>(`
+      SELECT
+        (SELECT count(*)::int FROM cic_product_contact WHERE created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_quotes,
+        (SELECT count(*)::int FROM cic_product_contact WHERE created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_quotes,
+        (SELECT count(*)::int FROM ${cTable} WHERE created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_contacts,
+        (SELECT count(*)::int FROM ${cTable} WHERE created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_contacts,
+
+        (SELECT count(*)::int FROM ${nTable} WHERE published = true AND created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_news,
+        (SELECT count(*)::int FROM ${nTable} WHERE published = true AND created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_news,
+        (SELECT count(*)::int FROM ${pTable} WHERE published = true AND created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_prods,
+        (SELECT count(*)::int FROM ${pTable} WHERE published = true AND created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_prods,
+        (SELECT count(*)::int FROM ${eTable} WHERE published = true AND created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_events,
+        (SELECT count(*)::int FROM ${eTable} WHERE published = true AND created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_events,
+
+        (SELECT count(*)::int FROM cic_activity_logs WHERE occurred_at >= '${startIso}' AND occurred_at <= '${endIso}') AS cur_activities,
+        (SELECT count(*)::int FROM cic_activity_logs WHERE occurred_at >= '${prevStartIso}' AND occurred_at <= '${prevEndIso}') AS prev_activities,
+        (SELECT sum(hits)::bigint FROM ${nTable} WHERE published = true) AS cumulative_hits,
+
+        (SELECT count(*)::int FROM cic_product_contact WHERE published = false AND created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_unproc_quotes,
+        (SELECT count(*)::int FROM cic_product_contact WHERE published = false AND created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_unproc_quotes,
+        (SELECT count(*)::int FROM ${cTable} WHERE published = false AND created_time >= '${startIso}' AND created_time <= '${endIso}') AS cur_unproc_contacts,
+        (SELECT count(*)::int FROM ${cTable} WHERE published = false AND created_time >= '${prevStartIso}' AND created_time <= '${prevEndIso}') AS prev_unproc_contacts,
+
+        (SELECT count(*)::int FROM cic_product_contact WHERE published = false) AS total_unproc_quotes,
+        (SELECT count(*)::int FROM ${cTable} WHERE published = false) AS total_unproc_contacts,
+
+        (SELECT count(*)::int FROM ${pTable} WHERE published = true AND (image IS NULL OR btrim(image)='')) AS prod_missing_img,
+        (SELECT count(*)::int FROM ${pTable} WHERE published = true AND (seo_title IS NULL OR btrim(seo_title)='' OR seo_description IS NULL OR btrim(seo_description)='')) AS prod_missing_seo,
+        (SELECT count(*)::int FROM ${nTable} WHERE published = true AND (seo_title IS NULL OR btrim(seo_title)='' OR seo_description IS NULL OR btrim(seo_description)='')) AS news_missing_seo
+    `),
+
+    isTodayFilter
+      ? sql.unsafe<Array<{
+          date_label: string;
+          requests_count: number;
+          content_updates_count: number;
+          traffic_count: number;
+        }>>(`
+          SELECT 
+            to_char(s.slot, 'HH24:MI') as date_label,
+            ((SELECT count(*)::int FROM cic_product_contact pc WHERE pc.created_time >= s.slot AND pc.created_time < s.slot + interval '4 hours') +
+             (SELECT count(*)::int FROM ${cTable} c WHERE c.created_time >= s.slot AND c.created_time < s.slot + interval '4 hours')) as requests_count,
+            ((SELECT count(*)::int FROM ${nTable} n WHERE n.created_time >= s.slot AND n.created_time < s.slot + interval '4 hours') +
+             (SELECT count(*)::int FROM ${pTable} p WHERE p.created_time >= s.slot AND p.created_time < s.slot + interval '4 hours') +
+             (SELECT count(*)::int FROM ${eTable} e WHERE e.created_time >= s.slot AND e.created_time < s.slot + interval '4 hours')) as content_updates_count,
+            (SELECT count(*)::int FROM cic_activity_logs a WHERE a.occurred_at >= s.slot AND a.occurred_at < s.slot + interval '4 hours') as traffic_count
+          FROM (
+            SELECT '${startIso}'::timestamptz + (i * interval '4 hours') as slot
+            FROM generate_series(0, 5) as i
+          ) s
+          ORDER BY s.slot ASC
+        `)
+      : sql.unsafe<Array<{
+          date_label: string;
+          requests_count: number;
+          content_updates_count: number;
+          traffic_count: number;
+        }>>(`
+          SELECT 
+            to_char(d.day, 'DD/MM') as date_label,
+            ((SELECT count(*)::int FROM cic_product_contact pc WHERE pc.created_time::date = d.day) +
+             (SELECT count(*)::int FROM ${cTable} c WHERE c.created_time::date = d.day)) as requests_count,
+            ((SELECT count(*)::int FROM ${nTable} n WHERE n.created_time::date = d.day) +
+             (SELECT count(*)::int FROM ${pTable} p WHERE p.created_time::date = d.day) +
+             (SELECT count(*)::int FROM ${eTable} e WHERE e.created_time::date = d.day)) as content_updates_count,
+            (SELECT count(*)::int FROM cic_activity_logs a WHERE a.occurred_at::date = d.day) as traffic_count
+          FROM (
+            SELECT ('${startIso}'::timestamptz + (i * interval '1 day'))::date as day
+            FROM generate_series(0, ${totalDays}) as i
+          ) d
+          ORDER BY d.day ASC
+        `),
+  ]);
+
+  const m = metricsRows[0] || ({} as any);
+
+  const curRequests = (m.cur_quotes ?? 0) + (m.cur_contacts ?? 0);
+  const prevRequests = (m.prev_quotes ?? 0) + (m.prev_contacts ?? 0);
+  const curContent = (m.cur_news ?? 0) + (m.cur_prods ?? 0) + (m.cur_events ?? 0);
+  const prevContent = (m.prev_news ?? 0) + (m.prev_prods ?? 0) + (m.prev_events ?? 0);
+  const curActivities = m.cur_activities ?? 0;
+  const prevActivities = m.prev_activities ?? 0;
+  const cumulativeHits = Number(m.cumulative_hits ?? 0);
+
+  const totalBacklog = (m.total_unproc_quotes ?? 0) + (m.total_unproc_contacts ?? 0);
+  const curPeriodUnproc = (m.cur_unproc_quotes ?? 0) + (m.cur_unproc_contacts ?? 0);
+  const prevPeriodUnproc = (m.prev_unproc_quotes ?? 0) + (m.prev_unproc_contacts ?? 0);
+
+  const customerRequestsDelta = computeMetricDelta(curRequests, prevRequests);
+  const publishedContentDelta = computeMetricDelta(curContent, prevContent);
+  const trafficDelta = computeMetricDelta(curActivities, prevActivities);
+  const unprocessedDelta = computeMetricDelta(curPeriodUnproc, prevPeriodUnproc);
+
+  // Deterministic Operational Insight generation from real DB metrics
+  let reqInsight = '';
+  if (curRequests > 0 && prevRequests > 0) {
+    if (customerRequestsDelta.percentChange! > 0) {
+      reqInsight = isEn
+        ? `Customer inquiries increased by ${customerRequestsDelta.percentChange}% vs previous period`
+        : `Yêu cầu khách hàng tăng ${customerRequestsDelta.percentChange}% so với kỳ trước`;
+    } else if (customerRequestsDelta.percentChange! < 0) {
+      reqInsight = isEn
+        ? `Customer inquiries decreased by ${Math.abs(customerRequestsDelta.percentChange!)}% vs previous period`
+        : `Yêu cầu khách hàng giảm ${Math.abs(customerRequestsDelta.percentChange!)}% so với kỳ trước`;
+    } else {
+      reqInsight = isEn
+        ? `Customer inquiries remained steady (${curRequests} inquiries)`
+        : `Yêu cầu khách hàng duy trì ổn định (${curRequests} yêu cầu)`;
+    }
+  } else if (curRequests > 0) {
+    reqInsight = isEn
+      ? `Recorded ${curRequests} new customer inquiries in this period`
+      : `Ghi nhận ${curRequests} yêu cầu khách hàng mới trong kỳ`;
+  } else {
+    reqInsight = isEn
+      ? 'No new customer inquiries in this period'
+      : 'Chưa có yêu cầu khách hàng mới trong kỳ';
+  }
+
+  const slaInsight = totalBacklog > 0
+    ? (isEn ? `${totalBacklog} inquiries pending response` : `${totalBacklog} yêu cầu chờ xử lý`)
+    : (isEn ? 'All customer inquiries resolved' : 'Toàn bộ yêu cầu khách hàng đã được phản hồi');
+
+  let healthInsight = '';
+  const prodMissingImg = m.prod_missing_img ?? 0;
+  const prodMissingSeo = m.prod_missing_seo ?? 0;
+  const newsMissingSeo = m.news_missing_seo ?? 0;
+
+  if (prodMissingImg > 0) {
+    healthInsight = isEn ? `${prodMissingImg} products missing cover image` : `${prodMissingImg} sản phẩm chưa có ảnh`;
+  } else if (prodMissingSeo > 0) {
+    healthInsight = isEn ? `${prodMissingSeo} products missing SEO tags` : `${prodMissingSeo} sản phẩm thiếu thông tin SEO`;
+  } else if (newsMissingSeo > 0) {
+    healthInsight = isEn ? `${newsMissingSeo} articles pending SEO review` : `${newsMissingSeo} bài viết chưa tối ưu SEO`;
+  } else {
+    healthInsight = isEn ? 'Operational response optimal' : 'Hệ thống vận hành tối ưu';
+  }
+
+  const operationalInsight = `${reqInsight} · ${slaInsight} · ${healthInsight}.`;
+
+  return {
+    timeFilter: {
+      type: filterType,
+      label: filterLabel,
+      fromDate: formatDisplayDate(startTime),
+      toDate: formatDisplayDate(endTime),
+      prevFromDate: formatDisplayDate(prevStartTime),
+      prevToDate: formatDisplayDate(prevEndTime),
+    },
+    traffic: {
+      ...trafficDelta,
+      cumulativeHits,
+      activityInteractions: curActivities,
+      note: isEn
+        ? 'Cumulative article views in DB. Connect GA4 for per-day visitor sessions.'
+        : 'Lượt đọc bài viết tích lũy trong DB. Cần kết nối GA4 để đồng bộ phiên theo ngày.',
+    },
+    customerRequests: {
+      ...customerRequestsDelta,
+      breakdown: {
+        productQuotes: { current: m.cur_quotes ?? 0, previous: m.prev_quotes ?? 0 },
+        contacts: { current: m.cur_contacts ?? 0, previous: m.prev_contacts ?? 0 },
+      },
+    },
+    publishedContent: {
+      ...publishedContentDelta,
+      breakdown: {
+        news: { current: m.cur_news ?? 0, previous: m.prev_news ?? 0 },
+        products: { current: m.cur_prods ?? 0, previous: m.prev_prods ?? 0 },
+        events: { current: m.cur_events ?? 0, previous: m.prev_events ?? 0 },
+      },
+    },
+    unprocessedBacklog: {
+      ...unprocessedDelta,
+      totalBacklog,
+      currentPeriodUnprocessed: curPeriodUnproc,
+    },
+    trendSeries: seriesRows.map((r) => ({
+      date: r.date_label,
+      requests: Number(r.requests_count ?? 0),
+      contentUpdates: Number(r.content_updates_count ?? 0),
+      traffic: Number(r.traffic_count ?? 0),
+    })),
+    operationalInsight,
+  };
 }

@@ -44,9 +44,13 @@ export const ActionableQueue: React.FC<ActionableQueueProps> = ({
   const isEn = workspaceLocale === 'en';
   const [filter, setFilter] = useState<'all' | 'sla' | 'seo' | 'draft'>('all');
 
-  const unprocessedQuotes = data.kpi?.unprocessed_registrations ?? 705;
-  const unprocessedContacts = data.kpi?.unprocessed_contacts ?? 56;
+  const unprocessedQuotes = data.kpi?.unprocessed_registrations ?? 0;
+  const unprocessedContacts = data.kpi?.unprocessed_contacts ?? 0;
   const totalInquiries = unprocessedQuotes + unprocessedContacts;
+
+  const prodMissingSeo = data.health?.items?.find((i) => i.id === 'product_seo')?.count ?? 0;
+  const prodMissingImg = data.health?.items?.find((i) => i.id === 'product_media')?.count ?? 0;
+  const newsMissingSeo = data.health?.items?.find((i) => i.id === 'news_seo')?.count ?? 0;
 
   const draftItems = (data.pendingContents ?? []).filter((i) => i.status !== 'published');
 
@@ -69,11 +73,13 @@ export const ActionableQueue: React.FC<ActionableQueueProps> = ({
       id: 'seo-products',
       category: 'seo',
       severity: 'high',
-      title: isEn ? 'Products Missing SEO Meta Description' : '39 Sản phẩm thiếu thẻ mô tả SEO & từ khóa',
+      title: isEn
+        ? `${prodMissingSeo} Products Missing SEO Meta Description`
+        : `${prodMissingSeo} Sản phẩm thiếu thẻ mô tả SEO & từ khóa`,
       description: isEn
         ? 'Products without meta description impact Google SERP indexing and search discovery.'
         : 'Chưa có tóm tắt meta description, ảnh hưởng trực tiếp đến thứ hạng tìm kiếm Google.',
-      count: 39,
+      count: prodMissingSeo,
       badgeLabel: isEn ? 'High Priority' : 'Ưu tiên cao',
       actionText: isEn ? 'Update SEO' : 'Bổ sung SEO',
       actionPath: '/cms/products',
@@ -83,11 +89,13 @@ export const ActionableQueue: React.FC<ActionableQueueProps> = ({
       id: 'media-products',
       category: 'media',
       severity: 'medium',
-      title: isEn ? 'Products Missing Featured Images' : '21 Sản phẩm chưa có hình ảnh đại diện',
+      title: isEn
+        ? `${prodMissingImg} Products Missing Featured Images`
+        : `${prodMissingImg} Sản phẩm chưa có hình ảnh đại diện`,
       description: isEn
         ? 'Missing thumbnail images lowers product presentation quality on storefront catalog.'
         : 'Sản phẩm hiển thị hình mặc định (placeholder), cần tải lên hình ảnh sản phẩm chính thức.',
-      count: 21,
+      count: prodMissingImg,
       badgeLabel: isEn ? 'Visual Quality' : 'Bổ sung ảnh',
       actionText: isEn ? 'Upload Media' : 'Thêm ảnh SP',
       actionPath: '/cms/products',
@@ -97,11 +105,13 @@ export const ActionableQueue: React.FC<ActionableQueueProps> = ({
       id: 'seo-news',
       category: 'seo',
       severity: 'medium',
-      title: isEn ? 'News Articles Without Meta Description' : '369 Bài viết tin tức thiếu mô tả tóm tắt SEO',
+      title: isEn
+        ? `${newsMissingSeo} News Articles Without Meta Description`
+        : `${newsMissingSeo} Bài viết tin tức thiếu mô tả tóm tắt SEO`,
       description: isEn
         ? 'Search engines generate snippets automatically; manual SEO summary improves search CTR.'
         : 'Cần bổ sung trích đoạn mô tả chuẩn SEO để tối ưu tỷ lệ click tìm kiếm tự nhiên.',
-      count: 369,
+      count: newsMissingSeo,
       badgeLabel: isEn ? 'SEO Optimize' : 'Tối ưu SEO',
       actionText: isEn ? 'Review News' : 'Duyệt bài viết',
       actionPath: '/cms/news',

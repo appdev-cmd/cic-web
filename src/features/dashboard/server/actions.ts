@@ -4,7 +4,9 @@ import { requireCmsAccess } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
 import { revalidatePath } from 'next/cache';
 import { writeAuditEvent } from '@/server/audit/writer';
-import { invalidateCmsDashboardCache } from './queries';
+import { invalidateCmsDashboardCache, getDashboardOperationsMetrics } from './queries';
+import type { DashboardOperationsMetrics, DashboardTimeFilterType } from '@/cms/types';
+import type { CmsLocale } from '@/cms/data/CmsDataSource';
 
 export async function updateDashboardItemStatusAction(
   type: 'contact' | 'registration' | 'pending',
@@ -119,3 +121,14 @@ export async function updateDashboardItemStatusAction(
     return { success: false, error: err instanceof Error ? err.message : 'Có lỗi xảy ra khi cập nhật.' };
   }
 }
+
+export async function getDashboardOperationsMetricsAction(options: {
+  filterType: DashboardTimeFilterType;
+  fromDate?: string;
+  toDate?: string;
+  locale?: CmsLocale;
+}): Promise<DashboardOperationsMetrics> {
+  await requireCmsAccess();
+  return getDashboardOperationsMetrics(options);
+}
+

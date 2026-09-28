@@ -140,5 +140,56 @@ export interface OperationsTrendItem {
   date_label: string;
   requests_count: number;
   content_updates_count: number;
+  traffic_count?: number;
+}
+
+export type DashboardTimeFilterType = 'today' | '7d' | '30d' | 'month' | 'custom';
+
+export interface DashboardMetricDelta {
+  current: number;
+  previous: number;
+  percentChange: number | null;
+  trend: 'up' | 'down' | 'neutral';
+  formattedChange: string;
+}
+
+export interface DashboardOperationsMetrics {
+  timeFilter: {
+    type: DashboardTimeFilterType;
+    label: string;
+    fromDate: string;
+    toDate: string;
+    prevFromDate: string;
+    prevToDate: string;
+  };
+  traffic: DashboardMetricDelta & {
+    cumulativeHits: number;
+    activityInteractions: number;
+    note: string;
+  };
+  customerRequests: DashboardMetricDelta & {
+    breakdown: {
+      productQuotes: { current: number; previous: number };
+      contacts: { current: number; previous: number };
+    };
+  };
+  publishedContent: DashboardMetricDelta & {
+    breakdown: {
+      news: { current: number; previous: number };
+      products: { current: number; previous: number };
+      events: { current: number; previous: number };
+    };
+  };
+  unprocessedBacklog: DashboardMetricDelta & {
+    totalBacklog: number;
+    currentPeriodUnprocessed: number;
+  };
+  trendSeries: Array<{
+    date: string;
+    requests: number;
+    contentUpdates: number;
+    traffic: number;
+  }>;
+  operationalInsight: string;
 }
 
