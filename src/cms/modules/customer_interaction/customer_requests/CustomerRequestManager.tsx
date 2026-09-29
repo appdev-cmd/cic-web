@@ -476,6 +476,12 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    showToast(
+      workspaceLocale === 'en'
+        ? `Successfully exported ${filteredRequests.length} requests to CSV.`
+        : `Đã xuất thành công ${filteredRequests.length} yêu cầu ra file CSV.`,
+      'success'
+    );
   };
 
   // Handlers

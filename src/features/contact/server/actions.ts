@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { contactInputSchema } from '../schemas/contactInput';
 import { getDatabaseClient } from '@/server/db/foundation';
+import { createSupabaseAdminClient } from '@/server/supabase/admin';
 import { getPostgresClient } from '@/server/db/postgres';
 import { customerInteractionInputSchema } from '../schemas/customerInteractionInput';
 import { sendEmail } from '@/lib/email/transporter';
@@ -127,7 +128,12 @@ export async function submitCustomerInteractionAction(payload: unknown) {
   const input = customerInteractionInputSchema.parse(payload);
   const values = input.values;
   const now = new Date().toISOString();
-  const client = await getDatabaseClient();
+  let client;
+  try {
+    client = createSupabaseAdminClient();
+  } catch {
+    client = await getDatabaseClient();
+  }
 
   const email = typeof values.email === 'string' ? values.email.trim() : '';
 
@@ -163,23 +169,22 @@ export async function submitCustomerInteractionAction(payload: unknown) {
       ? values.notes.trim()
       : null;
 
-  const { data, error } = await client
-    .from('cic_contact')
-    .insert({
-      email,
-      fullname,
-      telephone,
-      subject,
-      message,
-      parts_email: JSON.stringify({ formId: input.formId, source: input.source, values }),
-      edited_time: now,
-      created_time: now,
-      published: false,
-    })
-    .select('id,created_time')
-    .single();
-
-  if (error || !data) throw new Error('Unable to submit customer request.');
+  const sql = getPostgresClient();
+  let data: { id: number; created_time: string };
+  try {
+    const [row] = await sql`
+      INSERT INTO cic_contact (
+        email, fullname, telephone, subject, message, parts_email, edited_time, created_time, published
+      ) VALUES (
+        ${email}, ${fullname}, ${telephone}, ${subject}, ${message}, ${JSON.stringify({ formId: input.formId, source: input.source, values })}, ${now}, ${now}, false
+      )
+      RETURNING id, created_time
+    `;
+    data = row as { id: number; created_time: string };
+  } catch (dbErr: any) {
+    console.error('[submitCustomerInteractionAction DB error]:', dbErr);
+    throw new Error('Unable to submit customer request: ' + (dbErr?.message || 'db error'));
+  }
 
   // Initialize operational overlay in customer request states
   try {
