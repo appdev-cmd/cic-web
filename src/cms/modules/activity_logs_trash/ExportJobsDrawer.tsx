@@ -9,6 +9,7 @@ import {
   Plus,
   Shield,
   FileCode,
+  Loader2,
 } from 'lucide-react';
 import { ExportJob } from './types';
 
@@ -31,6 +32,7 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
 }) => {
   const [dateRange, setDateRange] = useState('7days');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -157,13 +159,28 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                 </div>
 
                 <div className="pt-2 flex justify-end">
-                  {job.status === 'completed' && job.downloadUrl && <button
-                    onClick={() => { void onDownload(job.id); }}
-                    className="min-h-11 px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-bold text-xs rounded-xl border border-blue-500/20 flex items-center gap-1.5 cursor-pointer transition-all"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Tải xuống File CSV</span>
-                  </button>}
+                  {job.status === 'completed' && job.downloadUrl && (
+                    <button
+                      onClick={async () => {
+                        if (downloadingId) return;
+                        setDownloadingId(job.id);
+                        try {
+                          await onDownload(job.id);
+                        } finally {
+                          setDownloadingId(null);
+                        }
+                      }}
+                      disabled={downloadingId === job.id}
+                      className="min-h-11 px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 disabled:opacity-50 text-blue-600 font-bold text-xs rounded-xl border border-blue-500/20 flex items-center gap-1.5 cursor-pointer transition-all"
+                    >
+                      {downloadingId === job.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Download className="w-3.5 h-3.5" />
+                      )}
+                      <span>{downloadingId === job.id ? 'Đang tạo liên kết...' : 'Tải xuống File CSV'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))

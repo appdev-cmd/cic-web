@@ -91,10 +91,10 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
   const [trashTargets, setTrashTargets] = useState<CustomerRequest[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
+  const showToast = (msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
+    setToastMessage({ text: msg, type });
     setTimeout(() => setToastMessage(null), 3500);
   };
 
@@ -390,7 +390,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
   // Export CSV based on filtered dataset
   const handleExportCSV = () => {
     if (filteredRequests.length === 0) {
-      alert('Không có dữ liệu yêu cầu nào phù hợp để xuất file.');
+      showToast('Không có dữ liệu yêu cầu nào phù hợp với bộ lọc để xuất file.', 'warning');
       return;
     }
 
@@ -536,7 +536,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(`Không thể thêm ghi chú: ${err.error || 'Lỗi hệ thống'}`);
+        showToast(`Không thể thêm ghi chú: ${err.error || 'Lỗi hệ thống'}`, 'error');
         return;
       }
 
@@ -568,7 +568,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       showToast('Đã thêm ghi chú nội bộ thành công!');
       onRefresh?.();
     } catch (e: any) {
-      showToast(`Lỗi kết nối: ${e.message}`);
+      showToast(`Lỗi kết nối: ${e.message}`, 'error');
     }
   };
 
@@ -591,7 +591,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(`Không thể phân công: ${err.error || 'Lỗi hệ thống'}`);
+        showToast(`Không thể phân công: ${err.error || 'Lỗi hệ thống'}`, 'error');
         return;
       }
 
@@ -644,7 +644,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       showToast(`Đã phân công ${requestIds.length} yêu cầu cho ${targetStaff.name}!`);
       onRefresh?.();
     } catch (e: any) {
-      showToast(`Lỗi kết nối: ${e.message}`);
+      showToast(`Lỗi kết nối: ${e.message}`, 'error');
     }
   };
 
@@ -692,7 +692,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(`Không thể xóa yêu cầu: ${err.error || 'Lỗi hệ thống'}`);
+        showToast(`Không thể xóa yêu cầu: ${err.error || 'Lỗi hệ thống'}`, 'error');
         return;
       }
 
@@ -706,7 +706,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       setTrashTargets(null);
       onRefresh?.();
     } catch (e: any) {
-      showToast(`Lỗi kết nối: ${e.message}`);
+      showToast(`Lỗi kết nối: ${e.message}`, 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -742,7 +742,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
         setRequests((prev) =>
           prev.map((r) => (r.id === id ? { ...r, status: currentStatus as RequestStatus } : r))
         );
-        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`);
+        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`, 'error');
         return;
       }
 
@@ -752,7 +752,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       setRequests((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: currentStatus as RequestStatus } : r))
       );
-      showToast(`Lỗi kết nối: ${e.message}`);
+      showToast(`Lỗi kết nối: ${e.message}`, 'error');
     }
   };
 
@@ -794,7 +794,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
             return r;
           })
         );
-        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`);
+        showToast(`Không thể cập nhật trạng thái: ${err.error || 'Lỗi hệ thống'}`, 'error');
         return;
       }
 
@@ -811,7 +811,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
           return r;
         })
       );
-      showToast(`Lỗi kết nối: ${e.message}`);
+      showToast(`Lỗi kết nối: ${e.message}`, 'error');
     }
   };
 
@@ -860,7 +860,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
             return r;
           })
         );
-        showToast(`Không thể cập nhật độ ưu tiên: ${err.error || 'Lỗi hệ thống'}`);
+        showToast(`Không thể cập nhật độ ưu tiên: ${err.error || 'Lỗi hệ thống'}`, 'error');
         return;
       }
 
@@ -877,7 +877,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
           return r;
         })
       );
-      showToast(`Lỗi kết nối: ${e.message}`);
+      showToast(`Lỗi kết nối: ${e.message}`, 'error');
     }
   };
 
@@ -885,9 +885,23 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
     <div className="space-y-6">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-5">
-          <Sparkles className="w-4 h-4 text-orange-400" />
-          <span>{toastMessage}</span>
+        <div
+          className={`fixed bottom-6 inset-x-4 sm:inset-x-auto sm:right-8 sm:bottom-8 z-[100] px-4 py-3 rounded-xl shadow-2xl border text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-5 pointer-events-auto ${
+            toastMessage.type === 'error'
+              ? 'bg-rose-950 text-rose-100 border-rose-800 shadow-rose-950/50'
+              : toastMessage.type === 'warning'
+              ? 'bg-amber-950 text-amber-100 border-amber-800 shadow-amber-950/50'
+              : 'bg-slate-900 text-white border-slate-700 shadow-slate-950/50'
+          }`}
+        >
+          {toastMessage.type === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          ) : toastMessage.type === 'warning' ? (
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+          ) : (
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+          )}
+          <span>{toastMessage.text}</span>
         </div>
       )}
 

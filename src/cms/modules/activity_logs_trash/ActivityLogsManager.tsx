@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react';
 import {
   Shield,
   CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
 } from 'lucide-react';
 
 import {
@@ -35,20 +37,39 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabili
   const [eventDetailOpen, setEventDetailOpen] = useState(false);
   const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
 
-  // Toast message
-  const [toast, setToast] = useState<string | null>(null);
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
-  const showToast = (text: string) => {
-    setToast(text);
+  const showToast = (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+    setToast({ message, type });
     setTimeout(() => {
       setToast(null);
-    }, 4000);
+    }, 4500);
   };
 
   const handleCreateNewExport = async (range: string) => {
-    const result = await createAuditExportAction({ range, workspace: 'global' });
-    setExportJobs((prev) => [{ id: result.id, requestedAt: new Date().toISOString(), requestedBy: 'Bạn', scopeName: 'global', dateRange: range, filterSummary: 'Nhật ký hoạt động', status: 'completed', downloadUrl: result.id }, ...prev]);
-    showToast('Đã tạo tệp xuất nhật ký an toàn.');
+    try {
+      const result = await createAuditExportAction({ range, workspace: 'global' });
+      setExportJobs((prev) => [
+        {
+          id: result.id,
+          requestedAt: new Date().toISOString(),
+          requestedBy: 'Bạn',
+          scopeName: 'global',
+          dateRange: range,
+          filterSummary: 'Nhật ký hoạt động',
+          status: 'completed',
+          downloadUrl: result.id,
+        },
+        ...prev,
+      ]);
+      showToast('Đã tạo tệp xuất nhật ký an toàn.', 'success');
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : 'Không thể tạo tệp xuất nhật ký.',
+        'error'
+      );
+    }
   };
 
   const handleLoadPage = useCallback(async (query: AuditListQuery) => {
@@ -67,16 +88,6 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabili
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
-      {/* TOAST NOTIFICATION */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
-          <div className="px-4 py-3 bg-slate-900 text-white border border-slate-800 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3">
-            <CheckCircle2 className="w-4 h-4 text-orange-400 shrink-0" />
-            <span>{toast}</span>
-          </div>
-        </div>
-      )}
-
       <CmsPageHeader
         icon={<Shield />}
         title={dict.modules.system.logs.title}
@@ -111,8 +122,42 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabili
         jobs={exportJobs}
         onCreateNewExport={handleCreateNewExport}
         canExport={capabilities.export}
-        onDownload={async (id) => { window.location.assign(await getAuditExportDownloadUrlAction(id)); }}
+        onDownload={async (id) => {
+          try {
+            const url = await getAuditExportDownloadUrlAction(id);
+            window.location.assign(url);
+          } catch (error) {
+            showToast(
+              error instanceof Error ? error.message : 'Không thể tải xuống tệp xuất.',
+              'error'
+            );
+          }
+        }}
       />
+
+      {/* TOAST NOTIFICATION (Placed after drawers with z-[100] to ensure zero overlap) */}
+      {toast && (
+        <div className="fixed bottom-6 inset-x-4 sm:inset-x-auto sm:right-8 sm:bottom-8 z-[100] animate-in slide-in-from-bottom-5 duration-300 pointer-events-auto">
+          <div
+            className={`px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border ${
+              toast.type === 'error'
+                ? 'bg-rose-950 text-rose-100 border-rose-800 shadow-rose-950/50'
+                : toast.type === 'warning'
+                ? 'bg-amber-950 text-amber-100 border-amber-800 shadow-amber-950/50'
+                : 'bg-slate-900 text-white border-slate-700 shadow-slate-950/50'
+            }`}
+          >
+            {toast.type === 'error' ? (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            ) : toast.type === 'warning' ? (
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            )}
+            <span>{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
