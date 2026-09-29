@@ -7,6 +7,7 @@ import type { CmsRole } from './types';
 import { RolesOverviewTab } from './RolesOverviewTab';
 import { RoleEditorModal } from './RoleEditorModal';
 import { CmsButton } from '../../components/ui/CmsButton';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
@@ -17,15 +18,13 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData; c
   const router = useRouter();
   const workspaceLocale = useCmsWorkspaceLocale();
   const dict = getCmsDictionary(workspaceLocale);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { toast } = useCmsToast();
   const roles = data.roles;
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [roleToEdit, setRoleToEdit] = useState<CmsRole | null>(null);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMutating, setIsMutating] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<CmsRole | null>(null);
-  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
-  const showToast = (message: string) => { setToastMsg(message); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToastMsg(null), 3500); };
+  const showToast = (message: string, isError = false) => { if (isError) toast.error(message); else toast.success(message); };
   const openCreate = () => { setRoleToEdit(null); setIsEditorOpen(true); };
   const openEdit = (role: CmsRole) => { setRoleToEdit(role); setIsEditorOpen(true); };
   const saveRole = async (candidate: CmsRole) => {
@@ -68,12 +67,12 @@ export const PermissionManagement: React.FC<{ data: PermissionsGovernanceData; c
     if (!roleToDelete || isMutating) return;
     setIsMutating(true);
     try { await deleteCmsRoleAction(roleToDelete.id); showToast(`Đã chuyển vai trò "${roleToDelete.name}" vào Thùng rác.`); setRoleToDelete(null); router.refresh(); }
-    catch (error) { showToast(error instanceof Error ? error.message : 'Không thể chuyển vai trò vào Thùng rác.'); }
+    catch (error) { showToast(error instanceof Error ? error.message : 'Không thể chuyển vai trò vào Thùng rác.', true); }
     finally { setIsMutating(false); }
   };
   const activeCount = roles.filter((role) => role.status === 'active').length;
   return <div className="space-y-5 animate-in fade-in duration-200" aria-busy={isMutating}>
-    {toastMsg && <div role="status" aria-live="polite" className="fixed inset-x-3 top-20 z-50 mx-auto flex max-w-md items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-2xl sm:inset-x-auto sm:right-6 sm:mx-0"><CheckCircle2 className="size-4 shrink-0 text-emerald-400" /><span className="min-w-0 break-words">{toastMsg}</span></div>}
+    
     <CmsPageHeader icon={<Shield />} title={dict.modules.system.permissions.title} description={dict.modules.system.permissions.description} meta={<span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300">{activeCount} {dict.modules.system.permissions.itemUnit}</span>} actions={capabilities.create ? <CmsButton onClick={openCreate} variant="primary" size="sm" leadingIcon={<Shield />}>{dict.modules.system.permissions.createButton}</CmsButton> : undefined} />
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"><span><strong className="text-slate-950 dark:text-white">{roles.length}</strong> tổng vai trò</span><span><strong className="text-slate-950 dark:text-white">{activeCount}</strong> đang hoạt động</span><span><strong className="text-slate-950 dark:text-white">{data.assignments.length}</strong> lượt gán nhân sự</span></div>
     <RolesOverviewTab roles={roles} assignments={data.assignments} users={data.users} onAssignRole={assignRole} onRevokeAssignment={revokeAssignment} onOpenCreate={openCreate} onOpenEdit={openEdit} onToggleRoleStatus={toggleStatus} onDeleteRole={setRoleToDelete} canCreate={capabilities.create} canEdit={capabilities.edit} canDelete={capabilities.delete} isMutating={isMutating} />

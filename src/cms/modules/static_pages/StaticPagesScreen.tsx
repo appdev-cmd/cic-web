@@ -16,6 +16,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
@@ -424,7 +425,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   const [previewPage, setPreviewPage] = useState<PageBuilderPage | null>(null);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'has_draft' | 'published'>('all');
-  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null);
+  const { toast } = useCmsToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [newPageName, setNewPageName] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -452,8 +453,11 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   }, [workspaceLocale, pagesByLocale]);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ message, type });
-    window.setTimeout(() => setToast(null), 3500);
+    if (type === 'error') {
+      toast.error(message);
+    } else {
+      toast.success(message);
+    }
   };
 
   const filteredPages = useMemo(() => {
@@ -630,7 +634,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   if (editingPage) {
     return (
       <>
-        {toast && <Toast message={toast.message} type={toast.type} />}
         <PageBuilderEditor
           key={`${editingPage.id}-${editingPage.draft.version}-${editingPage.published.version}`}
           workspaceLocale={workspaceLocale}
@@ -649,7 +652,6 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
 
   return (
     <div className="space-y-5">
-      {toast && <Toast message={toast.message} type={toast.type} />}
       {isLoadingDetail && <LoadingOverlay message="Đang tải dữ liệu trang từ Database..." />}
 
       <CmsPageHeader
@@ -804,23 +806,7 @@ export function StaticPagesScreen({ pagesByLocale, capabilities }: StaticPagesSc
   );
 }
 
-function Toast({ message, type = 'success' }: { message: string; type?: 'success' | 'error' }) {
-  const isError = type === 'error';
-  return (
-    <div
-      className={`fixed bottom-6 right-6 z-[80] flex max-w-[calc(100vw-3rem)] items-center gap-2 rounded-xl border px-4 py-3 text-xs font-semibold text-white shadow-2xl ${
-        isError ? 'border-rose-700 bg-rose-900' : 'border-slate-700 bg-slate-900'
-      }`}
-    >
-      {isError ? (
-        <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
-      ) : (
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-      )}
-      {message}
-    </div>
-  );
-}
+
 
 function LoadingOverlay({ message }: { message: string }) {
   return (

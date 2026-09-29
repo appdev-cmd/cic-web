@@ -6,6 +6,7 @@ import { findPageBuilderImage } from '../PageMediaPickerModal';
 import { formatHeroHeading } from '../../../../web/components/HomeView';
 import { CTA_OPTIONS } from './editorConstants';
 import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 interface HeroSlidesEditorProps {
   slides: Array<{
@@ -32,6 +33,7 @@ export function HeroSlidesEditor({
   mediaImages,
   onActiveSlideChange,
 }: HeroSlidesEditorProps) {
+  const { toast } = useCmsToast();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const currentIdx = Math.min(Math.max(0, activeSlideIndex), Math.max(0, slides.length - 1));
   const currentSlide = slides[currentIdx] ?? {
@@ -73,7 +75,7 @@ export function HeroSlidesEditor({
 
   const handleDeleteSlide = (idx: number) => {
     if (slides.length <= 1) {
-      alert('Slider Hero phải có ít nhất 1 slide.');
+      toast.warning('Slider Hero phải có ít nhất 1 slide.');
       return;
     }
     const next = slides.filter((_, i) => i !== idx);

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
 import {
   updateFunctionSeo,
@@ -89,16 +90,15 @@ export const FunctionSeoManager: React.FC<Props> = ({
     facet: SeoFacetLevel;
   } | null>(null);
 
+  const { toast } = useCmsToast();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
-  const [toast, setToast] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [activeSection, setActiveSection] = useState<'overview' | 'templates' | 'redirects'>('overview');
   const [healthFilter, setHealthFilter] = useState<'all' | 'noindex' | 'missing-description' | 'missing-owner'>('all');
 
   const notify = (msg: string) => {
-    setToast(msg);
-    window.setTimeout(() => setToast(''), 3500);
+    toast.success(msg);
   };
 
   const filtered = useMemo(() => {
@@ -145,7 +145,7 @@ export const FunctionSeoManager: React.FC<Props> = ({
       setEditingMain(null);
       notify('Đã lưu cấu hình SEO trang chính vào cơ sở dữ liệu.');
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Không thể lưu cấu hình SEO.');
+      toast.error(err instanceof Error ? err.message : 'Không thể lưu cấu hình SEO.');
     }
   };
 
@@ -165,7 +165,7 @@ export const FunctionSeoManager: React.FC<Props> = ({
       );
       notify(`Đã ${updated ? 'bật' : 'tắt'} lập chỉ mục cho "${record.label}".`);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Không thể cập nhật chỉ số lập chỉ mục.');
+      toast.error(err instanceof Error ? err.message : 'Không thể cập nhật chỉ số lập chỉ mục.');
     }
   };
 
@@ -214,13 +214,6 @@ export const FunctionSeoManager: React.FC<Props> = ({
 
   return (
     <div className="space-y-4">
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-xs font-semibold text-emerald-800 shadow-lg animate-in fade-in slide-in-from-bottom-2 dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          <span>{toast}</span>
-        </div>
-      )}
-
       <CmsPageHeader
         icon={<SearchCheck />}
         title={dict.modules.system.seo.title}
@@ -749,6 +742,7 @@ function RedirectWorkspace({
   canEdit?: boolean;
   onNotify?: (msg: string) => void;
 }) {
+  const { toast } = useCmsToast();
   const [redirects, setRedirects] = useState<RedirectRule[]>(initialRedirects);
   const [showForm, setShowForm] = useState(false);
   const [sourcePath, setSourcePath] = useState('');
@@ -824,7 +818,7 @@ function RedirectWorkspace({
         );
         onNotify?.(`Đã ${!redirect.active ? 'bật' : 'tắt'} chuyển hướng.`);
       } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Không thể thay đổi trạng thái.');
+        toast.error(err instanceof Error ? err.message : 'Không thể thay đổi trạng thái.');
       }
     });
   };
@@ -837,7 +831,7 @@ function RedirectWorkspace({
         setRedirects((curr) => curr.filter((r) => r.id !== id));
         onNotify?.('Đã xóa quy tắc chuyển hướng.');
       } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Không thể xóa redirect.');
+        toast.error(err instanceof Error ? err.message : 'Không thể xóa redirect.');
       }
     });
   };

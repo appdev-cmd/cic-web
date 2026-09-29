@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Send, User, Calendar, Loader2, Database, FileSpreadsheet, Mail, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { FormItem } from '../types';
 import type { FormSubmissionDetail, FormSubmissionDeliveryEntity } from '@/features/forms/types';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 interface FormSubmissionsModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const FormSubmissionsModal: React.FC<FormSubmissionsModalProps> = ({
   form,
   onClose,
 }) => {
+  const { toast } = useCmsToast();
   const [submissions, setSubmissions] = useState<FormSubmissionDetail[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,8 +61,9 @@ export const FormSubmissionsModal: React.FC<FormSubmissionsModalProps> = ({
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        alert(data.error || data.result?.lastError || 'Gửi lại thất bại.');
+        toast.error(data.error || data.result?.lastError || 'Gửi lại thất bại.');
       } else {
+        toast.success('Đã gửi lại dữ liệu biểu mẫu thành công.');
         // Update local submission state with the new delivery status
         setSubmissions((prev) =>
           prev.map((sub) => {
@@ -80,7 +83,7 @@ export const FormSubmissionsModal: React.FC<FormSubmissionsModalProps> = ({
         );
       }
     } catch (err: any) {
-      alert(err?.message || 'Lỗi khi gửi lại.');
+      toast.error(err?.message || 'Lỗi khi gửi lại.');
     } finally {
       setRetryingDeliveryId(null);
     }

@@ -17,6 +17,7 @@ import { MenuGroup, MenuItem } from './types';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import type { MenuModuleData } from '../../data/PresentationDataSource';
 import { useCmsWorkspaceLocale } from '@/cms/context/CmsWorkspaceLocaleContext';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { buildMenuTree, flattenMenuTree } from '@/features/menu/domain/tree';
 import type { ReorderMenuItemInput } from '@/features/menu/domain/types';
 import {
@@ -94,7 +95,7 @@ export const MenuManager: React.FC<MenuManagerProps> = ({
   // UI View Mode & Modal States
   const [viewMode, setViewMode] = useState<'tree' | 'table'>('tree');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [toastMessage, setToastMessage] = useState<{ text: string; isError?: boolean } | null>(null);
+  const { toast } = useCmsToast();
 
   // Modals & Drawers
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -108,8 +109,11 @@ export const MenuManager: React.FC<MenuManagerProps> = ({
   const activeGroup = groups.find((g) => g.id === activeGroupId) || groups[0];
 
   const showToast = (msg: string, isError = false) => {
-    setToastMessage({ text: msg, isError });
-    setTimeout(() => setToastMessage(null), 3500);
+    if (isError) {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
   };
 
   // Filter items belonging to the active group and construct tree
@@ -389,23 +393,7 @@ export const MenuManager: React.FC<MenuManagerProps> = ({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 text-white rounded-xl shadow-2xl border flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 text-xs font-semibold ${
-            toastMessage.isError
-              ? 'bg-rose-900 dark:bg-rose-950 border-rose-700 text-rose-100'
-              : 'bg-slate-900 dark:bg-slate-800 border-slate-700'
-          }`}
-        >
-          {toastMessage.isError ? (
-            <AlertCircle className="w-4 h-4 text-rose-400" />
-          ) : (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          )}
-          <span>{toastMessage.text}</span>
-        </div>
-      )}
+      
 
       {/* Top Banner & Group Selector */}
       <div className="space-y-3">

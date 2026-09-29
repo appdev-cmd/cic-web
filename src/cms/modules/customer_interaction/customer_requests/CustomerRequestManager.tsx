@@ -33,6 +33,7 @@ import { REQUEST_STATUSES, REQUEST_STATUS_LABELS, PRIORITY_LABELS } from '../sha
 import type { PriorityLevel, RequestStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { CmsButton } from '../../../components/ui/CmsButton';
 import { CmsBulkActionBar } from '../../../components/ui/CmsBulkActionBar';
 import { MOCK_STAFF_MEMBERS } from '../../contacts/mockData';
@@ -91,11 +92,11 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
   const [trashTargets, setTrashTargets] = useState<CustomerRequest[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
-
+  const { toast } = useCmsToast();
   const showToast = (msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
-    setToastMessage({ text: msg, type });
-    setTimeout(() => setToastMessage(null), 3500);
+    if (type === 'error') toast.error(msg);
+    else if (type === 'warning') toast.warning(msg);
+    else toast.success(msg);
   };
 
   // Sync when serverData updates (e.g. on route change or initial load)
@@ -883,27 +884,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div
-          className={`fixed bottom-6 inset-x-4 sm:inset-x-auto sm:right-8 sm:bottom-8 z-[100] px-4 py-3 rounded-xl shadow-2xl border text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-5 pointer-events-auto ${
-            toastMessage.type === 'error'
-              ? 'bg-rose-950 text-rose-100 border-rose-800 shadow-rose-950/50'
-              : toastMessage.type === 'warning'
-              ? 'bg-amber-950 text-amber-100 border-amber-800 shadow-amber-950/50'
-              : 'bg-slate-900 text-white border-slate-700 shadow-slate-950/50'
-          }`}
-        >
-          {toastMessage.type === 'error' ? (
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-          ) : toastMessage.type === 'warning' ? (
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-          ) : (
-            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-          )}
-          <span>{toastMessage.text}</span>
-        </div>
-      )}
+      
 
       {viewMode === 'list' ? (
         <>

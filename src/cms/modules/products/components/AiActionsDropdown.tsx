@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Search, Globe, ChevronDown, Check, Loader2, AlertCircle } from 'lucide-react';
 import type { ProductAiActionType } from '@/features/ai-operator/types';
 import { runProductAiAction } from '@/features/ai-operator/server/actions';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 interface AiActionsDropdownProps {
   currentProduct: Record<string, unknown>;
@@ -14,6 +15,7 @@ export const AiActionsDropdown: React.FC<AiActionsDropdownProps> = ({
   workspaceLocale,
   onApplyUpdates,
 }) => {
+  const { toast } = useCmsToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeAction, setActiveAction] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export const AiActionsDropdown: React.FC<AiActionsDropdownProps> = ({
       });
       onApplyUpdates(result.updatedFields, result.explanation);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Có lỗi xảy ra khi thực hiện tác vụ AI.');
+      toast.error(err instanceof Error ? err.message : 'Có lỗi xảy ra khi thực hiện tác vụ AI.');
     } finally {
       setIsLoading(false);
       setActiveAction(null);

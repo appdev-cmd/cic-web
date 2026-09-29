@@ -53,6 +53,7 @@ import { CmsBulkActionBar } from '../../components/ui/CmsBulkActionBar';
 import { CmsSelectionCheckbox } from '../../components/ui/CmsSelectionCheckbox';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 const usesSystemAlias = (type: MasterDataType) => ['brands', 'applications', 'product_types'].includes(type);
 const getSystemAlias = (item: AnyMasterItem) => item.alias || item.name
@@ -109,11 +110,10 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
   const [isFormDrawerOpen, setIsFormDrawerOpen] = useState(false);
 
   // Toast Notification
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { toast } = useCmsToast();
 
   const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+    toast.success(msg);
   };
 
   // Pagination State
@@ -264,13 +264,7 @@ export const ProductSettingsManager: React.FC<ProductSettingsManagerProps> = ({ 
 
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-200">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-bold animate-in fade-in slide-in-from-bottom-4">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      
 
       {/* 1. TOP MODULE HEADER CARD */}
       <CmsPageHeader

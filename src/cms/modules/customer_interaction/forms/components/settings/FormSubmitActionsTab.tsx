@@ -5,6 +5,7 @@ import { EMAIL_EVENTS, TEMPLATE_STATUSES, type EmailTemplate } from '../../../..
 import { CmsButton } from '../../../../../components/ui/CmsButton';
 import type { CmsLocale } from '../../../../../data/CmsDataSource';
 import type { GoogleSheetsColumnMapping, GoogleSheetsDestinationConfig, EmailDestinationConfig } from '@/features/forms/types';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 interface FormSubmitActionsTabProps {
   formId?: string;
@@ -23,6 +24,7 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
   workspaceLocale,
   onPreviewEmailTemplate,
 }) => {
+  const { toast } = useCmsToast();
   // Service Account Email from server
   const [serviceAccountEmail, setServiceAccountEmail] = useState('');
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -206,14 +208,16 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        alert(data.error || 'Lỗi khi khởi tạo dòng tiêu đề.');
+        toast.error(data.error || 'Lỗi khi khởi tạo dòng tiêu đề.');
       } else {
-        setInitHeaderSuccess(`Đã tạo thành công ${defaultHeaders.length} cột tiêu đề trên sheet!`);
+        const msg = `Đã tạo thành công ${defaultHeaders.length} cột tiêu đề trên sheet!`;
+        setInitHeaderSuccess(msg);
+        toast.success(msg);
         // Re-run test connection to reload mapping
         handleTestConnection();
       }
     } catch (err: any) {
-      alert(err?.message || 'Lỗi khi khởi tạo tiêu đề.');
+      toast.error(err?.message || 'Lỗi khi khởi tạo tiêu đề.');
     } finally {
       setIsInitializingHeaders(false);
     }

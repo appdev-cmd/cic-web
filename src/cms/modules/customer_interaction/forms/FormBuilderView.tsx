@@ -25,6 +25,7 @@ import { FormSubmitActionsTab } from './components/settings/FormSubmitActionsTab
 import { FormAnalyticsTab } from './components/settings/FormAnalyticsTab';
 import { FormLivePreviewModal } from './components/modals/FormLivePreviewModal';
 import { FormEmailPreviewModal } from './components/modals/FormEmailPreviewModal';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 interface FormBuilderViewProps {
   form: FormItem | null;
@@ -41,6 +42,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   onSave,
   onCancel,
 }) => {
+  const { toast } = useCmsToast();
   const [formData, setFormData] = useState<FormFormData>({
     adminName: '',
     title: '',
@@ -271,7 +273,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   const deleteField = (fieldId: string) => {
     const target = formData.fields.find((f) => f.id === fieldId);
     if (target?.isLocked) {
-      alert('Trường này đã bị khóa vì có dữ liệu đã gửi từ trước.');
+      toast.warning('Trường này đã bị khóa vì có dữ liệu đã gửi từ trước.');
       return;
     }
     if (confirm('Bạn có chắc chắn muốn xóa trường dữ liệu này khỏi biểu mẫu?')) {
