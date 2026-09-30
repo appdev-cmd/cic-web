@@ -414,7 +414,6 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         onSelectMenu={(path, title) => {
           navigateToCmsPath(path, title);
         }}
-        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         user={currentUser}
