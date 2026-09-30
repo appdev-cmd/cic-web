@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
@@ -20,6 +20,7 @@ import {
   extractTagsAction,
   translateFieldsAction,
   generateOutlineAction,
+  classifyProductTaxonomyAction,
 } from '@/features/ai-operator/server/shared-actions';
 
 interface ProductsFormViewProps {
@@ -90,7 +91,8 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       return next;
     });
   };
-  const [mediaTarget, setMediaTarget] = useState<'image' | 'icon' | null>(null);
+  const [gallery, setGallery] = useState<string[]>(product?.gallery || []);
+  const [mediaTarget, setMediaTarget] = useState<'image' | 'icon' | 'gallery_add' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingAction, setSubmittingAction] = useState<'draft' | 'publish' | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -110,87 +112,74 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     seoDescription: string;
     seoKeyword: string;
     tagsText: string;
+    gallery: string[];
   } | null>(null);
 
   const isAnchorsReady = Boolean(name.trim() && manufactory && categoryIds.length > 0);
 
-  const handleAiSection2 = () => {
+  const removeGalleryImage = (indexToRemove: number) => {
+    setGallery((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleAiSection2 = async () => {
     if (!name.trim()) {
       toast.warning('Vui lòng nhập Tên sản phẩm trước.');
       return;
     }
 
-    const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
-    const selectedCats = categories
-      .filter((c) => categoryIds.includes(c.id))
-      .map((c) => c.name)
-      .join(', ');
+    try {
+      const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+      const selectedCatNames = categories
+        .filter((c) => categoryIds.includes(c.id))
+        .map((c) => c.name);
 
-    if (!alias.trim() || !manualAlias) {
-      setAlias(slugify(name));
-    }
-
-    if (!code.trim()) {
-      const generatedCode = name
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .substring(0, 20);
-      if (generatedCode) setCode(generatedCode);
-    }
-
-    if (!otherLanguages1.trim()) {
-      setOtherLanguages1(`/en/products/${slugify(name)}`);
-    }
-
-    if (!types) {
       const activeTypes = productTypes.filter((t) => t.status === 'active');
-      const matchedType =
-        activeTypes.find(
-          (t) =>
-            t.name.toLowerCase().includes('phần mềm') ||
-            t.name.toLowerCase().includes('bản quyền') ||
-            t.name.toLowerCase().includes('thương mại')
-        ) || activeTypes[0];
-      if (matchedType) setTypes(matchedType.id);
-    }
-
-    if (applications.length === 0) {
       const activeApps = applicationOptions.filter((a) => a.status === 'active');
-      const matchedApps = activeApps.filter((a) => {
-        const appName = a.name.toLowerCase();
-        const prodName = name.toLowerCase();
-        const catName = selectedCats.toLowerCase();
-        return (
-          ((catName.includes('kết cấu') || prodName.includes('etabs') || prodName.includes('sap2000')) &&
-            (appName.includes('kết cấu') || appName.includes('bê tông') || appName.includes('thép') || appName.includes('xây dựng'))) ||
-          ((catName.includes('kiến trúc') || prodName.includes('cad') || prodName.includes('revit')) &&
-            (appName.includes('kiến trúc') || appName.includes('cad') || appName.includes('bim'))) ||
-          ((catName.includes('giao thông') || prodName.includes('vissim') || prodName.includes('visum')) &&
-            (appName.includes('giao thông') || appName.includes('hạ tầng') || appName.includes('mô phỏng'))) ||
-          ((catName.includes('địa kỹ thuật') || prodName.includes('plaxis')) &&
-            (appName.includes('địa kỹ thuật') || appName.includes('móng') || appName.includes('hầm')))
-        );
-      });
-      if (matchedApps.length > 0) {
-        setApplications(matchedApps.map((a) => a.id));
-      }
-    }
+      const candidateProds = relatedProducts.map((p) => ({
+        id: p.id,
+        name: p.name || p.title || '',
+        brandName: p.manufactory || p.brand_name || '',
+        categoryName: categories.find((c) => (p.category_ids || []).includes(c.id) || p.category_id === c.id)?.name || '',
+      }));
 
-    if (productsRelates.length === 0) {
-      const sameBrandOrCat = relatedProducts.filter((p) => {
-        if (p.id === product?.id) return false;
-        const matchBrand = manufactory && (p.manufactory === manufactory || p.brand_id === manufactory);
-        const matchCat = categoryIds.some((cid) => (p.category_ids || []).includes(cid) || p.category_id === cid);
-        return matchBrand || matchCat;
+      const taxResult = await classifyProductTaxonomyAction({
+        name,
+        brandName: selectedBrand,
+        categoryNames: selectedCatNames,
+        content: description,
+        availableTypes: activeTypes.map((t) => ({ id: t.id, name: t.name })),
+        availableApplications: activeApps.map((a) => ({ id: a.id, name: a.name })),
+        candidateProducts: candidateProds,
       });
-      if (sameBrandOrCat.length > 0) {
-        setProductsRelates(sameBrandOrCat.slice(0, 3).map((p) => p.id));
-      }
-    }
 
-    toast.success('Đã tự động nhận diện Mã SKU, URL Tiếng Anh và Phân loại kỹ thuật!');
+      if (!alias.trim() || !manualAlias) {
+        setAlias(slugify(name));
+      }
+      if (!code.trim() && taxResult.suggestedSku) {
+        setCode(taxResult.suggestedSku);
+      }
+      if (!otherLanguages1.trim()) {
+        setOtherLanguages1(`/en/products/${slugify(name)}`);
+      }
+      if (!types && taxResult.selectedTypeId) {
+        setTypes(taxResult.selectedTypeId);
+      }
+      if (applications.length === 0 && taxResult.selectedApplicationIds.length > 0) {
+        setApplications(taxResult.selectedApplicationIds);
+      }
+      if (productsRelates.length === 0 && taxResult.selectedRelatedProductIds.length > 0) {
+        setProductsRelates(taxResult.selectedRelatedProductIds);
+      }
+
+      toast.success('Đã tự động nhận diện Mã SKU, URL Tiếng Anh và Phân loại kỹ thuật bằng Trợ lý AI!');
+    } catch {
+      if (!alias.trim() || !manualAlias) setAlias(slugify(name));
+      if (!code.trim()) {
+        setCode(name.toUpperCase().replace(/[^A-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').substring(0, 20));
+      }
+      if (!otherLanguages1.trim()) setOtherLanguages1(`/en/products/${slugify(name)}`);
+      toast.info('Đã chuẩn hóa thông tin kỹ thuật cơ bản.');
+    }
   };
 
   const handleSmartAutoFill = async () => {
@@ -211,81 +200,40 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       seoDescription,
       seoKeyword,
       tagsText,
+      gallery: [...gallery],
     };
 
     try {
       setIsAutoFilling(true);
       const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
-      const selectedCats = categories
+      const selectedCatNames = categories
         .filter((c) => categoryIds.includes(c.id))
-        .map((c) => c.name)
-        .join(', ');
+        .map((c) => c.name);
+      const selectedCats = selectedCatNames.join(', ');
 
       const contextStr = `${name} do hãng ${selectedBrand} phát triển, lĩnh vực ${selectedCats}.`;
       const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
 
-      // 1. Tự động nhận diện Phân loại & Định danh kỹ thuật (Section 2)
-      if (!alias.trim() && !manualAlias) {
-        setAlias(slugify(name));
-      }
-      if (!code.trim()) {
-        const generatedCode = name
-          .toUpperCase()
-          .replace(/[^A-Z0-9]/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .substring(0, 20);
-        if (generatedCode) setCode(generatedCode);
-      }
-      if (!otherLanguages1.trim()) {
-        setOtherLanguages1(`/en/products/${slugify(name)}`);
-      }
-      if (!types) {
-        const activeTypes = productTypes.filter((t) => t.status === 'active');
-        const matchedType =
-          activeTypes.find(
-            (t) =>
-              t.name.toLowerCase().includes('phần mềm') ||
-              t.name.toLowerCase().includes('bản quyền') ||
-              t.name.toLowerCase().includes('thương mại')
-          ) || activeTypes[0];
-        if (matchedType) setTypes(matchedType.id);
-      }
-      if (applications.length === 0) {
-        const activeApps = applicationOptions.filter((a) => a.status === 'active');
-        const matchedApps = activeApps.filter((a) => {
-          const appName = a.name.toLowerCase();
-          const prodName = name.toLowerCase();
-          const catName = selectedCats.toLowerCase();
-          return (
-            ((catName.includes('kết cấu') || prodName.includes('etabs') || prodName.includes('sap2000')) &&
-              (appName.includes('kết cấu') || appName.includes('bê tông') || appName.includes('thép') || appName.includes('xây dựng'))) ||
-            ((catName.includes('kiến trúc') || prodName.includes('cad') || prodName.includes('revit')) &&
-              (appName.includes('kiến trúc') || appName.includes('cad') || appName.includes('bim'))) ||
-            ((catName.includes('giao thông') || prodName.includes('vissim') || prodName.includes('visum')) &&
-              (appName.includes('giao thông') || appName.includes('hạ tầng') || appName.includes('mô phỏng'))) ||
-            ((catName.includes('địa kỹ thuật') || prodName.includes('plaxis')) &&
-              (appName.includes('địa kỹ thuật') || appName.includes('móng') || appName.includes('hầm')))
-          );
-        });
-        if (matchedApps.length > 0) {
-          setApplications(matchedApps.map((a) => a.id));
-        }
-      }
-      if (productsRelates.length === 0) {
-        const sameBrandOrCat = relatedProducts.filter((p) => {
-          if (p.id === product?.id) return false;
-          const matchBrand = manufactory && (p.manufactory === manufactory || p.brand_id === manufactory);
-          const matchCat = categoryIds.some((cid) => (p.category_ids || []).includes(cid) || p.category_id === cid);
-          return matchBrand || matchCat;
-        });
-        if (sameBrandOrCat.length > 0) {
-          setProductsRelates(sameBrandOrCat.slice(0, 3).map((p) => p.id));
-        }
-      }
+      const activeTypes = productTypes.filter((t) => t.status === 'active');
+      const activeApps = applicationOptions.filter((a) => a.status === 'active');
+      const candidateProds = relatedProducts.map((p) => ({
+        id: p.id,
+        name: p.name || p.title || '',
+        brandName: p.manufactory || p.brand_name || '',
+        categoryName: categories.find((c) => (p.category_ids || []).includes(c.id) || p.category_id === c.id)?.name || '',
+      }));
 
-      // 2. Gọi AI sinh Tóm tắt, SEO và Thẻ Tags
-      const [seoRes, summaryRes, tagsRes] = await Promise.all([
+      // Chạy song song 4 tác vụ AI: Phân loại kỹ thuật + SEO + Tóm tắt + Tags
+      const [taxRes, seoRes, summaryRes, tagsRes] = await Promise.all([
+        classifyProductTaxonomyAction({
+          name,
+          brandName: selectedBrand,
+          categoryNames: selectedCatNames,
+          content: cleanDesc,
+          availableTypes: activeTypes.map((t) => ({ id: t.id, name: t.name })),
+          availableApplications: activeApps.map((a) => ({ id: a.id, name: a.name })),
+          candidateProducts: candidateProds,
+        }),
         (!seoTitle || !seoDescription)
           ? generateSeoAction({
               title: name,
@@ -308,11 +256,24 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           ? extractTagsAction({
               title: name,
               content: `${selectedBrand} ${selectedCats} ${cleanDesc}`,
-              count: 5,
+              count: 6,
             })
           : Promise.resolve(null),
       ]);
 
+      // 1. Phân loại kỹ thuật thông minh từ AI (không hardcode)
+      if (!alias.trim() && !manualAlias) setAlias(slugify(name));
+      if (!code.trim() && taxRes?.suggestedSku) setCode(taxRes.suggestedSku);
+      if (!otherLanguages1.trim()) setOtherLanguages1(`/en/products/${slugify(name)}`);
+      if (!types && taxRes?.selectedTypeId) setTypes(taxRes.selectedTypeId);
+      if (applications.length === 0 && taxRes?.selectedApplicationIds?.length) {
+        setApplications(taxRes.selectedApplicationIds);
+      }
+      if (productsRelates.length === 0 && taxRes?.selectedRelatedProductIds?.length) {
+        setProductsRelates(taxRes.selectedRelatedProductIds);
+      }
+
+      // 2. Tóm tắt, SEO và Thẻ Tags
       if (summaryRes && !summary.trim()) {
         setSummary(summaryRes.summary);
       }
@@ -347,6 +308,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       setSeoDescription(undoSnapshotRef.current.seoDescription);
       setSeoKeyword(undoSnapshotRef.current.seoKeyword);
       setTagsText(undoSnapshotRef.current.tagsText);
+      setGallery(undoSnapshotRef.current.gallery);
       undoSnapshotRef.current = null;
     }
     setHasAiAutoFilled(false);
@@ -485,11 +447,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const payload = (): Partial<ProductItem> => {
     const base: Partial<ProductItem> = {
       name, alias: alias || slugify(name), code, other_languages1: otherLanguages1, image, icon,
+      gallery,
       category_ids: categoryIds, category_id: categoryIds.join(','), manufactory,
       application: applications, types, products_relates: productsRelates, summary,
       description, feature_details: featureDetails, video, tawk_to: tawkTo, tags: ids(tagsText),
-      price_old: priceOld, price: priceOld, is_hot: isHot, teamview, ordering: Number(ordering) || 1,
-      landing_page: landingPage, seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
+      price_old: priceOld, price: priceOld, is_hot: isHot, teamview: false, ordering: Number(ordering) || 1,
+      landing_page: '', seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
       file_catalogue: fileCatalogue, file_price: filePrice, link_catalogue: linkCatalogue,
       file_driver_name: fileDriverName, file_driver: fileDriver, link_driver: linkDriver,
     };
@@ -990,14 +953,77 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         <div className="mb-4 flex items-center gap-2 font-black dark:text-white"><ImageIcon className="h-5 w-5 text-orange-600" />Media</div>
         <div className="space-y-4">
           <div>
-            <label className={labelClass}>Ảnh sản phẩm</label>
+            <label className={labelClass}>Ảnh đại diện</label>
             {image && <img src={findPageBuilderImage(image)?.thumbnail_url ?? findPageBuilderImage(image)?.url ?? image} alt="" className="mb-2 aspect-video w-full rounded-xl object-cover" />}
-            <button type="button" onClick={() => setMediaTarget('image')} className="w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn hoặc tải ảnh sản phẩm</button>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setMediaTarget('image')} className="flex-1 rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:hover:bg-orange-950/30">Chọn hoặc tải ảnh</button>
+              {image && (
+                <button type="button" onClick={() => setImage('')} className="rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-slate-500 hover:bg-red-50 hover:text-red-600 dark:border-slate-700">Xóa</button>
+              )}
+            </div>
           </div>
-          <div>
-            <label className={labelClass}>Icon</label>
-            {icon && <img src={findPageBuilderImage(icon)?.thumbnail_url ?? findPageBuilderImage(icon)?.url ?? icon} alt="" className="mb-2 h-20 w-20 rounded-xl object-contain" />}
-            <button type="button" onClick={() => setMediaTarget('icon')} className="w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn hoặc tải icon</button>
+
+          {/* Ảnh Slide / Slider Gallery */}
+          <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className={labelClass}>
+                Ảnh slide (Slider)
+                {gallery.length > 0 && (
+                  <span className="ml-1.5 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-700 dark:bg-orange-950/60 dark:text-orange-300">
+                    {gallery.length} ảnh
+                  </span>
+                )}
+              </label>
+            </div>
+            <p className="mb-2 text-[11px] text-slate-500 dark:text-slate-400">
+              Các hình ảnh hiển thị trình chiếu (slider) trên trang chi tiết sản phẩm.
+            </p>
+
+            {gallery.length > 0 && (
+              <div className="mb-2.5 grid grid-cols-3 gap-2">
+                {gallery.map((imgUrl, idx) => (
+                  <div key={idx} className="group relative aspect-video overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800">
+                    <img
+                      src={findPageBuilderImage(imgUrl)?.thumbnail_url ?? findPageBuilderImage(imgUrl)?.url ?? imgUrl}
+                      alt={`Slide ${idx + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(idx)}
+                        className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+                        title="Xóa ảnh khỏi slide"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 py-0.5 text-[9px] font-bold text-white">
+                      #{idx + 1}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setMediaTarget('gallery_add')}
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-orange-300 px-3 py-2 text-xs font-bold text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:hover:bg-orange-950/30"
+            >
+              <Plus className="h-3.5 w-3.5" /> Thêm ảnh vào slide
+            </button>
+          </div>
+
+          <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+            <label className={labelClass}>Icon sản phẩm</label>
+            {icon && <img src={findPageBuilderImage(icon)?.thumbnail_url ?? findPageBuilderImage(icon)?.url ?? icon} alt="" className="mb-2 h-16 w-16 rounded-xl object-contain" />}
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setMediaTarget('icon')} className="flex-1 rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:hover:bg-orange-950/30">Chọn hoặc tải icon</button>
+              {icon && (
+                <button type="button" onClick={() => setIcon('')} className="rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-slate-500 hover:bg-red-50 hover:text-red-600 dark:border-slate-700">Xóa</button>
+              )}
+            </div>
           </div>
           <div>
             <div className="mb-1.5 flex items-center justify-between">
@@ -1008,7 +1034,17 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
       </section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Hiển thị</div><div className="space-y-4"><div><label className={labelClass}>Giá</label><input id="field-price" className={`${inputClass} ${isTouched('price') ? 'border-l-4 border-l-orange-500' : ''}`} value={priceOld} onChange={(e) => setPriceOld(e.target.value)} /></div><label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200"><span>Sản phẩm nổi bật <span className="font-normal text-slate-400">({featuredCount + Number(isHot)}/{FEATURED_CONTENT_LIMITS.product})</span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Dự phòng cho section Sản phẩm trong tương lai; không dùng cho Hệ sinh thái Công nghệ CIC.</span></span><input type="checkbox" checked={isHot} disabled={!isHot && featuredCount >= FEATURED_CONTENT_LIMITS.product} onChange={(e) => setIsHot(e.target.checked)} /></label><label className="flex items-center justify-between text-sm font-semibold dark:text-slate-200"><span>Link TeamViewer</span><input type="checkbox" checked={teamview} onChange={(e) => setTeamview(e.target.checked)} /></label><div><label className={labelClass}>Thứ tự</label><input type="number" className={inputClass} value={ordering} onChange={(e) => setOrdering(Number(e.target.value))} /></div><div><label className={labelClass}>Landing page</label><input className={inputClass} value={landingPage} onChange={(e) => setLandingPage(e.target.value)} /></div></div></section>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Hiển thị</div>
+        <div className="space-y-4">
+          <div><label className={labelClass}>Giá</label><input id="field-price" className={`${inputClass} ${isTouched('price') ? 'border-l-4 border-l-orange-500' : ''}`} value={priceOld} onChange={(e) => setPriceOld(e.target.value)} /></div>
+          <label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200">
+            <span>Sản phẩm nổi bật <span className="font-normal text-slate-400">({featuredCount + Number(isHot)}/{FEATURED_CONTENT_LIMITS.product})</span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Dự phòng cho section Sản phẩm trong tương lai; không dùng cho Hệ sinh thái Công nghệ CIC.</span></span>
+            <input type="checkbox" checked={isHot} disabled={!isHot && featuredCount >= FEATURED_CONTENT_LIMITS.product} onChange={(e) => setIsHot(e.target.checked)} />
+          </label>
+          <div><label className={labelClass}>Thứ tự</label><input type="number" className={inputClass} value={ordering} onChange={(e) => setOrdering(Number(e.target.value))} /></div>
+        </div>
+      </section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2 font-black dark:text-white">
@@ -1025,7 +1061,20 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         </div>
       </section>
     </aside></div>
-    {mediaTarget && <PageMediaPickerModal locale={locale} returnValue="url" currentId={mediaTarget === 'image' ? image : icon} onClose={() => setMediaTarget(null)} onConfirm={(mediaUrl) => mediaTarget === 'image' ? setImage(mediaUrl) : setIcon(mediaUrl)} />}
+    {mediaTarget && (
+      <PageMediaPickerModal
+        locale={locale}
+        returnValue="url"
+        currentId={mediaTarget === 'image' ? image : mediaTarget === 'icon' ? icon : ''}
+        onClose={() => setMediaTarget(null)}
+        onConfirm={(mediaUrl) => {
+          if (mediaTarget === 'image') setImage(mediaUrl);
+          else if (mediaTarget === 'icon') setIcon(mediaUrl);
+          else if (mediaTarget === 'gallery_add') setGallery((prev) => [...prev, mediaUrl]);
+          setMediaTarget(null);
+        }}
+      />
+    )}
 
     {/* Tạm thời ẩn AI Changes Diff Modal - mở lại khi server AI sẵn sàng */}
     {/* <AiChangesDiffModal

@@ -33,18 +33,18 @@ export async function generateSeoAction(input: GenerateSeoInput): Promise<Genera
   const systemPrompt = `Bạn là Giám đốc Marketing & SEO cao cấp của Công ty Cổ phần Công nghệ và Tư vấn Đầu tư Xây dựng (CIC).
 QUY TẮC CỐT LÕI VỀ THƯƠNG HIỆU & NỘI DUNG (TUÂN THỦ 100%):
 1. VAI TRÒ DOANH NGHIỆP:
-   - CIC là ĐƠN VỊ PHÂN PHỐI BẢN QUYỀN CHÍNH THỨC & CHUYỂN GIAO CÔNG NGHỆ tại Việt Nam, KHÔNG PHẢI là tác giả phát triển các phần mềm quốc tế (Ví dụ: CSI là hãng phát triển ETABS/SAP2000; ASCON phát triển Kompas-3D; PTV Group phát triển Vissim/Visum).
-   - Chỉ những phần mềm nội bộ như Escon, CICTKT, KPW mới do CIC phát triển.
+   - CIC là ĐƠN VỊ PHÂN PHỐI BẢN QUYỀN CHÍNH THỨC, TƯ VẤN GIẢI PHÁP & CHUYỂN GIAO CÔNG NGHỆ tại Việt Nam, KHÔNG PHẢI là tác giả phát triển các sản phẩm/phần mềm quốc tế (trừ các sản phẩm thương hiệu riêng do chính CIC phát triển như Escon, CICTKT, KPW).
+   - Hãy tôn trọng thương hiệu và quyền tác giả của Hãng sản xuất (nếu có), đồng thời khẳng định rõ ràng vai trò đại diện phân phối chính hãng và hỗ trợ kỹ thuật của CIC.
 2. TỪ KHÓA BỊ CẤM TUYỆT ĐỐI (NEGATIVE KEYWORDS):
    - KHÔNG BAO GIỜ dùng các từ: "Tải", "Download", "Tải về", "Cài đặt miễn phí", "Crack", "Full crack", "Keygen", "Link tải".
-   - Lý do: Đây là giải pháp phần mềm kỹ thuật bản quyền cao cấp B2B cho kỹ sư/doanh nghiệp. Dùng từ "Tải" làm giảm uy tín thương hiệu và giống các web phát tán phần mềm lậu.
+   - Lý do: Đây là các giải pháp công nghệ, phần mềm, thiết bị kỹ thuật bản quyền cao cấp B2B. Dùng từ "Tải" làm giảm uy tín thương hiệu và gây hiểu lầm là web chia sẻ phần mềm lậu.
 3. TỪ KHÓA KHUYẾN KHÍCH:
-   - Hãy dùng: "Bản quyền chính hãng", "Phần mềm", "Giải pháp", "Tư vấn & Báo giá", "Chính hãng tại CIC".
+   - Hãy linh hoạt sử dụng: "Bản quyền chính hãng", "Giải pháp", "Thiết bị", "Phần mềm", "Tư vấn & Báo giá", "Chính hãng tại CIC".
 
 TIÊU CHUẨN ĐẦU RA (JSON):
-- seo_title: Tối đa 60 ký tự (chuẩn độ dài hiển thị Google Desktop/Mobile).
-  * Mẫu khuyến nghị: "Phần mềm [Tên sản phẩm] ([Hãng SX]) — Bản quyền chính hãng | CIC" hoặc "Bản quyền [Tên sản phẩm] chính hãng [Hãng SX] — CIC"
-- seo_description: 135 đến 155 ký tự. Nêu rõ: CIC phân phối chính hãng [Tên sản phẩm] từ [Hãng SX] tại Việt Nam; cung cấp chuyển giao công nghệ, đào tạo và báo giá doanh nghiệp.
+- seo_title: Tối đa 60 ký tự (chuẩn độ dài hiển thị Google Desktop/Mobile). Tùy theo bản chất sản phẩm (phần mềm, thiết bị, dịch vụ) để đặt tiêu đề linh hoạt, hấp dẫn và tự nhiên:
+  * Ví dụ: "[Tên sản phẩm] ([Hãng SX]) — Bản quyền chính hãng | CIC" hoặc "Giải pháp [Tên sản phẩm] chính hãng [Hãng SX] — CIC"
+- seo_description: 135 đến 155 ký tự. Nêu rõ tính năng cốt lõi và vai trò của CIC là đại diện phân phối/chuyển giao công nghệ chính hãng tại Việt Nam, kèm dịch vụ tư vấn kỹ thuật.
 - seo_keyword: 5 đến 8 từ khóa kỹ thuật chuẩn (Tên sản phẩm, Hãng SX, Lĩnh vực, Bản quyền chính hãng, Giải pháp CIC).
 Chỉ trả về JSON thuần túy: { "seo_title": "...", "seo_description": "...", "seo_keyword": "..." }`;
 
@@ -234,3 +234,141 @@ Chỉ trả về JSON định dạng: { "outlineHtml": "<h3>1...</h3><p>...</p>.
     temperature: 0.3,
   });
 }
+
+export interface AvailableTaxonomyOption {
+  id: string;
+  name: string;
+}
+
+export interface CandidateProductOption {
+  id: string;
+  name: string;
+  brandName?: string;
+  categoryName?: string;
+}
+
+export interface ClassifyProductTaxonomyInput {
+  name: string;
+  brandName?: string;
+  categoryNames?: string[];
+  content?: string;
+  availableTypes: AvailableTaxonomyOption[];
+  availableApplications: AvailableTaxonomyOption[];
+  candidateProducts: CandidateProductOption[];
+}
+
+export interface ClassifyProductTaxonomyOutput {
+  suggestedSku: string;
+  selectedTypeId: string;
+  selectedApplicationIds: string[];
+  selectedRelatedProductIds: string[];
+}
+
+/**
+ * Shared AI Action: Dynamically classify product taxonomy (Types, Applications, SKU, Related Products)
+ * based on semantic engineering analysis without hardcoding product names or categories.
+ */
+export async function classifyProductTaxonomyAction(
+  input: ClassifyProductTaxonomyInput
+): Promise<ClassifyProductTaxonomyOutput> {
+  await requireCmsAccess();
+
+  const name = input.name?.trim();
+  if (!name) {
+    throw new Error('Tên sản phẩm là bắt buộc để phân loại kỹ thuật.');
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là chuyên gia phân loại kỹ thuật và quản lý danh mục sản phẩm công nghệ của CIC (Công ty phân phối phần mềm, thiết bị kỹ thuật, đào tạo và chuyển giao công nghệ tại Việt Nam).
+NHIỆM VỤ: Dựa trên Tên sản phẩm, Hãng sản xuất, Lĩnh vực kỹ thuật và danh sách thực tế các tùy chọn hệ thống được cung cấp:
+1. "suggestedSku": Đề xuất mã sản phẩm / Model / SKU chuẩn kỹ thuật quốc tế ngắn gọn, viết hoa, phân cách bằng dấu gạch ngang (VD: 'ETABS-V23', 'KOMPAS-3D-V23', 'VISSIM-2025', 'GEO-STUDIO-2024'). Không chứa ký tự đặc biệt rác.
+2. "selectedTypeId": Phân tích sản phẩm để chọn ra đúng 1 "id" từ danh sách "availableTypes" phù hợp nhất với bản chất của sản phẩm (ví dụ phần mềm, bản quyền, thiết bị, dịch vụ đào tạo...). Nếu không tìm thấy loại nào phù hợp, trả về chuỗi rỗng "".
+3. "selectedApplicationIds": Chọn từ 1 đến 3 "id" từ danh sách "availableApplications" có tính ứng dụng kỹ thuật phù hợp nhất với sản phẩm. Nếu không có ứng dụng nào phù hợp, trả về mảng rỗng [].
+4. "selectedRelatedProductIds": Chọn từ 1 đến 3 "id" từ danh sách "candidateProducts" có mức độ liên quan kỹ thuật hoặc thương mại cao nhất (ưu tiên cùng hãng sản xuất, cùng quy trình thiết kế, hoặc các giải pháp bổ trợ nhau). Nếu không có sản phẩm nào phù hợp, trả về mảng rỗng [].
+
+QUY TẮC BẮT BUỘC:
+- Phân tích linh hoạt theo bản chất kỹ thuật của sản phẩm, không suy diễn cố định.
+- CHỈ ĐƯỢC CHỌN ID CÓ TRONG DANH SÁCH ĐƯỢC CUNG CẤP, TUYỆT ĐỐI KHÔNG TỰ BỊA RA ID MỚI.
+- Định dạng JSON trả về:
+{
+  "suggestedSku": "...",
+  "selectedTypeId": "...",
+  "selectedApplicationIds": ["id1", "id2"],
+  "selectedRelatedProductIds": ["idA", "idB"]
+}`;
+
+  const userPrompt = JSON.stringify({
+    productName: name,
+    brandName: input.brandName || '',
+    categoryNames: input.categoryNames || [],
+    sampleContent: (input.content || '').replace(/<[^>]*>?/gm, '').substring(0, 1000),
+    availableTypes: input.availableTypes.slice(0, 30),
+    availableApplications: input.availableApplications.slice(0, 60),
+    candidateProducts: input.candidateProducts.slice(0, 40),
+  });
+
+  try {
+    const result = await llm.generateStructured<ClassifyProductTaxonomyOutput>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.1,
+    });
+
+    const validTypeId = input.availableTypes.some((t) => t.id === result.selectedTypeId)
+      ? result.selectedTypeId
+      : '';
+    const validAppIds = (result.selectedApplicationIds || []).filter((id) =>
+      input.availableApplications.some((a) => a.id === id)
+    );
+    const validRelatedIds = (result.selectedRelatedProductIds || []).filter((id) =>
+      input.candidateProducts.some((p) => p.id === id)
+    );
+
+    return {
+      suggestedSku:
+        result.suggestedSku ||
+        name
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .substring(0, 20),
+      selectedTypeId: validTypeId,
+      selectedApplicationIds: validAppIds,
+      selectedRelatedProductIds: validRelatedIds,
+    };
+  } catch (error) {
+    // Dynamic token-similarity fallback without hardcoded keywords
+    const cleanTokens = name
+      .toLowerCase()
+      .split(/[\s\-_/.]+/)
+      .filter((t) => t.length > 2);
+    const matchedType =
+      input.availableTypes.find((t) =>
+        cleanTokens.some((tok) => t.name.toLowerCase().includes(tok))
+      ) || input.availableTypes[0];
+    const matchedApps = input.availableApplications
+      .filter((a) => cleanTokens.some((tok) => a.name.toLowerCase().includes(tok)))
+      .slice(0, 3);
+    const related = input.candidateProducts
+      .filter(
+        (p) =>
+          (input.brandName && p.brandName === input.brandName) ||
+          (input.categoryNames && input.categoryNames.includes(p.categoryName || ''))
+      )
+      .slice(0, 3);
+
+    return {
+      suggestedSku: name
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .substring(0, 20),
+      selectedTypeId: matchedType?.id || '',
+      selectedApplicationIds: matchedApps.map((a) => a.id),
+      selectedRelatedProductIds: related.map((p) => p.id),
+    };
+  }
+}
+
