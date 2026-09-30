@@ -5,6 +5,8 @@ import { getLlmProvider } from './llm-provider';
 
 export interface GenerateSeoInput {
   title: string;
+  brandName?: string;
+  categoryName?: string;
   content?: string;
   moduleType?: 'product' | 'news' | 'event' | 'service' | 'project';
 }
@@ -16,7 +18,7 @@ export interface GenerateSeoOutput {
 }
 
 /**
- * Shared AI Action: Generate high-performing SEO metadata
+ * Shared AI Action: Generate high-performing, accurate B2B SEO metadata
  * Usable across all CMS modules: Products, News, Events, Projects, Services.
  */
 export async function generateSeoAction(input: GenerateSeoInput): Promise<GenerateSeoOutput> {
@@ -28,15 +30,28 @@ export async function generateSeoAction(input: GenerateSeoInput): Promise<Genera
   }
 
   const llm = getLlmProvider();
-  const systemPrompt = `Bạn là chuyên gia SEO hàng đầu cho tập đoàn công nghệ và phần mềm kỹ thuật CIC (Building Information Modeling, CAD/CAM, Kết cấu, Giao thông, Địa kỹ thuật).
-Nhiệm vụ của bạn là sinh metadata SEO chuẩn Google tối ưu tỷ lệ nhấp (CTR):
-- seo_title: Tối đa 65 ký tự, hấp dẫn, chứa từ khóa chính, kèm nhận diện thương hiệu "CIC".
-- seo_description: 140 đến 160 ký tự, súc tích, tóm tắt giá trị chính và có lời kêu gọi hành động (Call To Action).
-- seo_keyword: 4 đến 8 từ khóa kỹ thuật chuyên ngành quan trọng nhất, cách nhau bằng dấu phẩy.
-Trả về định dạng JSON thuần túy gồm 3 trường: seo_title, seo_description, seo_keyword.`;
+  const systemPrompt = `Bạn là Giám đốc Marketing & SEO cao cấp của Công ty Cổ phần Công nghệ và Tư vấn Đầu tư Xây dựng (CIC).
+QUY TẮC CỐT LÕI VỀ THƯƠNG HIỆU & NỘI DUNG (TUÂN THỦ 100%):
+1. VAI TRÒ DOANH NGHIỆP:
+   - CIC là ĐƠN VỊ PHÂN PHỐI BẢN QUYỀN CHÍNH THỨC & CHUYỂN GIAO CÔNG NGHỆ tại Việt Nam, KHÔNG PHẢI là tác giả phát triển các phần mềm quốc tế (Ví dụ: CSI là hãng phát triển ETABS/SAP2000; ASCON phát triển Kompas-3D; PTV Group phát triển Vissim/Visum).
+   - Chỉ những phần mềm nội bộ như Escon, CICTKT, KPW mới do CIC phát triển.
+2. TỪ KHÓA BỊ CẤM TUYỆT ĐỐI (NEGATIVE KEYWORDS):
+   - KHÔNG BAO GIỜ dùng các từ: "Tải", "Download", "Tải về", "Cài đặt miễn phí", "Crack", "Full crack", "Keygen", "Link tải".
+   - Lý do: Đây là giải pháp phần mềm kỹ thuật bản quyền cao cấp B2B cho kỹ sư/doanh nghiệp. Dùng từ "Tải" làm giảm uy tín thương hiệu và giống các web phát tán phần mềm lậu.
+3. TỪ KHÓA KHUYẾN KHÍCH:
+   - Hãy dùng: "Bản quyền chính hãng", "Phần mềm", "Giải pháp", "Tư vấn & Báo giá", "Chính hãng tại CIC".
+
+TIÊU CHUẨN ĐẦU RA (JSON):
+- seo_title: Tối đa 60 ký tự (chuẩn độ dài hiển thị Google Desktop/Mobile).
+  * Mẫu khuyến nghị: "Phần mềm [Tên sản phẩm] ([Hãng SX]) — Bản quyền chính hãng | CIC" hoặc "Bản quyền [Tên sản phẩm] chính hãng [Hãng SX] — CIC"
+- seo_description: 135 đến 155 ký tự. Nêu rõ: CIC phân phối chính hãng [Tên sản phẩm] từ [Hãng SX] tại Việt Nam; cung cấp chuyển giao công nghệ, đào tạo và báo giá doanh nghiệp.
+- seo_keyword: 5 đến 8 từ khóa kỹ thuật chuẩn (Tên sản phẩm, Hãng SX, Lĩnh vực, Bản quyền chính hãng, Giải pháp CIC).
+Chỉ trả về JSON thuần túy: { "seo_title": "...", "seo_description": "...", "seo_keyword": "..." }`;
 
   const userPrompt = JSON.stringify({
     title,
+    brandName: input.brandName || '',
+    categoryName: input.categoryName || '',
     moduleType: input.moduleType || 'general',
     sampleContent: (input.content || '').replace(/<[^>]*>?/gm, '').substring(0, 1000),
   });
@@ -50,6 +65,8 @@ Trả về định dạng JSON thuần túy gồm 3 trường: seo_title, seo_de
 
 export interface GenerateSummaryInput {
   title: string;
+  brandName?: string;
+  categoryName?: string;
   content: string;
   maxLength?: number;
 }
@@ -74,18 +91,25 @@ export async function generateSummaryAction(input: GenerateSummaryInput): Promis
   const llm = getLlmProvider();
   const maxLen = input.maxLength || 220;
 
-  const systemPrompt = `Bạn là biên tập viên kỹ thuật của CIC. Hãy đọc nội dung và viết một đoạn tóm tắt (excerpt) chuyên nghiệp, súc tích (khoảng 1-2 câu, dưới ${maxLen} ký tự) để hiển thị ngoài danh sách bài viết/sản phẩm.
-Định dạng JSON trả về: { "summary": "..." }`;
+  const systemPrompt = `Bạn là biên tập viên kỹ thuật cao cấp của CIC.
+QUY TẮC NỘI DUNG:
+1. Xác định đúng quan hệ: CIC là đối tác phân phối chính hãng và hỗ trợ kỹ thuật tại Việt Nam cho giải pháp của Hãng sản xuất đối tác.
+2. TUYỆT ĐỐI KHÔNG nhận CIC là đơn vị phát triển nếu phần mềm thuộc đối tác (như CSI, ASCON, PTV Group, Bentley, Autodesk).
+3. Văn phong B2B chuyên nghiệp, tập trung vào giá trị kỹ thuật thực tế, tiêu chuẩn tính toán và công năng phục vụ kỹ sư/doanh nghiệp.
+4. Độ dài: 1-2 câu súc tích (dưới ${maxLen} ký tự), không chứa markdown, không chứa từ "Tải" hay "Download".
+Định dạng JSON: { "summary": "..." }`;
 
   const userPrompt = JSON.stringify({
     title,
+    brandName: input.brandName || '',
+    categoryName: input.categoryName || '',
     content: cleanContent.substring(0, 2000),
   });
 
   return await llm.generateStructured<GenerateSummaryOutput>({
     systemPrompt,
     userPrompt,
-    temperature: 0.3,
+    temperature: 0.2,
   });
 }
 

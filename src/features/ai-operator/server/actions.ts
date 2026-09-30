@@ -298,13 +298,17 @@ export async function runProductAiAction(params: {
       const name = String(prod.name || prod.title || 'Sản phẩm');
       const summary = String(prod.summary || prod.description || '');
 
-      const prompt = `Bạn là chuyên gia SEO của CIC. Tạo thẻ SEO tối ưu cho sản phẩm:
-Tên: "${name}"
-Mô tả: "${summary.substring(0, 300)}"
-Yêu cầu:
-- seo_title: độ dài 40-65 ký tự, bao gồm tên sản phẩm và chữ "CIC"
-- seo_description: độ dài 120-160 ký tự, hấp dẫn, chuẩn Google snippet
-- seo_keyword: 5-8 từ khóa kỹ thuật ngăn cách bởi dấu phẩy
+      const prompt = `Bạn là Giám đốc SEO B2B của CIC. Tạo bộ thẻ SEO tối ưu cho giải pháp phần mềm kỹ thuật:
+Tên sản phẩm: "${name}"
+Mô tả tóm tắt: "${summary.substring(0, 300)}"
+QUY TẮC BẮT BUỘC:
+1. CIC là đơn vị phân phối bản quyền chính thức và chuyển giao công nghệ tại Việt Nam.
+2. TUYỆT ĐỐI KHÔNG dùng các từ: "Tải", "Download", "Tải về", "Cài đặt miễn phí", "Crack".
+3. Hãy dùng từ chuyên nghiệp: "Bản quyền chính hãng", "Phần mềm", "Giải pháp", "Tư vấn & Báo giá".
+Yêu cầu định dạng:
+- seo_title: độ dài 40-60 ký tự, cấu trúc chuẩn: "Phần mềm [Tên sản phẩm] — Bản quyền chính hãng | CIC"
+- seo_description: độ dài 135-155 ký tự, nêu rõ phân phối bản quyền chính hãng và tư vấn kỹ thuật tại CIC
+- seo_keyword: 5-8 từ khóa kỹ thuật chuyên ngành ngăn cách bởi dấu phẩy
 Trả về đúng định dạng JSON: { "seo_title": string, "seo_description": string, "seo_keyword": string }`;
 
       const res = await llm.generateStructured<{ seo_title: string; seo_description: string; seo_keyword: string }>({

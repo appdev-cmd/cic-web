@@ -100,6 +100,11 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [hasAiAutoFilled, setHasAiAutoFilled] = useState(false);
   const undoSnapshotRef = useRef<{
     alias: string;
+    code: string;
+    otherLanguages1: string;
+    types: string;
+    applications: string[];
+    productsRelates: string[];
     summary: string;
     seoTitle: string;
     seoDescription: string;
@@ -109,6 +114,85 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
   const isAnchorsReady = Boolean(name.trim() && manufactory && categoryIds.length > 0);
 
+  const handleAiSection2 = () => {
+    if (!name.trim()) {
+      toast.warning('Vui lòng nhập Tên sản phẩm trước.');
+      return;
+    }
+
+    const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+    const selectedCats = categories
+      .filter((c) => categoryIds.includes(c.id))
+      .map((c) => c.name)
+      .join(', ');
+
+    if (!alias.trim() || !manualAlias) {
+      setAlias(slugify(name));
+    }
+
+    if (!code.trim()) {
+      const generatedCode = name
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .substring(0, 20);
+      if (generatedCode) setCode(generatedCode);
+    }
+
+    if (!otherLanguages1.trim()) {
+      setOtherLanguages1(`/en/products/${slugify(name)}`);
+    }
+
+    if (!types) {
+      const activeTypes = productTypes.filter((t) => t.status === 'active');
+      const matchedType =
+        activeTypes.find(
+          (t) =>
+            t.name.toLowerCase().includes('phần mềm') ||
+            t.name.toLowerCase().includes('bản quyền') ||
+            t.name.toLowerCase().includes('thương mại')
+        ) || activeTypes[0];
+      if (matchedType) setTypes(matchedType.id);
+    }
+
+    if (applications.length === 0) {
+      const activeApps = applicationOptions.filter((a) => a.status === 'active');
+      const matchedApps = activeApps.filter((a) => {
+        const appName = a.name.toLowerCase();
+        const prodName = name.toLowerCase();
+        const catName = selectedCats.toLowerCase();
+        return (
+          ((catName.includes('kết cấu') || prodName.includes('etabs') || prodName.includes('sap2000')) &&
+            (appName.includes('kết cấu') || appName.includes('bê tông') || appName.includes('thép') || appName.includes('xây dựng'))) ||
+          ((catName.includes('kiến trúc') || prodName.includes('cad') || prodName.includes('revit')) &&
+            (appName.includes('kiến trúc') || appName.includes('cad') || appName.includes('bim'))) ||
+          ((catName.includes('giao thông') || prodName.includes('vissim') || prodName.includes('visum')) &&
+            (appName.includes('giao thông') || appName.includes('hạ tầng') || appName.includes('mô phỏng'))) ||
+          ((catName.includes('địa kỹ thuật') || prodName.includes('plaxis')) &&
+            (appName.includes('địa kỹ thuật') || appName.includes('móng') || appName.includes('hầm')))
+        );
+      });
+      if (matchedApps.length > 0) {
+        setApplications(matchedApps.map((a) => a.id));
+      }
+    }
+
+    if (productsRelates.length === 0) {
+      const sameBrandOrCat = relatedProducts.filter((p) => {
+        if (p.id === product?.id) return false;
+        const matchBrand = manufactory && (p.manufactory === manufactory || p.brand_id === manufactory);
+        const matchCat = categoryIds.some((cid) => (p.category_ids || []).includes(cid) || p.category_id === cid);
+        return matchBrand || matchCat;
+      });
+      if (sameBrandOrCat.length > 0) {
+        setProductsRelates(sameBrandOrCat.slice(0, 3).map((p) => p.id));
+      }
+    }
+
+    toast.success('Đã tự động nhận diện Mã SKU, URL Tiếng Anh và Phân loại kỹ thuật!');
+  };
+
   const handleSmartAutoFill = async () => {
     if (!isAnchorsReady) {
       toast.warning('Vui lòng điền đủ Tên sản phẩm, chọn Hãng và Lĩnh vực trước khi dùng AI!');
@@ -117,6 +201,11 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
     undoSnapshotRef.current = {
       alias,
+      code,
+      otherLanguages1,
+      types,
+      applications: [...applications],
+      productsRelates: [...productsRelates],
       summary,
       seoTitle,
       seoDescription,
@@ -135,10 +224,73 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       const contextStr = `${name} do hãng ${selectedBrand} phát triển, lĩnh vực ${selectedCats}.`;
       const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
 
+      // 1. Tự động nhận diện Phân loại & Định danh kỹ thuật (Section 2)
+      if (!alias.trim() && !manualAlias) {
+        setAlias(slugify(name));
+      }
+      if (!code.trim()) {
+        const generatedCode = name
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .substring(0, 20);
+        if (generatedCode) setCode(generatedCode);
+      }
+      if (!otherLanguages1.trim()) {
+        setOtherLanguages1(`/en/products/${slugify(name)}`);
+      }
+      if (!types) {
+        const activeTypes = productTypes.filter((t) => t.status === 'active');
+        const matchedType =
+          activeTypes.find(
+            (t) =>
+              t.name.toLowerCase().includes('phần mềm') ||
+              t.name.toLowerCase().includes('bản quyền') ||
+              t.name.toLowerCase().includes('thương mại')
+          ) || activeTypes[0];
+        if (matchedType) setTypes(matchedType.id);
+      }
+      if (applications.length === 0) {
+        const activeApps = applicationOptions.filter((a) => a.status === 'active');
+        const matchedApps = activeApps.filter((a) => {
+          const appName = a.name.toLowerCase();
+          const prodName = name.toLowerCase();
+          const catName = selectedCats.toLowerCase();
+          return (
+            ((catName.includes('kết cấu') || prodName.includes('etabs') || prodName.includes('sap2000')) &&
+              (appName.includes('kết cấu') || appName.includes('bê tông') || appName.includes('thép') || appName.includes('xây dựng'))) ||
+            ((catName.includes('kiến trúc') || prodName.includes('cad') || prodName.includes('revit')) &&
+              (appName.includes('kiến trúc') || appName.includes('cad') || appName.includes('bim'))) ||
+            ((catName.includes('giao thông') || prodName.includes('vissim') || prodName.includes('visum')) &&
+              (appName.includes('giao thông') || appName.includes('hạ tầng') || appName.includes('mô phỏng'))) ||
+            ((catName.includes('địa kỹ thuật') || prodName.includes('plaxis')) &&
+              (appName.includes('địa kỹ thuật') || appName.includes('móng') || appName.includes('hầm')))
+          );
+        });
+        if (matchedApps.length > 0) {
+          setApplications(matchedApps.map((a) => a.id));
+        }
+      }
+      if (productsRelates.length === 0) {
+        const sameBrandOrCat = relatedProducts.filter((p) => {
+          if (p.id === product?.id) return false;
+          const matchBrand = manufactory && (p.manufactory === manufactory || p.brand_id === manufactory);
+          const matchCat = categoryIds.some((cid) => (p.category_ids || []).includes(cid) || p.category_id === cid);
+          return matchBrand || matchCat;
+        });
+        if (sameBrandOrCat.length > 0) {
+          setProductsRelates(sameBrandOrCat.slice(0, 3).map((p) => p.id));
+        }
+      }
+
+      // 2. Gọi AI sinh Tóm tắt, SEO và Thẻ Tags
       const [seoRes, summaryRes, tagsRes] = await Promise.all([
         (!seoTitle || !seoDescription)
           ? generateSeoAction({
               title: name,
+              brandName: selectedBrand,
+              categoryName: selectedCats,
               content: cleanDesc || contextStr,
               moduleType: 'product',
             })
@@ -146,6 +298,8 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         (!summary.trim())
           ? generateSummaryAction({
               title: name,
+              brandName: selectedBrand,
+              categoryName: selectedCats,
               content: cleanDesc || contextStr,
               maxLength: 200,
             })
@@ -159,9 +313,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           : Promise.resolve(null),
       ]);
 
-      if (!alias.trim() && !manualAlias) {
-        setAlias(slugify(name));
-      }
       if (summaryRes && !summary.trim()) {
         setSummary(summaryRes.summary);
       }
@@ -175,7 +326,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       }
 
       setHasAiAutoFilled(true);
-      toast.success('Gemini AI đã tự động điền Tóm tắt, SEO và Thẻ Tags!');
+      toast.success('Trợ lý AI đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags!');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Có lỗi khi AI tự động điền dữ liệu.');
     } finally {
@@ -186,6 +337,11 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const handleUndoAutoFill = () => {
     if (undoSnapshotRef.current) {
       setAlias(undoSnapshotRef.current.alias);
+      setCode(undoSnapshotRef.current.code);
+      setOtherLanguages1(undoSnapshotRef.current.otherLanguages1);
+      setTypes(undoSnapshotRef.current.types);
+      setApplications(undoSnapshotRef.current.applications);
+      setProductsRelates(undoSnapshotRef.current.productsRelates);
       setSummary(undoSnapshotRef.current.summary);
       setSeoTitle(undoSnapshotRef.current.seoTitle);
       setSeoDescription(undoSnapshotRef.current.seoDescription);
@@ -209,6 +365,8 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     try {
       const res = await generateSummaryAction({
         title: name || 'Sản phẩm phần mềm',
+        brandName: selectedBrand,
+        categoryName: selectedCats,
         content: contextStr,
         maxLength: 200,
       });
@@ -221,10 +379,16 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
   const handleAiSeo = async () => {
     const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+    const selectedCats = categories
+      .filter((c) => categoryIds.includes(c.id))
+      .map((c) => c.name)
+      .join(', ');
     const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
     try {
       const res = await generateSeoAction({
         title: name || 'Sản phẩm phần mềm',
+        brandName: selectedBrand,
+        categoryName: selectedCats,
         content: cleanDesc || `${summary} ${selectedBrand}`,
         moduleType: 'product',
       });
@@ -439,7 +603,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           />
           <AiMagicWand
             label="Dịch sang EN"
-            title="Dịch thông tin sang tiếng Anh bằng Gemini AI"
+            title="Dịch thông tin sang tiếng Anh bằng Trợ lý AI"
             onTrigger={handleAiTranslateEn}
             variant="outline"
             size="sm"
@@ -487,7 +651,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             </div>
             <div>
               <span className="font-bold text-slate-900 dark:text-white">
-                ✦ Gemini AI: Đã tự động điền Tóm tắt, bộ thẻ SEO và Thẻ Tags.
+                ✦ Trợ lý AI: Đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags.
               </span>
               <span className="text-slate-600 dark:text-slate-400 ml-2 hidden sm:inline">
                 (Nội dung bài viết và hình ảnh của bạn được giữ nguyên 100%)
@@ -586,7 +750,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
                 size="sm"
                 disabled={!isAnchorsReady || isAutoFilling}
                 loading={isAutoFilling}
-                loadingText="Gemini đang phân tích..."
+                loadingText="AI đang phân tích & điền..."
                 onClick={handleSmartAutoFill}
                 leadingIcon={<Sparkles className="h-4 w-4" />}
               >
@@ -597,9 +761,16 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
           {/* Section 2: Phân loại & Liên kết mở rộng */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
-              <Package className="h-5 w-5 text-orange-600" />
-              2. Phân loại & Định danh kỹ thuật
+            <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <Package className="h-5 w-5 text-orange-600" />
+                2. Phân loại & Định danh kỹ thuật
+              </div>
+              <AiMagicWand
+                label="Nhận diện kỹ thuật"
+                title="Tự động nhận diện Mã SKU, URL Tiếng Anh, Loại phần mềm & Sản phẩm liên quan"
+                onTrigger={handleAiSection2}
+              />
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
@@ -831,7 +1002,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className={labelClass}>Tags</label>
-              <AiMagicWand label="Gợi ý Tags" title="Tự động bóc tách từ khóa kỹ thuật bằng Gemini AI" onTrigger={handleAiTags} />
+              <AiMagicWand label="Gợi ý Tags" title="Tự động bóc tách từ khóa kỹ thuật bằng Trợ lý AI" onTrigger={handleAiTags} />
             </div>
             <textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="VD: SAP2000, Phần mềm kết cấu, CSI Vietnam..." />
           </div>
