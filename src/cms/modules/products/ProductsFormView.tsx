@@ -12,6 +12,15 @@ import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import type { AiProductDraftResult, FieldChangeItem, FieldOrigin, ProductFormViewMode } from '@/features/ai-operator/types';
 import { AiChangesDiffModal } from './components/AiChangesDiffModal';
 import { AiActionsDropdown } from './components/AiActionsDropdown';
+import { useCmsToast } from '@/cms/context/CmsToastContext';
+import { AiMagicWand } from '@/features/ai-operator/components/AiMagicWand';
+import {
+  generateSeoAction,
+  generateSummaryAction,
+  extractTagsAction,
+  translateFieldsAction,
+  generateOutlineAction,
+} from '@/features/ai-operator/server/shared-actions';
 
 interface ProductsFormViewProps {
   locale: 'vi' | 'en';
@@ -85,6 +94,227 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingAction, setSubmittingAction] = useState<'draft' | 'publish' | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const { toast } = useCmsToast();
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [hasAiAutoFilled, setHasAiAutoFilled] = useState(false);
+  const undoSnapshotRef = useRef<{
+    alias: string;
+    summary: string;
+    seoTitle: string;
+    seoDescription: string;
+    seoKeyword: string;
+    tagsText: string;
+  } | null>(null);
+
+  const isAnchorsReady = Boolean(name.trim() && manufactory && categoryIds.length > 0);
+
+  const handleSmartAutoFill = async () => {
+    if (!isAnchorsReady) {
+      toast.warning('Vui lòng điền đủ Tên sản phẩm, chọn Hãng và Lĩnh vực trước khi dùng AI!');
+      return;
+    }
+
+    undoSnapshotRef.current = {
+      alias,
+      summary,
+      seoTitle,
+      seoDescription,
+      seoKeyword,
+      tagsText,
+    };
+
+    try {
+      setIsAutoFilling(true);
+      const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+      const selectedCats = categories
+        .filter((c) => categoryIds.includes(c.id))
+        .map((c) => c.name)
+        .join(', ');
+
+      const contextStr = `${name} do hãng ${selectedBrand} phát triển, lĩnh vực ${selectedCats}.`;
+      const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
+
+      const [seoRes, summaryRes, tagsRes] = await Promise.all([
+        (!seoTitle || !seoDescription)
+          ? generateSeoAction({
+              title: name,
+              content: cleanDesc || contextStr,
+              moduleType: 'product',
+            })
+          : Promise.resolve(null),
+        (!summary.trim())
+          ? generateSummaryAction({
+              title: name,
+              content: cleanDesc || contextStr,
+              maxLength: 200,
+            })
+          : Promise.resolve(null),
+        (!tagsText.trim())
+          ? extractTagsAction({
+              title: name,
+              content: `${selectedBrand} ${selectedCats} ${cleanDesc}`,
+              count: 5,
+            })
+          : Promise.resolve(null),
+      ]);
+
+      if (!alias.trim() && !manualAlias) {
+        setAlias(slugify(name));
+      }
+      if (summaryRes && !summary.trim()) {
+        setSummary(summaryRes.summary);
+      }
+      if (seoRes) {
+        if (!seoTitle.trim()) setSeoTitle(seoRes.seo_title);
+        if (!seoDescription.trim()) setSeoDescription(seoRes.seo_description);
+        if (!seoKeyword.trim()) setSeoKeyword(seoRes.seo_keyword);
+      }
+      if (tagsRes && !tagsText.trim()) {
+        setTagsText(tagsRes.tags.join(', '));
+      }
+
+      setHasAiAutoFilled(true);
+      toast.success('Gemini AI đã tự động điền Tóm tắt, SEO và Thẻ Tags!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Có lỗi khi AI tự động điền dữ liệu.');
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
+
+  const handleUndoAutoFill = () => {
+    if (undoSnapshotRef.current) {
+      setAlias(undoSnapshotRef.current.alias);
+      setSummary(undoSnapshotRef.current.summary);
+      setSeoTitle(undoSnapshotRef.current.seoTitle);
+      setSeoDescription(undoSnapshotRef.current.seoDescription);
+      setSeoKeyword(undoSnapshotRef.current.seoKeyword);
+      setTagsText(undoSnapshotRef.current.tagsText);
+      undoSnapshotRef.current = null;
+    }
+    setHasAiAutoFilled(false);
+    toast.info('Đã hoàn tác các trường vừa được AI điền tự động.');
+  };
+
+  const handleAiSummary = async () => {
+    const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+    const selectedCats = categories
+      .filter((c) => categoryIds.includes(c.id))
+      .map((c) => c.name)
+      .join(', ');
+    const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
+    const contextStr = cleanDesc || `${name} của hãng ${selectedBrand}, lĩnh vực ${selectedCats}.`;
+
+    try {
+      const res = await generateSummaryAction({
+        title: name || 'Sản phẩm phần mềm',
+        content: contextStr,
+        maxLength: 200,
+      });
+      setSummary(res.summary);
+      toast.success('Đã cập nhật Tóm tắt bằng AI!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi tạo tóm tắt.');
+    }
+  };
+
+  const handleAiSeo = async () => {
+    const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+    const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
+    try {
+      const res = await generateSeoAction({
+        title: name || 'Sản phẩm phần mềm',
+        content: cleanDesc || `${summary} ${selectedBrand}`,
+        moduleType: 'product',
+      });
+      setSeoTitle(res.seo_title);
+      setSeoDescription(res.seo_description);
+      setSeoKeyword(res.seo_keyword);
+      toast.success('Đã tối ưu bộ thẻ SEO bằng AI!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi tối ưu SEO.');
+    }
+  };
+
+  const handleAiTags = async () => {
+    const selectedBrand = brands.find((b) => b.id === manufactory)?.name || '';
+    const cleanDesc = description.replace(/<[^>]*>?/gm, ' ').trim();
+    try {
+      const res = await extractTagsAction({
+        title: name || 'Sản phẩm phần mềm',
+        content: `${selectedBrand} ${summary} ${cleanDesc}`,
+        count: 6,
+      });
+      setTagsText(res.tags.join(', '));
+      toast.success('Đã cập nhật danh sách Thẻ Tags!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi gợi ý Tags.');
+    }
+  };
+
+  const handleAiOverviewOutline = async () => {
+    if (description.replace(/<[^>]*>?/gm, '').trim().length > 30) {
+      const ok = window.confirm('Mục Tổng quan đã có nội dung và hình ảnh. Bạn có muốn chèn thêm khung dàn bài mẫu vào cuối bài không?');
+      if (!ok) return;
+    }
+    try {
+      const res = await generateOutlineAction({
+        title: name || 'Sản phẩm phần mềm',
+        moduleType: 'product',
+      });
+      setDescription((prev) => (prev ? `${prev}<br/><hr/><br/>${res.outlineHtml}` : res.outlineHtml));
+      toast.success('Đã chèn khung dàn ý tổng quan!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi tạo dàn ý tổng quan.');
+    }
+  };
+
+  const handleAiFeaturesOutline = async () => {
+    if (featureDetails.replace(/<[^>]*>?/gm, '').trim().length > 30) {
+      const ok = window.confirm('Mục Chi tiết tính năng đã có nội dung. Bạn có muốn chèn thêm khung dàn bài mẫu vào cuối bài không?');
+      if (!ok) return;
+    }
+    try {
+      const res = await generateOutlineAction({
+        title: `${name} - Tính năng kỹ thuật`,
+        moduleType: 'product',
+        notes: 'Tập trung vào các mô-đun công cụ, tính năng mô hình hóa 3D, phân tích kết cấu và liên kết BIM',
+      });
+      setFeatureDetails((prev) => (prev ? `${prev}<br/><hr/><br/>${res.outlineHtml}` : res.outlineHtml));
+      toast.success('Đã chèn khung dàn ý tính năng!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Lỗi khi tạo dàn ý tính năng.');
+    }
+  };
+
+  const handleAiTranslateEn = async () => {
+    try {
+      const fieldsToTranslate: Record<string, string> = {};
+      if (name.trim()) fieldsToTranslate.name = name;
+      if (summary.trim()) fieldsToTranslate.summary = summary;
+      if (seoTitle.trim()) fieldsToTranslate.seo_title = seoTitle;
+      if (seoDescription.trim()) fieldsToTranslate.seo_description = seoDescription;
+
+      if (Object.keys(fieldsToTranslate).length === 0) {
+        toast.warning('Chưa có thông tin để dịch sang tiếng Anh.');
+        return;
+      }
+
+      const res = await translateFieldsAction({
+        fields: fieldsToTranslate,
+        targetLang: 'en',
+      });
+
+      if (res.translations.name && !otherLanguages1.trim()) {
+        setOtherLanguages1(`/en/products/${slugify(res.translations.name)}`);
+      }
+
+      toast.success('Đã hoàn tất dịch thuật ngữ tiếng Anh bằng AI!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Có lỗi khi dịch nội dung.');
+    }
+  };
 
   useEffect(() => { if (!manualAlias) setAlias(slugify(name)); }, [name, manualAlias]);
   const ids = (text: string) => text.split(',').map((item) => item.trim()).filter(Boolean);
@@ -202,12 +432,18 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {/* Tạm thời ẩn AI Actions theo yêu cầu - mở lại khi server AI sẵn sàng */}
-          {/* <AiActionsDropdown
+          <AiActionsDropdown
             currentProduct={payload()}
             workspaceLocale={locale}
             onApplyUpdates={handleApplyAiUpdates}
-          /> */}
+          />
+          <AiMagicWand
+            label="Dịch sang EN"
+            title="Dịch thông tin sang tiếng Anh bằng Gemini AI"
+            onTrigger={handleAiTranslateEn}
+            variant="outline"
+            size="sm"
+          />
           <CmsButton
             variant="secondary"
             size="sm"
@@ -242,50 +478,32 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         </div>
       </header>
 
-      {/* Tạm thời ẩn AI Changes Notification Banner và Form View Modes - mở lại khi server AI sẵn sàng */}
-      {/* {aiChanges.length > 0 && !aiBannerDismissed && (
-        <div className="rounded-xl border border-orange-200 dark:border-orange-800/80 bg-orange-50/80 dark:bg-orange-950/30 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs animate-in fade-in duration-150">
+      {/* Thông báo hoàn tác khi AI vừa tự động điền */}
+      {hasAiAutoFilled && (
+        <div className="rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/90 dark:bg-emerald-950/40 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs animate-in fade-in duration-150">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 shrink-0">
+            <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
               <span className="font-bold text-slate-900 dark:text-white">
-                ✦ Smart Operator: Đã hoàn thiện {aiChanges.length} mục dựa trên dữ liệu CIC
+                ✦ Gemini AI: Đã tự động điền Tóm tắt, bộ thẻ SEO và Thẻ Tags.
               </span>
               <span className="text-slate-600 dark:text-slate-400 ml-2 hidden sm:inline">
-                (Các trường được viền cam bên trái)
+                (Nội dung bài viết và hình ảnh của bạn được giữ nguyên 100%)
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsDiffOpen(true)}
-              className="px-2.5 py-1 font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs"
-            >
-              Xem chi tiết thay đổi
-            </button>
-            <button
-              type="button"
-              onClick={handleRevertAll}
-              className="px-2.5 py-1 font-semibold rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-            >
-              Hoàn tác AI
-            </button>
-            <button
-              type="button"
-              onClick={() => setAiBannerDismissed(true)}
-              className="text-slate-400 hover:text-slate-600 text-xs px-1 cursor-pointer"
-              title="Ẩn thông báo"
-            >
-              ✕
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleUndoAutoFill}
+            className="px-3 py-1.5 font-bold rounded-lg bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Hoàn tác AI về ban đầu
+          </button>
         </div>
-      )} */}
-
-      {/* {formViewModes: [Cần xử lý] | [Đề xuất AI] | [Tất cả]} */}
+      )}
 
       {formError && (
         <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300" role="alert">
@@ -296,10 +514,165 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(310px,1fr)]">
         <main className="space-y-5">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Package className="h-5 w-5 text-orange-600" />Thông tin sản phẩm</div><div className="grid gap-4 md:grid-cols-2"><div className="md:col-span-2"><label className={labelClass}>Tên sản phẩm *</label><input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} /></div><div><label className={labelClass}>Alias</label><input className={inputClass} value={alias} onChange={(e) => { setManualAlias(true); setAlias(e.target.value); }} /></div><div><label className={labelClass}>Biệt danh</label><input className={inputClass} value={code} onChange={(e) => setCode(e.target.value)} /></div><div><label className={labelClass}>URL ngôn ngữ khác</label><input className={inputClass} value={otherLanguages1} onChange={(e) => setOtherLanguages1(e.target.value)} /></div><div><label className={labelClass}>Hãng sản xuất</label><SearchableSelect options={brands.map((item) => ({ id: item.id, label: item.name }))} selectedId={manufactory} onChange={setManufactory} /></div><div><label className={labelClass}>Loại sản phẩm</label><SearchableSelect options={productTypes.filter((item) => item.status === 'active').map((item) => ({ id: item.id, label: item.name }))} selectedId={types} onChange={setTypes} /></div><div className="md:col-span-2"><label className={labelClass}>Lĩnh vực *</label><SearchableMultiSelect options={categories.map((item) => ({ id: item.id, label: item.name }))} selectedIds={categoryIds} onChange={setCategoryIds} /></div><div className="md:col-span-2"><label className={labelClass}>Ứng dụng</label><SearchableMultiSelect options={applicationOptions.filter((item) => item.status === 'active').map((item) => ({ id: item.id, label: item.name }))} selectedIds={applications} onChange={setApplications} /></div><div className="md:col-span-2"><label className={labelClass}>Sản phẩm liên quan</label><SearchableMultiSelect options={relatedProducts.filter((item) => item.id !== product?.id).map((item) => ({ id: item.id, label: item.name || item.title }))} selectedIds={productsRelates} onChange={setProductsRelates} /></div><div className="md:col-span-2"><label className={labelClass}>Tóm tắt</label><textarea rows={4} className={inputClass} value={summary} onChange={(e) => setSummary(e.target.value)} /></div></div></section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Tổng quan</div><RichTextEditor value={description} onChange={setDescription} minHeight="320px" allowedEmbeds={['cta', 'form']} /></section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Chi tiết tính năng</div><RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" allowedEmbeds={['cta', 'form']} /></section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Video</div><RichTextEditor value={video} onChange={setVideo} minHeight="260px" /></section>
+          {/* Section 1: Thông tin cốt lõi (Anchors) */}
+          <section className="rounded-2xl border-2 border-orange-200/90 bg-gradient-to-b from-orange-50/40 to-white p-5 shadow-xs dark:border-orange-900/50 dark:from-orange-950/20 dark:to-slate-900">
+            <div className="mb-2 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <Package className="h-5 w-5 text-orange-600" />
+                1. Thông tin nhận diện cốt lõi
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/80">
+                ⚡ Điền 3 ô này để kích hoạt Trợ lý AI
+              </span>
+            </div>
+            <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
+              Nhập Tên sản phẩm, chọn Hãng và Lĩnh vực để AI nhận diện ngữ cảnh và hỗ trợ điền tự động các mục còn lại.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <label className={labelClass}>Tên sản phẩm *</label>
+                <input
+                  className={inputClass}
+                  placeholder="VD: SAP2000 v25, Kompas-3D v23, Plaxis 3D..."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Hãng sản xuất *</label>
+                <SearchableSelect
+                  options={brands.map((item) => ({ id: item.id, label: item.name }))}
+                  selectedId={manufactory}
+                  onChange={setManufactory}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Lĩnh vực chính *</label>
+                <SearchableMultiSelect
+                  options={categories.map((item) => ({ id: item.id, label: item.name }))}
+                  selectedIds={categoryIds}
+                  onChange={setCategoryIds}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Thanh kích hoạt thông minh (Smart AI Copilot Trigger Bar) */}
+          <div
+            className={`rounded-2xl border p-4 transition-all duration-200 ${
+              isAnchorsReady
+                ? 'border-orange-300 bg-gradient-to-r from-orange-50 via-amber-50/60 to-orange-50 dark:border-orange-800/80 dark:from-orange-950/30 dark:via-amber-950/20 dark:to-orange-950/30 shadow-xs'
+                : 'border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/40 opacity-80'
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="space-y-1 max-w-lg">
+                <div className="flex items-center gap-2">
+                  <Sparkles className={`w-4 h-4 ${isAnchorsReady ? 'text-orange-600 dark:text-orange-400 animate-pulse' : 'text-slate-400'}`} />
+                  <span className="font-bold text-sm text-slate-800 dark:text-slate-200">
+                    {isAnchorsReady
+                      ? '✦ Đã nhận diện thông tin sản phẩm! Bạn có muốn AI hỗ trợ điền?'
+                      : 'Trợ lý AI Co-pilot (Điền đủ Tên, Hãng và Lĩnh vực ở trên để mở khóa)'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {isAnchorsReady
+                    ? 'AI sẽ tự động sinh Tóm tắt, bộ thẻ SEO và Thẻ Tags. (Tuyệt đối không ghi đè bài viết hoặc hình ảnh của bạn)'
+                    : `Trạng thái: ${[Boolean(name.trim()) && 'Tên', Boolean(manufactory) && 'Hãng', categoryIds.length > 0 && 'Lĩnh vực'].filter(Boolean).length}/3 trường cốt lõi đã sẵn sàng.`}
+                </p>
+              </div>
+              <CmsButton
+                variant="primary"
+                size="sm"
+                disabled={!isAnchorsReady || isAutoFilling}
+                loading={isAutoFilling}
+                loadingText="Gemini đang phân tích..."
+                onClick={handleSmartAutoFill}
+                leadingIcon={<Sparkles className="h-4 w-4" />}
+              >
+                Tự động điền phần còn lại với AI
+              </CmsButton>
+            </div>
+          </div>
+
+          {/* Section 2: Phân loại & Liên kết mở rộng */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
+              <Package className="h-5 w-5 text-orange-600" />
+              2. Phân loại & Định danh kỹ thuật
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className={labelClass}>Alias (Đường dẫn tĩnh)</label>
+                <input className={inputClass} value={alias} onChange={(e) => { setManualAlias(true); setAlias(e.target.value); }} />
+              </div>
+              <div>
+                <label className={labelClass}>Biệt danh / Mã sản phẩm</label>
+                <input className={inputClass} value={code} onChange={(e) => setCode(e.target.value)} />
+              </div>
+              <div>
+                <label className={labelClass}>URL ngôn ngữ khác (Tiếng Anh)</label>
+                <input className={inputClass} value={otherLanguages1} onChange={(e) => setOtherLanguages1(e.target.value)} />
+              </div>
+              <div>
+                <label className={labelClass}>Loại sản phẩm</label>
+                <SearchableSelect options={productTypes.filter((item) => item.status === 'active').map((item) => ({ id: item.id, label: item.name }))} selectedId={types} onChange={setTypes} />
+              </div>
+              <div className="md:col-span-2">
+                <label className={labelClass}>Ứng dụng</label>
+                <SearchableMultiSelect options={applicationOptions.filter((item) => item.status === 'active').map((item) => ({ id: item.id, label: item.name }))} selectedIds={applications} onChange={setApplications} />
+              </div>
+              <div className="md:col-span-2">
+                <label className={labelClass}>Sản phẩm liên quan</label>
+                <SearchableMultiSelect options={relatedProducts.filter((item) => item.id !== product?.id).map((item) => ({ id: item.id, label: item.name || item.title }))} selectedIds={productsRelates} onChange={setProductsRelates} />
+              </div>
+            </div>
+          </section>
+
+          {/* Section 3: Tóm tắt */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <FileText className="h-5 w-5 text-orange-600" />
+                Tóm tắt sản phẩm
+              </div>
+              <AiMagicWand label="Tóm tắt từ bài viết" title="Tự động đọc bài viết và tóm tắt ngắn gọn" onTrigger={handleAiSummary} />
+            </div>
+            <textarea rows={4} className={inputClass} value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Tóm tắt 1-2 câu súc tích để hiển thị ngoài danh mục sản phẩm..." />
+          </section>
+
+          {/* Section 4: Tổng quan */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <FileText className="h-5 w-5 text-orange-600" />
+                Tổng quan
+              </div>
+              <AiMagicWand label="Khung dàn bài" title="Tạo khung dàn bài kỹ thuật chuẩn có sẵn đề mục" onTrigger={handleAiOverviewOutline} />
+            </div>
+            <RichTextEditor value={description} onChange={setDescription} minHeight="320px" allowedEmbeds={['cta', 'form']} />
+          </section>
+
+          {/* Section 5: Chi tiết tính năng */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <FileText className="h-5 w-5 text-orange-600" />
+                Chi tiết tính năng
+              </div>
+              <AiMagicWand label="Khung tính năng" title="Tạo dàn ý các tính năng kỹ thuật nổi bật" onTrigger={handleAiFeaturesOutline} />
+            </div>
+            <RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" allowedEmbeds={['cta', 'form']} />
+          </section>
+
+          {/* Section 6: Video */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-3 flex items-center gap-2 font-black dark:text-white">
+              <FileText className="h-5 w-5 text-orange-600" />
+              Video
+            </div>
+            <RichTextEditor value={video} onChange={setVideo} minHeight="260px" />
+          </section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
           <Link2 className="h-5 w-5 text-orange-600" />
@@ -455,11 +828,31 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             {icon && <img src={findPageBuilderImage(icon)?.thumbnail_url ?? findPageBuilderImage(icon)?.url ?? icon} alt="" className="mb-2 h-20 w-20 rounded-xl object-contain" />}
             <button type="button" onClick={() => setMediaTarget('icon')} className="w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn hoặc tải icon</button>
           </div>
-          <div><label className={labelClass}>Tags</label><textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} /></div>
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className={labelClass}>Tags</label>
+              <AiMagicWand label="Gợi ý Tags" title="Tự động bóc tách từ khóa kỹ thuật bằng Gemini AI" onTrigger={handleAiTags} />
+            </div>
+            <textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="VD: SAP2000, Phần mềm kết cấu, CSI Vietnam..." />
+          </div>
         </div>
       </section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Hiển thị</div><div className="space-y-4"><div><label className={labelClass}>Giá</label><input id="field-price" className={`${inputClass} ${isTouched('price') ? 'border-l-4 border-l-orange-500' : ''}`} value={priceOld} onChange={(e) => setPriceOld(e.target.value)} /></div><label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200"><span>Sản phẩm nổi bật <span className="font-normal text-slate-400">({featuredCount + Number(isHot)}/{FEATURED_CONTENT_LIMITS.product})</span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Dự phòng cho section Sản phẩm trong tương lai; không dùng cho Hệ sinh thái Công nghệ CIC.</span></span><input type="checkbox" checked={isHot} disabled={!isHot && featuredCount >= FEATURED_CONTENT_LIMITS.product} onChange={(e) => setIsHot(e.target.checked)} /></label><label className="flex items-center justify-between text-sm font-semibold dark:text-slate-200"><span>Link TeamViewer</span><input type="checkbox" checked={teamview} onChange={(e) => setTeamview(e.target.checked)} /></label><div><label className={labelClass}>Thứ tự</label><input type="number" className={inputClass} value={ordering} onChange={(e) => setOrdering(Number(e.target.value))} /></div><div><label className={labelClass}>Landing page</label><input className={inputClass} value={landingPage} onChange={(e) => setLandingPage(e.target.value)} /></div></div></section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Search className="h-5 w-5 text-orange-600" />SEO</div><div className="space-y-4"><div><label className={labelClass}>SEO title</label><input id="field-seo_title" className={`${inputClass} ${isTouched('seo_title') ? 'border-l-4 border-l-orange-500' : ''}`} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} /></div><div><label className={labelClass}>SEO keyword</label><input className={inputClass} value={seoKeyword} onChange={(e) => setSeoKeyword(e.target.value)} /></div><div><label className={labelClass}>SEO description</label><textarea id="field-seo_description" rows={4} className={`${inputClass} ${isTouched('seo_description') ? 'border-l-4 border-l-orange-500' : ''}`} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} /></div><div><label className={labelClass}>Tawk.to</label><textarea rows={3} className={inputClass} value={tawkTo} onChange={(e) => setTawkTo(e.target.value)} /></div></div></section>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-black dark:text-white">
+            <Search className="h-5 w-5 text-orange-600" />
+            SEO
+          </div>
+          <AiMagicWand label="Tối ưu SEO" title="Tự động sinh bộ thẻ Title, Description, Keyword chuẩn Google" onTrigger={handleAiSeo} />
+        </div>
+        <div className="space-y-4">
+          <div><label className={labelClass}>SEO title</label><input id="field-seo_title" className={`${inputClass} ${isTouched('seo_title') ? 'border-l-4 border-l-orange-500' : ''}`} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} /></div>
+          <div><label className={labelClass}>SEO keyword</label><input className={inputClass} value={seoKeyword} onChange={(e) => setSeoKeyword(e.target.value)} /></div>
+          <div><label className={labelClass}>SEO description</label><textarea id="field-seo_description" rows={4} className={`${inputClass} ${isTouched('seo_description') ? 'border-l-4 border-l-orange-500' : ''}`} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} /></div>
+          <div><label className={labelClass}>Tawk.to</label><textarea rows={3} className={inputClass} value={tawkTo} onChange={(e) => setTawkTo(e.target.value)} /></div>
+        </div>
+      </section>
     </aside></div>
     {mediaTarget && <PageMediaPickerModal locale={locale} returnValue="url" currentId={mediaTarget === 'image' ? image : icon} onClose={() => setMediaTarget(null)} onConfirm={(mediaUrl) => mediaTarget === 'image' ? setImage(mediaUrl) : setIcon(mediaUrl)} />}
 

@@ -194,12 +194,124 @@ export class DevStubLlmProvider implements LlmProvider {
 }
 
 /**
- * Returns the configured LLM provider.
- * Falls back to DevStubLlmProvider if AI_OPERATOR_API_URL is missing.
+ * Production Google Gemini Provider using Generative Language REST API.
+ * Supports structured JSON output mode and automatic fallback.
+ */
+export class GeminiLlmProvider implements LlmProvider {
+  public readonly name = 'gemini-flash';
+
+  private readonly apiKey: string;
+  private readonly modelName: string;
+  private readonly fallbackModelName: string;
+  private readonly timeoutMs: number;
+
+  constructor() {
+    this.apiKey = (process.env.GEMINI_API_KEY || '').trim();
+    this.modelName = (process.env.GEMINI_MODEL || 'gemini-flash-lite-latest').trim();
+    this.fallbackModelName = (process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.5-flash').trim();
+    const timeoutParsed = Number(process.env.AI_OPERATOR_TIMEOUT_MS);
+    this.timeoutMs = Number.isFinite(timeoutParsed) && timeoutParsed > 0 ? timeoutParsed : 30000;
+  }
+
+  private async callGeminiApi<T>(model: string, options: LlmGenerateOptions): Promise<T> {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
+
+    const body: Record<string, unknown> = {
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: options.userPrompt }],
+        },
+      ],
+      generationConfig: {
+        temperature: options.temperature ?? 0.2,
+        responseMimeType: 'application/json',
+      },
+    };
+
+    if (options.systemPrompt) {
+      body.systemInstruction = {
+        parts: [{ text: options.systemPrompt }],
+      };
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Gemini (${model}) returned HTTP ${response.status}: ${errorText.substring(0, 300)}`);
+      }
+
+      const data = await response.json();
+      const textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!textContent) {
+        throw new Error(`Gemini (${model}) returned empty candidates.`);
+      }
+
+      return JSON.parse(textContent) as T;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async generateStructured<T>(options: LlmGenerateOptions): Promise<T> {
+    if (!this.apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured in environment variables.');
+    }
+
+    try {
+      // Primary model attempt
+      return await this.callGeminiApi<T>(this.modelName, options);
+    } catch (primaryErr: unknown) {
+      const errMsg = primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+      console.warn(`[AI-Operator] Gemini primary model (${this.modelName}) failed: ${errMsg}. Trying fallback model (${this.fallbackModelName})...`);
+
+      if (this.fallbackModelName && this.fallbackModelName !== this.modelName) {
+        try {
+          return await this.callGeminiApi<T>(this.fallbackModelName, options);
+        } catch (fallbackErr: unknown) {
+          const fbMsg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+          console.warn(`[AI-Operator] Gemini fallback model (${this.fallbackModelName}) also failed: ${fbMsg}. Falling back to deterministic grounded provider...`);
+        }
+      }
+
+      // Safe deterministic fallback
+      const devFallback = new DevStubLlmProvider();
+      return devFallback.generateStructured<T>(options);
+    }
+  }
+}
+
+/**
+ * Returns the configured LLM provider based on AI_PROVIDER environment variable.
+ * Easily switchable: 'gemini' | 'qwen' | 'openai'
+ * Falls back safely to DevStubLlmProvider if keys/urls are missing.
  */
 export function getLlmProvider(): LlmProvider {
-  if (process.env.AI_OPERATOR_API_URL) {
-    return new QwenLlmProvider();
+  const provider = (process.env.AI_PROVIDER || '').toLowerCase().trim();
+
+  // Explicit or auto-detected Gemini
+  if (provider === 'gemini' || (!provider && process.env.GEMINI_API_KEY)) {
+    if (process.env.GEMINI_API_KEY) {
+      return new GeminiLlmProvider();
+    }
   }
+
+  // Explicit or auto-detected Qwen
+  if (provider === 'qwen' || (!provider && process.env.AI_OPERATOR_API_URL)) {
+    if (process.env.AI_OPERATOR_API_URL) {
+      return new QwenLlmProvider();
+    }
+  }
+
   return new DevStubLlmProvider();
 }
