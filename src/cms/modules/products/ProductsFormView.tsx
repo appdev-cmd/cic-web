@@ -10,8 +10,6 @@ import type { CmsProductListItem, ProductBrand, ProductCategory, ProductItem, Pr
 import type { MasterApplicationItem, MasterProductTypeItem } from '../product_settings/types';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
 import type { AiProductDraftResult, FieldChangeItem, FieldOrigin, ProductFormViewMode } from '@/features/ai-operator/types';
-import { AiChangesDiffModal } from './components/AiChangesDiffModal';
-import { AiActionsDropdown } from './components/AiActionsDropdown';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
 import { AiMagicWand } from '@/features/ai-operator/components/AiMagicWand';
 import {
@@ -69,7 +67,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [video, setVideo] = useState(product?.video || product?.video_url || '');
   const [tawkTo, setTawkTo] = useState(product?.tawk_to || '');
   const [tagsText, setTagsText] = useState((product?.tags || []).join(', '));
-  const [priceOld, setPriceOld] = useState(product?.price || product?.price_old || '');
+  const [priceOld, setPriceOld] = useState(product?.price || product?.price_old || 'Liên hệ');
   const [isHot, setIsHot] = useState(product?.is_hot ?? false);
   const [teamview, setTeamview] = useState(product?.teamview ?? false);
   const [ordering, setOrdering] = useState(product?.ordering || 1);
@@ -559,11 +557,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <AiActionsDropdown
-            currentProduct={payload()}
-            workspaceLocale={locale}
-            onApplyUpdates={handleApplyAiUpdates}
-          />
           <AiMagicWand
             label="Dịch sang EN"
             title="Dịch thông tin sang tiếng Anh bằng Trợ lý AI"
@@ -577,6 +570,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             disabled={isSubmitting}
             onClick={() => onOpenPreview({ ...(product || {}), ...payload() } as ProductItem)}
             leadingIcon={<Eye className="h-4 w-4" />}
+            title="Xem trước ngay giao diện website với dữ liệu đang nhập (không cần lưu nháp)"
           >
             Xem trước
           </CmsButton>
@@ -642,25 +636,25 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(310px,1fr)]">
         <main className="space-y-5">
           {/* Section 1: Thông tin cốt lõi (Anchors) */}
-          <section className="rounded-2xl border-2 border-orange-200/90 bg-gradient-to-b from-orange-50/40 to-white p-5 shadow-xs dark:border-orange-900/50 dark:from-orange-950/20 dark:to-slate-900">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-2 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 font-black dark:text-white">
                 <Package className="h-5 w-5 text-orange-600" />
-                1. Thông tin nhận diện cốt lõi
+                1. Thông tin cơ bản
               </div>
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/80">
-                ⚡ Điền 3 ô này để kích hoạt Trợ lý AI
+              <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                Thông tin bắt buộc (*)
               </span>
             </div>
             <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
-              Nhập Tên sản phẩm, chọn Hãng và Lĩnh vực để AI nhận diện ngữ cảnh và hỗ trợ điền tự động các mục còn lại.
+              Nhập tên sản phẩm, hãng sản xuất và lĩnh vực chuyên ngành để làm căn cứ nhận diện.
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className={labelClass}>Tên sản phẩm *</label>
                 <input
                   className={inputClass}
-                  placeholder="VD: SAP2000 v25, Kompas-3D v23, Plaxis 3D..."
+                  placeholder="VD: SAP2000, Kompas-3D, PTV Vissim..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
@@ -684,40 +678,40 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             </div>
           </section>
 
-          {/* Thanh kích hoạt thông minh (Smart AI Copilot Trigger Bar) */}
+          {/* Thanh hỗ trợ điền nhanh */}
           <div
             className={`rounded-2xl border p-4 transition-all duration-200 ${
               isAnchorsReady
-                ? 'border-orange-300 bg-gradient-to-r from-orange-50 via-amber-50/60 to-orange-50 dark:border-orange-800/80 dark:from-orange-950/30 dark:via-amber-950/20 dark:to-orange-950/30 shadow-xs'
-                : 'border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/40 opacity-80'
+                ? 'border-slate-200 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/60 shadow-xs'
+                : 'border-slate-200/60 bg-slate-50/40 dark:border-slate-800/50 dark:bg-slate-900/30'
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="space-y-1 max-w-lg">
                 <div className="flex items-center gap-2">
-                  <Sparkles className={`w-4 h-4 ${isAnchorsReady ? 'text-orange-600 dark:text-orange-400 animate-pulse' : 'text-slate-400'}`} />
-                  <span className="font-bold text-sm text-slate-800 dark:text-slate-200">
+                  <Sparkles className={`w-4 h-4 ${isAnchorsReady ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'}`} />
+                  <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                     {isAnchorsReady
-                      ? '✦ Đã nhận diện thông tin sản phẩm! Bạn có muốn AI hỗ trợ điền?'
-                      : 'Trợ lý AI Co-pilot (Điền đủ Tên, Hãng và Lĩnh vực ở trên để mở khóa)'}
+                      ? 'Gợi ý tự động: Có thể hỗ trợ điền nhanh thông tin kỹ thuật, SEO và thẻ tags.'
+                      : 'Hỗ trợ điền nhanh (Nhập Tên, Hãng và Lĩnh vực ở trên để kích hoạt)'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {isAnchorsReady
-                    ? 'AI sẽ tự động sinh Tóm tắt, bộ thẻ SEO và Thẻ Tags. (Tuyệt đối không ghi đè bài viết hoặc hình ảnh của bạn)'
-                    : `Trạng thái: ${[Boolean(name.trim()) && 'Tên', Boolean(manufactory) && 'Hãng', categoryIds.length > 0 && 'Lĩnh vực'].filter(Boolean).length}/3 trường cốt lõi đã sẵn sàng.`}
+                    ? 'Chỉ bổ sung các trường còn trống, tuyệt đối không can thiệp vào bài viết hay hình ảnh của bạn.'
+                    : `Trạng thái: ${[Boolean(name.trim()) && 'Tên', Boolean(manufactory) && 'Hãng', categoryIds.length > 0 && 'Lĩnh vực'].filter(Boolean).length}/3 trường bắt buộc.`}
                 </p>
               </div>
               <CmsButton
-                variant="primary"
+                variant={isAnchorsReady ? 'primary' : 'secondary'}
                 size="sm"
                 disabled={!isAnchorsReady || isAutoFilling}
                 loading={isAutoFilling}
-                loadingText="AI đang phân tích & điền..."
+                loadingText="Đang phân tích & điền..."
                 onClick={handleSmartAutoFill}
                 leadingIcon={<Sparkles className="h-4 w-4" />}
               >
-                Tự động điền phần còn lại với AI
+                Gợi ý điền nhanh
               </CmsButton>
             </div>
           </div>
@@ -1037,7 +1031,25 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Hiển thị</div>
         <div className="space-y-4">
-          <div><label className={labelClass}>Giá</label><input id="field-price" className={`${inputClass} ${isTouched('price') ? 'border-l-4 border-l-orange-500' : ''}`} value={priceOld} onChange={(e) => setPriceOld(e.target.value)} /></div>
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className={labelClass}>Giá</label>
+              <button
+                type="button"
+                onClick={() => setPriceOld('Liên hệ')}
+                className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 hover:underline dark:text-orange-400"
+              >
+                Đặt là &quot;Liên hệ&quot;
+              </button>
+            </div>
+            <input
+              id="field-price"
+              className={`${inputClass} ${isTouched('price') ? 'border-l-4 border-l-orange-500' : ''}`}
+              placeholder="VD: Liên hệ, 15.000.000 VNĐ, Báo giá theo license..."
+              value={priceOld}
+              onChange={(e) => setPriceOld(e.target.value)}
+            />
+          </div>
           <label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200">
             <span>Sản phẩm nổi bật <span className="font-normal text-slate-400">({featuredCount + Number(isHot)}/{FEATURED_CONTENT_LIMITS.product})</span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Dự phòng cho section Sản phẩm trong tương lai; không dùng cho Hệ sinh thái Công nghệ CIC.</span></span>
             <input type="checkbox" checked={isHot} disabled={!isHot && featuredCount >= FEATURED_CONTENT_LIMITS.product} onChange={(e) => setIsHot(e.target.checked)} />
