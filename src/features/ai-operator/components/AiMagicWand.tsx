@@ -22,7 +22,7 @@ export interface AiMagicWandProps {
 
 export function AiMagicWand({
   label,
-  title = 'Trợ lý AI hỗ trợ điền',
+  title = 'Gợi ý tự động',
   onTrigger,
   disabled = false,
   size = 'xs',

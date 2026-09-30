@@ -169,7 +169,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         setProductsRelates(taxResult.selectedRelatedProductIds);
       }
 
-      toast.success('Đã tự động nhận diện Mã SKU, URL Tiếng Anh và Phân loại kỹ thuật bằng Trợ lý AI!');
+      toast.success('Đã tự động nhận diện Mã SKU, URL Tiếng Anh và Phân loại kỹ thuật!');
     } catch {
       if (!alias.trim() || !manualAlias) setAlias(slugify(name));
       if (!code.trim()) {
@@ -182,7 +182,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
   const handleSmartAutoFill = async () => {
     if (!isAnchorsReady) {
-      toast.warning('Vui lòng điền đủ Tên sản phẩm, chọn Hãng và Lĩnh vực trước khi dùng AI!');
+      toast.warning('Vui lòng điền đủ Tên sản phẩm, chọn Hãng và Lĩnh vực trước!');
       return;
     }
 
@@ -278,16 +278,21 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       if (seoRes) {
         if (!seoTitle.trim()) setSeoTitle(seoRes.seo_title);
         if (!seoDescription.trim()) setSeoDescription(seoRes.seo_description);
-        if (!seoKeyword.trim()) setSeoKeyword(seoRes.seo_keyword);
+        if (!seoKeyword.trim()) {
+          const kw = Array.isArray(seoRes.seo_keyword)
+            ? (seoRes.seo_keyword as string[]).join(', ')
+            : String(seoRes.seo_keyword || '');
+          setSeoKeyword(kw);
+        }
       }
       if (tagsRes && !tagsText.trim()) {
         setTagsText(tagsRes.tags.join(', '));
       }
 
       setHasAiAutoFilled(true);
-      toast.success('Trợ lý AI đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags!');
+      toast.success('Đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags!');
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Có lỗi khi AI tự động điền dữ liệu.');
+      toast.error(err instanceof Error ? err.message : 'Có lỗi khi tự động điền dữ liệu.');
     } finally {
       setIsAutoFilling(false);
     }
@@ -310,7 +315,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       undoSnapshotRef.current = null;
     }
     setHasAiAutoFilled(false);
-    toast.info('Đã hoàn tác các trường vừa được AI điền tự động.');
+    toast.info('Đã hoàn tác các trường vừa được điền tự động.');
   };
 
   const handleAiSummary = async () => {
@@ -331,7 +336,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         maxLength: 200,
       });
       setSummary(res.summary);
-      toast.success('Đã cập nhật Tóm tắt bằng AI!');
+      toast.success('Đã cập nhật Tóm tắt tự động!');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Lỗi khi tạo tóm tắt.');
     }
@@ -354,8 +359,11 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       });
       setSeoTitle(res.seo_title);
       setSeoDescription(res.seo_description);
-      setSeoKeyword(res.seo_keyword);
-      toast.success('Đã tối ưu bộ thẻ SEO bằng AI!');
+      const kw = Array.isArray(res.seo_keyword)
+        ? (res.seo_keyword as string[]).join(', ')
+        : String(res.seo_keyword || '');
+      setSeoKeyword(kw);
+      toast.success('Đã tối ưu bộ thẻ SEO tự động!');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Lỗi khi tối ưu SEO.');
     }
@@ -434,7 +442,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         setOtherLanguages1(`/en/products/${slugify(res.translations.name)}`);
       }
 
-      toast.success('Đã hoàn tất dịch thuật ngữ tiếng Anh bằng AI!');
+      toast.success('Đã hoàn tất dịch thuật ngữ tiếng Anh!');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Có lỗi khi dịch nội dung.');
     }
@@ -450,7 +458,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       application: applications, types, products_relates: productsRelates, summary,
       description, feature_details: featureDetails, video, tawk_to: tawkTo, tags: ids(tagsText),
       price_old: priceOld, price: priceOld, is_hot: isHot, teamview: false, ordering: Number(ordering) || 1,
-      landing_page: '', seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
+      landing_page: '', seo_title: seoTitle,
+      seo_keyword: Array.isArray(seoKeyword) ? (seoKeyword as string[]).join(', ') : String(seoKeyword || ''),
+      seo_description: seoDescription,
       file_catalogue: fileCatalogue, file_price: filePrice, link_catalogue: linkCatalogue,
       file_driver_name: fileDriverName, file_driver: fileDriver, link_driver: linkDriver,
     };
@@ -559,7 +569,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         <div className="flex flex-wrap items-center gap-2">
           <AiMagicWand
             label="Dịch sang EN"
-            title="Dịch thông tin sang tiếng Anh bằng Trợ lý AI"
+            title="Dịch thông tin sang tiếng Anh"
             onTrigger={handleAiTranslateEn}
             variant="outline"
             size="sm"
@@ -599,7 +609,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         </div>
       </header>
 
-      {/* Thông báo hoàn tác khi AI vừa tự động điền */}
+      {/* Thông báo hoàn tác khi vừa tự động điền */}
       {hasAiAutoFilled && (
         <div className="rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/90 dark:bg-emerald-950/40 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs animate-in fade-in duration-150">
           <div className="flex items-center gap-2.5">
@@ -608,7 +618,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             </div>
             <div>
               <span className="font-bold text-slate-900 dark:text-white">
-                ✦ Trợ lý AI: Đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags.
+                ✦ Hệ thống: Đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags.
               </span>
               <span className="text-slate-600 dark:text-slate-400 ml-2 hidden sm:inline">
                 (Nội dung bài viết và hình ảnh của bạn được giữ nguyên 100%)
@@ -621,7 +631,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             className="px-3 py-1.5 font-bold rounded-lg bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Hoàn tác AI về ban đầu
+            Hoàn tác về ban đầu
           </button>
         </div>
       )}
@@ -1022,7 +1032,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className={labelClass}>Tags</label>
-              <AiMagicWand label="Gợi ý Tags" title="Tự động bóc tách từ khóa kỹ thuật bằng Trợ lý AI" onTrigger={handleAiTags} />
+              <AiMagicWand label="Gợi ý Tags" title="Tự động bóc tách từ khóa kỹ thuật" onTrigger={handleAiTags} />
             </div>
             <textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="VD: SAP2000, Phần mềm kết cấu, CSI Vietnam..." />
           </div>

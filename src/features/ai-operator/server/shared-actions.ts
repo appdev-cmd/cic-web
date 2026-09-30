@@ -45,7 +45,7 @@ TIÊU CHUẨN ĐẦU RA (JSON):
 - seo_title: Tối đa 60 ký tự (chuẩn độ dài hiển thị Google Desktop/Mobile). Tùy theo bản chất sản phẩm (phần mềm, thiết bị, dịch vụ) để đặt tiêu đề linh hoạt, hấp dẫn và tự nhiên:
   * Ví dụ: "[Tên sản phẩm] ([Hãng SX]) — Bản quyền chính hãng | CIC" hoặc "Giải pháp [Tên sản phẩm] chính hãng [Hãng SX] — CIC"
 - seo_description: 135 đến 155 ký tự. Nêu rõ tính năng cốt lõi và vai trò của CIC là đại diện phân phối/chuyển giao công nghệ chính hãng tại Việt Nam, kèm dịch vụ tư vấn kỹ thuật.
-- seo_keyword: 5 đến 8 từ khóa kỹ thuật chuẩn (Tên sản phẩm, Hãng SX, Lĩnh vực, Bản quyền chính hãng, Giải pháp CIC).
+- seo_keyword: Chuỗi văn bản chứa 5 đến 8 từ khóa kỹ thuật chuẩn cách nhau bởi dấu phẩy (Ví dụ: "Tên SP, Hãng SX, Lĩnh vực, Bản quyền chính hãng, Giải pháp CIC").
 Chỉ trả về JSON thuần túy: { "seo_title": "...", "seo_description": "...", "seo_keyword": "..." }`;
 
   const userPrompt = JSON.stringify({
@@ -56,11 +56,23 @@ Chỉ trả về JSON thuần túy: { "seo_title": "...", "seo_description": "..
     sampleContent: (input.content || '').replace(/<[^>]*>?/gm, '').substring(0, 1000),
   });
 
-  return await llm.generateStructured<GenerateSeoOutput>({
+  const raw = await llm.generateStructured<Record<string, unknown>>({
     systemPrompt,
     userPrompt,
     temperature: 0.2,
   });
+
+  const seo_keyword = Array.isArray(raw.seo_keyword)
+    ? raw.seo_keyword.map(String).join(', ')
+    : String(raw.seo_keyword || '');
+  const seo_title = Array.isArray(raw.seo_title)
+    ? raw.seo_title.map(String).join(' ')
+    : String(raw.seo_title || '');
+  const seo_description = Array.isArray(raw.seo_description)
+    ? raw.seo_description.map(String).join(' ')
+    : String(raw.seo_description || '');
+
+  return { seo_title, seo_description, seo_keyword };
 }
 
 export interface GenerateSummaryInput {

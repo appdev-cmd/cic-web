@@ -60,15 +60,69 @@ interface ProductsManagerProps {
   capabilities?: { create: boolean; edit: boolean; delete: boolean };
 }
 
+const toNullableId = (v: unknown): number | null => {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+const toIdArray = (arr: unknown): number[] => {
+  if (!Array.isArray(arr)) {
+    if (typeof arr === 'string' || typeof arr === 'number') {
+      const n = Number(arr);
+      return Number.isInteger(n) && n > 0 ? [n] : [];
+    }
+    return [];
+  }
+  return arr.map(Number).filter((n) => Number.isInteger(n) && n > 0);
+};
+
+const normalizeStr = (v: unknown): string => {
+  if (Array.isArray(v)) return v.map(String).join(', ');
+  if (v === null || v === undefined) return '';
+  return String(v);
+};
+
 const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
-  name: product.name || product.title || '', alias: product.alias || '', code: product.code || product.sku || '', other_languages1: product.other_languages1 || '',
-  summary: product.summary || product.short_description || '', description: product.description || product.content_html || '', feature_details: product.feature_details || '', video: product.video || product.video_url || '', tawk_to: product.tawk_to || '',
-  image: product.image || '', icon: product.icon || '', price: product.price || product.price_old || '', tags: product.tags || [], landing_page: product.landing_page || '', seo_title: product.seo_title || product.meta_title || '', seo_keyword: product.seo_keyword || product.meta_keywords || '', seo_description: product.seo_description || product.meta_description || '',
-  file_catalogue: product.file_catalogue || '', file_price: product.file_price || '', link_catalogue: product.link_catalogue || '', file_driver_name: product.file_driver_name || '', file_driver: product.file_driver || '', link_driver: product.link_driver || '',
-  downloads: Array.from({ length: 6 }, (_, index) => ({ name: String(product[`file_name${index + 1}` as keyof ProductItem] || ''), file: String(product[`file_download${index + 1}` as keyof ProductItem] || ''), link: String(product[`link_download${index + 1}` as keyof ProductItem] || '') })),
-  categoryIds: (product.category_ids || (product.category_id ? [product.category_id] : [])).map(Number), applicationIds: (product.application || product.application_areas || []).map(Number), relatedProductIds: (product.products_relates || []).map(Number),
-  manufactoryId: Number(product.manufactory || product.brand_id) || null, typeId: Number(product.types || product.product_type) || null,
-  published, is_hot: Boolean(product.is_hot), teamview: Boolean(product.teamview), ordering: Number(product.ordering || 0),
+  name: normalizeStr(product.name || product.title),
+  alias: normalizeStr(product.alias),
+  code: normalizeStr(product.code || product.sku),
+  other_languages1: normalizeStr(product.other_languages1),
+  summary: normalizeStr(product.summary || product.short_description),
+  description: normalizeStr(product.description || product.content_html),
+  feature_details: normalizeStr(product.feature_details),
+  video: normalizeStr(product.video || product.video_url),
+  tawk_to: normalizeStr(product.tawk_to),
+  image: normalizeStr(product.image),
+  icon: normalizeStr(product.icon),
+  price: normalizeStr(product.price || product.price_old),
+  tags: (Array.isArray(product.tags) ? product.tags : [])
+    .map(String)
+    .map((t) => t.trim())
+    .filter(Boolean),
+  landing_page: normalizeStr(product.landing_page),
+  seo_title: normalizeStr(product.seo_title || product.meta_title),
+  seo_keyword: normalizeStr(product.seo_keyword || product.meta_keywords),
+  seo_description: normalizeStr(product.seo_description || product.meta_description),
+  file_catalogue: normalizeStr(product.file_catalogue),
+  file_price: normalizeStr(product.file_price),
+  link_catalogue: normalizeStr(product.link_catalogue),
+  file_driver_name: normalizeStr(product.file_driver_name),
+  file_driver: normalizeStr(product.file_driver),
+  link_driver: normalizeStr(product.link_driver),
+  downloads: Array.from({ length: 6 }, (_, index) => ({
+    name: normalizeStr(product[`file_name${index + 1}` as keyof ProductItem]),
+    file: normalizeStr(product[`file_download${index + 1}` as keyof ProductItem]),
+    link: normalizeStr(product[`link_download${index + 1}` as keyof ProductItem]),
+  })),
+  categoryIds: toIdArray(product.category_ids || (product.category_id ? [product.category_id] : [])),
+  applicationIds: toIdArray(product.application || product.application_areas),
+  relatedProductIds: toIdArray(product.products_relates),
+  manufactoryId: toNullableId(product.manufactory || product.brand_id),
+  typeId: toNullableId(product.types || product.product_type),
+  published,
+  is_hot: Boolean(product.is_hot),
+  teamview: Boolean(product.teamview),
+  ordering: Number(product.ordering || 0),
 });
 
 export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspaceLocale, capabilities = { create: false, edit: false, delete: false } }) => {

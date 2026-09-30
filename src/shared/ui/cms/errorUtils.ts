@@ -44,6 +44,15 @@ export function sanitizeCmsErrorMessage(
     return 'Vui lòng kiểm tra và điền đầy đủ các thông tin bắt buộc.';
   }
 
+  if (
+    lower.includes('invalid input') ||
+    lower.includes('invalid_type') ||
+    lower.includes('expected string') ||
+    lower.includes('zoderror')
+  ) {
+    return 'Dữ liệu nhập vào chưa đúng định dạng. Vui lòng kiểm tra lại các trường thông tin.';
+  }
+
   // 4. Lỗi phân quyền
   if (
     lower.includes('permission') ||
