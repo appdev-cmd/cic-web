@@ -1,11 +1,83 @@
 import React, { useState, useEffect } from 'react';
-import { Database, FileSpreadsheet, Mail, Eye, Check, Copy, RefreshCw, AlertCircle, Sparkles, ExternalLink, Trash2, Plus, Info } from 'lucide-react';
-import { FormFormData } from '../../types';
+import { Database, FileSpreadsheet, Mail, Eye, Check, Copy, RefreshCw, AlertCircle, Sparkles, ExternalLink, Trash2, Plus, Info, Layers } from 'lucide-react';
+import { FormFormData, FormField } from '../../types';
+import type { FieldType, FieldRoleType } from '../../../shared/constants/fieldTypes';
+import { removeVietnameseTones, normalizeText } from '@/lib/integrations/google-sheets/matcher';
 import { EMAIL_EVENTS, TEMPLATE_STATUSES, type EmailTemplate } from '../../../../email_templates/types';
 import { CmsButton } from '../../../../../components/ui/CmsButton';
 import type { CmsLocale } from '../../../../../data/CmsDataSource';
 import type { GoogleSheetsColumnMapping, GoogleSheetsDestinationConfig, EmailDestinationConfig } from '@/features/forms/types';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
+
+function inferFieldFromHeader(
+  header: string,
+  index: number,
+  existingFieldKeys: Set<string>
+): FormField {
+  const trimmed = header.trim();
+  const normalized = normalizeText(trimmed);
+
+  let baseKey =
+    removeVietnameseTones(trimmed)
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '') || `field_${index + 1}`;
+
+  let fieldKey = baseKey;
+  let counter = 1;
+  while (existingFieldKeys.has(fieldKey.toLowerCase())) {
+    fieldKey = `${baseKey}_${counter++}`;
+  }
+  existingFieldKeys.add(fieldKey.toLowerCase());
+
+  let fieldType: FieldType = 'text';
+  let roleType: FieldRoleType = 'other';
+  let isRequired = false;
+  let placeholder = `Nhập ${trimmed.toLowerCase()}...`;
+
+  if (/^(ho va ten|ho ten|ten khach hang|fullname|full name|name)$/i.test(normalized)) {
+    fieldType = 'text';
+    roleType = 'customer_name';
+    isRequired = true;
+    placeholder = 'Nhập họ và tên của bạn...';
+  } else if (/^(so dien thoai|dien thoai|sdt|hotline|phone|telephone|mobile)$/i.test(normalized)) {
+    fieldType = 'phone';
+    roleType = 'phone';
+    isRequired = true;
+    placeholder = 'Nhập số điện thoại...';
+  } else if (/^(email|thu dien tu|dia chi email|mail)$/i.test(normalized)) {
+    fieldType = 'email';
+    roleType = 'email';
+    placeholder = 'Nhập địa chỉ email...';
+  } else if (/^(cong ty|to chuc|don vi|doanh nghiep|company|organization)$/i.test(normalized)) {
+    fieldType = 'text';
+    roleType = 'company';
+    placeholder = 'Nhập tên công ty hoặc đơn vị...';
+  } else if (/^(noi dung|loi nhan|yeu cau|tin nhan|message|content|nhu cau|ghi chu cua khach)$/i.test(normalized)) {
+    fieldType = 'textarea';
+    roleType = 'message';
+    placeholder = 'Nhập nội dung yêu cầu...';
+  } else if (/^(dia chi|address|noi o)$/i.test(normalized)) {
+    fieldType = 'text';
+    roleType = 'other';
+    placeholder = 'Nhập địa chỉ liên hệ...';
+  }
+
+  return {
+    id: `f_${Date.now()}_${index}_${Math.random().toString(36).substring(2, 6)}`,
+    fieldKey,
+    label: trimmed,
+    fieldType,
+    roleType,
+    placeholder,
+    helpText: '',
+    validation: { required: isRequired },
+    position: index + 1,
+    isRequired,
+    isLocked: false,
+  };
+}
 
 interface FormSubmitActionsTabProps {
   formId?: string;
@@ -328,6 +400,98 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
     }
   };
 
+  // Synchronize Form Fields (Tab 1: Thành phần & Trường dữ liệu) from Google Sheet headers
+  const handleSyncFieldsFromSheet = (targetHeaders?: string[]) => {
+    const headers = targetHeaders || sheetsConfig.columnMapping.map((c) => c.sheetHeader);
+    if (!headers || headers.length === 0) {
+      toast.error('Chưa có danh sách cột từ Sheet để đồng bộ.');
+      return;
+    }
+
+    const existingFieldKeys = new Set(formData.fields.map((f) => f.fieldKey.toLowerCase()));
+    const newFields: FormField[] = [...formData.fields];
+    let createdCount = 0;
+
+    const newMapping: GoogleSheetsColumnMapping[] = [];
+
+    headers.forEach((h, idx) => {
+      const trimmed = h.trim();
+      const normalized = normalizeText(trimmed);
+
+      // 1. System fields
+      if (/^(thoi gian|thoi gian gui|ngay gui|timestamp|created at|date|thoi gian tao)$/i.test(normalized)) {
+        newMapping.push({ sheetHeader: trimmed, sourceType: 'system', sourceKey: 'submitted_at' });
+        return;
+      }
+      if (/^(ma gui|ma yeu cau|ma submission|submission id|id|ma don|ma)$/i.test(normalized)) {
+        newMapping.push({ sheetHeader: trimmed, sourceType: 'system', sourceKey: 'submission_id' });
+        return;
+      }
+      if (/^(duong dan|duong dan trang|trang gui|url|link|source path|trang|link trang)$/i.test(normalized)) {
+        newMapping.push({ sheetHeader: trimmed, sourceType: 'system', sourceKey: 'source_path' });
+        return;
+      }
+      if (/^(ten bieu mau|bieu mau|form title|form name|ten form)$/i.test(normalized)) {
+        newMapping.push({ sheetHeader: trimmed, sourceType: 'system', sourceKey: 'form_title' });
+        return;
+      }
+
+      // 2. Check if a form field already matches (by label, normalized label, or fieldKey)
+      const existing = newFields.find(
+        (f) =>
+          f.label.trim().toLowerCase() === trimmed.toLowerCase() ||
+          normalizeText(f.label) === normalized ||
+          f.fieldKey.toLowerCase() === trimmed.toLowerCase()
+      );
+
+      if (existing) {
+        newMapping.push({ sheetHeader: trimmed, sourceType: 'field', sourceKey: existing.fieldKey });
+      } else {
+        // Create new Form Field from this Sheet Column!
+        const newField = inferFieldFromHeader(trimmed, newFields.length, existingFieldKeys);
+        newFields.push(newField);
+        createdCount++;
+        newMapping.push({ sheetHeader: trimmed, sourceType: 'field', sourceKey: newField.fieldKey });
+      }
+    });
+
+    // Update formData with both new fields AND updated column mapping
+    setFormData((prev) => {
+      const existing = prev.destinations || [];
+      const otherDests = existing.filter((d) => d.destinationType !== 'google_sheets');
+      const current = existing.find((d) => d.destinationType === 'google_sheets');
+      const currentConfig = (current?.config as GoogleSheetsDestinationConfig) || {
+        spreadsheetId: '',
+        sheetName: 'Sheet1',
+        columnMapping: [],
+        autoCreateHeaders: true,
+      };
+
+      const newDest = {
+        id: current?.id,
+        destinationType: 'google_sheets' as const,
+        name: current?.name || 'Google Sheets',
+        isEnabled: current ? current.isEnabled : true,
+        config: {
+          ...currentConfig,
+          columnMapping: newMapping,
+        },
+      };
+
+      return {
+        ...prev,
+        fields: newFields,
+        destinations: [...otherDests, newDest],
+      };
+    });
+
+    if (createdCount > 0) {
+      toast.success(`Đã tự động tạo ${createdCount} trường dữ liệu vào tab "Thành phần & Trường dữ liệu"!`);
+    } else {
+      toast.info('Tất cả các cột trên Sheet đều đã khớp với các trường hiện có trong Form.');
+    }
+  };
+
   const handleCopyEmail = () => {
     if (!serviceAccountEmail) return;
     navigator.clipboard.writeText(serviceAccountEmail);
@@ -578,28 +742,66 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                   </div>
 
                   {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 && (
-                    <CmsButton
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={handleInitializeHeaders}
-                      disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
-                      leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
-                      title="Đặt lại các cột tiêu đề theo trường của Form"
-                    >
-                      {isInitializingHeaders ? 'Đang tạo...' : 'Tạo lại tiêu đề mẫu từ Form'}
-                    </CmsButton>
+                    <div className="flex items-center gap-2">
+                      <CmsButton
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        onClick={() => handleSyncFieldsFromSheet()}
+                        leadingIcon={<Layers className="w-3.5 h-3.5" />}
+                        title="Tự động đồng bộ và tạo các trường dữ liệu ở tab Thành phần & Trường dữ liệu theo các cột Sheet"
+                      >
+                        Đồng bộ trường vào Form
+                      </CmsButton>
+
+                      <CmsButton
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleInitializeHeaders}
+                        disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
+                        leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                        title="Đặt lại các cột tiêu đề theo trường của Form"
+                      >
+                        {isInitializingHeaders ? 'Đang tạo...' : 'Tạo lại tiêu đề từ Form'}
+                      </CmsButton>
+                    </div>
                   )}
                 </div>
 
                 {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 ? (
                   <div className="space-y-2.5">
+                    {(() => {
+                      const unmapped = sheetsConfig.columnMapping.filter((c) => !c.sourceKey && c.sourceType !== 'system');
+                      if (unmapped.length === 0) return null;
+                      return (
+                        <div className="p-3 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>
+                              Có <strong>{unmapped.length} cột trên Sheet</strong> chưa có trong Form (<em>{unmapped.slice(0, 3).map((c) => c.sheetHeader).join(', ')}{unmapped.length > 3 ? '...' : ''}</em>).
+                            </span>
+                          </div>
+                          <CmsButton
+                            type="button"
+                            size="sm"
+                            variant="primary"
+                            onClick={() => handleSyncFieldsFromSheet()}
+                            leadingIcon={<Layers className="w-3.5 h-3.5" />}
+                          >
+                            Tự động tạo các trường này vào Form
+                          </CmsButton>
+                        </div>
+                      );
+                    })()}
+
                     <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/40 rounded-xl text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2.5">
                       <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                       <div className="space-y-1">
                         <div className="font-semibold text-[11.5px]">Cách xử lý các cột trên Google Sheet:</div>
                         <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-blue-800/90 dark:text-blue-300/90">
                           <li>Nếu bảng tính có <strong>cột nội bộ</strong> (như <em>Trạng thái xử lý, Nhân viên phụ trách, Ghi chú</em>) mà không cần Form điền, hãy chọn <strong>"-- Để trống cột này (không ghi dữ liệu) --"</strong>. Hệ thống sẽ giữ nguyên ô trống mà không làm xô lệch thứ tự cột.</li>
+                          <li>Bạn có thể bấm <strong>"Đồng bộ trường vào Form"</strong> để hệ thống tự tạo các trường dữ liệu ở tab <em>"Thành phần & Trường dữ liệu"</em> cho khớp 100% với Sheet.</li>
                           <li>Bạn có thể bấm biểu tượng <strong>thùng rác</strong> để xóa bớt cột không dùng, hoặc bấm <strong>"+ Thêm cột ghép mới"</strong> để tự tạo thêm cột theo ý muốn.</li>
                         </ul>
                       </div>
