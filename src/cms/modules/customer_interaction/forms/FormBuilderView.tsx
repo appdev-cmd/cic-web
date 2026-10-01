@@ -25,6 +25,7 @@ import { FormSubmitActionsTab } from './components/settings/FormSubmitActionsTab
 import { FormAnalyticsTab } from './components/settings/FormAnalyticsTab';
 import { FormLivePreviewModal } from './components/modals/FormLivePreviewModal';
 import { FormEmailPreviewModal } from './components/modals/FormEmailPreviewModal';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
 import { useCmsToast } from '@/cms/context/CmsToastContext';
 
 interface FormBuilderViewProps {
@@ -74,6 +75,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   const [previewEmailTemplateId, setPreviewEmailTemplateId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState<'draft' | 'publish' | null>(null);
+  const [deletingField, setDeletingField] = useState<FormField | null>(null);
 
   const previewEmailTemplate = emailTemplates.find((template) => template.id === previewEmailTemplateId);
 
@@ -281,20 +283,27 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
 
   const deleteField = (fieldId: string) => {
     const target = formData.fields.find((f) => f.id === fieldId);
-    if (target?.isLocked) {
+    if (!target) return;
+    if (target.isLocked) {
       toast.warning('Trường này đã bị khóa vì có dữ liệu đã gửi từ trước.');
       return;
     }
-    if (confirm('Bạn có chắc chắn muốn xóa trường dữ liệu này khỏi biểu mẫu?')) {
-      const nextFields = formData.fields.filter((f) => f.id !== fieldId);
-      setFormData((prev) => ({
-        ...prev,
-        fields: nextFields,
-      }));
-      if (selectedFieldId === fieldId) {
-        setSelectedFieldId(nextFields.length > 0 ? nextFields[0].id : null);
-      }
+    setDeletingField(target);
+  };
+
+  const handleConfirmDeleteField = () => {
+    if (!deletingField) return;
+    const fieldId = deletingField.id;
+    const nextFields = formData.fields.filter((f) => f.id !== fieldId);
+    setFormData((prev) => ({
+      ...prev,
+      fields: nextFields,
+    }));
+    if (selectedFieldId === fieldId) {
+      setSelectedFieldId(nextFields.length > 0 ? nextFields[0].id : null);
     }
+    toast.success(`Đã xóa trường "${deletingField.label}" khỏi biểu mẫu.`);
+    setDeletingField(null);
   };
 
   const moveField = (fieldId: string, direction: 'up' | 'down') => {
@@ -477,6 +486,18 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
         previewEmailTemplate={previewEmailTemplate}
         adminEmails={formData.submitConfig.adminEmails || []}
         onClose={() => setPreviewEmailTemplateId(null)}
+      />
+
+      {/* Delete Field Confirmation Modal */}
+      <CmsDeleteConfirmModal
+        isOpen={Boolean(deletingField)}
+        title="Xóa trường dữ liệu"
+        itemName={deletingField ? `${deletingField.label} (${deletingField.fieldKey})` : ''}
+        description={`Bạn có chắc chắn muốn xóa trường "${deletingField?.label}" khỏi biểu mẫu này không? Thao tác này sẽ loại bỏ trường khỏi giao diện thu thập thông tin.`}
+        confirmLabel="Xóa trường"
+        cancelLabel="Hủy bỏ"
+        onClose={() => setDeletingField(null)}
+        onConfirm={handleConfirmDeleteField}
       />
     </div>
   );
