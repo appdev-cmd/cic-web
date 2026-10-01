@@ -464,8 +464,19 @@ export const CountryPartnerNetwork: React.FC<CountryPartnerNetworkProps> = ({
       await navigator.clipboard.writeText(output);
       setExportStatus('Đã copy JSON');
     } catch {
-      window.prompt('Copy normalized partner-map layout JSON:', output);
-      setExportStatus('JSON đã mở');
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = output;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setExportStatus('Đã copy JSON');
+      } catch {
+        setExportStatus('Đã in ra Console');
+      }
     }
   }, []);
 
