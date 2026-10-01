@@ -32,6 +32,23 @@ import { REQUEST_STATUS_LABELS, REQUEST_STATUS_COLORS, REQUEST_STATUSES } from '
 import { PRIORITY_LEVELS, PRIORITY_LABELS, PRIORITY_COLORS } from '../../shared/constants/statusTypes';
 import type { PriorityLevel } from '../../shared/constants/statusTypes';
 
+const REQUEST_STATUS_BADGES: Record<string, string> = {
+  new: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
+  received: 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/60 dark:text-cyan-300 dark:border-cyan-800',
+  processing: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
+  contacted: 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800',
+  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
+  not_suitable: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  cancelled: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800',
+};
+
+const REQUEST_PRIORITY_BADGES: Record<string, string> = {
+  low: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+  medium: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
+  high: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800',
+  urgent: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800',
+};
+
 interface RequestDetailPageProps {
   requestId: string;
   request: CustomerRequest | null;
@@ -244,46 +261,44 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
       </div>
 
       {/* Hero Customer Card Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden border border-slate-700/80">
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-orange-500/10 blur-3xl pointer-events-none" />
-        
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-gradient-to-r from-orange-500/[0.04] via-transparent to-transparent">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-orange-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-lg shadow-orange-600/30 shrink-0">
+            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-sm shrink-0">
               {customerName.charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-extrabold text-white">{customerName}</h2>
+                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">{customerName}</h2>
                 <span
-                  className={`px-3 py-0.5 rounded-full text-xs font-bold border ${
-                    REQUEST_STATUS_COLORS[request.status as keyof typeof REQUEST_STATUS_COLORS] || 'bg-slate-800 text-slate-300'
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                    REQUEST_STATUS_BADGES[request.status] || 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
                   {REQUEST_STATUS_LABELS[request.status] || request.status}
                 </span>
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                    PRIORITY_COLORS[request.priority as keyof typeof PRIORITY_COLORS] || 'bg-slate-800 text-slate-300'
+                    REQUEST_PRIORITY_BADGES[request.priority] || 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
                   Độ ưu tiên: {PRIORITY_LABELS[request.priority] || request.priority}
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-300">
+              <div className="flex flex-wrap items-center gap-4 mt-2.5 text-xs text-slate-600 dark:text-slate-300">
                 {customerPhone && (
                   <button
                     type="button"
                     onClick={() => handleCopy(customerPhone, 'phone')}
-                    className="flex items-center gap-1.5 hover:text-orange-400 transition-colors"
+                    className="flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors cursor-pointer"
                   >
-                    <Phone className="w-3.5 h-3.5 text-orange-400" />
+                    <Phone className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                     <span>{customerPhone}</span>
                     {copiedField === 'phone' ? (
-                      <Check className="w-3 h-3 text-emerald-400" />
+                      <Check className="w-3 h-3 text-emerald-600" />
                     ) : (
-                      <Copy className="w-3 h-3 opacity-60" />
+                      <Copy className="w-3 h-3 opacity-50" />
                     )}
                   </button>
                 )}
@@ -292,21 +307,21 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
                   <button
                     type="button"
                     onClick={() => handleCopy(customerEmail, 'email')}
-                    className="flex items-center gap-1.5 hover:text-orange-400 transition-colors"
+                    className="flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors cursor-pointer"
                   >
-                    <Mail className="w-3.5 h-3.5 text-orange-400" />
+                    <Mail className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                     <span>{customerEmail}</span>
                     {copiedField === 'email' ? (
-                      <Check className="w-3 h-3 text-emerald-400" />
+                      <Check className="w-3 h-3 text-emerald-600" />
                     ) : (
-                      <Copy className="w-3 h-3 opacity-60" />
+                      <Copy className="w-3 h-3 opacity-50" />
                     )}
                   </button>
                 )}
 
                 {customerCompany && (
-                  <span className="flex items-center gap-1.5 text-slate-400">
-                    <Building2 className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                    <Building2 className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                     <span>{customerCompany}</span>
                   </span>
                 )}
@@ -314,18 +329,18 @@ export const RequestDetailPage: React.FC<RequestDetailPageProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-slate-800/80 border border-slate-700 p-3 rounded-xl backdrop-blur-xs">
-            <UserCheck className="w-4 h-4 text-orange-400 shrink-0" />
+          <div className="flex items-center gap-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 p-3 rounded-xl shadow-2xs">
+            <UserCheck className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
             <div className="text-xs">
-              <span className="text-slate-400 block text-[10px]">Người phụ trách</span>
-              <span className="font-bold text-slate-200">
+              <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider">Người phụ trách</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">
                 {request.assignedUserName || 'Chưa phân công'}
               </span>
             </div>
             <button
               type="button"
               onClick={() => onReassignRequest?.(request)}
-              className="ml-2 px-2.5 py-1 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1"
+              className="ml-2 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white rounded-lg text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1 shadow-xs"
             >
               <UserCheck className="w-3 h-3" />
               <span>{request.assignedUserName ? 'Đổi người phụ trách' : 'Gán người phụ trách'}</span>

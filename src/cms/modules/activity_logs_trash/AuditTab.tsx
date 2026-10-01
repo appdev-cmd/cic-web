@@ -69,7 +69,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-purple-600" />
+            <Shield className="w-5 h-5 text-orange-600 dark:text-orange-400" />
             <span>Nhật ký Hoạt động Kiểm toán (Activity Audit Logs)</span>
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -80,9 +80,9 @@ export const AuditTab: React.FC<AuditTabProps> = ({
         <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
           <button
             onClick={onOpenExportDrawer}
-            className="min-h-11 w-full md:w-auto px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+            className="min-h-11 w-full md:w-auto px-4 py-2 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
           >
-            <Download className="w-4 h-4 text-orange-400" />
+            <Download className="w-4 h-4 text-white" />
             <span>Tạo Báo cáo Export</span>
           </button>
         </div>
