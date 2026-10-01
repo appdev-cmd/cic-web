@@ -166,6 +166,16 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
     'menu_products_group',
   ]);
 
+  React.useEffect(() => {
+    menuGroups.forEach((group) => {
+      group.items.forEach((item) => {
+        if (item.children?.some((child) => child.path === activePath)) {
+          setExpandedSubItemIds((prev) => (prev.includes(item.id) ? prev : [...prev, item.id]));
+        }
+      });
+    });
+  }, [activePath, menuGroups]);
+
   const [searchKeyword, setSearchKeyword] = useState('');
   const [collapsedMenuTooltip, setCollapsedMenuTooltip] = useState<{
     id: string;

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { Clock, Eye, Lock, RotateCcw, Search, Trash2 } from 'lucide-react';
 import type { TrashItemViewModel, TrashListPage, TrashListQuery } from '@/features/trash/types';

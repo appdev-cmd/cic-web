@@ -37,6 +37,8 @@ import { WebsiteHealthDrawer } from './components/WebsiteHealthDrawer';
 import { ActionableQueue } from './components/ActionableQueue';
 import { CustomerRequestsLivePanel } from './components/CustomerRequestsLivePanel';
 import { PopularContentPanel } from './components/PopularContentPanel';
+import { useRouter } from 'next/navigation';
+import { useCmsDrawer } from '../../context/CmsDrawerContext';
 import { CompactContentStrip } from './components/CompactContentStrip';
 import { DashboardActivityTimeline } from './components/DashboardActivityTimeline';
 import { getDashboardOperationsMetricsAction } from '@/features/dashboard/server/actions';
@@ -46,8 +48,8 @@ const STORAGE_KEY = 'cic_cms_dashboard_pref_v2';
 interface DashboardOverviewProps {
   workspaceLocale: CmsLocale;
   data?: CmsDashboardData;
-  onNavigate: (path: string, title: string) => void;
-  onOpenDrawerItem: (type: 'contact' | 'registration' | 'pending' | 'activity', data: any) => void;
+  onNavigate?: (path: string, title: string) => void;
+  onOpenDrawerItem?: (type: 'contact' | 'registration' | 'pending' | 'activity', data: any) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
@@ -56,6 +58,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onNavigate,
   onOpenDrawerItem,
 }) => {
+  const router = useRouter();
+  const drawerContext = useCmsDrawer();
+  const activeNavigate = (path: string, title = '') => {
+    if (onNavigate) {
+      onNavigate(path, title);
+    } else {
+      router.push(path);
+    }
+  };
+  const activeOpenDrawer = onOpenDrawerItem ?? drawerContext.openDrawer;
   const dict = getCmsDictionary(workspaceLocale);
   const t = dict.dashboard;
   const isEn = workspaceLocale === 'en';
@@ -491,7 +503,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 data={data}
                 metrics={operationsMetrics}
                 workspaceLocale={workspaceLocale}
-                onNavigate={onNavigate}
+                onNavigate={activeNavigate}
               />
             );
           }
@@ -503,7 +515,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 key={widgetId}
                 data={data}
                 workspaceLocale={workspaceLocale}
-                onNavigate={onNavigate}
+                onNavigate={activeNavigate}
                 onOpenHealthDrawer={() => setIsHealthDrawerOpen(true)}
               />
             );
@@ -518,8 +530,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     contacts={contacts}
                     registrations={registrations}
                     workspaceLocale={workspaceLocale}
-                    onNavigate={onNavigate}
-                    onOpenDrawerItem={onOpenDrawerItem}
+                    onNavigate={activeNavigate}
+                    onOpenDrawerItem={activeOpenDrawer}
                   />
                 </div>
                 <div className="lg:col-span-5">
@@ -528,7 +540,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     popularContentInPeriod={operationsMetrics.popularContentInPeriod}
                     popularContentCumulative={operationsMetrics.popularContentCumulative}
                     workspaceLocale={workspaceLocale}
-                    onNavigate={onNavigate}
+                    onNavigate={activeNavigate}
                   />
                 </div>
               </div>
@@ -542,8 +554,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 key={widgetId}
                 activityLogs={activityLogs}
                 workspaceLocale={workspaceLocale}
-                onNavigate={onNavigate}
-                onOpenDrawerItem={onOpenDrawerItem}
+                onNavigate={activeNavigate}
+                onOpenDrawerItem={activeOpenDrawer}
               />
             );
           }
@@ -555,7 +567,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 key={widgetId}
                 kpi={data.kpi}
                 workspaceLocale={workspaceLocale}
-                onNavigate={onNavigate}
+                onNavigate={activeNavigate}
               />
             );
           }
@@ -570,7 +582,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         onClose={() => setIsHealthDrawerOpen(false)}
         health={data?.health}
         workspaceLocale={workspaceLocale}
-        onNavigate={onNavigate}
+        onNavigate={activeNavigate}
       />
 
       <DashboardCustomizerDrawer

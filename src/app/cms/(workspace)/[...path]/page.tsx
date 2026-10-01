@@ -17,9 +17,13 @@ import { CtaRoute } from '@/cms/modules/customer_interaction/cta/CtaRoute';
 import { StaticPagesRoute } from '@/cms/modules/static_pages/StaticPagesRoute';
 import { MenuRoute } from '@/cms/modules/menu/MenuRoute';
 import { FunctionSeoRoute } from '@/cms/modules/function_seo/FunctionSeoRoute';
-import { renderCmsFoundationRoute } from '../CmsFoundationRoute';
+import { renderCmsModuleContent } from '../../CmsFoundationRoute';
 
-export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...path]'>) {
+interface CmsCatchAllPageProps {
+  params: Promise<{ path: string[] }>;
+}
+
+export default async function CmsCatchAllPage({ params }: CmsCatchAllPageProps) {
   const { path } = await params;
   const cmsPath = `/cms/${path.join('/')}`;
   const moduleContent = isFunctionSeoCmsPath(cmsPath)
@@ -59,5 +63,5 @@ export default async function CmsCatchAllPage({ params }: PageProps<'/cms/[...pa
         : isSalesOwnerCmsPath(cmsPath)
           ? <SalesOwnersRoute />
         : undefined;
-  return renderCmsFoundationRoute(resolveCmsModule(cmsPath), cmsPath, moduleContent);
+  return renderCmsModuleContent(resolveCmsModule(cmsPath), cmsPath, moduleContent);
 }

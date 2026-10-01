@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
@@ -28,6 +30,7 @@ import {
   FormInput,
   Image as ImageIcon,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import {
   executeGlobalSearch,
@@ -46,7 +49,7 @@ interface CmsGlobalSearchPageProps {
   initialModule?: SearchResultModule | 'all';
   userRole?: string;
   records: CmsSearchRecord[];
-  onNavigate: (path: string, title: string) => void;
+  onNavigate?: (path: string, title: string) => void;
 }
 
 export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
@@ -57,6 +60,7 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
   records,
   onNavigate,
 }) => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedModule, setSelectedModule] = useState<SearchResultModule | 'all'>(initialModule);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -141,7 +145,11 @@ export const CmsGlobalSearchPage: React.FC<CmsGlobalSearchPageProps> = ({
       moduleLabel: item.moduleLabel,
       path: item.path,
     });
-    onNavigate(item.path, item.title);
+    if (onNavigate) {
+      onNavigate(item.path, item.title);
+    } else {
+      router.push(item.path);
+    }
   };
 
   const moduleTabs: Array<{ key: SearchResultModule | 'all'; label: string; icon: React.ComponentType<{ className?: string }> }> = [

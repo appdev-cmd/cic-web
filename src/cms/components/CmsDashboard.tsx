@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { CheckCircle2, RotateCcw } from 'lucide-react';
 
 import { CmsHeader } from './CmsHeader';
@@ -9,6 +10,7 @@ import { CmsCommandPalette } from './CmsCommandPalette';
 import { CmsRightDrawer, DrawerItem } from './CmsRightDrawer';
 import { MyAccountModal } from './MyAccountModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { CmsDrawerContext } from '../context/CmsDrawerContext';
 
 import { ContactMessage, ProductRegistration, PendingContent, CmsUser, type CmsMenuGroup } from '../types';
 import { resolveCmsModule, type CmsModuleKey } from '../routing';
@@ -205,6 +207,7 @@ export interface CmsDashboardProps {
   trashCapabilities?: { restore: boolean; purge: boolean };
   mediaData?: import('../data/MediaDataSource').MediaModuleData | null;
   mediaCapabilities?: { create: boolean; edit: boolean; delete: boolean; replace: boolean };
+  children?: ReactNode;
   moduleContent?: ReactNode;
   navigationPending?: boolean;
   moduleAccess?: Partial<Record<CmsModuleKey, boolean>>;
@@ -217,7 +220,7 @@ function GuardedModule({ authorized, ready, message, children }: Readonly<{ auth
   return children;
 }
 
-export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent, navigationPending = false, moduleAccess = {}, initialWorkspaceLocale }) => {
+export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/dashboard', children, onSwitchToWebsite, onLogout, onNavigate, currentUser: authenticatedUser, menuGroups, dashboardData: initialDashboardData, searchRecords = [], userRole = 'authenticated', usersData = null, userCapabilities = { create: false, edit: false, delete: false, currentUserId: '' }, permissionsData = null, permissionCapabilities = { create: false, edit: false, delete: false }, settingsData = null, settingsCapabilities = { edit: false }, functionSeoData = [], activityData = null, auditCapabilities = { export: false }, trashData = null, trashCapabilities = { restore: false, purge: false }, mediaData = null, mediaCapabilities = { create:false,edit:false,delete:false,replace:false }, moduleContent, navigationPending = false, moduleAccess = {}, initialWorkspaceLocale }) => {
   // Theme & Layout States (Persisted & Synced)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -286,14 +289,15 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   const cmsDict = getCmsDictionary(workspaceLocale);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const activePath = initialPath;
+  const pathname = usePathname();
+  const activePath = pathname || initialPath;
   const normalizedActivePath = activePath.split(/[?#]/, 1)[0].replace(/\/$/, '') || '/';
   const matchedMenuItem = menuGroups
     .flatMap((group) => group.items)
     .flatMap((item) => [item, ...(item.children ?? [])])
     .sort((left, right) => (right.path?.length ?? 0) - (left.path?.length ?? 0))
     .find((item) => item.path && (normalizedActivePath === item.path || normalizedActivePath.startsWith(`${item.path}/`)));
-  const currentPageTitle = initialPath.includes('/brands') || initialPath.includes('/manufacturers')
+  const currentPageTitle = activePath.includes('/brands') || activePath.includes('/manufacturers')
     ? (workspaceLocale === 'en' ? 'Manufacturers' : 'Hãng sản xuất')
     : (matchedMenuItem ? (cmsDict.menu.items[matchedMenuItem.id] || matchedMenuItem.title) : (resolveCmsModule(activePath) === 'dashboard' ? (workspaceLocale === 'en' ? 'Dashboard Overview' : 'Tổng quan CMS') : 'CMS'));
 
@@ -339,6 +343,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   }, [isCommandPaletteOpen]);
 
   const navigateToCmsPath = (path: string, title: string) => {
+    if (path === activePath) return;
     onNavigate?.(path);
     // The route and its server props commit together when the RSC payload arrives.
     // Updating local route state here would temporarily pair the new module with old props.
@@ -368,6 +373,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
   return (
     <CmsToastProvider>
       <CmsWorkspaceLocaleProvider locale={workspaceLocale}>
+        <CmsDrawerContext.Provider value={{ openDrawer: (type, data) => setDrawerItem({ type, data }), closeDrawer: () => setDrawerItem(null) }}>
         <CmsRouteProgressBar />
         <div className={`cms-shell min-h-screen transition-colors ${isDarkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* 1. HEADER */}
@@ -467,8 +473,8 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
               </div>
             )}
           >
-          {moduleContent ? (
-            moduleContent
+          {children ?? moduleContent ? (
+            children ?? moduleContent
           ) : activeModule === 'search' ? (
             <CmsGlobalSearchPage
               key={`${workspaceLocale}:${activePath}`}
@@ -600,6 +606,7 @@ export const CmsDashboard: React.FC<CmsDashboardProps> = ({ initialPath = '/cms/
         }}
       />
       </div>
+        </CmsDrawerContext.Provider>
       </CmsWorkspaceLocaleProvider>
     </CmsToastProvider>
   );

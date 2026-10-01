@@ -1,3 +1,4 @@
+'use client';
 /* eslint-disable @next/next/no-img-element -- the form previews operator-provided avatar URLs */
 import React, { useState, useEffect, useRef } from 'react';
 import {

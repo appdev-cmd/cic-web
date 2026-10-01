@@ -1,3 +1,4 @@
+'use client';
 /* eslint-disable @next/next/no-img-element -- legacy avatar URLs are rendered as-is */
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Lock, RefreshCw, Search, Trash2, Unlock, UserX } from 'lucide-react';
 import type { AgencyOption, RoleOption, UserAccountStatus } from './types';

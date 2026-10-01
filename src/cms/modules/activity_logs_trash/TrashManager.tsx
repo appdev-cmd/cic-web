@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useCallback, useRef, useState, useTransition } from 'react';
 import { AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import type { TrashItemViewModel, TrashListPage, TrashListQuery, TrashRestoreMode } from '@/features/trash/types';
