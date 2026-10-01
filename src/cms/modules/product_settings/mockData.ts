@@ -270,7 +270,7 @@ export const mockMasterApplications: MasterApplicationItem[] = [
     ordering: 4,
     usage_count: 80,
     sector_group: 'Quản lý Dự án & Chi phí',
-    color_badge: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+    color_badge: 'bg-sky-500/10 text-sky-600 border-sky-500/20',
     icon: 'FileCheck',
     description: 'Tra cứu đơn giá, định mức Bộ Xây dựng, đấu thầu xây lắp công trình công cộng.',
     created_time: '2025-01-02 08:30:00',

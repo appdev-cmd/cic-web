@@ -6,7 +6,7 @@ export const rolesMock: RoleOption[] = [
     name: 'Super Admin',
     description: 'Toàn quyền truy cập và cấu hình toàn bộ hệ thống CMS',
     permissions_count: 48,
-    badge_color: 'bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    badge_color: 'bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-300 border-orange-200 dark:border-orange-800',
   },
   {
     id: 'role_admin',
@@ -74,7 +74,7 @@ export const cicUsersMock = [
     country: 'Việt Nam',
     address: '37 Lê Thanh Nghị, Hai Bà Trưng, Hà Nội',
     summary: 'Quản trị viên hệ thống cấp cao phụ trách toàn bộ hệ thống CMS.',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     status: 'active',
     primaryRoleId: 'role_superadmin',
     ordering: 1,

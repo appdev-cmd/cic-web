@@ -189,7 +189,7 @@ export const DashboardCustomizerDrawer: React.FC<DashboardCustomizerDrawerProps>
             {/* SECTION 2: DISPLAY DENSITY */}
             <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Grid className="w-4 h-4 text-purple-500" />
+                <Grid className="w-4 h-4 text-orange-500" />
                 <span>{isEn ? 'Task Row Display Density' : 'Mật độ hiển thị Task Rows'}</span>
               </h3>
 

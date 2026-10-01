@@ -9,7 +9,7 @@ export const initialAuditLogsMock: AuditEvent[] = [
       name: 'Nguyễn Văn Minh (Admin)',
       email: 'minh.nguyen@cic.com.vn',
       role: 'Super Admin',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80',
       ipAddress: '118.70.182.95',
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
     },

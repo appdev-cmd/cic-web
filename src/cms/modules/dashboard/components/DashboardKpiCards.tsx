@@ -45,7 +45,7 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
       subtitle: t.kpiActive,
       count: kpi.static_pages,
       icon: FileText,
-      color: 'purple',
+      color: 'blue',
       path: '/cms/static-pages',
       pageTitle: workspaceLocale === 'en' ? 'Content Pages' : 'Quản lý Trang nội dung',
     },
@@ -77,21 +77,21 @@ export const DashboardKpiCards: React.FC<DashboardKpiCardsProps> = ({
       {cards.map((card) => {
         const IconComponent = card.icon;
         const isRed = card.color === 'red';
-        const isPurple = card.color === 'purple';
+        const isBlue = card.color === 'blue';
         const isEmerald = card.color === 'emerald';
 
         const hoverBorder = isRed
           ? 'hover:border-red-500'
-          : isPurple
-          ? 'hover:border-purple-500/50'
+          : isBlue
+          ? 'hover:border-blue-500/50'
           : isEmerald
           ? 'hover:border-emerald-500/50'
           : 'hover:border-orange-500/50';
 
         const iconBg = isRed
           ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-          : isPurple
-          ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+          : isBlue
+          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
           : isEmerald
           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
           : 'bg-orange-500/10 text-orange-600 dark:text-orange-400';

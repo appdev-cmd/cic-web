@@ -18,7 +18,7 @@ export const mockProductBrands: ProductBrand[] = [
 ];
 
 export const mockProductOwners: ProductOwnerOption[] = [
-  { id: 'usr_001', name: 'Nguyễn Văn Quản Trị', role: 'Superadmin / Product Director', department: 'Phòng Công nghệ', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
+  { id: 'usr_001', name: 'Nguyễn Văn Quản Trị', role: 'Superadmin / Product Director', department: 'Phòng Công nghệ', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80' },
   { id: 'usr_002', name: 'Lê Hoàng Nam', role: 'Chuyên viên Bán hàng Phần mềm CSI', department: 'Trung tâm Bán hàng MB', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
   { id: 'usr_003', name: 'Trần Thị Thu Thảo', role: 'Trưởng nhóm Nội dung & SEO', department: 'Phòng Marketing', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80' },
   { id: 'usr_004', name: 'Phạm Minh Tuấn', role: 'Kỹ sư Giải pháp Địa kỹ thuật', department: 'Phòng Kỹ thuật & Chuyển giao', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80' },
@@ -146,7 +146,7 @@ export const mockProducts: ProductItem[] = [
     canonical_url: 'https://cic.com.vn/san-pham/du-toan-escon-2026',
     owner_id: 'usr_001',
     owner_name: 'Nguyễn Văn Quản Trị',
-    owner_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    owner_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     inquiry_routing: 'Phòng Phần mềm Xây dựng CIC',
     editorial_status: 'published',
     catalog_status: 'active',
@@ -306,7 +306,7 @@ export const mockProductActivityLogs: ProductActivityLog[] = [
     product_id: 'prod_001',
     product_title: 'CSI ETABS Ultimate v21',
     user_name: 'Nguyễn Văn Quản Trị',
-    user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    user_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     user_role: 'Superadmin',
     action: 'publish',
     details: 'Đã xuất bản phiên bản công khai sản phẩm v2026.2 và kích hoạt hiển thị Catalog.',

@@ -59,7 +59,7 @@ export const mockArticles: NewsArticle[] = [
     ordering: 1,
     author: {
       name: 'Nguyễn Văn Nam',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80',
       email: 'nam.nv@cic.com.vn',
     },
     seo_title: 'CIC phát hành phần mềm CIC-SAP2000 v25 chuẩn TCVN mới nhất',
@@ -195,7 +195,7 @@ export const mockArticles: NewsArticle[] = [
     ordering: 4,
     author: {
       name: 'Nguyễn Văn Nam',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80',
       email: 'nam.nv@cic.com.vn',
     },
     seo_title: 'Báo cáo giải pháp thiết kế công trình giao thông 2026',

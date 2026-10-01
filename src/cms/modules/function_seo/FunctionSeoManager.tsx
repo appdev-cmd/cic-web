@@ -225,7 +225,7 @@ export const FunctionSeoManager: React.FC<Props> = ({
       case 'application':
         return <Layers className="h-3.5 w-3.5 text-emerald-500" />;
       case 'product_type':
-        return <Tag className="h-3.5 w-3.5 text-purple-500" />;
+        return <Tag className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />;
       default:
         return <SlidersHorizontal className="h-3.5 w-3.5 text-indigo-500" />;
     }

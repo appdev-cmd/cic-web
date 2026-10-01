@@ -59,7 +59,7 @@ export const ProductDuplicateModal: React.FC<ProductDuplicateModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-purple-500/10 text-purple-600 rounded-xl">
+            <div className="p-2 bg-orange-500/10 text-orange-600 rounded-xl">
               <Copy className="w-5 h-5" />
             </div>
             <div>
@@ -149,7 +149,7 @@ export const ProductDuplicateModal: React.FC<ProductDuplicateModalProps> = ({
           </button>
           <button
             onClick={handleDuplicate}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-1.5 cursor-pointer"
           >
             <Copy className="w-4 h-4" />
             <span>Xác nhận Nhân bản</span>

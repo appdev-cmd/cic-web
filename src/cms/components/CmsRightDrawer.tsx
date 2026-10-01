@@ -167,7 +167,7 @@ export const CmsRightDrawer: React.FC<CmsRightDrawerProps> = ({
           {item.type === 'pending' && (
             <div className="space-y-4 text-xs">
               <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl space-y-2 border border-slate-200/80 dark:border-slate-700/80">
-                <span className="px-2 py-0.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold rounded-md">
+                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold rounded-md">
                   Loại: {item.data.content_type.toUpperCase()}
                 </span>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">

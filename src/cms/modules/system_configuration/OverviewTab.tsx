@@ -61,7 +61,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               <CheckCircle2 className="w-3.5 h-3.5" /> 3 Phiên bản ngôn ngữ
             </div>
           </div>
-          <span className="p-3 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl">
+          <span className="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
             <Globe className="w-6 h-6" />
           </span>
         </div>

@@ -448,7 +448,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
         >
           <div className="relative shrink-0">
             <img
-              src={user?.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+              src={user?.user_avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80'}
               alt={user?.full_name || 'Admin'}
               className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
             />
@@ -483,7 +483,7 @@ export const CmsSidebar: React.FC<CmsSidebarProps> = ({
             <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-2.5 bg-slate-50/50 dark:bg-slate-800/30 rounded-t-2xl">
               <div className="relative shrink-0 mt-0.5">
                 <img
-                  src={user?.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                  src={user?.user_avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80'}
                   alt={user?.full_name || 'Admin'}
                   className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
                 />

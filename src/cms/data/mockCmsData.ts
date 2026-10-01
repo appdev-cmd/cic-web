@@ -17,7 +17,7 @@ export const currentUserMock: CmsUser = {
   full_name: 'Nguyễn Văn Quản Trị',
   email: 'admin@cic.com.vn',
   role: 'superadmin',
-  user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  user_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
   status: 'active',
   last_login_time: '2026-07-31 09:30:15',
 };
@@ -189,7 +189,7 @@ export const activityLogsMock: ActivityLog[] = [
   {
     id: 'log_401',
     username: 'admin_cic',
-    user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    user_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     activity_type: 'publish',
     description: 'Đã xuất bản bài viết "Xu hướng chuyển đổi số trong ngành Xây dựng 2026"',
     created_time: '2026-07-31 09:25:10',
@@ -220,7 +220,7 @@ export const activityLogsMock: ActivityLog[] = [
   {
     id: 'log_405',
     username: 'admin_cic',
-    user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    user_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     activity_type: 'auth',
     description: 'Đăng nhập hệ thống từ địa chỉ IP 118.70.182.95 (Hà Nội, Việt Nam)',
     created_time: '2026-07-30 14:00:12',
@@ -259,7 +259,7 @@ export const activityLogsMock: ActivityLog[] = [
   {
     id: 'log_410',
     username: 'admin_cic',
-    user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    user_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
     activity_type: 'update',
     description: 'Cập nhật cấu hình SEO mặc định và Google Analytics tracking ID',
     created_time: '2026-07-28 10:05:30',

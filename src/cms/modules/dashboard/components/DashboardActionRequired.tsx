@@ -119,7 +119,7 @@ export const DashboardActionRequired: React.FC<DashboardActionRequiredProps> = (
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-3">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl">
+            <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
@@ -153,7 +153,7 @@ export const DashboardActionRequired: React.FC<DashboardActionRequiredProps> = (
                 <span className="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-1 flex-1 mr-2">
                   {item.title}
                 </span>
-                <span className="px-1.5 py-0.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-bold rounded uppercase shrink-0">
+                <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded uppercase shrink-0">
                   {item.content_type === 'product'
                     ? (isEn ? 'Product' : 'Sản phẩm')
                     : item.content_type === 'news'
