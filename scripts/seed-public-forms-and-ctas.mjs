@@ -454,10 +454,6 @@ const PUBLIC_CTAS = [
     action_type: 'redirect_internal',
     action_config: { url: '/products', openInNewTab: false },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'home', pageTitle: 'Trang chủ', pagePath: '/', placementKey: 'home.hero.primary' },
-      { pageId: 'ecosystem', pageTitle: 'Hệ sinh thái số', pagePath: '/#ecosystem', placementKey: 'home.ecosystem.cta' },
-    ],
   },
   {
     code: 'cta_explore_products',
@@ -471,10 +467,6 @@ const PUBLIC_CTAS = [
     action_type: 'redirect_internal',
     action_config: { url: '/en/products', openInNewTab: false },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'home_en', pageTitle: 'Home (EN)', pagePath: '/en', placementKey: 'home.hero.primary' },
-      { pageId: 'ecosystem_en', pageTitle: 'Digital Ecosystem (EN)', pagePath: '/en#ecosystem', placementKey: 'home.ecosystem.cta' },
-    ],
   },
 
   // 2. About CIC CTA
@@ -490,10 +482,6 @@ const PUBLIC_CTAS = [
     action_type: 'redirect_internal',
     action_config: { url: '/about', openInNewTab: false },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'home', pageTitle: 'Trang chủ', pagePath: '/', placementKey: 'home.hero.secondary' },
-      { pageId: 'footer', pageTitle: 'Chân trang', pagePath: 'all', placementKey: 'footer.company_about' },
-    ],
   },
   {
     code: 'cta_about_cic',
@@ -507,29 +495,77 @@ const PUBLIC_CTAS = [
     action_type: 'redirect_internal',
     action_config: { url: '/en/about', openInNewTab: false },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'home_en', pageTitle: 'Home (EN)', pagePath: '/en', placementKey: 'home.hero.secondary' },
-      { pageId: 'footer_en', pageTitle: 'Footer (EN)', pagePath: 'all', placementKey: 'footer.company_about' },
-    ],
   },
 
-  // 3. Consultation Request CTA (Opens Consultation Modal)
+  // 3. Home Intro Journey CTA
+  {
+    code: 'cta_home_intro',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Khám phá hành trình CIC',
+    display_text: 'Khám phá hành trình CIC',
+    description: 'Nút dẫn đến trang Giới thiệu lịch sử và hành trình phát triển hơn 35 năm của CIC tại khối Home Intro.',
+    icon: 'ArrowRight',
+    style_variant: 'primary',
+    action_type: 'redirect_internal',
+    action_config: { url: '/about', openInNewTab: false },
+    form_code: null,
+  },
+  {
+    code: 'cta_home_intro',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Discover CIC Journey (EN)',
+    display_text: 'Discover CIC Journey',
+    description: 'Action button directing to company history and 35-year development milestones in Home Intro section.',
+    icon: 'ArrowRight',
+    style_variant: 'primary',
+    action_type: 'redirect_internal',
+    action_config: { url: '/en/about', openInNewTab: false },
+    form_code: null,
+  },
+
+  // 4. Company Profile Download / Flipbook CTA
+  {
+    code: 'cta_profile_download',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Xem & Tải Hồ sơ năng lực (Profile)',
+    display_text: 'Hồ sơ năng lực',
+    description: 'Mở xem trực tuyến cuốn Hồ sơ năng lực CIC (Flipbook / PDF) tại khối Giới thiệu trang chủ và trang Giới thiệu.',
+    icon: 'ArrowUpRight',
+    style_variant: 'outline',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf', openInNewTab: true },
+    form_code: null,
+  },
+  {
+    code: 'cta_profile_download',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - View & Download Company Profile (EN)',
+    display_text: 'Company Profile',
+    description: 'Direct access to online interactive CIC Company Profile Flipbook / PDF.',
+    icon: 'ArrowUpRight',
+    style_variant: 'outline',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf', openInNewTab: true },
+    form_code: null,
+  },
+
+  // 5. Consultation Request CTA (Global Modal)
   {
     code: 'cta_contact',
     workspace: 'vi',
     is_system: true,
     admin_name: 'CTA Hệ thống - Đăng ký tư vấn',
     display_text: 'Đăng ký tư vấn',
-    description: 'Nút kích hoạt cửa sổ Đăng ký tư vấn tại Header góc trên bên phải và thanh công cụ nổi.',
+    description: 'Nút kích hoạt cửa sổ Đăng ký tư vấn tại Header góc trên bên phải, thanh công cụ nổi, chatbot và banner tư vấn tin tức/sự kiện.',
     icon: 'MessageSquare',
     style_variant: 'primary',
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_home_consultation',
-    used_by_pages: [
-      { pageId: 'header', pageTitle: 'Header Toàn trang', pagePath: 'all', placementKey: 'header.consultation_cta' },
-      { pageId: 'floating_bar', pageTitle: 'Thanh công cụ nổi', pagePath: 'all', placementKey: 'floating.consultation' },
-    ],
   },
   {
     code: 'cta_contact',
@@ -537,35 +573,167 @@ const PUBLIC_CTAS = [
     is_system: true,
     admin_name: 'CTA System - Request Consultation (EN)',
     display_text: 'Request Consultation',
-    description: 'Global button at top-right Header opening the consultation request modal.',
+    description: 'Global button at top-right Header, floating toolbar, and consultation banners opening the consultation modal.',
     icon: 'MessageSquare',
     style_variant: 'primary',
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_home_consultation',
-    used_by_pages: [
-      { pageId: 'header_en', pageTitle: 'Global Header (EN)', pagePath: 'all', placementKey: 'header.consultation_cta' },
-      { pageId: 'floating_bar_en', pageTitle: 'Floating Bar (EN)', pagePath: 'all', placementKey: 'floating.consultation' },
-    ],
   },
 
-  // 4. Service Consultation CTA
+  // 6. View All Products CTA
+  {
+    code: 'cta_view_all_products',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Xem tất cả sản phẩm & giải pháp',
+    display_text: 'Xem tất cả sản phẩm',
+    description: 'Nút xem toàn bộ danh mục sản phẩm và phần mềm bản quyền từ khối Giải pháp nổi bật trên trang chủ.',
+    icon: 'Layers',
+    style_variant: 'primary',
+    action_type: 'redirect_internal',
+    action_config: { url: '/products', openInNewTab: false },
+    form_code: null,
+  },
+  {
+    code: 'cta_view_all_products',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - View All Products & Solutions (EN)',
+    display_text: 'View All Products',
+    description: 'Direct link to the full catalog of engineering software and technologies from homepage featured solutions.',
+    icon: 'Layers',
+    style_variant: 'primary',
+    action_type: 'redirect_internal',
+    action_config: { url: '/en/products', openInNewTab: false },
+    form_code: null,
+  },
+
+  // 7. View All News CTA
+  {
+    code: 'cta_view_all_news',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Xem tất cả tin tức',
+    display_text: 'Xem tất cả tin tức',
+    description: 'Nút điều hướng sang trang tin tức công nghệ và sự kiện từ khối Tin tức trên trang chủ.',
+    icon: 'ArrowRight',
+    style_variant: 'outline',
+    action_type: 'redirect_internal',
+    action_config: { url: '/news', openInNewTab: false },
+    form_code: null,
+  },
+  {
+    code: 'cta_view_all_news',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - View All News (EN)',
+    display_text: 'View All News',
+    description: 'Direct button to all news and industry insights from the homepage news section.',
+    icon: 'ArrowRight',
+    style_variant: 'outline',
+    action_type: 'redirect_internal',
+    action_config: { url: '/en/news', openInNewTab: false },
+    form_code: null,
+  },
+
+  // 8. View All Events CTA
+  {
+    code: 'cta_view_all_events',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Xem tất cả sự kiện',
+    display_text: 'Xem tất cả sự kiện',
+    description: 'Nút điều hướng sang lịch sự kiện, hội thảo và webinar từ khối Sự kiện trên trang chủ.',
+    icon: 'Calendar',
+    style_variant: 'outline',
+    action_type: 'redirect_internal',
+    action_config: { url: '/events', openInNewTab: false },
+    form_code: null,
+  },
+  {
+    code: 'cta_view_all_events',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - View All Events (EN)',
+    display_text: 'View All Events',
+    description: 'Direct button to technical seminars, workshops, and webinars from homepage events section.',
+    icon: 'Calendar',
+    style_variant: 'outline',
+    action_type: 'redirect_internal',
+    action_config: { url: '/en/events', openInNewTab: false },
+    form_code: null,
+  },
+
+  // 9. View All Projects CTA
+  {
+    code: 'cta_view_all_projects',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Xem tất cả dự án',
+    display_text: 'Xem tất cả dự án',
+    description: 'Nút điều hướng sang trang danh mục dự án trọng điểm từ khối Dự án trên trang chủ.',
+    icon: 'ChevronRight',
+    style_variant: 'outline',
+    action_type: 'redirect_internal',
+    action_config: { url: '/projects', openInNewTab: false },
+    form_code: null,
+  },
+  {
+    code: 'cta_view_all_projects',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - View All Projects (EN)',
+    display_text: 'View All Projects',
+    description: 'Direct button to featured engineering and consulting projects from homepage projects section.',
+    icon: 'ChevronRight',
+    style_variant: 'outline',
+    action_type: 'redirect_internal',
+    action_config: { url: '/en/projects', openInNewTab: false },
+    form_code: null,
+  },
+
+  // 10. Homepage Contact Form Submit CTA
+  {
+    code: 'cta_lienhe_trangchu',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Gửi yêu cầu tư vấn chân trang chủ',
+    display_text: 'Gửi thông tin ngay',
+    description: 'Nút gửi form tiếp nhận thông tin khách hàng tại phần chân trang chủ (#contact).',
+    icon: 'Send',
+    style_variant: 'primary',
+    action_type: 'open_form',
+    action_config: {},
+    form_code: 'form_home_contact',
+  },
+  {
+    code: 'cta_lienhe_trangchu',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Submit Homepage Consultation (EN)',
+    display_text: 'Submit Inquiry Now',
+    description: 'Button submitting customer inquiry on the homepage contact section (#contact).',
+    icon: 'Send',
+    style_variant: 'primary',
+    action_type: 'open_form',
+    action_config: {},
+    form_code: 'form_home_contact',
+  },
+
+  // 11. Service Consultation CTA
   {
     code: 'cta_tuvan_dichvu',
     workspace: 'vi',
     is_system: false,
     admin_name: 'CTA - Tư vấn dịch vụ BIM & Chuyển đổi số',
     display_text: 'Tư vấn dịch vụ',
-    description: 'Kích hoạt form đăng ký tư vấn dịch vụ tại trang Dịch vụ.',
+    description: 'Kích hoạt form đăng ký tư vấn dịch vụ tại trang danh mục và chi tiết dịch vụ.',
     icon: 'Briefcase',
     style_variant: 'primary',
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_tuvan_dichvu',
-    used_by_pages: [
-      { pageId: 'services', pageTitle: 'Dịch vụ', pagePath: '/services', placementKey: 'services.catalog.cta' },
-      { pageId: 'service_detail', pageTitle: 'Chi tiết dịch vụ', pagePath: '/services/[slug]', placementKey: 'services.detail.cta' },
-    ],
   },
   {
     code: 'cta_tuvan_dichvu',
@@ -579,29 +747,21 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_tuvan_dichvu',
-    used_by_pages: [
-      { pageId: 'services_en', pageTitle: 'Services (EN)', pagePath: '/en/services', placementKey: 'services.catalog.cta' },
-      { pageId: 'service_detail_en', pageTitle: 'Service Detail (EN)', pagePath: '/en/services/[slug]', placementKey: 'services.detail.cta' },
-    ],
   },
 
-  // 5. Product Quotation CTA
+  // 12. Product Quotation CTA
   {
     code: 'cta_baogia_sanpham',
     workspace: 'vi',
     is_system: false,
     admin_name: 'CTA - Nhận báo giá sản phẩm',
     display_text: 'Nhận báo giá',
-    description: 'Nút mở modal yêu cầu báo giá trên trang chi tiết sản phẩm.',
+    description: 'Nút mở modal yêu cầu báo giá trên trang danh mục và chi tiết sản phẩm.',
     icon: 'Tag',
     style_variant: 'primary',
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_baogia_sanpham',
-    used_by_pages: [
-      { pageId: 'products_list', pageTitle: 'Danh mục sản phẩm', pagePath: '/products', placementKey: 'products.card.quote' },
-      { pageId: 'product_detail', pageTitle: 'Chi tiết sản phẩm', pagePath: '/products/[slug]', placementKey: 'product.detail.quote' },
-    ],
   },
   {
     code: 'cta_baogia_sanpham',
@@ -615,28 +775,21 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_baogia_sanpham',
-    used_by_pages: [
-      { pageId: 'products_list_en', pageTitle: 'Products Catalog (EN)', pagePath: '/en/products', placementKey: 'products.card.quote' },
-      { pageId: 'product_detail_en', pageTitle: 'Product Detail (EN)', pagePath: '/en/products/[slug]', placementKey: 'product.detail.quote' },
-    ],
   },
 
-  // 6. Product Purchase CTA
+  // 13. Product Purchase CTA
   {
     code: 'cta_mua_sanpham',
     workspace: 'vi',
     is_system: false,
     admin_name: 'CTA - Đăng ký mua bản quyền',
     display_text: 'Đăng ký mua',
-    description: 'Nút đăng ký mua bản quyền chính hãng trên trang chi tiết sản phẩm.',
+    description: 'Nút đăng ký mua bản quyền phần mềm và thiết bị chính hãng trên trang chi tiết sản phẩm.',
     icon: 'ShoppingCart',
     style_variant: 'primary',
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_dangky_mua',
-    used_by_pages: [
-      { pageId: 'product_detail', pageTitle: 'Chi tiết sản phẩm', pagePath: '/products/[slug]', placementKey: 'product.detail.buy' },
-    ],
   },
   {
     code: 'cta_mua_sanpham',
@@ -650,12 +803,9 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_dangky_mua',
-    used_by_pages: [
-      { pageId: 'product_detail_en', pageTitle: 'Product Detail (EN)', pagePath: '/en/products/[slug]', placementKey: 'product.detail.buy' },
-    ],
   },
 
-  // 7. Download Trial CTA
+  // 14. Download Trial CTA
   {
     code: 'cta_taive_dungthu',
     workspace: 'vi',
@@ -668,9 +818,6 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_taive_dungthu',
-    used_by_pages: [
-      { pageId: 'product_detail', pageTitle: 'Chi tiết sản phẩm', pagePath: '/products/[slug]', placementKey: 'product.detail.download' },
-    ],
   },
   {
     code: 'cta_taive_dungthu',
@@ -684,12 +831,9 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_taive_dungthu',
-    used_by_pages: [
-      { pageId: 'product_detail_en', pageTitle: 'Product Detail (EN)', pagePath: '/en/products/[slug]', placementKey: 'product.detail.download' },
-    ],
   },
 
-  // 8. Event Registration CTA
+  // 15. Event Registration CTA
   {
     code: 'cta_dangky_sukien',
     workspace: 'vi',
@@ -702,10 +846,6 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_dangky_sukien',
-    used_by_pages: [
-      { pageId: 'events', pageTitle: 'Sự kiện & Hội thảo', pagePath: '/events', placementKey: 'events.card.register' },
-      { pageId: 'event_detail', pageTitle: 'Chi tiết sự kiện', pagePath: '/events/[slug]', placementKey: 'events.detail.register' },
-    ],
   },
   {
     code: 'cta_dangky_sukien',
@@ -719,13 +859,65 @@ const PUBLIC_CTAS = [
     action_type: 'open_form',
     action_config: {},
     form_code: 'form_dangky_sukien',
-    used_by_pages: [
-      { pageId: 'events_en', pageTitle: 'Events (EN)', pagePath: '/en/events', placementKey: 'events.card.register' },
-      { pageId: 'event_detail_en', pageTitle: 'Event Detail (EN)', pagePath: '/en/events/[slug]', placementKey: 'events.detail.register' },
-    ],
   },
 
-  // 9. Official Contact Page Redirect CTA
+  // 16. Article In-depth Inquiry CTA
+  {
+    code: 'cta_tuvan_tintuc',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Gửi câu hỏi tư vấn bài viết',
+    display_text: 'Gửi câu hỏi tư vấn',
+    description: 'Form tiếp nhận câu hỏi và tư vấn chuyên sâu đặt tại cuối bài viết tin tức, công nghệ.',
+    icon: 'HelpCircle',
+    style_variant: 'secondary',
+    action_type: 'open_form',
+    action_config: {},
+    form_code: 'form_tuvan_tintuc',
+  },
+  {
+    code: 'cta_tuvan_tintuc',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Article In-depth Inquiry (EN)',
+    display_text: 'Submit Inquiry',
+    description: 'Form receiving questions and in-depth consulting requests from technology news articles.',
+    icon: 'HelpCircle',
+    style_variant: 'secondary',
+    action_type: 'open_form',
+    action_config: {},
+    form_code: 'form_tuvan_tintuc',
+  },
+
+  // 17. Project Consultation Request CTA
+  {
+    code: 'cta_tuvan_duan',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Yêu cầu tư vấn giải pháp dự án',
+    display_text: 'Yêu cầu tư vấn ngay',
+    description: 'Nút yêu cầu tư vấn kỹ thuật đặt tại thanh bên (sidebar) trang chi tiết dự án tiêu biểu.',
+    icon: 'MessageSquare',
+    style_variant: 'primary',
+    action_type: 'open_form',
+    action_config: {},
+    form_code: 'form_home_consultation',
+  },
+  {
+    code: 'cta_tuvan_duan',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Project Solution Consultation (EN)',
+    display_text: 'Request Project Consultation',
+    description: 'Direct consultation request button located in the project detail sidebar.',
+    icon: 'MessageSquare',
+    style_variant: 'primary',
+    action_type: 'open_form',
+    action_config: {},
+    form_code: 'form_home_consultation',
+  },
+
+  // 18. Official Contact Page Redirect CTA
   {
     code: 'cta_lienhe_chinhthuc',
     workspace: 'vi',
@@ -736,12 +928,8 @@ const PUBLIC_CTAS = [
     icon: 'Mail',
     style_variant: 'outline',
     action_type: 'redirect_internal',
-    action_config: { url: '/lien-he', openInNewTab: false },
+    action_config: { url: '/contact', openInNewTab: false },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'about', pageTitle: 'Giới thiệu', pagePath: '/about', placementKey: 'about.contact_block' },
-      { pageId: 'footer', pageTitle: 'Chân trang', pagePath: 'all', placementKey: 'footer.branches_contact' },
-    ],
   },
   {
     code: 'cta_lienhe_chinhthuc',
@@ -755,13 +943,9 @@ const PUBLIC_CTAS = [
     action_type: 'redirect_internal',
     action_config: { url: '/en/contact', openInNewTab: false },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'about_en', pageTitle: 'About (EN)', pagePath: '/en/about', placementKey: 'about.contact_block' },
-      { pageId: 'footer_en', pageTitle: 'Footer (EN)', pagePath: 'all', placementKey: 'footer.branches_contact' },
-    ],
   },
 
-  // 10. Direct Hotline Call CTA
+  // 19. Direct Hotline Call CTA
   {
     code: 'cta_goi_hotline',
     workspace: 'vi',
@@ -774,11 +958,6 @@ const PUBLIC_CTAS = [
     action_type: 'call_phone',
     action_config: { phoneNumber: '024 3976 1381' },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'floating_bar', pageTitle: 'Thanh công cụ nổi', pagePath: 'all', placementKey: 'floating.hotline' },
-      { pageId: 'header', pageTitle: 'Header', pagePath: 'all', placementKey: 'header.hotline' },
-      { pageId: 'footer', pageTitle: 'Footer', pagePath: 'all', placementKey: 'footer.hotline' },
-    ],
   },
   {
     code: 'cta_goi_hotline',
@@ -792,11 +971,146 @@ const PUBLIC_CTAS = [
     action_type: 'call_phone',
     action_config: { phoneNumber: '024 3976 1381' },
     form_code: null,
-    used_by_pages: [
-      { pageId: 'floating_bar_en', pageTitle: 'Floating Bar (EN)', pagePath: 'all', placementKey: 'floating.hotline' },
-      { pageId: 'header_en', pageTitle: 'Header (EN)', pagePath: 'all', placementKey: 'header.hotline' },
-      { pageId: 'footer_en', pageTitle: 'Footer (EN)', pagePath: 'all', placementKey: 'footer.hotline' },
-    ],
+  },
+
+  // 20. Direct Email Inquiry CTA
+  {
+    code: 'cta_gui_email',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Gửi email tới hòm thư CIC',
+    display_text: 'Email: info@cic.com.vn',
+    description: 'Gửi thư điện tử trực tiếp đến hộp thư tiếp nhận thông tin của CIC.',
+    icon: 'Mail',
+    style_variant: 'outline',
+    action_type: 'send_email',
+    action_config: { emailAddress: 'info@cic.com.vn' },
+    form_code: null,
+  },
+  {
+    code: 'cta_gui_email',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Send Email to CIC (EN)',
+    display_text: 'Email: info@cic.com.vn',
+    description: 'Direct email inquiry to CIC official inbox.',
+    icon: 'Mail',
+    style_variant: 'outline',
+    action_type: 'send_email',
+    action_config: { emailAddress: 'info@cic.com.vn' },
+    form_code: null,
+  },
+
+  // 21. Zalo Official Support CTA
+  {
+    code: 'cta_chat_zalo',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Hỗ trợ qua Zalo Official Account',
+    display_text: 'Zalo: 024 3976 1381 / OA CIC',
+    description: 'Mở ứng dụng Zalo để chat trực tiếp với chuyên viên tư vấn CIC.',
+    icon: 'MessageCircle',
+    style_variant: 'secondary',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://zalo.me/1727624419140352798', openInNewTab: true },
+    form_code: null,
+  },
+  {
+    code: 'cta_chat_zalo',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Zalo OA Official Support (EN)',
+    display_text: 'Zalo Support: +84 24 3976 1381',
+    description: 'Open Zalo application for instant technical support from CIC team.',
+    icon: 'MessageCircle',
+    style_variant: 'secondary',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://zalo.me/1727624419140352798', openInNewTab: true },
+    form_code: null,
+  },
+
+  // 22. Facebook Fanpage CTA
+  {
+    code: 'cta_social_facebook',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Fanpage Facebook CIC Technology',
+    display_text: 'Fanpage Facebook CIC',
+    description: 'Mở trang mạng xã hội Facebook chính thức của CIC.',
+    icon: 'Facebook',
+    style_variant: 'outline',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://www.facebook.com/CICTechnologyandConsultancyVN', openInNewTab: true },
+    form_code: null,
+  },
+  {
+    code: 'cta_social_facebook',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - CIC Facebook Official (EN)',
+    display_text: 'CIC Facebook Official',
+    description: 'Direct link to official CIC Facebook fanpage.',
+    icon: 'Facebook',
+    style_variant: 'outline',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://www.facebook.com/CICTechnologyandConsultancyVN', openInNewTab: true },
+    form_code: null,
+  },
+
+  // 23. LinkedIn Company Page CTA
+  {
+    code: 'cta_social_linkedin',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Trang LinkedIn CIC Technology',
+    display_text: 'LinkedIn CIC',
+    description: 'Mở trang mạng lưới chuyên nghiệp LinkedIn của CIC.',
+    icon: 'Linkedin',
+    style_variant: 'outline',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://www.linkedin.com/in/c%C3%B4ng-ty-cp-c%C3%B4ng-ngh%E1%BB%87-v%C3%A0-t%C6%B0-v%E1%BA%A5n-cic/', openInNewTab: true },
+    form_code: null,
+  },
+  {
+    code: 'cta_social_linkedin',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - CIC LinkedIn Official (EN)',
+    display_text: 'CIC LinkedIn Official',
+    description: 'Official CIC LinkedIn profile for industry updates and career networking.',
+    icon: 'Linkedin',
+    style_variant: 'outline',
+    action_type: 'redirect_external',
+    action_config: { url: 'https://www.linkedin.com/in/c%C3%B4ng-ty-cp-c%C3%B4ng-ngh%E1%BB%87-v%C3%A0-t%C6%B0-v%E1%BA%A5n-cic/', openInNewTab: true },
+    form_code: null,
+  },
+
+  // 24. Newsletter Subscription CTA
+  {
+    code: 'cta_dangky_bantin',
+    workspace: 'vi',
+    is_system: false,
+    admin_name: 'CTA - Đăng ký nhận bản tin công nghệ',
+    display_text: 'Đăng ký nhận tin',
+    description: 'Đăng ký email để nhận bản tin công nghệ, thông báo hội thảo và cập nhật phần mềm định kỳ từ CIC.',
+    icon: 'Send',
+    style_variant: 'primary',
+    action_type: 'scroll_to_section',
+    action_config: { sectionId: 'contact' },
+    form_code: null,
+  },
+  {
+    code: 'cta_dangky_bantin',
+    workspace: 'en',
+    is_system: false,
+    admin_name: 'CTA - Subscribe Newsletter (EN)',
+    display_text: 'Subscribe Newsletter',
+    description: 'Subscribe to newsletter for tech insights, webinar notices, and software releases.',
+    icon: 'Send',
+    style_variant: 'primary',
+    action_type: 'scroll_to_section',
+    action_config: { sectionId: 'contact' },
+    form_code: null,
   },
 ];
 
