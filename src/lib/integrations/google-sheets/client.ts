@@ -73,6 +73,41 @@ export function formatSheetRange(sheetName: string, subRange: string): string {
   return `'${escaped}'!${subRange}`;
 }
 
+export function extractHeaderRow(rows: any[][]): string[] {
+  if (!rows || rows.length === 0) return [];
+
+  let bestRow: string[] = [];
+  let maxCols = 0;
+
+  for (const r of rows) {
+    if (!Array.isArray(r) || r.length === 0) continue;
+
+    // Find the last non-empty cell index in this row
+    let lastNonEmptyIndex = -1;
+    for (let i = r.length - 1; i >= 0; i--) {
+      if (String(r[i] || '').trim() !== '') {
+        lastNonEmptyIndex = i;
+        break;
+      }
+    }
+
+    if (lastNonEmptyIndex >= 0) {
+      // Keep all columns from 0 to lastNonEmptyIndex dynamically (supports any N columns)
+      const cells = r.slice(0, lastNonEmptyIndex + 1).map((c, idx) => {
+        const val = String(c || '').trim();
+        return val || `Cột ${idx + 1}`;
+      });
+
+      if (cells.length > maxCols) {
+        maxCols = cells.length;
+        bestRow = cells;
+      }
+    }
+  }
+
+  return bestRow;
+}
+
 export async function testGoogleSheetAccess(
   spreadsheetId: string,
   sheetName?: string
@@ -103,7 +138,7 @@ export async function testGoogleSheetAccess(
       ? sheetName
       : (sheetTitles[0] || sheetName || 'Sheet1');
 
-    // 2. Fetch first 5 rows to intelligently detect the header row (handles title banners on row 1/2)
+    // 2. Fetch first 5 rows to detect headers dynamically across any N columns
     let headers: string[] = [];
     try {
       const headerRes = await sheets.spreadsheets.values.get({
@@ -111,21 +146,7 @@ export async function testGoogleSheetAccess(
         range: formatSheetRange(targetSheet, '1:5'),
       });
       const rows = headerRes.data.values || [];
-      if (rows.length > 0) {
-        let bestRow: string[] = [];
-        let maxCols = 0;
-
-        for (const r of rows) {
-          if (Array.isArray(r)) {
-            const cells = r.map((c) => String(c || '').trim()).filter(Boolean);
-            if (cells.length > maxCols) {
-              maxCols = cells.length;
-              bestRow = cells;
-            }
-          }
-        }
-        headers = bestRow;
-      }
+      headers = extractHeaderRow(rows);
     } catch (readErr) {
       console.warn('[testGoogleSheetAccess] Header read warning:', readErr);
       headers = [];
@@ -157,22 +178,7 @@ export async function getGoogleSheetHeaders(
   });
 
   const rows = res.data.values || [];
-  if (rows.length === 0) {
-    return [];
-  }
-  let bestRow: string[] = [];
-  let maxCols = 0;
-
-  for (const r of rows) {
-    if (Array.isArray(r)) {
-      const cells = r.map((c) => String(c || '').trim()).filter(Boolean);
-      if (cells.length > maxCols) {
-        maxCols = cells.length;
-        bestRow = cells;
-      }
-    }
-  }
-  return bestRow;
+  return extractHeaderRow(rows);
 }
 
 export async function initializeGoogleSheetHeaders(
