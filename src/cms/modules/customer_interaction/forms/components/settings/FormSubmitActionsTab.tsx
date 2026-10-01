@@ -687,48 +687,40 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                 {/* Test Connection Alert Results */}
                 {testResult && (
                   <div
-                    className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                    className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-3 ${
                       testResult.success
-                        ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                        ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300'
                         : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
                     }`}
                   >
-                    {testResult.success ? (
-                      <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-rose-600 mt-0.5 shrink-0" />
-                    )}
-                    <div>
+                    <div className="flex items-center gap-2 min-w-0">
                       {testResult.success ? (
-                        <>
-                          <div className="font-bold">Kết nối thành công tới: "{testResult.title}"</div>
-                          <div className="mt-1 text-[11px] opacity-90 space-y-0.5">
-                            <div>
-                              Đang đọc từ trang tính: <strong>"{sheetsConfig.sheetName || testResult.activeSheet || 'Trang tính 1'}"</strong> (file có {testResult.sheets?.length || 1} trang tính).
-                            </div>
-                            <div>
-                              Đã quét và tìm thấy: <strong>{testResult.headers?.length || 0} cột dữ liệu</strong>.
-                              {testResult.sheets && testResult.sheets.length > 1 && (
-                                <span className="text-emerald-700 dark:text-emerald-300 ml-1">
-                                  (Nếu dữ liệu nằm ở trang tính khác, hãy đổi ở mục "Tên Trang tính" bên trên).
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </>
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                       ) : (
-                        <>
-                          <div className="font-bold">Kết nối không thành công</div>
-                          <div className="mt-0.5 text-[11px] opacity-90">{testResult.error}</div>
-                        </>
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                       )}
+                      <div className="truncate">
+                        {testResult.success ? (
+                          <span>
+                            Đã kết nối: <strong>{testResult.title}</strong> · Tab: <strong>{sheetsConfig.sheetName || testResult.activeSheet}</strong> ({testResult.headers?.length || 0} cột)
+                          </span>
+                        ) : (
+                          <span>{testResult.error}</span>
+                        )}
+                      </div>
                     </div>
+
+                    {testResult.success && testResult.sheets && testResult.sheets.length > 1 && (
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0 hidden sm:inline">
+                        (Có {testResult.sheets.length} tab)
+                      </span>
+                    )}
                   </div>
                 )}
 
                 {initHeaderSuccess && (
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 rounded-xl text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-600" />
+                  <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 rounded-xl text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>{initHeaderSuccess}</span>
                   </div>
                 )}
@@ -737,76 +729,38 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
               {/* Step 3: Column Mapping Section */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
-                    <strong>Bước 3:</strong> Cấu hình ánh xạ cột (Ghép cột Sheet với dữ liệu Form):
+                  <div className="text-xs text-slate-700 dark:text-slate-300 font-bold">
+                    Bước 3: Ghép cột Google Sheet với dữ liệu Form
                   </div>
 
                   {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <CmsButton
+                    <div className="flex items-center gap-1.5">
+                      <button
                         type="button"
-                        size="sm"
-                        variant="primary"
                         onClick={() => handleSyncFieldsFromSheet()}
-                        leadingIcon={<Layers className="w-3.5 h-3.5" />}
-                        title="Tự động đồng bộ và tạo các trường dữ liệu ở tab Thành phần & Trường dữ liệu theo các cột Sheet"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                        title="Tạo các trường dữ liệu ở tab Thành phần & Trường dữ liệu theo các cột Sheet"
                       >
+                        <Layers className="w-3.5 h-3.5 text-slate-500" />
                         Đồng bộ trường vào Form
-                      </CmsButton>
+                      </button>
 
-                      <CmsButton
+                      <button
                         type="button"
-                        size="sm"
-                        variant="secondary"
                         onClick={handleInitializeHeaders}
                         disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
-                        leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-medium text-slate-600 dark:text-slate-400 transition-colors cursor-pointer"
                         title="Đặt lại các cột tiêu đề theo trường của Form"
                       >
-                        {isInitializingHeaders ? 'Đang tạo...' : 'Tạo lại tiêu đề từ Form'}
-                      </CmsButton>
+                        <Sparkles className="w-3.5 h-3.5 text-slate-400" />
+                        Tạo lại tiêu đề từ Form
+                      </button>
                     </div>
                   )}
                 </div>
 
                 {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 ? (
                   <div className="space-y-2.5">
-                    {(() => {
-                      const unmapped = sheetsConfig.columnMapping.filter((c) => !c.sourceKey && c.sourceType !== 'system');
-                      if (unmapped.length === 0) return null;
-                      return (
-                        <div className="p-3 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3 flex-wrap">
-                          <div className="flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                            <span>
-                              Có <strong>{unmapped.length} cột trên Sheet</strong> chưa có trong Form (<em>{unmapped.slice(0, 3).map((c) => c.sheetHeader).join(', ')}{unmapped.length > 3 ? '...' : ''}</em>).
-                            </span>
-                          </div>
-                          <CmsButton
-                            type="button"
-                            size="sm"
-                            variant="primary"
-                            onClick={() => handleSyncFieldsFromSheet()}
-                            leadingIcon={<Layers className="w-3.5 h-3.5" />}
-                          >
-                            Tự động tạo các trường này vào Form
-                          </CmsButton>
-                        </div>
-                      );
-                    })()}
-
-                    <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/40 rounded-xl text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2.5">
-                      <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
-                      <div className="space-y-1">
-                        <div className="font-semibold text-[11.5px]">Cách xử lý các cột trên Google Sheet:</div>
-                        <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-blue-800/90 dark:text-blue-300/90">
-                          <li>Nếu bảng tính có <strong>cột nội bộ</strong> (như <em>Trạng thái xử lý, Nhân viên phụ trách, Ghi chú</em>) mà không cần Form điền, hãy chọn <strong>"-- Để trống cột này (không ghi dữ liệu) --"</strong>. Hệ thống sẽ giữ nguyên ô trống mà không làm xô lệch thứ tự cột.</li>
-                          <li>Bạn có thể bấm <strong>"Đồng bộ trường vào Form"</strong> để hệ thống tự tạo các trường dữ liệu ở tab <em>"Thành phần & Trường dữ liệu"</em> cho khớp 100% với Sheet.</li>
-                          <li>Bạn có thể bấm biểu tượng <strong>thùng rác</strong> để xóa bớt cột không dùng, hoặc bấm <strong>"+ Thêm cột ghép mới"</strong> để tự tạo thêm cột theo ý muốn.</li>
-                        </ul>
-                      </div>
-                    </div>
-
                     <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
                       <table className="w-full border-collapse">
                         <thead>
