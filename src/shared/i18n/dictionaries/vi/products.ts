@@ -2,7 +2,7 @@ import type { ProductsDictionary } from '../../types';
 
 export const viProducts: ProductsDictionary = {
   catalogTitle: 'Sản phẩm & Giải pháp',
-  catalogSubtitle: 'Danh mục giải pháp phần mềm kỹ thuật, mô phỏng chuyên sâu và thiết bị quan trắc thông minh hàng đầu tại Việt Nam.',
+  catalogSubtitle: 'Khám phá danh mục phần mềm bản quyền thay thế, mô phỏng chuyên sâu và các dòng thiết bị quan trắc thông minh hàng đầu phục vụ chuyển đổi số kỹ thuật tại Việt Nam.',
   filterTitle: 'Bộ lọc tìm kiếm',
   filterAll: 'Tất cả',
   filterCategory: 'Lĩnh vực',

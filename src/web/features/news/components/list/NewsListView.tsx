@@ -94,8 +94,9 @@ export function NewsListView({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           {/* Main Title & Editorial Headline */}
           <div className="border-b border-slate-200 pb-6">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 uppercase tracking-tight">
-              Tin tức &amp; Sự kiện
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight">
+              <span className="text-slate-900">BẢN TIN &amp; </span>
+              <span className="text-orange-600">SỰ KIỆN CÔNG NGHỆ</span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-500 font-medium">
               Cập nhật thông tin hoạt động, kiến thức kỹ thuật chuyên ngành và các thông cáo cổ đông mới nhất

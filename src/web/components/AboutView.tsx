@@ -531,8 +531,22 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       <h2 
                         {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true }))} 
                         data-page-builder-config-path={JSON.stringify(['title'])}
-                        className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900"
-                      >{textFrom(timelineConfig, 'title', aboutContent.timeline.title || 'Hành trình 35 năm')}</h2>
+                        className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2"
+                      >
+                        {(() => {
+                          const t = textFrom(timelineConfig, 'title', aboutContent.timeline.title || 'Hành trình 35 năm');
+                          if (t.toLowerCase().includes('35 năm')) {
+                            const [p1] = t.split(/35\s*năm/i);
+                            return (
+                              <>
+                                <span className="text-slate-900">{p1 || 'Hành trình '}</span>
+                                <span className="text-orange-600">35 năm</span>
+                              </>
+                            );
+                          }
+                          return <span className="text-slate-900">{t}</span>;
+                        })()}
+                      </h2>
                       <p 
                         {...bindElement(bindingRegistry, createElementBinding({ sectionKey: 'about.timeline', elementPath: 'description', semantic: 'text', ownership: 'section-config', editable: true }))} 
                         data-page-builder-config-path={JSON.stringify(['description'])}
@@ -1141,9 +1155,43 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                       sectionKey: 'about.capacity', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true,
                     }), bindingRegistry)}
                     data-page-builder-config-path={JSON.stringify(['title'])}
-                    className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-slate-900 leading-tight"
+                    className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-tight"
                   >
-                    {textFrom(capacityConfig, 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế')}
+                    {(() => {
+                      const rawTitle = textFrom(capacityConfig, 'title', 'Tiềm lực vững vàng, vươn tầm quốc tế');
+                      if (rawTitle.includes(',')) {
+                        const [part1, ...rest] = rawTitle.split(',');
+                        return (
+                          <>
+                            <span className="text-slate-900">{part1.trim()},</span>
+                            <br />
+                            <span className="text-orange-600">{rest.join(',').trim()}</span>
+                          </>
+                        );
+                      }
+                      if (rawTitle.includes('\n')) {
+                        const [part1, ...rest] = rawTitle.split('\n');
+                        return (
+                          <>
+                            <span className="text-slate-900">{part1.trim()}</span>
+                            <br />
+                            <span className="text-orange-600">{rest.join('\n').trim()}</span>
+                          </>
+                        );
+                      }
+                      const words = rawTitle.trim().split(/\s+/);
+                      if (words.length >= 4) {
+                        const mid = Math.ceil(words.length / 2);
+                        return (
+                          <>
+                            <span className="text-slate-900">{words.slice(0, mid).join(' ')}</span>
+                            <br />
+                            <span className="text-orange-600">{words.slice(mid).join(' ')}</span>
+                          </>
+                        );
+                      }
+                      return <span className="text-slate-900">{rawTitle}</span>;
+                    })()}
                   </h2>
                   <div className="w-16 h-1 bg-orange-600 mx-auto mt-3 mb-6"></div>
                   <p
@@ -1153,7 +1201,7 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                     data-page-builder-config-path={JSON.stringify(['description'])}
                     className="text-slate-600 text-base md:text-lg leading-relaxed mb-10 max-w-3xl"
                   >
-                    {textFrom(capacityConfig, 'description', capacityContent.description || 'Trải qua hành trình hơn 35 năm phát triển, CIC không ngừng khẳng định vị thế dẫn đầu trong việc cung cấp các giải pháp công nghệ tiên tiến.')}
+                    {textFrom(capacityConfig, 'description', capacityContent.description || 'Trải qua 35 năm hình thành và phát triển, CIC đã xây dựng được một đội ngũ nhân sự chất lượng cao, mạng lưới đối tác toàn cầu và danh mục khách hàng rộng khắp, khẳng định vị thế vững chắc trong lĩnh vực công nghệ và xây dựng.')}
                   </p>
                   
                   <div

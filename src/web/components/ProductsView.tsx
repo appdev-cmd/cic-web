@@ -416,11 +416,12 @@ export function ProductsView({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold uppercase text-[#444] tracking-tighter mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-4"
           >
+            <span className="text-slate-900">{locale === 'en' ? 'PORTFOLIO OF ' : 'HỆ THỐNG '}</span>
             <span className="text-orange-600">{t.products.catalogTitle}</span>
           </motion.h1>
-          <div className="w-20 h-1 bg-orange-600 mx-auto mb-6" />
+          <div className="w-16 sm:w-20 h-1 bg-orange-600 mx-auto mb-6" />
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

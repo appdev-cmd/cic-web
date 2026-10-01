@@ -86,8 +86,9 @@ export const EventListView: React.FC<EventListViewProps> = ({
           <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 block">
             Sự kiện & Hội thảo CIC
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold uppercase tracking-tight text-[#444] mt-1">
-            Cổng Sự Kiện Công Nghệ
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mt-1">
+            <span className="text-slate-900">CỔNG SỰ KIỆN &amp; </span>
+            <span className="text-orange-600">HỘI THẢO CÔNG NGHỆ</span>
           </h1>
           <p className="text-slate-500 text-sm mt-1 max-w-2xl font-medium">
             Tham dự các buổi Webinar, Workshop chuyên sâu và Lễ ra mắt công nghệ BIM, AI, CAD và Hạ tầng số do CIC cùng các đối tác quốc tế tổ chức.
