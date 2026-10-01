@@ -70,62 +70,72 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
 
   // Helper to update Google Sheets destination
   const updateSheetsDestination = (updates: Partial<GoogleSheetsDestinationConfig>, isEnabled?: boolean) => {
-    const existing = formData.destinations || [];
-    const otherDests = existing.filter((d) => d.destinationType !== 'google_sheets');
-    const current = getSheetsDestination();
+    setFormData((prev) => {
+      const existing = prev.destinations || [];
+      const otherDests = existing.filter((d) => d.destinationType !== 'google_sheets');
+      const current = existing.find((d) => d.destinationType === 'google_sheets');
+      const currentConfig = (current?.config as GoogleSheetsDestinationConfig) || {
+        spreadsheetId: '',
+        sheetName: 'Sheet1',
+        columnMapping: [],
+        autoCreateHeaders: true,
+      };
 
-    const newDest = {
-      id: current?.id,
-      destinationType: 'google_sheets' as const,
-      name: current?.name || 'Google Sheets',
-      isEnabled: isEnabled !== undefined ? isEnabled : (current ? current.isEnabled : true),
-      config: {
-        ...sheetsConfig,
-        ...updates,
-      },
-    };
+      const newDest = {
+        id: current?.id,
+        destinationType: 'google_sheets' as const,
+        name: current?.name || 'Google Sheets',
+        isEnabled: isEnabled !== undefined ? isEnabled : (current ? current.isEnabled : true),
+        config: {
+          ...currentConfig,
+          ...updates,
+        },
+      };
 
-    setFormData({
-      ...formData,
-      destinations: [...otherDests, newDest],
+      return {
+        ...prev,
+        destinations: [...otherDests, newDest],
+      };
     });
   };
 
   // Helper to update Email destination & sync with submitConfig
   const updateEmailDestination = (updates: Partial<EmailDestinationConfig>, isEnabled?: boolean) => {
-    const existing = formData.destinations || [];
-    const otherDests = existing.filter((d) => d.destinationType !== 'email');
-    const currentEmailDest = existing.find((d) => d.destinationType === 'email');
+    setFormData((prev) => {
+      const existing = prev.destinations || [];
+      const otherDests = existing.filter((d) => d.destinationType !== 'email');
+      const currentEmailDest = existing.find((d) => d.destinationType === 'email');
 
-    const newIsEnabled = isEnabled !== undefined ? isEnabled : (currentEmailDest ? currentEmailDest.isEnabled : true);
+      const newIsEnabled = isEnabled !== undefined ? isEnabled : (currentEmailDest ? currentEmailDest.isEnabled : true);
 
-    const newConfig: EmailDestinationConfig = {
-      sendAdminEmail: updates.sendAdminEmail !== undefined ? updates.sendAdminEmail : formData.submitConfig.sendAdminEmail,
-      adminEmails: updates.adminEmails !== undefined ? updates.adminEmails : formData.submitConfig.adminEmails,
-      adminEmailTemplateId: updates.adminEmailTemplateId !== undefined ? updates.adminEmailTemplateId : formData.submitConfig.adminEmailTemplate,
-      sendConfirmationEmail: updates.sendConfirmationEmail !== undefined ? updates.sendConfirmationEmail : formData.submitConfig.sendConfirmationEmail,
-      confirmationEmailTemplateId: updates.confirmationEmailTemplateId !== undefined ? updates.confirmationEmailTemplateId : formData.submitConfig.confirmationEmailTemplate,
-    };
+      const newConfig: EmailDestinationConfig = {
+        sendAdminEmail: updates.sendAdminEmail !== undefined ? updates.sendAdminEmail : prev.submitConfig.sendAdminEmail,
+        adminEmails: updates.adminEmails !== undefined ? updates.adminEmails : prev.submitConfig.adminEmails,
+        adminEmailTemplateId: updates.adminEmailTemplateId !== undefined ? updates.adminEmailTemplateId : prev.submitConfig.adminEmailTemplate,
+        sendConfirmationEmail: updates.sendConfirmationEmail !== undefined ? updates.sendConfirmationEmail : prev.submitConfig.sendConfirmationEmail,
+        confirmationEmailTemplateId: updates.confirmationEmailTemplateId !== undefined ? updates.confirmationEmailTemplateId : prev.submitConfig.confirmationEmailTemplate,
+      };
 
-    const newDest = {
-      id: currentEmailDest?.id,
-      destinationType: 'email' as const,
-      name: currentEmailDest?.name || 'Thông báo Email',
-      isEnabled: newIsEnabled,
-      config: newConfig,
-    };
+      const newDest = {
+        id: currentEmailDest?.id,
+        destinationType: 'email' as const,
+        name: currentEmailDest?.name || 'Thông báo Email',
+        isEnabled: newIsEnabled,
+        config: newConfig,
+      };
 
-    setFormData({
-      ...formData,
-      submitConfig: {
-        ...formData.submitConfig,
-        sendAdminEmail: newIsEnabled && newConfig.sendAdminEmail,
-        adminEmails: newConfig.adminEmails,
-        adminEmailTemplate: newConfig.adminEmailTemplateId || undefined,
-        sendConfirmationEmail: newIsEnabled && newConfig.sendConfirmationEmail,
-        confirmationEmailTemplate: newConfig.confirmationEmailTemplateId || undefined,
-      },
-      destinations: [...otherDests, newDest],
+      return {
+        ...prev,
+        submitConfig: {
+          ...prev.submitConfig,
+          sendAdminEmail: newIsEnabled && newConfig.sendAdminEmail,
+          adminEmails: newConfig.adminEmails,
+          adminEmailTemplate: newConfig.adminEmailTemplateId || undefined,
+          sendConfirmationEmail: newIsEnabled && newConfig.sendConfirmationEmail,
+          confirmationEmailTemplate: newConfig.confirmationEmailTemplateId || undefined,
+        },
+        destinations: [...otherDests, newDest],
+      };
     });
   };
 
@@ -168,11 +178,6 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
           headers: data.headers,
         });
 
-        // Auto-select correct sheet tab if changed
-        if (effectiveSheet && effectiveSheet !== sheetsConfig.sheetName) {
-          updateSheetsDestination({ sheetName: effectiveSheet });
-        }
-
         let finalMapping = data.suggestedMapping;
         if ((!finalMapping || finalMapping.length === 0) && data.headers && data.headers.length > 0) {
           finalMapping = data.headers.map((h: string) => {
@@ -196,9 +201,18 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
           });
         }
 
+        const nextUpdates: Partial<GoogleSheetsDestinationConfig> = {
+          sheetName: effectiveSheet || sheetsConfig.sheetName,
+        };
+
         if (finalMapping && finalMapping.length > 0) {
-          updateSheetsDestination({ columnMapping: finalMapping });
+          nextUpdates.columnMapping = finalMapping;
+          toast.success(`Đã kết nối và tự động tải ${finalMapping.length} cột từ Sheet!`);
+        } else {
+          toast.success('Kết nối Google Sheet thành công!');
         }
+
+        updateSheetsDestination(nextUpdates);
       }
     } catch (err: any) {
       setTestResult({ success: false, error: err?.message || 'Lỗi mạng khi kiểm tra kết nối.' });
@@ -235,9 +249,12 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
           headers: data.headers,
         });
 
+        const nextUpdates: Partial<GoogleSheetsDestinationConfig> = { sheetName: newTab };
         if (data.suggestedMapping && data.suggestedMapping.length > 0) {
-          updateSheetsDestination({ sheetName: newTab, columnMapping: data.suggestedMapping });
+          nextUpdates.columnMapping = data.suggestedMapping;
+          toast.success(`Đã chuyển sang tab "${newTab}" và tải ${data.suggestedMapping.length} cột!`);
         }
+        updateSheetsDestination(nextUpdates);
       }
     } catch {
       // silent
@@ -550,17 +567,19 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                     <strong>Bước 3:</strong> Cấu hình ánh xạ cột (Ghép cột Sheet với dữ liệu Form):
                   </div>
 
-                  <CmsButton
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={handleInitializeHeaders}
-                    disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
-                    leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
-                    title="Ghi dòng tiêu đề mẫu (gồm các trường của biểu mẫu) lên hàng 1 của Sheet"
-                  >
-                    {isInitializingHeaders ? 'Đang tạo...' : (sheetsConfig.columnMapping?.length > 0 ? 'Khởi tạo lại tiêu đề mẫu' : 'Khởi tạo tiêu đề mẫu từ Form')}
-                  </CmsButton>
+                  {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 && (
+                    <CmsButton
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleInitializeHeaders}
+                      disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
+                      leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                      title="Đặt lại các cột tiêu đề theo trường của Form"
+                    >
+                      {isInitializingHeaders ? 'Đang tạo...' : 'Tạo lại tiêu đề mẫu từ Form'}
+                    </CmsButton>
+                  )}
                 </div>
 
                 {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 ? (
@@ -690,30 +709,31 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="py-6 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-3">
-                    <p className="text-xs text-slate-500">
-                      Chưa có cấu hình ghép cột. Hãy bấm nút <strong>"Khởi tạo tiêu đề mẫu từ Form"</strong> để tạo tự động, hoặc bấm <strong>"Tải cột từ Sheet"</strong> nếu trên Sheet đã có sẵn các cột.
+                  <div className="py-7 px-5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-3.5">
+                    <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                      Chưa có cấu hình ghép cột. Hãy chọn một trong hai cách dưới đây:
                     </p>
-                    <div className="flex items-center justify-center flex-wrap gap-2">
+                    <div className="flex items-center justify-center flex-wrap gap-2.5">
                       <CmsButton
                         type="button"
                         size="sm"
                         variant="primary"
-                        onClick={handleInitializeHeaders}
-                        disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
-                        leadingIcon={<Sparkles className="w-3.5 h-3.5" />}
-                      >
-                        {isInitializingHeaders ? 'Đang tạo...' : 'Khởi tạo tiêu đề mẫu từ Form'}
-                      </CmsButton>
-                      <CmsButton
-                        type="button"
-                        size="sm"
-                        variant="secondary"
                         onClick={handleTestConnection}
                         disabled={isTestingSheets || !sheetsConfig.spreadsheetId}
                         leadingIcon={<RefreshCw className={`w-3.5 h-3.5 ${isTestingSheets ? 'animate-spin' : ''}`} />}
                       >
-                        Tải cột từ Sheet
+                        {isTestingSheets ? 'Đang tải cột...' : 'Tải cột từ Google Sheet'}
+                      </CmsButton>
+
+                      <CmsButton
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleInitializeHeaders}
+                        disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
+                        leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                      >
+                        {isInitializingHeaders ? 'Đang tạo...' : 'Khởi tạo tiêu đề mẫu từ Form'}
                       </CmsButton>
                     </div>
                   </div>

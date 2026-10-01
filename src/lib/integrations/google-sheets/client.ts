@@ -103,26 +103,28 @@ export async function testGoogleSheetAccess(
       ? sheetName
       : (sheetTitles[0] || sheetName || 'Sheet1');
 
-    // 2. Fetch row 1 & row 2 headers
+    // 2. Fetch first 5 rows to intelligently detect the header row (handles title banners on row 1/2)
     let headers: string[] = [];
     try {
       const headerRes = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: formatSheetRange(targetSheet, '1:2'),
+        range: formatSheetRange(targetSheet, '1:5'),
       });
-      const rows = headerRes.data.values;
-      if (rows && rows.length > 0) {
-        const row1 = Array.isArray(rows[0]) ? rows[0].map((h) => String(h || '').trim()).filter(Boolean) : [];
-        const row2 = Array.isArray(rows[1]) ? rows[1].map((h) => String(h || '').trim()).filter(Boolean) : [];
+      const rows = headerRes.data.values || [];
+      if (rows.length > 0) {
+        let bestRow: string[] = [];
+        let maxCols = 0;
 
-        // If row 1 is a merged title banner or single cell while row 2 has multiple columns, use row 2
-        if (row1.length <= 1 && row2.length > 1) {
-          headers = row2;
-        } else if (row1.length > 0) {
-          headers = row1;
-        } else if (row2.length > 0) {
-          headers = row2;
+        for (const r of rows) {
+          if (Array.isArray(r)) {
+            const cells = r.map((c) => String(c || '').trim()).filter(Boolean);
+            if (cells.length > maxCols) {
+              maxCols = cells.length;
+              bestRow = cells;
+            }
+          }
         }
+        headers = bestRow;
       }
     } catch (readErr) {
       console.warn('[testGoogleSheetAccess] Header read warning:', readErr);
@@ -151,21 +153,26 @@ export async function getGoogleSheetHeaders(
   const sheets = getGoogleSheetsClient();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: formatSheetRange(sheetName, '1:2'),
+    range: formatSheetRange(sheetName, '1:5'),
   });
 
-  const rows = res.data.values;
-  if (!rows || rows.length === 0) {
+  const rows = res.data.values || [];
+  if (rows.length === 0) {
     return [];
   }
-  const row1 = Array.isArray(rows[0]) ? rows[0].map((h) => String(h || '').trim()).filter(Boolean) : [];
-  const row2 = Array.isArray(rows[1]) ? rows[1].map((h) => String(h || '').trim()).filter(Boolean) : [];
+  let bestRow: string[] = [];
+  let maxCols = 0;
 
-  if (row1.length <= 1 && row2.length > 1) {
-    return row2;
+  for (const r of rows) {
+    if (Array.isArray(r)) {
+      const cells = r.map((c) => String(c || '').trim()).filter(Boolean);
+      if (cells.length > maxCols) {
+        maxCols = cells.length;
+        bestRow = cells;
+      }
+    }
   }
-  if (row1.length > 0) return row1;
-  return row2;
+  return bestRow;
 }
 
 export async function initializeGoogleSheetHeaders(
