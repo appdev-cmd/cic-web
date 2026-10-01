@@ -67,7 +67,10 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [video, setVideo] = useState(product?.video || product?.video_url || '');
   const [tawkTo, setTawkTo] = useState(product?.tawk_to || '');
   const [tagsText, setTagsText] = useState((product?.tags || []).join(', '));
-  const [priceOld, setPriceOld] = useState(product?.price || product?.price_old || 'Liên hệ');
+  const [priceOld, setPriceOld] = useState(() => {
+    const p = (product?.price || product?.price_old || '').trim();
+    return p || 'Liên hệ';
+  });
   const [isHot, setIsHot] = useState(product?.is_hot ?? false);
   const [teamview, setTeamview] = useState(product?.teamview ?? false);
   const [ordering, setOrdering] = useState(product?.ordering || 1);
@@ -106,6 +109,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     applications: string[];
     productsRelates: string[];
     summary: string;
+    priceOld: string;
     seoTitle: string;
     seoDescription: string;
     seoKeyword: string;
@@ -194,6 +198,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       applications: [...applications],
       productsRelates: [...productsRelates],
       summary,
+      priceOld,
       seoTitle,
       seoDescription,
       seoKeyword,
@@ -288,6 +293,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       if (tagsRes && !tagsText.trim()) {
         setTagsText(tagsRes.tags.join(', '));
       }
+      if (!priceOld.trim()) {
+        setPriceOld('Liên hệ');
+      }
 
       setHasAiAutoFilled(true);
       toast.success('Đã tự động điền Định danh kỹ thuật, Tóm tắt, SEO và Thẻ Tags!');
@@ -307,6 +315,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       setApplications(undoSnapshotRef.current.applications);
       setProductsRelates(undoSnapshotRef.current.productsRelates);
       setSummary(undoSnapshotRef.current.summary);
+      if (undoSnapshotRef.current.priceOld !== undefined) {
+        setPriceOld(undoSnapshotRef.current.priceOld || 'Liên hệ');
+      }
       setSeoTitle(undoSnapshotRef.current.seoTitle);
       setSeoDescription(undoSnapshotRef.current.seoDescription);
       setSeoKeyword(undoSnapshotRef.current.seoKeyword);
@@ -457,7 +468,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       category_ids: categoryIds, category_id: categoryIds.join(','), manufactory,
       application: applications, types, products_relates: productsRelates, summary,
       description, feature_details: featureDetails, video, tawk_to: tawkTo, tags: ids(tagsText),
-      price_old: priceOld, price: priceOld, is_hot: isHot, teamview: false, ordering: Number(ordering) || 1,
+      price_old: priceOld.trim() || 'Liên hệ', price: priceOld.trim() || 'Liên hệ', is_hot: isHot, teamview: false, ordering: Number(ordering) || 1,
       landing_page: '', seo_title: seoTitle,
       seo_keyword: Array.isArray(seoKeyword) ? (seoKeyword as string[]).join(', ') : String(seoKeyword || ''),
       seo_description: seoDescription,
@@ -1043,22 +1054,27 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
         <div className="space-y-4">
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className={labelClass}>Giá</label>
-              <button
-                type="button"
-                onClick={() => setPriceOld('Liên hệ')}
-                className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 hover:underline dark:text-orange-400"
-              >
-                Đặt là &quot;Liên hệ&quot;
-              </button>
+              <label className={labelClass}>Giá bán</label>
+              {priceOld.trim() !== 'Liên hệ' && (
+                <button
+                  type="button"
+                  onClick={() => setPriceOld('Liên hệ')}
+                  className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 hover:underline dark:text-orange-400"
+                >
+                  Đặt lại &quot;Liên hệ&quot;
+                </button>
+              )}
             </div>
             <input
               id="field-price"
               className={`${inputClass} ${isTouched('price') ? 'border-l-4 border-l-orange-500' : ''}`}
-              placeholder="VD: Liên hệ, 15.000.000 VNĐ, Báo giá theo license..."
+              placeholder="VD: Liên hệ (mặc định), 15.000.000 VNĐ, Báo giá theo license..."
               value={priceOld}
               onChange={(e) => setPriceOld(e.target.value)}
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Mặc định là <span className="font-semibold text-slate-700 dark:text-slate-300">Liên hệ</span>. Nếu có mức giá cụ thể, bạn có thể chỉnh sửa tại đây.
+            </p>
           </div>
           <label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200">
             <span>Sản phẩm nổi bật <span className="font-normal text-slate-400">({featuredCount + Number(isHot)}/{FEATURED_CONTENT_LIMITS.product})</span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Dự phòng cho section Sản phẩm trong tương lai; không dùng cho Hệ sinh thái Công nghệ CIC.</span></span>

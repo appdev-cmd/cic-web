@@ -94,7 +94,7 @@ const toProductInput = (product: Partial<ProductItem>, published: boolean) => ({
   tawk_to: normalizeStr(product.tawk_to),
   image: normalizeStr(product.image),
   icon: normalizeStr(product.icon),
-  price: normalizeStr(product.price || product.price_old),
+  price: normalizeStr(product.price || product.price_old).trim() || 'Liên hệ',
   tags: (Array.isArray(product.tags) ? product.tags : [])
     .map(String)
     .map((t) => t.trim())
@@ -134,7 +134,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
       ...item,
       name: item.name || item.title || '',
       code: item.code || item.sku || '',
-      price_old: item.price_old || item.price || '',
+      price_old: (item.price_old || item.price || 'Liên hệ').trim() || 'Liên hệ',
       types: item.types || item.product_type || '',
       manufactory: item.manufactory || item.brand_id || '',
       category_ids: item.category_ids && item.category_ids.length > 0
@@ -385,8 +385,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                 title: prodName,
                 code: productData.code || productData.sku || p.code || p.sku,
                 sku: productData.code || productData.sku || p.sku,
-                price_old: productData.price_old || productData.price || p.price_old || p.price,
-                price: productData.price_old || productData.price || p.price,
+                price_old: (productData.price_old || productData.price || p.price_old || p.price || 'Liên hệ').trim() || 'Liên hệ',
+                price: (productData.price_old || productData.price || p.price || 'Liên hệ').trim() || 'Liên hệ',
                 types: productData.types || productData.product_type || p.types || p.product_type,
                 product_type: productData.types || productData.product_type || p.product_type,
                 manufactory: productData.manufactory || productData.brand_id || p.manufactory || p.brand_id,
@@ -431,8 +431,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
         video: productData.video || productData.video_url || '',
         tawk_to: productData.tawk_to || '',
         tags: productData.tags || [],
-        price_old: productData.price_old || productData.price || '',
-        price: productData.price_old || productData.price || '',
+        price_old: (productData.price_old || productData.price || 'Liên hệ').trim() || 'Liên hệ',
+        price: (productData.price_old || productData.price || 'Liên hệ').trim() || 'Liên hệ',
         currency: productData.currency || 'VND',
         unit: productData.unit || '',
         origin: productData.origin || '',
@@ -526,6 +526,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
           )}
         >
           <ProductsFormView
+            key={selectedProductForForm?.id || 'new'}
             locale={workspaceLocale}
             product={selectedProductForForm}
             aiDraftResult={aiDraftResult}
@@ -759,7 +760,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
                   const isSelected = selectedIds.includes(p.id);
                   const prodName = p.name || p.title || 'Chưa đặt tên';
                   const prodCode = p.code || p.sku || '—';
-                  const prodPrice = p.price_old || p.price || 'Báo giá';
+                  const prodPrice = p.price_old || p.price || 'Liên hệ';
                   const catNames = getCategoryNames(p);
                   const brandName = getBrandName(p);
                   const typeName = getProductTypeName(p);
