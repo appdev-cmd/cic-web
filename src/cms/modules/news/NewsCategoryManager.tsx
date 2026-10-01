@@ -3,6 +3,7 @@ import { Edit3, Eye, EyeOff, FolderTree, Home, Plus, Search, Trash2 } from 'luci
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { NewsCategoryFormDrawer } from './NewsCategoryFormDrawer';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
 import type { NewsCategory } from './types';
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 export const NewsCategoryManager: React.FC<Props> = ({ categories, onChange, onMessage }) => {
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<NewsCategory | null | undefined>(undefined);
+  const [deletingCategory, setDeletingCategory] = useState<NewsCategory | null>(null);
   const ordered = useMemo(() => buildTree(categories).filter((item) => !query.trim() || `${item.name} ${item.alias}`.toLowerCase().includes(query.trim().toLowerCase())), [categories, query]);
 
   const save = (saved: NewsCategory) => {
@@ -26,7 +28,13 @@ export const NewsCategoryManager: React.FC<Props> = ({ categories, onChange, onM
   const remove = (item: NewsCategory) => {
     if ((item.count ?? 0) > 0) return onMessage(`Không thể xóa “${item.name}” vì đang có ${item.count} bài viết.`);
     if (categories.some((candidate) => candidate.parent_id === item.id)) return onMessage(`Không thể xóa “${item.name}” vì vẫn còn danh mục con.`);
-    if (window.confirm(`Xóa danh mục “${item.name}”?`)) { onChange(categories.filter((candidate) => candidate.id !== item.id)); onMessage('Đã xóa danh mục tin tức.'); }
+    setDeletingCategory(item);
+  };
+  const handleConfirmDelete = () => {
+    if (!deletingCategory) return;
+    onChange(categories.filter((candidate) => candidate.id !== deletingCategory.id));
+    onMessage(`Đã xóa danh mục tin tức “${deletingCategory.name}”.`);
+    setDeletingCategory(null);
   };
 
   return <div className="space-y-5">
@@ -37,6 +45,16 @@ export const NewsCategoryManager: React.FC<Props> = ({ categories, onChange, onM
       {ordered.length === 0 && <div className="py-12 text-center text-sm text-slate-500">Không tìm thấy danh mục phù hợp.</div>}
     </section>
     {editing !== undefined && <NewsCategoryFormDrawer category={editing} categories={categories} onClose={() => setEditing(undefined)} onSave={save} />}
+    <CmsDeleteConfirmModal
+      isOpen={Boolean(deletingCategory)}
+      title="Xóa danh mục tin tức"
+      itemName={deletingCategory?.name || ''}
+      description={`Bạn có chắc chắn muốn xóa danh mục tin tức “${deletingCategory?.name}”?`}
+      confirmLabel="Xóa danh mục"
+      cancelLabel="Hủy bỏ"
+      onClose={() => setDeletingCategory(null)}
+      onConfirm={handleConfirmDelete}
+    />
   </div>;
 };
 

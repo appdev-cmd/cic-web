@@ -211,11 +211,10 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                   {event.documents.map((doc, idx) => (
                     <a
                       key={idx}
-                      href={doc.url}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert(`Đã bắt đầu tải file: ${doc.name}`);
-                      }}
+                      href={doc.url && doc.url !== '#' ? doc.url : undefined}
+                      download={doc.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 hover:border-orange-600 text-xs font-bold text-slate-700 hover:text-orange-600 transition-all rounded-[8px]"
                     >
                       <span className="truncate max-w-[200px]">{doc.name}</span>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw, Plus, Trash2, Globe, ExternalLink, X } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
@@ -50,6 +51,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [aiBannerDismissed, setAiBannerDismissed] = useState(false);
   const [isTranslatingEn, setIsTranslatingEn] = useState(false);
   const [enCreatedInfo, setEnCreatedInfo] = useState<{ enName: string; enUrl: string } | null>(null);
+  const [outlineTarget, setOutlineTarget] = useState<'overview' | 'features' | null>(null);
 
   const [name, setName] = useState(product?.name || product?.title || '');
   const [alias, setAlias] = useState(product?.alias || '');
@@ -398,11 +400,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     }
   };
 
-  const handleAiOverviewOutline = async () => {
-    if (description.replace(/<[^>]*>?/gm, '').trim().length > 30) {
-      const ok = window.confirm('Mục Tổng quan đã có nội dung và hình ảnh. Bạn có muốn chèn thêm khung dàn bài mẫu vào cuối bài không?');
-      if (!ok) return;
-    }
+  const executeAiOverviewOutline = async () => {
     try {
       const res = await generateOutlineAction({
         title: name || 'Sản phẩm phần mềm',
@@ -415,11 +413,15 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     }
   };
 
-  const handleAiFeaturesOutline = async () => {
-    if (featureDetails.replace(/<[^>]*>?/gm, '').trim().length > 30) {
-      const ok = window.confirm('Mục Chi tiết tính năng đã có nội dung. Bạn có muốn chèn thêm khung dàn bài mẫu vào cuối bài không?');
-      if (!ok) return;
+  const handleAiOverviewOutline = async () => {
+    if (description.replace(/<[^>]*>?/gm, '').trim().length > 30) {
+      setOutlineTarget('overview');
+      return;
     }
+    await executeAiOverviewOutline();
+  };
+
+  const executeAiFeaturesOutline = async () => {
     try {
       const res = await generateOutlineAction({
         title: `${name} - Tính năng kỹ thuật`,
@@ -431,6 +433,14 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Lỗi khi tạo dàn ý tính năng.');
     }
+  };
+
+  const handleAiFeaturesOutline = async () => {
+    if (featureDetails.replace(/<[^>]*>?/gm, '').trim().length > 30) {
+      setOutlineTarget('features');
+      return;
+    }
+    await executeAiFeaturesOutline();
   };
 
   const handleTranslateToEn = async () => {
@@ -1181,6 +1191,26 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       onRevertField={handleRevertField}
       onRevertAll={handleRevertAll}
     /> */}
+
+    <CmsDeleteConfirmModal
+      isOpen={Boolean(outlineTarget)}
+      title="Chèn thêm khung dàn bài mẫu"
+      itemName={outlineTarget === 'overview' ? 'Mục Tổng quan' : 'Mục Chi tiết tính năng'}
+      description={
+        outlineTarget === 'overview'
+          ? 'Mục Tổng quan đã có nội dung và hình ảnh. Bạn có muốn chèn thêm khung dàn bài mẫu vào cuối bài không?'
+          : 'Mục Chi tiết tính năng đã có nội dung. Bạn có muốn chèn thêm khung dàn bài mẫu vào cuối bài không?'
+      }
+      confirmLabel="Chèn thêm vào cuối"
+      cancelLabel="Hủy bỏ"
+      onClose={() => setOutlineTarget(null)}
+      onConfirm={async () => {
+        const target = outlineTarget;
+        setOutlineTarget(null);
+        if (target === 'overview') await executeAiOverviewOutline();
+        else if (target === 'features') await executeAiFeaturesOutline();
+      }}
+    />
   </div>
   );
 };

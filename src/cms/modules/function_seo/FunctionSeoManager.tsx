@@ -39,6 +39,7 @@ import { CmsButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
 import type { FunctionSeoRecord, SeoFacetLevel, RedirectRule, SeoHealthMetrics } from '@/features/function-seo/types';
 
 interface Props {
@@ -752,6 +753,7 @@ function RedirectWorkspace({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [deletingRedirect, setDeletingRedirect] = useState<RedirectRule | null>(null);
 
   const saveRedirectHandler = () => {
     const from = sourcePath.trim();
@@ -823,13 +825,19 @@ function RedirectWorkspace({
     });
   };
 
-  const handleDelete = (id: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa quy tắc chuyển hướng này không?')) return;
+  const handleDelete = (redirect: RedirectRule) => {
+    setDeletingRedirect(redirect);
+  };
+
+  const handleConfirmDeleteRedirect = () => {
+    if (!deletingRedirect) return;
+    const id = deletingRedirect.id;
     startTransition(async () => {
       try {
         await deleteRedirect(id);
         setRedirects((curr) => curr.filter((r) => r.id !== id));
         onNotify?.('Đã xóa quy tắc chuyển hướng.');
+        setDeletingRedirect(null);
       } catch (err: unknown) {
         toast.error(err instanceof Error ? err.message : 'Không thể xóa redirect.');
       }
@@ -1033,7 +1041,7 @@ function RedirectWorkspace({
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDelete(redirect.id)}
+                            onClick={() => handleDelete(redirect)}
                             className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 cursor-pointer"
                             aria-label="Xóa redirect"
                           >
@@ -1068,6 +1076,18 @@ function RedirectWorkspace({
           <span>Mở sitemap.xml</span>
         </a>
       </div>
+
+      <CmsDeleteConfirmModal
+        isOpen={Boolean(deletingRedirect)}
+        title="Xóa quy tắc chuyển hướng"
+        itemName={deletingRedirect ? `${deletingRedirect.from} → ${deletingRedirect.to}` : ''}
+        description="Bạn có chắc chắn muốn xóa quy tắc chuyển hướng URL này? URL cũ sẽ không còn tự động chuyển hướng sang URL mới."
+        confirmLabel="Xóa quy tắc"
+        cancelLabel="Hủy bỏ"
+        isPending={isPending}
+        onClose={() => setDeletingRedirect(null)}
+        onConfirm={handleConfirmDeleteRedirect}
+      />
     </div>
   );
 }

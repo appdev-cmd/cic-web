@@ -27,6 +27,7 @@ import { CmsPagination } from '../../components/ui/CmsPagination';
 import { bulkDeleteCmsUsersAction, bulkUpdateCmsUserStatusAction, createCmsUserAction, deleteCmsUserAction, getCmsUserActivityAction, sendCmsPasswordResetAction, updateCmsUserAction, updateCmsUserStatusAction } from '@/features/users/server/actions';
 import { CmsDataGridFrame } from '@/shared/ui/cms/CmsDataGridFrame';
 import { CmsTrashConfirmDialog } from '@/shared/ui/cms/CmsTrashConfirmDialog';
+import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
 import { CicUsersOverview } from './CicUsersOverview';
 
 type UserColumnId = 'id' | 'email' | 'avatar' | 'fullName' | 'firstName' | 'lastName' | 'phone' | 'role' | 'agencies' | 'status' | 'online' | 'lastVisit' | 'visits' | 'created' | 'updated' | 'passwordChanged' | 'address' | 'summary';
@@ -75,6 +76,7 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities
   const [statusPromptUser, setStatusPromptUser] = useState<CicUser | null>(null);
   const [targetStatus, setTargetStatus] = useState<UserAccountStatus>('suspended');
   const [changeReason, setChangeReason] = useState('');
+  const [batchStatusTarget, setBatchStatusTarget] = useState<{ newSt: UserAccountStatus; label: string } | null>(null);
 
   // Audit Drawer State
   const [auditUser, setAuditUser] = useState<CicUser | null>(null);
@@ -170,19 +172,27 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities
   };
 
   // Batch Status Update (e.g. Suspend or Activate selected)
-  const handleBatchStatusChange = async (newSt: UserAccountStatus) => {
+  const handleBatchStatusChange = (newSt: UserAccountStatus) => {
     if (selectedIds.length === 0) return;
     const label = newSt === 'active' ? 'Kích hoạt' : newSt === 'suspended' ? 'Tạm khóa' : 'Ngừng sử dụng';
-    if (confirm(`Bạn có chắc muốn ${label} ${selectedIds.length} tài khoản đã chọn?`)) {
-      setIsMutating(true);
-      try {
-        await bulkUpdateCmsUserStatusAction(selectedIds, newSt);
-        setUsers((prev) => prev.map((u) => (selectedIds.includes(u.id) ? { ...u, status: newSt } : u)));
-        showToast(`Đã ${label} thành công ${selectedIds.length} tài khoản!`);
-        setSelectedIds([]);
-        router.refresh();
-      } catch (error) { showToast(error instanceof Error ? error.message : 'Không thể cập nhật tài khoản.'); }
-      finally { setIsMutating(false); }
+    setBatchStatusTarget({ newSt, label });
+  };
+
+  const confirmBatchStatusChange = async () => {
+    if (!batchStatusTarget || selectedIds.length === 0) return;
+    const { newSt, label } = batchStatusTarget;
+    setIsMutating(true);
+    try {
+      await bulkUpdateCmsUserStatusAction(selectedIds, newSt);
+      setUsers((prev) => prev.map((u) => (selectedIds.includes(u.id) ? { ...u, status: newSt } : u)));
+      showToast(`Đã ${label} thành công ${selectedIds.length} tài khoản!`);
+      setSelectedIds([]);
+      setBatchStatusTarget(null);
+      router.refresh();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Không thể cập nhật tài khoản.');
+    } finally {
+      setIsMutating(false);
     }
   };
 
@@ -773,6 +783,17 @@ export const CicUsersManager: React.FC<{ data: UsersGovernanceData; capabilities
         busy={isMutating}
         onClose={() => setDeleteTargets([])}
         onConfirm={() => void confirmDeleteUsers()}
+      />
+      <CmsDeleteConfirmModal
+        isOpen={Boolean(batchStatusTarget)}
+        title="Xác nhận đổi trạng thái tài khoản"
+        itemName={`${selectedIds.length} tài khoản đã chọn`}
+        description={`Bạn có chắc chắn muốn chuyển trạng thái của ${selectedIds.length} tài khoản đã chọn sang "${batchStatusTarget?.label}"?`}
+        confirmLabel={`Xác nhận ${batchStatusTarget?.label || ''}`}
+        cancelLabel="Hủy bỏ"
+        isPending={isMutating}
+        onClose={() => setBatchStatusTarget(null)}
+        onConfirm={confirmBatchStatusChange}
       />
     </div>
   );
