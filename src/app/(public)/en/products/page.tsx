@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import ProductsLoading from '../products/loading';
 import type { Metadata } from 'next';
 import { ProductsView } from '@/web/components/ProductsView';
 import { listPublishedProductsForReference } from '@/features/products/server/queries';
@@ -26,12 +28,14 @@ export default async function EnProductsPage() {
   ]);
 
   return (
-    <ProductsView
-      products={products}
-      contactsByProductId={contactsByProductId}
-      categoryOptions={categories.map((item) => item.name)}
-      applicationOptions={applications.map((item) => item.name)}
-      productTypeOptions={productTypes.map((item) => item.name)}
-    />
+    <Suspense fallback={<ProductsLoading />}>
+      <ProductsView
+        products={products}
+        contactsByProductId={contactsByProductId}
+        categoryOptions={categories.map((item) => item.name)}
+        applicationOptions={applications.map((item) => item.name)}
+        productTypeOptions={productTypes.map((item) => item.name)}
+      />
+    </Suspense>
   );
 }

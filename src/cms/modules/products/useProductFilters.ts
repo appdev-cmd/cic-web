@@ -25,6 +25,11 @@ export interface UseProductFiltersParams {
   applications: MasterApplicationItem[];
   activeTab: SystemViewTab;
   onFilterChange?: () => void;
+  initialSearchQuery?: string;
+  initialCategory?: string;
+  initialBrand?: string;
+  initialProductType?: string;
+  initialApplication?: string;
 }
 
 export interface UseProductFiltersReturn {
@@ -61,12 +66,17 @@ export const useProductFilters = ({
   applications,
   activeTab,
   onFilterChange,
+  initialSearchQuery = '',
+  initialCategory = 'all',
+  initialBrand = 'all',
+  initialProductType = 'all',
+  initialApplication = 'all',
 }: UseProductFiltersParams): UseProductFiltersReturn => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedBrand, setSelectedBrand] = useState<string>('all');
-  const [selectedProductType, setSelectedProductType] = useState<string>('all');
-  const [selectedApplication, setSelectedApplication] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
+  const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand);
+  const [selectedProductType, setSelectedProductType] = useState<string>(initialProductType);
+  const [selectedApplication, setSelectedApplication] = useState<string>(initialApplication);
 
   // Helper lookups
   const getCategoryNames = useCallback(

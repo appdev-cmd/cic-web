@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import ProductsLoading from './loading';
 import { ProductsView } from '@/web/components/ProductsView';
 import { listPublishedProductsForReference } from '@/features/products/server/queries';
 import { listPublishedProductApplications } from '@/features/product-applications/server/queries';
@@ -24,5 +26,9 @@ export default async function ProductsPage(){
     listPublishedProductTypes('vi'),
     listPublicProductContacts('vi'),
   ]);
-  return <ProductsView products={products} contactsByProductId={contactsByProductId} categoryOptions={categories.map((item) => item.name)} applicationOptions={applications.map((item) => item.name)} productTypeOptions={productTypes.map((item) => item.name)}/>;
+  return (
+    <Suspense fallback={<ProductsLoading />}>
+      <ProductsView products={products} contactsByProductId={contactsByProductId} categoryOptions={categories.map((item) => item.name)} applicationOptions={applications.map((item) => item.name)} productTypeOptions={productTypes.map((item) => item.name)}/>
+    </Suspense>
+  );
 }

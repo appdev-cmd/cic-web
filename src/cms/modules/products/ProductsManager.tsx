@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useTransition } from 'react';
+import React, { useState, useMemo, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Package,
@@ -157,8 +157,26 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
   const [selectedProductForForm, setSelectedProductForForm] = useState<ProductItem | null>(null);
 
+  // Read initial filter values from URL if present
+  const initialUrlParams = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return { tab: 'all' as SystemViewTab, q: '', category: 'all', brand: 'all', type: 'all', app: 'all', page: 1 };
+    }
+    const sp = new URLSearchParams(window.location.search);
+    const rawTab = sp.get('tab') as SystemViewTab;
+    const tab: SystemViewTab = rawTab && ['all', 'published', 'draft', 'is_hot'].includes(rawTab) ? rawTab : 'all';
+    const q = sp.get('q') || sp.get('search') || '';
+    const category = sp.get('category') || 'all';
+    const brand = sp.get('brand') || 'all';
+    const type = sp.get('type') || 'all';
+    const app = sp.get('app') || 'all';
+    const pageNum = parseInt(sp.get('page') || '1', 10);
+    const page = !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
+    return { tab, q, category, brand, type, app, page };
+  }, []);
+
   // System Views Tab
-  const [activeTab, setActiveTab] = useState<SystemViewTab>('all');
+  const [activeTab, setActiveTab] = useState<SystemViewTab>(initialUrlParams.tab);
 
   // Table Density & Column Visibility
   const [density, setDensity] = useState<'normal' | 'compact'>('normal');
@@ -229,7 +247,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   };
 
   // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialUrlParams.page);
   const [pageSize, setPageSize] = useState(10);
 
   // Product Filters & Lookups Hook
@@ -264,7 +282,93 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     applications,
     activeTab,
     onFilterChange: () => setCurrentPage(1),
+    initialSearchQuery: initialUrlParams.q,
+    initialCategory: initialUrlParams.category,
+    initialBrand: initialUrlParams.brand,
+    initialProductType: initialUrlParams.type,
+    initialApplication: initialUrlParams.app,
   });
+
+  // Debounced search query for CMS URL
+  const [debouncedCmsSearch, setDebouncedCmsSearch] = useState(searchQuery);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedCmsSearch(searchQuery);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const isCmsMounted = useRef(false);
+  const isCmsPopState = useRef(false);
+
+  // Synchronize filter & tab state to CMS URL search parameters
+  useEffect(() => {
+    if (!isCmsMounted.current) {
+      isCmsMounted.current = true;
+      return;
+    }
+    if (isCmsPopState.current) {
+      isCmsPopState.current = false;
+      return;
+    }
+    if (viewMode !== 'list') return; // Only sync when on list view
+
+    const sp = new URLSearchParams();
+    if (activeTab !== 'all') sp.set('tab', activeTab);
+    if (debouncedCmsSearch.trim()) sp.set('q', debouncedCmsSearch.trim());
+    if (selectedCategory !== 'all') sp.set('category', selectedCategory);
+    if (selectedBrand !== 'all') sp.set('brand', selectedBrand);
+    if (selectedProductType !== 'all') sp.set('type', selectedProductType);
+    if (selectedApplication !== 'all') sp.set('app', selectedApplication);
+    if (currentPage > 1) sp.set('page', String(currentPage));
+
+    const qs = sp.toString();
+    const pathname = window.location.pathname;
+    const targetUrl = qs ? `${pathname}?${qs}` : pathname;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    if (targetUrl !== currentUrl) {
+      window.history.replaceState(null, '', targetUrl);
+    }
+  }, [
+    activeTab,
+    debouncedCmsSearch,
+    selectedCategory,
+    selectedBrand,
+    selectedProductType,
+    selectedApplication,
+    currentPage,
+    viewMode,
+  ]);
+
+  // Support CMS browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === 'undefined') return;
+      const sp = new URLSearchParams(window.location.search);
+      const rawTab = sp.get('tab') as SystemViewTab;
+      const tab: SystemViewTab = rawTab && ['all', 'published', 'draft', 'is_hot'].includes(rawTab) ? rawTab : 'all';
+      const q = sp.get('q') || sp.get('search') || '';
+      const category = sp.get('category') || 'all';
+      const brand = sp.get('brand') || 'all';
+      const type = sp.get('type') || 'all';
+      const app = sp.get('app') || 'all';
+      const pageNum = parseInt(sp.get('page') || '1', 10);
+      const page = !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
+
+      isCmsPopState.current = true;
+      setActiveTab(tab);
+      setSearchQuery(q);
+      setSelectedCategory(category);
+      setSelectedBrand(brand);
+      setSelectedProductType(type);
+      setSelectedApplication(app);
+      setCurrentPage(page);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [setSearchQuery, setSelectedCategory, setSelectedBrand, setSelectedProductType, setSelectedApplication]);
 
   // Paginated Products
   const paginatedProducts = useMemo(() => {

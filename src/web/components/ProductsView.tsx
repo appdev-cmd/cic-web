@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { SlidersHorizontal } from 'lucide-react';
 import { Product } from '@shared/types';
 import { useI18n } from '@/shared/i18n';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ProductDetailView } from './ProductDetailView';
 import type { PublicProductContactMap } from '@/features/sales-owners/types';
 import { ProductFilterSidebar } from '../features/products/components/list/ProductFilterSidebar';
@@ -47,14 +47,7 @@ export function ProductsView({
 
   const { t, locale } = useI18n();
   const router = useRouter();
-  const [search, setSearch] = useState('');
-  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>([]);
-  const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedApps, setSelectedApps] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(15);
-  const [sortBy, setSortBy] = useState<'default' | 'name-asc'>('default');
+  const searchParams = useSearchParams();
 
   // Mobile filter menu state
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -63,21 +56,6 @@ export function ProductsView({
   const [modalType, setModalType] = useState<ProductModalType | null>(null);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(previewProduct || null);
-
-  // Filter items toggler
-  const toggleFilterItem = (currentList: string[], setList: (val: string[]) => void, item: string) => {
-    if (currentList.includes(item)) {
-      setList(currentList.filter((i) => i !== item));
-    } else {
-      setList([...currentList, item]);
-    }
-    setCurrentPage(1);
-  };
-
-  // Active filters count
-  const activeFiltersCount = useMemo(() => {
-    return selectedProductTypes.length + selectedFields.length + selectedBrands.length + selectedApps.length + (search.trim() ? 1 : 0);
-  }, [selectedProductTypes, selectedFields, selectedBrands, selectedApps, search]);
 
   // Dynamic filter values generated from data
   const fields = useMemo(() => {
@@ -103,6 +81,216 @@ export function ProductsView({
       .filter(Boolean)
       .filter((app) => !app.includes('[Du lieu da bi xoa'));
   }, [applicationOptions, productsData]);
+
+  // Helper to parse query parameters with smart case/accent matching
+  const parseUrlParams = useCallback(
+    (sp: URLSearchParams | { get: (k: string) => string | null; getAll: (k: string) => string[] } | null) => {
+      if (!sp) {
+        return {
+          search: '',
+          productTypes: [] as string[],
+          fields: [] as string[],
+          brands: [] as string[],
+          apps: [] as string[],
+          sort: 'default' as 'default' | 'name-asc',
+          page: 1,
+        };
+      }
+
+      const q = sp.get('q') || sp.get('search') || '';
+
+      const getList = (k1: string, k2?: string) => {
+        const vals = sp.getAll(k1);
+        if (k2) vals.push(...sp.getAll(k2));
+        const res: string[] = [];
+        vals.forEach((v) => {
+          v.split(',').map((s) => s.trim()).filter(Boolean).forEach((item) => {
+            if (!res.includes(item)) res.push(item);
+          });
+        });
+        return res;
+      };
+
+      const rawTypes = getList('type', 'productType');
+      const rawFields = getList('category', 'field');
+      const rawBrands = getList('brand');
+      const rawApps = getList('app', 'application');
+      const sort: 'default' | 'name-asc' = sp.get('sort') === 'name-asc' ? 'name-asc' : 'default';
+      const pageNum = parseInt(sp.get('page') || '1', 10);
+      const page = !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
+
+      // Smart match against available options (case-insensitive / exact)
+      const matchItems = (rawItems: string[], available: string[]) => {
+        return rawItems.map((raw) => {
+          const found = available.find((a) => a.toLowerCase().trim() === raw.toLowerCase().trim());
+          return found || raw;
+        });
+      };
+
+      return {
+        search: q,
+        productTypes: matchItems(rawTypes, productTypeOptions ?? []),
+        fields: matchItems(rawFields, fields),
+        brands: matchItems(rawBrands, brands),
+        apps: matchItems(rawApps, apps),
+        sort,
+        page,
+      };
+    },
+    [productTypeOptions, fields, brands, apps],
+  );
+
+  // Initialize filter states from URL search parameters
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).search;
+    }
+    return parseUrlParams(searchParams).search;
+  });
+
+  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).productTypes;
+    }
+    return parseUrlParams(searchParams).productTypes;
+  });
+
+  const [selectedFields, setSelectedFields] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).fields;
+    }
+    return parseUrlParams(searchParams).fields;
+  });
+
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).brands;
+    }
+    return parseUrlParams(searchParams).brands;
+  });
+
+  const [selectedApps, setSelectedApps] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).apps;
+    }
+    return parseUrlParams(searchParams).apps;
+  });
+
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).page;
+    }
+    return parseUrlParams(searchParams).page;
+  });
+
+  const [pageSize] = useState(15);
+  const [sortBy, setSortBy] = useState<'default' | 'name-asc'>(() => {
+    if (typeof window !== 'undefined') {
+      return parseUrlParams(new URLSearchParams(window.location.search)).sort;
+    }
+    return parseUrlParams(searchParams).sort;
+  });
+
+  // Debounced search query for URL synchronization
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  const isMountedRef = useRef(false);
+  const isPopStateRef = useRef(false);
+
+  // Synchronize state to URL query parameters
+  useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return;
+    }
+    if (isPopStateRef.current) {
+      isPopStateRef.current = false;
+      return;
+    }
+    if (selectedProduct || previewProduct) return;
+
+    const sp = new URLSearchParams();
+    if (debouncedSearch.trim()) sp.set('q', debouncedSearch.trim());
+    if (selectedProductTypes.length) sp.set('type', selectedProductTypes.join(','));
+    if (selectedFields.length) sp.set('category', selectedFields.join(','));
+    if (selectedBrands.length) sp.set('brand', selectedBrands.join(','));
+    if (selectedApps.length) sp.set('app', selectedApps.join(','));
+    if (sortBy !== 'default') sp.set('sort', sortBy);
+    if (currentPage > 1) sp.set('page', String(currentPage));
+
+    const qs = sp.toString();
+    const pathname = window.location.pathname;
+    const targetUrl = qs ? `${pathname}?${qs}` : pathname;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    if (targetUrl !== currentUrl) {
+      window.history.replaceState(null, '', targetUrl);
+    }
+  }, [
+    debouncedSearch,
+    selectedProductTypes,
+    selectedFields,
+    selectedBrands,
+    selectedApps,
+    sortBy,
+    currentPage,
+    selectedProduct,
+    previewProduct,
+  ]);
+
+  // Support browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === 'undefined') return;
+      const sp = new URLSearchParams(window.location.search);
+      const parsed = parseUrlParams(sp);
+      isPopStateRef.current = true;
+      setSearch(parsed.search);
+      setSelectedProductTypes(parsed.productTypes);
+      setSelectedFields(parsed.fields);
+      setSelectedBrands(parsed.brands);
+      setSelectedApps(parsed.apps);
+      setSortBy(parsed.sort);
+      setCurrentPage(parsed.page);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [parseUrlParams]);
+
+  // Sync if router navigates with searchParams
+  useEffect(() => {
+    if (!searchParams) return;
+    const parsed = parseUrlParams(searchParams);
+    setSearch((prev) => (prev !== parsed.search ? parsed.search : prev));
+    setSelectedProductTypes((prev) => (JSON.stringify(prev) !== JSON.stringify(parsed.productTypes) ? parsed.productTypes : prev));
+    setSelectedFields((prev) => (JSON.stringify(prev) !== JSON.stringify(parsed.fields) ? parsed.fields : prev));
+    setSelectedBrands((prev) => (JSON.stringify(prev) !== JSON.stringify(parsed.brands) ? parsed.brands : prev));
+    setSelectedApps((prev) => (JSON.stringify(prev) !== JSON.stringify(parsed.apps) ? parsed.apps : prev));
+    setSortBy((prev) => (prev !== parsed.sort ? parsed.sort : prev));
+    setCurrentPage((prev) => (prev !== parsed.page ? parsed.page : prev));
+  }, [searchParams, parseUrlParams]);
+
+  // Filter items toggler
+  const toggleFilterItem = (currentList: string[], setList: (val: string[]) => void, item: string) => {
+    if (currentList.includes(item)) {
+      setList(currentList.filter((i) => i !== item));
+    } else {
+      setList([...currentList, item]);
+    }
+    setCurrentPage(1);
+  };
+
+  // Active filters count
+  const activeFiltersCount = useMemo(() => {
+    return selectedProductTypes.length + selectedFields.length + selectedBrands.length + selectedApps.length + (search.trim() ? 1 : 0);
+  }, [selectedProductTypes, selectedFields, selectedBrands, selectedApps, search]);
 
   // Filter and Sort logic
   const filteredProducts = useMemo(() => {
@@ -138,6 +326,9 @@ export function ProductsView({
     setSelectedApps([]);
     setSortBy('default');
     setCurrentPage(1);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
   };
 
   // Pagination calculation
