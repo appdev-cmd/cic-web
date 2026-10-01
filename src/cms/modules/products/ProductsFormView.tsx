@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw, Plus, Trash2, Globe, ExternalLink, X } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
@@ -19,6 +19,7 @@ import {
   generateOutlineAction,
   classifyProductTaxonomyAction,
 } from '@/features/ai-operator/server/shared-actions';
+import { translateAndCreateEnProductAction } from '@/features/products/server/actions';
 
 interface ProductsFormViewProps {
   locale: 'vi' | 'en';
@@ -47,6 +48,8 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [aiChanges, setAiChanges] = useState<FieldChangeItem[]>(aiDraftResult?.changes || []);
   const [fieldOrigins, setFieldOrigins] = useState<Record<string, FieldOrigin>>(aiDraftResult?.fieldOrigins || {});
   const [aiBannerDismissed, setAiBannerDismissed] = useState(false);
+  const [isTranslatingEn, setIsTranslatingEn] = useState(false);
+  const [enCreatedInfo, setEnCreatedInfo] = useState<{ enName: string; enUrl: string } | null>(null);
 
   const [name, setName] = useState(product?.name || product?.title || '');
   const [alias, setAlias] = useState(product?.alias || '');
@@ -430,6 +433,44 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     }
   };
 
+  const handleTranslateToEn = async () => {
+    if (!name.trim()) {
+      toast.warning('Vui lòng nhập Tên sản phẩm trước khi dịch sang tiếng Anh.');
+      return;
+    }
+    setIsTranslatingEn(true);
+    try {
+      const res = await translateAndCreateEnProductAction({
+        sourceProductId: product?.id ?? null,
+        name,
+        code,
+        summary,
+        description,
+        feature_details: featureDetails,
+        seo_title: seoTitle,
+        seo_description: seoDescription,
+        seo_keyword: Array.isArray(seoKeyword) ? seoKeyword.join(', ') : String(seoKeyword || ''),
+        categoryIds: categoryIds.map(Number).filter((n) => Number.isInteger(n) && n > 0),
+        applicationIds: applications.map(Number).filter((n) => Number.isInteger(n) && n > 0),
+        manufactoryId: manufactory ? Number(manufactory) : null,
+        typeId: types ? Number(types) : null,
+        image,
+        icon,
+        price: priceOld.trim() || 'Liên hệ',
+        tags: ids(tagsText),
+        downloads,
+        video,
+      });
+
+      setOtherLanguages1(res.enUrl);
+      setEnCreatedInfo({ enName: res.enName, enUrl: res.enUrl });
+      toast.success('Đã dịch toàn bộ nội dung và tạo bản nháp Tiếng Anh thành công!');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Có lỗi khi dịch sang Tiếng Anh.');
+    } finally {
+      setIsTranslatingEn(false);
+    }
+  };
 
   useEffect(() => { if (!manualAlias) setAlias(slugify(name)); }, [name, manualAlias]);
   const ids = (text: string) => text.split(',').map((item) => item.trim()).filter(Boolean);
@@ -550,6 +591,20 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {locale === 'vi' && (
+            <CmsButton
+              variant="secondary"
+              size="sm"
+              disabled={isSubmitting || isTranslatingEn}
+              loading={isTranslatingEn}
+              loadingText="Đang dịch & tạo bản EN..."
+              onClick={handleTranslateToEn}
+              leadingIcon={<Globe className="h-4 w-4 text-orange-600 dark:text-orange-400" />}
+              title="Dịch toàn bộ bài viết, tính năng & SEO và tạo bản nháp sang Tiếng Anh"
+            >
+              Dịch sang bản Tiếng Anh
+            </CmsButton>
+          )}
           <CmsButton
             variant="secondary"
             size="sm"
@@ -584,6 +639,45 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </CmsButton>
         </div>
       </header>
+
+      {/* Thông báo khi vừa dịch & tạo bản Tiếng Anh thành công */}
+      {enCreatedInfo && (
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border border-emerald-200 bg-emerald-50/90 dark:border-emerald-900/60 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Bản nháp Tiếng Anh đã sẵn sàng</p>
+              <h4 className="text-sm font-extrabold text-emerald-950 dark:text-emerald-50 truncate">{enCreatedInfo.enName}</h4>
+              <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 font-mono mt-0.5">{enCreatedInfo.enUrl}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem('cic_cms_workspace_locale', 'en');
+                localStorage.setItem('cms_workspace_locale', 'en');
+                document.cookie = 'cms_workspace_locale=en; path=/; max-age=31536000; SameSite=Lax';
+                window.location.reload();
+              }}
+              className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Chuyển sang xem bản Tiếng Anh
+            </button>
+            <button
+              type="button"
+              onClick={() => setEnCreatedInfo(null)}
+              className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 cursor-pointer"
+              title="Đóng thông báo"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Thông báo hoàn tác khi vừa tự động điền */}
       {hasAiAutoFilled && (
