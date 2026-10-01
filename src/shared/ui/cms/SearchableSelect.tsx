@@ -59,6 +59,14 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     );
   });
 
+  const displayOptions = [...filteredOptions].sort((a, b) => {
+    const aSelected = a.id === selectedId;
+    const bSelected = b.id === selectedId;
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    return 0;
+  });
+
   const selectedOption = options.find((opt) => opt.id === selectedId);
 
   return (
@@ -103,36 +111,44 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           </div>
 
           <div className="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
-            {filteredOptions.length === 0 ? (
+            {displayOptions.length === 0 ? (
               <div className="p-3 text-center text-xs text-slate-400">
                 Không tìm thấy kết quả phù hợp
               </div>
             ) : (
-              filteredOptions.map((opt) => {
+              displayOptions.map((opt, idx) => {
                 const isSelected = opt.id === selectedId;
+                const isLastSelected =
+                  isSelected &&
+                  displayOptions[idx + 1] &&
+                  displayOptions[idx + 1].id !== selectedId;
                 const optLabel = getOptionLabel(opt);
                 return (
-                  <div
-                    key={opt.id}
-                    onClick={() => {
-                      onChange(opt.id);
-                      setIsOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className={`p-2 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
-                      isSelected
-                        ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold'
-                        : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      {opt.image && (
-                        <img src={opt.image} alt="" className="w-6 h-6 rounded object-cover shrink-0" />
-                      )}
-                      <span className="truncate">{optLabel}</span>
+                  <React.Fragment key={opt.id}>
+                    <div
+                      onClick={() => {
+                        onChange(opt.id);
+                        setIsOpen(false);
+                        setSearchQuery('');
+                      }}
+                      className={`p-2 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold'
+                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        {opt.image && (
+                          <img src={opt.image} alt="" className="w-6 h-6 rounded object-cover shrink-0" />
+                        )}
+                        <span className="truncate">{optLabel}</span>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-orange-600 shrink-0" />}
                     </div>
-                    {isSelected && <Check className="w-4 h-4 text-orange-600 shrink-0" />}
-                  </div>
+                    {isLastSelected && (
+                      <div className="my-1 border-b border-slate-100 dark:border-slate-800" />
+                    )}
+                  </React.Fragment>
                 );
               })
             )}
@@ -185,6 +201,14 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
       (opt.subLabel && opt.subLabel.toLowerCase().includes(query)) ||
       (opt.category && opt.category.toLowerCase().includes(query))
     );
+  });
+
+  const displayOptions = [...filteredOptions].sort((a, b) => {
+    const aSelected = selectedIds.includes(a.id);
+    const bSelected = selectedIds.includes(b.id);
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    return 0;
   });
 
   const toggleOption = (id: string) => {
@@ -291,51 +315,59 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
 
             {/* Options List */}
             <div className="max-h-56 overflow-y-auto p-1.5 space-y-0.5">
-              {filteredOptions.length === 0 ? (
+              {displayOptions.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400">
                   Không tìm thấy kết quả nào phù hợp
                 </div>
               ) : (
-                filteredOptions.map((opt) => {
+                displayOptions.map((opt, idx) => {
                   const isSelected = selectedIds.includes(opt.id);
+                  const isLastSelected =
+                    isSelected &&
+                    displayOptions[idx + 1] &&
+                    !selectedIds.includes(displayOptions[idx + 1].id);
                   return (
-                    <div
-                      key={opt.id}
-                      onClick={() => toggleOption(opt.id)}
-                      className={`p-2 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
-                        isSelected
-                          ? 'bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-semibold'
-                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 truncate pr-2">
-                        {opt.image && (
-                          <img
-                            src={opt.image}
-                            alt=""
-                            className="w-7 h-7 rounded-md object-cover border border-slate-200 dark:border-slate-700 shrink-0"
-                          />
-                        )}
-                        <div className="truncate">
-                          <p className="truncate font-medium">{getOptionLabel(opt)}</p>
-                          {(opt.code || opt.category || opt.subLabel) && (
-                            <p className="text-[10px] text-slate-400 truncate">
-                              {opt.code ? `Mã: ${opt.code}` : ''} {opt.subLabel ? opt.subLabel : ''} {opt.category ? `• ${opt.category}` : ''}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
+                    <React.Fragment key={opt.id}>
                       <div
-                        className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                        onClick={() => toggleOption(opt.id)}
+                        className={`p-2 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
                           isSelected
-                            ? 'bg-orange-600 border-orange-600 text-white'
-                            : 'border-slate-300 dark:border-slate-600'
+                            ? 'bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-semibold'
+                            : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
                         }`}
                       >
-                        {isSelected && <Check className="w-3 h-3" />}
+                        <div className="flex items-center gap-2.5 truncate pr-2">
+                          {opt.image && (
+                            <img
+                              src={opt.image}
+                              alt=""
+                              className="w-7 h-7 rounded-md object-cover border border-slate-200 dark:border-slate-700 shrink-0"
+                            />
+                          )}
+                          <div className="truncate">
+                            <p className="truncate font-medium">{getOptionLabel(opt)}</p>
+                            {(opt.code || opt.category || opt.subLabel) && (
+                              <p className="text-[10px] text-slate-400 truncate">
+                                {opt.code ? `Mã: ${opt.code}` : ''} {opt.subLabel ? opt.subLabel : ''} {opt.category ? `• ${opt.category}` : ''}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                            isSelected
+                              ? 'bg-orange-600 border-orange-600 text-white'
+                              : 'border-slate-300 dark:border-slate-600'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-3 h-3" />}
+                        </div>
                       </div>
-                    </div>
+                      {isLastSelected && (
+                        <div className="my-1.5 border-b border-slate-100 dark:border-slate-800" />
+                      )}
+                    </React.Fragment>
                   );
                 })
               )}
