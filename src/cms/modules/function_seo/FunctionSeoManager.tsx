@@ -40,7 +40,7 @@ import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { CmsPagination } from '../../components/ui/CmsPagination';
 import { CmsTabs } from '../../components/ui/CmsTabs';
 import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
-import type { FunctionSeoRecord, SeoFacetLevel, RedirectRule, SeoHealthMetrics } from '@/features/function-seo/types';
+import type { FunctionSeoRecord, SeoFacetLevel, RedirectRule, SeoHealthMetrics, SeoWarningItem } from '@/features/function-seo/types';
 
 interface Props {
   workspaceLocale?: CmsLocale;
@@ -175,15 +175,33 @@ export const FunctionSeoManager: React.FC<Props> = ({
     setRecords((current) =>
       current.map((item) => {
         if (item.id !== editingFacet.recordId) return item;
+        const existing = item.facetLevels || [];
+        const index = existing.findIndex((f) => f.id === updatedFacet.id);
+        const updatedLevels =
+          index >= 0
+            ? existing.map((f, i) => (i === index ? updatedFacet : f))
+            : [...existing, updatedFacet];
         return {
           ...item,
           updatedAt: new Date().toISOString(),
-          facetLevels: item.facetLevels?.map((f) => (f.id === updatedFacet.id ? updatedFacet : f)),
+          facetLevels: updatedLevels,
         };
       })
     );
     setEditingFacet(null);
     notify(`Đã lưu mẫu SEO cho "${updatedFacet.title}".`);
+  };
+
+  const handleEditWarningDirect = (recordId: string) => {
+    const target =
+      records.find((r) => r.id === recordId || r.path === recordId || r.routeKey === recordId) ||
+      records.find((r) => recordId.includes(r.path) || r.path.includes(recordId));
+
+    if (target) {
+      setEditingMain({ ...target });
+    } else {
+      toast.error('Không tìm thấy bản ghi cấu hình SEO tương ứng.');
+    }
   };
 
   const toggle = (id: string) =>
@@ -247,6 +265,7 @@ export const FunctionSeoManager: React.FC<Props> = ({
           }}
           onOpenRedirects={() => setActiveSection('redirects')}
           onNavigate={navigateTo}
+          onEditDirect={handleEditWarningDirect}
         />
       )}
 
@@ -445,11 +464,12 @@ export const FunctionSeoManager: React.FC<Props> = ({
                                   {facet.href && (
                                     <CmsButton
                                       size="sm"
-                                      variant="secondary"
+                                      variant="ghost"
                                       trailingIcon={<ExternalLink className="h-3 w-3" />}
                                       onClick={() => navigateTo(facet.href!)}
+                                      title="Chuyển đến trang quản lý dữ liệu nguồn"
                                     >
-                                      Quản lý
+                                      Mở nguồn
                                     </CmsButton>
                                   )}
                                 </div>
@@ -460,54 +480,140 @@ export const FunctionSeoManager: React.FC<Props> = ({
                       </div>
 
                       {/* CẤP 2 (Trang danh mục) */}
-                      {!hasFacets && item.categoryPattern && (
-                        <div className="relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                          <div className="min-w-0 space-y-0.5">
-                            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 font-mono text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                2
-                              </span>
-                              <span>Trang danh mục</span>
-                              <span className="font-mono text-[11px] font-normal text-slate-500">{item.categoryPattern}</span>
+                      {!hasFacets && item.categoryPattern && (() => {
+                        const existingCatFacet = item.facetLevels?.find((f) => f.id === `cat_${item.id}`);
+                        const catFacet: SeoFacetLevel = existingCatFacet || {
+                          id: `cat_${item.id}`,
+                          number: '2',
+                          title: `Danh mục ${item.label}`,
+                          facetType: 'category',
+                          pattern: item.categoryPattern || '',
+                          owner: item.categoryOwner || 'Ban Biên Tập',
+                          status: 'available',
+                          href: item.categoryPath,
+                          description: `Mẫu SEO cho trang danh mục ${item.label}`,
+                          titleTemplate: `${item.label} theo danh mục | {Tên danh mục}`,
+                          keywordsTemplate: `{Tên danh mục}, ${item.label.toLowerCase()}, danh mục`,
+                          descriptionTemplate: `Danh sách các mục thuộc danh mục {Tên danh mục} của ${item.label}.`,
+                        };
+
+                        return (
+                          <div className="relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                            <div className="min-w-0 space-y-0.5">
+                              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 font-mono text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                  2
+                                </span>
+                                <span>Trang danh mục</span>
+                                <span className="font-mono text-[11px] font-normal text-slate-500">{item.categoryPattern}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-500">Quản lý tại: {item.categoryOwner}</p>
+                              {catFacet.titleTemplate && (
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                                  Mẫu Title: <span className="font-mono text-orange-600 dark:text-orange-400">{catFacet.titleTemplate}</span>
+                                </p>
+                              )}
                             </div>
-                            <p className="text-[11px] text-slate-500">Quản lý tại: {item.categoryOwner}</p>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {capabilities.canEdit && (
+                                <CmsButton
+                                  size="sm"
+                                  variant="secondary"
+                                  leadingIcon={<Edit3 className="h-3 w-3" />}
+                                  onClick={() =>
+                                    setEditingFacet({
+                                      recordId: item.id,
+                                      recordLabel: item.label,
+                                      facet: { ...catFacet },
+                                    })
+                                  }
+                                >
+                                  Sửa SEO
+                                </CmsButton>
+                              )}
+                              {item.categoryPath && (
+                                <CmsButton
+                                  size="sm"
+                                  variant="ghost"
+                                  trailingIcon={<ExternalLink className="h-3 w-3" />}
+                                  onClick={() => navigateTo(item.categoryPath!)}
+                                  title="Chuyển đến trang quản lý dữ liệu nguồn"
+                                >
+                                  Mở nguồn
+                                </CmsButton>
+                              )}
+                            </div>
                           </div>
-                          {item.categoryPath && (
-                            <CmsButton
-                              size="sm"
-                              variant="secondary"
-                              trailingIcon={<ExternalLink className="h-3 w-3" />}
-                              onClick={() => navigateTo(item.categoryPath!)}
-                            >
-                              Quản lý
-                            </CmsButton>
-                          )}
-                        </div>
-                      )}
+                        );
+                      })()}
 
                       {/* CẤP CHI TIẾT */}
-                      <div className="relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                        <div className="min-w-0 space-y-0.5">
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 font-mono text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                              {hasFacets ? '2' : item.categoryPattern ? '3' : '2'}
-                            </span>
-                            <span>Trang chi tiết</span>
-                            <span className="font-mono text-[11px] font-normal text-slate-500">{item.detailPattern}</span>
+                      {(() => {
+                        const existingDetailFacet = item.facetLevels?.find((f) => f.id === `detail_${item.id}`);
+                        const detailFacet: SeoFacetLevel = existingDetailFacet || {
+                          id: `detail_${item.id}`,
+                          number: hasFacets ? '2' : item.categoryPattern ? '3' : '2',
+                          title: `Trang chi tiết ${item.label}`,
+                          facetType: 'custom',
+                          pattern: item.detailPattern || '',
+                          owner: item.detailOwner || 'Quản trị viên',
+                          status: 'available',
+                          href: item.detailPath,
+                          description: `Mẫu SEO mặc định cho trang chi tiết ${item.label}`,
+                          titleTemplate: `{Tên bài viết/sản phẩm} | ${item.label} - CIC`,
+                          keywordsTemplate: `{Tên bài viết/sản phẩm}, ${item.label.toLowerCase()}`,
+                          descriptionTemplate: `Thông tin chi tiết về {Tên bài viết/sản phẩm}. Đơn vị cung cấp giải pháp CIC.`,
+                        };
+
+                        return (
+                          <div className="relative flex items-center justify-between gap-3 rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                            <div className="min-w-0 space-y-0.5">
+                              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 font-mono text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                  {hasFacets ? '2' : item.categoryPattern ? '3' : '2'}
+                                </span>
+                                <span>Trang chi tiết</span>
+                                <span className="font-mono text-[11px] font-normal text-slate-500">{item.detailPattern}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-500">Quản lý SEO trực tiếp tại: {item.detailOwner}</p>
+                              {detailFacet.titleTemplate && (
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                                  Mẫu Title: <span className="font-mono text-orange-600 dark:text-orange-400">{detailFacet.titleTemplate}</span>
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {capabilities.canEdit && (
+                                <CmsButton
+                                  size="sm"
+                                  variant="secondary"
+                                  leadingIcon={<Edit3 className="h-3 w-3" />}
+                                  onClick={() =>
+                                    setEditingFacet({
+                                      recordId: item.id,
+                                      recordLabel: item.label,
+                                      facet: { ...detailFacet },
+                                    })
+                                  }
+                                >
+                                  Sửa SEO mẫu
+                                </CmsButton>
+                              )}
+                              {item.detailPath && item.detailStatus === 'available' && (
+                                <CmsButton
+                                  size="sm"
+                                  variant="ghost"
+                                  trailingIcon={<ExternalLink className="h-3 w-3" />}
+                                  onClick={() => navigateTo(item.detailPath)}
+                                  title="Chuyển đến trang quản lý dữ liệu nguồn"
+                                >
+                                  Mở nguồn
+                                </CmsButton>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-[11px] text-slate-500">Quản lý SEO trực tiếp tại: {item.detailOwner}</p>
-                        </div>
-                        {item.detailPath && item.detailStatus === 'available' && (
-                          <CmsButton
-                            size="sm"
-                            variant="secondary"
-                            trailingIcon={<ExternalLink className="h-3 w-3" />}
-                            onClick={() => navigateTo(item.detailPath)}
-                          >
-                            Quản lý
-                          </CmsButton>
-                        )}
-                      </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </section>
@@ -562,18 +668,60 @@ function SeoOverview({
   onOpenTemplates,
   onOpenRedirects,
   onNavigate,
+  onEditDirect,
 }: {
   records: FunctionSeoRecord[];
   metrics?: SeoHealthMetrics;
   onOpenTemplates: (filter?: 'all' | 'noindex' | 'missing-description' | 'missing-owner') => void;
   onOpenRedirects: () => void;
   onNavigate: (href: string) => void;
+  onEditDirect?: (recordId: string) => void;
 }) {
   const totalPages = metrics?.totalPages ?? records.length;
-  const noindexCount = metrics?.noindexCount ?? records.filter((r) => !r.indexable).length;
-  const missingDescription = metrics?.missingDescriptionCount ?? records.filter((r) => !r.description.trim()).length;
-  const missingTitles = metrics?.missingTitleCount ?? records.filter((r) => !r.title.trim()).length;
-  const warnings = metrics?.warnings ?? [];
+  const noindexCount = records.filter((r) => !r.indexable).length;
+  const missingDescription = records.filter((r) => !r.description.trim()).length;
+  const missingTitles = records.filter((r) => !r.title.trim()).length;
+
+  const activeWarnings = useMemo(() => {
+    const baseWarnings = metrics?.warnings ?? [];
+    if (!baseWarnings || baseWarnings.length === 0) {
+      const generated: SeoWarningItem[] = [];
+      for (const r of records) {
+        const issues: string[] = [];
+        if (!r.title.trim()) issues.push('Chưa cấu hình Tiêu đề SEO (Title)');
+        if (!r.description.trim()) issues.push('Thiếu thẻ mô tả Meta Description');
+        if (!r.indexable) issues.push('Đang tắt lập chỉ mục Google (noindex)');
+        if (issues.length > 0) {
+          generated.push({
+            id: r.id,
+            path: r.path,
+            label: r.label,
+            severity: !r.indexable || !r.title.trim() ? 'high' : 'medium',
+            issues,
+            editUrl: r.module === 'products' ? '/cms/products' : r.module === 'news' ? '/cms/news' : '/cms/function-seo',
+          });
+        }
+      }
+      return generated;
+    }
+
+    return baseWarnings
+      .map((w) => {
+        const live = records.find((r) => r.id === w.id || r.path === w.path);
+        if (!live) return w;
+        const issues: string[] = [];
+        if (!live.title.trim()) issues.push('Chưa cấu hình Tiêu đề SEO (Title)');
+        if (!live.description.trim()) issues.push('Thiếu thẻ mô tả Meta Description');
+        if (!live.indexable) issues.push('Đang tắt lập chỉ mục Google (noindex)');
+        return {
+          ...w,
+          label: live.label,
+          issues,
+          severity: (!live.indexable || !live.title.trim()) ? ('high' as const) : ('medium' as const),
+        };
+      })
+      .filter((w) => w.issues.length > 0);
+  }, [metrics?.warnings, records]);
 
   const healthItems = [
     { label: 'Tổng số trang', value: totalPages, note: 'Trang hệ thống và bài viết', tone: 'blue', filter: 'all' },
@@ -635,22 +783,22 @@ function SeoOverview({
       </section>
 
       {/* Cảnh báo trang cần xử lý ngay */}
-      {warnings.length > 0 && (
+      {activeWarnings.length > 0 && (
         <section className="rounded-xl border border-amber-200 bg-white shadow-xs dark:border-amber-900/50 dark:bg-slate-900 overflow-hidden">
           <div className="flex items-center justify-between border-b border-amber-100 bg-amber-50/60 px-5 py-3 dark:border-amber-900/40 dark:bg-amber-950/20">
             <div className="flex items-center gap-2">
               <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" />
               <h3 className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                Các trang phát hiện thiếu SEO cần khắc phục ({warnings.length})
+                Các trang phát hiện thiếu SEO cần khắc phục ({activeWarnings.length})
               </h3>
             </div>
             <span className="text-[11px] text-amber-700 dark:text-amber-300">
-              Đối chiếu theo mục 2.3 functional spec
+              Sửa trực tiếp bằng modal hoặc mở trang nguồn
             </span>
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {warnings.map((w) => (
+            {activeWarnings.map((w) => (
               <div key={w.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/40">
                 <div>
                   <div className="flex items-center gap-2">
@@ -667,28 +815,41 @@ function SeoOverview({
                     </span>
                   </div>
                   <div className="mt-1 flex flex-wrap gap-1.5">
-                    {w.issues.map((issue, idx) => (
+                    {w.issues.map((issue: string, idx: number) => (
                       <span key={idx} className="text-xs text-rose-600 dark:text-rose-400">
                         • {issue}
                       </span>
                     ))}
                   </div>
                 </div>
-                <div className="shrink-0">
-                  <CmsButton
-                    size="sm"
-                    variant="secondary"
-                    trailingIcon={<ArrowRight className="size-3.5" />}
-                    onClick={() => {
-                      if (w.editUrl === '/cms/function-seo') {
-                        onOpenTemplates('missing-description');
-                      } else {
-                        onNavigate(w.editUrl);
-                      }
-                    }}
-                  >
-                    Sửa tại nguồn
-                  </CmsButton>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {onEditDirect && (
+                    <CmsButton
+                      size="sm"
+                      variant="primary"
+                      leadingIcon={<Edit3 className="size-3.5" />}
+                      onClick={() => onEditDirect(w.id)}
+                    >
+                      Sửa SEO trực tiếp
+                    </CmsButton>
+                  )}
+                  {w.editUrl && (
+                    <CmsButton
+                      size="sm"
+                      variant="ghost"
+                      trailingIcon={<ExternalLink className="size-3.5" />}
+                      onClick={() => {
+                        if (w.editUrl === '/cms/function-seo') {
+                          onOpenTemplates('missing-description');
+                        } else {
+                          onNavigate(w.editUrl);
+                        }
+                      }}
+                      title="Chuyển đến trang nguồn module"
+                    >
+                      Mở nguồn
+                    </CmsButton>
+                  )}
                 </div>
               </div>
             ))}
@@ -1213,6 +1374,7 @@ function FacetSeoEditor({
   onSave: (updated: SeoFacetLevel) => void;
 }) {
   const [formState, setFormState] = useState<SeoFacetLevel>({ ...facet });
+  const [focusedField, setFocusedField] = useState<'title' | 'keywords' | 'description'>('title');
 
   const dynamicTags = useMemo(() => {
     switch (formState.facetType) {
@@ -1225,16 +1387,34 @@ function FacetSeoEditor({
       case 'product_type':
         return ['{Tên loại sản phẩm}'];
       default:
-        return ['{Tên lĩnh vực}'];
+        return ['{Tên bài viết/sản phẩm}', '{Tên danh mục}', '{Tên lĩnh vực}'];
     }
   }, [formState.facetType]);
 
   const insertTag = (tag: string) => {
-    setFormState((prev) => ({
-      ...prev,
-      titleTemplate: (prev.titleTemplate || '') + (prev.titleTemplate ? ' ' : '') + tag,
-    }));
+    setFormState((prev) => {
+      if (focusedField === 'description') {
+        const cur = prev.descriptionTemplate || '';
+        return { ...prev, descriptionTemplate: cur + (cur ? ' ' : '') + tag };
+      }
+      if (focusedField === 'keywords') {
+        const cur = prev.keywordsTemplate || '';
+        return { ...prev, keywordsTemplate: cur + (cur ? ', ' : '') + tag };
+      }
+      const cur = prev.titleTemplate || '';
+      return { ...prev, titleTemplate: cur + (cur ? ' ' : '') + tag };
+    });
   };
+
+  const previewTitle = (formState.titleTemplate || formState.title || moduleLabel)
+    .replace(/\{.*?\}/g, 'Ví dụ');
+  const previewDesc = (formState.descriptionTemplate || formState.description || 'Chưa cấu hình mô tả mẫu...')
+    .replace(/\{.*?\}/g, 'Ví dụ');
+  const previewPath = (formState.pattern || '/[slug]')
+    .replace('[category]', 'phan-mem')
+    .replace('[brand]', 'autodesk')
+    .replace('[type]', 'ban-quyen')
+    .replace('[slug]', 'chi-tiet');
 
   return (
     <div
@@ -1258,7 +1438,7 @@ function FacetSeoEditor({
 
         <div className="space-y-3.5 p-5">
           <div className="rounded-lg bg-amber-50/70 p-2.5 text-xs text-amber-900 dark:bg-amber-950/30 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/40">
-            Bạn có thể nhập nội dung cố định hoặc bấm chèn các biến tự động dưới đây để hệ thống tự điền theo từng mục khi người dùng truy cập.
+            Bạn có thể nhập nội dung cố định hoặc bấm chèn các biến tự động dưới đây để hệ thống tự điền theo từng mục khi người dùng truy cập. Biến sẽ được chèn vào trường đang chọn (hiện tại: <strong>{focusedField === 'title' ? 'Tiêu đề' : focusedField === 'keywords' ? 'Từ khóa' : 'Mô tả'}</strong>).
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
@@ -1275,24 +1455,52 @@ function FacetSeoEditor({
             ))}
           </div>
 
-          <Field label="Tiêu đề SEO (Title)" count={`${(formState.titleTemplate || '').length}/60`}>
+          <Field label="Mẫu Tiêu đề SEO (Title Template)" count={`${(formState.titleTemplate || '').length}/60`}>
             <input
               className={inputClass}
               value={formState.titleTemplate || ''}
+              onFocus={() => setFocusedField('title')}
               onChange={(e) => setFormState({ ...formState, titleTemplate: e.target.value })}
               placeholder="VD: {Tên danh mục} - Phần mềm & Giải pháp | CIC"
             />
           </Field>
 
-          <Field label="Mô tả (Meta Description)" count={`${(formState.descriptionTemplate || '').length}/160`}>
+          <Field label="Mẫu Từ khóa (Keywords Template)">
+            <input
+              className={inputClass}
+              value={formState.keywordsTemplate || ''}
+              onFocus={() => setFocusedField('keywords')}
+              onChange={(e) => setFormState({ ...formState, keywordsTemplate: e.target.value })}
+              placeholder="VD: {Tên danh mục}, bản quyền, giải pháp"
+            />
+          </Field>
+
+          <Field label="Mẫu Mô tả (Description Template)" count={`${(formState.descriptionTemplate || '').length}/160`}>
             <textarea
               rows={3}
               className={inputClass}
               value={formState.descriptionTemplate || ''}
+              onFocus={() => setFocusedField('description')}
               onChange={(e) => setFormState({ ...formState, descriptionTemplate: e.target.value })}
               placeholder="VD: Danh sách các giải pháp chuyên dụng thuộc {Tên danh mục}..."
             />
           </Field>
+
+          {/* SERP Preview */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-950/50">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Xem trước kết quả Google mẫu (SERP Preview)</p>
+            <div className="font-sans space-y-1">
+              <p className="text-xs text-[#202124] dark:text-slate-400 font-mono">
+                https://cic.com.vn{previewPath}
+              </p>
+              <h3 className="text-sm font-semibold text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer line-clamp-1">
+                {previewTitle} | CIC Technology
+              </h3>
+              <p className="text-xs text-[#4d5156] dark:text-[#bdc1c6] line-clamp-2">
+                {previewDesc}
+              </p>
+            </div>
+          </div>
         </div>
 
         <footer className="sticky bottom-0 flex justify-end gap-2 border-t border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900">
