@@ -67,6 +67,7 @@ export async function POST(
       spreadsheetId,
       spreadsheetTitle: testResult.spreadsheetTitle,
       sheets: testResult.sheets || [],
+      activeSheet: testResult.activeSheet,
       headers: testResult.headers || [],
       suggestedMapping,
     });

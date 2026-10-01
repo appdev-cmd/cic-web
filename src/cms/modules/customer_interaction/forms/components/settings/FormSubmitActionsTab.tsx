@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, FileSpreadsheet, Mail, Eye, Check, Copy, RefreshCw, AlertCircle, Sparkles, ExternalLink } from 'lucide-react';
+import { Database, FileSpreadsheet, Mail, Eye, Check, Copy, RefreshCw, AlertCircle, Sparkles, ExternalLink, Trash2, Plus, Info } from 'lucide-react';
 import { FormFormData } from '../../types';
 import { EMAIL_EVENTS, TEMPLATE_STATUSES, type EmailTemplate } from '../../../../email_templates/types';
 import { CmsButton } from '../../../../../components/ui/CmsButton';
@@ -35,6 +35,7 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
     success: boolean;
     title?: string;
     sheets?: string[];
+    activeSheet?: string;
     headers?: string[];
     error?: string;
   } | null>(null);
@@ -157,16 +158,19 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
           error: data.error || 'Kiểm tra kết nối thất bại.',
         });
       } else {
+        const effectiveSheet = data.activeSheet || (data.sheets && data.sheets.length > 0 ? (data.sheets.includes(sheetsConfig.sheetName) ? sheetsConfig.sheetName : data.sheets[0]) : sheetsConfig.sheetName);
+
         setTestResult({
           success: true,
           title: data.spreadsheetTitle,
           sheets: data.sheets,
+          activeSheet: effectiveSheet,
           headers: data.headers,
         });
 
-        // If sheet tabs available and current tab is not in list, auto-select first sheet
-        if (data.sheets && data.sheets.length > 0 && !data.sheets.includes(sheetsConfig.sheetName)) {
-          updateSheetsDestination({ sheetName: data.sheets[0] });
+        // Auto-select correct sheet tab if changed
+        if (effectiveSheet && effectiveSheet !== sheetsConfig.sheetName) {
+          updateSheetsDestination({ sheetName: effectiveSheet });
         }
 
         let finalMapping = data.suggestedMapping;
@@ -198,6 +202,45 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
       }
     } catch (err: any) {
       setTestResult({ success: false, error: err?.message || 'Lỗi mạng khi kiểm tra kết nối.' });
+    } finally {
+      setIsTestingSheets(false);
+    }
+  };
+
+  const handleSheetTabChange = async (newTab: string) => {
+    updateSheetsDestination({ sheetName: newTab });
+    if (!sheetsConfig.spreadsheetId) return;
+
+    setIsTestingSheets(true);
+    setInitHeaderSuccess(null);
+
+    try {
+      const res = await fetch(`/api/cms/forms/${formId || 'new'}/destinations/google-sheets/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spreadsheetId: sheetsConfig.spreadsheetId,
+          sheetName: newTab,
+          fields: formData.fields,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTestResult({
+          success: true,
+          title: data.spreadsheetTitle,
+          sheets: data.sheets,
+          activeSheet: newTab,
+          headers: data.headers,
+        });
+
+        if (data.suggestedMapping && data.suggestedMapping.length > 0) {
+          updateSheetsDestination({ sheetName: newTab, columnMapping: data.suggestedMapping });
+        }
+      }
+    } catch {
+      // silent
     } finally {
       setIsTestingSheets(false);
     }
@@ -412,13 +455,27 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                     <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Tên Trang tính (Sheet Tab)
                     </label>
-                    <input
-                      type="text"
-                      value={sheetsConfig.sheetName || 'Sheet1'}
-                      onChange={(e) => updateSheetsDestination({ sheetName: e.target.value })}
-                      placeholder="Sheet1 hoặc Trang tính1"
-                      className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs bg-white dark:bg-slate-800 font-mono"
-                    />
+                    {testResult?.sheets && testResult.sheets.length > 0 ? (
+                      <select
+                        value={sheetsConfig.sheetName || testResult.activeSheet || testResult.sheets[0]}
+                        onChange={(e) => handleSheetTabChange(e.target.value)}
+                        className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200"
+                      >
+                        {testResult.sheets.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={sheetsConfig.sheetName || 'Sheet1'}
+                        onChange={(e) => updateSheetsDestination({ sheetName: e.target.value })}
+                        placeholder="Sheet1 hoặc Trang tính 1"
+                        className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs bg-white dark:bg-slate-800 font-mono"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -507,69 +564,130 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                 </div>
 
                 {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 ? (
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold text-left">
-                          <th className="py-2 px-3 w-1/2">Cột trên Google Sheet (Tiêu đề hàng 1)</th>
-                          <th className="py-2 px-3 w-1/2">Trường dữ liệu ghi vào</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {sheetsConfig.columnMapping.map((col, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                            <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-200">
-                              {col.sheetHeader}
-                            </td>
-                            <td className="py-2 px-3">
-                              <select
-                                value={col.sourceType === 'system' ? `sys:${col.sourceKey}` : `field:${col.sourceKey}`}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  const newMapping = [...sheetsConfig.columnMapping];
-                                  if (val.startsWith('sys:')) {
-                                    newMapping[idx] = {
-                                      sheetHeader: col.sheetHeader,
-                                      sourceType: 'system',
-                                      sourceKey: val.replace('sys:', ''),
-                                    };
-                                  } else if (val.startsWith('field:')) {
-                                    newMapping[idx] = {
-                                      sheetHeader: col.sheetHeader,
-                                      sourceType: 'field',
-                                      sourceKey: val.replace('field:', ''),
-                                    };
-                                  } else {
-                                    newMapping[idx] = {
-                                      sheetHeader: col.sheetHeader,
-                                      sourceType: 'field',
-                                      sourceKey: '',
-                                    };
-                                  }
-                                  updateSheetsDestination({ columnMapping: newMapping });
-                                }}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                              >
-                                <option value="">-- Không ghi vào cột này --</option>
-                                <optgroup label="Dữ liệu hệ thống">
-                                  <option value="sys:submitted_at">Ngày giờ gửi (submitted_at)</option>
-                                  <option value="sys:submission_id">Mã lượt gửi (submission_id)</option>
-                                  <option value="sys:source_path">Đường dẫn trang gửi (source_path)</option>
-                                  <option value="sys:form_title">Tiêu đề biểu mẫu (form_title)</option>
-                                </optgroup>
-                                <optgroup label="Các trường của biểu mẫu này">
-                                  {formData.fields.map((f) => (
-                                    <option key={f.fieldKey} value={`field:${f.fieldKey}`}>
-                                      {f.label} ({f.fieldKey})
-                                    </option>
-                                  ))}
-                                </optgroup>
-                              </select>
-                            </td>
+                  <div className="space-y-2.5">
+                    <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/40 rounded-xl text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2.5">
+                      <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                      <div className="space-y-1">
+                        <div className="font-semibold text-[11.5px]">Cách xử lý các cột trên Google Sheet:</div>
+                        <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-blue-800/90 dark:text-blue-300/90">
+                          <li>Nếu bảng tính có <strong>cột nội bộ</strong> (như <em>Trạng thái xử lý, Nhân viên phụ trách, Ghi chú</em>) mà không cần Form điền, hãy chọn <strong>"-- Để trống cột này (không ghi dữ liệu) --"</strong>. Hệ thống sẽ giữ nguyên ô trống mà không làm xô lệch thứ tự cột.</li>
+                          <li>Bạn có thể bấm biểu tượng <strong>thùng rác</strong> để xóa bớt cột không dùng, hoặc bấm <strong>"+ Thêm cột ghép mới"</strong> để tự tạo thêm cột theo ý muốn.</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold text-left">
+                            <th className="py-2.5 px-3 w-[45%]">Cột trên Google Sheet</th>
+                            <th className="py-2.5 px-3 w-[45%]">Trường dữ liệu ghi vào</th>
+                            <th className="py-2.5 px-3 w-[10%] text-center">Xóa</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {sheetsConfig.columnMapping.map((col, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                              <td className="py-2 px-3">
+                                <input
+                                  type="text"
+                                  value={col.sheetHeader}
+                                  onChange={(e) => {
+                                    const newMapping = [...sheetsConfig.columnMapping];
+                                    newMapping[idx] = { ...newMapping[idx], sheetHeader: e.target.value };
+                                    updateSheetsDestination({ columnMapping: newMapping });
+                                  }}
+                                  placeholder={`Cột ${idx + 1}`}
+                                  className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-800 dark:text-slate-200"
+                                />
+                              </td>
+                              <td className="py-2 px-3">
+                                <select
+                                  value={col.sourceType === 'system' ? `sys:${col.sourceKey}` : (col.sourceKey ? `field:${col.sourceKey}` : '')}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    const newMapping = [...sheetsConfig.columnMapping];
+                                    if (val.startsWith('sys:')) {
+                                      newMapping[idx] = {
+                                        sheetHeader: col.sheetHeader,
+                                        sourceType: 'system',
+                                        sourceKey: val.replace('sys:', ''),
+                                      };
+                                    } else if (val.startsWith('field:')) {
+                                      newMapping[idx] = {
+                                        sheetHeader: col.sheetHeader,
+                                        sourceType: 'field',
+                                        sourceKey: val.replace('field:', ''),
+                                      };
+                                    } else {
+                                      newMapping[idx] = {
+                                        sheetHeader: col.sheetHeader,
+                                        sourceType: 'field',
+                                        sourceKey: '',
+                                      };
+                                    }
+                                    updateSheetsDestination({ columnMapping: newMapping });
+                                  }}
+                                  className={`w-full px-2.5 py-1.5 rounded-lg border text-xs ${
+                                    !col.sourceKey
+                                      ? 'border-amber-200 dark:border-amber-800/60 bg-amber-50/50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300'
+                                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                                  }`}
+                                >
+                                  <option value="">-- Để trống cột này (không ghi dữ liệu) --</option>
+                                  <optgroup label="Dữ liệu hệ thống">
+                                    <option value="sys:submitted_at">Ngày giờ gửi (submitted_at)</option>
+                                    <option value="sys:submission_id">Mã lượt gửi (submission_id)</option>
+                                    <option value="sys:source_path">Đường dẫn trang gửi (source_path)</option>
+                                    <option value="sys:form_title">Tiêu đề biểu mẫu (form_title)</option>
+                                  </optgroup>
+                                  <optgroup label="Các trường của biểu mẫu này">
+                                    {formData.fields.map((f) => (
+                                      <option key={f.fieldKey} value={`field:${f.fieldKey}`}>
+                                        {f.label} ({f.fieldKey})
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                </select>
+                              </td>
+                              <td className="py-2 px-3 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newMapping = sheetsConfig.columnMapping.filter((_, i) => i !== idx);
+                                    updateSheetsDestination({ columnMapping: newMapping });
+                                  }}
+                                  title="Xóa cột này"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newMapping = [
+                            ...sheetsConfig.columnMapping,
+                            { sheetHeader: `Cột ${sheetsConfig.columnMapping.length + 1}`, sourceType: 'field' as const, sourceKey: '' },
+                          ];
+                          updateSheetsDestination({ columnMapping: newMapping });
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs text-orange-600 hover:text-orange-700 font-medium px-2 py-1 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Thêm cột ghép mới
+                      </button>
+
+                      <span className="text-[11px] text-slate-400">
+                        {sheetsConfig.columnMapping.length} cột ({sheetsConfig.columnMapping.filter((c) => c.sourceKey).length} cột nhận dữ liệu, {sheetsConfig.columnMapping.filter((c) => !c.sourceKey).length} cột để trống)
+                      </span>
+                    </div>
                   </div>
                 ) : (
                   <div className="py-6 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-3">

@@ -5,6 +5,7 @@ export interface GoogleSheetMetadataResult {
   success: boolean;
   spreadsheetTitle?: string;
   sheets?: string[];
+  activeSheet?: string;
   headers?: string[];
   error?: string;
 }
@@ -66,16 +67,22 @@ function parseGoogleApiError(err: any): string {
   return `Lỗi từ Google Sheets: ${msg.slice(0, 150)}`;
 }
 
+export function formatSheetRange(sheetName: string, subRange: string): string {
+  const clean = (sheetName || 'Sheet1').trim();
+  const escaped = clean.replace(/'/g, "''");
+  return `'${escaped}'!${subRange}`;
+}
+
 export async function testGoogleSheetAccess(
   spreadsheetId: string,
   sheetName?: string
 ): Promise<GoogleSheetMetadataResult> {
-    if (!hasGoogleServiceAccountCredentials()) {
-      return {
-        success: false,
-        error: 'Hệ thống chưa được cấu hình tài khoản Google Service Account trên server (thiếu file JSON credentials hoặc biến GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY).',
-      };
-    }
+  if (!hasGoogleServiceAccountCredentials()) {
+    return {
+      success: false,
+      error: 'Hệ thống chưa được cấu hình tài khoản Google Service Account trên server (thiếu file JSON credentials hoặc biến GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY).',
+    };
+  }
 
   try {
     const sheets = getGoogleSheetsClient();
@@ -91,21 +98,34 @@ export async function testGoogleSheetAccess(
       .map((s) => s.properties?.title)
       .filter((t): t is string => Boolean(t));
 
-    const targetSheet = sheetName || sheetTitles[0] || 'Sheet1';
+    // If requested sheetName exists in sheetTitles use it; otherwise prefer first sheet tab
+    const targetSheet = (sheetName && sheetTitles.includes(sheetName))
+      ? sheetName
+      : (sheetTitles[0] || sheetName || 'Sheet1');
 
-    // 2. Fetch row 1 headers
+    // 2. Fetch row 1 & row 2 headers
     let headers: string[] = [];
     try {
       const headerRes = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `${targetSheet}!1:1`,
+        range: formatSheetRange(targetSheet, '1:2'),
       });
       const rows = headerRes.data.values;
-      if (rows && rows.length > 0 && Array.isArray(rows[0])) {
-        headers = rows[0].map((h) => String(h || '').trim()).filter(Boolean);
+      if (rows && rows.length > 0) {
+        const row1 = Array.isArray(rows[0]) ? rows[0].map((h) => String(h || '').trim()).filter(Boolean) : [];
+        const row2 = Array.isArray(rows[1]) ? rows[1].map((h) => String(h || '').trim()).filter(Boolean) : [];
+
+        // If row 1 is a merged title banner or single cell while row 2 has multiple columns, use row 2
+        if (row1.length <= 1 && row2.length > 1) {
+          headers = row2;
+        } else if (row1.length > 0) {
+          headers = row1;
+        } else if (row2.length > 0) {
+          headers = row2;
+        }
       }
-    } catch {
-      // Row 1 read error is non-fatal if sheet tab is empty
+    } catch (readErr) {
+      console.warn('[testGoogleSheetAccess] Header read warning:', readErr);
       headers = [];
     }
 
@@ -113,6 +133,7 @@ export async function testGoogleSheetAccess(
       success: true,
       spreadsheetTitle,
       sheets: sheetTitles,
+      activeSheet: targetSheet,
       headers,
     };
   } catch (err: any) {
@@ -130,14 +151,21 @@ export async function getGoogleSheetHeaders(
   const sheets = getGoogleSheetsClient();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: `${sheetName}!1:1`,
+    range: formatSheetRange(sheetName, '1:2'),
   });
 
   const rows = res.data.values;
-  if (!rows || rows.length === 0 || !Array.isArray(rows[0])) {
+  if (!rows || rows.length === 0) {
     return [];
   }
-  return rows[0].map((h) => String(h || '').trim()).filter(Boolean);
+  const row1 = Array.isArray(rows[0]) ? rows[0].map((h) => String(h || '').trim()).filter(Boolean) : [];
+  const row2 = Array.isArray(rows[1]) ? rows[1].map((h) => String(h || '').trim()).filter(Boolean) : [];
+
+  if (row1.length <= 1 && row2.length > 1) {
+    return row2;
+  }
+  if (row1.length > 0) return row1;
+  return row2;
 }
 
 export async function initializeGoogleSheetHeaders(
@@ -150,7 +178,7 @@ export async function initializeGoogleSheetHeaders(
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `${sheetName}!A1`,
+    range: formatSheetRange(sheetName, 'A1'),
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [headers],
@@ -169,7 +197,7 @@ export async function appendGoogleSheetRow(
 
   const res = await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: `${sheetName}!A1`,
+    range: formatSheetRange(sheetName, 'A1'),
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
     requestBody: {
@@ -182,3 +210,4 @@ export async function appendGoogleSheetRow(
     updatedRange: res.data.updates?.updatedRange || undefined,
   };
 }
+
