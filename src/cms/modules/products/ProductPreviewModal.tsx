@@ -24,7 +24,7 @@ export const ProductPreviewModal: React.FC<Props> = ({ isOpen, product, categori
     id: numericId, name: product.name || product.title || 'Sản phẩm mới (Bản xem trước)', price: product.price || product.price_old || 'Liên hệ',
     description: product.summary || product.short_description || '', desc: product.description || product.content_html || '', field: category, brand,
     app: applicationNames.join(', ') || category, img: normalizeProductMediaUrl(product.image), productType,
-    slides: (product.gallery?.length ? product.gallery : product.image ? [product.image] : []).map(normalizeProductMediaUrl),
+    slides: (product.gallery?.length ? product.gallery : product.image ? [product.image] : []).map(normalizeProductMediaUrl).filter(Boolean),
     overviewHtml: normalizeProductHtml(product.description || product.content_html), featuresHtml: normalizeProductHtml(product.feature_details),
     videoUrl: extractProductVideoUrl(product.video || product.video_url), documents,
   };

@@ -27,7 +27,8 @@ import {
   ExternalLink,
   MessageSquare,
   PhoneCall,
-  ShoppingCart
+  ShoppingCart,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Product } from '@shared/types';
 import { useI18n } from '@/shared/i18n';
@@ -176,10 +177,21 @@ export function ProductDetailView({
   // Product slideshow images
   const slideImages = useMemo(() => {
     if (product.slides && product.slides.length > 0) {
-      return product.slides;
+      const validSlides = product.slides.map((s) => String(s ?? '').trim()).filter(Boolean);
+      if (validSlides.length > 0) return validSlides;
     }
-    return [product.img];
+    const mainImg = String(product.img ?? '').trim();
+    if (mainImg) {
+      return [mainImg];
+    }
+    return [];
   }, [product.slides, product.img]);
+
+  useEffect(() => {
+    if (currentSlide >= slideImages.length) {
+      setCurrentSlide(0);
+    }
+  }, [slideImages.length, currentSlide]);
 
   // Next / Prev slide handlers
   const handleNextSlide = () => {
@@ -228,32 +240,39 @@ export function ProductDetailView({
               
               {/* Slideshow image container */}
               <div className="w-full h-full bg-slate-50 relative overflow-hidden rounded-lg flex items-center justify-center p-3">
-                <AnimatePresence mode="wait">
-                  <motion.img
-                    key={currentSlide}
-                    src={slideImages[currentSlide]}
-                    alt={`${product.name} slide ${currentSlide}`}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.3 }}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-contain"
-                  />
-                </AnimatePresence>
+                {slideImages.length > 0 && slideImages[currentSlide] ? (
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={currentSlide}
+                      src={slideImages[currentSlide]}
+                      alt={`${product.name} slide ${currentSlide}`}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.3 }}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-contain"
+                    />
+                  </AnimatePresence>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-400 select-none">
+                    <ImageIcon className="w-12 h-12 text-slate-300 stroke-[1.5]" />
+                    <span className="text-xs font-medium text-slate-400">Chưa có hình ảnh sản phẩm</span>
+                  </div>
+                )}
 
                 {/* Left/Right Arrows & Indicator - Only if multiple slides */}
                 {slideImages.length > 1 && (
                   <>
                     <button
                       onClick={handlePrevSlide}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-lg"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-lg cursor-pointer"
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button
                       onClick={handleNextSlide}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-lg"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-slate-950/70 hover:bg-orange-600 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 rounded-lg cursor-pointer"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -267,20 +286,22 @@ export function ProductDetailView({
               </div>
             </div>
 
-            {/* Thumbnail Navigation */}
-            <div className="flex flex-wrap gap-2">
-              {slideImages.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`w-20 sm:w-24 aspect-[4/3] border-2 transition-all p-1 overflow-hidden bg-white rounded-[8px] flex items-center justify-center ${
-                    currentSlide === idx ? 'border-orange-600 ring-2 ring-orange-500/20' : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
-                  }`}
-                >
-                  <img src={img} alt={`thumbnail ${idx + 1}`} referrerPolicy="no-referrer" className="w-full h-full object-contain rounded-[4px]" />
-                </button>
-              ))}
-            </div>
+            {/* Thumbnail Navigation - Only if multiple slides */}
+            {slideImages.length > 1 && (
+              <div className="flex flex-wrap gap-2">
+                {slideImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`w-20 sm:w-24 aspect-[4/3] border-2 transition-all p-1 overflow-hidden bg-white rounded-[8px] flex items-center justify-center cursor-pointer ${
+                      currentSlide === idx ? 'border-orange-600 ring-2 ring-orange-500/20' : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt={`thumbnail ${idx + 1}`} referrerPolicy="no-referrer" className="w-full h-full object-contain rounded-[4px]" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column: Key Details */}
@@ -566,13 +587,19 @@ export function ProductDetailView({
                   {/* Image on Left (Logo size), Title on Right */}
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-transparent p-0 flex items-center justify-center overflow-hidden rounded-none">
-                      <img 
-                        src={rel.icon || rel.img}
-                        alt={rel.name}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
-                      />
+                      {(rel.icon || rel.img)?.trim() ? (
+                        <img 
+                          src={(rel.icon || rel.img).trim()}
+                          alt={rel.name}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 rounded-none"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-100 rounded-lg">
+                          <ImageIcon className="w-5 h-5 text-slate-400" />
+                        </div>
+                      )}
                     </div>
                     <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2 flex-1">
                       {rel.name}

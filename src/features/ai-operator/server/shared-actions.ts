@@ -195,11 +195,17 @@ Return a JSON object containing the translated key-value pairs matching the exac
     targetLanguage: targetLang,
   });
 
-  return await llm.generateStructured<TranslateFieldsOutput>({
+  const raw = await llm.generateStructured<any>({
     systemPrompt,
     userPrompt,
     temperature: 0.2,
   });
+
+  const translations = raw && typeof raw === 'object' && 'translations' in raw && typeof raw.translations === 'object' && raw.translations !== null
+    ? (raw.translations as Record<string, string>)
+    : (raw && typeof raw === 'object' ? (raw as Record<string, string>) : {});
+
+  return { translations };
 }
 
 export interface GenerateOutlineInput {

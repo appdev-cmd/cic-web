@@ -16,7 +16,6 @@ import {
   generateSeoAction,
   generateSummaryAction,
   extractTagsAction,
-  translateFieldsAction,
   generateOutlineAction,
   classifyProductTaxonomyAction,
 } from '@/features/ai-operator/server/shared-actions';
@@ -431,33 +430,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
     }
   };
 
-  const handleAiTranslateEn = async () => {
-    try {
-      const fieldsToTranslate: Record<string, string> = {};
-      if (name.trim()) fieldsToTranslate.name = name;
-      if (summary.trim()) fieldsToTranslate.summary = summary;
-      if (seoTitle.trim()) fieldsToTranslate.seo_title = seoTitle;
-      if (seoDescription.trim()) fieldsToTranslate.seo_description = seoDescription;
-
-      if (Object.keys(fieldsToTranslate).length === 0) {
-        toast.warning('Chưa có thông tin để dịch sang tiếng Anh.');
-        return;
-      }
-
-      const res = await translateFieldsAction({
-        fields: fieldsToTranslate,
-        targetLang: 'en',
-      });
-
-      if (res.translations.name && !otherLanguages1.trim()) {
-        setOtherLanguages1(`/en/products/${slugify(res.translations.name)}`);
-      }
-
-      toast.success('Đã hoàn tất dịch thuật ngữ tiếng Anh!');
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Có lỗi khi dịch nội dung.');
-    }
-  };
 
   useEffect(() => { if (!manualAlias) setAlias(slugify(name)); }, [name, manualAlias]);
   const ids = (text: string) => text.split(',').map((item) => item.trim()).filter(Boolean);
@@ -578,13 +550,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <AiMagicWand
-            label="Dịch sang EN"
-            title="Dịch thông tin sang tiếng Anh"
-            onTrigger={handleAiTranslateEn}
-            variant="outline"
-            size="sm"
-          />
           <CmsButton
             variant="secondary"
             size="sm"
