@@ -31,7 +31,7 @@ interface FormBuilderViewProps {
   form: FormItem | null;
   workspaceLocale: CmsLocale;
   emailTemplates: EmailTemplate[];
-  onSave: (formData: FormFormData, action: 'draft' | 'publish') => void;
+  onSave: (formData: FormFormData, action: 'draft' | 'publish') => Promise<void> | void;
   onCancel: () => void;
 }
 
@@ -73,6 +73,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewEmailTemplateId, setPreviewEmailTemplateId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
+  const [isSaving, setIsSaving] = useState<'draft' | 'publish' | null>(null);
 
   const previewEmailTemplate = emailTemplates.find((template) => template.id === previewEmailTemplateId);
 
@@ -193,7 +194,8 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
     }));
   };
 
-  const handleSave = (action: 'draft' | 'publish') => {
+  const handleSave = async (action: 'draft' | 'publish') => {
+    if (isSaving) return;
     if (action === 'publish') {
       if (!formData.adminName.trim() || !formData.title.trim() || !formData.code.trim()) {
         setSaveError('Tên quản trị, tiêu đề và mã biểu mẫu là bắt buộc trước khi xuất bản.');
@@ -225,7 +227,14 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
       }
     }
     setSaveError('');
-    onSave(formData, action);
+    setIsSaving(action);
+    try {
+      await onSave(formData, action);
+    } catch (err: any) {
+      setSaveError(err?.message || 'Có lỗi xảy ra khi lưu biểu mẫu.');
+    } finally {
+      setIsSaving(null);
+    }
   };
 
   const addField = (fieldType: FieldType) => {
@@ -321,7 +330,8 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            disabled={Boolean(isSaving)}
+            className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             title="Quay lại danh sách"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -347,6 +357,7 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
             variant="secondary"
             size="sm"
             onClick={() => setIsPreviewOpen(true)}
+            disabled={Boolean(isSaving)}
             leadingIcon={<Eye className="w-4 h-4 text-orange-500" />}
           >
             Xem trước
@@ -355,6 +366,9 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
             variant="secondary"
             size="sm"
             onClick={() => handleSave('draft')}
+            disabled={Boolean(isSaving)}
+            loading={isSaving === 'draft'}
+            loadingText="Đang lưu nháp..."
             leadingIcon={<Save className="w-4 h-4 text-slate-500" />}
           >
             Lưu bản nháp
@@ -363,6 +377,9 @@ export const FormBuilderView: React.FC<FormBuilderViewProps> = ({
             variant="primary"
             size="sm"
             onClick={() => handleSave('publish')}
+            disabled={Boolean(isSaving)}
+            loading={isSaving === 'publish'}
+            loadingText="Đang xuất bản..."
             leadingIcon={<Play className="w-4 h-4" />}
           >
             Xuất bản phiên bản mới

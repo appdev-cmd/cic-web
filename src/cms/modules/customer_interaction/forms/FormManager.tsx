@@ -330,9 +330,40 @@ export const FormManager: React.FC<FormManagerProps> = ({
   const handleSaveForm = async (formData: FormFormData, action: 'draft' | 'publish') => {
     const targetStatus = action === 'publish' ? 'active' : 'draft';
 
-    try {
-      if (editingForm) {
-        // Update existing form via PUT /api/cms/forms/[id]
+    if (editingForm) {
+      // 1. Optimistic transition: immediately switch back to list view
+      const prevForms = [...forms];
+      const nextVersion =
+        action === 'publish'
+          ? Number(editingForm.currentVersion || 1) + 1
+          : Number(editingForm.currentVersion || 1);
+
+      const optimisticUpdatedForm: FormItem = {
+        ...editingForm,
+        adminName: formData.adminName,
+        title: formData.title,
+        description: formData.description,
+        status: targetStatus,
+        currentVersion: nextVersion,
+        submitConfig: formData.submitConfig,
+        fields: formData.fields,
+        destinations: formData.destinations as any,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setForms((prev) =>
+        prev.map((f) => (f.id === editingForm.id ? optimisticUpdatedForm : f))
+      );
+      setPageMode('list');
+      setEditingForm(null);
+      showToast(
+        action === 'publish'
+          ? `Đã xuất bản "${formData.adminName}" (v${nextVersion}) thành công!`
+          : `Đã lưu bản nháp "${formData.adminName}" thành công!`
+      );
+
+      // 2. Perform background server update
+      try {
         const res = await fetch(`/api/cms/forms/${editingForm.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -343,34 +374,41 @@ export const FormManager: React.FC<FormManagerProps> = ({
             status: targetStatus,
             incrementVersion: action === 'publish',
             submitConfig: formData.submitConfig,
+            destinations: formData.destinations,
             fields: formData.fields,
           }),
         });
 
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          showToast(`Lỗi lưu biểu mẫu: ${err.error || 'Lỗi hệ thống'}`);
-          return;
+          throw new Error(err.error || 'Lỗi hệ thống');
         }
 
         const json = await res.json();
         const updatedForm = json.form;
 
-        setForms((prev) =>
-          prev.map((f) =>
-            f.id === editingForm.id
-              ? {
-                  ...f,
-                  ...updatedForm,
-                  governance: f.governance,
-                  analytics: f.analytics,
-                }
-              : f
-          )
-        );
-        showToast(`Đã lưu biểu mẫu "${formData.adminName}" thành công!`);
-      } else {
-        // Create new form via POST /api/cms/forms
+        if (updatedForm) {
+          setForms((prev) =>
+            prev.map((f) =>
+              f.id === editingForm.id
+                ? {
+                    ...f,
+                    ...updatedForm,
+                    governance: f.governance,
+                    analytics: f.analytics,
+                  }
+                : f
+            )
+          );
+        }
+        onRefresh?.();
+      } catch (e: any) {
+        setForms(prevForms);
+        showToast(`Lỗi lưu biểu mẫu: ${e.message}`);
+      }
+    } else {
+      // Create new form: wait for fast server response with button loading feedback
+      try {
         const res = await fetch('/api/cms/forms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -382,6 +420,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
             description: formData.description,
             status: targetStatus,
             submitConfig: formData.submitConfig,
+            destinations: formData.destinations,
             fields: formData.fields,
           }),
         });
@@ -389,7 +428,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           showToast(`Lỗi tạo biểu mẫu: ${err.error || 'Lỗi hệ thống'}`);
-          return;
+          throw new Error(err.error || 'Lỗi tạo biểu mẫu');
         }
 
         const json = await res.json();
@@ -403,14 +442,19 @@ export const FormManager: React.FC<FormManagerProps> = ({
           },
           ...prev,
         ]);
-        showToast(`Đã tạo biểu mẫu mới "${formData.adminName}" thành công!`);
-      }
 
-      setPageMode('list');
-      setEditingForm(null);
-      onRefresh?.();
-    } catch (e: any) {
-      showToast(`Lỗi kết nối: ${e.message}`);
+        setPageMode('list');
+        setEditingForm(null);
+        showToast(
+          action === 'publish'
+            ? `Đã xuất bản biểu mẫu "${formData.adminName}" thành công!`
+            : `Đã lưu bản nháp "${formData.adminName}" thành công!`
+        );
+        onRefresh?.();
+      } catch (e: any) {
+        showToast(`Lỗi kết nối: ${e.message}`);
+        throw e;
+      }
     }
   };
 
