@@ -30,6 +30,8 @@ export async function POST(
       return NextResponse.json({ error: 'Spreadsheet ID không hợp lệ.' }, { status: 400 });
     }
 
+    const clientFields = Array.isArray(body?.fields) ? body.fields : null;
+
     // Test access and get headers
     const testResult = await testGoogleSheetAccess(spreadsheetId, sheetName);
     if (!testResult.success) {
@@ -39,9 +41,24 @@ export async function POST(
     // If headers exist, match with form fields
     let suggestedMapping: import('@/features/forms/types').GoogleSheetsColumnMapping[] = [];
     if (testResult.headers && testResult.headers.length > 0) {
-      const form = await getFormById(id);
-      if (form && form.fields) {
-        suggestedMapping = matchSheetHeadersToFields(testResult.headers, form.fields);
+      let fieldsToMatch = clientFields;
+      if (!fieldsToMatch || fieldsToMatch.length === 0) {
+        if (id && id !== 'new') {
+          const form = await getFormById(id);
+          if (form && form.fields) {
+            fieldsToMatch = form.fields;
+          }
+        }
+      }
+
+      if (fieldsToMatch && fieldsToMatch.length > 0) {
+        suggestedMapping = matchSheetHeadersToFields(testResult.headers, fieldsToMatch);
+      } else {
+        suggestedMapping = testResult.headers.map((h: string) => ({
+          sheetHeader: h.trim(),
+          sourceType: 'field' as const,
+          sourceKey: '',
+        }));
       }
     }
 

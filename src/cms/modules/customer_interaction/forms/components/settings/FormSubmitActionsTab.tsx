@@ -146,6 +146,7 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
         body: JSON.stringify({
           spreadsheetId: sheetsConfig.spreadsheetId,
           sheetName: sheetsConfig.sheetName,
+          fields: formData.fields,
         }),
       });
 
@@ -168,9 +169,31 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
           updateSheetsDestination({ sheetName: data.sheets[0] });
         }
 
-        // If suggestedMapping returned, merge with existing mapping
-        if (data.suggestedMapping && data.suggestedMapping.length > 0) {
-          updateSheetsDestination({ columnMapping: data.suggestedMapping });
+        let finalMapping = data.suggestedMapping;
+        if ((!finalMapping || finalMapping.length === 0) && data.headers && data.headers.length > 0) {
+          finalMapping = data.headers.map((h: string) => {
+            const trimmed = h.trim();
+            const foundField = formData.fields.find(
+              (f) => (f.label && f.label.trim().toLowerCase() === trimmed.toLowerCase()) || f.fieldKey.toLowerCase() === trimmed.toLowerCase()
+            );
+            if (foundField) {
+              return { sheetHeader: trimmed, sourceType: 'field' as const, sourceKey: foundField.fieldKey };
+            }
+            if (/thoi gian|ngay gui|timestamp/i.test(trimmed)) {
+              return { sheetHeader: trimmed, sourceType: 'system' as const, sourceKey: 'submitted_at' };
+            }
+            if (/ma gui|ma yeu cau|submission/i.test(trimmed)) {
+              return { sheetHeader: trimmed, sourceType: 'system' as const, sourceKey: 'submission_id' };
+            }
+            if (/trang gui|duong dan|url|link/i.test(trimmed)) {
+              return { sheetHeader: trimmed, sourceType: 'system' as const, sourceKey: 'source_path' };
+            }
+            return { sheetHeader: trimmed, sourceType: 'field' as const, sourceKey: '' };
+          });
+        }
+
+        if (finalMapping && finalMapping.length > 0) {
+          updateSheetsDestination({ columnMapping: finalMapping });
         }
       }
     } catch (err: any) {
@@ -195,6 +218,17 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
       'Trang gửi',
     ];
 
+    const initialMapping: GoogleSheetsColumnMapping[] = [
+      { sheetHeader: 'Thời gian gửi', sourceType: 'system', sourceKey: 'submitted_at' },
+      { sheetHeader: 'Mã yêu cầu', sourceType: 'system', sourceKey: 'submission_id' },
+      ...formData.fields.map((f) => ({
+        sheetHeader: f.label || f.fieldKey,
+        sourceType: 'field' as const,
+        sourceKey: f.fieldKey,
+      })),
+      { sheetHeader: 'Trang gửi', sourceType: 'system', sourceKey: 'source_path' },
+    ];
+
     try {
       const res = await fetch(`/api/cms/forms/${formId || 'new'}/destinations/google-sheets/init-headers`, {
         method: 'POST',
@@ -203,6 +237,7 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
           spreadsheetId: sheetsConfig.spreadsheetId,
           sheetName: sheetsConfig.sheetName,
           headers: defaultHeaders,
+          fields: formData.fields,
         }),
       });
 
@@ -213,8 +248,18 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
         const msg = `Đã tạo thành công ${defaultHeaders.length} cột tiêu đề trên sheet!`;
         setInitHeaderSuccess(msg);
         toast.success(msg);
-        // Re-run test connection to reload mapping
-        handleTestConnection();
+
+        const mappingToApply = data.suggestedMapping && data.suggestedMapping.length > 0
+          ? data.suggestedMapping
+          : initialMapping;
+
+        updateSheetsDestination({ columnMapping: mappingToApply });
+        setTestResult({
+          success: true,
+          title: sheetsConfig.spreadsheetId,
+          sheets: [sheetsConfig.sheetName || 'Sheet1'],
+          headers: defaultHeaders,
+        });
       }
     } catch (err: any) {
       toast.error(err?.message || 'Lỗi khi khởi tạo tiêu đề.');
@@ -443,23 +488,22 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
 
               {/* Step 3: Column Mapping Section */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
                     <strong>Bước 3:</strong> Cấu hình ánh xạ cột (Ghép cột Sheet với dữ liệu Form):
                   </div>
 
-                  {(!sheetsConfig.columnMapping || sheetsConfig.columnMapping.length === 0) && (
-                    <CmsButton
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={handleInitializeHeaders}
-                      disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
-                      leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
-                    >
-                      {isInitializingHeaders ? 'Đang tạo...' : 'Khởi tạo tiêu đề mẫu từ Form'}
-                    </CmsButton>
-                  )}
+                  <CmsButton
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleInitializeHeaders}
+                    disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
+                    leadingIcon={<Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                    title="Ghi dòng tiêu đề mẫu (gồm các trường của biểu mẫu) lên hàng 1 của Sheet"
+                  >
+                    {isInitializingHeaders ? 'Đang tạo...' : (sheetsConfig.columnMapping?.length > 0 ? 'Khởi tạo lại tiêu đề mẫu' : 'Khởi tạo tiêu đề mẫu từ Form')}
+                  </CmsButton>
                 </div>
 
                 {sheetsConfig.columnMapping && sheetsConfig.columnMapping.length > 0 ? (
@@ -528,10 +572,32 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                     </table>
                   </div>
                 ) : (
-                  <div className="py-6 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center">
-                    <p className="text-xs text-slate-500 mb-2">
-                      Chưa có cấu hình ghép cột. Hãy bấm nút <strong>"Kiểm tra kết nối & Tải cột"</strong> để hệ thống tự động đọc hàng 1 từ Google Sheet hoặc bấm <strong>"Khởi tạo tiêu đề mẫu từ Form"</strong>.
+                  <div className="py-6 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-3">
+                    <p className="text-xs text-slate-500">
+                      Chưa có cấu hình ghép cột. Hãy bấm nút <strong>"Khởi tạo tiêu đề mẫu từ Form"</strong> để tạo tự động, hoặc bấm <strong>"Tải cột từ Sheet"</strong> nếu trên Sheet đã có sẵn các cột.
                     </p>
+                    <div className="flex items-center justify-center flex-wrap gap-2">
+                      <CmsButton
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        onClick={handleInitializeHeaders}
+                        disabled={isInitializingHeaders || !sheetsConfig.spreadsheetId}
+                        leadingIcon={<Sparkles className="w-3.5 h-3.5" />}
+                      >
+                        {isInitializingHeaders ? 'Đang tạo...' : 'Khởi tạo tiêu đề mẫu từ Form'}
+                      </CmsButton>
+                      <CmsButton
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleTestConnection}
+                        disabled={isTestingSheets || !sheetsConfig.spreadsheetId}
+                        leadingIcon={<RefreshCw className={`w-3.5 h-3.5 ${isTestingSheets ? 'animate-spin' : ''}`} />}
+                      >
+                        Tải cột từ Sheet
+                      </CmsButton>
+                    </div>
                   </div>
                 )}
               </div>

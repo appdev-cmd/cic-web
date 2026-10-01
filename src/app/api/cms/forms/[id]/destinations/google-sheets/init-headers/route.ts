@@ -4,6 +4,9 @@ import { normalizeServerError } from '@/server/errors';
 import { normalizeSpreadsheetId } from '@/features/forms/server/validation/destination-schemas';
 import { initializeGoogleSheetHeaders } from '@/lib/integrations/google-sheets/client';
 
+import { matchSheetHeadersToFields } from '@/lib/integrations/google-sheets/matcher';
+import { getFormById } from '@/features/forms/server/queries';
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,11 +17,12 @@ export async function POST(
       return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
     }
 
-    await params; // consume params
+    const { id } = await params;
     const body = await request.json();
     const rawSpreadsheetId = body?.spreadsheetId;
     const sheetName = body?.sheetName?.trim() || 'Sheet1';
     const headers = body?.headers;
+    const clientFields = Array.isArray(body?.fields) ? body.fields : null;
 
     if (!rawSpreadsheetId || !Array.isArray(headers) || headers.length === 0) {
       return NextResponse.json({ error: 'Thiếu Spreadsheet ID hoặc danh sách tiêu đề cột headers.' }, { status: 400 });
@@ -27,10 +31,27 @@ export async function POST(
     const spreadsheetId = normalizeSpreadsheetId(rawSpreadsheetId);
     await initializeGoogleSheetHeaders(spreadsheetId, sheetName, headers);
 
+    let fieldsToMatch = clientFields;
+    if (!fieldsToMatch || fieldsToMatch.length === 0) {
+      if (id && id !== 'new') {
+        const form = await getFormById(id);
+        if (form && form.fields) fieldsToMatch = form.fields;
+      }
+    }
+
+    const suggestedMapping = fieldsToMatch && fieldsToMatch.length > 0
+      ? matchSheetHeadersToFields(headers, fieldsToMatch)
+      : headers.map((h: string) => ({
+          sheetHeader: h.trim(),
+          sourceType: 'field' as const,
+          sourceKey: '',
+        }));
+
     return NextResponse.json({
       success: true,
       message: `Đã khởi tạo ${headers.length} cột tiêu đề trên sheet "${sheetName}".`,
       headers,
+      suggestedMapping,
     });
   } catch (err: unknown) {
     const norm = normalizeServerError(err);
