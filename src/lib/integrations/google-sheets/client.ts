@@ -138,12 +138,12 @@ export async function testGoogleSheetAccess(
       ? sheetName
       : (sheetTitles[0] || sheetName || 'Sheet1');
 
-    // 2. Fetch first 5 rows to detect headers dynamically across any N columns
+    // 2. Fetch first 10 rows to detect headers dynamically across any N columns
     let headers: string[] = [];
     try {
       const headerRes = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: formatSheetRange(targetSheet, '1:5'),
+        range: formatSheetRange(targetSheet, '1:10'),
       });
       const rows = headerRes.data.values || [];
       headers = extractHeaderRow(rows);
@@ -174,7 +174,7 @@ export async function getGoogleSheetHeaders(
   const sheets = getGoogleSheetsClient();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: formatSheetRange(sheetName, '1:5'),
+    range: formatSheetRange(sheetName, '1:10'),
   });
 
   const rows = res.data.values || [];

@@ -538,8 +538,18 @@ export const FormSubmitActionsTab: React.FC<FormSubmitActionsTabProps> = ({
                       {testResult.success ? (
                         <>
                           <div className="font-bold">Kết nối thành công tới: "{testResult.title}"</div>
-                          <div className="mt-0.5 text-[11px] opacity-90">
-                            Tìm thấy {testResult.sheets?.length || 0} trang tính · {testResult.headers?.length || 0} cột ở hàng đầu tiên.
+                          <div className="mt-1 text-[11px] opacity-90 space-y-0.5">
+                            <div>
+                              Đang đọc từ trang tính: <strong>"{sheetsConfig.sheetName || testResult.activeSheet || 'Trang tính 1'}"</strong> (file có {testResult.sheets?.length || 1} trang tính).
+                            </div>
+                            <div>
+                              Đã quét và tìm thấy: <strong>{testResult.headers?.length || 0} cột dữ liệu</strong>.
+                              {testResult.sheets && testResult.sheets.length > 1 && (
+                                <span className="text-emerald-700 dark:text-emerald-300 ml-1">
+                                  (Nếu dữ liệu nằm ở trang tính khác, hãy đổi ở mục "Tên Trang tính" bên trên).
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </>
                       ) : (
