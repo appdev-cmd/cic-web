@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw, Plus, Trash2, Globe, ExternalLink, X } from 'lucide-react';
+import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Package, Save, Search, Send, Star, FileDown, ShieldCheck, Tag, AlertCircle, Sparkles, RotateCcw, Plus, Trash2, Globe, ExternalLink, X, Video } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { CmsDeleteConfirmModal } from '@/shared/ui/cms/CmsDeleteConfirmModal';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
@@ -40,6 +40,13 @@ interface ProductsFormViewProps {
 
 interface LegacyDownload { name: string; file: string; link: string }
 const slugify = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+function toYoutubeEmbedUrl(urlOrIframe: string): string {
+  if (!urlOrIframe) return '';
+  const matchIframe = urlOrIframe.match(/src=["']([^"']+)["']/i);
+  const raw = matchIframe ? matchIframe[1] : urlOrIframe.trim();
+  const ytMatch = raw.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+  return ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : (raw.startsWith('http') ? raw : '');
+}
 const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300';
 
@@ -69,25 +76,16 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [description, setDescription] = useState(product?.description || product?.content_html || '');
   const [featureDetails, setFeatureDetails] = useState(product?.feature_details || '');
   const [video, setVideo] = useState(product?.video || product?.video_url || '');
-  const [tawkTo, setTawkTo] = useState(product?.tawk_to || '');
   const [tagsText, setTagsText] = useState((product?.tags || []).join(', '));
   const [priceOld, setPriceOld] = useState(() => {
     const p = (product?.price || product?.price_old || '').trim();
     return p || 'Liên hệ';
   });
   const [isHot, setIsHot] = useState(product?.is_hot ?? false);
-  const [teamview, setTeamview] = useState(product?.teamview ?? false);
   const [ordering, setOrdering] = useState(product?.ordering || 1);
-  const [landingPage, setLandingPage] = useState(product?.landing_page || '');
   const [seoTitle, setSeoTitle] = useState(product?.seo_title || product?.meta_title || '');
   const [seoKeyword, setSeoKeyword] = useState(product?.seo_keyword || product?.meta_keywords || '');
   const [seoDescription, setSeoDescription] = useState(product?.seo_description || product?.meta_description || '');
-  const [fileCatalogue, setFileCatalogue] = useState(product?.file_catalogue || '');
-  const [filePrice, setFilePrice] = useState(product?.file_price || '');
-  const [linkCatalogue, setLinkCatalogue] = useState(product?.link_catalogue || '');
-  const [fileDriverName, setFileDriverName] = useState(product?.file_driver_name || '');
-  const [fileDriver, setFileDriver] = useState(product?.file_driver || '');
-  const [linkDriver, setLinkDriver] = useState(product?.link_driver || '');
   const [downloads, setDownloads] = useState<LegacyDownload[]>(Array.from({ length: 6 }, (_, index) => ({ name: product?.[`file_name${index + 1}` as keyof ProductItem] as string || '', file: product?.[`file_download${index + 1}` as keyof ProductItem] as string || '', link: product?.[`link_download${index + 1}` as keyof ProductItem] as string || '' })));
   const updateDownload = (index: number, key: keyof LegacyDownload, val: string) => {
     setDownloads((prev) => {
@@ -490,13 +488,13 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       gallery,
       category_ids: categoryIds, category_id: categoryIds.join(','), manufactory,
       application: applications, types, products_relates: productsRelates, summary,
-      description, feature_details: featureDetails, video, tawk_to: tawkTo, tags: ids(tagsText),
+      description, feature_details: featureDetails, video, tawk_to: '', tags: ids(tagsText),
       price_old: priceOld.trim() || 'Liên hệ', price: priceOld.trim() || 'Liên hệ', is_hot: isHot, teamview: false, ordering: Number(ordering) || 1,
       landing_page: '', seo_title: seoTitle,
       seo_keyword: Array.isArray(seoKeyword) ? (seoKeyword as string[]).join(', ') : String(seoKeyword || ''),
       seo_description: seoDescription,
-      file_catalogue: fileCatalogue, file_price: filePrice, link_catalogue: linkCatalogue,
-      file_driver_name: fileDriverName, file_driver: fileDriver, link_driver: linkDriver,
+      file_catalogue: '', file_price: '', link_catalogue: '',
+      file_driver_name: '', file_driver: '', link_driver: '',
     };
     downloads.forEach((item, index) => { Object.assign(base, { [`file_name${index + 1}`]: item.name, [`file_download${index + 1}`]: item.file, [`link_download${index + 1}`]: item.link }); });
     return base;
@@ -883,103 +881,47 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
             <RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" allowedEmbeds={['cta', 'form']} />
           </section>
 
-          {/* Section 6: Video */}
+          {/* Section 6: Video giới thiệu */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-3 flex items-center gap-2 font-black dark:text-white">
-              <FileText className="h-5 w-5 text-orange-600" />
-              Video
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <Video className="h-5 w-5 text-orange-600" />
+                Video giới thiệu sản phẩm
+              </div>
+              <span className="text-[11px] text-slate-400">YouTube URL hoặc mã nhúng</span>
             </div>
-            <RichTextEditor value={video} onChange={setVideo} minHeight="260px" />
+            <div className="space-y-3">
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="Dán link YouTube (VD: https://www.youtube.com/watch?v=... hoặc https://youtu.be/...)"
+                value={video}
+                onChange={(e) => setVideo(e.target.value)}
+              />
+              {toYoutubeEmbedUrl(video) && (
+                <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-black aspect-video max-w-lg">
+                  <iframe
+                    src={toYoutubeEmbedUrl(video)}
+                    title="Video preview"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+            </div>
           </section>
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
-          <Link2 className="h-5 w-5 text-orange-600" />
-          Tệp sản phẩm & Tài liệu đính kèm
-        </div>
-        <div className="space-y-6">
-          {/* File báo giá (Catalog / Price) */}
-          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-orange-600 uppercase tracking-wider">
-              <FileDown className="w-4 h-4" />
-              File báo giá & Catalogue
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div>
-                <label className={labelClass}>Tên file báo giá / tiêu đề</label>
-                <input 
-                  className={inputClass} 
-                  value={fileCatalogue} 
-                  onChange={(e) => setFileCatalogue(e.target.value)} 
-                  placeholder="VD: Báo giá AutoCAD 2026..." 
-                />
-              </div>
-              <div>
-                <ProductFileInput
-                  label="Chọn tệp báo giá"
-                  value={filePrice}
-                  onChange={setFilePrice}
-                  onAutoFillName={(autoName) => {
-                    if (!fileCatalogue) setFileCatalogue(autoName);
-                  }}
-                  placeholder="Chọn file báo giá từ máy..."
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Link báo giá (URL trực tuyến)</label>
-                <input 
-                  className={inputClass} 
-                  value={linkCatalogue} 
-                  onChange={(e) => setLinkCatalogue(e.target.value)} 
-                  placeholder="https://..." 
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* File khóa cứng (Driver / Dongle) */}
-          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4" />
-              File Driver & Khóa cứng (Dongle)
+          {/* Section 7: Tệp sản phẩm & Tài liệu đính kèm */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
+              <Link2 className="h-5 w-5 text-orange-600" />
+              Tệp sản phẩm & Tài liệu đính kèm
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div>
-                <label className={labelClass}>Tên file khóa cứng / driver</label>
-                <input 
-                  className={inputClass} 
-                  value={fileDriverName} 
-                  onChange={(e) => setFileDriverName(e.target.value)} 
-                  placeholder="VD: Driver Sentinel HASP..." 
-                />
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Danh sách tệp tải về & Catalogue (Tối đa 6 tệp)
               </div>
-              <div>
-                <ProductFileInput
-                  label="Chọn tệp Driver / Khóa cứng"
-                  value={fileDriver}
-                  onChange={setFileDriver}
-                  onAutoFillName={(autoName) => {
-                    if (!fileDriverName) setFileDriverName(autoName);
-                  }}
-                  placeholder="Chọn file driver từ máy..."
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Link khóa cứng (URL trực tuyến)</label>
-                <input 
-                  className={inputClass} 
-                  value={linkDriver} 
-                  onChange={(e) => setLinkDriver(e.target.value)} 
-                  placeholder="https://..." 
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Các tệp tải về 1 - 6 */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Danh sách tệp tải về bổ sung (Tối đa 6 tệp)
-            </div>
             {downloads.map((item, index) => (
               <div key={index} className="grid gap-3 rounded-xl border border-slate-200 p-3.5 md:grid-cols-3 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xs">
                 <div>
@@ -1014,9 +956,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
               </div>
             ))}
           </div>
-        </div>
-      </section>
-    </main><aside className="space-y-5">
+        </section>
+      </main>
+      <aside className="space-y-5">
       <ContentQualityPanel
         title="Trạng thái xuất bản"
         onFieldFocus={handleFieldFocus}
@@ -1164,7 +1106,6 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
           <div><label className={labelClass}>SEO title</label><input id="field-seo_title" className={`${inputClass} ${isTouched('seo_title') ? 'border-l-4 border-l-orange-500' : ''}`} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} /></div>
           <div><label className={labelClass}>SEO keyword</label><input className={inputClass} value={seoKeyword} onChange={(e) => setSeoKeyword(e.target.value)} /></div>
           <div><label className={labelClass}>SEO description</label><textarea id="field-seo_description" rows={4} className={`${inputClass} ${isTouched('seo_description') ? 'border-l-4 border-l-orange-500' : ''}`} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} /></div>
-          <div><label className={labelClass}>Tawk.to</label><textarea rows={3} className={inputClass} value={tawkTo} onChange={(e) => setTawkTo(e.target.value)} /></div>
         </div>
       </section>
     </aside></div>
