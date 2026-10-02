@@ -1,8 +1,21 @@
 import postgres from 'postgres';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.local' });
-const sql = postgres(process.env.POSTGRES_URL || process.env.DATABASE_URL);
+dotenv.config({ path: '.env.local', override: false });
+dotenv.config({ path: '.env', override: false });
+
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+if (!dbUrl) {
+  console.warn('⚠️ [SEED] DATABASE_URL/POSTGRES_URL is not set. Skipping canonical pages seeding.');
+  process.exit(0);
+}
+
+const sql = postgres(dbUrl, {
+  max: 5,
+  prepare: false,
+  ssl: 'require',
+  connect_timeout: 10,
+});
 
 function normalizeConfig(cfg) {
   if (!cfg) return {};

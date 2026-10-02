@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
-    "build": "node scripts/seed-public-forms-and-ctas.mjs && node scripts/seed-mark-requests-processed.mjs && next build",
+    "build": "node scripts/seed-canonical-pages-content.mjs && node scripts/seed-public-forms-and-ctas.mjs && node scripts/seed-mark-requests-processed.mjs && next build",
     "postbuild": "node scripts/seed-mark-requests-processed.mjs",
     "db:seed-forms-ctas": "node scripts/seed-public-forms-and-ctas.mjs",
     "db:seed-mark-requests-processed": "node scripts/seed-mark-requests-processed.mjs",
