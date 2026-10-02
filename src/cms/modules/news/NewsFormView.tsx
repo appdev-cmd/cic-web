@@ -13,6 +13,8 @@ import {
   AlertCircle,
   Sparkles,
   RotateCcw,
+  Globe,
+  ExternalLink,
 } from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
@@ -33,6 +35,7 @@ import {
   generateOutlineAction,
   suggestRelatedProductsForNewsAction,
 } from '@/features/ai-operator/server/shared-actions';
+import { translateAndCreateEnNewsAction } from '@/features/news/server/actions';
 
 interface NewsFormViewProps {
   articleToEdit: NewsArticle | null;
@@ -109,7 +112,11 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
   const isAnchorsReady = Boolean(title.trim()) && Boolean(categoryId);
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [hasAiAutoFilled, setHasAiAutoFilled] = useState(false);
+  const [isTranslatingEn, setIsTranslatingEn] = useState(false);
+  const [enCreatedInfo, setEnCreatedInfo] = useState<{ enName: string; enUrl: string } | null>(null);
   const [undoSnapshot, setUndoSnapshot] = useState<{
+    alias: string;
+    otherLanguages1: string;
     summary: string;
     tagsText: string;
     seoTitle: string;
@@ -129,6 +136,8 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       setIsAutoFilling(true);
       // Save current state for undo
       setUndoSnapshot({
+        alias,
+        otherLanguages1,
         summary,
         tagsText,
         seoTitle,
@@ -139,44 +148,56 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       });
 
       const categoryName = getCategoryName();
+      const contentContext = content.trim() ? content : `${title}. Chuyên mục công nghệ: ${categoryName}`;
+
+      if (!alias.trim() && !manualAlias) setAlias(slugify(title));
+      if (!otherLanguages1.trim()) setOtherLanguages1(`/en/news/${slugify(title)}`);
 
       // Parallel AI execution: Summary + Tags + SEO + Related Products
       const [summaryRes, tagsRes, seoRes, relRes] = await Promise.all([
-        generateSummaryAction({
-          title,
-          categoryName,
-          content,
-          maxLength: 220,
-        }).catch((err) => {
-          console.warn('AI Summary failed:', err);
-          return { summary: '' };
-        }),
-        extractTagsAction({
-          title,
-          content,
-          count: 6,
-        }).catch((err) => {
-          console.warn('AI Tags failed:', err);
-          return { tags: [] };
-        }),
-        generateSeoAction({
-          title,
-          categoryName,
-          content,
-          moduleType: 'news',
-        }).catch((err) => {
-          console.warn('AI SEO failed:', err);
-          return { seo_title: '', seo_description: '', seo_keyword: '' };
-        }),
-        suggestRelatedProductsForNewsAction({
-          title,
-          categoryName,
-          content,
-          candidateProducts: relatedProducts.map((p) => ({ id: p.id, name: p.name })),
-        }).catch((err) => {
-          console.warn('AI Related Products failed:', err);
-          return { selectedProductIds: [] };
-        }),
+        (!summary.trim())
+          ? generateSummaryAction({
+              title,
+              categoryName,
+              content: contentContext,
+              maxLength: 220,
+            }).catch((err) => {
+              console.warn('AI Summary failed:', err);
+              return { summary: '' };
+            })
+          : Promise.resolve({ summary: '' }),
+        (!tagsText.trim())
+          ? extractTagsAction({
+              title,
+              content: contentContext,
+              count: 6,
+            }).catch((err) => {
+              console.warn('AI Tags failed:', err);
+              return { tags: [] };
+            })
+          : Promise.resolve({ tags: [] }),
+        (!seoTitle.trim() || !seoDescription.trim())
+          ? generateSeoAction({
+              title,
+              categoryName,
+              content: contentContext,
+              moduleType: 'news',
+            }).catch((err) => {
+              console.warn('AI SEO failed:', err);
+              return { seo_title: '', seo_description: '', seo_keyword: '' };
+            })
+          : Promise.resolve({ seo_title: '', seo_description: '', seo_keyword: '' }),
+        (productsRelated.length === 0 && relatedProducts.length > 0)
+          ? suggestRelatedProductsForNewsAction({
+              title,
+              categoryName,
+              content: contentContext,
+              candidateProducts: relatedProducts.map((p) => ({ id: p.id, name: p.name })),
+            }).catch((err) => {
+              console.warn('AI Related Products failed:', err);
+              return { selectedProductIds: [] };
+            })
+          : Promise.resolve({ selectedProductIds: [] }),
       ]);
 
       if (summaryRes.summary) setSummary(summaryRes.summary);
@@ -200,6 +221,8 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
   // Undo AI Auto-Fill
   const handleUndoAutoFill = () => {
     if (!undoSnapshot) return;
+    setAlias(undoSnapshot.alias);
+    setOtherLanguages1(undoSnapshot.otherLanguages1);
     setSummary(undoSnapshot.summary);
     setTagsText(undoSnapshot.tagsText);
     setSeoTitle(undoSnapshot.seoTitle);
@@ -209,6 +232,46 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     setContent(undoSnapshot.content);
     setHasAiAutoFilled(false);
     onMessage?.('Đã hoàn tác dữ liệu về ban đầu.', 'info');
+  };
+
+  // Translate to English & Create EN Draft
+  const handleTranslateToEn = async () => {
+    if (!title.trim()) {
+      onMessage?.('Vui lòng nhập Tiêu đề bài viết trước khi dịch sang tiếng Anh.', 'info');
+      return;
+    }
+    setIsTranslatingEn(true);
+    try {
+      const res = await translateAndCreateEnNewsAction({
+        sourceNewsId: articleToEdit?.id ?? null,
+        title,
+        summary,
+        content,
+        seo_title: seoTitle,
+        seo_description: seoDescription,
+        seo_keyword: seoKeyword,
+        tags: tagsText.split(',').map((t) => t.trim()).filter(Boolean),
+        categoryId,
+        image,
+        video,
+        fileUpload,
+        newsRelated,
+        productsRelated,
+        isHot,
+        showInHomepage,
+        ordering: Number(ordering) || 1,
+        startTime: createdTime,
+        endTime,
+      });
+
+      setOtherLanguages1(res.enUrl);
+      setEnCreatedInfo({ enName: res.enTitle, enUrl: res.enUrl });
+      onMessage?.('Đã dịch toàn bộ bài viết và tạo bản nháp Tiếng Anh thành công!', 'success');
+    } catch (err: unknown) {
+      onMessage?.(err instanceof Error ? err.message : 'Có lỗi khi dịch sang Tiếng Anh.', 'error');
+    } finally {
+      setIsTranslatingEn(false);
+    }
   };
 
   // Individual Magic Wand Handlers
@@ -368,6 +431,20 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          {locale === 'vi' && (
+            <CmsButton
+              variant="secondary"
+              size="sm"
+              disabled={isSubmitting || isTranslatingEn}
+              loading={isTranslatingEn}
+              loadingText="Đang dịch & tạo bản EN..."
+              onClick={handleTranslateToEn}
+              leadingIcon={<Globe className="h-4 w-4 text-orange-600 dark:text-orange-400" />}
+              title="Dịch toàn bộ bài viết, nội dung & SEO và tạo bản nháp sang Tiếng Anh"
+            >
+              Dịch sang bản Tiếng Anh
+            </CmsButton>
+          )}
           <CmsButton
             variant="secondary"
             size="sm"
@@ -401,6 +478,45 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           </CmsButton>
         </div>
       </header>
+
+      {/* English Draft Created Banner */}
+      {enCreatedInfo && (
+        <div className="rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-emerald-500 text-white shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Bản nháp Tiếng Anh đã sẵn sàng</p>
+              <h4 className="text-sm font-extrabold text-emerald-950 dark:text-emerald-50 truncate">{enCreatedInfo.enName}</h4>
+              <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 font-mono mt-0.5">{enCreatedInfo.enUrl}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem('cic_cms_workspace_locale', 'en');
+                localStorage.setItem('cms_workspace_locale', 'en');
+                document.cookie = 'cms_workspace_locale=en; path=/; max-age=31536000; SameSite=Lax';
+                window.location.reload();
+              }}
+              className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Chuyển sang xem bản Tiếng Anh
+            </button>
+            <button
+              type="button"
+              onClick={() => setEnCreatedInfo(null)}
+              className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 cursor-pointer"
+              title="Đóng thông báo"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Undo Notification Banner */}
       {hasAiAutoFilled && (
@@ -455,6 +571,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               </span>
             </div>
 
+            {/* 1. Tiêu đề và Danh mục cốt lõi */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className={labelClass}>Tiêu đề tin *</label>
@@ -469,45 +586,59 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   }}
                 />
               </div>
-              <div>
-                <label className={labelClass}>Alias (Đường dẫn tĩnh)</label>
-                <input
-                  className={inputClass}
-                  value={alias}
-                  placeholder="duong-dan-tin-tuc"
-                  onChange={(e) => {
-                    setManualAlias(true);
-                    setAlias(e.target.value);
-                  }}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>URL ngôn ngữ khác (Tiếng Anh)</label>
-                <input
-                  className={inputClass}
-                  value={otherLanguages1}
-                  placeholder="/en/news/article-slug"
-                  onChange={(e) => setOtherLanguages1(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Danh mục *</label>
+              <div className="md:col-span-2">
+                <label className={labelClass}>Danh mục tin tức *</label>
                 <SearchableSelect
                   options={categories.map((item) => ({ id: item.id, label: item.name }))}
                   selectedId={categoryId}
                   onChange={setCategoryId}
                 />
               </div>
-              <div>
-                <label className={labelClass}>Thứ tự hiển thị</label>
-                <input
-                  type="number"
-                  className={inputClass}
-                  value={ordering}
-                  onChange={(e) => setOrdering(Number(e.target.value))}
-                />
-              </div>
+            </div>
 
+            {/* Smart Trigger Bar: Kích hoạt ngay khi có Tiêu đề & Danh mục */}
+            <div
+              className={`mt-4 mb-4 rounded-xl border p-3.5 transition-all ${
+                isAnchorsReady
+                  ? 'border-orange-300 bg-orange-50/70 dark:border-orange-900/60 dark:bg-orange-950/20 shadow-xs'
+                  : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 opacity-80'
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5 max-w-lg">
+                  <div className="flex items-center gap-2">
+                    <Sparkles
+                      className={`h-4 w-4 ${isAnchorsReady ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'}`}
+                    />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      {isAnchorsReady
+                        ? 'Trợ lý AI Co-pilot: Sẵn sàng tự động điền Tóm tắt, SEO, Thẻ Tags và Gợi ý sản phẩm!'
+                        : 'Trợ lý AI Co-pilot (Chỉ cần nhập Tiêu đề và Chọn danh mục ở trên để mở khóa)'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {isAnchorsReady
+                      ? 'AI sẽ tự động tạo Sapo, tối ưu SEO Google, gắn thẻ Tags và gợi ý sản phẩm liên quan từ kho CIC.'
+                      : 'Hệ thống cần tối thiểu Tiêu đề và Danh mục để nhận diện ngữ cảnh và hỗ trợ điền tự động.'}
+                  </p>
+                </div>
+                <CmsButton
+                  type="button"
+                  variant={isAnchorsReady ? 'primary' : 'secondary'}
+                  size="sm"
+                  disabled={!isAnchorsReady || isAutoFilling}
+                  loading={isAutoFilling}
+                  loadingText="Đang phân tích & điền..."
+                  onClick={handleSmartAutoFill}
+                  leadingIcon={<Sparkles className="h-4 w-4" />}
+                >
+                  Tự động điền phần còn lại với AI
+                </CmsButton>
+              </div>
+            </div>
+
+            {/* Các trường cấu hình chi tiết (Sapo, Alias, URL tiếng Anh, Thứ tự) */}
+            <div className="grid gap-4 md:grid-cols-2 pt-3 border-t border-slate-100 dark:border-slate-800/80">
               {/* Tóm tắt bài viết với Đũa thần AI */}
               <div className="md:col-span-2">
                 <div className="flex items-center justify-between mb-1.5">
@@ -522,55 +653,45 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   />
                 </div>
                 <textarea
-                  rows={4}
+                  rows={3}
                   className={inputClass}
                   value={summary}
                   placeholder="Đoạn văn tóm tắt ngắn gọn 1-2 câu dẫn nhập cho bài viết..."
                   onChange={(e) => setSummary(e.target.value)}
                 />
               </div>
-            </div>
 
-            {/* Smart Trigger Bar: Kích hoạt khi có Tiêu đề & Danh mục */}
-            <div
-              className={`mt-5 rounded-xl border p-3.5 transition-all ${
-                isAnchorsReady
-                  ? 'border-orange-300 bg-orange-50/70 dark:border-orange-900/60 dark:bg-orange-950/20'
-                  : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40'
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-0.5 max-w-lg">
-                  <div className="flex items-center gap-2">
-                    <Sparkles
-                      className={`h-4 w-4 ${isAnchorsReady ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'}`}
-                    />
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      {isAnchorsReady
-                        ? 'Trợ lý AI Co-pilot: Sẵn sàng tự động điền Tóm tắt, SEO, Thẻ Tags và Gợi ý sản phẩm!'
-                        : 'Trợ lý AI Co-pilot (Nhập Tiêu đề và Chọn danh mục ở trên để mở khóa)'}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {isAnchorsReady
-                      ? 'Chỉ bổ sung các trường còn trống, tuyệt đối không can thiệp vào bài viết hay hình ảnh của bạn.'
-                      : `Tiến độ thông tin mỏ neo: ${
-                          [Boolean(title.trim()) && 'Tiêu đề', Boolean(categoryId) && 'Danh mục'].filter(Boolean).length
-                        }/2 trường bắt buộc.`}
-                  </p>
-                </div>
-                <CmsButton
-                  type="button"
-                  variant={isAnchorsReady ? 'primary' : 'secondary'}
-                  size="sm"
-                  disabled={!isAnchorsReady || isAutoFilling}
-                  loading={isAutoFilling}
-                  loadingText="Đang phân tích & điền..."
-                  onClick={handleSmartAutoFill}
-                  leadingIcon={<Sparkles className="h-4 w-4" />}
-                >
-                  Gợi ý điền nhanh với AI
-                </CmsButton>
+              <div>
+                <label className={labelClass}>Alias (Đường dẫn tĩnh)</label>
+                <input
+                  className={inputClass}
+                  value={alias}
+                  placeholder="duong-dan-tin-tuc"
+                  onChange={(e) => {
+                    setManualAlias(true);
+                    setAlias(e.target.value);
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>URL ngôn ngữ khác (Tiếng Anh)</label>
+                <input
+                  className={inputClass}
+                  value={otherLanguages1}
+                  placeholder="/en/news/article-slug"
+                  onChange={(e) => setOtherLanguages1(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Thứ tự hiển thị</label>
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={ordering}
+                  onChange={(e) => setOrdering(Number(e.target.value))}
+                />
               </div>
             </div>
           </section>
