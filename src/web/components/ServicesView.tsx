@@ -259,9 +259,8 @@ export const ServicesView = ({ initialServiceId = null, onNavigateHome, previewS
             >
               {/* Header section */}
               <div className="border-l-4 border-orange-600 pl-6 space-y-2">
-                <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
-                  <span className="text-slate-900">HỆ THỐNG </span>
-                  <span className="text-orange-600">DỊCH VỤ &amp; GIẢI PHÁP CÔNG NGHỆ</span>
+                <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
+                  GIẢI PHÁP &amp; DỊCH VỤ CÔNG NGHỆ
                 </h1>
                 <p className="max-w-4xl text-sm leading-relaxed text-slate-600">
                   Thúc đẩy chuyển đổi số với tư vấn chiến lược và kỹ thuật công nghệ tiên tiến từ CIC. Chúng tôi kết nối giữa hạ tầng truyền thống và đổi mới sáng tạo sẵn sàng cho tương lai, đồng hành cùng hơn 5.000+ dự án cấp quốc gia.

@@ -79,9 +79,8 @@ export function ProjectsRuntimeView({ projects, onSelectProject }: ProjectsRunti
         <div className="space-y-12">
           {/* Header section */}
           <div className="border-l-4 border-orange-600 pl-6 space-y-2">
-            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
-              <span className="text-slate-900">DANH MỤC </span>
-              <span className="text-orange-600">DỰ ÁN TIÊU BIỂU</span>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
+              Dự Án Thực Tế
             </h1>
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
               {t.projects.catalogSubtitle}

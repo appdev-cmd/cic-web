@@ -93,12 +93,11 @@ export function NewsListView({
       <div className="py-8 sm:py-12 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           {/* Main Title & Editorial Headline */}
-          <div className="border-b border-slate-200 pb-6">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight">
-              <span className="text-slate-900">BẢN TIN &amp; </span>
-              <span className="text-orange-600">SỰ KIỆN CÔNG NGHỆ</span>
+          <div className="border-l-4 border-orange-600 pl-6 space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
+              Tin Tức &amp; Truyền Thông
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-500 font-medium">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
               Cập nhật thông tin hoạt động, kiến thức kỹ thuật chuyên ngành và các thông cáo cổ đông mới nhất
             </p>
           </div>

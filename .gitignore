@@ -23,3 +23,6 @@ images/
 ggsheet-*.json
 *serviceaccount*.json
 *credentials*.json
+
+# Scratch & local temp
+scratch/
