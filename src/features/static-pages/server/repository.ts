@@ -16,6 +16,35 @@ import { CUSTOM_LEGAL_PAGE_CONTRACT } from '../manifest';
 
 const text = (v: unknown) => (typeof v === 'string' ? v : '');
 
+export function normalizeSectionConfig(cfg: unknown): Record<string, unknown> {
+  if (!cfg) return {};
+  if (typeof cfg === 'string') {
+    try {
+      const parsed = JSON.parse(cfg);
+      return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
+    }
+  }
+  if (typeof cfg === 'object') {
+    const keys = Object.keys(cfg);
+    if (keys.length > 5 && keys.slice(0, 5).every((k, idx) => k === String(idx))) {
+      try {
+        const reconstructed = keys
+          .sort((a, b) => Number(a) - Number(b))
+          .map((k) => (cfg as Record<string, unknown>)[k])
+          .join('');
+        const parsed = JSON.parse(reconstructed);
+        return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : {};
+      } catch {
+        // fallback
+      }
+    }
+    return cfg as Record<string, unknown>;
+  }
+  return {};
+}
+
 /**
  * Lists static pages for CMS management.
  * Explicit projection joining draft and published revisions.
@@ -122,7 +151,7 @@ async function loadRevisionDetail(sql: Sql, revisionId: number): Promise<StaticP
     sectionKey: text(s.section_key),
     sectionType: text(s.section_type),
     position: Number(s.position),
-    config: (s.config ?? {}) as Record<string, unknown>,
+    config: normalizeSectionConfig(s.config),
     references: refsBySection.get(Number(s.id)) ?? [],
   }));
 
@@ -288,7 +317,7 @@ export async function savePageDraftRecord(
         INSERT INTO cic_content_page_sections (
           revision_id, section_key, section_type, position, config
         ) VALUES (
-          ${targetRevId}, ${sec.sectionKey}, ${sec.sectionType}, ${position}, ${sql.json((sec.config ?? {}) as never)}
+          ${targetRevId}, ${sec.sectionKey}, ${sec.sectionType}, ${position}, ${sql.json(normalizeSectionConfig(sec.config) as never)}
         ) RETURNING id
       `;
 
@@ -405,7 +434,7 @@ export async function publishPageRecord(
         INSERT INTO cic_content_page_sections (
           revision_id, section_key, section_type, position, config
         ) VALUES (
-          ${newRevId}, ${sec.section_key}, ${sec.section_type}, ${sec.position}, ${sql.json((sec.config ?? {}) as never)}
+          ${newRevId}, ${sec.section_key}, ${sec.section_type}, ${sec.position}, ${sql.json(normalizeSectionConfig(sec.config) as never)}
         ) RETURNING id
       `;
 
