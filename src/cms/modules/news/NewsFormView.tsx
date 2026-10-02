@@ -858,17 +858,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                 placeholder="Tải file đính kèm từ máy..."
               />
 
-              <div>
-                <label className={labelClass}>Video / mã nhúng (Youtube, Vimeo)</label>
-                <textarea
-                  rows={3}
-                  className={inputClass}
-                  value={video}
-                  placeholder="https://www.youtube.com/watch?v=... hoặc mã <iframe>"
-                  onChange={(event) => setVideo(event.target.value)}
-                />
-              </div>
-
               {/* Tags với Đũa thần AI */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
@@ -949,16 +938,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   onChange={(e) => setCreatedTime(e.target.value)}
                 />
               </div>
-
-              <div>
-                <label className={labelClass}>Thời gian kết thúc</label>
-                <input
-                  type="datetime-local"
-                  className={inputClass}
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
             </div>
           </section>
 
@@ -1003,15 +982,6 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   value={seoDescription}
                   placeholder="Mô tả kết quả tìm kiếm (135 - 155 ký tự)"
                   onChange={(e) => setSeoDescription(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Tawk.to Script</label>
-                <textarea
-                  rows={3}
-                  className={inputClass}
-                  value={tawkTo}
-                  onChange={(e) => setTawkTo(e.target.value)}
                 />
               </div>
             </div>
