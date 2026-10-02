@@ -22,8 +22,8 @@ export const HomePartnersSection: React.FC<HomePartnersSectionProps> = ({
   renderPolicy,
 }) => {
   return (
-    <section data-page-builder-section-key="home.partners" className="py-8 sm:py-9 bg-white/40 border-t border-slate-100 overflow-hidden relative z-10">
-      <div className="max-w-7xl mx-auto px-6 mb-4 relative z-10">
+    <section data-page-builder-section-key="home.partners" className="py-10 sm:py-12 bg-white/40 border-t border-slate-100 overflow-hidden relative z-10">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <SectionHeader 
           title={title || "Đối tác chiến lược"} 
           sub={subtitle || "Hợp tác cùng các tập đoàn công nghệ hàng đầu thế giới"} 

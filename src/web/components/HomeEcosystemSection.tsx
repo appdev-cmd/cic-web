@@ -55,7 +55,7 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
 
   if (editMode) {
     return (
-      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 bg-white py-10 text-slate-950 sm:py-12 lg:scroll-mt-28 lg:py-14">
+      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 bg-white py-10 sm:py-12 text-slate-950 lg:scroll-mt-28">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
           <div className="mx-auto mb-6 max-w-3xl text-center">
             <h2
@@ -113,7 +113,7 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
   }
 
   return (
-    <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 overflow-hidden bg-white py-10 text-slate-950 sm:py-12 lg:scroll-mt-28 lg:py-14">
+    <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 overflow-hidden bg-white py-10 sm:py-12 text-slate-950 lg:scroll-mt-28">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
         <div className="grid items-start gap-6 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-4 lg:sticky lg:top-28">

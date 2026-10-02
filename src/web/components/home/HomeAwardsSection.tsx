@@ -27,7 +27,7 @@ export const HomeAwardsSection: React.FC<HomeAwardsSectionProps> = ({
           titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
           subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
         />
-        <div className="mt-4">
+        <div className="mt-1">
           <AwardsSlider awards={awards} paused={editMode} />
         </div>
       </div>

@@ -22,7 +22,7 @@ export const HomeStatsSection: React.FC<HomeStatsSectionProps> = ({
   bindingRegistry = elementBindingRegistry,
 }) => {
   return (
-    <section data-page-builder-section-key="home.stats" className="py-8 sm:py-10 lg:py-12 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
+    <section data-page-builder-section-key="home.stats" className="py-10 sm:py-12 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div
           {...bindElement<HTMLDivElement>(createElementBinding({
