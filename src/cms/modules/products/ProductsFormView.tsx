@@ -40,13 +40,6 @@ interface ProductsFormViewProps {
 
 interface LegacyDownload { name: string; file: string; link: string }
 const slugify = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
-function toYoutubeEmbedUrl(urlOrIframe: string): string {
-  if (!urlOrIframe) return '';
-  const matchIframe = urlOrIframe.match(/src=["']([^"']+)["']/i);
-  const raw = matchIframe ? matchIframe[1] : urlOrIframe.trim();
-  const ytMatch = raw.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
-  return ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : (raw.startsWith('http') ? raw : '');
-}
 const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300';
 
@@ -493,8 +486,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       landing_page: '', seo_title: seoTitle,
       seo_keyword: Array.isArray(seoKeyword) ? (seoKeyword as string[]).join(', ') : String(seoKeyword || ''),
       seo_description: seoDescription,
-      file_catalogue: '', file_price: '', link_catalogue: '',
-      file_driver_name: '', file_driver: '', link_driver: '',
+      file_catalogue: product?.file_catalogue ?? '',
+      file_price: product?.file_price ?? '',
+      link_catalogue: product?.link_catalogue ?? '',
+      file_driver_name: product?.file_driver_name ?? '',
+      file_driver: product?.file_driver ?? '',
+      link_driver: product?.link_driver ?? '',
     };
     downloads.forEach((item, index) => { Object.assign(base, { [`file_name${index + 1}`]: item.name, [`file_download${index + 1}`]: item.file, [`link_download${index + 1}`]: item.link }); });
     return base;
@@ -866,7 +863,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
               </div>
               <AiMagicWand label="Khung dàn bài" title="Tạo khung dàn bài kỹ thuật chuẩn có sẵn đề mục" onTrigger={handleAiOverviewOutline} />
             </div>
-            <RichTextEditor value={description} onChange={setDescription} minHeight="320px" allowedEmbeds={['cta', 'form']} />
+            <RichTextEditor value={description} onChange={setDescription} minHeight="320px" allowedEmbeds={['cta', 'form', 'video']} />
           </section>
 
           {/* Section 5: Chi tiết tính năng */}
@@ -878,7 +875,7 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
               </div>
               <AiMagicWand label="Khung tính năng" title="Tạo dàn ý các tính năng kỹ thuật nổi bật" onTrigger={handleAiFeaturesOutline} />
             </div>
-            <RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" allowedEmbeds={['cta', 'form']} />
+            <RichTextEditor value={featureDetails} onChange={setFeatureDetails} minHeight="300px" allowedEmbeds={['cta', 'form', 'video']} />
           </section>
 
           {/* Section 6: Video giới thiệu */}
@@ -888,28 +885,9 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
                 <Video className="h-5 w-5 text-orange-600" />
                 Video giới thiệu sản phẩm
               </div>
-              <span className="text-[11px] text-slate-400">YouTube URL hoặc mã nhúng</span>
+              <span className="text-[11px] text-slate-400">Dán link video, YouTube hoặc nhúng đa phương tiện</span>
             </div>
-            <div className="space-y-3">
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="Dán link YouTube (VD: https://www.youtube.com/watch?v=... hoặc https://youtu.be/...)"
-                value={video}
-                onChange={(e) => setVideo(e.target.value)}
-              />
-              {toYoutubeEmbedUrl(video) && (
-                <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-black aspect-video max-w-lg">
-                  <iframe
-                    src={toYoutubeEmbedUrl(video)}
-                    title="Video preview"
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              )}
-            </div>
+            <RichTextEditor value={video} onChange={setVideo} minHeight="220px" allowedEmbeds={['video']} />
           </section>
 
           {/* Section 7: Tệp sản phẩm & Tài liệu đính kèm */}

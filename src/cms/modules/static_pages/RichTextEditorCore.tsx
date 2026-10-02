@@ -51,16 +51,49 @@ import {
 } from 'ckeditor5';
 import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
-import { FileInput, Megaphone, X } from 'lucide-react';
+import { Check, ExternalLink, FileInput, Megaphone, Play, Video, X } from 'lucide-react';
 import { getDemoCtaModuleData, getDemoFormModuleData } from '../../data/demoCustomerInteractionDataSource';
 import type { CustomerInteractionEmbed } from '../../../shared/customerInteractionContract';
+
+export type RichTextEmbedType = CustomerInteractionEmbed | 'video';
 
 export interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   onBlur?: (value: string) => void;
   minHeight?: string;
-  allowedEmbeds?: CustomerInteractionEmbed[];
+  allowedEmbeds?: RichTextEmbedType[];
+}
+
+export function toEmbedUrl(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+
+  // 1. Check if user pasted full iframe tag
+  const iframeMatch = trimmed.match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
+  if (iframeMatch?.[1]) {
+    return iframeMatch[1];
+  }
+
+  // 2. YouTube (standard watch, short youtu.be, shorts, embed)
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  if (ytMatch?.[1]) {
+    return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  }
+
+  // 3. Vimeo
+  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^/]*\/videos\/|video\/|album\/(?:\d+\/)?video\/|)(\d+)|player\.vimeo\.com\/video\/(\d+))/i);
+  const vimeoId = vimeoMatch?.[1] || vimeoMatch?.[2];
+  if (vimeoId) {
+    return `https://player.vimeo.com/video/${vimeoId}`;
+  }
+
+  // 4. Any direct web URL fallback
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return trimmed;
 }
 
 class UploadAdapter {
@@ -106,8 +139,8 @@ interface CmsReferenceAttributes extends Record<string, unknown> {
   alignment: CmsReferenceAlignment;
 }
 
-const YOUTUBE_EMBED_SOURCE = /^https:\/\/(?:www\.)?(?:youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)[A-Za-z0-9_-]+(?:\?[^\s"<>]*)?$/;
-const MEDIA_IFRAME_ATTRIBUTES = ['src', 'title', 'width', 'height', 'frameborder', 'allow', 'referrerpolicy', 'allowfullscreen'] as const;
+const EMBED_SOURCE_REGEX = /^(https?:)?\/\//i;
+const MEDIA_IFRAME_ATTRIBUTES = ['src', 'title', 'width', 'height', 'style', 'frameborder', 'allow', 'referrerpolicy', 'allowfullscreen'] as const;
 
 class CmsMediaEmbedPlugin extends Plugin {
   static get requires() {
@@ -125,7 +158,7 @@ class CmsMediaEmbedPlugin extends Plugin {
     editor.conversion.for('upcast').elementToElement({
       view: {
         name: 'iframe',
-        attributes: { src: YOUTUBE_EMBED_SOURCE },
+        attributes: { src: EMBED_SOURCE_REGEX },
       },
       model: (viewElement, { writer }) => {
         const attributes = Object.fromEntries(
@@ -156,10 +189,13 @@ class CmsMediaEmbedPlugin extends Plugin {
       model: 'cmsMediaEmbed',
       view: (modelElement, { writer }) => {
         const src = String(modelElement.getAttribute('src') || '');
-        const title = String(modelElement.getAttribute('title') || 'YouTube video player');
+        const title = String(modelElement.getAttribute('title') || 'Video player');
+        const style = String(modelElement.getAttribute('style') || '');
+        const width = String(modelElement.getAttribute('width') || '');
+        const height = String(modelElement.getAttribute('height') || '');
         const allow = String(modelElement.getAttribute('allow') || 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
         const wrapper = writer.createContainerElement('figure', { class: 'cms-rich-media-embed' });
-        const iframe = writer.createRawElement('iframe', {
+        const iframeAttrs: Record<string, string> = {
           src,
           title,
           allow,
@@ -167,7 +203,11 @@ class CmsMediaEmbedPlugin extends Plugin {
           allowfullscreen: 'allowfullscreen',
           frameborder: String(modelElement.getAttribute('frameborder') || '0'),
           tabindex: '-1',
-        });
+        };
+        if (style) iframeAttrs.style = style;
+        if (width) iframeAttrs.width = width;
+        if (height) iframeAttrs.height = height;
+        const iframe = writer.createRawElement('iframe', iframeAttrs);
         writer.insert(writer.createPositionAt(wrapper, 0), iframe);
         return toWidget(wrapper, writer, { label: `Video: ${title}` });
       },
@@ -273,6 +313,73 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   const [selectedFormId, setSelectedFormId] = useState('');
   const [referencePicker, setReferencePicker] = useState<CmsReferenceType | null>(null);
   const [referenceAlignment, setReferenceAlignment] = useState<CmsReferenceAlignment>('center');
+
+  // Video Embed states
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [videoInputUrl, setVideoInputUrl] = useState('');
+  const [videoResizeType, setVideoResizeType] = useState<'responsive' | 'default' | '560x315' | '854x480' | '1280x720'>('responsive');
+  const [videoAlignment, setVideoAlignment] = useState<'none' | 'left' | 'center' | 'right'>('none');
+  const [videoError, setVideoError] = useState<string | null>(null);
+
+  const previewEmbedUrl = useMemo(() => {
+    if (!videoInputUrl.trim()) return '';
+    return toEmbedUrl(videoInputUrl);
+  }, [videoInputUrl]);
+
+  const handleInsertVideo = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const trimmed = videoInputUrl.trim();
+    if (!trimmed) {
+      setVideoError('Vui lòng nhập đường dẫn URL hoặc mã nhúng video.');
+      return;
+    }
+    const embedUrl = toEmbedUrl(trimmed);
+    if (!embedUrl) {
+      setVideoError('Không nhận diện được định dạng liên kết video hợp lệ.');
+      return;
+    }
+
+    const alignStyle =
+      videoAlignment === 'center'
+        ? 'display:flex;justify-content:center;margin:16px auto;text-align:center;'
+        : videoAlignment === 'right'
+          ? 'display:flex;justify-content:flex-end;margin:16px 0 16px auto;text-align:right;'
+          : videoAlignment === 'left'
+            ? 'display:flex;justify-content:flex-start;margin:16px auto 16px 0;text-align:left;'
+            : 'margin:16px 0;';
+
+    let videoHtml = '';
+    if (videoResizeType === 'responsive') {
+      videoHtml = `<div class="cms-video-wrapper" style="${alignStyle}"><div style="position:relative;width:100%;max-width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;"><iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen"></iframe></div></div>`;
+    } else {
+      let width = '640';
+      let height = '360';
+      if (videoResizeType === '560x315') { width = '560'; height = '315'; }
+      else if (videoResizeType === '854x480') { width = '854'; height = '480'; }
+      else if (videoResizeType === '1280x720') { width = '1280'; height = '720'; }
+
+      videoHtml = `<div class="cms-video-wrapper" style="${alignStyle}"><iframe src="${embedUrl}" width="${width}" height="${height}" style="max-width:100%;border:0;border-radius:10px;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen"></iframe></div>`;
+    }
+
+    try {
+      const viewFragment = editor.data.processor.toView(videoHtml);
+      const modelFragment = editor.data.toModel(viewFragment);
+      editor.model.insertContent(modelFragment);
+      const nextData = editor.getData();
+      lastDataRef.current = nextData;
+      onChange(nextData);
+      editor.editing.view.focus();
+    } catch (err) {
+      console.warn('Error inserting video embed:', err);
+    }
+
+    setVideoModalOpen(false);
+    setVideoInputUrl('');
+    setVideoResizeType('responsive');
+    setVideoAlignment('none');
+    setVideoError(null);
+  };
 
   // Synchronize when the external value changes and differs from the last emitted editor data
   useEffect(() => {
@@ -437,6 +544,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       />
 
       {allowedEmbeds.length > 0 && <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+        {allowedEmbeds.includes('video') && (
+        <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+          <button type="button" onClick={() => { setVideoModalOpen(true); setVideoError(null); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-xs"><Video className="h-4 w-4" />Chèn Video</button>
+        </div>
+        )}
         {allowedEmbeds.includes('cta') && (
         <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
           <button type="button" onClick={() => { setSelectedCtaId((current) => current || activeCtas[0]?.id || ''); setReferenceAlignment('center'); setReferencePicker('cta'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white"><Megaphone className="h-4 w-4" />Chèn CTA</button>
@@ -448,6 +560,182 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         </div>
         )}
       </div>}
+
+      {/* Modal Chèn Video / Đa phương tiện theo chuẩn tiếng Việt */}
+      {videoModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="video-embed-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setVideoModalOpen(false);
+          }}
+        >
+          <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 animate-in fade-in-0 zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <Video className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 id="video-embed-title" className="text-base font-bold text-slate-900 dark:text-white">
+                    Chèn Video / Đa phương tiện
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Embed Media Content (Photo, Video, Audio or Rich Content)</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="Đóng"
+                onClick={() => setVideoModalOpen(false)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="space-y-4 p-5">
+              {/* Instructions */}
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                Dán đường dẫn (hỗ trợ cả link rút gọn) từ bất kỳ nguồn nào như <strong className="text-slate-700 dark:text-slate-200">YouTube, Vimeo, TikTok, Bilibili, Facebook, Google Drive...</strong> hoặc dán trực tiếp toàn bộ thẻ <strong className="text-slate-700 dark:text-slate-200">&lt;iframe&gt;</strong>.
+              </p>
+
+              {/* URL Input */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
+                  URL <span className="font-normal text-slate-400">(Đường dẫn video hoặc mã nhúng):</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={videoInputUrl}
+                    onChange={(e) => {
+                      setVideoInputUrl(e.target.value);
+                      if (videoError) setVideoError(null);
+                    }}
+                    placeholder="VD: https://www.youtube.com/watch?v=... hoặc <iframe src=...>"
+                    className={`w-full rounded-xl border px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 dark:bg-slate-800 dark:text-white ${
+                      videoError
+                        ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20 dark:border-slate-700'
+                    }`}
+                    autoFocus
+                  />
+                  {videoInputUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setVideoInputUrl('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {videoError && <p className="mt-1 text-xs text-red-500">{videoError}</p>}
+              </div>
+
+              {/* Resize Type */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
+                  Kích thước <span className="font-normal text-slate-400">(Resize Type - chỉ áp dụng video):</span>
+                </label>
+                <select
+                  value={videoResizeType}
+                  onChange={(e) => setVideoResizeType(e.target.value as any)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="responsive">Tự động co giãn (Responsive 16:9 - Khuyên dùng)</option>
+                  <option value="default">Mặc định (Không đổi kích thước)</option>
+                  <option value="560x315">Kích thước chuẩn (560 x 315 px)</option>
+                  <option value="854x480">Kích thước lớn (854 x 480 px)</option>
+                  <option value="1280x720">Kích thước Full HD (1280 x 720 px)</option>
+                </select>
+              </div>
+
+              {/* Alignment */}
+              <div>
+                <label className="mb-2 block text-xs font-bold text-slate-700 dark:text-slate-200">
+                  Căn chỉnh <span className="font-normal text-slate-400">(Alignment):</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {[
+                    { id: 'none', label: 'Không căn (None)' },
+                    { id: 'left', label: 'Trái (Left)' },
+                    { id: 'center', label: 'Giữa (Center)' },
+                    { id: 'right', label: 'Phải (Right)' },
+                  ].map((align) => (
+                    <label
+                      key={align.id}
+                      className={`flex cursor-pointer items-center gap-2 rounded-xl border p-2.5 text-xs font-semibold transition ${
+                        videoAlignment === align.id
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-500'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="video-alignment"
+                        value={align.id}
+                        checked={videoAlignment === align.id}
+                        onChange={() => setVideoAlignment(align.id as any)}
+                        className="text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span>{align.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Preview */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">
+                  Xem trước:
+                </label>
+                {previewEmbedUrl ? (
+                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-black dark:border-slate-800 aspect-video max-h-52 w-full">
+                    <iframe
+                      src={previewEmbedUrl}
+                      title="Xem trước video"
+                      className="h-full w-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 py-7 text-center text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-800/40">
+                    <Play className="mb-2 h-7 w-7 text-slate-300 dark:text-slate-600" />
+                    <span>Dán đường dẫn video vào ô trên để xem trước tại đây</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3.5 dark:border-slate-800 dark:bg-slate-900/60">
+              <button
+                type="button"
+                onClick={() => setVideoModalOpen(false)}
+                className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Hủy bỏ (Cancel)
+              </button>
+              <button
+                type="button"
+                disabled={!videoInputUrl.trim()}
+                onClick={handleInsertVideo}
+                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-40"
+              >
+                <Check className="h-4 w-4" />
+                Xác nhận chèn (OK)
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
 
       {referencePicker && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="reference-preview-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setReferencePicker(null); }}>

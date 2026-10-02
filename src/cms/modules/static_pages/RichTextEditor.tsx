@@ -1,10 +1,10 @@
-﻿'use client';
+'use client';
 
 import dynamic from 'next/dynamic';
 import React from 'react';
-import type { RichTextEditorProps } from './RichTextEditorCore';
+import type { RichTextEditorProps, RichTextEmbedType } from './RichTextEditorCore';
 
-export type { RichTextEditorProps };
+export type { RichTextEditorProps, RichTextEmbedType };
 
 export const RichTextEditor = dynamic<RichTextEditorProps>(
   () => import('./RichTextEditorCore').then((mod) => mod.RichTextEditor),
