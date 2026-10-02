@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import { SectionHeader } from '@/shared/components/Typography';
 
 export interface HomeEcosystemItem {
   id: string;
@@ -27,163 +28,85 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
   editMode = false,
   onSelect,
 }) => {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(items.length > 1);
-
-  const syncScrollState = () => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector<HTMLElement>('[data-ecosystem-card]');
-    const gap = Number.parseFloat(window.getComputedStyle(track).columnGap || '20');
-    const step = (card?.getBoundingClientRect().width ?? track.clientWidth * 0.82) + gap;
-    const lastReachableIndex = Math.min(items.length - 1, Math.max(0, Math.round((track.scrollWidth - track.clientWidth) / step)));
-    setActiveIndex(Math.min(lastReachableIndex, Math.max(0, Math.round(track.scrollLeft / step))));
-    setCanScrollLeft(track.scrollLeft > 8);
-    setCanScrollRight(track.scrollLeft + track.clientWidth < track.scrollWidth - 8);
-  };
-
-  const move = (direction: -1 | 1) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector<HTMLElement>('[data-ecosystem-card]');
-    const gap = Number.parseFloat(window.getComputedStyle(track).columnGap || '20');
-    const step = (card?.getBoundingClientRect().width ?? track.clientWidth * 0.82) + gap;
-    track.scrollBy({ left: direction * step, behavior: 'smooth' });
-  };
-
-  if (editMode) {
-    return (
-      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="mx-auto mb-10 max-w-3xl text-center">
-            <h2
-              data-page-builder-config-path={JSON.stringify(['title'])}
-              className="text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
-            >
-              {title}
-            </h2>
-            <div aria-hidden="true" className="mx-auto my-5 h-1 w-14 rounded-full bg-orange-600" />
-            <p
-              data-page-builder-config-path={JSON.stringify(['subtitle'])}
-              className="text-base leading-7 text-slate-600"
-            >
-              {subtitle}
-            </p>
-          </div>
-
-          <div
-            ref={trackRef}
-            data-page-collection="ecosystem"
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full"
-          >
-            {items.map((item) => (
-              <div
-                key={item.id}
-                data-ecosystem-card
-                className="group relative flex flex-col rounded-[10px] border border-slate-200/80 bg-slate-100 p-2 text-left shadow-sm w-full transition-[border-color,box-shadow] duration-200 hover:border-slate-300"
-              >
-                <span className="relative block h-[350px] overflow-hidden rounded-[8px] bg-slate-900 sm:h-[390px] lg:h-[410px]">
-                  <img src={item.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out" />
-                  <span className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" aria-hidden="true" />
-                  <span className="absolute left-4 top-4 rounded-full bg-orange-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
-                    {item.badge}
-                  </span>
-                  <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <span className="line-clamp-4 block text-sm leading-6 text-slate-100 drop-shadow-sm">
-                      {item.description}
-                    </span>
-                  </span>
-                </span>
-                <span className="flex min-h-20 items-center justify-between gap-3 px-3 py-3 sm:px-4">
-                  <span className="text-lg font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-orange-600 sm:text-xl">
-                    {item.title}
-                  </span>
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-sm transition-colors" aria-hidden="true">
-                    <ArrowUpRight className="size-5" />
-                  </span>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Hiển thị đầy đủ 3 ảnh/trụ cột chính của Hệ sinh thái không bị ẩn hay cắt
+  const displayItems = items.slice(0, 3);
 
   return (
-    <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 overflow-hidden bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20">
+    <section
+      data-page-builder-section-key="home.ecosystem"
+      id="solutions"
+      className="relative scroll-mt-24 bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20"
+    >
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-        <div className="grid items-start gap-9 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-4 lg:sticky lg:top-28">
-            <h2
-              data-page-builder-config-path={JSON.stringify(['title'])}
-              className="max-w-md text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
-            >
-              {title}
-            </h2>
-            <div aria-hidden="true" className="my-5 h-1 w-14 rounded-full bg-orange-600" />
-            <p
-              data-page-builder-config-path={JSON.stringify(['subtitle'])}
-              className="max-w-md text-base leading-7 text-slate-600"
-            >
-              {subtitle}
-            </p>
+        {/* Header đồng bộ chuẩn nhận diện trang chủ */}
+        <SectionHeader
+          title={title || 'Hệ sinh thái Công nghệ CIC'}
+          sub={
+            subtitle ||
+            'Phần mềm, thiết bị, AI, BIM, Digital Twins cùng năng lực tư vấn và đào tạo chuyên sâu trong một hệ sinh thái công nghệ thống nhất.'
+          }
+          titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
+          subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
+          className="mb-10 sm:mb-12"
+        />
 
-            <div className="mt-7 flex items-center gap-4 sm:mt-9">
-              <div className="flex gap-2.5">
-                <button type="button" onClick={() => move(-1)} disabled={!canScrollLeft} className="flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition-colors hover:border-slate-950 hover:bg-slate-950 hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300" aria-label="Xem giải pháp trước">
-                  <ChevronLeft className="size-5" />
-                </button>
-                <button type="button" onClick={() => move(1)} disabled={!canScrollRight} className="flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition-colors hover:border-slate-950 hover:bg-slate-950 hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300" aria-label="Xem giải pháp tiếp theo">
-                  <ChevronRight className="size-5" />
-                </button>
+        {/* 3 Cột ảnh đầy đủ, khoáng đạt, không bị viền lồng viền bó cứng */}
+        <div
+          data-page-collection="ecosystem"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 w-full"
+        >
+          {displayItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              data-ecosystem-card
+              onClick={() => {
+                if (!editMode) onSelect(item);
+              }}
+              aria-label={`Xem ${item.title}`}
+              aria-disabled={editMode}
+              className="group text-left cursor-pointer flex flex-col transition-all duration-300 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl"
+            >
+              {/* Khung ảnh tự nhiên, không viền xám dày bọc ngoài */}
+              <div className="relative w-full h-[360px] sm:h-[400px] lg:h-[430px] overflow-hidden rounded-2xl shadow-sm group-hover:shadow-xl transition-all duration-500 bg-slate-900">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  loading="lazy"
+                  className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent"
+                  aria-hidden="true"
+                />
+
+                {/* Badge nhận diện */}
+                <span className="absolute left-4 top-4 rounded-full bg-orange-600/90 backdrop-blur-xs px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">
+                  {item.badge}
+                </span>
+
+                {/* Đoạn mô tả tự nhiên trên gradient */}
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                  <p className="line-clamp-3 text-sm text-slate-200 leading-relaxed font-normal drop-shadow-xs">
+                    {item.description}
+                  </p>
+                </div>
               </div>
-              <p className="border-l border-slate-200 pl-4 text-xs font-bold tabular-nums text-slate-400" aria-live="polite">
-                <span className="text-sm text-orange-600">{String(activeIndex + 1).padStart(2, '0')}</span>
-                <span className="mx-1.5">/</span>
-                {String(items.length).padStart(2, '0')}
-              </p>
-            </div>
-          </div>
 
-          <div className="min-w-0 lg:col-span-8">
-            <div ref={trackRef} data-page-collection="ecosystem" onScroll={syncScrollState} className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5" style={{ WebkitOverflowScrolling: 'touch' }}>
-              {items.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  data-ecosystem-card
-                  onClick={() => { if (!editMode) onSelect(item); }}
-                  aria-label={`Xem ${item.title}`}
-                  aria-disabled={editMode}
-                  className="group w-[82vw] max-w-[390px] shrink-0 snap-start rounded-[10px] border border-slate-200/80 bg-slate-100 p-2 text-left shadow-[0_6px_24px_-12px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_18px_38px_-18px_rgba(15,23,42,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 sm:w-[350px] lg:w-[380px]"
+              {/* Tiêu đề và nút điều hướng thoáng mắt, hiện đại */}
+              <div className="flex items-center justify-between gap-3 pt-4 px-1">
+                <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 group-hover:text-orange-600 transition-colors">
+                  {item.title}
+                </span>
+                <span
+                  className="size-10 shrink-0 rounded-full bg-slate-100 group-hover:bg-orange-600 group-hover:text-white text-slate-700 flex items-center justify-center transition-all duration-300 shadow-xs"
+                  aria-hidden="true"
                 >
-                  <span className="relative block h-[350px] overflow-hidden rounded-[8px] bg-slate-900 sm:h-[390px] lg:h-[410px]">
-                    <img src={item.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.035]" />
-                    <span className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" aria-hidden="true" />
-                    <span className="absolute left-4 top-4 rounded-full bg-orange-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
-                      {item.badge}
-                    </span>
-                    <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                      <span className="line-clamp-4 block text-sm leading-6 text-slate-100 drop-shadow-sm">
-                        {item.description}
-                      </span>
-                    </span>
-                  </span>
-                  <span className="flex min-h-20 items-center justify-between gap-3 px-3 py-3 sm:px-4">
-                    <span className="text-lg font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-orange-600 sm:text-xl">
-                      {item.title}
-                    </span>
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-sm transition-colors group-hover:bg-slate-950 group-hover:text-white" aria-hidden="true">
-                      <ArrowUpRight className="size-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+                  <ArrowUpRight className="size-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </section>
