@@ -19,7 +19,7 @@ export const HomeAwardsSection: React.FC<HomeAwardsSectionProps> = ({
   editMode = false,
 }) => {
   return (
-    <section data-page-builder-section-key="home.awards" className="py-16 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
+    <section data-page-builder-section-key="home.awards" className="py-10 sm:py-12 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <SectionHeader 
           title={title || "Thành tựu & Giải thưởng"} 
@@ -27,7 +27,7 @@ export const HomeAwardsSection: React.FC<HomeAwardsSectionProps> = ({
           titleProps={{ 'data-page-builder-config-path': JSON.stringify(['title']) } as any}
           subProps={{ 'data-page-builder-config-path': JSON.stringify(['subtitle']) } as any}
         />
-        <div className="mt-6">
+        <div className="mt-4">
           <AwardsSlider awards={awards} paused={editMode} />
         </div>
       </div>

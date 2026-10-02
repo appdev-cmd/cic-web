@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface HomeEcosystemItem {
@@ -44,12 +44,6 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
     setCanScrollRight(track.scrollLeft + track.clientWidth < track.scrollWidth - 8);
   };
 
-  useEffect(() => {
-    syncScrollState();
-    window.addEventListener('resize', syncScrollState);
-    return () => window.removeEventListener('resize', syncScrollState);
-  }, [items.length]);
-
   const move = (direction: -1 | 1) => {
     const track = trackRef.current;
     if (!track) return;
@@ -61,9 +55,9 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
 
   if (editMode) {
     return (
-      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20">
+      <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 bg-white py-10 text-slate-950 sm:py-12 lg:scroll-mt-28 lg:py-14">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="mx-auto mb-10 max-w-3xl text-center">
+          <div className="mx-auto mb-6 max-w-3xl text-center">
             <h2
               data-page-builder-config-path={JSON.stringify(['title'])}
               className="text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
@@ -88,26 +82,26 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
               <div
                 key={item.id}
                 data-ecosystem-card
-                className="group relative flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-100 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_16px_32px_-8px_rgba(15,23,42,0.14)] transition-all duration-300 text-left"
+                className="group relative flex flex-col rounded-[10px] border border-slate-200/80 bg-slate-100 p-2 text-left shadow-sm w-full transition-[border-color,box-shadow] duration-200 hover:border-slate-300"
               >
-                <span className="relative block h-[340px] sm:h-[370px] lg:h-[390px] w-full overflow-hidden bg-slate-950">
-                  <img src={item.image} alt={item.title} loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                  <span className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent" aria-hidden="true" />
-                  <span className="absolute left-4 top-4 rounded-full bg-orange-600/95 backdrop-blur-xs px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-xs">
+                <span className="relative block h-[350px] overflow-hidden rounded-[8px] bg-slate-900 sm:h-[390px] lg:h-[410px]">
+                  <img src={item.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" aria-hidden="true" />
+                  <span className="absolute left-4 top-4 rounded-full bg-orange-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
                     {item.badge}
                   </span>
                   <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <span className="line-clamp-3 block text-xs sm:text-sm leading-relaxed text-slate-100/90 font-normal drop-shadow-xs">
+                    <span className="line-clamp-4 block text-sm leading-6 text-slate-100 drop-shadow-sm">
                       {item.description}
                     </span>
                   </span>
                 </span>
-                <span className="flex min-h-[72px] items-center justify-between gap-3 px-4 py-3 bg-white">
-                  <span className="text-base sm:text-lg font-bold leading-snug tracking-tight text-slate-900 transition-colors group-hover:text-orange-600 line-clamp-2">
+                <span className="flex min-h-20 items-center justify-between gap-3 px-3 py-3 sm:px-4">
+                  <span className="text-lg font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-orange-600 sm:text-xl">
                     {item.title}
                   </span>
-                  <span className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-700 border border-slate-200/60 shadow-xs transition-colors group-hover:bg-orange-600 group-hover:border-orange-600 group-hover:text-white" aria-hidden="true">
-                    <ArrowUpRight className="size-4 sm:size-4.5" />
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-sm transition-colors" aria-hidden="true">
+                    <ArrowUpRight className="size-5" />
                   </span>
                 </span>
               </div>
@@ -119,13 +113,13 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
   }
 
   return (
-    <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 overflow-hidden bg-white py-14 text-slate-950 sm:py-16 lg:scroll-mt-28 lg:py-20">
+    <section data-page-builder-section-key="home.ecosystem" id="solutions" className="relative scroll-mt-24 overflow-hidden bg-white py-10 text-slate-950 sm:py-12 lg:scroll-mt-28 lg:py-14">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-        <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-12">
-          <div className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-28">
+        <div className="grid items-start gap-6 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-4 lg:sticky lg:top-28">
             <h2
               data-page-builder-config-path={JSON.stringify(['title'])}
-              className="max-w-md text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl"
+              className="max-w-md text-3xl font-black uppercase leading-[1.08] tracking-tighter text-slate-950 sm:text-4xl lg:text-5xl"
             >
               {title}
             </h2>
@@ -139,22 +133,10 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
 
             <div className="mt-7 flex items-center gap-4 sm:mt-9">
               <div className="flex gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => move(-1)}
-                  disabled={!canScrollLeft}
-                  className="flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition-colors hover:border-slate-950 hover:bg-slate-950 hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300 cursor-pointer"
-                  aria-label="Xem giải pháp trước"
-                >
+                <button type="button" onClick={() => move(-1)} disabled={!canScrollLeft} className="flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition-colors hover:border-slate-950 hover:bg-slate-950 hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300" aria-label="Xem giải pháp trước">
                   <ChevronLeft className="size-5" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => move(1)}
-                  disabled={!canScrollRight}
-                  className="flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition-colors hover:border-slate-950 hover:bg-slate-950 hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300 cursor-pointer"
-                  aria-label="Xem giải pháp tiếp theo"
-                >
+                <button type="button" onClick={() => move(1)} disabled={!canScrollRight} className="flex size-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm transition-colors hover:border-slate-950 hover:bg-slate-950 hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300" aria-label="Xem giải pháp tiếp theo">
                   <ChevronRight className="size-5" />
                 </button>
               </div>
@@ -166,14 +148,8 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
             </div>
           </div>
 
-          <div className="min-w-0 lg:col-span-9 xl:col-span-9">
-            <div
-              ref={trackRef}
-              data-page-collection="ecosystem"
-              onScroll={syncScrollState}
-              className="flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{ WebkitOverflowScrolling: 'touch' }}
-            >
+          <div className="min-w-0 lg:col-span-8">
+            <div ref={trackRef} data-page-collection="ecosystem" onScroll={syncScrollState} className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5" style={{ WebkitOverflowScrolling: 'touch' }}>
               {items.map((item) => (
                 <button
                   key={item.id}
@@ -182,31 +158,26 @@ export const HomeEcosystemSection: React.FC<HomeEcosystemSectionProps> = ({
                   onClick={() => { if (!editMode) onSelect(item); }}
                   aria-label={`Xem ${item.title}`}
                   aria-disabled={editMode}
-                  className="group shrink-0 snap-start flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-100/90 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_16px_32px_-8px_rgba(15,23,42,0.14)] hover:-translate-y-1 transition-all duration-300 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 w-[85vw] min-w-[85vw] sm:w-[70vw] sm:min-w-[70vw] md:w-[calc((100%-1.25rem)/2)] md:min-w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2*1.25rem)/3)] lg:min-w-[calc((100%-2*1.25rem)/3)]"
+                  className="group w-[82vw] max-w-[390px] shrink-0 snap-start rounded-[10px] border border-slate-200/80 bg-slate-100 p-2 text-left shadow-[0_6px_24px_-12px_rgba(15,23,42,0.18)] transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_18px_38px_-18px_rgba(15,23,42,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 sm:w-[350px] lg:w-[380px]"
                 >
-                  <span className="relative block h-[340px] sm:h-[370px] lg:h-[390px] w-full overflow-hidden bg-slate-950">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      loading="lazy"
-                      className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                    <span className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent" aria-hidden="true" />
-                    <span className="absolute left-4 top-4 rounded-full bg-orange-600/95 backdrop-blur-xs px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-xs">
+                  <span className="relative block h-[350px] overflow-hidden rounded-[8px] bg-slate-900 sm:h-[390px] lg:h-[410px]">
+                    <img src={item.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.035]" />
+                    <span className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" aria-hidden="true" />
+                    <span className="absolute left-4 top-4 rounded-full bg-orange-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
                       {item.badge}
                     </span>
                     <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                      <span className="line-clamp-3 block text-xs sm:text-sm leading-relaxed text-slate-100/90 font-normal drop-shadow-xs">
+                      <span className="line-clamp-4 block text-sm leading-6 text-slate-100 drop-shadow-sm">
                         {item.description}
                       </span>
                     </span>
                   </span>
-                  <span className="flex min-h-[72px] items-center justify-between gap-3 px-4 py-3 bg-white">
-                    <span className="text-base sm:text-lg font-bold leading-snug tracking-tight text-slate-900 transition-colors group-hover:text-orange-600 line-clamp-2">
+                  <span className="flex min-h-20 items-center justify-between gap-3 px-3 py-3 sm:px-4">
+                    <span className="text-lg font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-orange-600 sm:text-xl">
                       {item.title}
                     </span>
-                    <span className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-700 border border-slate-200/60 shadow-xs transition-colors group-hover:bg-orange-600 group-hover:border-orange-600 group-hover:text-white" aria-hidden="true">
-                      <ArrowUpRight className="size-4 sm:size-4.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-sm transition-colors group-hover:bg-slate-950 group-hover:text-white" aria-hidden="true">
+                      <ArrowUpRight className="size-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </span>
                   </span>
                 </button>

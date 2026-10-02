@@ -25,7 +25,7 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   return (
-    <section data-page-builder-section-key="home.intro" id="about" className="py-20 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
+    <section data-page-builder-section-key="home.intro" id="about" className="py-10 sm:py-12 lg:py-14 bg-white/40 relative overflow-hidden z-10 border-t border-slate-100">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <motion.div 
@@ -34,7 +34,7 @@ export const HomeIntroSection: React.FC<HomeIntroSectionProps> = ({
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
           >
-            <h2 data-page-builder-config-path={JSON.stringify(['title'])} className={`${typeH2} text-[#0b1b36] mb-8 normal-case`}>
+            <h2 data-page-builder-config-path={JSON.stringify(['title'])} className={`${typeH2} text-[#0b1b36] mb-4 sm:mb-5 normal-case`}>
               {introData?.title ? (
                 /<[a-z][\s\S]*>/i.test(introData.title) ? (
                   <span dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(introData.title) }} />

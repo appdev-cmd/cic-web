@@ -67,7 +67,7 @@ export const HomeEventsSection: React.FC<HomeEventsSectionProps> = ({
     : (pastEvents.length > 0 ? pastEvents.slice(0, 3) : DEFAULT_SIDE_EVENTS);
 
   return (
-    <section data-page-builder-section-key="home.events" id="events" className="py-12 bg-slate-950/90 text-white relative overflow-hidden border-t border-white/5 z-10">
+    <section data-page-builder-section-key="home.events" id="events" className="py-10 sm:py-12 bg-slate-950/90 text-white relative overflow-hidden border-t border-white/5 z-10">
       <div className="absolute inset-0 bg-tech-grid opacity-10 pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <SectionHeader 

@@ -22,7 +22,7 @@ export const HomeStatsSection: React.FC<HomeStatsSectionProps> = ({
   bindingRegistry = elementBindingRegistry,
 }) => {
   return (
-    <section data-page-builder-section-key="home.stats" className="py-20 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
+    <section data-page-builder-section-key="home.stats" className="py-8 sm:py-10 lg:py-12 bg-slate-50/30 relative overflow-hidden border-y border-slate-200 z-10">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div
           {...bindElement<HTMLDivElement>(createElementBinding({
@@ -33,7 +33,7 @@ export const HomeStatsSection: React.FC<HomeStatsSectionProps> = ({
             editable: false,
             collectionPath: 'items',
           }), bindingRegistry)}
-          className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 md:divide-x divide-slate-200"
+          className="grid grid-cols-2 md:grid-cols-4 gap-y-6 sm:gap-y-8 gap-x-8 md:divide-x divide-slate-200"
         >
           {homeStats.map((stat, i) => {
             const itemPath = createCollectionItemPath('items', stat.id);

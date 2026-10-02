@@ -48,7 +48,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
   });
 
   return (
-    <section data-page-builder-section-key="home.projects" id="projects" className="py-16 bg-white relative overflow-hidden border-t border-slate-100 z-10">
+    <section data-page-builder-section-key="home.projects" id="projects" className="py-10 sm:py-12 bg-white relative overflow-hidden border-t border-slate-100 z-10">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <SectionHeader 
           title={title || "Dự án tiêu biểu"} 
@@ -61,7 +61,7 @@ export const HomeProjectsSection: React.FC<HomeProjectsSectionProps> = ({
         {(() => {
           const isEn = Boolean(title && /project|featured/i.test(title)) || (typeof window !== 'undefined' && window.location.pathname.startsWith('/en'));
           return (
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-5 sm:mb-6">
               <div className="flex flex-wrap justify-center gap-2">
                 {[
                   { id: 'all', label: isEn ? 'All' : 'Tất cả' },

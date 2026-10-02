@@ -45,7 +45,7 @@ export const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
   });
 
   return (
-    <section data-page-builder-section-key="home.news" id="news" className="py-12 bg-slate-50/40 border-t border-slate-100 z-10 relative">
+    <section data-page-builder-section-key="home.news" id="news" className="py-10 sm:py-12 bg-slate-50/40 border-t border-slate-100 z-10 relative">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader 
           title={title || "Tin tức và Góc nhìn"} 
@@ -55,7 +55,7 @@ export const HomeNewsSection: React.FC<HomeNewsSectionProps> = ({
         />
 
         {/* News Categories */}
-        <div className="flex flex-wrap gap-2.5 mb-8 scrollbar-hide overflow-x-auto pb-2">
+        <div className="flex flex-wrap gap-2.5 mb-5 sm:mb-6 scrollbar-hide overflow-x-auto pb-2">
           {[
             { id: 'all', label: 'Tất cả' },
             { id: 'company', label: 'Tin Công ty' },

@@ -60,7 +60,7 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
   };
 
   return (
-    <section data-page-builder-section-key="home.contact_cta" id="contact" className="py-12 bg-slate-50/50 overflow-hidden relative z-10">
+    <section data-page-builder-section-key="home.contact_cta" id="contact" className="py-10 sm:py-12 bg-slate-50/50 overflow-hidden relative z-10">
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-600 opacity-5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
       </div>
@@ -73,7 +73,7 @@ export const HomeContactSection: React.FC<HomeContactSectionProps> = ({ contactC
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-8 leading-[1.1] tracking-tighter">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-5 leading-[1.1] tracking-tighter">
               {contactCta?.title ? (
                 /<[a-z][\s\S]*>/i.test(contactCta.title) ? (
                   <span dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(contactCta.title) }} />
