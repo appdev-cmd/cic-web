@@ -231,7 +231,16 @@ export async function generateOutlineAction(input: GenerateOutlineInput): Promis
   }
 
   const llm = getLlmProvider();
-  const systemPrompt = `Bạn là biên tập viên kỹ thuật trưởng của CIC.
+  const isNews = input.moduleType === 'news';
+  const systemPrompt = isNews
+    ? `Bạn là biên tập viên báo chí & kỹ thuật cao cấp của CIC.
+Nhiệm vụ của bạn là soạn một KHUNG DÀN Ý BÀI VIẾT TIN TỨC / BÁO CHÍ (Outline Template) chuẩn mực dạng HTML để biên tập viên dễ dàng phát triển nội dung và chèn ảnh minh họa.
+KHUNG DÀN Ý PHẢI CÓ CẤU TRÚC BÁO CHÍ B2B CHUẨN:
+- <h3>1. Bối cảnh & Mục tiêu</h3> (kèm 1-2 câu dẫn gợi mở bối cảnh ngành/công nghệ)
+- <h3>2. Nội dung trọng tâm & Giải pháp công nghệ</h3> (gợi ý các luận điểm, giải pháp kỹ thuật chính dạng gạch đầu dòng)
+- <h3>3. Hiệu quả ứng dụng thực tế & Định hướng phát triển</h3> (gợi ý lợi ích thực tế, bước triển khai tiếp theo hoặc cam kết đồng hành của CIC)
+Chỉ trả về JSON định dạng: { "outlineHtml": "<h3>1...</h3><p>...</p>..." }`
+    : `Bạn là biên tập viên kỹ thuật trưởng của CIC.
 Nhiệm vụ của bạn là soạn một KHUNG DÀN Ý BÀI VIẾT (Outline Template) chuẩn mực dạng HTML để kỹ sư hoặc biên tập viên dễ dàng điền tiếp số liệu và chèn ảnh minh họa.
 KHUNG DÀN Ý PHẢI CÓ CẤU TRÚC:
 - <h3>1. Giới thiệu tổng quan</h3> (kèm 1 đoạn gợi mở ngắn)
@@ -389,4 +398,65 @@ QUY TẮC BẮT BUỘC:
     };
   }
 }
+
+export interface SuggestRelatedProductsForNewsInput {
+  title: string;
+  categoryName?: string;
+  content?: string;
+  candidateProducts: Array<{ id: string | number; name: string }>;
+}
+
+export interface SuggestRelatedProductsForNewsOutput {
+  selectedProductIds: string[];
+}
+
+/**
+ * Shared AI Action: Automatically recommend 1-3 relevant products for a news article
+ */
+export async function suggestRelatedProductsForNewsAction(
+  input: SuggestRelatedProductsForNewsInput
+): Promise<SuggestRelatedProductsForNewsOutput> {
+  await requireCmsAccess();
+
+  const title = input.title?.trim();
+  if (!title || !input.candidateProducts || input.candidateProducts.length === 0) {
+    return { selectedProductIds: [] };
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là chuyên gia kết nối giải pháp công nghệ của CIC (Công ty phân phối phần mềm, thiết bị kỹ thuật, đào tạo và chuyển giao công nghệ tại Việt Nam).
+NHIỆM VỤ: Dựa trên Tiêu đề bài viết tin tức, Chuyên mục và Nội dung trích dẫn, hãy chọn từ 1 đến 3 "id" sản phẩm/phần mềm/thiết bị phù hợp nhất từ danh sách "candidateProducts" được cung cấp để liên kết sản phẩm liên quan vào bài viết.
+QUY TẮC BẮT BUỘC:
+- CHỈ ĐƯỢC CHỌN ID CÓ TRONG DANH SÁCH "candidateProducts", TUYỆT ĐỐI KHÔNG TỰ BỊA RA ID MỚI.
+- Nếu bài viết không liên quan đến sản phẩm/phần mềm nào trong danh sách, trả về mảng rỗng [].
+- Định dạng JSON trả về: { "selectedProductIds": ["id1", "id2"] }`;
+
+  const userPrompt = JSON.stringify({
+    articleTitle: title,
+    categoryName: input.categoryName || '',
+    sampleContent: (input.content || '').replace(/<[^>]*>?/gm, ' ').substring(0, 1200).trim(),
+    candidateProducts: input.candidateProducts.slice(0, 50).map((p) => ({ id: String(p.id), name: p.name })),
+  });
+
+  try {
+    const raw = await llm.generateStructured<{ selectedProductIds?: string[] }>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.1,
+    });
+
+    const validIds = (raw.selectedProductIds || []).filter((id) =>
+      input.candidateProducts.some((p) => String(p.id) === String(id))
+    );
+
+    return { selectedProductIds: validIds.map(String) };
+  } catch {
+    const tokens = title.toLowerCase().split(/[\s\-_/.,+]+/).filter((t) => t.length > 2);
+    const matched = input.candidateProducts.filter((p) =>
+      tokens.some((tok) => p.name.toLowerCase().includes(tok))
+    ).slice(0, 2);
+    return { selectedProductIds: matched.map((p) => String(p.id)) };
+  }
+}
+
 

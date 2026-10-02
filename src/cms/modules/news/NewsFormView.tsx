@@ -1,5 +1,19 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, Link2, Save, Search, Send, Star, X, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Eye,
+  FileText,
+  Image as ImageIcon,
+  Link2,
+  Save,
+  Search,
+  Send,
+  Star,
+  X,
+  AlertCircle,
+  Sparkles,
+  RotateCcw,
+} from 'lucide-react';
 import { CmsButton } from '@/shared/ui/cms/CmsButton';
 import { ContentQualityPanel } from '../../components/ContentQualityPanel';
 import { SearchableMultiSelect, SearchableSelect } from '../../components/SearchableSelect';
@@ -11,6 +25,14 @@ import type { NewsArticle, NewsCategory, RelatedProductItem } from './types';
 import { NEWS_PLACEMENT_LIMITS } from './newsPlacementPolicy';
 import type { CmsLocale } from '../../data/CmsDataSource';
 import { sanitizeHtmlContent } from '@/shared/lib/sanitize';
+import { AiMagicWand } from '@/features/ai-operator/components/AiMagicWand';
+import {
+  generateSeoAction,
+  generateSummaryAction,
+  extractTagsAction,
+  generateOutlineAction,
+  suggestRelatedProductsForNewsAction,
+} from '@/features/ai-operator/server/shared-actions';
 
 interface NewsFormViewProps {
   articleToEdit: NewsArticle | null;
@@ -22,13 +44,36 @@ interface NewsFormViewProps {
   locale: CmsLocale;
   onSave: (data: Partial<NewsArticle>) => void | Promise<void>;
   onCancel: () => void;
+  onMessage?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const slugify = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
-const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+const inputClass =
+  'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 const labelClass = 'mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300';
 
-export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categories, relatedArticles, relatedProducts, mediaImages, placementCounts, locale, onSave, onCancel }) => {
+export const NewsFormView: React.FC<NewsFormViewProps> = ({
+  articleToEdit,
+  categories,
+  relatedArticles,
+  relatedProducts,
+  mediaImages,
+  placementCounts,
+  locale,
+  onSave,
+  onCancel,
+  onMessage,
+}) => {
   const [title, setTitle] = useState(articleToEdit?.title || '');
   const [alias, setAlias] = useState(articleToEdit?.alias || '');
   const [manualAlias, setManualAlias] = useState(false);
@@ -39,7 +84,9 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
   const [tawkTo, setTawkTo] = useState(articleToEdit?.tawk_to || '');
   const [fileUpload, setFileUpload] = useState(articleToEdit?.file_upload || '');
   const [video, setVideo] = useState(articleToEdit?.video || '');
-  const [tagsText, setTagsText] = useState(Array.isArray(articleToEdit?.tags) ? articleToEdit.tags.join(', ') : articleToEdit?.tags || '');
+  const [tagsText, setTagsText] = useState(
+    Array.isArray(articleToEdit?.tags) ? articleToEdit.tags.join(', ') : articleToEdit?.tags || ''
+  );
   const [content, setContent] = useState(articleToEdit?.content || '');
   const [newsRelated, setNewsRelated] = useState<string[]>(articleToEdit?.news_related || []);
   const [productsRelated, setProductsRelated] = useState<string[]>(articleToEdit?.products_related || []);
@@ -57,6 +104,200 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
   const [submittingType, setSubmittingType] = useState<'draft' | 'publish' | null>(null);
   const [formError, setFormError] = useState('');
   const selectedImage = mediaImages.find((asset) => asset.id === image || asset.url === image);
+
+  // AI Co-pilot State
+  const isAnchorsReady = Boolean(title.trim()) && Boolean(categoryId);
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [hasAiAutoFilled, setHasAiAutoFilled] = useState(false);
+  const [undoSnapshot, setUndoSnapshot] = useState<{
+    summary: string;
+    tagsText: string;
+    seoTitle: string;
+    seoKeyword: string;
+    seoDescription: string;
+    productsRelated: string[];
+    content: string;
+  } | null>(null);
+
+  const getCategoryName = () => categories.find((c) => c.id === categoryId)?.name || '';
+
+  // 1-Click Smart Auto-Fill
+  const handleSmartAutoFill = async () => {
+    if (!isAnchorsReady || isAutoFilling) return;
+    setFormError('');
+    try {
+      setIsAutoFilling(true);
+      // Save current state for undo
+      setUndoSnapshot({
+        summary,
+        tagsText,
+        seoTitle,
+        seoKeyword,
+        seoDescription,
+        productsRelated: [...productsRelated],
+        content,
+      });
+
+      const categoryName = getCategoryName();
+
+      // Parallel AI execution: Summary + Tags + SEO + Related Products
+      const [summaryRes, tagsRes, seoRes, relRes] = await Promise.all([
+        generateSummaryAction({
+          title,
+          categoryName,
+          content,
+          maxLength: 220,
+        }).catch((err) => {
+          console.warn('AI Summary failed:', err);
+          return { summary: '' };
+        }),
+        extractTagsAction({
+          title,
+          content,
+          count: 6,
+        }).catch((err) => {
+          console.warn('AI Tags failed:', err);
+          return { tags: [] };
+        }),
+        generateSeoAction({
+          title,
+          categoryName,
+          content,
+          moduleType: 'news',
+        }).catch((err) => {
+          console.warn('AI SEO failed:', err);
+          return { seo_title: '', seo_description: '', seo_keyword: '' };
+        }),
+        suggestRelatedProductsForNewsAction({
+          title,
+          categoryName,
+          content,
+          candidateProducts: relatedProducts.map((p) => ({ id: p.id, name: p.name })),
+        }).catch((err) => {
+          console.warn('AI Related Products failed:', err);
+          return { selectedProductIds: [] };
+        }),
+      ]);
+
+      if (summaryRes.summary) setSummary(summaryRes.summary);
+      if (tagsRes.tags.length > 0) setTagsText(tagsRes.tags.join(', '));
+      if (seoRes.seo_title) setSeoTitle(seoRes.seo_title);
+      if (seoRes.seo_description) setSeoDescription(seoRes.seo_description);
+      if (seoRes.seo_keyword) setSeoKeyword(seoRes.seo_keyword);
+      if (relRes.selectedProductIds?.length > 0) {
+        setProductsRelated((prev) => Array.from(new Set([...prev, ...relRes.selectedProductIds])));
+      }
+
+      setHasAiAutoFilled(true);
+      onMessage?.('✦ Đã tự động điền Tóm tắt, Bộ 3 SEO, Tags và Gợi ý sản phẩm liên quan!', 'success');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Lỗi khi chạy AI Co-pilot');
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
+
+  // Undo AI Auto-Fill
+  const handleUndoAutoFill = () => {
+    if (!undoSnapshot) return;
+    setSummary(undoSnapshot.summary);
+    setTagsText(undoSnapshot.tagsText);
+    setSeoTitle(undoSnapshot.seoTitle);
+    setSeoKeyword(undoSnapshot.seoKeyword);
+    setSeoDescription(undoSnapshot.seoDescription);
+    setProductsRelated(undoSnapshot.productsRelated);
+    setContent(undoSnapshot.content);
+    setHasAiAutoFilled(false);
+    onMessage?.('Đã hoàn tác dữ liệu về ban đầu.', 'info');
+  };
+
+  // Individual Magic Wand Handlers
+  const handleAiSummary = async () => {
+    if (!title.trim() && !content.trim()) return;
+    try {
+      const res = await generateSummaryAction({
+        title,
+        categoryName: getCategoryName(),
+        content,
+        maxLength: 220,
+      });
+      if (res.summary) {
+        setSummary(res.summary);
+        onMessage?.('Đã tạo tóm tắt bài viết thành công!', 'success');
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Không thể tạo tóm tắt AI');
+    }
+  };
+
+  const handleAiOutline = async () => {
+    if (!title.trim()) return;
+    try {
+      const cleanLen = content.replace(/<[^>]*>?/gm, '').trim().length;
+      if (cleanLen > 30) {
+        if (!confirm('Nội dung đã có bài viết. Bạn có muốn chèn thêm khung dàn bài vào cuối bài không?')) return;
+        const res = await generateOutlineAction({ title, moduleType: 'news' });
+        setContent((prev) => `${prev}<br/><hr/><br/>${res.outlineHtml}`);
+      } else {
+        const res = await generateOutlineAction({ title, moduleType: 'news' });
+        setContent(res.outlineHtml);
+      }
+      onMessage?.('Đã tạo khung dàn ý bài viết chuẩn B2B!', 'success');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Không thể tạo dàn ý AI');
+    }
+  };
+
+  const handleAiTags = async () => {
+    if (!title.trim()) return;
+    try {
+      const res = await extractTagsAction({ title, content, count: 6 });
+      if (res.tags?.length > 0) {
+        setTagsText(res.tags.join(', '));
+        onMessage?.('Đã bóc tách thẻ Tags kỹ thuật!', 'success');
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Không thể tạo Tags AI');
+    }
+  };
+
+  const handleAiSeo = async () => {
+    if (!title.trim()) return;
+    try {
+      const res = await generateSeoAction({
+        title,
+        categoryName: getCategoryName(),
+        content,
+        moduleType: 'news',
+      });
+      if (res.seo_title) setSeoTitle(res.seo_title);
+      if (res.seo_description) setSeoDescription(res.seo_description);
+      if (res.seo_keyword) setSeoKeyword(res.seo_keyword);
+      onMessage?.('Đã tối ưu bộ 3 thẻ SEO Google!', 'success');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Không thể tối ưu SEO AI');
+    }
+  };
+
+  const handleAiRelatedProducts = async () => {
+    if (!title.trim() || relatedProducts.length === 0) return;
+    try {
+      const res = await suggestRelatedProductsForNewsAction({
+        title,
+        categoryName: getCategoryName(),
+        content,
+        candidateProducts: relatedProducts.map((p) => ({ id: p.id, name: p.name })),
+      });
+      if (res.selectedProductIds?.length > 0) {
+        setProductsRelated((prev) => Array.from(new Set([...prev, ...res.selectedProductIds])));
+        onMessage?.(`Đã gợi ý ${res.selectedProductIds.length} sản phẩm liên quan!`, 'success');
+      } else {
+        onMessage?.('Không tìm thấy sản phẩm phù hợp với chủ đề bài viết này.', 'info');
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Không thể gợi ý sản phẩm AI');
+    }
+  };
 
   const save = async (nextPublished: boolean) => {
     setFormError('');
@@ -76,12 +317,28 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
       setIsSubmitting(true);
       setSubmittingType(nextPublished ? 'publish' : 'draft');
       await onSave({
-        title, alias: alias || slugify(title), other_languages1: otherLanguages1, category_id: categoryId,
-        ordering: Number(ordering) || 1, image, tawk_to: tawkTo, file_upload: fileUpload,
-        tags: tagsText.split(',').map((item) => item.trim()).filter(Boolean), content, video,
-        news_related: newsRelated, products_related: productsRelated, published: nextPublished, is_hot: isHot,
-        show_in_homepage: showInHomepage, start_time: createdTime, end_time: endTime, summary,
-        seo_title: seoTitle, seo_keyword: seoKeyword, seo_description: seoDescription,
+        title,
+        alias: alias || slugify(title),
+        other_languages1: otherLanguages1,
+        category_id: categoryId,
+        ordering: Number(ordering) || 1,
+        image,
+        tawk_to: tawkTo,
+        file_upload: fileUpload,
+        tags: tagsText.split(',').map((item) => item.trim()).filter(Boolean),
+        content,
+        video,
+        news_related: newsRelated,
+        products_related: productsRelated,
+        published: nextPublished,
+        is_hot: isHot,
+        show_in_homepage: showInHomepage,
+        start_time: createdTime,
+        end_time: endTime,
+        summary,
+        seo_title: seoTitle,
+        seo_keyword: seoKeyword,
+        seo_description: seoDescription,
       });
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Không thể lưu bài viết. Vui lòng kiểm tra lại thông tin.');
@@ -91,64 +348,537 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({ articleToEdit, categ
     }
   };
 
-  return <div className="space-y-5 pb-16">
-    <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-      <div className="flex items-center gap-3">
-        <button type="button" onClick={onCancel} disabled={isSubmitting} className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800 disabled:opacity-50"><ArrowLeft className="h-5 w-5" /></button>
-        <div><p className="text-xs font-bold text-orange-600">TIN TỨC</p><h1 className="font-black dark:text-white">{articleToEdit ? 'Chỉnh sửa tin tức' : 'Thêm tin tức'}</h1></div>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <CmsButton variant="secondary" size="sm" leadingIcon={<Eye className="h-4 w-4" />} disabled={isSubmitting} onClick={() => setPreviewOpen(true)}>
-          Xem trước
-        </CmsButton>
-        <CmsButton
-          variant="secondary"
-          size="sm"
-          leadingIcon={<Save className="h-4 w-4" />}
-          loading={isSubmitting && submittingType === 'draft'}
-          loadingText="Đang lưu..."
-          disabled={isSubmitting}
-          onClick={() => void save(false)}
-        >
-          Lưu nháp
-        </CmsButton>
-        <CmsButton
-          variant="primary"
-          size="sm"
-          leadingIcon={<Send className="h-4 w-4" />}
-          loading={isSubmitting && submittingType === 'publish'}
-          loadingText="Đang xuất bản..."
-          disabled={isSubmitting}
-          onClick={() => void save(true)}
-        >
-          Xuất bản
-        </CmsButton>
-      </div>
-    </header>
-    {formError && (
-      <div role="alert" className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
-        <AlertCircle className="mt-0.5 size-5 shrink-0" />
-        <div className="min-w-0 flex-1">{formError}</div>
-      </div>
-    )}
+  return (
+    <div className="space-y-5 pb-16">
+      {/* Header Sticky Action Bar */}
+      <header className="cms-sticky-action flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="rounded-xl bg-slate-100 p-2 dark:bg-slate-800 disabled:opacity-50 cursor-pointer"
+            aria-label="Quay lại danh sách"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <p className="text-xs font-bold text-orange-600">TIN TỨC</p>
+            <h1 className="font-black dark:text-white">{articleToEdit ? 'Chỉnh sửa tin tức' : 'Thêm tin tức'}</h1>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <CmsButton
+            variant="secondary"
+            size="sm"
+            leadingIcon={<Eye className="h-4 w-4" />}
+            disabled={isSubmitting}
+            onClick={() => setPreviewOpen(true)}
+          >
+            Xem trước
+          </CmsButton>
+          <CmsButton
+            variant="secondary"
+            size="sm"
+            leadingIcon={<Save className="h-4 w-4" />}
+            loading={isSubmitting && submittingType === 'draft'}
+            loadingText="Đang lưu..."
+            disabled={isSubmitting}
+            onClick={() => void save(false)}
+          >
+            Lưu nháp
+          </CmsButton>
+          <CmsButton
+            variant="primary"
+            size="sm"
+            leadingIcon={<Send className="h-4 w-4" />}
+            loading={isSubmitting && submittingType === 'publish'}
+            loadingText="Đang xuất bản..."
+            disabled={isSubmitting}
+            onClick={() => void save(true)}
+          >
+            Xuất bản
+          </CmsButton>
+        </div>
+      </header>
 
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-      <main className="space-y-5">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-4 flex items-center gap-2 font-black dark:text-white"><FileText className="h-5 w-5 text-orange-600" />Thông tin bài viết</div>
-          <div className="grid gap-4 md:grid-cols-2"><div className="md:col-span-2"><label className={labelClass}>Tiêu đề tin *</label><input className={inputClass} value={title} onChange={(e) => { const nextTitle=e.target.value; setTitle(nextTitle); if(!manualAlias)setAlias(slugify(nextTitle)); }} /></div><div><label className={labelClass}>Alias</label><input className={inputClass} value={alias} onChange={(e) => { setManualAlias(true); setAlias(e.target.value); }} /></div><div><label className={labelClass}>URL ngôn ngữ khác</label><input className={inputClass} value={otherLanguages1} onChange={(e) => setOtherLanguages1(e.target.value)} /></div><div><label className={labelClass}>Danh mục *</label><SearchableSelect options={categories.map((item) => ({ id: item.id, label: item.name }))} selectedId={categoryId} onChange={setCategoryId} /></div><div><label className={labelClass}>Thứ tự</label><input type="number" className={inputClass} value={ordering} onChange={(e) => setOrdering(Number(e.target.value))} /></div><div className="md:col-span-2"><label className={labelClass}>Tóm tắt</label><textarea rows={4} className={inputClass} value={summary} onChange={(e) => setSummary(e.target.value)} /></div></div>
-        </section>
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><label className={labelClass}>Nội dung</label><RichTextEditor value={content} onChange={setContent} minHeight="360px" allowedEmbeds={['cta', 'form']} /></section>
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Link2 className="h-5 w-5 text-orange-600" />Nội dung liên quan</div><div className="space-y-4"><div><label className={labelClass}>Tin liên quan</label><SearchableMultiSelect options={relatedArticles.filter((item) => item.id !== articleToEdit?.id).map((item) => ({ id: item.id, label: item.title }))} selectedIds={newsRelated} onChange={setNewsRelated} /></div><div><label className={labelClass}>Sản phẩm liên quan</label><SearchableMultiSelect options={relatedProducts.map((item) => ({ id: item.id, label: item.name }))} selectedIds={productsRelated} onChange={setProductsRelated} /></div></div></section>
-      </main>
-      <aside className="space-y-5">
-        <ContentQualityPanel title="Kiểm tra chất lượng bài viết" checks={[{ label: 'Có tiêu đề tin', passed: Boolean(title.trim()) }, { label: 'Đã chọn danh mục', passed: Boolean(categoryId) }, { label: 'Có tóm tắt', passed: Boolean(summary.trim()) }, { label: 'Có nội dung bài viết', passed: content.replace(/<[^>]+>/g, '').trim().length > 30 }, { label: 'Có hình ảnh', passed: Boolean(image) }, { label: 'Có cấu hình SEO', passed: Boolean(seoTitle.trim() && seoDescription.trim()) }]} />
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><ImageIcon className="h-5 w-5 text-orange-600" />Media và tệp</div><div className="space-y-4"><div><label className={labelClass}>Hình ảnh</label>{image && <img src={selectedImage?.thumbnail_url ?? selectedImage?.url ?? image} alt="" className="mb-2 aspect-video w-full rounded-xl object-cover" />}<button type="button" onClick={() => setMediaPickerOpen(true)} className="min-h-11 w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600">Chọn hoặc tải ảnh</button></div><ProductFileInput label="File đính kèm" value={fileUpload} onChange={setFileUpload} placeholder="Tải file đính kèm từ máy..." /><div><label className={labelClass}>Video / mã nhúng</label><textarea rows={3} className={inputClass} value={video} onChange={(event)=>setVideo(event.target.value)} /></div><div><label className={labelClass}>Tags</label><textarea rows={3} className={inputClass} value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="Phân cách bằng dấu phẩy" /></div></div></section>
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Star className="h-5 w-5 text-orange-600" />Xuất bản</div><div className="space-y-3"><label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200"><span><span className="block">Tin nổi bật <span className="text-xs font-normal text-slate-400">({placementCounts.featured + Number(isHot)}/{NEWS_PLACEMENT_LIMITS.featured})</span></span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Hiện trong khu Hot News của trang Tin tức.</span></span><input type="checkbox" checked={isHot} disabled={!isHot && placementCounts.featured >= NEWS_PLACEMENT_LIMITS.featured} onChange={(e) => setIsHot(e.target.checked)} /></label><label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200"><span><span className="block">Hiện Trang chủ <span className="text-xs font-normal text-slate-400">({placementCounts.homepage + Number(showInHomepage)}/{NEWS_PLACEMENT_LIMITS.homepage})</span></span><span className="mt-0.5 block text-[11px] font-normal text-slate-500">Cho phép bài xuất hiện tại khu Tin tức trên Trang chủ, độc lập với Tin nổi bật.</span></span><input type="checkbox" checked={showInHomepage} disabled={!showInHomepage && placementCounts.homepage >= NEWS_PLACEMENT_LIMITS.homepage} onChange={(e) => setShowInHomepage(e.target.checked)} /></label><div><label className={labelClass}>Thời gian xuất bản</label><input type="datetime-local" className={inputClass} value={createdTime} onChange={(e) => setCreatedTime(e.target.value)} /></div><div><label className={labelClass}>Thời gian kết thúc</label><input type="datetime-local" className={inputClass} value={endTime} onChange={(e) => setEndTime(e.target.value)} /></div></div></section>
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-4 flex items-center gap-2 font-black dark:text-white"><Search className="h-5 w-5 text-orange-600" />SEO</div><div className="space-y-4"><div><label className={labelClass}>SEO title</label><input className={inputClass} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} /></div><div><label className={labelClass}>SEO keyword</label><input className={inputClass} value={seoKeyword} onChange={(e) => setSeoKeyword(e.target.value)} /></div><div><label className={labelClass}>SEO description</label><textarea rows={4} className={inputClass} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} /></div><div><label className={labelClass}>Tawk.to</label><textarea rows={3} className={inputClass} value={tawkTo} onChange={(e) => setTawkTo(e.target.value)} /></div></div></section>
-      </aside>
+      {/* Undo Notification Banner */}
+      {hasAiAutoFilled && (
+        <div className="rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/90 dark:bg-emerald-950/40 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs animate-in fade-in duration-150">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold text-slate-900 dark:text-white">
+                ✦ Trợ lý AI: Đã tự động điền Tóm tắt, Bộ 3 SEO, Thẻ Tags và Gợi ý sản phẩm liên quan.
+              </span>
+              <span className="text-slate-600 dark:text-slate-400 ml-2 hidden sm:inline">
+                (Hình ảnh đại diện và bài viết của bạn được bảo toàn 100%)
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleUndoAutoFill}
+            className="px-3 py-1.5 font-bold rounded-lg bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Hoàn tác về ban đầu
+          </button>
+        </div>
+      )}
+
+      {/* Error Alert */}
+      {formError && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+        >
+          <AlertCircle className="mt-0.5 size-5 shrink-0" />
+          <div className="min-w-0 flex-1">{formError}</div>
+        </div>
+      )}
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+        {/* Main Column */}
+        <main className="space-y-5">
+          {/* Section 1: Thông tin bài viết & Smart Trigger Bar */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <FileText className="h-5 w-5 text-orange-600" />
+                Thông tin bài viết
+              </div>
+              <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                Thông tin bắt buộc (*)
+              </span>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <label className={labelClass}>Tiêu đề tin *</label>
+                <input
+                  className={inputClass}
+                  value={title}
+                  placeholder="Nhập tiêu đề bài viết tin tức hoặc sự kiện..."
+                  onChange={(e) => {
+                    const nextTitle = e.target.value;
+                    setTitle(nextTitle);
+                    if (!manualAlias) setAlias(slugify(nextTitle));
+                  }}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Alias (Đường dẫn tĩnh)</label>
+                <input
+                  className={inputClass}
+                  value={alias}
+                  placeholder="duong-dan-tin-tuc"
+                  onChange={(e) => {
+                    setManualAlias(true);
+                    setAlias(e.target.value);
+                  }}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>URL ngôn ngữ khác (Tiếng Anh)</label>
+                <input
+                  className={inputClass}
+                  value={otherLanguages1}
+                  placeholder="/en/news/article-slug"
+                  onChange={(e) => setOtherLanguages1(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Danh mục *</label>
+                <SearchableSelect
+                  options={categories.map((item) => ({ id: item.id, label: item.name }))}
+                  selectedId={categoryId}
+                  onChange={setCategoryId}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Thứ tự hiển thị</label>
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={ordering}
+                  onChange={(e) => setOrdering(Number(e.target.value))}
+                />
+              </div>
+
+              {/* Tóm tắt bài viết với Đũa thần AI */}
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Tóm tắt bài viết (Sapo)
+                  </label>
+                  <AiMagicWand
+                    label="Tóm tắt từ bài viết"
+                    title="Tự động đọc nội dung bài viết và viết Sapo tóm tắt 1-2 câu"
+                    onTrigger={handleAiSummary}
+                    disabled={!title.trim() && !content.trim()}
+                  />
+                </div>
+                <textarea
+                  rows={4}
+                  className={inputClass}
+                  value={summary}
+                  placeholder="Đoạn văn tóm tắt ngắn gọn 1-2 câu dẫn nhập cho bài viết..."
+                  onChange={(e) => setSummary(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Smart Trigger Bar: Kích hoạt khi có Tiêu đề & Danh mục */}
+            <div
+              className={`mt-5 rounded-xl border p-3.5 transition-all ${
+                isAnchorsReady
+                  ? 'border-orange-300 bg-orange-50/70 dark:border-orange-900/60 dark:bg-orange-950/20'
+                  : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40'
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5 max-w-lg">
+                  <div className="flex items-center gap-2">
+                    <Sparkles
+                      className={`h-4 w-4 ${isAnchorsReady ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'}`}
+                    />
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      {isAnchorsReady
+                        ? 'Trợ lý AI Co-pilot: Sẵn sàng tự động điền Tóm tắt, SEO, Thẻ Tags và Gợi ý sản phẩm!'
+                        : 'Trợ lý AI Co-pilot (Nhập Tiêu đề và Chọn danh mục ở trên để mở khóa)'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {isAnchorsReady
+                      ? 'Chỉ bổ sung các trường còn trống, tuyệt đối không can thiệp vào bài viết hay hình ảnh của bạn.'
+                      : `Tiến độ thông tin mỏ neo: ${
+                          [Boolean(title.trim()) && 'Tiêu đề', Boolean(categoryId) && 'Danh mục'].filter(Boolean).length
+                        }/2 trường bắt buộc.`}
+                  </p>
+                </div>
+                <CmsButton
+                  type="button"
+                  variant={isAnchorsReady ? 'primary' : 'secondary'}
+                  size="sm"
+                  disabled={!isAnchorsReady || isAutoFilling}
+                  loading={isAutoFilling}
+                  loadingText="Đang phân tích & điền..."
+                  onClick={handleSmartAutoFill}
+                  leadingIcon={<Sparkles className="h-4 w-4" />}
+                >
+                  Gợi ý điền nhanh với AI
+                </CmsButton>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 2: Nội dung chi tiết */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
+              <label className={labelClass}>Nội dung bài viết *</label>
+              <AiMagicWand
+                label="Khung dàn bài"
+                title="Tạo khung cấu trúc dàn ý bài viết chuẩn mẫu B2B có sẵn các đề mục"
+                onTrigger={handleAiOutline}
+                disabled={!title.trim()}
+              />
+            </div>
+            <RichTextEditor value={content} onChange={setContent} minHeight="360px" allowedEmbeds={['cta', 'form']} />
+          </section>
+
+          {/* Section 3: Nội dung liên quan */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
+              <Link2 className="h-5 w-5 text-orange-600" />
+              Nội dung liên quan
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>Tin liên quan</label>
+                <SearchableMultiSelect
+                  options={relatedArticles
+                    .filter((item) => item.id !== articleToEdit?.id)
+                    .map((item) => ({ id: item.id, label: item.title }))}
+                  selectedIds={newsRelated}
+                  onChange={setNewsRelated}
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Sản phẩm liên quan
+                  </label>
+                  <AiMagicWand
+                    label="Gợi ý sản phẩm"
+                    title="Tự động đề xuất phần mềm / thiết bị phù hợp với chủ đề bài viết"
+                    onTrigger={handleAiRelatedProducts}
+                    disabled={!title.trim() || relatedProducts.length === 0}
+                  />
+                </div>
+                <SearchableMultiSelect
+                  options={relatedProducts.map((item) => ({ id: item.id, label: item.name }))}
+                  selectedIds={productsRelated}
+                  onChange={setProductsRelated}
+                />
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* Sidebar Column */}
+        <aside className="space-y-5">
+          {/* Quality Panel */}
+          <ContentQualityPanel
+            title="Kiểm tra chất lượng bài viết"
+            checks={[
+              { label: 'Có tiêu đề tin', passed: Boolean(title.trim()) },
+              { label: 'Đã chọn danh mục', passed: Boolean(categoryId) },
+              { label: 'Có tóm tắt', passed: Boolean(summary.trim()) },
+              { label: 'Có nội dung bài viết', passed: content.replace(/<[^>]+>/g, '').trim().length > 30 },
+              { label: 'Có hình ảnh đại diện', passed: Boolean(image) },
+              { label: 'Có cấu hình SEO', passed: Boolean(seoTitle.trim() && seoDescription.trim()) },
+            ]}
+          />
+
+          {/* Media và tệp */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
+              <ImageIcon className="h-5 w-5 text-orange-600" />
+              Media và tệp
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>Hình ảnh đại diện</label>
+                {image && (
+                  <img
+                    src={selectedImage?.thumbnail_url ?? selectedImage?.url ?? image}
+                    alt=""
+                    className="mb-2 aspect-video w-full rounded-xl object-cover"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMediaPickerOpen(true)}
+                  className="min-h-11 w-full rounded-xl border border-dashed border-orange-300 px-3 py-2.5 text-xs font-bold text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/20 cursor-pointer transition-colors"
+                >
+                  Chọn hoặc tải ảnh
+                </button>
+              </div>
+
+              <ProductFileInput
+                label="File đính kèm (Tài liệu/Thông cáo)"
+                value={fileUpload}
+                onChange={setFileUpload}
+                placeholder="Tải file đính kèm từ máy..."
+              />
+
+              <div>
+                <label className={labelClass}>Video / mã nhúng (Youtube, Vimeo)</label>
+                <textarea
+                  rows={3}
+                  className={inputClass}
+                  value={video}
+                  placeholder="https://www.youtube.com/watch?v=... hoặc mã <iframe>"
+                  onChange={(event) => setVideo(event.target.value)}
+                />
+              </div>
+
+              {/* Tags với Đũa thần AI */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Thẻ Tags
+                  </label>
+                  <AiMagicWand
+                    label="Gợi ý Tags"
+                    title="Tự động bóc tách từ khóa công nghệ và kỹ thuật"
+                    onTrigger={handleAiTags}
+                    disabled={!title.trim()}
+                  />
+                </div>
+                <textarea
+                  rows={3}
+                  className={inputClass}
+                  value={tagsText}
+                  onChange={(e) => setTagsText(e.target.value)}
+                  placeholder="Ví dụ: BIM, Chuyển đổi số, Autodesk, Kết cấu (ngăn cách bằng dấu phẩy)"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Xuất bản */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
+              <Star className="h-5 w-5 text-orange-600" />
+              Xuất bản
+            </div>
+            <div className="space-y-3">
+              <label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200 cursor-pointer">
+                <span>
+                  <span className="block">
+                    Tin nổi bật{' '}
+                    <span className="text-xs font-normal text-slate-400">
+                      ({placementCounts.featured + Number(isHot)}/{NEWS_PLACEMENT_LIMITS.featured})
+                    </span>
+                  </span>
+                  <span className="mt-0.5 block text-[11px] font-normal text-slate-500">
+                    Hiện trong khu Hot News của trang Tin tức.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={isHot}
+                  disabled={!isHot && placementCounts.featured >= NEWS_PLACEMENT_LIMITS.featured}
+                  onChange={(e) => setIsHot(e.target.checked)}
+                />
+              </label>
+
+              <label className="flex items-start justify-between gap-4 text-sm font-semibold dark:text-slate-200 cursor-pointer">
+                <span>
+                  <span className="block">
+                    Hiện Trang chủ{' '}
+                    <span className="text-xs font-normal text-slate-400">
+                      ({placementCounts.homepage + Number(showInHomepage)}/{NEWS_PLACEMENT_LIMITS.homepage})
+                    </span>
+                  </span>
+                  <span className="mt-0.5 block text-[11px] font-normal text-slate-500">
+                    Cho phép bài xuất hiện tại khu Tin tức trên Trang chủ.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={showInHomepage}
+                  disabled={!showInHomepage && placementCounts.homepage >= NEWS_PLACEMENT_LIMITS.homepage}
+                  onChange={(e) => setShowInHomepage(e.target.checked)}
+                />
+              </label>
+
+              <div>
+                <label className={labelClass}>Thời gian xuất bản</label>
+                <input
+                  type="datetime-local"
+                  className={inputClass}
+                  value={createdTime}
+                  onChange={(e) => setCreatedTime(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Thời gian kết thúc</label>
+                <input
+                  type="datetime-local"
+                  className={inputClass}
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* SEO với Đũa thần AI */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <Search className="h-5 w-5 text-orange-600" />
+                SEO Google
+              </div>
+              <AiMagicWand
+                label="Tối ưu SEO"
+                title="Tự động sinh bộ 3 thẻ Title, Description, Keyword chuẩn Google"
+                onTrigger={handleAiSeo}
+                disabled={!title.trim()}
+              />
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>SEO Title</label>
+                <input
+                  className={inputClass}
+                  value={seoTitle}
+                  placeholder="Tiêu đề hiển thị trên kết quả tìm kiếm Google (tối đa 60 ký tự)"
+                  onChange={(e) => setSeoTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>SEO Keyword</label>
+                <input
+                  className={inputClass}
+                  value={seoKeyword}
+                  placeholder="Từ khóa SEO kỹ thuật (phân cách bằng dấu phẩy)"
+                  onChange={(e) => setSeoKeyword(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>SEO Description</label>
+                <textarea
+                  rows={4}
+                  className={inputClass}
+                  value={seoDescription}
+                  placeholder="Mô tả kết quả tìm kiếm (135 - 155 ký tự)"
+                  onChange={(e) => setSeoDescription(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Tawk.to Script</label>
+                <textarea
+                  rows={3}
+                  className={inputClass}
+                  value={tawkTo}
+                  onChange={(e) => setTawkTo(e.target.value)}
+                />
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      {/* Media Picker Modal */}
+      {mediaPickerOpen && (
+        <PageMediaPickerModal
+          currentId={image}
+          images={mediaImages}
+          locale={locale}
+          returnValue="url"
+          onClose={() => setMediaPickerOpen(false)}
+          onConfirm={setImage}
+        />
+      )}
+
+      {/* Preview Modal */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/65 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Xem trước tin tức"
+        >
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="font-black dark:text-white">Xem trước bài viết</h2>
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                aria-label="Đóng"
+                className="cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <article className="p-6">
+              <h1 className="text-3xl font-black dark:text-white">{title || 'Chưa có tiêu đề'}</h1>
+              <p className="mt-3 text-slate-500">{summary}</p>
+              <div
+                className="ck-content mt-6"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(content) }}
+              />
+            </article>
+          </div>
+        </div>
+      )}
     </div>
-    {mediaPickerOpen && <PageMediaPickerModal currentId={image} images={mediaImages} locale={locale} returnValue="url" onClose={() => setMediaPickerOpen(false)} onConfirm={setImage} />}
-    {previewOpen && <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/65 p-4" role="dialog" aria-modal="true" aria-label="Xem trước tin tức"><div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-slate-900"><div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><h2 className="font-black dark:text-white">Xem trước bài viết</h2><button type="button" onClick={() => setPreviewOpen(false)} aria-label="Đóng"><X className="h-5 w-5" /></button></div><article className="p-6"><h1 className="text-3xl font-black dark:text-white">{title || 'Chưa có tiêu đề'}</h1><p className="mt-3 text-slate-500">{summary}</p><div className="ck-content mt-6" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(content) }} /></article></div></div>}
-  </div>;
+  );
 };

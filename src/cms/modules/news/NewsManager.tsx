@@ -346,6 +346,7 @@ export const NewsManager: React.FC<NewsManagerProps> = ({ data, workspaceLocale,
             setViewMode('list');
             setEditingArticle(null);
           }}
+          onMessage={showToast}
         />
       ) : viewMode === 'categories' ? (
         <NewsCategoryManager categories={categories} onChange={(next) => {
