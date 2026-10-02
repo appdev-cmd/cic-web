@@ -60,7 +60,7 @@ export function NewsCard({
           {news.title}
         </h3>
 
-        <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed font-normal flex-1">
+        <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed font-normal flex-1 text-justify">
           {news.shortDesc}
         </p>
 

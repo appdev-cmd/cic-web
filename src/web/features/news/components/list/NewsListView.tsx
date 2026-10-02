@@ -95,10 +95,10 @@ export function NewsListView({
           {/* Main Title & Editorial Headline */}
           <div className="border-l-4 border-orange-600 pl-6 space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-[#444] dark:text-white uppercase tracking-tight">
-              Tin Tức &amp; Truyền Thông
+              TIN TỨC &amp; GÓC NHÌN
             </h1>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-              Cập nhật thông tin hoạt động, kiến thức kỹ thuật chuyên ngành và các thông cáo cổ đông mới nhất
+            <p className="text-sm font-normal text-slate-600 max-w-3xl leading-relaxed">
+              Cập nhật tin tức CIC, chia sẻ kiến thức chuyên ngành và góc nhìn về công nghệ trong thực tiễn
             </p>
           </div>
 

@@ -7,9 +7,9 @@ import type { Metadata } from 'next';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Tin Tức & Sự Kiện Công Nghệ',
+  title: 'TIN TỨC & GÓC NHÌN | CIC Technology',
   description:
-    'Cập nhật tin tức công nghệ mới nhất, sự kiện chuyển giao kỹ thuật và các hoạt động nổi bật từ CIC Technology.',
+    'Cập nhật tin tức CIC, chia sẻ kiến thức chuyên ngành và góc nhìn về công nghệ trong thực tiễn.',
   alternates: {
     canonical: '/news',
   },

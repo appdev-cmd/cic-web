@@ -51,7 +51,7 @@ export function NewsHeroSection({
             {mainStory.title}
           </h2>
 
-          <p className="text-sm lg:text-base text-slate-300 line-clamp-3 leading-relaxed font-medium max-w-3xl">
+          <p className="text-sm lg:text-base text-slate-300 line-clamp-3 leading-relaxed font-medium max-w-3xl text-justify">
             {mainStory.shortDesc}
           </p>
 
@@ -73,7 +73,7 @@ export function NewsHeroSection({
           <div 
             key={sideItem.id}
             onClick={() => onSelectNews(sideItem.id)}
-            className="group cursor-pointer flex gap-4 items-center p-2 bg-transparent hover:bg-slate-100/50 transition-all border-0 shadow-none rounded-[10px] overflow-hidden"
+            className="group cursor-pointer flex gap-4 items-start p-2 bg-transparent hover:bg-slate-100/50 transition-all border-0 shadow-none rounded-[10px] overflow-hidden"
           >
             {/* Larger Thumbnail Image */}
             <div className="w-36 sm:w-40 lg:w-44 h-28 lg:h-32 shrink-0 overflow-hidden relative bg-slate-900 rounded-[10px]">
@@ -96,7 +96,7 @@ export function NewsHeroSection({
               <h4 className="text-sm lg:text-base font-bold text-slate-900 transition-colors line-clamp-2 leading-snug">
                 {sideItem.title}
               </h4>
-              <p className="text-[13px] text-slate-500 line-clamp-3 font-medium leading-relaxed">
+              <p className="text-[13px] text-slate-500 line-clamp-3 font-medium leading-relaxed text-justify">
                 {sideItem.shortDesc}
               </p>
             </div>
