@@ -34,6 +34,8 @@ type ReferenceRow = {
   file_name4: unknown; file_download4: unknown; link_download4: unknown;
   file_name5: unknown; file_download5: unknown; link_download5: unknown;
   file_name6: unknown; file_download6: unknown; link_download6: unknown;
+  file_catalogue?: unknown; file_price?: unknown; link_catalogue?: unknown;
+  file_driver_name?: unknown; file_driver?: unknown; link_driver?: unknown;
 };
 
 function mapReferenceRow(row: ReferenceRow, locale: 'vi' | 'en' = 'vi'): ProductReference {
@@ -43,15 +45,32 @@ function mapReferenceRow(row: ReferenceRow, locale: 'vi' | 'en' = 'vi'): Product
   const categories = Array.isArray(row.category_names)
     ? row.category_names.map((name) => String(name)).filter(Boolean)
     : [];
-  const documents = Array.from({ length: 6 }, (_, index) => {
+
+  const documents: { name: string; url: string }[] = [];
+
+  const catalogueUrl = String(row.link_catalogue ?? row.file_price ?? '').trim();
+  if (catalogueUrl) {
+    const catalogueName = String(row.file_catalogue ?? '').trim() || (locale === 'en' ? 'Price list & Catalogue' : 'Báo giá & Catalogue');
+    documents.push({ name: catalogueName, url: catalogueUrl });
+  }
+
+  const driverUrl = String(row.link_driver ?? row.file_driver ?? '').trim();
+  if (driverUrl) {
+    const driverName = String(row.file_driver_name ?? '').trim() || (locale === 'en' ? 'Driver & Dongle' : 'Bộ cài Driver / Khóa cứng');
+    documents.push({ name: driverName, url: driverUrl });
+  }
+
+  Array.from({ length: 6 }, (_, index) => {
     const position = index + 1;
     const name = row[`file_name${position}` as keyof ReferenceRow];
     const file = row[`file_download${position}` as keyof ReferenceRow];
     const link = row[`link_download${position}` as keyof ReferenceRow];
     const url = String(link ?? file ?? '').trim();
     const fallbackName = locale === 'en' ? `Document ${position}` : `Tài liệu ${position}`;
-    return url ? { name: String(name ?? fallbackName), url } : null;
-  }).filter((item): item is { name: string; url: string } => item !== null);
+    if (url) {
+      documents.push({ name: String(name ?? fallbackName), url });
+    }
+  });
 
   const fallbackPrice = locale === 'en' ? 'Contact for Quote' : 'Liên hệ';
   const fallbackField = locale === 'en' ? 'General' : 'Khác';
@@ -216,6 +235,7 @@ export async function getPublishedProductBySlugForReference(slug: string, locale
       p.file_name1,p.file_download1,p.link_download1,p.file_name2,p.file_download2,p.link_download2,
       p.file_name3,p.file_download3,p.link_download3,p.file_name4,p.file_download4,p.link_download4,
       p.file_name5,p.file_download5,p.link_download5,p.file_name6,p.file_download6,p.link_download6,
+      p.file_catalogue,p.file_price,p.link_catalogue,p.file_driver_name,p.file_driver,p.link_driver,
       (SELECT array_agg(i.image ORDER BY i.ordering,i.id) FROM ${imgTable} i WHERE i.record_id=p.id AND i.image IS NOT NULL AND btrim(i.image)<>'') slides,
       (SELECT array_agg(r.related_product_id ORDER BY r.ordering,r.related_product_id) FROM ${relTable} r JOIN ${pTable} rp ON rp.id=r.related_product_id AND rp.published=true WHERE r.product_id=p.id) related_ids,
       (SELECT array_agg(c.name ORDER BY c.ordering,c.id)

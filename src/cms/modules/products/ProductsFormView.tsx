@@ -80,6 +80,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
   const [seoKeyword, setSeoKeyword] = useState(product?.seo_keyword || product?.meta_keywords || '');
   const [seoDescription, setSeoDescription] = useState(product?.seo_description || product?.meta_description || '');
   const [downloads, setDownloads] = useState<LegacyDownload[]>(Array.from({ length: 6 }, (_, index) => ({ name: product?.[`file_name${index + 1}` as keyof ProductItem] as string || '', file: product?.[`file_download${index + 1}` as keyof ProductItem] as string || '', link: product?.[`link_download${index + 1}` as keyof ProductItem] as string || '' })));
+  const [fileCatalogue, setFileCatalogue] = useState<string>(product?.file_catalogue || '');
+  const [filePrice, setFilePrice] = useState<string>(product?.file_price || '');
+  const [linkCatalogue, setLinkCatalogue] = useState<string>(product?.link_catalogue || '');
+  const [fileDriverName, setFileDriverName] = useState<string>(product?.file_driver_name || '');
+  const [fileDriver, setFileDriver] = useState<string>(product?.file_driver || '');
+  const [linkDriver, setLinkDriver] = useState<string>(product?.link_driver || '');
   const updateDownload = (index: number, key: keyof LegacyDownload, val: string) => {
     setDownloads((prev) => {
       const next = [...prev];
@@ -486,12 +492,12 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
       landing_page: '', seo_title: seoTitle,
       seo_keyword: Array.isArray(seoKeyword) ? (seoKeyword as string[]).join(', ') : String(seoKeyword || ''),
       seo_description: seoDescription,
-      file_catalogue: product?.file_catalogue ?? '',
-      file_price: product?.file_price ?? '',
-      link_catalogue: product?.link_catalogue ?? '',
-      file_driver_name: product?.file_driver_name ?? '',
-      file_driver: product?.file_driver ?? '',
-      link_driver: product?.link_driver ?? '',
+      file_catalogue: fileCatalogue,
+      file_price: filePrice,
+      link_catalogue: linkCatalogue,
+      file_driver_name: fileDriverName,
+      file_driver: fileDriver,
+      link_driver: linkDriver,
     };
     downloads.forEach((item, index) => { Object.assign(base, { [`file_name${index + 1}`]: item.name, [`file_download${index + 1}`]: item.file, [`link_download${index + 1}`]: item.link }); });
     return base;
@@ -892,49 +898,136 @@ export const ProductsFormView: React.FC<ProductsFormViewProps> = ({ locale, prod
 
           {/* Section 7: Tệp sản phẩm & Tài liệu đính kèm */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
-              <Link2 className="h-5 w-5 text-orange-600" />
-              Tệp sản phẩm & Tài liệu đính kèm
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-black dark:text-white">
+                <Link2 className="h-5 w-5 text-orange-600" />
+                Tệp sản phẩm & Tài liệu đính kèm
+              </div>
+              <span className="text-[11px] text-slate-400">Catalogue, Driver & Bộ cài đặt</span>
             </div>
-            <div className="space-y-3">
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Danh sách tệp tải về & Catalogue (Tối đa 6 tệp)
+
+            <div className="space-y-6">
+              {/* Khối 1: File báo giá & Catalogue chính */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="mb-3 flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <FileDown className="h-4 w-4 text-orange-600" />
+                  File Báo giá & Catalogue chính
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Tên file báo giá / catalogue</label>
+                    <input
+                      className={inputClass}
+                      value={fileCatalogue}
+                      onChange={(e) => setFileCatalogue(e.target.value)}
+                      placeholder="VD: Báo giá phần mềm CIC, Catalogue..."
+                    />
+                  </div>
+                  <div>
+                    <ProductFileInput
+                      label="File báo giá đính kèm"
+                      value={filePrice}
+                      onChange={setFilePrice}
+                      onAutoFillName={(autoName) => {
+                        if (!fileCatalogue) setFileCatalogue(autoName);
+                      }}
+                      placeholder="Chọn tệp catalogue từ máy..."
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Link tải catalogue trực tuyến</label>
+                    <input
+                      className={inputClass}
+                      value={linkCatalogue}
+                      onChange={(e) => setLinkCatalogue(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
               </div>
-            {downloads.map((item, index) => (
-              <div key={index} className="grid gap-3 rounded-xl border border-slate-200 p-3.5 md:grid-cols-3 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xs">
-                <div>
-                  <label className={labelClass}>Ghi chú / Tên tệp {index + 1}</label>
-                  <input 
-                    className={inputClass} 
-                    value={item.name} 
-                    onChange={(e) => updateDownload(index, 'name', e.target.value)} 
-                    placeholder={`Tên tài liệu / phần mềm ${index + 1}...`}
-                  />
+
+              {/* Khối 2: File Driver & Khóa cứng (Dongle) */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="mb-3 flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  File Driver & Khóa cứng (Dongle)
                 </div>
-                <div>
-                  <ProductFileInput
-                    label={`Chọn tệp đính kèm ${index + 1}`}
-                    value={item.file}
-                    onChange={(val) => updateDownload(index, 'file', val)}
-                    onAutoFillName={(autoName) => {
-                      if (!item.name) updateDownload(index, 'name', autoName);
-                    }}
-                    placeholder={`Chọn tệp ${index + 1} từ máy...`}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Link tải trực tuyến {index + 1}</label>
-                  <input 
-                    className={inputClass} 
-                    value={item.link} 
-                    onChange={(e) => updateDownload(index, 'link', e.target.value)} 
-                    placeholder="https://..."
-                  />
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Tên file khóa cứng / driver</label>
+                    <input
+                      className={inputClass}
+                      value={fileDriverName}
+                      onChange={(e) => setFileDriverName(e.target.value)}
+                      placeholder="VD: Khóa cứng Rockey, Driver..."
+                    />
+                  </div>
+                  <div>
+                    <ProductFileInput
+                      label="File driver đính kèm"
+                      value={fileDriver}
+                      onChange={setFileDriver}
+                      onAutoFillName={(autoName) => {
+                        if (!fileDriverName) setFileDriverName(autoName);
+                      }}
+                      placeholder="Chọn tệp driver/bộ cài..."
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Link tải driver trực tuyến</label>
+                    <input
+                      className={inputClass}
+                      value={linkDriver}
+                      onChange={(e) => setLinkDriver(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
+
+              {/* Khối 3: Danh sách tệp tải về & Catalogue bổ sung (Tối đa 6 tệp) */}
+              <div>
+                <div className="mb-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Danh sách tệp tải về & Catalogue bổ sung (Tối đa 6 tệp)
+                </div>
+                <div className="space-y-3">
+                  {downloads.map((item, index) => (
+                    <div key={index} className="grid gap-3 rounded-xl border border-slate-200 p-3.5 md:grid-cols-3 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-2xs">
+                      <div>
+                        <label className={labelClass}>Ghi chú / Tên tệp {index + 1}</label>
+                        <input 
+                          className={inputClass} 
+                          value={item.name} 
+                          onChange={(e) => updateDownload(index, 'name', e.target.value)} 
+                          placeholder={`Tên tài liệu / phần mềm ${index + 1}...`}
+                        />
+                      </div>
+                      <div>
+                        <ProductFileInput
+                          label={`Chọn tệp đính kèm ${index + 1}`}
+                          value={item.file}
+                          onChange={(val) => updateDownload(index, 'file', val)}
+                          onAutoFillName={(autoName) => {
+                            if (!item.name) updateDownload(index, 'name', autoName);
+                          }}
+                          placeholder={`Chọn tệp ${index + 1} từ máy...`}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Link tải trực tuyến {index + 1}</label>
+                        <input 
+                          className={inputClass} 
+                          value={item.link} 
+                          onChange={(e) => updateDownload(index, 'link', e.target.value)} 
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
       </main>
       <aside className="space-y-5">
       <ContentQualityPanel

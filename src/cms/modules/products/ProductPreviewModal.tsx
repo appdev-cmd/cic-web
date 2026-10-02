@@ -18,7 +18,21 @@ export const ProductPreviewModal: React.FC<Props> = ({ isOpen, product, categori
   const applicationNames = (product.application || product.application_areas || []).map((id) => applications.find((item) => item.id === id)?.name).filter(Boolean) as string[];
   const brand = brands.find((item) => item.id === (product.manufactory || product.brand_id))?.name || product.brand_name || '';
   const productType = productTypes.find((item) => item.id === (product.types || product.product_type))?.name || '';
-  const documents = Array.from({ length: 6 }, (_, index) => { const position = index + 1; const name = String(product[`file_name${position}` as keyof ProductItem] || ''); const url = String(product[`link_download${position}` as keyof ProductItem] || product[`file_download${position}` as keyof ProductItem] || ''); return url ? { name: name || `Tài liệu ${position}`, url } : null; }).filter((item): item is { name: string; url: string } => item !== null);
+  const documents: { name: string; url: string }[] = [];
+  const catalogueUrl = String(product.link_catalogue || product.file_price || '').trim();
+  if (catalogueUrl) {
+    documents.push({ name: String(product.file_catalogue || '').trim() || 'Báo giá & Catalogue', url: catalogueUrl });
+  }
+  const driverUrl = String(product.link_driver || product.file_driver || '').trim();
+  if (driverUrl) {
+    documents.push({ name: String(product.file_driver_name || '').trim() || 'Bộ cài Driver / Khóa cứng', url: driverUrl });
+  }
+  Array.from({ length: 6 }, (_, index) => {
+    const position = index + 1;
+    const name = String(product[`file_name${position}` as keyof ProductItem] || '');
+    const url = String(product[`link_download${position}` as keyof ProductItem] || product[`file_download${position}` as keyof ProductItem] || '');
+    if (url) documents.push({ name: name || `Tài liệu ${position}`, url });
+  });
   const numericId = Number.parseInt(String(product.id).replace(/\D/g, ''), 10) || 900000;
   const previewProduct: Product = {
     id: numericId, name: product.name || product.title || 'Sản phẩm mới (Bản xem trước)', price: product.price || product.price_old || 'Liên hệ',
