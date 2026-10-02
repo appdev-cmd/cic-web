@@ -13,6 +13,10 @@ import {
   trashEvent,
 } from './repository';
 import type { EventLocale } from '../types';
+import { getLlmProvider } from '@/features/ai-operator/server/llm-provider';
+import { getPostgresClient } from '@/server/db/postgres';
+import { normalizeEventSlug } from '../domain/slug';
+import type { EventInput } from '../schemas/eventInput';
 
 const localeSchema = z.enum(['vi', 'en']);
 const idSchema = z.coerce.number().int().positive();
@@ -76,6 +80,183 @@ export async function trashEventsAction(localeRaw: unknown, idsRaw: unknown) {
   }
   revalidateEvents();
   return { ok: true, count: results.length };
+}
+
+export interface TranslateAndCreateEnEventInput {
+  sourceEventId?: string | number;
+  title: string;
+  chuDe?: string;
+  place?: string;
+  timeEvent: string;
+  endTime: string;
+  linkDangky?: string;
+  summary?: string;
+  content: string;
+  image?: string;
+  tags?: string[];
+  productsRelated?: string[];
+  newsRelated?: string[];
+  eventRelated?: string[];
+  ordering?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeyword?: string;
+}
+
+export async function translateAndCreateEnEventAction(input: TranslateAndCreateEnEventInput) {
+  const actor = await requirePermission('events', 'create');
+  const title = input.title?.trim();
+  if (!title) {
+    throw new Error('Vui lòng nhập tiêu đề sự kiện trước khi dịch sang tiếng Anh.');
+  }
+  if (!input.timeEvent || !input.endTime) {
+    throw new Error('Vui lòng nhập thời gian bắt đầu và kết thúc sự kiện.');
+  }
+
+  const fieldsToTranslate: Record<string, string> = { title };
+  if (input.chuDe?.trim()) fieldsToTranslate.chu_de = input.chuDe.trim();
+  if (input.place?.trim()) fieldsToTranslate.place = input.place.trim();
+  if (input.summary?.trim()) fieldsToTranslate.summary = input.summary.trim();
+  if (input.content?.trim()) fieldsToTranslate.content = input.content.trim();
+  if (input.seoTitle?.trim()) fieldsToTranslate.seo_title = input.seoTitle.trim();
+  if (input.seoDescription?.trim()) fieldsToTranslate.seo_description = input.seoDescription.trim();
+  if (input.seoKeyword?.trim()) fieldsToTranslate.seo_keyword = input.seoKeyword.trim();
+
+  const llm = getLlmProvider();
+  const systemPrompt = `You are a professional technical translator and conference coordinator for CIC Technology (a leading AEC & engineering technology corporation in Vietnam).
+Translate the provided key-value fields of an engineering seminar / webinar / event from Vietnamese into professional, engaging English for a B2B engineering audience.
+CRITICAL RULES:
+1. Preserve all HTML tags, classes, and attributes completely intact (e.g. <h2>, <h3>, <p>, <b>, <ul>, <li>, <a>, <table>, <tr>, <td>, <img>). Do NOT remove or modify HTML structure.
+2. Use precise AEC, software engineering, and BIM terminology (e.g. Building Information Modeling, Structural Analysis, Geotechnical, Smart Port, High-speed Rail, Digital Twin).
+3. Return a JSON object with the exact same keys containing the translated values:
+{
+  "title": "...",
+  "chu_de": "...",
+  "place": "...",
+  "summary": "...",
+  "content": "...",
+  "seo_title": "...",
+  "seo_description": "...",
+  "seo_keyword": "..."
+}`;
+
+  const raw = await llm.generateStructured<Record<string, string>>({
+    systemPrompt,
+    userPrompt: JSON.stringify(fieldsToTranslate),
+    temperature: 0.2,
+  });
+
+  const translated = (raw && typeof raw === 'object' && 'translations' in raw && typeof (raw as any).translations === 'object' && (raw as any).translations !== null)
+    ? (raw as any).translations
+    : (raw && typeof raw === 'object' ? raw : {});
+
+  const enTitle = String(translated.title || title).trim();
+  const baseEnAlias = normalizeEventSlug(enTitle) || normalizeEventSlug(title);
+  const sql = getPostgresClient();
+
+  let existingEnId: number | null = null;
+  if (input.sourceEventId) {
+    const existingById = await sql.unsafe<{ id: number }[]>(
+      `SELECT id FROM cic_event_en WHERE id = $1 LIMIT 1`,
+      [Number(input.sourceEventId)]
+    );
+    if (existingById.length > 0) {
+      existingEnId = Number(existingById[0].id);
+    }
+  }
+
+  if (!existingEnId) {
+    const existingByAlias = await sql.unsafe<{ id: number }[]>(
+      `SELECT id FROM cic_event_en WHERE lower(btrim(alias)) = lower(btrim($1)) LIMIT 1`,
+      [baseEnAlias]
+    );
+    if (existingByAlias.length > 0) {
+      existingEnId = Number(existingByAlias[0].id);
+    }
+  }
+
+  let finalEnAlias = baseEnAlias;
+  const isTaken = await sql.unsafe<{ id: number }[]>(
+    `SELECT id FROM cic_event_en WHERE lower(btrim(alias)) = lower(btrim($1)) AND ($2::int IS NULL OR id <> $2) LIMIT 1`,
+    [finalEnAlias, existingEnId]
+  );
+  if (isTaken.length > 0) {
+    finalEnAlias = `${baseEnAlias}-${Date.now().toString().slice(-4)}`;
+  }
+
+  // Filter valid related items for EN
+  let validEnRelatedProductIds: string[] = [];
+  if (input.productsRelated?.length) {
+    const candidateProdIds = input.productsRelated.map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (candidateProdIds.length > 0) {
+      const existingProds = await sql.unsafe<{ id: number }[]>(
+        `SELECT id FROM cic_products_en WHERE id = ANY($1::int[])`,
+        [candidateProdIds]
+      );
+      validEnRelatedProductIds = existingProds.map((r) => String(r.id));
+    }
+  }
+
+  let validEnRelatedNewsIds: string[] = [];
+  if (input.newsRelated?.length) {
+    const candidateNewsIds = input.newsRelated.map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (candidateNewsIds.length > 0) {
+      const existingNews = await sql.unsafe<{ id: number }[]>(
+        `SELECT id FROM cic_news_en WHERE id = ANY($1::int[])`,
+        [candidateNewsIds]
+      );
+      validEnRelatedNewsIds = existingNews.map((r) => String(r.id));
+    }
+  }
+
+  let validEnRelatedEventIds: string[] = [];
+  if (input.eventRelated?.length) {
+    const candidateEventIds = input.eventRelated.map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (candidateEventIds.length > 0) {
+      const existingEvents = await sql.unsafe<{ id: number }[]>(
+        `SELECT id FROM cic_event_en WHERE id = ANY($1::int[])`,
+        [candidateEventIds]
+      );
+      validEnRelatedEventIds = existingEvents.map((r) => String(r.id));
+    }
+  }
+
+  const enPayload: EventInput = {
+    title: enTitle,
+    alias: finalEnAlias,
+    chuDe: String(translated.chu_de || input.chuDe || '').trim(),
+    place: String(translated.place || input.place || '').trim(),
+    timeEvent: input.timeEvent,
+    endTime: input.endTime,
+    specificTime: '',
+    linkDangky: input.linkDangky || '',
+    summary: String(translated.summary || input.summary || '').trim(),
+    content: String(translated.content || input.content || '<p>Event information coming soon.</p>').trim(),
+    image: input.image || '',
+    tags: Array.isArray(input.tags) ? input.tags : [],
+    published: false,
+    isHot: false,
+    showInHomepage: false,
+    ordering: Number(input.ordering) || 1,
+    seoTitle: String(translated.seo_title || enTitle).trim(),
+    seoKeyword: String(translated.seo_keyword || '').trim(),
+    seoDescription: String(translated.seo_description || translated.summary || input.summary || '').trim(),
+    tawkTo: '',
+    productsRelated: validEnRelatedProductIds,
+    newsRelated: validEnRelatedNewsIds,
+    eventRelated: validEnRelatedEventIds,
+  };
+
+  const parsedEnPayload = eventInputSchema.parse(enPayload);
+  const result = await saveEvent('en', existingEnId, parsedEnPayload, actor);
+
+  revalidateEvents();
+  return {
+    enId: result.id,
+    enTitle,
+    enAlias: finalEnAlias,
+    isUpdate: Boolean(existingEnId),
+  };
 }
 
 const eventRegistrationInputSchema = z.object({

@@ -428,6 +428,7 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
             featuredCount={events.filter((item) => item.id !== eventToEdit?.id && item.is_hot).length}
             onSave={handleSaveEvent}
             onOpenPreview={setPreviewEvent}
+            onMessage={showToast}
             onCancel={() => {
               setIsFormOpen(false);
               setEventToEdit(null);

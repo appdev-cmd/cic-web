@@ -232,7 +232,16 @@ export async function generateOutlineAction(input: GenerateOutlineInput): Promis
 
   const llm = getLlmProvider();
   const isNews = input.moduleType === 'news';
-  const systemPrompt = isNews
+  const isEvent = input.moduleType === 'event';
+  const systemPrompt = isEvent
+    ? `Bạn là chuyên gia tổ chức sự kiện & hội thảo kỹ thuật B2B của CIC (Tập đoàn công nghệ xây dựng, giao thông, hạ tầng và chuyển đổi số).
+Nhiệm vụ của bạn là soạn một KHUNG CHƯƠNG TRÌNH & DÀN Ý SỰ KIỆN (Event Agenda & Outline Template) chuẩn mực dạng HTML để biên tập viên dễ dàng chỉnh sửa thời lượng và bổ sung thông tin diễn giả.
+KHUNG DÀN Ý SỰ KIỆN BẮT BUỘC CÓ CẤU TRÚC:
+- <h3>1. Giới thiệu tổng quan & Diễn giả</h3> (Đoạn dẫn ngắn gọn về mục tiêu sự kiện, đối tượng tham gia và chuyên gia/đối tác tham gia)
+- <h3>2. Khung chương trình (Agenda) chi tiết</h3> (Lộ trình thời gian rõ ràng: Đón tiếp đại biểu -> Khai mạc -> Trình bày chuyên đề / Demo giải pháp công nghệ trực quan -> Tọa đàm thảo luận & Hỏi đáp Q&A -> Bế mạc)
+- <h3>3. Quyền lợi đại biểu & Hướng dẫn tham dự</h3> (Gợi ý tài liệu hội thảo, bản quyền trải nghiệm, giải đáp kỹ thuật, thông tin liên hệ ban tổ chức CIC)
+Chỉ trả về JSON định dạng: { "outlineHtml": "<h3>1...</h3><p>...</p>..." }`
+    : isNews
     ? `Bạn là biên tập viên báo chí & kỹ thuật cao cấp của CIC.
 Nhiệm vụ của bạn là soạn một KHUNG DÀN Ý BÀI VIẾT TIN TỨC / BÁO CHÍ (Outline Template) chuẩn mực dạng HTML để biên tập viên dễ dàng phát triển nội dung và chèn ảnh minh họa.
 KHUNG DÀN Ý PHẢI CÓ CẤU TRÚC BÁO CHÍ B2B CHUẨN:
@@ -532,6 +541,103 @@ QUY TẮC BẮT BUỘC:
     ).slice(0, 2);
     return { selectedNewsIds: matched.map((a) => String(a.id)) };
   }
+}
+
+export interface SuggestRelatedEventsInput {
+  title: string;
+  summary?: string;
+  content?: string;
+  candidateEvents: Array<{ id: string | number; title: string }>;
+  currentEventId?: string | number | null;
+}
+
+export interface SuggestRelatedEventsOutput {
+  selectedEventIds: string[];
+}
+
+/**
+ * AI suggestion for related events based on title, topic, summary, and agenda.
+ */
+export async function suggestRelatedEventsAction(
+  input: SuggestRelatedEventsInput
+): Promise<SuggestRelatedEventsOutput> {
+  await requireCmsAccess();
+
+  const title = input.title?.trim();
+  const currentId = input.currentEventId ? String(input.currentEventId) : null;
+  const filteredCandidates = (input.candidateEvents || [])
+    .filter((e) => String(e.id) !== currentId && e.title?.trim())
+    .slice(0, 50);
+
+  if (!title || filteredCandidates.length === 0) {
+    return { selectedEventIds: [] };
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là chuyên gia điều phối hội thảo & sự kiện công nghệ của CIC (Tập đoàn công nghệ kỹ thuật AEC, giao thông, hạ tầng và chuyển đổi số tại Việt Nam).
+NHIỆM VỤ: Dựa trên Tiêu đề sự kiện, Tóm tắt và Nội dung sự kiện đang tổ chức, hãy chọn từ 1 đến 3 "id" sự kiện liên quan nhất từ danh sách "candidateEvents" được cung cấp (cùng chuỗi hội thảo công nghệ, cùng nhóm giải pháp, hoặc sự kiện tiếp nối).
+QUY TẮC BẮT BUỘC:
+- CHỈ ĐƯỢC CHỌN ID CÓ TRONG DANH SÁCH "candidateEvents", TUYỆT ĐỐI KHÔNG TỰ BỊA RA ID MỚI.
+- Nếu không có sự kiện nào liên quan, trả về mảng rỗng [].
+- Định dạng JSON trả về: { "selectedEventIds": ["id1", "id2"] }`;
+
+  const userPrompt = JSON.stringify({
+    eventTitle: title,
+    summary: input.summary || '',
+    sampleContent: (input.content || '').replace(/<[^>]*>?/gm, ' ').substring(0, 1000).trim(),
+    candidateEvents: filteredCandidates.map((e) => ({
+      id: String(e.id),
+      title: e.title,
+    })),
+  });
+
+  try {
+    const raw = await llm.generateStructured<{ selectedEventIds?: string[] }>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.1,
+    });
+
+    const validIds = (raw.selectedEventIds || []).filter((id) =>
+      filteredCandidates.some((e) => String(e.id) === String(id))
+    );
+
+    return { selectedEventIds: validIds.map(String) };
+  } catch {
+    const tokens = (title + ' ' + (input.summary || ''))
+      .toLowerCase()
+      .split(/[\s\-_/.,+]+/)
+      .filter((t) => t.length > 3);
+    const matched = filteredCandidates.filter((e) =>
+      tokens.some((tok) => e.title.toLowerCase().includes(tok))
+    ).slice(0, 2);
+    return { selectedEventIds: matched.map((e) => String(e.id)) };
+  }
+}
+
+export interface GenerateEventThemeInput {
+  title: string;
+}
+
+export interface GenerateEventThemeOutput {
+  chuDe: string;
+}
+
+/**
+ * AI / Heuristic generator for event sub-theme from title
+ */
+export async function generateEventThemeAction(
+  input: GenerateEventThemeInput
+): Promise<GenerateEventThemeOutput> {
+  await requireCmsAccess();
+  const title = input.title?.trim() || '';
+  if (!title) return { chuDe: '' };
+
+  const cleaned = title
+    .replace(/^(hội thảo trực tuyến|hội thảo quốc tế|hội thảo chuyên đề|hội thảo|webinar miễn phí|webinar đặc biệt|webinar|tọa đàm trực tuyến|tọa đàm|khóa đào tạo|tập huấn)[\s:–—-]+/i, '')
+    .trim();
+
+  return { chuDe: cleaned || title };
 }
 
 
