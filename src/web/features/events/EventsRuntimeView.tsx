@@ -79,6 +79,7 @@ export function EventsRuntimeView({
       onNavigateHome={() => router.push('/')}
       onNavigateToProduct={(productId) => router.push(`/products/${productId}`)}
       onNavigateToService={(serviceId) => router.push(`/services/${serviceId}`)}
+      onOpenConsultation={() => router.push('/contact')}
     />
   );
 }
