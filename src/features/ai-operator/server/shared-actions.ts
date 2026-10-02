@@ -459,4 +459,79 @@ QUY TẮC BẮT BUỘC:
   }
 }
 
+export interface SuggestRelatedNewsInput {
+  title: string;
+  categoryName?: string;
+  summary?: string;
+  content?: string;
+  candidateArticles: Array<{ id: string | number; title: string; categoryName?: string }>;
+  currentArticleId?: string | number | null;
+}
+
+export interface SuggestRelatedNewsOutput {
+  selectedNewsIds: string[];
+}
+
+/**
+ * AI suggestion for related news articles based on title, category, sapo, and body content.
+ */
+export async function suggestRelatedNewsAction(
+  input: SuggestRelatedNewsInput
+): Promise<SuggestRelatedNewsOutput> {
+  await requireCmsAccess();
+
+  const title = input.title?.trim();
+  const currentId = input.currentArticleId ? String(input.currentArticleId) : null;
+  const filteredCandidates = (input.candidateArticles || [])
+    .filter((a) => String(a.id) !== currentId && a.title?.trim())
+    .slice(0, 50);
+
+  if (!title || filteredCandidates.length === 0) {
+    return { selectedNewsIds: [] };
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là biên tập viên tin tức công nghệ của CIC (Tập đoàn công nghệ kỹ thuật AEC, giao thông, hạ tầng và chuyển đổi số tại Việt Nam).
+NHIỆM VỤ: Dựa trên Tiêu đề bài viết, Chuyên mục và Tóm tắt/Nội dung của bài viết đang biên tập, hãy chọn từ 1 đến 3 "id" bài viết liên quan nhất từ danh sách "candidateArticles" được cung cấp (cùng chủ đề công nghệ, cùng lĩnh vực ứng dụng, hoặc bài viết liên quan tiếp nối).
+QUY TẮC BẮT BUỘC:
+- CHỈ ĐƯỢC CHỌN ID CÓ TRONG DANH SÁCH "candidateArticles", TUYỆT ĐỐI KHÔNG TỰ BỊA RA ID MỚI.
+- Nếu không có bài viết nào liên quan, trả về mảng rỗng [].
+- Định dạng JSON trả về: { "selectedNewsIds": ["id1", "id2"] }`;
+
+  const userPrompt = JSON.stringify({
+    articleTitle: title,
+    categoryName: input.categoryName || '',
+    summary: input.summary || '',
+    sampleContent: (input.content || '').replace(/<[^>]*>?/gm, ' ').substring(0, 1000).trim(),
+    candidateArticles: filteredCandidates.map((a) => ({
+      id: String(a.id),
+      title: a.title,
+      categoryName: a.categoryName || '',
+    })),
+  });
+
+  try {
+    const raw = await llm.generateStructured<{ selectedNewsIds?: string[] }>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.1,
+    });
+
+    const validIds = (raw.selectedNewsIds || []).filter((id) =>
+      filteredCandidates.some((a) => String(a.id) === String(id))
+    );
+
+    return { selectedNewsIds: validIds.map(String) };
+  } catch {
+    const tokens = (title + ' ' + (input.summary || ''))
+      .toLowerCase()
+      .split(/[\s\-_/.,+]+/)
+      .filter((t) => t.length > 3);
+    const matched = filteredCandidates.filter((a) =>
+      tokens.some((tok) => a.title.toLowerCase().includes(tok))
+    ).slice(0, 2);
+    return { selectedNewsIds: matched.map((a) => String(a.id)) };
+  }
+}
+
 

@@ -34,6 +34,7 @@ import {
   extractTagsAction,
   generateOutlineAction,
   suggestRelatedProductsForNewsAction,
+  suggestRelatedNewsAction,
 } from '@/features/ai-operator/server/shared-actions';
 import { translateAndCreateEnNewsAction } from '@/features/news/server/actions';
 
@@ -122,6 +123,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     seoTitle: string;
     seoKeyword: string;
     seoDescription: string;
+    newsRelated: string[];
     productsRelated: string[];
     content: string;
   } | null>(null);
@@ -143,6 +145,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
         seoTitle,
         seoKeyword,
         seoDescription,
+        newsRelated: [...newsRelated],
         productsRelated: [...productsRelated],
         content,
       });
@@ -153,8 +156,8 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       if (!alias.trim() && !manualAlias) setAlias(slugify(title));
       if (!otherLanguages1.trim()) setOtherLanguages1(`/en/news/${slugify(title)}`);
 
-      // Parallel AI execution: Summary + Tags + SEO + Related Products
-      const [summaryRes, tagsRes, seoRes, relRes] = await Promise.all([
+      // Parallel AI execution: Summary + Tags + SEO + Related Products + Related News
+      const [summaryRes, tagsRes, seoRes, relRes, relNewsRes] = await Promise.all([
         (!summary.trim())
           ? generateSummaryAction({
               title,
@@ -198,6 +201,23 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               return { selectedProductIds: [] };
             })
           : Promise.resolve({ selectedProductIds: [] }),
+        (newsRelated.length === 0 && relatedArticles.length > 0)
+          ? suggestRelatedNewsAction({
+              title,
+              categoryName,
+              summary,
+              content: contentContext,
+              candidateArticles: relatedArticles.map((a) => ({
+                id: a.id,
+                title: a.title,
+                categoryName: categories.find((c) => c.id === a.category_id)?.name,
+              })),
+              currentArticleId: articleToEdit?.id,
+            }).catch((err) => {
+              console.warn('AI Related News failed:', err);
+              return { selectedNewsIds: [] };
+            })
+          : Promise.resolve({ selectedNewsIds: [] }),
       ]);
 
       if (summaryRes.summary) setSummary(summaryRes.summary);
@@ -208,9 +228,12 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       if (relRes.selectedProductIds?.length > 0) {
         setProductsRelated((prev) => Array.from(new Set([...prev, ...relRes.selectedProductIds])));
       }
+      if (relNewsRes.selectedNewsIds?.length > 0) {
+        setNewsRelated((prev) => Array.from(new Set([...prev, ...relNewsRes.selectedNewsIds])));
+      }
 
       setHasAiAutoFilled(true);
-      onMessage?.('✦ Đã tự động điền Tóm tắt, Bộ 3 SEO, Tags và Gợi ý sản phẩm liên quan!', 'success');
+      onMessage?.('✦ Đã tự động điền Tóm tắt, Bộ 3 SEO, Tags, Gợi ý sản phẩm và Tin tức liên quan!', 'success');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Lỗi khi chạy AI Co-pilot');
     } finally {
@@ -228,6 +251,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     setSeoTitle(undoSnapshot.seoTitle);
     setSeoKeyword(undoSnapshot.seoKeyword);
     setSeoDescription(undoSnapshot.seoDescription);
+    setNewsRelated(undoSnapshot.newsRelated);
     setProductsRelated(undoSnapshot.productsRelated);
     setContent(undoSnapshot.content);
     setHasAiAutoFilled(false);
@@ -359,6 +383,32 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
       }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Không thể gợi ý sản phẩm AI');
+    }
+  };
+
+  const handleAiRelatedNews = async () => {
+    if (!title.trim() || relatedArticles.length === 0) return;
+    try {
+      const res = await suggestRelatedNewsAction({
+        title,
+        categoryName: getCategoryName(),
+        summary,
+        content,
+        candidateArticles: relatedArticles.map((a) => ({
+          id: a.id,
+          title: a.title,
+          categoryName: categories.find((c) => c.id === a.category_id)?.name,
+        })),
+        currentArticleId: articleToEdit?.id,
+      });
+      if (res.selectedNewsIds?.length > 0) {
+        setNewsRelated((prev) => Array.from(new Set([...prev, ...res.selectedNewsIds])));
+        onMessage?.(`Đã gợi ý ${res.selectedNewsIds.length} bài viết tin tức liên quan!`, 'success');
+      } else {
+        onMessage?.('Không tìm thấy bài viết tin tức phù hợp với chủ đề này.', 'info');
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Không thể gợi ý tin liên quan AI');
     }
   };
 
@@ -571,7 +621,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               </span>
             </div>
 
-            {/* 1. Tiêu đề và Danh mục cốt lõi */}
+            {/* 1. Tiêu đề, Danh mục và Tóm tắt Sapo cốt lõi */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className={labelClass}>Tiêu đề tin *</label>
@@ -594,6 +644,32 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   onChange={setCategoryId}
                 />
               </div>
+              {/* Tóm tắt bài viết / Sapo - Có thể nhập để thêm thông tin hoặc để trống */}
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Tóm tắt bài viết (Sapo)
+                    </label>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">
+                      (Có thể nhập sapo để thêm thông tin cho AI sinh, hoặc để trống để AI tự tạo)
+                    </span>
+                  </div>
+                  <AiMagicWand
+                    label="Tóm tắt từ bài viết"
+                    title="Tự động đọc nội dung bài viết và viết Sapo tóm tắt 1-2 câu"
+                    onTrigger={handleAiSummary}
+                    disabled={!title.trim() && !content.trim()}
+                  />
+                </div>
+                <textarea
+                  rows={3}
+                  className={inputClass}
+                  value={summary}
+                  placeholder="Đoạn văn tóm tắt ngắn gọn 1-2 câu dẫn nhập cho bài viết..."
+                  onChange={(e) => setSummary(e.target.value)}
+                />
+              </div>
             </div>
 
             {/* Smart Trigger Bar: Kích hoạt ngay khi có Tiêu đề & Danh mục */}
@@ -612,13 +688,13 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                     />
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                       {isAnchorsReady
-                        ? 'Trợ lý AI Co-pilot: Sẵn sàng tự động điền Tóm tắt, SEO, Thẻ Tags và Gợi ý sản phẩm!'
-                        : 'Trợ lý AI Co-pilot (Chỉ cần nhập Tiêu đề và Chọn danh mục ở trên để mở khóa)'}
+                        ? 'Trợ lý AI Co-pilot: Sẵn sàng tự động điền SEO, Tags, Gợi ý sản phẩm & Tin tức liên quan!'
+                        : 'Trợ lý AI Co-pilot (Nhập Tiêu đề và Chọn danh mục ở trên để mở khóa)'}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     {isAnchorsReady
-                      ? 'AI sẽ tự động tạo Sapo, tối ưu SEO Google, gắn thẻ Tags và gợi ý sản phẩm liên quan từ kho CIC.'
+                      ? 'AI sẽ tự động tối ưu SEO Google, gắn thẻ Tags, đề xuất Sản phẩm và Tin liên quan từ cơ sở dữ liệu.'
                       : 'Hệ thống cần tối thiểu Tiêu đề và Danh mục để nhận diện ngữ cảnh và hỗ trợ điền tự động.'}
                   </p>
                 </div>
@@ -637,30 +713,8 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               </div>
             </div>
 
-            {/* Các trường cấu hình chi tiết (Sapo, Alias, URL tiếng Anh, Thứ tự) */}
+            {/* Các trường cấu hình đường dẫn & hiển thị */}
             <div className="grid gap-4 md:grid-cols-2 pt-3 border-t border-slate-100 dark:border-slate-800/80">
-              {/* Tóm tắt bài viết với Đũa thần AI */}
-              <div className="md:col-span-2">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Tóm tắt bài viết (Sapo)
-                  </label>
-                  <AiMagicWand
-                    label="Tóm tắt từ bài viết"
-                    title="Tự động đọc nội dung bài viết và viết Sapo tóm tắt 1-2 câu"
-                    onTrigger={handleAiSummary}
-                    disabled={!title.trim() && !content.trim()}
-                  />
-                </div>
-                <textarea
-                  rows={3}
-                  className={inputClass}
-                  value={summary}
-                  placeholder="Đoạn văn tóm tắt ngắn gọn 1-2 câu dẫn nhập cho bài viết..."
-                  onChange={(e) => setSummary(e.target.value)}
-                />
-              </div>
-
               <div>
                 <label className={labelClass}>Alias (Đường dẫn tĩnh)</label>
                 <input
@@ -718,7 +772,15 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
             </div>
             <div className="space-y-4">
               <div>
-                <label className={labelClass}>Tin liên quan</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className={labelClass}>Tin liên quan</label>
+                  <AiMagicWand
+                    label="Gợi ý tin liên quan"
+                    title="Tự động đề xuất các bài viết tin tức có cùng chủ đề hoặc giải pháp"
+                    onTrigger={handleAiRelatedNews}
+                    disabled={!title.trim() || relatedArticles.length === 0}
+                  />
+                </div>
                 <SearchableMultiSelect
                   options={relatedArticles
                     .filter((item) => item.id !== articleToEdit?.id)
