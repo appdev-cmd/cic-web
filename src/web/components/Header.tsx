@@ -165,7 +165,7 @@ export const Header = ({
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex items-center justify-between h-full gap-3">
-          <div className="flex items-center gap-2 h-full">
+          <div className="flex items-center gap-2 h-full shrink-0">
             <a 
               href={locale === 'en' ? '/en' : '/'}
               onClick={(e) => {
@@ -176,7 +176,7 @@ export const Header = ({
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 navigateTo(locale === 'en' ? '/en' : '/');
               }}
-              className="flex items-center group h-full"
+              className="flex items-center group h-full min-w-[130px] md:min-w-[160px]"
             >
               <img 
                 src={
@@ -185,6 +185,8 @@ export const Header = ({
                     : (settings?.values?.logo || settings?.values?.logo_white || '/LOGO - 1990-08.png')
                 } 
                 alt={settings?.values?.site_name || 'CIC Logo'} 
+                width={160}
+                height={72}
                 className="h-16 md:h-18 max-h-18 w-auto object-contain transition-all duration-300 group-hover:scale-105"
               />
             </a>

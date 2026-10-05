@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 @import "tailwindcss" source(none);
 @source ".";
 @source "../shared";
@@ -8,8 +7,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Roboto", system-ui, -apple-system, sans-serif;
-  --font-display: "Roboto", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-roboto, "Roboto"), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-roboto, "Roboto"), system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Monaco, Consolas, monospace;
   --tracking-tighter: -0.03em;
   --tracking-tight: -0.02em;
@@ -26,8 +25,8 @@
   --type-body-leading: 1.65;
   --type-prose-measure: 68ch;
   --type-display-max: 4.5rem;
-  --font-sans: "Roboto", system-ui, -apple-system, sans-serif;
-  --font-display: "Roboto", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-roboto, "Roboto"), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-roboto, "Roboto"), system-ui, -apple-system, sans-serif;
   --token-color-brand-primary: #ea580c;
   --token-color-brand-hover: #c2410c;
   --token-color-brand-active: #9a3412;
@@ -109,7 +108,17 @@ body {
 /* Legacy CMS HTML is rendered inside the Next.js shell. Keep it fluid on every
    viewport and prevent editor-authored inline dimensions from breaking layout. */
 .ck-content, .cms-rich-content, .legacy-html-content { max-width: 100%; overflow-wrap: anywhere; }
-.ck-content img, .cms-rich-content img, .legacy-html-content img { display: block; max-width: 100% !important; height: auto !important; margin-inline: auto; }
+.ck-content img, .cms-rich-content img, .legacy-html-content img { 
+  display: block; 
+  max-width: 100% !important; 
+  height: auto !important; 
+  margin-inline: auto; 
+  background-color: #f8fafc; 
+  border-radius: 6px; 
+}
+.ck-content img:not([width]), .cms-rich-content img:not([width]), .legacy-html-content img:not([width]) {
+  min-height: 80px;
+}
 .ck-content iframe, .cms-rich-content iframe, .legacy-html-content iframe { width: 100%; max-width: 100%; aspect-ratio: 16 / 9; border: 0; }
 .ck-content table, .cms-rich-content table, .legacy-html-content table { display: block; max-width: 100%; overflow-x: auto; }
 .ck-content a, .cms-rich-content a, .legacy-html-content a { overflow-wrap: anywhere; }

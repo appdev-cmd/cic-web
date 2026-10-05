@@ -90,10 +90,12 @@ export const Footer = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 mb-8">
           {/* Company Info */}
           <div className="lg:col-span-4">
-            <div className="mb-8">
+            <div className="mb-8 min-h-[104px] sm:min-h-[120px]">
               <img 
                 src={values.logo_white || values.logo || '/LOGO - 1990-08.png'}
                 alt="CIC Logo Small" 
+                width={260}
+                height={120}
                 className="h-26 sm:h-30 w-auto mb-4 rounded-[10px]"
               />
             </div>

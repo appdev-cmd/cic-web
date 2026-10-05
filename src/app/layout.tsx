@@ -2,7 +2,16 @@ import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { Roboto } from 'next/font/google';
+
 import './globals.css';
+
+const roboto = Roboto({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['300', '400', '500', '700', '900'],
+  display: 'swap',
+  variable: '--font-roboto',
+});
 
 import { OrganizationJsonLd } from '@/features/seo/components';
 import { CANONICAL_SITE_URL } from '@/lib/seo/siteUrl';
@@ -60,8 +69,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = headersList.get('x-locale') || 'vi';
 
   return (
-    <html lang={locale} data-scroll-behavior="smooth">
-      <body>
+    <html lang={locale} data-scroll-behavior="smooth" className={roboto.variable}>
+      <body className={roboto.className}>
         <OrganizationJsonLd />
         {children}
       </body>
