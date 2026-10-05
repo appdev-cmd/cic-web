@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- Dynamic 16–28px option thumbnails preserve the existing picker layout and URL behavior. */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, Check, ChevronDown } from 'lucide-react';
 
 export interface SelectOption {
@@ -46,9 +46,20 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const uniqueOptions = useMemo(() => {
+    const seen = new Set<string>();
+    return (options || []).filter((opt) => {
+      if (!opt || opt.id == null) return false;
+      const strId = String(opt.id);
+      if (seen.has(strId)) return false;
+      seen.add(strId);
+      return true;
+    });
+  }, [options]);
+
   const getOptionLabel = (opt: SelectOption) => opt.name || opt.label || '';
 
-  const filteredOptions = options.filter((opt) => {
+  const filteredOptions = uniqueOptions.filter((opt) => {
     const labelText = getOptionLabel(opt).toLowerCase();
     const query = searchQuery.toLowerCase();
     return (
@@ -67,7 +78,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return 0;
   });
 
-  const selectedOption = options.find((opt) => opt.id === selectedId);
+  const selectedOption = uniqueOptions.find((opt) => opt.id === selectedId);
 
   return (
     <div className="space-y-1.5 relative" ref={dropdownRef}>
@@ -124,7 +135,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   displayOptions[idx + 1].id !== selectedId;
                 const optLabel = getOptionLabel(opt);
                 return (
-                  <React.Fragment key={opt.id}>
+                  <React.Fragment key={`${opt.id}-${idx}`}>
                     <div
                       onClick={() => {
                         onChange(opt.id);
@@ -190,9 +201,20 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const uniqueOptions = useMemo(() => {
+    const seen = new Set<string>();
+    return (options || []).filter((opt) => {
+      if (!opt || opt.id == null) return false;
+      const strId = String(opt.id);
+      if (seen.has(strId)) return false;
+      seen.add(strId);
+      return true;
+    });
+  }, [options]);
+
   const getOptionLabel = (opt: SelectOption) => opt.name || opt.label || '';
 
-  const filteredOptions = options.filter((opt) => {
+  const filteredOptions = uniqueOptions.filter((opt) => {
     const labelText = getOptionLabel(opt).toLowerCase();
     const query = searchQuery.toLowerCase();
     return (
@@ -249,12 +271,12 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
           {selectedIds.length === 0 ? (
             <span className="text-xs text-slate-400 px-2">{placeholder}</span>
           ) : (
-            selectedIds.map((id) => {
-              const item = options.find((opt) => opt.id === id);
+            selectedIds.map((id, sIdx) => {
+              const item = uniqueOptions.find((opt) => opt.id === id);
               if (!item) return null;
               return (
                 <span
-                  key={id}
+                  key={`${id}-${sIdx}`}
                   className="px-2.5 py-1 bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 text-xs font-semibold rounded-lg flex items-center gap-1.5"
                 >
                   {item.image && (
@@ -327,7 +349,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
                     displayOptions[idx + 1] &&
                     !selectedIds.includes(displayOptions[idx + 1].id);
                   return (
-                    <React.Fragment key={opt.id}>
+                    <React.Fragment key={`${opt.id}-${idx}`}>
                       <div
                         onClick={() => toggleOption(opt.id)}
                         className={`p-2 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${

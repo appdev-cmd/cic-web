@@ -28,6 +28,7 @@ import {
   generateSummaryAction,
   generateOutlineAction,
   translateFieldsAction,
+  suggestRelatedEntitiesAction,
 } from '@/features/ai-operator/server/shared-actions';
 import type { CmsProject, ProjectRelationOption } from './types';
 import { FEATURED_CONTENT_LIMITS } from '../featuredContentPolicy';
@@ -143,6 +144,43 @@ export const ProjectFormView: React.FC<Props> = ({
         locale: locale as 'vi' | 'en',
       });
 
+      let suggestedProducts = form.products_related;
+      let suggestedServices = form.services_related;
+
+      if (form.products_related.length === 0 && productOptions.length > 0) {
+        try {
+          const pRes = await suggestRelatedEntitiesAction({
+            title: form.title.trim(),
+            context: `${form.sector} ${draft.solution} ${draft.summary}`,
+            entityType: 'product',
+            candidates: productOptions,
+            maxSelect: 3,
+          });
+          if (pRes.selectedIds.length > 0) {
+            suggestedProducts = pRes.selectedIds;
+          }
+        } catch {
+          // non-blocking
+        }
+      }
+
+      if (form.services_related.length === 0 && serviceOptions.length > 0) {
+        try {
+          const sRes = await suggestRelatedEntitiesAction({
+            title: form.title.trim(),
+            context: `${form.sector} ${draft.solution} ${draft.summary}`,
+            entityType: 'service',
+            candidates: serviceOptions,
+            maxSelect: 2,
+          });
+          if (sRes.selectedIds.length > 0) {
+            suggestedServices = sRes.selectedIds;
+          }
+        } catch {
+          // non-blocking
+        }
+      }
+
       setForm((prev) => ({
         ...prev,
         tagline: prev.tagline || draft.tagline,
@@ -152,6 +190,8 @@ export const ProjectFormView: React.FC<Props> = ({
         seo_title: prev.seo_title || draft.seo_title,
         seo_description: prev.seo_description || draft.seo_description,
         seo_keyword: prev.seo_keyword || draft.seo_keyword,
+        products_related: suggestedProducts,
+        services_related: suggestedServices,
       }));
 
       if (!technologyInput.trim() && draft.technologies.length > 0) {
@@ -159,7 +199,7 @@ export const ProjectFormView: React.FC<Props> = ({
       }
 
       setHasAiAutoFilled(true);
-      showToast('✦ Trợ lý AI đã tự động điền Tagline, Tóm tắt, Giải pháp, Công nghệ & SEO!');
+      showToast('✦ Trợ lý AI đã tự động điền Tagline, Tóm tắt, Giải pháp, Công nghệ, SEO & Nội dung liên quan!');
     } catch (err: any) {
       showToast(err?.message || 'Không thể tự động điền với AI. Vui lòng thử lại.');
     } finally {
@@ -240,6 +280,54 @@ export const ProjectFormView: React.FC<Props> = ({
       seo_keyword: res.seo_keyword,
     }));
     showToast('✦ Đã tối ưu bộ 3 thẻ SEO Google!');
+  };
+
+  const handleAiRelatedProducts = async () => {
+    if (!form.title.trim()) {
+      showToast('Vui lòng nhập Tên dự án trước khi gợi ý sản phẩm.');
+      return;
+    }
+    try {
+      const res = await suggestRelatedEntitiesAction({
+        title: form.title,
+        context: `${form.sector} ${form.solution} ${form.summary} ${form.technologies.join(' ')}`,
+        entityType: 'product',
+        candidates: productOptions,
+        maxSelect: 4,
+      });
+      if (res.selectedIds.length > 0) {
+        set('products_related', Array.from(new Set([...form.products_related, ...res.selectedIds])));
+        showToast(`✦ Đã gợi ý ${res.selectedIds.length} sản phẩm liên quan phù hợp!`);
+      } else {
+        showToast('Không tìm thấy sản phẩm khớp với dự án này.');
+      }
+    } catch {
+      showToast('Không thể gợi ý sản phẩm lúc này.');
+    }
+  };
+
+  const handleAiRelatedServices = async () => {
+    if (!form.title.trim()) {
+      showToast('Vui lòng nhập Tên dự án trước khi gợi ý dịch vụ.');
+      return;
+    }
+    try {
+      const res = await suggestRelatedEntitiesAction({
+        title: form.title,
+        context: `${form.sector} ${form.solution} ${form.summary}`,
+        entityType: 'service',
+        candidates: serviceOptions,
+        maxSelect: 3,
+      });
+      if (res.selectedIds.length > 0) {
+        set('services_related', Array.from(new Set([...form.services_related, ...res.selectedIds])));
+        showToast(`✦ Đã gợi ý ${res.selectedIds.length} dịch vụ liên quan phù hợp!`);
+      } else {
+        showToast('Không tìm thấy dịch vụ khớp với dự án này.');
+      }
+    } catch {
+      showToast('Không thể gợi ý dịch vụ lúc này.');
+    }
   };
 
   const handleTranslateToEn = async () => {
@@ -691,7 +779,15 @@ export const ProjectFormView: React.FC<Props> = ({
           <Section icon={<Link2 />} title="4. Nội dung liên quan">
             <div className="space-y-4">
               <div>
-                <span className={labelClass}>Sản phẩm / Phần mềm liên quan</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className={labelClass}>Sản phẩm / Phần mềm liên quan</span>
+                  <AiMagicWand
+                    label="Gợi ý sản phẩm"
+                    title="AI tự động phân tích tiêu đề & giải pháp để đề xuất phần mềm liên quan"
+                    onTrigger={handleAiRelatedProducts}
+                    disabled={!form.title.trim() || productOptions.length === 0}
+                  />
+                </div>
                 <SearchableMultiSelect
                   options={productOptions}
                   selectedIds={form.products_related}
@@ -700,7 +796,15 @@ export const ProjectFormView: React.FC<Props> = ({
                 />
               </div>
               <div>
-                <span className={labelClass}>Dịch vụ liên quan</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className={labelClass}>Dịch vụ liên quan</span>
+                  <AiMagicWand
+                    label="Gợi ý dịch vụ"
+                    title="AI tự động phân tích để đề xuất dịch vụ kỹ thuật liên quan"
+                    onTrigger={handleAiRelatedServices}
+                    disabled={!form.title.trim() || serviceOptions.length === 0}
+                  />
+                </div>
                 <SearchableMultiSelect
                   options={serviceOptions}
                   selectedIds={form.services_related}

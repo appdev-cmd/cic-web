@@ -132,19 +132,37 @@ export async function GET() {
       };
     });
 
-    const mappedProducts = (productOptions as ProductOptionRow[]).map((p) => ({
-      id: String(p.id),
-      label: p.label,
-      subLabel: [p.brand, p.application].filter(Boolean).join(' · '),
-      image: p.image,
-    }));
+    const productMap = new Map<string, { id: string; label: string; subLabel: string; image?: string | null }>();
+    for (const p of productOptions as ProductOptionRow[]) {
+      const idStr = String(p.id);
+      const appName = p.application ? String(p.application) : null;
+      const existing = productMap.get(idStr);
+      if (!existing) {
+        productMap.set(idStr, {
+          id: idStr,
+          label: p.label,
+          subLabel: [p.brand, appName].filter(Boolean).join(' · '),
+          image: p.image,
+        });
+      } else if (appName && existing.subLabel && !existing.subLabel.includes(appName)) {
+        existing.subLabel = `${existing.subLabel}, ${appName}`;
+      }
+    }
+    const mappedProducts = Array.from(productMap.values());
 
-    const mappedServices = (serviceOptions as ServiceOptionRow[]).map((s) => ({
-      id: String(s.id),
-      label: s.label,
-      subLabel: s.category || 'Dịch vụ CIC',
-      image: s.image,
-    }));
+    const serviceMap = new Map<string, { id: string; label: string; subLabel: string; image?: string | null }>();
+    for (const s of serviceOptions as ServiceOptionRow[]) {
+      const idStr = String(s.id);
+      if (!serviceMap.has(idStr)) {
+        serviceMap.set(idStr, {
+          id: idStr,
+          label: s.label,
+          subLabel: s.category || 'Dịch vụ CIC',
+          image: s.image,
+        });
+      }
+    }
+    const mappedServices = Array.from(serviceMap.values());
 
     return NextResponse.json({
       projects: mappedProjects,

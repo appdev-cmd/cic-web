@@ -101,19 +101,37 @@ export async function getCmsProjects(locale: ProjectLocale): Promise<ProjectsMod
     };
   });
 
-  const mappedProducts: ProjectRelationOption[] = (productOptions as Record<string, unknown>[]).map((p) => ({
-    id: String(p.id),
-    label: String(p.label ?? p.id),
-    subLabel: [p.brand, p.application].filter(Boolean).map(String).join(' · '),
-    image: normalizeMediaUrl(p.image ? String(p.image) : ''),
-  }));
+  const productMap = new Map<string, ProjectRelationOption>();
+  for (const p of productOptions as Record<string, unknown>[]) {
+    const idStr = String(p.id);
+    const appName = p.application ? String(p.application) : null;
+    const existing = productMap.get(idStr);
+    if (!existing) {
+      productMap.set(idStr, {
+        id: idStr,
+        label: String(p.label ?? p.id),
+        subLabel: [p.brand, appName].filter(Boolean).map(String).join(' · '),
+        image: normalizeMediaUrl(p.image ? String(p.image) : ''),
+      });
+    } else if (appName && existing.subLabel && !existing.subLabel.includes(appName)) {
+      existing.subLabel = `${existing.subLabel}, ${appName}`;
+    }
+  }
+  const mappedProducts = Array.from(productMap.values());
 
-  const mappedServices: ProjectRelationOption[] = (serviceOptions as Record<string, unknown>[]).map((s) => ({
-    id: String(s.id),
-    label: String(s.label ?? s.id),
-    subLabel: String(s.category ?? 'Dịch vụ CIC'),
-    image: normalizeMediaUrl(s.image ? String(s.image) : ''),
-  }));
+  const serviceMap = new Map<string, ProjectRelationOption>();
+  for (const s of serviceOptions as Record<string, unknown>[]) {
+    const idStr = String(s.id);
+    if (!serviceMap.has(idStr)) {
+      serviceMap.set(idStr, {
+        id: idStr,
+        label: String(s.label ?? s.id),
+        subLabel: String(s.category ?? 'Dịch vụ CIC'),
+        image: normalizeMediaUrl(s.image ? String(s.image) : ''),
+      });
+    }
+  }
+  const mappedServices = Array.from(serviceMap.values());
 
   return {
     projects: mappedProjects,

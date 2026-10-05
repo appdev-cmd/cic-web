@@ -792,4 +792,93 @@ Chỉ trả về JSON hợp lệ:
   };
 }
 
+export interface SuggestRelatedEntitiesInput {
+  title: string;
+  context?: string;
+  entityType: 'product' | 'service';
+  candidates: Array<{ id: string | number; label?: string; name?: string; subLabel?: string; category?: string }>;
+  maxSelect?: number;
+}
+
+export interface SuggestRelatedEntitiesOutput {
+  selectedIds: string[];
+}
+
+/**
+ * Shared AI Action: Automatically recommend relevant products or services for projects/services
+ */
+export async function suggestRelatedEntitiesAction(
+  input: SuggestRelatedEntitiesInput
+): Promise<SuggestRelatedEntitiesOutput> {
+  await requireCmsAccess();
+
+  const title = input.title?.trim();
+  const candidates = (input.candidates || []).filter((c) => c && c.id != null && (c.label || c.name));
+  const maxSelect = Math.min(Math.max(input.maxSelect || 3, 1), 6);
+
+  if (!title || candidates.length === 0) {
+    return { selectedIds: [] };
+  }
+
+  // Pre-filter candidate list up to 60 items
+  const compactCandidates = candidates.slice(0, 60).map((c) => ({
+    id: String(c.id),
+    name: c.label || c.name || '',
+    desc: [c.subLabel, c.category].filter(Boolean).join(' · '),
+  }));
+
+  const isProduct = input.entityType === 'product';
+  const entityNameVi = isProduct ? 'phần mềm/sản phẩm công nghệ' : 'dịch vụ kỹ thuật/tư vấn';
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là chuyên gia giải pháp công nghệ kỹ thuật AEC, giao thông hạ tầng và chuyển đổi số của Tập đoàn CIC.
+NHIỆM VỤ: Dựa trên Tên bài viết/dự án/dịch vụ, Lĩnh vực và Thông tin mô tả, hãy chọn từ 1 đến ${maxSelect} "id" ${entityNameVi} phù hợp và liên quan nhất từ danh sách "candidates" được cung cấp.
+QUY TẮC BẮT BUỘC:
+- CHỈ ĐƯỢC CHỌN ID CÓ TRONG DANH SÁCH "candidates", TUYỆT ĐỐI KHÔNG TỰ BỊA RA ID MỚI.
+- Nếu không có mục nào thực sự phù hợp, trả về mảng rỗng [].
+- Định dạng JSON trả về: { "selectedIds": ["id1", "id2"] }`;
+
+  const userPrompt = JSON.stringify({
+    title,
+    context: input.context || '',
+    candidates: compactCandidates,
+  });
+
+  try {
+    const raw = await llm.generateStructured<{ selectedIds?: string[] }>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.1,
+    });
+
+    const validIds = (raw.selectedIds || []).filter((id) =>
+      compactCandidates.some((c) => c.id === String(id))
+    );
+
+    return { selectedIds: validIds.slice(0, maxSelect).map(String) };
+  } catch {
+    // Heuristic fallback: token matching
+    const fullText = (title + ' ' + (input.context || '')).toLowerCase();
+    const tokens = fullText
+      .split(/[\s\-_/.,+()]+/)
+      .filter((t) => t.length > 2);
+
+    const scored = compactCandidates
+      .map((c) => {
+        const cText = (c.name + ' ' + c.desc).toLowerCase();
+        let score = 0;
+        for (const tok of tokens) {
+          if (cText.includes(tok)) score += tok.length > 4 ? 2 : 1;
+        }
+        return { id: c.id, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, maxSelect);
+
+    return { selectedIds: scored.map((item) => item.id) };
+  }
+}
+
+
 

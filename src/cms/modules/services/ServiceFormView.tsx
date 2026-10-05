@@ -33,6 +33,7 @@ import {
   generateOutlineAction,
   extractTagsAction,
   translateFieldsAction,
+  suggestRelatedEntitiesAction,
 } from '@/features/ai-operator/server/shared-actions';
 import type { CmsLocale } from '../../data/CmsDataSource';
 
@@ -115,6 +116,24 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         locale: locale as 'vi' | 'en',
       });
 
+      let suggestedProducts = formData.related_product_ids || [];
+      if (suggestedProducts.length === 0 && productOptions.length > 0) {
+        try {
+          const pRes = await suggestRelatedEntitiesAction({
+            title: formData.title.trim(),
+            context: `${draft.summary} ${draft.tags.join(' ')}`,
+            entityType: 'product',
+            candidates: productOptions,
+            maxSelect: 3,
+          });
+          if (pRes.selectedIds.length > 0) {
+            suggestedProducts = pRes.selectedIds;
+          }
+        } catch {
+          // non-blocking
+        }
+      }
+
       setFormData((prev) => ({
         ...prev,
         slug: prev.slug || slugify(prev.title),
@@ -123,11 +142,12 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
         meta_description: prev.meta_description || draft.meta_description,
         meta_keywords: prev.meta_keywords || draft.meta_keywords,
         tags: prev.tags || draft.tags.join(', '),
+        related_product_ids: suggestedProducts,
       }));
 
       setIsDirty(true);
       setHasAiAutoFilled(true);
-      showToast('✦ Trợ lý AI đã tự động điền Tóm tắt, Bộ 3 SEO & Thẻ Tags!');
+      showToast('✦ Trợ lý AI đã tự động điền Tóm tắt, Bộ 3 SEO, Thẻ Tags & Sản phẩm áp dụng!');
     } catch (err: any) {
       showToast(err?.message || 'Không thể tự động điền với AI. Vui lòng thử lại.');
     } finally {
@@ -214,6 +234,31 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
     if (res.tags.length > 0) {
       handleChange('tags', res.tags.join(', '));
       showToast(`✦ Đã gợi ý ${res.tags.length} thẻ tags!`);
+    }
+  };
+
+  const handleAiRelatedProducts = async () => {
+    if (!formData.title.trim()) {
+      showToast('Vui lòng nhập Tên dịch vụ trước khi gợi ý sản phẩm.');
+      return;
+    }
+    try {
+      const res = await suggestRelatedEntitiesAction({
+        title: formData.title,
+        context: `${formData.summary} ${formData.tags || ''} ${formData.description}`,
+        entityType: 'product',
+        candidates: productOptions,
+        maxSelect: 4,
+      });
+      if (res.selectedIds.length > 0) {
+        const merged = Array.from(new Set([...(formData.related_product_ids || []), ...res.selectedIds]));
+        handleChange('related_product_ids', merged);
+        showToast(`✦ Đã gợi ý ${res.selectedIds.length} sản phẩm áp dụng phù hợp!`);
+      } else {
+        showToast('Không tìm thấy sản phẩm khớp với dịch vụ này.');
+      }
+    } catch {
+      showToast('Không thể gợi ý sản phẩm lúc này.');
     }
   };
 
@@ -650,7 +695,17 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               </div>
 
               <div id="field-related">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sản phẩm / Phần mềm liên quan áp dụng</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Sản phẩm / Phần mềm liên quan áp dụng
+                  </label>
+                  <AiMagicWand
+                    label="Gợi ý sản phẩm"
+                    title="AI tự động đề xuất phần mềm liên quan áp dụng cho dịch vụ"
+                    onTrigger={handleAiRelatedProducts}
+                    disabled={!formData.title.trim() || productOptions.length === 0}
+                  />
+                </div>
                 <SearchableMultiSelect
                   options={productOptions}
                   selectedIds={formData.related_product_ids ?? []}
