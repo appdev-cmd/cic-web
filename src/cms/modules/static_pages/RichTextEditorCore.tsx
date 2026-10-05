@@ -48,6 +48,8 @@ import {
   Undo,
   Widget,
   toWidget,
+  ButtonView,
+  IconMedia,
 } from 'ckeditor5';
 import type { Editor, FileLoader, PluginConstructor } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
@@ -292,6 +294,24 @@ class CmsReferencePlugin extends Plugin {
   }
 }
 
+class CmsVideoToolbarPlugin extends Plugin {
+  init() {
+    const editor = this.editor;
+    editor.ui.componentFactory.add('insertCmsVideo', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Chèn video (YouTube, Vimeo, iframe)',
+        icon: IconMedia,
+        tooltip: true,
+      });
+      button.on('execute', () => {
+        editor.fire('cms:openVideoModal');
+      });
+      return button;
+    });
+  }
+}
+
 const editorPlugins: PluginConstructor<Editor>[] = [
   Essentials, Paragraph, Heading, Autoformat, Undo,
   Bold, Italic, Underline, Strikethrough, RemoveFormat,
@@ -300,7 +320,7 @@ const editorPlugins: PluginConstructor<Editor>[] = [
   List, ListProperties, Link, PasteFromOffice,
   Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, ImageInsert, ImageResize, LinkImage, AutoImage,
   Table, TableToolbar, TableCaption, TableProperties, TableCellProperties, TableColumnResize,
-  MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin, CmsMediaEmbedPlugin,
+  MediaEmbed, SourceEditing, GeneralHtmlSupport, CmsReferencePlugin, CmsMediaEmbedPlugin, CmsVideoToolbarPlugin,
 ];
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, onBlur, minHeight = '280px', allowedEmbeds = [] }) => {
@@ -421,7 +441,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         'bold', 'italic', 'underline', 'strikethrough', 'removeFormat', '|',
         'fontColor', 'fontBackgroundColor', '|',
         'alignment', 'bulletedList', 'numberedList', 'outdent', 'indent', '|',
-        'link', 'uploadImage', 'insertImage', 'mediaEmbed', 'insertTable', 'blockQuote',
+        'link', 'uploadImage', 'insertImage',
+        ...(allowedEmbeds.includes('video') ? ['insertCmsVideo'] : []),
+        'insertTable', 'blockQuote',
       ],
     },
     heading: {
@@ -452,7 +474,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
       ],
     },
     placeholder: 'Nhập nội dung tại đây…',
-  }), []);
+  }), [allowedEmbeds]);
 
   const insertReference = (attributes: CmsReferenceAttributes) => {
     const editor = editorRef.current;
@@ -515,6 +537,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         data={editorData}
         onReady={(editor) => {
           editorRef.current = editor;
+          editor.on('cms:openVideoModal', () => {
+            setVideoModalOpen(true);
+            setVideoError(null);
+          });
           const root = editor.editing.view.document.getRoot();
           if (root) {
             editor.editing.view.change((writer) => {
@@ -543,23 +569,42 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         }}
       />
 
-      {allowedEmbeds.length > 0 && <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
-        {allowedEmbeds.includes('video') && (
-        <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <button type="button" onClick={() => { setVideoModalOpen(true); setVideoError(null); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-xs"><Video className="h-4 w-4" />Chèn Video</button>
+      {(allowedEmbeds.includes('cta') || allowedEmbeds.includes('form')) && (
+        <div className="flex flex-wrap gap-2 border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+          {allowedEmbeds.includes('cta') && (
+            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCtaId((current) => current || activeCtas[0]?.id || '');
+                  setReferenceAlignment('center');
+                  setReferencePicker('cta');
+                }}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white hover:bg-orange-700 transition"
+              >
+                <Megaphone className="h-4 w-4" />
+                Chèn CTA
+              </button>
+            </div>
+          )}
+          {allowedEmbeds.includes('form') && (
+            <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedFormId((current) => current || activeForms[0]?.id || '');
+                  setReferenceAlignment('full');
+                  setReferencePicker('form');
+                }}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 transition"
+              >
+                <FileInput className="h-4 w-4" />
+                Chèn Form
+              </button>
+            </div>
+          )}
         </div>
-        )}
-        {allowedEmbeds.includes('cta') && (
-        <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <button type="button" onClick={() => { setSelectedCtaId((current) => current || activeCtas[0]?.id || ''); setReferenceAlignment('center'); setReferencePicker('cta'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-3 py-2 text-xs font-bold text-white"><Megaphone className="h-4 w-4" />Chèn CTA</button>
-        </div>
-        )}
-        {allowedEmbeds.includes('form') && (
-        <div className="flex min-w-0 flex-wrap gap-2 sm:flex-nowrap">
-          <button type="button" onClick={() => { setSelectedFormId((current) => current || activeForms[0]?.id || ''); setReferenceAlignment('full'); setReferencePicker('form'); }} className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-bold text-white dark:bg-slate-600"><FileInput className="h-4 w-4" />Chèn Form</button>
-        </div>
-        )}
-      </div>}
+      )}
 
       {/* Modal Chèn Video / Đa phương tiện theo chuẩn tiếng Việt */}
       {videoModalOpen && typeof document !== 'undefined' && createPortal(

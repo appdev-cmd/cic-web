@@ -740,7 +740,7 @@ export const ServiceFormView: React.FC<ServiceFormViewProps> = ({
               <RichTextEditor
                 value={formData.description}
                 onChange={(value) => handleChange('description', value)}
-                allowedEmbeds={['cta', 'form']}
+                allowedEmbeds={['cta', 'form', 'video']}
                 minHeight="360px"
               />
             </div>

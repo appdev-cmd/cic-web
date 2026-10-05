@@ -831,7 +831,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               value={content}
               onChange={setContent}
               minHeight="340px"
-              allowedEmbeds={['cta', 'form']}
+              allowedEmbeds={['cta', 'form', 'video']}
             />
           </section>
 

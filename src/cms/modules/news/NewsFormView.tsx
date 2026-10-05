@@ -799,7 +799,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                 disabled={!title.trim()}
               />
             </div>
-            <RichTextEditor value={content} onChange={setContent} minHeight="360px" allowedEmbeds={['cta', 'form']} />
+            <RichTextEditor value={content} onChange={setContent} minHeight="360px" allowedEmbeds={['cta', 'form', 'video']} />
           </section>
 
           {/* Section 3: Nội dung liên quan */}
