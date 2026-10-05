@@ -485,20 +485,21 @@ export const AboutView = ({ activeTab, setActiveTab, onNavigateToContact, capaci
                   <div className="w-full relative z-10">
                     <SectionHeader
                       title={textFrom(overviewConfig, 'title', 'Tổng quan doanh nghiệp')}
+                      className="!mb-4"
                       titleProps={{
                         ...bindElement<HTMLHeadingElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'title', semantic: 'text', ownership: 'section-config', editable: true })),
                         'data-page-builder-config-path': JSON.stringify(['title']),
                       } as any}
                     />
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                      <div>
-                        {displayedOverviewParagraphs.map((paragraph, index) => <p key={index} data-page-builder-config-path={JSON.stringify(['paragraphs', index])} className="text-sm md:text-base text-slate-600 mb-4 last:mb-0 leading-relaxed font-normal text-justify">{paragraph}</p>)}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                      <div className="space-y-3.5">
+                        {displayedOverviewParagraphs.map((paragraph, index) => <p key={index} data-page-builder-config-path={JSON.stringify(['paragraphs', index])} className="text-sm md:text-base text-slate-600 leading-relaxed font-normal text-justify">{paragraph}</p>)}
                       </div>
                       <div 
                         {...bindElement<HTMLDivElement>(bindingRegistry, createElementBinding({ sectionKey: 'about.overview', elementPath: 'videoUrl', semantic: 'text', ownership: 'section-config', editable: true }))}
                         data-page-builder-video-path={JSON.stringify(['videoUrl'])} 
                         data-page-builder-video-url={textFrom(overviewConfig, 'videoUrl', 'https://www.youtube.com/watch?v=hdLFK_09-tU?start=448')}
-                        className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black"
+                        className="relative aspect-video rounded-[10px] overflow-hidden shadow-xl border-4 border-slate-100 bg-black self-start"
                       >
                         <iframe 
                           className="w-full h-full scale-[1.03] origin-center"

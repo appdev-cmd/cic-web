@@ -98,8 +98,9 @@ async function run() {
     title: 'TỔNG QUAN DOANH NGHIỆP',
     videoUrl: 'https://www.youtube.com/watch?v=hdLFK_09-tU&t=448s',
     paragraphs: [
+      'Công ty Cổ phần Công nghệ và Tư vấn CIC tiền thân là Trung tâm tin học thuộc Bộ Xây dựng thành lập vào ngày 27/11/1990, bắt đầu hoạt động với chức năng là cơ quan tham mưu tin học thuộc Bộ Xây dựng nhằm phục vụ yêu cầu ứng dụng và phát triển Công nghệ thông tin trong ngành.',
+      'Hiện nay, chúng tôi là thành viên của VC Group, tổ hợp hàng đầu về tư vấn xây dựng, thiết bị và công nghệ tại Việt Nam.',
       'Sau hơn 35 năm phát triển, CIC đã xây dựng được đội ngũ quản lý vững vàng cùng tập thể nhân viên có trình độ chuyên môn cao, sáng tạo và tận tâm; cung cấp sản phẩm phần mềm, thiết bị và dịch vụ công nghệ có tính ứng dụng cao cho ngành Xây dựng.',
-      'CIC là đối tác tin cậy của hơn 5.000 khách hàng trong và ngoài nước, từ các cơ quan quản lý nhà nước, viện nghiên cứu, trường đại học đến các tập đoàn, doanh nghiệp xây dựng hàng đầu.',
     ],
   };
 
