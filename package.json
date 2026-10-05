@@ -15,6 +15,7 @@
     "typecheck": "npm run typecheck:foundation && npm run typecheck:legacy",
     "test:security": "node --import tsx --conditions=react-server scripts/verify-security-remediation.ts",
     "test:ai-gateway": "node scripts/test-ai-gateway.mjs",
+    "deploy:ai-gateway": "npx supabase functions deploy gemini-proxy --project-ref tjkytlstopieiqqiiisy --no-verify-jwt",
     "test:e2e": "node --max-old-space-size=4096 scripts/e2e-full-system-test.mjs",
     "typecheck:foundation": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
     "typecheck:legacy": "tsc --noEmit -p tsconfig.legacy.json",
