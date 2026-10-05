@@ -88,9 +88,9 @@ async function run() {
 
   // ABOUT VI SEED
   const aboutHeroConfig = {
-    badge: 'Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam',
+    badge: 'Về chúng tôi',
     title: 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ',
-    subtitle: 'Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam',
+    subtitle: 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.',
     backgroundImageId: '/35nam_cic_1.JPG',
   };
 
@@ -190,7 +190,7 @@ async function run() {
 
   // CAPACITY & EXPERIENCE VI SEED
   const capHeroConfig = {
-    badge: 'Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam',
+    badge: 'Năng lực & Kinh nghiệm',
     title: 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ',
     subtitle: 'Năng lực & Kinh nghiệm triển khai thực tế của CIC',
     backgroundImageId: '/35nam_cic_1.JPG',

@@ -37,7 +37,6 @@ INSERT INTO cic_menus_items (id, group_id, parent_id, name, link, target, orderi
   (3, 1, 2, 'Giới thiệu chung', '/gioi-thieu', '_self', 1, 1, true, null, true, true),
   (4, 1, 2, 'Cơ cấu tổ chức', '/gioi-thieu/co-cau-to-chuc', '_self', 2, 1, true, null, true, true),
   (5, 1, 2, 'Năng lực & Kinh nghiệm', '/gioi-thieu/nang-luc-kinh-nghiem', '_self', 3, 1, true, null, true, true),
-  (6, 1, 2, 'Hồ sơ năng lực CIC', 'https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf', '_blank', 4, 1, true, null, true, true),
   (7, 1, null, 'Sản phẩm', '/products', '_self', 3, 0, true, 'Package', true, true),
   (8, 1, null, 'Dịch vụ', '/services', '_self', 4, 0, true, 'Layers', true, true),
   (9, 1, 8, 'Tư vấn BIM', '/services/tu-van-bim', '_self', 1, 1, true, null, true, true),

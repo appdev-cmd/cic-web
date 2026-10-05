@@ -77,8 +77,7 @@ async function seedCanonicalMenu() {
       VALUES
         (${g1VI.id}, ${aboutVI.id}, 'Giới thiệu chung', '/gioi-thieu', '_self', 1, 1, true, null, true),
         (${g1VI.id}, ${aboutVI.id}, 'Cơ cấu tổ chức', '/gioi-thieu/co-cau-to-chuc', '_self', 2, 1, true, null, true),
-        (${g1VI.id}, ${aboutVI.id}, 'Năng lực & Kinh nghiệm', '/gioi-thieu/nang-luc-kinh-nghiem', '_self', 3, 1, true, null, true),
-        (${g1VI.id}, ${aboutVI.id}, 'Hồ sơ năng lực CIC', 'https://www.cic.com.vn/flipbooks/index.html?pdf=CICProfile2024Final.pdf', '_blank', 4, 1, true, null, true)
+        (${g1VI.id}, ${aboutVI.id}, 'Năng lực & Kinh nghiệm', '/gioi-thieu/nang-luc-kinh-nghiem', '_self', 3, 1, true, null, true)
     `;
 
     await sql`
