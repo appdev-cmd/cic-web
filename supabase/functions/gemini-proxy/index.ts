@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
     let model = 'gemini-2.5-flash';
     let fallbackModel = 'gemini-flash-lite-latest';
 
-    if (opConfig) {
+    if (opConfig && opName !== 'raw.generate') {
       model = opConfig.model;
       fallbackModel = opConfig.fallbackModel;
       temperature = opConfig.temperature;
@@ -125,9 +125,9 @@ Deno.serve(async (req: Request) => {
       systemInstruction = opConfig.systemInstruction;
       userPrompt = opConfig.buildPrompt(payload.input || {});
     } else {
-      // Fallback to raw prompts if provided directly
-      systemInstruction = payload.systemPrompt || '';
-      userPrompt = payload.userPrompt || '';
+      // Direct raw generate
+      systemInstruction = payload.systemPrompt || (payload.input?.systemPrompt as string) || '';
+      userPrompt = payload.userPrompt || (payload.input?.userPrompt as string) || '';
       if (typeof payload.temperature === 'number') temperature = payload.temperature;
       if (typeof payload.maxTokens === 'number') maxOutputTokens = payload.maxTokens;
     }

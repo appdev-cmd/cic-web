@@ -305,7 +305,12 @@ export class SupabaseAiGatewayProvider implements LlmProvider {
 
   constructor() {
     this.supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/$/, '');
-    this.anonKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+    this.anonKey = (
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      ''
+    ).trim();
     const timeoutParsed = Number(process.env.AI_OPERATOR_TIMEOUT_MS);
     this.timeoutMs = Number.isFinite(timeoutParsed) && timeoutParsed > 0 ? timeoutParsed : 60000;
   }
