@@ -31,7 +31,8 @@ function GuardedModule({ authorized, ready, message, children }: Readonly<{ auth
   return children;
 }
 
-export async function renderCmsModuleContent(module: CmsModuleKey, path = '/cms/dashboard', customModuleContent?: ReactNode) {
+export async function renderCmsModuleContent(module: CmsModuleKey, _path = '/cms/dashboard', customModuleContent?: ReactNode) {
+  void _path;
   if (customModuleContent) {
     return customModuleContent;
   }

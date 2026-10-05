@@ -35,7 +35,7 @@ export function WebsiteShell({
   const [isFloatingExpanded, setIsFloatingExpanded] = useState(false);
 
   const locale: Locale = pathname?.startsWith('/en') ? 'en' : 'vi';
-  const settings = (locale === 'en' ? settingsMap?.en : settingsMap?.vi) ?? initialSettings ?? settingsMap?.vi!;
+  const settings = (locale === 'en' ? settingsMap?.en : settingsMap?.vi) ?? initialSettings ?? settingsMap?.vi;
   const navigation = (locale === 'en' ? navigationMap?.en : navigationMap?.vi) ?? initialNavigation ?? navigationMap?.vi;
 
   const navigate = (href: string) => {
@@ -101,7 +101,7 @@ export function WebsiteShell({
                   icon: <Facebook size={22} className="text-white" />, 
                   label: locale === 'en' ? 'CIC Facebook Official' : 'Fanpage Facebook CIC', 
                   color: 'bg-[#1877F2] hover:bg-[#1566d2] shadow-blue-600/20', 
-                  link: settings.values.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN'
+                  link: settings?.values?.facebook || 'https://www.facebook.com/CICTechnologyandConsultancyVN'
                 },
                 { 
                   id: 'linkedin',
@@ -219,8 +219,8 @@ export function WebsiteShell({
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         hotline={hotline}
-        email={settings.values.public_email || settings.values.admin_email || 'info@cic.com.vn'}
-        address={settings.branches.find((b) => b.isHeadOffice)?.address || settings.values.address || (locale === 'en' ? '4th Floor, VG Building, 235 Nguyen Trai, Thanh Xuan, Hanoi, Vietnam' : 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội')}
+        email={settings?.values?.public_email || settings?.values?.admin_email || 'info@cic.com.vn'}
+        address={settings?.branches?.find((b) => b.isHeadOffice)?.address || settings?.values?.address || (locale === 'en' ? '4th Floor, VG Building, 235 Nguyen Trai, Thanh Xuan, Hanoi, Vietnam' : 'Tầng 4, Tòa nhà VG Building, 235 Nguyễn Trãi, Thanh Xuân, Hà Nội')}
       />
       </div>
     </I18nProvider>

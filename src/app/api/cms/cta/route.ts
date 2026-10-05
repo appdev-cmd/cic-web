@@ -3,14 +3,14 @@ import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { normalizeServerError } from '@/server/errors';
 import { listCtas } from '@/features/cta/server/queries';
 import { createCta } from '@/features/cta/server/mutations';
-import type { CtaStatus, CtaWorkspace } from '@/features/cta/types';
+import type { ActionType, CtaFilterParams, CtaStatus, CtaWorkspace } from '@/features/cta/types';
 
 function errorResponse(error: unknown) {
   const normalized = normalizeServerError(error);
   if (normalized.code === 'UNAUTHENTICATED') return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
   if (normalized.code === 'FORBIDDEN') return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
   console.error('[API /api/cms/cta Error]', error);
-  return NextResponse.json({ error: (error as any)?.message || 'Internal Server Error' }, { status: 500 });
+  return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
 }
 
 export async function GET(request: NextRequest) {
@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const workspace = (searchParams.get('workspace') as CtaWorkspace) || 'vi';
     const status = (searchParams.get('status') as CtaStatus) || undefined;
-    const actionType = (searchParams.get('actionType') as any) || undefined;
+    const actionType = (searchParams.get('actionType') as ActionType) || undefined;
     const search = searchParams.get('search') || undefined;
     const dateFrom = searchParams.get('dateFrom') || undefined;
     const dateTo = searchParams.get('dateTo') || undefined;
-    const sortBy = (searchParams.get('sortBy') as any) || undefined;
+    const sortBy = (searchParams.get('sortBy') as CtaFilterParams['sortBy']) || undefined;
 
     const ctas = await listCtas({
       workspace,

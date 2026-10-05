@@ -3,7 +3,6 @@ import postgres, { type Sql } from 'postgres';
 import { getServerEnv } from '@/server/config/env';
 
 declare global {
-  // eslint-disable-next-line no-var
   var __postgresClient: Sql | undefined;
 }
 

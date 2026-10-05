@@ -3,14 +3,14 @@ import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { normalizeServerError } from '@/server/errors';
 import { listForms } from '@/features/forms/server/queries';
 import { createForm } from '@/features/forms/server/mutations';
-import type { FormStatus, FormWorkspace } from '@/features/forms/types';
+import type { FormFilterParams, FormStatus, FormWorkspace } from '@/features/forms/types';
 
 function errorResponse(error: unknown) {
   const normalized = normalizeServerError(error);
   if (normalized.code === 'UNAUTHENTICATED') return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
   if (normalized.code === 'FORBIDDEN') return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
   console.error('[API /api/cms/forms Error]', error);
-  return NextResponse.json({ error: (error as any)?.message || 'Internal Server Error' }, { status: 500 });
+  return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
 }
 
 export async function GET(request: NextRequest) {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || undefined;
     const dateFrom = searchParams.get('dateFrom') || undefined;
     const dateTo = searchParams.get('dateTo') || undefined;
-    const sortBy = (searchParams.get('sortBy') as any) || undefined;
+    const sortBy = (searchParams.get('sortBy') as FormFilterParams['sortBy']) || undefined;
 
     const forms = await listForms({
       workspace,

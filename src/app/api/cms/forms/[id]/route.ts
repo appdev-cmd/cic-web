@@ -10,7 +10,7 @@ function errorResponse(error: unknown) {
   if (normalized.code === 'UNAUTHENTICATED') return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
   if (normalized.code === 'FORBIDDEN') return NextResponse.json({ error: 'Permission denied.' }, { status: 403 });
   console.error('[API /api/cms/forms/[id] Error]', error);
-  return NextResponse.json({ error: (error as any)?.message || 'Internal Server Error' }, { status: 500 });
+  return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
 }
 
 export async function GET(

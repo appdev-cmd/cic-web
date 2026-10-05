@@ -17,7 +17,10 @@ export async function GET(
     }
 
     return NextResponse.json(cta);
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Lỗi nạp CTA.' }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Lỗi nạp CTA.' },
+      { status: 500 }
+    );
   }
 }

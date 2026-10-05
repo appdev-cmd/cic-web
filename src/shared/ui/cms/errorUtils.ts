@@ -8,7 +8,14 @@ export function sanitizeCmsErrorMessage(
   fallback = 'Thao tác không thành công. Vui lòng thử lại sau.'
 ): string {
   if (!error) return fallback;
-  const msg = typeof error === 'string' ? error : (error as any)?.message || '';
+  const msg =
+    typeof error === 'string'
+      ? error
+      : error instanceof Error
+      ? error.message
+      : typeof error === 'object' && error !== null && 'message' in error && typeof (error as { message: unknown }).message === 'string'
+      ? (error as { message: string }).message
+      : '';
   if (!msg) return fallback;
 
   const lower = msg.toLowerCase();

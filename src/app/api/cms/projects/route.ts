@@ -1,7 +1,48 @@
 import { NextResponse } from 'next/server';
 import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
-import { AppError, normalizeServerError } from '@/server/errors';
+import { normalizeServerError } from '@/server/errors';
+
+interface ProjectRow {
+  id: number | string;
+  title: string;
+  alias: string;
+  tagline?: string | null;
+  summary?: string | null;
+  content?: string | null;
+  sector?: string | null;
+  solution?: string | null;
+  technologies?: unknown;
+  customer_name?: string | null;
+  location?: string | null;
+  start_year?: number | null;
+  end_year?: number | null;
+  is_ongoing?: boolean | null;
+  image?: string | null;
+  is_featured?: boolean | null;
+  published?: boolean | null;
+  ordering?: number | null;
+  seo_title?: string | null;
+  seo_keyword?: string | null;
+  seo_description?: string | null;
+  created_time?: string | Date | null;
+  updated_time?: string | Date | null;
+}
+
+interface ProductOptionRow {
+  id: number | string;
+  label: string;
+  brand?: string | null;
+  application?: string | null;
+  image?: string | null;
+}
+
+interface ServiceOptionRow {
+  id: number | string;
+  label: string;
+  category?: string | null;
+  image?: string | null;
+}
 
 function errorResponse(error: unknown) {
   const normalized = normalizeServerError(error);
@@ -19,7 +60,7 @@ export async function GET() {
     const sql = getPostgresClient();
 
     const [projects, productRels, serviceRels, productOptions, serviceOptions] = await Promise.all([
-      sql`
+      sql<ProjectRow[]>`
         SELECT id, title, alias, tagline, summary, content, image, sector, solution,
                technologies, customer_name, location, start_year, end_year, is_ongoing,
                is_featured, published, ordering, seo_title, seo_keyword, seo_description,
@@ -29,7 +70,7 @@ export async function GET() {
       `,
       sql`SELECT project_id, product_id FROM cic_projects_products_rel ORDER BY ordering ASC`,
       sql`SELECT project_id, service_id FROM cic_projects_services_rel ORDER BY ordering ASC`,
-      sql`
+      sql<ProductOptionRow[]>`
         SELECT p.id, p.name as label, p.image, m.name as brand, a.name as application
         FROM cic_products p
         LEFT JOIN cic_manufactories m ON m.id::text = p.manufactory
@@ -38,7 +79,7 @@ export async function GET() {
         WHERE p.published = true
         ORDER BY p.ordering ASC, p.id ASC
       `,
-      sql`
+      sql<ServiceOptionRow[]>`
         SELECT id, title as label, image, category_name as category
         FROM cic_services
         WHERE published::text IN ('1', 'true')
@@ -60,7 +101,7 @@ export async function GET() {
       serviceRelMap.get(pId)!.push(String(r.service_id));
     }
 
-    const mappedProjects = projects.map((row: any) => {
+    const mappedProjects = (projects as ProjectRow[]).map((row) => {
       const numId = Number(row.id);
       return {
         id: String(row.id),
@@ -91,14 +132,14 @@ export async function GET() {
       };
     });
 
-    const mappedProducts = productOptions.map((p: any) => ({
+    const mappedProducts = (productOptions as ProductOptionRow[]).map((p) => ({
       id: String(p.id),
       label: p.label,
       subLabel: [p.brand, p.application].filter(Boolean).join(' · '),
       image: p.image,
     }));
 
-    const mappedServices = serviceOptions.map((s: any) => ({
+    const mappedServices = (serviceOptions as ServiceOptionRow[]).map((s) => ({
       id: String(s.id),
       label: s.label,
       subLabel: s.category || 'Dịch vụ CIC',
