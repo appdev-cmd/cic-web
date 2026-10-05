@@ -40,7 +40,7 @@ export const ProductSidebarMedia: React.FC<ProductSidebarMediaProps> = ({
         Media
       </div>
       <div className="space-y-4">
-        <div>
+        <div id="field-image">
           <label className={labelClass}>Ảnh đại diện</label>
           {image && (
             <img

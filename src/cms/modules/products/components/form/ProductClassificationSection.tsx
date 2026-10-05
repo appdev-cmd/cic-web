@@ -62,8 +62,10 @@ export const ProductClassificationSection: React.FC<ProductClassificationSection
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className={labelClass}>Alias (Đường dẫn tĩnh)</label>
+          <label className={labelClass} htmlFor="field-alias">Alias (Đường dẫn tĩnh)</label>
           <input
+            id="field-alias"
+            name="alias"
             className={inputClass}
             value={alias}
             onChange={(e) => {

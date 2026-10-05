@@ -406,6 +406,40 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
     }
   };
 
+  const handleFieldFocus = (fieldKey: string) => {
+    setTimeout(() => {
+      const el =
+        document.getElementById(`field-${fieldKey}`) ||
+        document.querySelector(`[name="${fieldKey}"]`) ||
+        document.getElementById(`field-${fieldKey}-input`);
+
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const highlightTarget = (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea'
+          ? el
+          : el.closest('section') || el) as HTMLElement;
+
+        highlightTarget.classList.add('ring-2', 'ring-orange-500', 'ring-offset-2', 'dark:ring-offset-slate-900', 'transition-all', 'duration-300');
+        setTimeout(() => {
+          highlightTarget.classList.remove('ring-2', 'ring-orange-500', 'ring-offset-2', 'dark:ring-offset-slate-900');
+        }, 2200);
+
+        const focusable =
+          el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement
+            ? el
+            : el.querySelector<HTMLElement>('input, textarea, button, [tabindex="0"]');
+
+        if (focusable) {
+          focusable.focus();
+        } else if (el instanceof HTMLElement) {
+          el.setAttribute('tabindex', '-1');
+          el.focus();
+        }
+      }
+    }, 150);
+  };
+
   return (
     <div className="space-y-5 pb-16">
       {/* Header Sticky Action Bar */}
@@ -571,8 +605,10 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
             {/* 1. Các trường neo cốt lõi */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className={labelClass}>Tiêu đề sự kiện *</label>
+                <label className={labelClass} htmlFor="field-title">Tiêu đề sự kiện *</label>
                 <input
+                  id="field-title"
+                  name="title"
                   className={inputClass}
                   value={title}
                   placeholder="Ví dụ: Hội thảo: Đột Phá Ứng Dụng AI Trong Vận Hành Cảng Biển..."
@@ -581,8 +617,10 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               </div>
 
               <div>
-                <label className={labelClass}>Thời gian bắt đầu *</label>
+                <label className={labelClass} htmlFor="field-time_event">Thời gian bắt đầu *</label>
                 <input
+                  id="field-time_event"
+                  name="time_event"
                   type="datetime-local"
                   className={inputClass}
                   value={timeEvent}
@@ -591,8 +629,10 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               </div>
 
               <div>
-                <label className={labelClass}>Thời gian kết thúc *</label>
+                <label className={labelClass} htmlFor="field-end_time">Thời gian kết thúc *</label>
                 <input
+                  id="field-end_time"
+                  name="end_time"
                   type="datetime-local"
                   min={timeEvent}
                   className={inputClass}
@@ -602,8 +642,10 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
               </div>
 
               <div>
-                <label className={labelClass}>Địa điểm / Hình thức tổ chức</label>
+                <label className={labelClass} htmlFor="field-place">Địa điểm / Hình thức tổ chức</label>
                 <input
+                  id="field-place"
+                  name="place"
                   className={inputClass}
                   value={place}
                   placeholder="Ví dụ: Online qua Zoom hoặc Khách sạn Daewoo, Hà Nội"
@@ -671,6 +713,8 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
                   />
                 </div>
                 <textarea
+                  id="field-summary"
+                  name="summary"
                   rows={3}
                   className={inputClass}
                   value={summary}
@@ -749,7 +793,7 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
           </section>
 
           {/* Section 2: Nội dung & Agenda */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <section id="field-content" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 font-black dark:text-white">
                 <FileText className="h-5 w-5 text-orange-600" />
@@ -907,25 +951,33 @@ export const EventsFormView: React.FC<EventsFormViewProps> = ({
         {/* Aside Sidebar */}
         <aside className="space-y-5">
           <ContentQualityPanel
+            title="Trạng thái xuất bản"
+            onFieldFocus={handleFieldFocus}
             checks={[
-              { label: 'Có tiêu đề sự kiện', passed: Boolean(title.trim()) },
-              { label: 'Có thời gian bắt đầu', passed: Boolean(timeEvent) },
+              { label: 'Tiêu đề sự kiện', passed: Boolean(title.trim()), required: true, fieldKey: 'title', group: 'content' },
+              { label: 'Thời gian bắt đầu', passed: Boolean(timeEvent), required: true, fieldKey: 'time_event', group: 'business' },
               {
-                label: 'Có thời gian kết thúc hợp lệ',
+                label: 'Thời gian kết thúc hợp lệ',
                 passed: Boolean(endTime) && new Date(endTime).getTime() > new Date(timeEvent).getTime(),
+                required: true,
+                fieldKey: 'end_time',
+                group: 'business',
               },
-              { label: 'Có địa điểm / hình thức', passed: Boolean(place.trim()) },
-              { label: 'Có tóm tắt giới thiệu', passed: Boolean(summary.trim()) },
+              { label: 'Địa điểm / hình thức', passed: Boolean(place.trim()), required: true, fieldKey: 'place', group: 'content' },
+              { label: 'Tóm tắt giới thiệu', passed: Boolean(summary.trim()), required: true, fieldKey: 'summary', group: 'content' },
               {
-                label: 'Có nội dung sự kiện',
+                label: 'Nội dung sự kiện',
                 passed: content.replace(/<[^>]+>/g, '').trim().length > 30,
+                required: true,
+                fieldKey: 'content',
+                group: 'content',
               },
-              { label: 'Có hình ảnh đại diện', passed: Boolean(image) },
+              { label: 'Hình ảnh đại diện', passed: Boolean(image), required: true, fieldKey: 'image', group: 'media' },
             ]}
           />
 
           {/* Media & Tags */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <section id="field-image" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
               <ImageIcon className="h-5 w-5 text-orange-600" />
               Media & Thẻ Tags

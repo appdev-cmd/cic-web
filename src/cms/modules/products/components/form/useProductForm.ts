@@ -572,12 +572,37 @@ export function useProductForm({
     setFormMode('all');
     setTimeout(() => {
       const el =
-        document.getElementById(`field-${fieldKey}`) || document.querySelector(`[name="${fieldKey}"]`);
+        document.getElementById(`field-${fieldKey}`) ||
+        document.querySelector(`[name="${fieldKey}"]`) ||
+        document.getElementById(`field-${fieldKey}-input`);
+
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        (el as HTMLElement).focus();
+
+        // Highlight effect to draw immediate visual attention
+        const highlightTarget = (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea'
+          ? el
+          : el.closest('section') || el) as HTMLElement;
+
+        highlightTarget.classList.add('ring-2', 'ring-orange-500', 'ring-offset-2', 'dark:ring-offset-slate-900', 'transition-all', 'duration-300');
+        setTimeout(() => {
+          highlightTarget.classList.remove('ring-2', 'ring-orange-500', 'ring-offset-2', 'dark:ring-offset-slate-900');
+        }, 2200);
+
+        // Find the most appropriate interactive element to focus
+        const focusable =
+          el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement
+            ? el
+            : el.querySelector<HTMLElement>('input, textarea, button, [tabindex="0"]');
+
+        if (focusable) {
+          focusable.focus();
+        } else if (el instanceof HTMLElement) {
+          el.setAttribute('tabindex', '-1');
+          el.focus();
+        }
       }
-    }, 100);
+    }, 150);
   };
 
   const isTouched = (fName: string) => Boolean(fieldOrigins[fName]);

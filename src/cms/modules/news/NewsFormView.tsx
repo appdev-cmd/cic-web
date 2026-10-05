@@ -461,6 +461,40 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
     }
   };
 
+  const handleFieldFocus = (fieldKey: string) => {
+    setTimeout(() => {
+      const el =
+        document.getElementById(`field-${fieldKey}`) ||
+        document.querySelector(`[name="${fieldKey}"]`) ||
+        document.getElementById(`field-${fieldKey}-input`);
+
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const highlightTarget = (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea'
+          ? el
+          : el.closest('section') || el) as HTMLElement;
+
+        highlightTarget.classList.add('ring-2', 'ring-orange-500', 'ring-offset-2', 'dark:ring-offset-slate-900', 'transition-all', 'duration-300');
+        setTimeout(() => {
+          highlightTarget.classList.remove('ring-2', 'ring-orange-500', 'ring-offset-2', 'dark:ring-offset-slate-900');
+        }, 2200);
+
+        const focusable =
+          el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLButtonElement
+            ? el
+            : el.querySelector<HTMLElement>('input, textarea, button, [tabindex="0"]');
+
+        if (focusable) {
+          focusable.focus();
+        } else if (el instanceof HTMLElement) {
+          el.setAttribute('tabindex', '-1');
+          el.focus();
+        }
+      }
+    }, 150);
+  };
+
   return (
     <div className="space-y-5 pb-16">
       {/* Header Sticky Action Bar */}
@@ -624,8 +658,10 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
             {/* 1. Tiêu đề, Danh mục và Tóm tắt Sapo cốt lõi */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className={labelClass}>Tiêu đề tin *</label>
+                <label className={labelClass} htmlFor="field-title">Tiêu đề tin *</label>
                 <input
+                  id="field-title"
+                  name="title"
                   className={inputClass}
                   value={title}
                   placeholder="Nhập tiêu đề bài viết tin tức hoặc sự kiện..."
@@ -636,7 +672,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   }}
                 />
               </div>
-              <div className="md:col-span-2">
+              <div id="field-category" className="md:col-span-2">
                 <label className={labelClass}>Danh mục tin tức *</label>
                 <SearchableSelect
                   options={categories.map((item) => ({ id: item.id, label: item.name }))}
@@ -648,7 +684,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
               <div className="md:col-span-2">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300" htmlFor="field-summary">
                       Tóm tắt bài viết (Sapo)
                     </label>
                     <span className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">
@@ -663,6 +699,8 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
                   />
                 </div>
                 <textarea
+                  id="field-summary"
+                  name="summary"
                   rows={3}
                   className={inputClass}
                   value={summary}
@@ -751,7 +789,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           </section>
 
           {/* Section 2: Nội dung chi tiết */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <section id="field-content" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
               <label className={labelClass}>Nội dung bài viết *</label>
               <AiMagicWand
@@ -815,19 +853,20 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
         <aside className="space-y-5">
           {/* Quality Panel */}
           <ContentQualityPanel
-            title="Kiểm tra chất lượng bài viết"
+            title="Trạng thái xuất bản"
+            onFieldFocus={handleFieldFocus}
             checks={[
-              { label: 'Có tiêu đề tin', passed: Boolean(title.trim()) },
-              { label: 'Đã chọn danh mục', passed: Boolean(categoryId) },
-              { label: 'Có tóm tắt', passed: Boolean(summary.trim()) },
-              { label: 'Có nội dung bài viết', passed: content.replace(/<[^>]+>/g, '').trim().length > 30 },
-              { label: 'Có hình ảnh đại diện', passed: Boolean(image) },
-              { label: 'Có cấu hình SEO', passed: Boolean(seoTitle.trim() && seoDescription.trim()) },
+              { label: 'Tiêu đề tin tức', passed: Boolean(title.trim()), required: true, fieldKey: 'title', group: 'content' },
+              { label: 'Đã chọn danh mục', passed: Boolean(categoryId), required: true, fieldKey: 'category', group: 'classification' },
+              { label: 'Có tóm tắt (Sapo)', passed: Boolean(summary.trim()), required: true, fieldKey: 'summary', group: 'content' },
+              { label: 'Có nội dung bài viết', passed: content.replace(/<[^>]+>/g, '').trim().length > 30, required: true, fieldKey: 'content', group: 'content' },
+              { label: 'Hình ảnh đại diện', passed: Boolean(image), required: true, fieldKey: 'image', group: 'media' },
+              { label: 'Cấu hình SEO (Title & Description)', passed: Boolean(seoTitle.trim() && seoDescription.trim()), required: false, fieldKey: 'seo', group: 'seo' },
             ]}
           />
 
           {/* Media và tệp */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <section id="field-image" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center gap-2 font-black dark:text-white">
               <ImageIcon className="h-5 w-5 text-orange-600" />
               Media và tệp
@@ -942,7 +981,7 @@ export const NewsFormView: React.FC<NewsFormViewProps> = ({
           </section>
 
           {/* SEO với Đũa thần AI */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <section id="field-seo" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 font-black dark:text-white">
                 <Search className="h-5 w-5 text-orange-600" />

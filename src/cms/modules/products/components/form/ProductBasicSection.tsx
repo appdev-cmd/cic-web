@@ -50,15 +50,17 @@ export const ProductBasicSection: React.FC<ProductBasicSectionProps> = ({
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className={labelClass}>Tên sản phẩm *</label>
+            <label className={labelClass} htmlFor="field-name">Tên sản phẩm *</label>
             <input
+              id="field-name"
+              name="name"
               className={inputClass}
               placeholder="VD: SAP2000, Kompas-3D, PTV Vissim..."
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
+          <div id="field-manufactory">
             <label className={labelClass}>Hãng sản xuất *</label>
             <SearchableSelect
               options={brands.map((b) => ({ id: b.id, label: b.name }))}
@@ -67,7 +69,7 @@ export const ProductBasicSection: React.FC<ProductBasicSectionProps> = ({
               placeholder="Chọn hãng sản xuất..."
             />
           </div>
-          <div>
+          <div id="field-category_ids">
             <label className={labelClass}>Lĩnh vực chính *</label>
             <SearchableMultiSelect
               options={categories.map((c) => ({ id: c.id, label: c.name }))}

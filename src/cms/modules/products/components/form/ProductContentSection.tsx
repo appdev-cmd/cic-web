@@ -47,6 +47,8 @@ export const ProductContentSection: React.FC<ProductContentSectionProps> = ({
           />
         </div>
         <textarea
+          id="field-summary"
+          name="summary"
           rows={4}
           className={inputClass}
           value={summary}
@@ -56,7 +58,7 @@ export const ProductContentSection: React.FC<ProductContentSectionProps> = ({
       </section>
 
       {/* Section 4: Tổng quan */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <section id="field-description" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2 font-black dark:text-white">
             <FileText className="h-5 w-5 text-orange-600" />
