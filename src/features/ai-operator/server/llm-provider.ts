@@ -292,25 +292,126 @@ export class GeminiLlmProvider implements LlmProvider {
 }
 
 /**
+ * Production Supabase Edge Function AI Gateway Provider.
+ * Calls Supabase Edge Function `gemini-proxy` which securely holds the GEMINI_API_KEY.
+ * Falls back to local GeminiLlmProvider or DevStubLlmProvider if gateway is not reachable.
+ */
+export class SupabaseAiGatewayProvider implements LlmProvider {
+  public readonly name = 'supabase-gemini-gateway';
+
+  private readonly supabaseUrl: string;
+  private readonly anonKey: string;
+  private readonly timeoutMs: number;
+
+  constructor() {
+    this.supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/$/, '');
+    this.anonKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+    const timeoutParsed = Number(process.env.AI_OPERATOR_TIMEOUT_MS);
+    this.timeoutMs = Number.isFinite(timeoutParsed) && timeoutParsed > 0 ? timeoutParsed : 60000;
+  }
+
+  async generateStructured<T>(options: LlmGenerateOptions): Promise<T> {
+    if (!this.supabaseUrl) {
+      console.warn('[AI-Operator] NEXT_PUBLIC_SUPABASE_URL is not configured. Falling back to local provider...');
+      return this.fallback<T>(options);
+    }
+
+    const endpoint = `${this.supabaseUrl}/functions/v1/gemini-proxy`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (this.anonKey) {
+        headers['Authorization'] = `Bearer ${this.anonKey}`;
+        headers['apikey'] = this.anonKey;
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          operation: 'raw.generate',
+          systemPrompt: options.systemPrompt,
+          userPrompt: options.userPrompt,
+          temperature: options.temperature,
+          maxTokens: options.maxTokens,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Supabase AI Gateway returned HTTP ${response.status}: ${errorText.substring(0, 300)}`);
+      }
+
+      const resJson = await response.json();
+      if (!resJson?.success || !resJson?.data) {
+        throw new Error(resJson?.error || 'Supabase AI Gateway returned invalid response');
+      }
+
+      return resJson.data as T;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI-Operator] Supabase AI Gateway failed: ${errMsg}. Falling back to secondary provider...`);
+      return this.fallback<T>(options);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private async fallback<T>(options: LlmGenerateOptions): Promise<T> {
+    if (process.env.GEMINI_API_KEY) {
+      const gemini = new GeminiLlmProvider();
+      return gemini.generateStructured<T>(options);
+    }
+    const devFallback = new DevStubLlmProvider();
+    return devFallback.generateStructured<T>(options);
+  }
+}
+
+/**
  * Returns the configured LLM provider based on AI_PROVIDER environment variable.
- * Easily switchable: 'gemini' | 'qwen' | 'openai'
- * Falls back safely to DevStubLlmProvider if keys/urls are missing.
+ * Priority:
+ * 1. Explicit AI_PROVIDER ('supabase' | 'gemini' | 'qwen' | 'dev')
+ * 2. Supabase Gateway (if NEXT_PUBLIC_SUPABASE_URL is available) with automatic local fallback
+ * 3. Local Gemini (if GEMINI_API_KEY is available)
+ * 4. Qwen (if AI_OPERATOR_API_URL is available)
+ * 5. DevStubLlmProvider (deterministic safe fallback)
  */
 export function getLlmProvider(): LlmProvider {
   const provider = (process.env.AI_PROVIDER || '').toLowerCase().trim();
 
-  // Explicit or auto-detected Gemini
-  if (provider === 'gemini' || (!provider && process.env.GEMINI_API_KEY)) {
-    if (process.env.GEMINI_API_KEY) {
-      return new GeminiLlmProvider();
-    }
+  // Explicit selections
+  if (provider === 'supabase' || provider === 'supabase-gateway') {
+    return new SupabaseAiGatewayProvider();
   }
 
-  // Explicit or auto-detected Qwen
-  if (provider === 'qwen' || (!provider && process.env.AI_OPERATOR_API_URL)) {
-    if (process.env.AI_OPERATOR_API_URL) {
-      return new QwenLlmProvider();
-    }
+  if (provider === 'gemini') {
+    return new GeminiLlmProvider();
+  }
+
+  if (provider === 'qwen') {
+    return new QwenLlmProvider();
+  }
+
+  if (provider === 'dev' || provider === 'stub') {
+    return new DevStubLlmProvider();
+  }
+
+  // Auto-detection
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) {
+    return new SupabaseAiGatewayProvider();
+  }
+
+  if (process.env.GEMINI_API_KEY) {
+    return new GeminiLlmProvider();
+  }
+
+  if (process.env.AI_OPERATOR_API_URL) {
+    return new QwenLlmProvider();
   }
 
   return new DevStubLlmProvider();

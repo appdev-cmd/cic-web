@@ -52,6 +52,7 @@ export interface LlmGenerateOptions {
   userPrompt: string;
   jsonSchema?: object;
   temperature?: number;
+  maxTokens?: number;
 }
 
 export interface LlmProvider {

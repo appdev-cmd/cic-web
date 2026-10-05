@@ -14,6 +14,7 @@
     "lint": "eslint src/app src/server src/shared/components src/shared/i18n src/shared/tokens src/shared/ui src/instrumentation.ts src/proxy.ts scripts/check-foundation-env.ts scripts/check-foundation-boundaries.mjs scripts/check-data-foundation.mjs scripts/check-repository-security.mjs next.config.ts postcss.config.mjs --max-warnings=0",
     "typecheck": "npm run typecheck:foundation && npm run typecheck:legacy",
     "test:security": "node --import tsx --conditions=react-server scripts/verify-security-remediation.ts",
+    "test:ai-gateway": "node scripts/test-ai-gateway.mjs",
     "test:e2e": "node --max-old-space-size=4096 scripts/e2e-full-system-test.mjs",
     "typecheck:foundation": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
     "typecheck:legacy": "tsc --noEmit -p tsconfig.legacy.json",
