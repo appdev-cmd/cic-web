@@ -91,7 +91,7 @@ async function run() {
     badge: 'Về chúng tôi',
     title: 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ',
     subtitle: 'Tiên phong cung cấp giải pháp phần mềm kỹ thuật, thiết bị công nghệ và tư vấn chuyển đổi số toàn diện cho ngành Xây dựng Việt Nam.',
-    backgroundImageId: '/35nam_cic_1.JPG',
+    backgroundImageId: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80',
   };
 
   const aboutOverviewConfig = {
@@ -177,16 +177,16 @@ async function run() {
 
   // ORGANIZATION VI SEED
   const orgHeroConfig = {
-    badge: 'Hơn 35 năm đồng hành cùng kỹ thuật Việt Nam',
+    badge: 'Cơ cấu tổ chức',
     title: 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ',
     subtitle: 'Cơ cấu tổ chức chuyên nghiệp, tinh gọn và hiệu quả',
-    backgroundImageId: '/35nam_cic_1.JPG',
+    backgroundImageId: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80',
   };
 
   const orgConfig = {
     title: 'CƠ CẤU TỔ CHỨC',
     subtitle: 'Sơ đồ cơ cấu tổ chức chuyên nghiệp và hiệu quả',
-    imageId: '/35nam_cic_1.JPG',
+    imageId: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80',
   };
 
   // CAPACITY & EXPERIENCE VI SEED
@@ -194,7 +194,7 @@ async function run() {
     badge: 'Năng lực & Kinh nghiệm',
     title: 'HƠN 35 NĂM NHỊP BƯỚC CÙNG CÔNG NGHỆ',
     subtitle: 'Năng lực & Kinh nghiệm triển khai thực tế của CIC',
-    backgroundImageId: '/35nam_cic_1.JPG',
+    backgroundImageId: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80',
   };
 
   const capacityConfig = {
