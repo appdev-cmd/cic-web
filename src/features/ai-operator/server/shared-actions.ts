@@ -210,7 +210,7 @@ Return a JSON object containing the translated key-value pairs matching the exac
 
 export interface GenerateOutlineInput {
   title: string;
-  moduleType?: 'product' | 'news' | 'event';
+  moduleType?: 'product' | 'news' | 'event' | 'service' | 'project';
   notes?: string;
 }
 
@@ -233,6 +233,8 @@ export async function generateOutlineAction(input: GenerateOutlineInput): Promis
   const llm = getLlmProvider();
   const isNews = input.moduleType === 'news';
   const isEvent = input.moduleType === 'event';
+  const isService = input.moduleType === 'service';
+  const isProject = input.moduleType === 'project';
   const systemPrompt = isEvent
     ? `Bạn là chuyên gia tổ chức sự kiện & hội thảo kỹ thuật B2B của CIC (Tập đoàn công nghệ xây dựng, giao thông, hạ tầng và chuyển đổi số).
 Nhiệm vụ của bạn là soạn một KHUNG CHƯƠNG TRÌNH & DÀN Ý SỰ KIỆN (Event Agenda & Outline Template) chuẩn mực dạng HTML để biên tập viên dễ dàng chỉnh sửa thời lượng và bổ sung thông tin diễn giả.
@@ -248,6 +250,22 @@ KHUNG DÀN Ý PHẢI CÓ CẤU TRÚC BÁO CHÍ B2B CHUẨN:
 - <h3>1. Bối cảnh & Mục tiêu</h3> (kèm 1-2 câu dẫn gợi mở bối cảnh ngành/công nghệ)
 - <h3>2. Nội dung trọng tâm & Giải pháp công nghệ</h3> (gợi ý các luận điểm, giải pháp kỹ thuật chính dạng gạch đầu dòng)
 - <h3>3. Hiệu quả ứng dụng thực tế & Định hướng phát triển</h3> (gợi ý lợi ích thực tế, bước triển khai tiếp theo hoặc cam kết đồng hành của CIC)
+Chỉ trả về JSON định dạng: { "outlineHtml": "<h3>1...</h3><p>...</p>..." }`
+    : isService
+    ? `Bạn là chuyên gia tư vấn giải pháp kỹ thuật cao cấp của CIC.
+Nhiệm vụ của bạn là soạn một KHUNG DÀN BÀI DỊCH VỤ KỸ THUẬT (Service Outline Template) chuẩn mực dạng HTML để biên tập viên dễ dàng phát triển nội dung và chèn hình ảnh minh họa quy trình.
+KHUNG DÀN BÀI DỊCH VỤ PHẢI CÓ CẤU TRÚC:
+- <h3>1. Giới thiệu Dịch vụ & Căn cứ Tiêu chuẩn</h3> (Đoạn dẫn nêu mục tiêu dịch vụ, căn cứ pháp lý và tiêu chuẩn TCVN / Eurocode / AASHTO áp dụng)
+- <h3>2. Quy trình Thực hiện & Giải pháp Công nghệ</h3> (Lộ trình 3-4 bước: Khảo sát thu thập số liệu -> Mô hình hóa & Tính toán phân tích chuyên sâu -> Thẩm định & Báo cáo đánh giá)
+- <h3>3. Năng lực Chuyên gia & Cam kết Đồng hành</h3> (Năng lực chứng chỉ hành nghề của CIC, cam kết bảo hành kỹ thuật và chuyển giao giải pháp cho doanh nghiệp)
+Chỉ trả về JSON định dạng: { "outlineHtml": "<h3>1...</h3><p>...</p>..." }`
+    : isProject
+    ? `Bạn là chuyên gia hồ sơ năng lực dự án kỹ thuật của CIC.
+Nhiệm vụ của bạn là soạn một KHUNG HỒ SƠ NĂNG LỰC DỰ ÁN (Project Case Study Template) chuẩn mực dạng HTML.
+KHUNG DÀN BÀI DỰ ÁN PHẢI CÓ CẤU TRÚC:
+- <h3>1. Bối cảnh & Quy mô Công trình</h3> (Mô tả bối cảnh dự án, chủ đầu tư, địa điểm và ý nghĩa hạ tầng)
+- <h3>2. Thách thức Kỹ thuật & Giải pháp Công nghệ CIC</h3> (Các bài toán phức tạp và cách CIC áp dụng phần mềm chuyên ngành giải quyết triệt để)
+- <h3>3. Kết quả Triển khai & Giá trị Thực tiễn</h3> (Hiệu quả tiết kiệm thời gian/chi phí, kiểm soát an toàn và chuyển giao bàn giao thành công)
 Chỉ trả về JSON định dạng: { "outlineHtml": "<h3>1...</h3><p>...</p>..." }`
     : `Bạn là biên tập viên kỹ thuật trưởng của CIC.
 Nhiệm vụ của bạn là soạn một KHUNG DÀN Ý BÀI VIẾT (Outline Template) chuẩn mực dạng HTML để kỹ sư hoặc biên tập viên dễ dàng điền tiếp số liệu và chèn ảnh minh họa.
@@ -638,6 +656,140 @@ export async function generateEventThemeAction(
     .trim();
 
   return { chuDe: cleaned || title };
+}
+
+export interface GenerateServiceDraftInput {
+  title: string;
+  relatedProductNames?: string[];
+  locale?: 'vi' | 'en';
+}
+
+export interface GenerateServiceDraftOutput {
+  summary: string;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
+  tags: string[];
+}
+
+export async function generateServiceSmartDraftAction(
+  input: GenerateServiceDraftInput
+): Promise<GenerateServiceDraftOutput> {
+  await requireCmsAccess();
+  const title = input.title?.trim();
+  if (!title) {
+    throw new Error('Tên dịch vụ là bắt buộc để AI tự động điền.');
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là Giám đốc Dịch vụ Kỹ thuật & Marketing B2B của CIC (Công ty phân phối phần mềm & chuyển giao giải pháp công nghệ hàng đầu Việt Nam).
+Nhiệm vụ: Dựa vào Tên dịch vụ kỹ thuật và danh sách phần mềm/công nghệ áp dụng (nếu có), hãy tự động sinh toàn bộ thông tin nội dung & SEO chuẩn Google:
+1. summary: Tóm tắt 1-2 câu ngắn gọn (khoảng 120-180 ký tự) nêu bật năng lực tư vấn, chứng chỉ kỹ thuật và lợi ích thực tiễn cho doanh nghiệp. TUYỆT ĐỐI KHÔNG dùng từ "Tải" hay "Download".
+2. meta_title: Tối đa 60 ký tự, chuẩn cấu trúc: "Dịch vụ [Tên dịch vụ] — Tư vấn & Chuyển giao | CIC"
+3. meta_description: 135-155 ký tự, nêu rõ vai trò CIC tư vấn chuyên sâu và chuyển giao giải pháp công nghệ chính hãng.
+4. meta_keywords: 5-8 từ khóa kỹ thuật chuyên ngành ngăn cách bởi dấu phẩy.
+5. tags: 3-5 thẻ tag chuyên môn phân loại ngắn gọn (VD: ["BIM", "Tư vấn kỹ thuật", "Kiểm định"]).
+Chỉ trả về JSON hợp lệ:
+{
+  "summary": "...",
+  "meta_title": "...",
+  "meta_description": "...",
+  "meta_keywords": "...",
+  "tags": ["..."]
+}`;
+
+  const userPrompt = JSON.stringify({
+    title,
+    relatedProductNames: input.relatedProductNames || [],
+    locale: input.locale || 'vi',
+  });
+
+  const res = await llm.generateStructured<GenerateServiceDraftOutput>({
+    systemPrompt,
+    userPrompt,
+    temperature: 0.2,
+  });
+
+  return {
+    summary: res.summary || '',
+    meta_title: res.meta_title || '',
+    meta_description: res.meta_description || '',
+    meta_keywords: res.meta_keywords || '',
+    tags: Array.isArray(res.tags) ? res.tags : [],
+  };
+}
+
+export interface GenerateProjectDraftInput {
+  title: string;
+  customer_name?: string;
+  sector?: string;
+  location?: string;
+  locale?: 'vi' | 'en';
+}
+
+export interface GenerateProjectDraftOutput {
+  tagline: string;
+  summary: string;
+  solution: string;
+  technologies: string[];
+  seo_title: string;
+  seo_description: string;
+  seo_keyword: string;
+}
+
+export async function generateProjectSmartDraftAction(
+  input: GenerateProjectDraftInput
+): Promise<GenerateProjectDraftOutput> {
+  await requireCmsAccess();
+  const title = input.title?.trim();
+  if (!title) {
+    throw new Error('Tên dự án là bắt buộc để AI tự động điền.');
+  }
+
+  const llm = getLlmProvider();
+  const systemPrompt = `Bạn là Giám đốc Quản lý Dự án & Marketing B2B của CIC.
+Nhiệm vụ: Dựa vào Tên dự án, Chủ đầu tư và Lĩnh vực, hãy tự động sinh bộ thông tin hồ sơ năng lực dự án hoàn chỉnh:
+1. tagline: Câu thông điệp ngắn 8-15 từ nêu bật tầm vóc kỹ thuật của dự án (VD: "Giải pháp mô phỏng giao thông vi mô và kiểm định tải trọng cầu quy mô quốc gia").
+2. summary: Tóm tắt quy mô và phạm vi giải pháp CIC tham gia (khoảng 140-200 ký tự).
+3. solution: Tên giải pháp kỹ thuật chính phù hợp với công trình (VD: "Mô hình hóa thông tin công trình BIM & Đo đạc dao động kết cấu").
+4. technologies: 3-5 công nghệ, tiêu chuẩn thiết kế hoặc phần mềm kỹ thuật áp dụng (VD: ["Mô hình hóa BIM", "Mô phỏng PTV Vissim", "Tiêu chuẩn TCVN"]).
+5. seo_title: Tối đa 60 ký tự, cấu trúc: "Dự án [Tên dự án] — Giải pháp công nghệ | CIC"
+6. seo_description: 135-155 ký tự, nêu rõ vai trò CIC tư vấn/cung cấp giải pháp cho chủ đầu tư.
+7. seo_keyword: 5-8 từ khóa kỹ thuật chuẩn cách nhau bởi dấu phẩy.
+Chỉ trả về JSON hợp lệ:
+{
+  "tagline": "...",
+  "summary": "...",
+  "solution": "...",
+  "technologies": ["..."],
+  "seo_title": "...",
+  "seo_description": "...",
+  "seo_keyword": "..."
+}`;
+
+  const userPrompt = JSON.stringify({
+    title,
+    customer_name: input.customer_name || '',
+    sector: input.sector || '',
+    location: input.location || '',
+    locale: input.locale || 'vi',
+  });
+
+  const res = await llm.generateStructured<GenerateProjectDraftOutput>({
+    systemPrompt,
+    userPrompt,
+    temperature: 0.2,
+  });
+
+  return {
+    tagline: res.tagline || '',
+    summary: res.summary || '',
+    solution: res.solution || '',
+    technologies: Array.isArray(res.technologies) ? res.technologies : [],
+    seo_title: res.seo_title || '',
+    seo_description: res.seo_description || '',
+    seo_keyword: res.seo_keyword || '',
+  };
 }
 
 
