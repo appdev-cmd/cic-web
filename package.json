@@ -22,6 +22,7 @@
     "check:data-foundation": "node scripts/check-data-foundation.mjs",
     "check:repository-security": "node scripts/check-repository-security.mjs",
     "audit:db-security": "node scripts/audit-database-security.mjs",
+    "audit:rls-deep": "node scripts/verify-deep-rls.mjs",
     "audit:auth-foundation": "node scripts/audit-auth-foundation.mjs",
     "dev:legacy": "vite --port=3001 --host=0.0.0.0",
     "build:legacy": "vite build",
