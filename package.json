@@ -31,6 +31,7 @@
     "db:seed-permissions": "node scripts/seed-canonical-permissions.mjs",
     "db:apply-audit-foundation": "node scripts/apply-activity-audit-foundation.mjs",
     "db:apply-users-identity": "node scripts/apply-users-identity-hardening.mjs",
+    "db:apply-rls-hardening": "node scripts/apply-database-rls-hardening.mjs",
     "bootstrap:cms-admin": "node scripts/bootstrap-cms-admin.mjs",
     "verify:audit-foundation": "node scripts/verify-activity-audit-foundation.mjs && node --experimental-strip-types --conditions=react-server scripts/verify-audit-redaction.mjs",
     "verify:users-identity": "node scripts/verify-users-identity.mjs",
