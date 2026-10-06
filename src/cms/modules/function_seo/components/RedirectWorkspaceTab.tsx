@@ -41,6 +41,15 @@ export function RedirectWorkspaceTab({
     const to = targetPath.trim();
     if (!from || !to) return setError('Vui lòng nhập đủ URL cũ và URL đích.');
     if (from === to) return setError('URL cũ và URL đích không được giống nhau.');
+    if (from.startsWith('//') || to.startsWith('//')) {
+      return setError('URL không được bắt đầu bằng // (protocol-relative URL).');
+    }
+    if (!from.startsWith('/') && !/^https?:\/\//i.test(from)) {
+      return setError('URL cũ phải bắt đầu bằng / hoặc http(s)://');
+    }
+    if (!to.startsWith('/') && !/^https?:\/\//i.test(to)) {
+      return setError('URL đích phải bắt đầu bằng / hoặc http(s)://');
+    }
 
     setError('');
     startTransition(async () => {
@@ -204,6 +213,15 @@ export function RedirectWorkspaceTab({
             </label>
           </div>
 
+          {/^https?:\/\//i.test(targetPath.trim()) && (
+            <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2.5 text-xs font-medium text-amber-800 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800/50 dark:text-amber-300">
+              <ExternalLink className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>
+                <strong>Cảnh báo External Redirect:</strong> URL đích đang trỏ ra ngoài tên miền website ({targetPath.trim()}). Vui lòng đảm bảo liên kết đích an toàn và chính xác.
+              </span>
+            </div>
+          )}
+
           {error && (
             <div className="flex items-center gap-2 rounded-lg bg-rose-50 p-2 text-xs font-semibold text-rose-700 border border-rose-200">
               <AlertTriangle className="size-4 shrink-0 text-rose-600" />
@@ -265,7 +283,15 @@ export function RedirectWorkspaceTab({
                     {redirect.from}
                   </td>
                   <td className="px-4 py-3 font-mono text-slate-600 dark:text-slate-300">
-                    {redirect.to}
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate max-w-[280px]" title={redirect.to}>{redirect.to}</span>
+                      {/^https?:\/\//i.test(redirect.to) && (
+                        <span className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 font-sans text-[10px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 shrink-0" title="Chuyển hướng ra ngoài website (External Domain)">
+                          <ExternalLink className="size-2.5" />
+                          Ext
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span

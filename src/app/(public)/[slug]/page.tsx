@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: DynamicSlugPageProps): Promis
   if (!page) {
     const { resolveRedirect } = await import('@/features/function-seo/server/queries');
     const redirectMatch = await resolveRedirect(`/${slug}`);
-    if (redirectMatch) {
+    if (redirectMatch && !redirectMatch.targetPath.startsWith('//')) {
       const { redirect, RedirectType } = await import('next/navigation');
       redirect(redirectMatch.targetPath, redirectMatch.statusCode === 301 ? RedirectType.replace : RedirectType.push);
     }
@@ -70,7 +70,7 @@ export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) 
   if (!page) {
     const { resolveRedirect } = await import('@/features/function-seo/server/queries');
     const redirectMatch = await resolveRedirect(`/${slug}`);
-    if (redirectMatch) {
+    if (redirectMatch && !redirectMatch.targetPath.startsWith('//')) {
       const { redirect, RedirectType } = await import('next/navigation');
       redirect(redirectMatch.targetPath, redirectMatch.statusCode === 301 ? RedirectType.replace : RedirectType.push);
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCtaByCode } from '@/features/cta/server/queries';
 import type { CtaWorkspace } from '@/features/cta/types';
+import { createSafeErrorResponse } from '@/server/errors';
 
 export async function GET(
   req: Request,
@@ -18,9 +19,7 @@ export async function GET(
 
     return NextResponse.json(cta);
   } catch (error: unknown) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Lỗi nạp CTA.' },
-      { status: 500 }
-    );
+    return createSafeErrorResponse(error, 'Lỗi nạp CTA.');
   }
 }
+

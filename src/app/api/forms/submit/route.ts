@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { submitDynamicForm } from '@/features/forms/server/mutations';
 import { checkRateLimit, getClientIp } from '@/server/auth/rate-limit';
+import { createSafeErrorResponse } from '@/server/errors';
 
 export async function POST(req: Request) {
   try {
@@ -42,10 +43,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result);
   } catch (error: unknown) {
-    console.error('[API /api/forms/submit Error]', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Có lỗi xảy ra khi gửi biểu mẫu.' },
-      { status: 500 }
-    );
+    return createSafeErrorResponse(error, 'Có lỗi xảy ra khi gửi biểu mẫu.');
   }
 }
