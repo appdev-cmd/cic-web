@@ -9,6 +9,7 @@ import { customerInteractionInputSchema } from '../schemas/customerInteractionIn
 import { sendEmail } from '@/lib/email/transporter';
 import { escapeHtml } from '@/lib/email/tokens';
 import { checkRateLimit, getClientIp } from '@/server/auth/rate-limit';
+import { createCmsNotification } from '@/server/notifications/service';
 
 
 export async function submitContactAction(payload: unknown) {
@@ -60,6 +61,23 @@ export async function submitContactAction(payload: unknown) {
   } catch (err) {
     console.error('[submitContactAction] Error initializing customer request state:', err);
   }
+
+  // Trigger CMS Notification
+  void createCmsNotification({
+    title: `Liên hệ mới: ${input.fullname || 'Khách hàng'}`,
+    description: `${input.email || ''} - SĐT: ${input.telephone || 'Chưa cung cấp'}: ${input.subject || input.message?.slice(0, 100) || ''}`,
+    type: 'contact',
+    targetModule: 'customer_requests',
+    targetAction: 'view',
+    linkUrl: `/cms/customer-requests?search=${encodeURIComponent(input.email || input.fullname || '')}`,
+    metadata: {
+      contactId: data.id,
+      name: input.fullname,
+      email: input.email,
+      telephone: input.telephone,
+      subject: input.subject,
+    },
+  });
 
   // Send automatic email notifications
   try {
@@ -210,6 +228,30 @@ export async function submitCustomerInteractionAction(payload: unknown) {
   } catch (err) {
     console.error('[submitCustomerInteractionAction] Error initializing customer request state:', err);
   }
+
+  // Trigger CMS Notification
+  const isQuoteRequest =
+    input.source?.ctaName?.toLowerCase().includes('báo giá') ||
+    input.source?.pageTitle?.toLowerCase().includes('báo giá') ||
+    input.formName?.toLowerCase().includes('báo giá') ||
+    Boolean(subject?.toLowerCase().includes('báo giá'));
+  void createCmsNotification({
+    title: `${isQuoteRequest ? 'Yêu cầu báo giá mới' : 'Yêu cầu tư vấn mới'}: ${fullname || 'Khách hàng'}`,
+    description: `${input.formName || 'Đăng ký tư vấn'} - ${email || telephone || ''}: ${subject || message?.slice(0, 100) || ''}`,
+    type: isQuoteRequest ? 'quote' : 'contact',
+    targetModule: 'customer_requests',
+    targetAction: 'view',
+    linkUrl: `/cms/customer-requests?search=${encodeURIComponent(email || fullname || '')}`,
+    metadata: {
+      contactId: data.id,
+      name: fullname,
+      email,
+      telephone,
+      formName: input.formName,
+      source: input.source,
+      subject,
+    },
+  });
 
   // Send automatic email notifications for customer interaction
   try {

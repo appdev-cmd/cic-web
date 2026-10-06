@@ -17,6 +17,7 @@ import { getLlmProvider } from '@/features/ai-operator/server/llm-provider';
 import { getPostgresClient } from '@/server/db/postgres';
 import { normalizeEventSlug } from '../domain/slug';
 import type { EventInput } from '../schemas/eventInput';
+import { createCmsNotification } from '@/server/notifications/service';
 
 const localeSchema = z.enum(['vi', 'en']);
 const idSchema = z.coerce.number().int().positive();
@@ -356,6 +357,25 @@ export async function registerEventAction(payload: unknown) {
   } catch (err) {
     console.error('[registerEventAction] Error initializing customer request state:', err);
   }
+
+  // Trigger CMS Notification
+  void createCmsNotification({
+    title: `Đăng ký sự kiện: ${input.fullName || 'Khách hàng'}`,
+    description: `${input.eventTitle} (${input.attendeesCount} người) - SĐT: ${input.phone || ''} - Email: ${input.email}`,
+    type: 'registration',
+    targetModule: 'events',
+    targetAction: 'view',
+    linkUrl: `/cms/events?search=${encodeURIComponent(input.eventTitle)}`,
+    metadata: {
+      eventId: input.eventId,
+      eventTitle: input.eventTitle,
+      fullName: input.fullName,
+      email: input.email,
+      phone: input.phone,
+      company: input.company,
+      attendeesCount: input.attendeesCount,
+    },
+  });
 
   // Send Emails
   try {
