@@ -28,6 +28,7 @@ interface FormListProps {
   onDuplicateForm: (form: FormItem) => void;
   onDeleteForm: (id: string) => void;
   onQuickStatusToggle: (id: string, currentStatus: string) => void;
+  onOpenUsedBy?: (form: FormItem) => void;
 }
 
 export const FormList: React.FC<FormListProps> = ({
@@ -42,6 +43,7 @@ export const FormList: React.FC<FormListProps> = ({
   onDuplicateForm,
   onDeleteForm,
   onQuickStatusToggle,
+  onOpenUsedBy,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -167,10 +169,22 @@ export const FormList: React.FC<FormListProps> = ({
                             </div>
                           ))}
                         </div>
-                        {form.usedByPages.length > 2 && (
-                          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold block">
-                            +{form.usedByPages.length - 2} vị trí khác...
-                          </span>
+                        {form.usedByPages.length > 2 ? (
+                          <button
+                            type="button"
+                            onClick={() => onOpenUsedBy?.(form)}
+                            className="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold cursor-pointer text-left"
+                          >
+                            <span>+{form.usedByPages.length - 2} vị trí khác...</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onOpenUsedBy?.(form)}
+                            className="text-[10px] text-slate-400 hover:text-blue-500 hover:underline cursor-pointer block text-left"
+                          >
+                            Chi tiết vị trí
+                          </button>
                         )}
                       </div>
                     ) : (

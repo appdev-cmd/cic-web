@@ -13,6 +13,7 @@ import { FormList } from './components/FormList';
 import { FormBuilderView } from './FormBuilderView';
 import { FormPreviewModal } from './components/FormPreviewModal';
 import { FormSubmissionsModal } from './components/FormSubmissionsModal';
+import { FormUsedByModal } from './components/FormUsedByModal';
 import { FORM_STATUSES, FormStatus } from '../shared/constants/statusTypes';
 import { CmsPageHeader } from '../../../components/ui/CmsPageHeader';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
@@ -56,6 +57,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
   const [editingForm, setEditingForm] = useState<FormItem | null>(null);
   const [previewForm, setPreviewForm] = useState<FormItem | null>(null);
   const [submissionsForm, setSubmissionsForm] = useState<FormItem | null>(null);
+  const [usedByForm, setUsedByForm] = useState<FormItem | null>(null);
 
   const [trashTargets, setTrashTargets] = useState<FormItem[] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -623,6 +625,7 @@ export const FormManager: React.FC<FormManagerProps> = ({
         onDuplicateForm={handleDuplicateForm}
         onDeleteForm={handleDeleteForm}
         onQuickStatusToggle={handleQuickStatusToggle}
+        onOpenUsedBy={(form) => setUsedByForm(form)}
       />
 
       {/* Modals */}
@@ -636,6 +639,12 @@ export const FormManager: React.FC<FormManagerProps> = ({
         isOpen={!!submissionsForm}
         form={submissionsForm}
         onClose={() => setSubmissionsForm(null)}
+      />
+
+      <FormUsedByModal
+        isOpen={!!usedByForm}
+        form={usedByForm}
+        onClose={() => setUsedByForm(null)}
       />
 
       <CmsTrashConfirmDialog

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   MapPin, 
@@ -72,30 +72,14 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
     phone: '',
     subject: '',
     note: '',
-    captchaAnswer: ''
   });
+  const [honeypot, setHoneypot] = useState('');
+  const formMountedAt = useRef(Date.now());
 
-  // Simple Captcha (Anti-Spam)
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [successLead, setSuccessLead] = useState<ContactLead | null>(null);
-  
-  // Load initial captcha
-  useEffect(() => {
-    generateNewCaptcha();
-  }, []);
-
-  const generateNewCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 9) + 1;
-    const num2 = Math.floor(Math.random() * 9) + 1;
-    setCaptcha({
-      num1,
-      num2,
-      answer: num1 + num2
-    });
-  };
 
   const branches = content.branches.branches;
   const activeBranchModel = branches.find((branch) => branch.id === activeBranch) ?? branches[0];
@@ -126,11 +110,6 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
       errors.subject = locale === 'en' ? 'Please enter inquiry subject' : 'Vui lòng nhập tiêu đề';
     }
 
-    // Captcha validation
-    if (!formData.captchaAnswer || parseInt(formData.captchaAnswer) !== captcha.answer) {
-      errors.captchaAnswer = t.contact.captchaError;
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -141,13 +120,34 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
     if (isSubmitting) return;
     if (!validateForm()) return;
 
+    // Silent honeypot / bot detection
+    if (honeypot.trim().length > 0 || Date.now() - formMountedAt.current < 1000) {
+      setSuccessLead({
+        id: 'lead-req-' + Date.now(),
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        note: formData.note,
+        submittedAt: new Date().toISOString(),
+      });
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        note: '',
+      });
+      return;
+    }
+
     setSubmitError('');
     setIsSubmitting(true);
     try {
       const submission = await submitCustomerInteraction({
         formId: SYSTEM_FORM_IDS.contactRequest,
         formName: 'Gửi yêu cầu liên hệ',
-        values: formData,
+        values: { ...formData, _hp: honeypot },
         source: { pageType: 'contact', pageId: 'contact', pageUrl: '/lien-he', pageTitle: 'Liên hệ', placementKey: 'contact.form' },
       });
       const newLead: ContactLead = {
@@ -169,9 +169,7 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
         phone: '',
         subject: '',
         note: '',
-        captchaAnswer: ''
       });
-      generateNewCaptcha();
     } catch (err) {
       setSubmitError(t.contact.errorMessage);
     } finally {
@@ -473,30 +471,18 @@ export const ContactView = ({ onNavigateHome, content: propContent, renderPolicy
                     ></textarea>
                   </div>
 
-                  {/* Nhập mã bảo mật */}
-                  <div className="bg-slate-50 border border-slate-200 p-4 space-y-2.5 rounded-[8px]">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                      Nhập mã bảo mật <span className="text-orange-600">*</span>
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-slate-900 text-white font-sans font-black text-sm px-4 py-2 border border-white/10 select-none tracking-widest shrink-0 rounded-[8px]">
-                        {captcha.num1} + {captcha.num2} = ?
-                      </div>
-                      <input
-                        type="number"
-                        placeholder="Nhập kết quả..."
-                        value={formData.captchaAnswer}
-                        onChange={(e) => setFormData({ ...formData, captchaAnswer: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 bg-white border text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 rounded-[8px] transition-all ${
-                          formErrors.captchaAnswer ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:ring-orange-600/20 focus:border-orange-600'
-                        }`}
-                      />
-                    </div>
-                    {formErrors.captchaAnswer && (
-                      <span className="text-xs text-red-500 font-semibold flex items-center gap-1 block">
-                        <AlertCircle size={13} /> {formErrors.captchaAnswer}
-                      </span>
-                    )}
+                  {/* Invisible Honeypot field (anti-spam, invisible to users) */}
+                  <div className="sr-only" aria-hidden="true" style={{ display: 'none', position: 'absolute', left: '-9999px' }}>
+                    <label htmlFor="company_website_hp">Do not fill this field</label>
+                    <input
+                      id="company_website_hp"
+                      type="text"
+                      name="_hp"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
                   </div>
 
                   {/* Error Alert */}

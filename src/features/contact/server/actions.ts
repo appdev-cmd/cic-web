@@ -27,6 +27,10 @@ export async function submitContactAction(payload: unknown) {
   }
 
   const input = contactInputSchema.parse(payload);
+  if (input._hp && input._hp.trim().length > 0) {
+    return { ok: true };
+  }
+  const { _hp, ...contactData } = input;
   let client;
   try {
     client = createSupabaseAdminClient();
@@ -38,7 +42,7 @@ export async function submitContactAction(payload: unknown) {
   const { data, error } = await client
     .from('cic_contact')
     .insert({
-      ...input,
+      ...contactData,
       edited_time: now,
       created_time: now,
       published: false,
@@ -214,6 +218,12 @@ export async function submitCustomerInteractionAction(payload: unknown) {
 
   const input = customerInteractionInputSchema.parse(payload);
   const values = input.values;
+
+  // Honeypot check - silently discard bot submission
+  if (values && typeof values._hp === 'string' && values._hp.trim().length > 0) {
+    return { ok: true, requestId: `hp-${Date.now()}` };
+  }
+
   const now = new Date().toISOString();
   let client;
   try {
