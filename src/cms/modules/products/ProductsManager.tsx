@@ -157,26 +157,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
   const [selectedProductForForm, setSelectedProductForForm] = useState<ProductItem | null>(null);
 
-  // Read initial filter values from URL if present
-  const initialUrlParams = useMemo(() => {
-    if (typeof window === 'undefined') {
-      return { tab: 'all' as SystemViewTab, q: '', category: 'all', brand: 'all', type: 'all', app: 'all', page: 1 };
-    }
-    const sp = new URLSearchParams(window.location.search);
-    const rawTab = sp.get('tab') as SystemViewTab;
-    const tab: SystemViewTab = rawTab && ['all', 'published', 'draft', 'is_hot'].includes(rawTab) ? rawTab : 'all';
-    const q = sp.get('q') || sp.get('search') || '';
-    const category = sp.get('category') || 'all';
-    const brand = sp.get('brand') || 'all';
-    const type = sp.get('type') || 'all';
-    const app = sp.get('app') || 'all';
-    const pageNum = parseInt(sp.get('page') || '1', 10);
-    const page = !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
-    return { tab, q, category, brand, type, app, page };
-  }, []);
-
   // System Views Tab
-  const [activeTab, setActiveTab] = useState<SystemViewTab>(initialUrlParams.tab);
+  const [activeTab, setActiveTab] = useState<SystemViewTab>('all');
 
   // Table Density & Column Visibility
   const [density, setDensity] = useState<'normal' | 'compact'>('normal');
@@ -247,7 +229,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   };
 
   // Pagination State
-  const [currentPage, setCurrentPage] = useState(initialUrlParams.page);
+  const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   // Product Filters & Lookups Hook
@@ -282,15 +264,10 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
     applications,
     activeTab,
     onFilterChange: () => setCurrentPage(1),
-    initialSearchQuery: initialUrlParams.q,
-    initialCategory: initialUrlParams.category,
-    initialBrand: initialUrlParams.brand,
-    initialProductType: initialUrlParams.type,
-    initialApplication: initialUrlParams.app,
   });
 
   // Debounced search query for CMS URL
-  const [debouncedCmsSearch, setDebouncedCmsSearch] = useState(searchQuery);
+  const [debouncedCmsSearch, setDebouncedCmsSearch] = useState('');
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedCmsSearch(searchQuery);
@@ -301,10 +278,37 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({ data, workspac
   const isCmsMounted = useRef(false);
   const isCmsPopState = useRef(false);
 
+  // Read initial filter values from URL after mount to prevent SSR hydration mismatch
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const rawTab = sp.get('tab') as SystemViewTab;
+    const tab: SystemViewTab = rawTab && ['all', 'published', 'draft', 'is_hot'].includes(rawTab) ? rawTab : 'all';
+    const q = sp.get('q') || sp.get('search') || '';
+    const category = sp.get('category') || 'all';
+    const brand = sp.get('brand') || 'all';
+    const type = sp.get('type') || 'all';
+    const app = sp.get('app') || 'all';
+    const pageNum = parseInt(sp.get('page') || '1', 10);
+    const page = !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
+
+    if (tab !== 'all') setActiveTab(tab);
+    if (q) {
+      setSearchQuery(q);
+      setDebouncedCmsSearch(q);
+    }
+    if (category !== 'all') setSelectedCategory(category);
+    if (brand !== 'all') setSelectedBrand(brand);
+    if (type !== 'all') setSelectedProductType(type);
+    if (app !== 'all') setSelectedApplication(app);
+    if (page !== 1) setCurrentPage(page);
+
+    isCmsMounted.current = true;
+  }, [setSearchQuery, setSelectedCategory, setSelectedBrand, setSelectedProductType, setSelectedApplication]);
+
   // Synchronize filter & tab state to CMS URL search parameters
   useEffect(() => {
     if (!isCmsMounted.current) {
-      isCmsMounted.current = true;
       return;
     }
     if (isCmsPopState.current) {

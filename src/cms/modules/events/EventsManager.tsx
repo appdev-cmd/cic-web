@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Trash2,
@@ -134,13 +134,15 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
   // Filter States (Dual Statuses)
   const [searchTitle, setSearchTitle] = useState('');
   const [editorialFilter, setEditorialFilter] = useState<string>('all');
-  const [eventStatusFilter, setEventStatusFilter] = useState<string>(() => {
-    if (typeof window === 'undefined') return 'all';
+  const [eventStatusFilter, setEventStatusFilter] = useState<string>('all');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     const requestedFilter = new URLSearchParams(window.location.search).get('progress');
-    return requestedFilter === 'upcoming' || requestedFilter === 'ongoing' || requestedFilter === 'ended'
-      ? requestedFilter
-      : 'all';
-  });
+    if (requestedFilter === 'upcoming' || requestedFilter === 'ongoing' || requestedFilter === 'ended') {
+      setEventStatusFilter(requestedFilter);
+    }
+  }, []);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 

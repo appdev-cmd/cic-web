@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import {
   Calendar,
   CheckCircle2,
@@ -204,25 +204,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   };
 
   // Preference state with localStorage hydration & automatic version upgrade
-  const [preference, setPreference] = useState<DashboardPreference>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && Array.isArray(parsed.widgets)) {
-            const hasHero = parsed.widgets.some((w: any) => w.id === 'operations_hero');
-            if (hasHero) {
-              return parsed as DashboardPreference;
-            }
+  const [preference, setPreference] = useState<DashboardPreference>(defaultDashboardPreference);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.widgets)) {
+          const hasHero = parsed.widgets.some((w: any) => w.id === 'operations_hero');
+          if (hasHero) {
+            setPreference(parsed as DashboardPreference);
           }
         }
-      } catch {
-        // ignore localStorage error
       }
+    } catch {
+      // ignore localStorage error
     }
-    return defaultDashboardPreference;
-  });
+  }, []);
 
   // Health Drawer state
   const [isHealthDrawerOpen, setIsHealthDrawerOpen] = useState(false);
