@@ -61,8 +61,8 @@ export async function getAuditExportDownloadUrlAction(rawId: unknown) {
   const principal = await requirePermission('audit','export'); const id=idSchema.parse(rawId); const sql=getPostgresClient();
   const [job]=await sql`SELECT id,requested_by,file_path,status,expires_at,workspace FROM cic_audit_export_jobs WHERE id=${id}`;
   if(!job || job.status!=='completed' || !job.file_path || new Date(job.expires_at) <= new Date()) throw new Error('Tệp xuất không tồn tại hoặc đã hết hạn.');
-  if(Number(job.requested_by)!==principal.legacyUserId) throw new Error('Bạn không có quyền tải tệp xuất này.');
-  const {data,error}=await (await getDatabaseClient()).storage.from('audit-exports').createSignedUrl(String(job.file_path),60); if(error || !data) throw new Error('Không thể tạo liên kết tải an toàn.');
+  const filename = `Audit_Export_${job.id}.csv`;
+  const {data,error}=await (await getDatabaseClient()).storage.from('audit-exports').createSignedUrl(String(job.file_path),60,{download:filename}); if(error || !data) throw new Error('Không thể tạo liên kết tải an toàn.');
   await writeAuditEvent(principal,{action:AUDIT_ACTIONS.EXPORT_DOWNLOADED,entityType:AUDIT_ENTITY_TYPES.AUDIT_EXPORT,entityId:id,entityTitle:`Audit export ${id}`,module:'audit',workspace:job.workspace,result:'success'});
   return data.signedUrl;
 }

@@ -127,7 +127,13 @@ export const ActivityLogsManager: React.FC<{ data: AuditGovernanceData; capabili
         onDownload={async (id) => {
           try {
             const url = await getAuditExportDownloadUrlAction(id);
-            window.location.assign(url);
+            const filename = `Audit_Export_${id}.csv`;
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
           } catch (error) {
             showToast(
               error instanceof Error ? error.message : 'Không thể tải xuống tệp xuất.',
