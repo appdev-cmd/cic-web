@@ -156,6 +156,11 @@ export const ExportJobsDrawer: React.FC<ExportJobsDrawerProps> = ({
                   {job.status === 'completed' && job.totalRecords !== undefined && <div>Dung lượng: <strong>{job.fileSizeMb} MB</strong> ({job.totalRecords.toLocaleString()} dòng)</div>}
                   {job.status === 'completed' && job.expiresAt && <div className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">Hạn tải xuống an toàn: {job.expiresAt}</div>}
                   {(job.status === 'queued' || job.status === 'processing') && <div className="font-semibold text-blue-600">Tệp đang được xử lý. Nút tải sẽ xuất hiện khi hoàn tất.</div>}
+                  {job.status === 'failed' && (
+                    <div className="font-semibold text-rose-600 dark:text-rose-400">
+                      Lý do: {job.errorMessage || 'Tạo tệp thất bại'}
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2 flex justify-end">

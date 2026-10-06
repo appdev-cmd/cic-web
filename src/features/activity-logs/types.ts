@@ -49,6 +49,7 @@ export interface ExportJob {
   expiresAt?: string;
   filePath?: string;
   fileExt?: 'xlsx' | 'csv';
+  errorMessage?: string;
 }
 
 export interface AuditGovernanceData {

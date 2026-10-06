@@ -50,6 +50,7 @@ function mapJob(row: Record<string, unknown>): ExportJob {
     expiresAt: text(row.expires_at) || undefined,
     filePath: filePath || undefined,
     fileExt,
+    errorMessage: text(row.error_message) || undefined,
     downloadUrl: row.status === 'completed' ? `/api/cms/audit-exports/${row.id}` : undefined,
   };
 }

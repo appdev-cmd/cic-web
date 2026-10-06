@@ -75,8 +75,25 @@ export async function createAuditExportAction(raw: unknown) {
     revalidatePath('/cms', 'layout');
     return { id: jobId };
   } catch (error) {
-    await storage.remove([path]);
-    await sql`UPDATE cic_audit_export_jobs SET status='failed',error_message='Export failed',completed_at=now() WHERE id=${jobId}`;
+    const errorMessage = error instanceof Error ? error.message : 'Xuất dữ liệu thất bại';
+    await storage.remove([path]).catch(() => {});
+    await sql`UPDATE cic_audit_export_jobs SET status='failed',error_message=${errorMessage},completed_at=now() WHERE id=${jobId}`;
+    try {
+      await writeAuditEvent(principal, {
+        action: AUDIT_ACTIONS.EXPORT_CREATED,
+        entityType: AUDIT_ENTITY_TYPES.AUDIT_EXPORT,
+        entityId: jobId,
+        entityTitle: `Audit export ${jobId}`,
+        module: 'audit',
+        workspace: input.workspace,
+        result: 'failed',
+        resultMessage: errorMessage,
+        metadata: { range: input.range, error: errorMessage },
+      });
+    } catch {
+      // Do not shadow primary error
+    }
+    revalidatePath('/cms', 'layout');
     throw error;
   }
 }
