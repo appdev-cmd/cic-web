@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, Calendar, FileSpreadsheet, RotateCcw } from 'lucide-react';
+import { Search, X, Calendar, FileSpreadsheet, RotateCcw, Loader2 } from 'lucide-react';
 import type { RequestFilterState } from '../types';
 import { REQUEST_STATUSES } from '../../shared/constants/statusTypes';
 
@@ -14,6 +14,7 @@ export interface RequestFilterBarProps {
   onFilterChange: (newFilter: RequestFilterState) => void;
   onResetFilters: () => void;
   onExportCSV: () => void;
+  isExporting?: boolean;
   hasActiveFilters: boolean;
   totalCount: number;
   formOptions: RequestFilterOption[];
@@ -27,6 +28,7 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
   onFilterChange,
   onResetFilters,
   onExportCSV,
+  isExporting = false,
   hasActiveFilters,
   totalCount,
   formOptions,
@@ -96,11 +98,24 @@ export const RequestFilterBar: React.FC<RequestFilterBarProps> = ({
           <button
             type="button"
             onClick={onExportCSV}
-            className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold rounded-xl text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition-all cursor-pointer"
-            title="Xuất file CSV danh sách yêu cầu đang lọc"
+            disabled={isExporting}
+            className="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold rounded-xl text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            title="Xuất file CSV danh sách yêu cầu đang lọc (Toàn bộ dữ liệu)"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>{workspaceLocale === "en" ? `Export CSV (${totalCount})` : `Xuất CSV (${totalCount})`}</span>
+            {isExporting ? (
+              <Loader2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 animate-spin shrink-0" />
+            ) : (
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            )}
+            <span>
+              {isExporting
+                ? workspaceLocale === 'en'
+                  ? 'Exporting...'
+                  : 'Đang xuất CSV...'
+                : workspaceLocale === 'en'
+                ? `Export CSV (${totalCount})`
+                : `Xuất CSV (${totalCount})`}
+            </span>
           </button>
 
           {/* Reset Filters Button */}

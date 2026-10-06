@@ -55,13 +55,11 @@ Bạn PHẢI tự phân tích ngữ nghĩa và ý định thực sự của ngư
     - Nội dung rác, ký tự bàn phím vô nghĩa, spam chào hàng ngoài ngành (bất động sản, casino, tiền ảo, dịch vụ SEO, link độc hại).
     - Lời lẽ khiếm nhã, chửi bới.
   * "enterprise" (Doanh nghiệp lớn / Nhu cầu quy mô / Ưu tiên cao):
-    - ĐIỀU KIỆN TIÊN QUYẾT BẮT BUỘC: Đơn vị gửi PHẢI là tổ chức lớn có danh tính xác thực (Tập đoàn, Tổng công ty, Viện nghiên cứu/thiết kế đầu ngành, Ban Quản lý dự án, Trường Đại học kỹ thuật lớn...).
-    - BẮT BUỘC PHẢI CÓ TÊN CÔNG TY / TỔ CHỨC HOẶC EMAIL TÊN MIỀN DOANH NGHIỆP:
-      * Nếu người gửi dùng email cá nhân miễn phí (@gmail.com, @yahoo.com...) VÀ trường công ty để trống: TUYỆT ĐỐI KHÔNG ĐƯỢC XẾP VÀO "enterprise" dù khách có nhắc đến các từ "bản network", "nhiều máy", "bản pro", "license mạng"! Rất nhiều cá nhân, kỹ sư tự do hoặc văn phòng nhỏ hỏi giá bản network. Những trường hợp cá nhân/không rõ công ty này BẮT BUỘC chỉ được xếp vào "qualified".
-    - Chỉ xếp vào "enterprise" khi XÁC MINH ĐƯỢC là tổ chức quy mô lớn VÀ có nhu cầu số lượng lớn (từ 3 license trở lên, hoặc dự án hạ tầng trọng điểm cụ thể như cao tốc, metro, sân bay, công trình biển, hoặc gói đào tạo chuyển giao công nghệ toàn diện cho phòng ban).
+    - Đơn vị gửi là tổ chức lớn có danh tính xác thực (Tập đoàn, Tổng công ty, Viện nghiên cứu/thiết kế đầu ngành, Ban Quản lý dự án, Trường Đại học kỹ thuật lớn...).
+    - Nhu cầu quy mô lớn cụ thể: Đặt mua số lượng nhiều bản quyền (từ 3 license trở lên, hoặc bản quyền mạng Network/Multi-user), hoặc gói đào tạo chuyển giao công nghệ toàn diện cho phòng ban kỹ sư, hoặc hỏi mua các thiết bị khảo sát công nghệ cao giá trị lớn (LiDAR AlphaAir, tàu APACHE, radar PS2000), hoặc phục vụ dự án hạ tầng trọng điểm cụ thể (cao tốc, sân bay, cảng biển, metro, công trình biển).
     - LƯU Ý NGHIÊM NGẶT: Nếu là công ty lớn nhưng chỉ hỏi 1 bản quyền lẻ hoặc hỏi giá tham khảo chung chung, BẮT BUỘC xếp vào "qualified", KHÔNG ĐƯỢC tự ý nâng lên "enterprise".
   * "qualified" (Khách hàng tiềm năng chuẩn):
-    - Khách hàng cá nhân, kỹ sư, văn phòng thiết kế nhỏ, doanh nghiệp vừa và nhỏ có nhu cầu hợp lệ về phần mềm (kể cả hỏi bản Standalone hay Network), thiết bị hoặc đào tạo/chứng chỉ của CIC.
+    - Khách hàng có nhu cầu hợp lệ về giải pháp kỹ thuật, phần mềm, thiết bị hoặc đào tạo/chứng chỉ của CIC.
     - Kể cả khi khách không nêu chính xác tên hãng sản phẩm nhưng mô tả đúng bài toán kỹ thuật (ví dụ: tính ổn định mái dốc, tính lún hầm, mô hình BIM, phần mềm kết cấu thép theo tiêu chuẩn, thiết bị bay chụp khảo sát địa hình...).
 
 4. ĐỊNH DẠNG TRẢ VỀ:
@@ -238,69 +236,6 @@ export function detectCreditOrIrrelevant(text: string): { isCredit: boolean; isS
   return { isCredit: false, isSpam: false };
 }
 
-const FREE_EMAIL_DOMAINS = [
-  'gmail.com',
-  'yahoo.com',
-  'yahoo.com.vn',
-  'hotmail.com',
-  'outlook.com',
-  'icloud.com',
-  'mail.com',
-  'proton.me',
-  'protonmail.com',
-  'yandex.com',
-];
-
-/**
- * Verify whether the submission carries credible signals of being a large enterprise / organization.
- * Individuals using free webmail without a verified company name CANNOT be classified as Enterprise.
- */
-export function hasEnterpriseSignals(input: CustomerRequestTriageInput, text: string): boolean {
-  const normalized = stripVietnameseDiacritics(text);
-  const company = (input.company || '').trim().toLowerCase();
-  const email = (input.email || '').trim().toLowerCase();
-
-  // 1. Corporate domain email (not free webmail)
-  const isCorporateEmail = Boolean(
-    email &&
-    email.includes('@') &&
-    !FREE_EMAIL_DOMAINS.some((d) => email.endsWith(`@${d}`))
-  );
-
-  // 2. Explicit verified enterprise company field
-  const hasEnterpriseCompany = Boolean(
-    company &&
-    (company.includes('tập đoàn') ||
-      company.includes('tổng công ty') ||
-      company.includes('ban quản lý') ||
-      company.includes('viện') ||
-      company.includes('sở') ||
-      company.includes('trường') ||
-      company.length >= 6)
-  );
-
-  // 3. Explicit large corporate context or enterprise-scale demand in text
-  const hasOrgContextInText =
-    normalized.includes('tap doan') ||
-    normalized.includes('tong cong ty') ||
-    normalized.includes('ban quan ly') ||
-    normalized.includes('du an cao toc') ||
-    normalized.includes('du an san bay') ||
-    normalized.includes('du an metro') ||
-    normalized.includes('vien thiet ke') ||
-    normalized.includes('vien nghien cuu') ||
-    normalized.includes('cong trinh bien') ||
-    normalized.includes('ben minh la cong ty') ||
-    normalized.includes('cong ty minh can') ||
-    normalized.includes('phong thiet ke') ||
-    normalized.includes('phong ky thuat') ||
-    normalized.includes('mua cho phong') ||
-    normalized.includes('mua cho cong ty') ||
-    /\b([3-9]|\d{2,})\s*(license|licence|ban quyen|bo|may)\b/i.test(normalized);
-
-  return isCorporateEmail || hasEnterpriseCompany || hasOrgContextInText;
-}
-
 /**
  * Fast deterministic pre-check to catch obvious credit/loan confusion or gibberish
  * even before hitting LLM or in case LLM is unreachable.
@@ -416,19 +351,9 @@ export async function analyzeCustomerRequestWithAi(
       };
     }
 
-    let category: AiTriageCategory = rawCategory as AiTriageCategory;
-    let rawPriority = String(rawResult?.priority || '').toLowerCase();
+    const category: AiTriageCategory = rawCategory as AiTriageCategory;
 
-    // STRICT ENTERPRISE GUARDRAIL:
-    // If AI flagged as enterprise, but sender has NO corporate domain, NO company name, and NO org in text:
-    const hasOrgSignals = hasEnterpriseSignals(input, combinedText);
-    const wasDemotedFromEnterprise = category === 'enterprise' && !hasOrgSignals;
-
-    if (wasDemotedFromEnterprise) {
-      category = 'qualified';
-      rawPriority = 'medium';
-    }
-
+    const rawPriority = String(rawResult?.priority || '').toLowerCase();
     const priority = (['urgent', 'high', 'medium', 'low'].includes(rawPriority)
       ? rawPriority
       : category === 'enterprise'
@@ -445,34 +370,27 @@ export async function analyzeCustomerRequestWithAi(
       ? (rawResult.tags as unknown[]).map((t) => String(t).trim()).filter(Boolean)
       : [];
     const baseTag = category === 'enterprise' ? 'ai:enterprise' : category === 'irrelevant' ? 'ai:irrelevant' : 'ai:qualified';
-    const filteredRawTags = wasDemotedFromEnterprise
-      ? rawTags.filter((t) => !['ai:enterprise', 'doanh_nghiep_lon', 'vip'].includes(t))
-      : rawTags;
-    const tags = Array.from(new Set([baseTag, ...filteredRawTags]));
+    const tags = Array.from(new Set([baseTag, ...rawTags]));
 
     const summary = typeof rawResult?.summary === 'string' && rawResult.summary.trim()
       ? rawResult.summary.trim()
       : `Yêu cầu từ ${input.fullname || 'khách hàng'}: ${input.subject || input.message || 'Không có mô tả'}`;
 
-    const reason = wasDemotedFromEnterprise
-      ? 'Khách hàng có nhu cầu hợp lệ về phần mềm nhưng dùng email cá nhân và chưa có thông tin tổ chức/doanh nghiệp lớn xác thực, phân loại nhóm Khách tiềm năng chuẩn (qualified).'
-      : (typeof rawResult?.reason === 'string' && rawResult.reason.trim()
-        ? rawResult.reason.trim()
-        : `Phân loại ${category} dựa trên nội dung yêu cầu.`);
+    const reason = typeof rawResult?.reason === 'string' && rawResult.reason.trim()
+      ? rawResult.reason.trim()
+      : `Phân loại ${category} dựa trên nội dung yêu cầu.`;
 
     const identifiedProducts = Array.isArray(rawResult?.identifiedProducts) && (rawResult.identifiedProducts as unknown[]).length > 0
       ? (rawResult.identifiedProducts as unknown[]).map((p) => String(p).trim()).filter(Boolean)
       : extractIdentifiedProducts(combinedText);
 
-    const suggestedAction = typeof rawResult?.suggestedAction === 'string' && rawResult.suggestedAction.trim() && !wasDemotedFromEnterprise
+    const suggestedAction = typeof rawResult?.suggestedAction === 'string' && rawResult.suggestedAction.trim()
       ? rawResult.suggestedAction.trim()
       : category === 'enterprise'
       ? 'Phân công Trưởng nhóm kinh doanh liên hệ trực tiếp xác nhận quy mô và nhu cầu triển khai'
       : category === 'irrelevant'
       ? 'Lưu trữ hoặc chuyển mục Không phù hợp (không phân bổ kinh doanh).'
-      : wasDemotedFromEnterprise
-      ? 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp, khéo léo tìm hiểu đơn vị công tác và quy mô số máy để báo giá phù hợp.'
-      : 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp, xác nhận quy mô nhu cầu và gửi báo giá.';
+      : 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp và gửi báo giá.';
 
     let confidence = 85;
     if (typeof rawResult?.confidence === 'number' && Number.isFinite(rawResult.confidence)) {
@@ -512,7 +430,6 @@ export async function analyzeCustomerRequestWithAi(
     const identified = extractIdentifiedProducts(combinedText);
     const normalized = stripVietnameseDiacritics(combinedText);
     const isBig =
-      hasEnterpriseSignals(input, combinedText) &&
       (normalized.includes('tap doan') ||
         normalized.includes('tong cong ty') ||
         normalized.includes('ban quan ly') ||

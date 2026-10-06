@@ -221,8 +221,8 @@ export async function listCustomerRequests(params: CustomerRequestFilterParams):
   const sql = getPostgresClient();
   const workspace = params.workspace === 'en' ? 'en' : 'vi';
   const page = Math.max(1, params.page || 1);
-  const pageSize = Math.max(1, Math.min(100, params.pageSize || 10));
-  const offset = (page - 1) * pageSize;
+  const pageSize = params.unlimited ? 50000 : Math.max(1, Math.min(100, params.pageSize || 10));
+  const offset = params.unlimited ? 0 : (page - 1) * pageSize;
 
   // Build the Unified Source CTE based on workspace
   let sourceCte;

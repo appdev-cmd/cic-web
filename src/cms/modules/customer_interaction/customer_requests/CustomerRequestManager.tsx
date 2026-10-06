@@ -65,6 +65,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
   const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<RequestFilterState>({
     searchQuery: '',
@@ -388,100 +389,72 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
     });
   }, [requests, filter]);
 
-  // Export CSV based on filtered dataset
-  const handleExportCSV = () => {
-    if (filteredRequests.length === 0) {
-      showToast('Không có dữ liệu yêu cầu nào phù hợp với bộ lọc để xuất file.', 'warning');
+  // Export CSV for entire matching dataset (not limited to 1 page)
+  const handleExportCSV = async () => {
+    if (totalCount === 0) {
+      showToast(
+        workspaceLocale === 'en'
+          ? 'No customer requests match the active filter to export.'
+          : 'Không có dữ liệu yêu cầu nào phù hợp với bộ lọc để xuất file.',
+        'warning'
+      );
       return;
     }
 
-    const headers = [
-      'Mã Yêu cầu',
-      'Thời gian gửi',
-      'Họ và tên',
-      'Email',
-      'Số điện thoại',
-      'Công ty',
-      'Biểu mẫu',
-      'CTA',
-      'Trang gửi',
-      'Trạng thái',
-      'Người phụ trách',
-      'Độ ưu tiên',
-      'Thẻ (Tags)',
-      'Nội dung / Nhu cầu',
-    ];
+    setIsExporting(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('workspace', workspaceLocale);
+      if (filter.tab && filter.tab !== 'all') params.set('tab', filter.tab);
+      if (filter.searchQuery.trim()) params.set('searchQuery', filter.searchQuery.trim());
+      if (filter.status) params.set('status', filter.status);
+      if (filter.formId) params.set('formId', filter.formId);
+      if (filter.ctaId) params.set('ctaId', filter.ctaId);
+      if (filter.assignedUserId) params.set('assignedUserId', filter.assignedUserId);
+      if (filter.dateFrom) params.set('dateFrom', filter.dateFrom);
+      if (filter.dateTo) params.set('dateTo', filter.dateTo);
 
-    const sanitizeCsvCell = (val: unknown) => {
-      const serialized = (val ?? '').toString().replace(/[\r\n]+/g, ' ').trim();
-      // Spreadsheet formula injection guard (CSV injection)
-      const safe = /^[=+\-@\t\r]/.test(serialized) ? `'${serialized}` : serialized;
-      return `"${safe.replace(/"/g, '""')}"`;
-    };
+      const res = await fetch(`/api/cms/customer-requests/export?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error(`Export request failed with status: ${res.status}`);
+      }
 
-    const rows = filteredRequests.map((r) => {
-      const getVal = (keys: string[], types: string[]) => {
-        const found = r.submissionValues?.find(
-          (v) => keys.includes(v.fieldKey.toLowerCase()) || types.includes(v.fieldType)
-        );
-        return found?.valueText || '';
-      };
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
 
-      const name = getVal(['full_name', 'name', 'ho_ten'], ['text']);
-      const email = getVal(['email'], ['email']);
-      const phone = getVal(['phone', 'sdt', 'dien_thoai'], ['phone']);
-      const company = getVal(['company', 'cong_ty'], []);
-      const message = getVal(['message', 'noi_dung', 'note'], ['textarea']);
+      // Extract filename from response header if available
+      const disposition = res.headers.get('content-disposition');
+      let filename = `Bao_cao_yeu_cau_khach_hang_${new Date().toISOString().slice(0, 10)}.csv`;
+      if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match?.[1]) filename = match[1];
+      }
 
-      const statusLabel = REQUEST_STATUS_LABELS[r.status] || r.status;
-      const priorityLabel = PRIORITY_LABELS[r.priority] || r.priority;
-      const tagsStr = (r.tags || []).join('; ');
-      const rawDate = r.sourceConfig?.submittedAt || r.createdAt;
-      const dateStr = rawDate && !isNaN(new Date(rawDate).getTime())
-        ? new Date(rawDate).toLocaleString('vi-VN')
-        : '';
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      return [
-        r.id,
-        dateStr,
-        name,
-        email,
-        phone,
-        company,
-        r.sourceConfig?.formName || '',
-        r.sourceConfig?.ctaName || '',
-        r.sourceConfig?.pageTitle || '',
-        statusLabel,
-        r.assignedUserName || 'Chưa phân công',
-        priorityLabel,
-        tagsStr,
-        message,
-      ].map(sanitizeCsvCell);
-    });
-
-    const csvContent =
-      '\uFEFF' +
-      [
-        headers.map(sanitizeCsvCell).join(','),
-        ...rows.map((row) => row.join(',')),
-      ].join('\r\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    const nowStr = new Date().toISOString().slice(0, 10);
-    link.setAttribute('download', `Yeu_cau_khach_hang_${nowStr}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    showToast(
-      workspaceLocale === 'en'
-        ? `Successfully exported ${filteredRequests.length} requests to CSV.`
-        : `Đã xuất thành công ${filteredRequests.length} yêu cầu ra file CSV.`,
-      'success'
-    );
+      showToast(
+        workspaceLocale === 'en'
+          ? `Successfully exported all ${totalCount} matching requests to CSV.`
+          : `Đã xuất thành công toàn bộ ${totalCount} yêu cầu phù hợp ra file CSV.`,
+        'success'
+      );
+    } catch (err) {
+      console.error('[handleExportCSV error]', err);
+      showToast(
+        workspaceLocale === 'en'
+          ? 'Failed to export customer requests. Please try again.'
+          : 'Có lỗi xảy ra khi xuất file CSV. Vui lòng thử lại.',
+        'error'
+      );
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Handlers
@@ -977,8 +950,9 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
             }}
             onResetFilters={handleResetFilters}
             onExportCSV={handleExportCSV}
+            isExporting={isExporting}
             hasActiveFilters={hasActiveFilters}
-            totalCount={filteredRequests.length}
+            totalCount={totalCount}
             formOptions={formOptions}
             ctaOptions={ctaOptions}
             assigneeOptions={assigneeOptions}

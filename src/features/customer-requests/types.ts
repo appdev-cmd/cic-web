@@ -96,6 +96,7 @@ export interface CustomerRequestFilterParams {
   dateTo?: string;
   page?: number;
   pageSize?: number;
+  unlimited?: boolean;
 }
 
 export interface CustomerRequestStats {
