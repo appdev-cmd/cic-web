@@ -369,7 +369,7 @@ export async function triageCustomerRequest(
 
   // Extract fields from submissionValues & sourceConfig
   const nameVal = detail.submissionValues.find((v) =>
-    ['fullname', 'fullName', 'name', 'ho_ten', 'hoten'].includes(v.fieldKey)
+    ['fullname', 'fullName', 'full_name', 'name', 'ho_ten', 'hoten'].includes(v.fieldKey)
   )?.valueText;
   const emailVal = detail.submissionValues.find((v) =>
     ['email', 'thu_dien_tu'].includes(v.fieldKey)
@@ -381,12 +381,17 @@ export async function triageCustomerRequest(
     ['company', 'don_vi', 'cong_ty'].includes(v.fieldKey)
   )?.valueText;
   const subjectVal =
-    detail.submissionValues.find((v) => ['subject', 'tieu_de'].includes(v.fieldKey))?.valueText ||
+    detail.submissionValues.find((v) => ['subject', 'tieu_de', 'title'].includes(v.fieldKey))?.valueText ||
     detail.sourceConfig?.ctaName ||
     detail.sourceConfig?.formName;
   const messageVal = detail.submissionValues.find((v) =>
-    ['message', 'note', 'notes', 'noi_dung', 'loi_nhan'].includes(v.fieldKey)
+    ['message', 'note', 'notes', 'noi_dung', 'loi_nhan', 'content'].includes(v.fieldKey)
   )?.valueText;
+
+  const valuesMap = detail.submissionValues.reduce<Record<string, unknown>>((acc, curr) => {
+    acc[curr.fieldKey] = curr.valueText;
+    return acc;
+  }, {});
 
   const aiResult = await analyzeCustomerRequestWithAi({
     fullname: nameVal,
@@ -396,6 +401,7 @@ export async function triageCustomerRequest(
     subject: subjectVal,
     message: messageVal,
     formName: detail.sourceConfig?.formName,
+    values: valuesMap,
   });
 
   const { sourceType, sourceId } = parseUnifiedRequestId(unifiedId);
@@ -404,8 +410,11 @@ export async function triageCustomerRequest(
     const workspace = await resolveSourceWorkspace(sql, sourceType, sourceId);
     const state = await getOrCreateState(sql, sourceType, sourceId, workspace);
 
-    // Merge existing tags with AI tags
-    const mergedTags = Array.from(new Set([...(state.tags || []), ...aiResult.tags]));
+    // Replace conflicting previous AI category tags (ai:qualified, ai:enterprise, ai:irrelevant)
+    const existingTags = (state.tags || []).filter(
+      (t) => !['ai:qualified', 'ai:enterprise', 'ai:irrelevant'].includes(t)
+    );
+    const mergedTags = Array.from(new Set([...existingTags, ...aiResult.tags]));
 
     // Update state priority and tags, and status if state is still 'new' and AI suggests 'not_suitable'
     const newStatus =

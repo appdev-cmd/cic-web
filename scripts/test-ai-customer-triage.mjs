@@ -69,7 +69,20 @@ async function runTests() {
   if (test4.category !== 'qualified') {
     throw new Error(`Test 4 FAILED! Mua 1 license lẻ thông thường không được xếp vào enterprise, got ${test4.category}`);
   }
-  console.log('-> TEST 4 PASSED! (Tiêu chí Enterprise nghiêm ngặt: Mua 1 license lẻ tự động xếp vào qualified)');
+  // Test Case 5: Tiếng Việt không dấu - Hỏi kiểm tra nợ xấu cá nhân (Replicating exact user case)
+  console.log('\n[TEST 5] Khách gõ tiếng Việt không dấu hỏi nợ xấu (kiem tra no xau):');
+  const test5 = await analyzeCustomerRequestWithAi({
+    fullname: 'nguyen anh hao',
+    telephone: '0901473320',
+    email: 'nguyenanhhao1987@gmail.com',
+    subject: 'kiem tra no xau',
+    message: 'nho cic kiem tra dum toi hien tai toi bi no xau la bao nhieu tien de toi tra no xau',
+  });
+  console.log('Result 5:', JSON.stringify(test5, null, 2));
+  if (test5.category !== 'irrelevant' || test5.suggestedStatus !== 'not_suitable') {
+    throw new Error(`Test 5 FAILED! Expected category 'irrelevant' and status 'not_suitable', got ${test5.category}`);
+  }
+  console.log('-> TEST 5 PASSED! (Phát hiện chính xác tiếng Việt không dấu: kiem tra no xau -> irrelevant)');
 
   console.log('\n--- TẤT CẢ CÁC BÀI TEST ĐÃ VƯỢT QUA 100%! ---');
 }

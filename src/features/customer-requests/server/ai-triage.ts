@@ -95,57 +95,193 @@ BẮT BUỘC chỉ trả về JSON hợp lệ với cấu trúc sau, không kèm
 }`;
 
 /**
- * Fast heuristic pre-check to catch obvious credit/loan confusion or gibberish
- * even before hitting LLM or in case LLM is unreachable.
+ * Normalize Vietnamese text by removing diacritics / accents for robust matching.
  */
-function heuristicCheck(text: string): Partial<AiTriageResult> | null {
-  const lower = text.toLowerCase();
-  const creditKeywords = [
-    'nợ xấu',
-    'vay tiền',
-    'vay vốn',
-    'điểm tín dụng',
-    'bùng nợ',
-    'xoá nợ',
-    'xóa nợ',
-    'tra cứu cic',
-    'kiểm tra cic',
-    'mở thẻ tín dụng',
-    'vay ngân hàng',
-    'giải ngân',
-    'lãi suất vay',
-    'vay tiêu dùng',
-    'vay fe',
-    'vay online',
-    'vay nhanh',
-  ];
+export function stripVietnameseDiacritics(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase()
+    .trim();
+}
 
-  for (const kw of creditKeywords) {
-    if (lower.includes(kw)) {
-      return {
-        category: 'irrelevant',
-        confidence: 96,
-        priority: 'low',
-        suggestedStatus: 'not_suitable',
-        tags: ['ai:irrelevant', 'nham_tin_dung'],
-        summary: 'Người gửi nhầm lẫn với Trung tâm Thông tin Tín dụng Quốc gia (CIC Ngân hàng), yêu cầu liên quan đến nợ xấu/vay vốn.',
-        reason: `Phát hiện từ khóa tín dụng/vay vốn ngân hàng: "${kw}".`,
-        identifiedProducts: [],
-        suggestedAction: 'Bỏ qua hoặc gửi email phản hồi từ chối tự động thông báo nhầm thương hiệu.',
-      };
+/**
+ * Normalized (accent-free) keywords indicating credit / debt / banking loan inquiries.
+ * Catches both accented and unaccented input (e.g. "kiem tra no xau", "tra no xau", "vay tien").
+ */
+const CREDIT_AND_DEBT_KEYWORDS_NORMALIZED = [
+  'no xau',          // nợ xấu
+  'tra no xau',      // trả nợ xấu
+  'xoa no xau',      // xóa nợ xấu
+  'xoa no',          // xóa nợ
+  'tra no',          // trả nợ
+  'bi no xau',       // bị nợ xấu
+  'co no xau',       // có nợ xấu
+  'kiem tra no',     // kiểm tra nợ
+  'check cic',       // check cic
+  'tra cuu cic',     // tra cứu cic
+  'kiem tra cic',    // kiểm tra cic
+  'no chu y',        // nợ chú ý
+  'no nhom',         // nợ nhóm
+  'no nhom 1', 'no nhom 2', 'no nhom 3', 'no nhom 4', 'no nhom 5',
+  'vay tien',        // vay tiền
+  'vay von',         // vay vốn
+  'vay nong',        // vay nóng
+  'vay nhanh',       // vay nhanh
+  'vay online',      // vay online
+  'vay fe',          // vay fe
+  'fe credit',
+  'vay f88',
+  'f88',
+  'vay tieu dung',   // vay tiêu dùng
+  'vay tra gop',     // vay trả góp
+  'vay tin chap',    // vay tín chấp
+  'vay the chap',    // vay thế chấp
+  'tin chap',
+  'the chap',
+  'diem tin dung',   // điểm tín dụng
+  'bung no',         // bùng nợ
+  'bung app',        // bùng app
+  'mo the tin dung', // mở thẻ tín dụng
+  'the tin dung',    // thẻ tín dụng
+  'rut tien the',    // rút tiền thẻ
+  'dao han the',     // đáo hạn thẻ
+  'vay ngan hang',   // vay ngân hàng
+  'giai ngan',       // giải ngân
+  'lai suat vay',    // lãi suất vay
+  'khoan vay',       // khoản vay
+  'ho so vay',       // hồ sơ vay
+  'tat toan khoan vay',
+  'sotienvay',
+  'so tien vay',
+  'can vay tien',
+  'muon vay tien',
+  'cho vay tien',
+  'vay duoc khong',
+  'vay duoc bao nhieu',
+];
+
+export const CIC_PRODUCTS_CATALOG: Array<{ name: string; normalizedKeys: string[] }> = [
+  { name: 'Dự toán CIC', normalizedKeys: ['du toan cic', 'du toan', 'quan ly chi phi', 'chi so gia', 'don gia xay dung'] },
+  { name: 'SAP2000', normalizedKeys: ['sap2000', 'sap 2000'] },
+  { name: 'ETABS', normalizedKeys: ['etabs'] },
+  { name: 'SAFE', normalizedKeys: ['safe'] },
+  { name: 'CSiBridge', normalizedKeys: ['csibridge', 'csi bridge'] },
+  { name: 'PERFORM-3D', normalizedKeys: ['perform-3d', 'perform 3d'] },
+  { name: 'Chứng chỉ CSI', normalizedKeys: ['chung chi csi', 'thi csi', 'dao tao csi'] },
+  { name: 'STAAD.Pro', normalizedKeys: ['staad', 'staad.pro', 'staadpro'] },
+  { name: 'MicroStation', normalizedKeys: ['microstation'] },
+  { name: 'SACS', normalizedKeys: ['sacs'] },
+  { name: 'PROKON', normalizedKeys: ['prokon', 'padds'] },
+  { name: 'IDEA StatiCa', normalizedKeys: ['idea statica', 'statica'] },
+  { name: 'CADprofi', normalizedKeys: ['cadprofi'] },
+  { name: 'Autodesk AEC', normalizedKeys: ['autocad', 'revit', 'civil 3d', 'navisworks', 'autodesk', 'aec collection'] },
+  { name: 'HiCAD', normalizedKeys: ['hicad'] },
+  { name: 'PLAXIS', normalizedKeys: ['plaxis', 'plaxis 2d', 'plaxis 3d'] },
+  { name: 'GeoStudio', normalizedKeys: ['geostudio', 'geoslope', 'slope/w', 'seep/w'] },
+  { name: 'Leapfrog', normalizedKeys: ['leapfrog', 'leapfrog geo'] },
+  { name: 'Deswik', normalizedKeys: ['deswik'] },
+  { name: 'Caesar II', normalizedKeys: ['caesar ii', 'caesar 2', 'caesar'] },
+  { name: 'KOMPAS-3D', normalizedKeys: ['kompas-3d', 'kompas 3d', 'kompas'] },
+  { name: 'NX Siemens', normalizedKeys: ['siemens nx', 'phan mem nx'] },
+  { name: 'SOLIDWORKS', normalizedKeys: ['solidworks'] },
+  { name: 'HTRI SmartPM', normalizedKeys: ['htri', 'smartpm'] },
+  { name: 'DNV GL (Sesam/Phast)', normalizedKeys: ['sesam', 'phast', 'dnv'] },
+  { name: 'OpenTrack Railway', normalizedKeys: ['opentrack'] },
+  { name: 'PTV Vissim/Visum', normalizedKeys: ['vissim', 'visum', 'ptv'] },
+  { name: 'BIMcollab', normalizedKeys: ['bimcollab'] },
+  { name: 'Giải pháp BIM', normalizedKeys: ['giai phap bim', 'trien khai bim', 'tu van bim'] },
+  { name: 'CHCNAV LiDAR / UAV', normalizedKeys: ['chcnav', 'alphaair', 'alpha air', 'lidar', 'uav', 'flycam x500', 'may quet 3d', 'laser scanner', 'rs10', 'rs7', 'alphauni'] },
+  { name: 'Tàu đo đạc APACHE', normalizedKeys: ['apache', 'apache 3', 'apache 6', 'tau thuy van'] },
+  { name: 'Robot FIFISH', normalizedKeys: ['fifish', 'robot duoi nuoc'] },
+  { name: 'Radar PS2000', normalizedKeys: ['ps2000', 'radar quan trac'] },
+  { name: 'LiDAR ZX300e', normalizedKeys: ['zx300e', 'do gio lidar'] },
+  { name: 'Pháo sương Spraycannon', normalizedKeys: ['spraycannon', 'dap bui'] },
+];
+
+export function extractIdentifiedProducts(text: string): string[] {
+  const normalized = stripVietnameseDiacritics(text);
+  const matched = new Set<string>();
+
+  for (const item of CIC_PRODUCTS_CATALOG) {
+    for (const key of item.normalizedKeys) {
+      if (normalized.includes(key)) {
+        matched.add(item.name);
+        break;
+      }
     }
   }
 
-  // Detect gibberish keyboard smash
+  return Array.from(matched);
+}
+
+/**
+ * Detect credit / loan confusion or spam.
+ */
+export function detectCreditOrIrrelevant(text: string): { isCredit: boolean; isSpam: boolean; matchedKeyword?: string } {
+  const normalized = stripVietnameseDiacritics(text);
+
+  for (const kw of CREDIT_AND_DEBT_KEYWORDS_NORMALIZED) {
+    const regex = new RegExp(`(^|\\s)${kw.replace(/\s+/g, '\\s+')}(\\s|$)`, 'i');
+    if (regex.test(normalized)) {
+      return { isCredit: true, isSpam: false, matchedKeyword: kw };
+    }
+  }
+
+  // Regex patterns for loan amounts (e.g. "vay 50tr", "vay 20 trieu", "muon 100k")
+  if (/\bvay\s+(\d+)\s*(trieu|tr|ti|ty|tỷ|k|dong|vnd)?\b/i.test(normalized) || /\bmuon\s+tien\b/i.test(normalized)) {
+    return { isCredit: true, isSpam: false, matchedKeyword: 'vay tiền' };
+  }
+
+  // Regex for debt check
+  if (/\b(kiem\s+tra|tra\s+cuu|check)\b.*?\bno\s+xau\b/i.test(normalized)) {
+    return { isCredit: true, isSpam: false, matchedKeyword: 'kiểm tra nợ xấu' };
+  }
+
+  // Keyboard smash
   if (/^[a-z0-9\s]{1,15}$/i.test(text.trim()) && /([a-z0-9])\1{4,}/i.test(text.trim())) {
+    return { isCredit: false, isSpam: true, matchedKeyword: 'ký tự lặp vô nghĩa' };
+  }
+
+  // Gambling / casino / crypto / generic SEO spam
+  if (/(baccarat|casino|keonhacai|kubet|shbet|tiền ảo|crypto|bitcoin|dịch vụ seo|backlink)/i.test(text)) {
+    return { isCredit: false, isSpam: true, matchedKeyword: 'quảng cáo ngoài ngành' };
+  }
+
+  return { isCredit: false, isSpam: false };
+}
+
+/**
+ * Fast deterministic pre-check to catch obvious credit/loan confusion or gibberish
+ * even before hitting LLM or in case LLM is unreachable.
+ */
+function heuristicCheck(text: string): Partial<AiTriageResult> | null {
+  const check = detectCreditOrIrrelevant(text);
+
+  if (check.isCredit) {
     return {
       category: 'irrelevant',
-      confidence: 90,
+      confidence: 100,
+      priority: 'low',
+      suggestedStatus: 'not_suitable',
+      tags: ['ai:irrelevant', 'nham_tin_dung'],
+      summary: 'Yêu cầu liên quan đến nợ xấu / vay vốn ngân hàng, nhầm lẫn thương hiệu với CIC Ngân hàng Nhà nước.',
+      reason: `Phát hiện từ khóa tín dụng/nợ xấu: "${check.matchedKeyword}".`,
+      identifiedProducts: [],
+      suggestedAction: 'Lưu trữ hoặc chuyển mục Không phù hợp (Nhầm lẫn thương hiệu tín dụng, không phân bổ kinh doanh).',
+    };
+  }
+
+  if (check.isSpam) {
+    return {
+      category: 'irrelevant',
+      confidence: 100,
       priority: 'low',
       suggestedStatus: 'not_suitable',
       tags: ['ai:irrelevant', 'spam'],
-      summary: 'Nội dung điền rác hoặc ký tự bàn phím lặp lại vô nghĩa.',
-      reason: 'Chuỗi ký tự lặp lại vô nghĩa.',
+      summary: 'Nội dung điền rác hoặc quảng cáo dịch vụ ngoài ngành không phù hợp.',
+      reason: `Phát hiện rác/quảng cáo ngoài ngành: "${check.matchedKeyword}".`,
       identifiedProducts: [],
       suggestedAction: 'Xóa hoặc chuyển vào mục Không phù hợp.',
     };
@@ -170,23 +306,23 @@ export async function analyzeCustomerRequestWithAi(
     .filter(Boolean)
     .join('\n');
 
-  // 1. Fast heuristic pre-check
+  // 1. Fast deterministic heuristic pre-check
   const heuristic = heuristicCheck(combinedText);
   if (heuristic && heuristic.category === 'irrelevant') {
     return {
       category: 'irrelevant',
-      confidence: heuristic.confidence ?? 95,
+      confidence: heuristic.confidence ?? 100,
       priority: heuristic.priority ?? 'low',
       suggestedStatus: heuristic.suggestedStatus ?? 'not_suitable',
       tags: heuristic.tags ?? ['ai:irrelevant', 'nham_tin_dung'],
-      summary: heuristic.summary ?? 'Nội dung không liên quan đến kinh doanh phần mềm CIC.',
+      summary: heuristic.summary ?? 'Nội dung không liên quan đến hoạt động kinh doanh phần mềm kỹ thuật của CIC.',
       reason: heuristic.reason ?? 'Nhầm lẫn CIC tín dụng hoặc nội dung rác.',
       identifiedProducts: heuristic.identifiedProducts ?? [],
-      suggestedAction: heuristic.suggestedAction ?? 'Bỏ qua / Lưu trữ.',
+      suggestedAction: heuristic.suggestedAction ?? 'Lưu trữ hoặc chuyển mục Không phù hợp.',
     };
   }
 
-  // 2. Invoke Gemini LLM via configured provider
+  // 2. Invoke LLM provider with fallback
   try {
     const provider = getLlmProvider();
     const userPrompt = `Hãy thẩm định và phân loại yêu cầu khách hàng sau đây:\n\n${combinedText}`;
@@ -197,10 +333,57 @@ export async function analyzeCustomerRequestWithAi(
       temperature: 0.1,
     });
 
-    // Validate and sanitize LLM response
+    // CRITICAL: Double-check credit confusion even on LLM output
+    const postCheck = detectCreditOrIrrelevant(combinedText);
+    if (postCheck.isCredit) {
+      return {
+        category: 'irrelevant',
+        confidence: 100,
+        priority: 'low',
+        suggestedStatus: 'not_suitable',
+        tags: ['ai:irrelevant', 'nham_tin_dung'],
+        summary: 'Yêu cầu liên quan đến nợ xấu / vay vốn ngân hàng, nhầm lẫn thương hiệu với CIC Ngân hàng Nhà nước.',
+        reason: `Phát hiện từ khóa tín dụng/nợ xấu: "${postCheck.matchedKeyword}".`,
+        identifiedProducts: [],
+        suggestedAction: 'Lưu trữ hoặc chuyển mục Không phù hợp (Nhầm lẫn thương hiệu tín dụng, không phân bổ kinh doanh).',
+      };
+    }
+
     const rawCategory = String(rawResult?.category || '').toLowerCase();
-    const category: AiTriageCategory =
-      rawCategory === 'enterprise' ? 'enterprise' : rawCategory === 'irrelevant' ? 'irrelevant' : 'qualified';
+    const isValidCategory = ['enterprise', 'qualified', 'irrelevant'].includes(rawCategory);
+
+    // If LLM returned empty/unrecognized object (e.g. from dev stub fallback)
+    if (!isValidCategory) {
+      const identified = extractIdentifiedProducts(combinedText);
+      if (identified.length > 0) {
+        return {
+          category: 'qualified',
+          confidence: 85,
+          priority: 'medium',
+          suggestedStatus: 'new',
+          tags: ['ai:qualified', ...identified.map((p) => `sp:${p.toLowerCase().replace(/\s+/g, '_')}`)],
+          summary: `Khách hàng quan tâm đến giải pháp phần mềm / thiết bị: ${identified.join(', ')}.`,
+          reason: `Nhận diện sản phẩm kỹ thuật hợp lệ của CIC: ${identified.join(', ')}.`,
+          identifiedProducts: identified,
+          suggestedAction: 'Phân bổ nhân viên kinh doanh liên hệ tư vấn và gửi báo giá.',
+        };
+      }
+
+      // No products recognized and vague inquiry -> default to irrelevant
+      return {
+        category: 'irrelevant',
+        confidence: 80,
+        priority: 'low',
+        suggestedStatus: 'not_suitable',
+        tags: ['ai:irrelevant', 'chua_ro_muc_dich'],
+        summary: `Yêu cầu từ ${input.fullname || 'khách hàng'} không chứa thông tin sản phẩm hay lĩnh vực kỹ thuật của CIC.`,
+        reason: 'Nội dung không đề cập đến bất kỳ phần mềm, thiết bị đo đạc hay dịch vụ kỹ thuật nào của công ty CIC.',
+        identifiedProducts: [],
+        suggestedAction: 'Kiểm tra lại tính xác thực trước khi phân bổ kinh doanh.',
+      };
+    }
+
+    const category: AiTriageCategory = rawCategory as AiTriageCategory;
 
     const rawPriority = String(rawResult?.priority || '').toLowerCase();
     const priority = (['urgent', 'high', 'medium', 'low'].includes(rawPriority)
@@ -229,17 +412,17 @@ export async function analyzeCustomerRequestWithAi(
       ? rawResult.reason.trim()
       : `Phân loại ${category} dựa trên nội dung yêu cầu.`;
 
-    const identifiedProducts = Array.isArray(rawResult?.identifiedProducts)
+    const identifiedProducts = Array.isArray(rawResult?.identifiedProducts) && (rawResult.identifiedProducts as unknown[]).length > 0
       ? (rawResult.identifiedProducts as unknown[]).map((p) => String(p).trim()).filter(Boolean)
-      : [];
+      : extractIdentifiedProducts(combinedText);
 
     const suggestedAction = typeof rawResult?.suggestedAction === 'string' && rawResult.suggestedAction.trim()
       ? rawResult.suggestedAction.trim()
       : category === 'enterprise'
-      ? 'Ưu tiên liên hệ sớm xác nhận yêu cầu dự án lớn.'
+      ? 'Phân công Trưởng nhóm kinh doanh liên hệ trực tiếp xác nhận quy mô và nhu cầu triển khai'
       : category === 'irrelevant'
-      ? 'Chuyển vào mục Không phù hợp / Bỏ qua.'
-      : 'Liên hệ tư vấn và gửi báo giá.';
+      ? 'Lưu trữ hoặc chuyển mục Không phù hợp (không phân bổ kinh doanh).'
+      : 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp và gửi báo giá.';
 
     const confidence = typeof rawResult?.confidence === 'number' && Number.isFinite(rawResult.confidence)
       ? Math.min(100, Math.max(0, Math.round(rawResult.confidence)))
@@ -257,43 +440,73 @@ export async function analyzeCustomerRequestWithAi(
       suggestedAction,
     };
   } catch (error) {
-    console.error('[analyzeCustomerRequestWithAi] LLM invocation failed, using graceful fallback:', error);
+    console.error('[analyzeCustomerRequestWithAi] LLM invocation failed, using deterministic fallback:', error);
 
-    // Safe fallback based on keyword heuristics
-    const lower = combinedText.toLowerCase();
+    const postCheck = detectCreditOrIrrelevant(combinedText);
+    if (postCheck.isCredit) {
+      return {
+        category: 'irrelevant',
+        confidence: 100,
+        priority: 'low',
+        suggestedStatus: 'not_suitable',
+        tags: ['ai:irrelevant', 'nham_tin_dung'],
+        summary: 'Yêu cầu liên quan đến nợ xấu / vay vốn ngân hàng, nhầm lẫn thương hiệu với CIC Ngân hàng Nhà nước.',
+        reason: `Phát hiện từ khóa tín dụng/nợ xấu: "${postCheck.matchedKeyword}".`,
+        identifiedProducts: [],
+        suggestedAction: 'Lưu trữ hoặc chuyển mục Không phù hợp (Nhầm lẫn thương hiệu tín dụng, không phân bổ kinh doanh).',
+      };
+    }
+
+    const identified = extractIdentifiedProducts(combinedText);
+    const normalized = stripVietnameseDiacritics(combinedText);
     const isBig =
-      lower.includes('tập đoàn') ||
-      lower.includes('tổng công ty') ||
-      lower.includes('viện') ||
-      lower.includes('dự án') ||
-      lower.includes('cao tốc') ||
-      lower.includes('license mạng') ||
-      lower.includes('network');
+      (normalized.includes('tap doan') ||
+        normalized.includes('tong cong ty') ||
+        normalized.includes('ban quan ly') ||
+        normalized.includes('vien') ||
+        normalized.includes('du an cao toc') ||
+        normalized.includes('license mang') ||
+        normalized.includes('network license')) &&
+      identified.length > 0;
 
     if (isBig) {
       return {
         category: 'enterprise',
-        confidence: 75,
-        priority: 'high',
+        confidence: 85,
+        priority: 'urgent',
         suggestedStatus: 'new',
-        tags: ['ai:enterprise', 'vip'],
+        tags: ['ai:enterprise', 'doanh_nghiep_lon'],
         summary: `Yêu cầu từ đơn vị quy mô lớn: ${input.company || input.fullname || 'Khách hàng'}.`,
-        reason: 'Phát hiện từ khóa doanh nghiệp lớn / dự án quy mô.',
-        identifiedProducts: [],
-        suggestedAction: 'Ưu tiên liên hệ kiểm tra nhu cầu phần mềm.',
+        reason: 'Tổ chức quy mô lớn quan tâm đến giải pháp kỹ thuật của CIC.',
+        identifiedProducts: identified,
+        suggestedAction: 'Phân công Trưởng nhóm kinh doanh liên hệ trực tiếp xác nhận quy mô và nhu cầu triển khai.',
+      };
+    }
+
+    if (identified.length > 0) {
+      return {
+        category: 'qualified',
+        confidence: 85,
+        priority: 'medium',
+        suggestedStatus: 'new',
+        tags: ['ai:qualified'],
+        summary: `Yêu cầu tư vấn phần mềm / thiết bị: ${identified.join(', ')}.`,
+        reason: 'Khách hàng quan tâm đến sản phẩm kỹ thuật chính hãng của CIC.',
+        identifiedProducts: identified,
+        suggestedAction: 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp và gửi báo giá.',
       };
     }
 
     return {
-      category: 'qualified',
-      confidence: 70,
-      priority: 'medium',
-      suggestedStatus: 'new',
-      tags: ['ai:qualified'],
-      summary: `Yêu cầu liên hệ từ ${input.fullname || 'khách hàng'}.`,
-      reason: 'Tiếp nhận thông thường.',
+      category: 'irrelevant',
+      confidence: 80,
+      priority: 'low',
+      suggestedStatus: 'not_suitable',
+      tags: ['ai:irrelevant', 'chua_ro_muc_dich'],
+      summary: `Yêu cầu từ ${input.fullname || 'khách hàng'} không chứa thông tin sản phẩm hay lĩnh vực kỹ thuật của CIC.`,
+      reason: 'Nội dung không đề cập đến bất kỳ phần mềm hay thiết bị kỹ thuật nào của CIC.',
       identifiedProducts: [],
-      suggestedAction: 'Phân công nhân viên liên hệ tư vấn.',
+      suggestedAction: 'Kiểm tra lại tính xác thực trước khi phân bổ kinh doanh.',
     };
   }
 }
