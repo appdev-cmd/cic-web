@@ -81,6 +81,18 @@ const ACTION_TRANSLATIONS: Record<string, { title: string; desc: string }> = {
     title: 'Đăng xuất khỏi CMS',
     desc: 'Kết thúc phiên làm việc an toàn và thu hồi các token xác thực.',
   },
+  'security.access_denied': {
+    title: 'Từ chối truy cập do thiếu quyền (Access Denied)',
+    desc: 'Tài khoản cố gắng thực hiện hành động vượt quá phạm vi phân quyền RBAC được cấp phép và đã bị hệ thống chặn đứng.',
+  },
+  'user.status_changed': {
+    title: 'Thay đổi trạng thái tài khoản',
+    desc: 'Cập nhật trạng thái kích hoạt, tạm khóa hoặc đình chỉ hoạt động của người dùng.',
+  },
+  'user.password_reset_requested': {
+    title: 'Yêu cầu khôi phục mật khẩu',
+    desc: 'Gửi email chứa liên kết thiết lập lại mật khẩu an toàn đến người dùng.',
+  },
 };
 
 // 2. Thư viện chuyển đổi tên trường thuộc tính sang tiếng Việt

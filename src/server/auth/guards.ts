@@ -126,6 +126,25 @@ export function can(principal: CmsPrincipal, module: string, action: string): bo
 }
 export async function requirePermission(module: string, action: string): Promise<CmsPrincipal> {
   const principal = await getCurrentCmsPrincipal();
-  if (!can(principal, module, action)) throw new AppError('Permission denied.', 'FORBIDDEN');
+  if (!can(principal, module, action)) {
+    try {
+      const { writeAuditEvent } = await import('@/server/audit/writer');
+      const { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } = await import('@/server/audit/registry');
+      await writeAuditEvent(principal, {
+        action: AUDIT_ACTIONS.SECURITY_ACCESS_DENIED,
+        entityType: AUDIT_ENTITY_TYPES.SYSTEM_SETTINGS,
+        entityId: `${module}:${action}`,
+        entityTitle: `Từ chối truy cập quyền [${module}.${action}]`,
+        module: 'permissions',
+        workspace: 'global',
+        result: 'denied',
+        resultMessage: `Tài khoản ${principal.fullName || principal.username} (ID: ${principal.legacyUserId}) không có quyền thực hiện thao tác [${action}] trên phân hệ [${module}].`,
+        metadata: { attemptedModule: module, attemptedAction: action, roleCodes: principal.roleCodes },
+      });
+    } catch {
+      // Do not allow audit recording failure to bypass the permission barrier
+    }
+    throw new AppError('Permission denied.', 'FORBIDDEN');
+  }
   return principal;
 }

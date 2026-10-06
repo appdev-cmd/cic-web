@@ -93,6 +93,7 @@ export const AUDIT_ACTIONS = {
   REDIRECT_CREATED: 'redirect.created',
   REDIRECT_UPDATED: 'redirect.updated',
   REDIRECT_DELETED: 'redirect.deleted',
+  SECURITY_ACCESS_DENIED: 'security.access_denied',
 } as const;
 
 export const AUDIT_ENTITY_TYPES = {
@@ -226,4 +227,5 @@ export const auditActionRegistry = {
   [AUDIT_ACTIONS.REDIRECT_CREATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.REDIRECT },
   [AUDIT_ACTIONS.REDIRECT_UPDATED]: { category: 'config_publish', severity: 'medium', entityType: AUDIT_ENTITY_TYPES.REDIRECT },
   [AUDIT_ACTIONS.REDIRECT_DELETED]: { category: 'config_publish', severity: 'high', entityType: AUDIT_ENTITY_TYPES.REDIRECT },
+  [AUDIT_ACTIONS.SECURITY_ACCESS_DENIED]: { category: 'permissions_users', severity: 'critical', entityType: AUDIT_ENTITY_TYPES.SYSTEM_SETTINGS },
 } as const;

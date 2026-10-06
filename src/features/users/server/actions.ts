@@ -64,23 +64,89 @@ async function syncStatuses(targets:readonly AuthSyncTarget[],status:string){
   catch{for(const item of changed.reverse())await item.admin.auth.admin.updateUserById(item.user.id,{ban_duration:banDuration(item.previousStatus)});throw new Error('Không thể đồng bộ trạng thái xác thực; thay đổi dữ liệu đã được hoàn tác.');}
 }
 
-export async function updateCmsUserStatusAction(id:string,status:unknown,reason:unknown){
-  const actor=await requirePermission('users','edit'); const parsedStatus=accountStatusSchema.parse(status); const safeReason=z.string().trim().min(1).max(1000).parse(reason);
-  await updateUserStatuses([idSchema.parse(id)],parsedStatus,safeReason,actor,(targets)=>syncStatuses(targets,parsedStatus));refresh();
+export async function updateCmsUserStatusAction(id: string, status: unknown, reason: unknown) {
+  const actor = await requirePermission('users', 'edit');
+  const parsedId = idSchema.parse(id);
+  const parsedStatus = accountStatusSchema.parse(status);
+  const safeReason = z.string().trim().min(1).max(1000).parse(reason);
+  try {
+    await updateUserStatuses([parsedId], parsedStatus, safeReason, actor, (targets) => syncStatuses(targets, parsedStatus));
+    refresh();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Thay đổi trạng thái tài khoản thất bại.';
+    try {
+      await writeAuditEvent(actor, {
+        action: AUDIT_ACTIONS.USER_STATUS_CHANGED,
+        entityType: AUDIT_ENTITY_TYPES.USER,
+        entityId: String(parsedId),
+        entityTitle: `Tài khoản ${parsedId}`,
+        module: 'users',
+        workspace: 'global',
+        result: 'failed',
+        resultMessage: errorMessage,
+        after: { status: parsedStatus, reason: safeReason, error: errorMessage },
+      });
+    } catch {
+      // Do not shadow primary error
+    }
+    throw error;
+  }
 }
 
-export async function bulkUpdateCmsUserStatusAction(ids:string[],status:unknown){
-  const actor=await requirePermission('users','edit'); const parsedIds=z.array(idSchema).min(1).max(100).parse(ids); const parsedStatus=accountStatusSchema.parse(status);
-  await updateUserStatuses(parsedIds,parsedStatus,`Cập nhật hàng loạt sang ${parsedStatus}`,actor,(targets)=>syncStatuses(targets,parsedStatus));refresh();
+export async function bulkUpdateCmsUserStatusAction(ids: string[], status: unknown) {
+  const actor = await requirePermission('users', 'edit');
+  const parsedIds = z.array(idSchema).min(1).max(100).parse(ids);
+  const parsedStatus = accountStatusSchema.parse(status);
+  await updateUserStatuses(parsedIds, parsedStatus, `Cập nhật hàng loạt sang ${parsedStatus}`, actor, (targets) => syncStatuses(targets, parsedStatus));
+  refresh();
 }
 
-export async function sendCmsPasswordResetAction(id:string){
-  const actor=await requirePermission('users','edit'); const numericId=idSchema.parse(id);
-  const sql=getPostgresClient();
-  await assertActorCanManageTargetUser(sql, actor, numericId, 'khôi phục mật khẩu của');
-  const {admin,user}=await findAuthUser({authUserId:null,email:await getUserEmail(numericId)});
-  const {error}=await admin.auth.resetPasswordForEmail(user.email!);if(error)throw new Error('Không thể gửi email khôi phục mật khẩu.');
-  await writeAuditEvent(actor,{action:AUDIT_ACTIONS.USER_PASSWORD_RESET_REQUESTED,entityType:AUDIT_ENTITY_TYPES.USER,entityId:String(numericId),entityTitle:String(user.user_metadata?.username??`Tài khoản ${numericId}`),module:'users',workspace:'global',result:'success',metadata:{delivery:'email'}});refresh();
+export async function sendCmsPasswordResetAction(id: string) {
+  const actor = await requirePermission('users', 'edit');
+  const numericId = idSchema.parse(id);
+  const sql = getPostgresClient();
+  let userLabel = `Tài khoản ${numericId}`;
+  let userEmail = '';
+
+  try {
+    await assertActorCanManageTargetUser(sql, actor, numericId, 'khôi phục mật khẩu của');
+    userEmail = await getUserEmail(numericId);
+    const { admin, user } = await findAuthUser({ authUserId: null, email: userEmail });
+    userLabel = String(user.user_metadata?.username ?? user.email ?? `Tài khoản ${numericId}`);
+
+    const { error } = await admin.auth.resetPasswordForEmail(user.email!);
+    if (error) throw error;
+
+    await writeAuditEvent(actor, {
+      action: AUDIT_ACTIONS.USER_PASSWORD_RESET_REQUESTED,
+      entityType: AUDIT_ENTITY_TYPES.USER,
+      entityId: String(numericId),
+      entityTitle: userLabel,
+      module: 'users',
+      workspace: 'global',
+      result: 'success',
+      metadata: { delivery: 'email', recipient: userEmail },
+    });
+    refresh();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Không thể gửi email khôi phục mật khẩu.';
+    try {
+      await writeAuditEvent(actor, {
+        action: AUDIT_ACTIONS.USER_PASSWORD_RESET_REQUESTED,
+        entityType: AUDIT_ENTITY_TYPES.USER,
+        entityId: String(numericId),
+        entityTitle: userLabel,
+        module: 'users',
+        workspace: 'global',
+        result: 'failed',
+        resultMessage: errorMessage,
+        metadata: { delivery: 'email', recipient: userEmail, error: errorMessage },
+      });
+    } catch {
+      // Do not shadow primary error
+    }
+    throw error;
+  }
 }
 
 async function getUserEmail(id:number){
