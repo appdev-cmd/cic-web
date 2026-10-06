@@ -405,6 +405,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
     try {
       const params = new URLSearchParams();
       params.set('workspace', workspaceLocale);
+      params.set('format', 'xlsx');
       if (filter.tab && filter.tab !== 'all') params.set('tab', filter.tab);
       if (filter.searchQuery.trim()) params.set('searchQuery', filter.searchQuery.trim());
       if (filter.status) params.set('status', filter.status);
@@ -426,7 +427,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
       // Extract filename from response header if available
       const disposition = res.headers.get('content-disposition');
-      let filename = `Bao_cao_yeu_cau_khach_hang_${new Date().toISOString().slice(0, 10)}.csv`;
+      let filename = `Bao_cao_yeu_cau_khach_hang_${new Date().toISOString().slice(0, 10)}.xlsx`;
       if (disposition && disposition.includes('filename=')) {
         const match = disposition.match(/filename="?([^"]+)"?/);
         if (match?.[1]) filename = match[1];
@@ -440,8 +441,8 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
 
       showToast(
         workspaceLocale === 'en'
-          ? `Successfully exported all ${totalCount} matching requests to CSV.`
-          : `Đã xuất thành công toàn bộ ${totalCount} yêu cầu phù hợp ra file CSV.`,
+          ? `Successfully exported all ${totalCount} matching requests to Excel (.xlsx).`
+          : `Đã xuất thành công toàn bộ ${totalCount} yêu cầu phù hợp ra file Excel (.xlsx).`,
         'success'
       );
     } catch (err) {
@@ -449,7 +450,7 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
       showToast(
         workspaceLocale === 'en'
           ? 'Failed to export customer requests. Please try again.'
-          : 'Có lỗi xảy ra khi xuất file CSV. Vui lòng thử lại.',
+          : 'Có lỗi xảy ra khi xuất file Excel. Vui lòng thử lại.',
         'error'
       );
     } finally {

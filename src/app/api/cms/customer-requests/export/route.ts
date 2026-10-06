@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { can, getCurrentCmsPrincipal } from '@/server/auth/guards';
 import { normalizeServerError } from '@/server/errors';
 import { listCustomerRequests } from '@/features/customer-requests/server/queries';
-import { formatCustomerRequestsCsv } from '@/features/customer-requests/server/csv-export';
+import {
+  formatCustomerRequestsExcel,
+  formatCustomerRequestsCsv,
+} from '@/features/customer-requests/server/csv-export';
 import type { RequestListTabType, RequestStatus } from '@/features/customer-requests/types';
 
 function errorResponse(error: unknown) {
@@ -33,6 +36,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const workspace = (searchParams.get('workspace') || 'vi') as 'vi' | 'en';
+    const format = (searchParams.get('format') || 'xlsx').toLowerCase(); // 'xlsx' (default) or 'csv'
     const searchQuery = searchParams.get('searchQuery') || undefined;
     const tab = (searchParams.get('tab') || undefined) as RequestListTabType | undefined;
     const status = (searchParams.get('status') || undefined) as RequestStatus | undefined;
@@ -57,9 +61,7 @@ export async function GET(request: NextRequest) {
     });
 
     const requests = data.requests || [];
-
-    // Format into polished CSV with UTF-8 BOM, metadata header and Excel phone formula
-    const csvContent = formatCustomerRequestsCsv(requests, {
+    const metadata = {
       workspace,
       searchQuery,
       tab,
@@ -69,17 +71,33 @@ export async function GET(request: NextRequest) {
       dateFrom,
       dateTo,
       totalCount: requests.length,
-    });
+    };
 
     const now = new Date();
     const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
     const dateStamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
-    const filename = `Bao_cao_yeu_cau_khach_hang_${dateStamp}.csv`;
 
-    return new Response(csvContent, {
+    if (format === 'csv') {
+      const csvContent = formatCustomerRequestsCsv(requests, metadata);
+      const filename = `Bao_cao_yeu_cau_khach_hang_${dateStamp}.csv`;
+      return new Response(csvContent, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      });
+    }
+
+    // Default: Native Excel (.xlsx) format - 100% split columns in WPS Office & Microsoft Excel
+    const excelBuffer = formatCustomerRequestsExcel(requests, metadata);
+    const filename = `Bao_cao_yeu_cau_khach_hang_${dateStamp}.xlsx`;
+
+    return new Response(excelBuffer, {
       status: 200,
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
