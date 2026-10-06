@@ -14,7 +14,12 @@ import { analyzeCustomerRequestWithAi, type AiTriageResult } from '@/features/cu
 
 
 export async function submitContactAction(payload: unknown) {
-  const headersList = await headers();
+  let headersList: Headers;
+  try {
+    headersList = await headers();
+  } catch {
+    headersList = new Headers();
+  }
   const ip = getClientIp(headersList);
   const rateLimit = checkRateLimit(`contact:${ip}`, { maxRequests: 10, windowSeconds: 60 });
   if (!rateLimit.success) {
@@ -22,7 +27,12 @@ export async function submitContactAction(payload: unknown) {
   }
 
   const input = contactInputSchema.parse(payload);
-  const client = await getDatabaseClient();
+  let client;
+  try {
+    client = createSupabaseAdminClient();
+  } catch {
+    client = await getDatabaseClient();
+  }
   const now = new Date().toISOString();
 
   const { data, error } = await client
@@ -117,7 +127,6 @@ export async function submitContactAction(payload: unknown) {
       title: `${isEnterprise ? '[⭐ VIP] ' : ''}Liên hệ mới: ${input.fullname || 'Khách hàng'}`,
       description: `${aiResult.summary} (SĐT: ${input.telephone || 'Chưa cung cấp'})`,
       type: 'contact',
-      priority: isEnterprise ? 'urgent' : 'normal',
       targetModule: 'customer_requests',
       targetAction: 'view',
       linkUrl: `/cms/customer-requests?search=${encodeURIComponent(input.email || input.fullname || '')}`,
@@ -129,6 +138,7 @@ export async function submitContactAction(payload: unknown) {
         subject: input.subject,
         aiCategory: aiResult.category,
         aiScore: aiResult.confidence,
+        priority: isEnterprise ? 'urgent' : 'normal',
       },
     });
   }
@@ -190,7 +200,12 @@ export async function submitContactAction(payload: unknown) {
 }
 
 export async function submitCustomerInteractionAction(payload: unknown) {
-  const headersList = await headers();
+  let headersList: Headers;
+  try {
+    headersList = await headers();
+  } catch {
+    headersList = new Headers();
+  }
   const ip = getClientIp(headersList);
   const rateLimit = checkRateLimit(`interaction:${ip}`, { maxRequests: 10, windowSeconds: 60 });
   if (!rateLimit.success) {
@@ -344,7 +359,6 @@ export async function submitCustomerInteractionAction(payload: unknown) {
       title: `${isEnterprise ? '[⭐ VIP] ' : ''}${isQuoteRequest ? 'Yêu cầu báo giá mới' : 'Yêu cầu tư vấn mới'}: ${fullname || 'Khách hàng'}`,
       description: `${aiResult.summary} (SĐT: ${telephone || 'Chưa cung cấp'})`,
       type: isQuoteRequest ? 'quote' : 'contact',
-      priority: isEnterprise ? 'urgent' : 'normal',
       targetModule: 'customer_requests',
       targetAction: 'view',
       linkUrl: `/cms/customer-requests?search=${encodeURIComponent(email || fullname || '')}`,
@@ -358,6 +372,7 @@ export async function submitCustomerInteractionAction(payload: unknown) {
         subject,
         aiCategory: aiResult.category,
         aiScore: aiResult.confidence,
+        priority: isEnterprise ? 'urgent' : 'normal',
       },
     });
   }

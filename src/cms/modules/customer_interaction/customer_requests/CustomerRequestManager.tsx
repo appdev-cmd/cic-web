@@ -944,6 +944,27 @@ export const CustomerRequestManager: React.FC<CustomerRequestManagerProps> = ({
                 </button>
               );
             })}
+
+            {/* Quick VIP Filter Pill */}
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage(1);
+                const isVipActive = filter.searchQuery === 'ai:enterprise';
+                setFilter((prev) => ({
+                  ...prev,
+                  searchQuery: isVipActive ? '' : 'ai:enterprise',
+                }));
+              }}
+              className={`ml-auto px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer text-xs ${
+                filter.searchQuery === 'ai:enterprise'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 hover:bg-amber-100'
+              }`}
+              title="Lọc nhanh các yêu cầu từ Doanh nghiệp lớn / VIP do AI thẩm định"
+            >
+              <span>⭐ Doanh nghiệp lớn (VIP)</span>
+            </button>
           </div>
 
           {/* Multi-condition Filter Panel */}

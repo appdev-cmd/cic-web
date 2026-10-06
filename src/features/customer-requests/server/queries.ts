@@ -428,6 +428,7 @@ export async function listCustomerRequests(params: CustomerRequestFilterParams):
       OR src.company ILIKE ${q}
       OR src.product_name ILIKE ${q}
       OR (src.source_type || ':' || src.source_id::text) ILIKE ${q}
+      OR EXISTS (SELECT 1 FROM unnest(s.tags) AS t WHERE t ILIKE ${q})
     )`;
   }
 

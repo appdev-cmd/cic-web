@@ -190,10 +190,24 @@ export const RequestList: React.FC<RequestListProps> = ({
               const notesCount = request.internalNotes?.length || 0;
               const latestNote = notesCount > 0 ? request.internalNotes[notesCount - 1] : null;
 
+              const isEnterprise =
+                request.tags?.includes('ai:enterprise') ||
+                request.tags?.includes('vip') ||
+                request.priority === 'urgent';
+              const isIrrelevant =
+                request.tags?.includes('ai:irrelevant') ||
+                request.status === 'not_suitable';
+
               return (
                 <tr
                   key={request.id}
-                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
+                  className={`transition-colors ${
+                    isEnterprise
+                      ? 'bg-amber-500/[0.04] hover:bg-amber-500/[0.08] dark:bg-amber-950/20 dark:hover:bg-amber-950/30'
+                      : isIrrelevant
+                      ? 'opacity-75 hover:opacity-100 hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                      : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                  }`}
                 >
                   {/* Checkbox */}
                   <td className="p-3 sticky left-0 bg-white dark:bg-slate-900 z-10">
@@ -206,13 +220,25 @@ export const RequestList: React.FC<RequestListProps> = ({
 
                   {/* Khách hàng */}
                   <td className="p-3">
-                    <button
-                      type="button"
-                      onClick={() => onViewRequest(request)}
-                      className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 text-left line-clamp-1 transition-colors cursor-pointer"
-                    >
-                      {name}
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => onViewRequest(request)}
+                        className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 text-left line-clamp-1 transition-colors cursor-pointer"
+                      >
+                        {name}
+                      </button>
+                      {isEnterprise && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shrink-0">
+                          ⭐ VIP
+                        </span>
+                      )}
+                      {isIrrelevant && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                          Không phù hợp
+                        </span>
+                      )}
+                    </div>
                     {email && (
                       <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate max-w-[150px]">
                         {email}
