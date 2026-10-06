@@ -80,6 +80,106 @@ async function callGoogleGeminiApi(
   return JSON.parse(cleaned);
 }
 
+/**
+ * Validates the caller's JWT token or Service Role Key and confirms CMS Operator role.
+ * Returns null if authenticated and authorized, or a Response object if rejected.
+ */
+async function authenticateAndAuthorize(req: Request): Promise<Response | null> {
+  const authHeader = req.headers.get('Authorization') || req.headers.get('authorization') || '';
+  if (!authHeader) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: 'Unauthorized: Missing Authorization header.',
+      }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!token) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: 'Unauthorized: Bearer token is empty.',
+      }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // @ts-expect-error Deno global is present in Supabase Edge Functions runtime
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
+  // 1. Approved server-to-server call using Service Role Key
+  if (serviceRoleKey && token === serviceRoleKey) {
+    return null;
+  }
+
+  // 2. Validate User JWT via Supabase Auth
+  // @ts-expect-error Deno global is present in Supabase Edge Functions runtime
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  // @ts-expect-error Deno global is present in Supabase Edge Functions runtime
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+
+  if (!supabaseUrl) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Server configuration error: SUPABASE_URL missing.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  try {
+    const authVerifyUrl = `${supabaseUrl.replace(/\/$/, '')}/auth/v1/user`;
+    const verifyRes = await fetch(authVerifyUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': supabaseAnonKey || token,
+      },
+    });
+
+    if (!verifyRes.ok) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Unauthorized: Invalid or expired authentication token.',
+        }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userData = await verifyRes.json();
+    if (!userData?.id) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized: Identity could not be determined.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Role check: verify user has active CMS profile
+    const appMetadata = userData.app_metadata || {};
+    const isCmsProfile = appMetadata.cms_profile === true || appMetadata.role === 'admin' || appMetadata.role === 'operator';
+    if (!isCmsProfile) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Forbidden: Insufficient privileges. Only verified CMS operators can access the AI Gateway.',
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return null;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[AI Gateway Auth Error]', err);
+    return new Response(
+      JSON.stringify({ success: false, error: `Authentication validation error: ${msg}` }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
 // @ts-expect-error Deno global is present in Supabase Edge Functions runtime
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -91,6 +191,12 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ success: false, error: 'Method not allowed' }),
       { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+  }
+
+  // Enforce JWT validation & CMS role check
+  const authErrorResponse = await authenticateAndAuthorize(req);
+  if (authErrorResponse) {
+    return authErrorResponse;
   }
 
   try {

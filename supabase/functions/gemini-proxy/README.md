@@ -44,9 +44,16 @@ npx supabase functions deploy gemini-proxy --project-ref tjkytlstopieiqqiiisy --
 npm run test:ai-gateway
 ```
 
-2. Kiểm tra endpoint trực tiếp sau khi deploy:
+2. Kiểm tra endpoint trực tiếp sau khi deploy (Yêu cầu Authorization header):
 ```bash
 curl -i --location --request POST "https://tjkytlstopieiqqiiisy.supabase.co/functions/v1/gemini-proxy" \
   --header "Content-Type: application/json" \
+  --header "Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY_OR_USER_JWT>" \
   --data '{"operation":"raw.generate","userPrompt":"Xin chào CIC"}'
 ```
+
+### Cơ chế bảo mật:
+- **Xác thực JWT:** Mọi request bắt buộc phải có `Authorization: Bearer <token>`.
+- **Phân quyền Role:** Chỉ chấp nhận `SUPABASE_SERVICE_ROLE_KEY` (gọi từ Backend Server) hoặc User JWT có cờ `cms_profile: true` trong `app_metadata` (người dùng CMS đã đăng nhập).
+- Các request không hợp lệ sẽ bị từ chối ngay với HTTP `401 Unauthorized` hoặc `403 Forbidden`.
+
