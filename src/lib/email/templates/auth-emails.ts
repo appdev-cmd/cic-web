@@ -1,4 +1,6 @@
 import { sendEmail, type SendMailResult } from '../transporter';
+import { getEmailTemplateForEvent } from '@/features/email-templates/server/queries';
+import { interpolateTokens } from '../tokens';
 
 interface WelcomeEmailParams {
   to: string;
@@ -231,9 +233,39 @@ export function renderPasswordResetEmailHtml(params: PasswordResetEmailParams): 
 }
 
 /**
- * Gửi email chào mừng kèm thông tin tài khoản
+ * Gửi email chào mừng kèm thông tin tài khoản (Tự động nạp mẫu từ DB nếu có, có fallback)
  */
 export async function sendWelcomeUserEmail(params: WelcomeEmailParams): Promise<SendMailResult> {
+  const variables: Record<string, string> = {
+    '{{customer.full_name}}': params.fullName || 'Thành viên mới',
+    '{{auth.username}}': params.username,
+    '{{customer.email}}': params.to,
+    '{{auth.password}}': params.password || '',
+    '{{auth.role_name}}': params.roleName || 'Quản trị viên',
+    '{{auth.login_url}}': params.loginUrl,
+    '{{auth.activation_url}}': params.loginUrl,
+    '{{brand.name}}': 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ TƯ VẤN CIC',
+    '{{brand.website_url}}': 'https://www.cic.com.vn',
+    '{{brand.support_email}}': 'info@cic.com.vn',
+    '{{brand.support_phone}}': '024 3974 1373 - 0866 059 659',
+  };
+
+  try {
+    const dbTemplate = await getEmailTemplateForEvent('vi', 'auth_activate', 'customer');
+    if (dbTemplate && dbTemplate.content) {
+      const subject = interpolateTokens(dbTemplate.subject || '[CIC Portal] Thông tin tài khoản quản trị hệ thống của bạn', variables, { isHtml: false });
+      const html = interpolateTokens(dbTemplate.content, variables, { isHtml: true });
+      return sendEmail({
+        to: params.to,
+        subject,
+        html,
+      });
+    }
+  } catch (error) {
+    console.warn('[sendWelcomeUserEmail] Không thể tải mẫu email từ DB, dùng mẫu mặc định dự phòng:', error);
+  }
+
+  // Fallback mặc định nếu chưa cấu hình DB hoặc DB có sự cố
   const html = renderWelcomeUserEmailHtml(params);
   const text = `
 Kính gửi ${params.fullName || 'Thành viên mới'},
@@ -264,9 +296,35 @@ Website: https://www.cic.com.vn
 }
 
 /**
- * Gửi email khôi phục mật khẩu tài khoản
+ * Gửi email khôi phục mật khẩu tài khoản (Tự động nạp mẫu từ DB nếu có, có fallback)
  */
 export async function sendPasswordResetEmail(params: PasswordResetEmailParams): Promise<SendMailResult> {
+  const variables: Record<string, string> = {
+    '{{customer.full_name}}': params.fullName || 'Quý khách',
+    '{{auth.username}}': params.username,
+    '{{auth.reset_password_url}}': params.resetUrl,
+    '{{brand.name}}': 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ TƯ VẤN CIC',
+    '{{brand.website_url}}': 'https://www.cic.com.vn',
+    '{{brand.support_email}}': 'info@cic.com.vn',
+    '{{brand.support_phone}}': '024 3974 1373 - 0866 059 659',
+  };
+
+  try {
+    const dbTemplate = await getEmailTemplateForEvent('vi', 'auth_forgot_password', 'customer');
+    if (dbTemplate && dbTemplate.content) {
+      const subject = interpolateTokens(dbTemplate.subject || '[CIC Portal] Yêu cầu thiết lập lại mật khẩu tài khoản', variables, { isHtml: false });
+      const html = interpolateTokens(dbTemplate.content, variables, { isHtml: true });
+      return sendEmail({
+        to: params.to,
+        subject,
+        html,
+      });
+    }
+  } catch (error) {
+    console.warn('[sendPasswordResetEmail] Không thể tải mẫu email từ DB, dùng mẫu mặc định dự phòng:', error);
+  }
+
+  // Fallback mặc định nếu chưa cấu hình DB hoặc DB có sự cố
   const html = renderPasswordResetEmailHtml(params);
   const text = `
 Kính gửi ${params.fullName || 'Quý khách'},

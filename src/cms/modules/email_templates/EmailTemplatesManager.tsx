@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, Check, Copy, Edit, Eye, FileText, Link2, MailCheck, Plus, Search, ShieldCheck, Trash2, X } from 'lucide-react';
 import { CmsButton, CmsIconButton } from '../../components/ui/CmsButton';
 import { CmsPageHeader } from '../../components/ui/CmsPageHeader';
 import { getCmsDictionary } from '@/cms/i18n/cmsDictionary';
@@ -368,6 +368,16 @@ export const EmailTemplatesManager: React.FC<Props> = ({
               variant="danger"
               onClick={() => {
                 const toDelete = templates.filter((t) => selected.includes(t.id));
+                const systemItems = toDelete.filter(
+                  (t) => t.isSystem || t.event === 'auth_activate' || t.event === 'auth_forgot_password'
+                );
+                if (systemItems.length > 0) {
+                  notify(
+                    `Không thể xóa các mẫu email hệ thống: ${systemItems.map((s) => `"${s.name}"`).join(', ')}.`,
+                    'error'
+                  );
+                  return;
+                }
                 setDeleteTargets(toDelete);
               }}
               disabled={actionLoading || isDeleting}
@@ -414,6 +424,9 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                     label: item.status,
                     className: 'bg-slate-100 text-slate-700',
                   };
+                  const isSystemItem = Boolean(
+                    item.isSystem || item.event === 'auth_activate' || item.event === 'auth_forgot_password'
+                  );
                   return (
                     <tr key={item.id}>
                       <td className="p-3 text-center">
@@ -428,19 +441,30 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                         />
                       </td>
                       <td className="p-3">
-                        <button
-                          className="max-w-[420px] truncate text-left font-semibold text-slate-900 hover:text-orange-600 dark:text-white"
-                          onClick={() => {
-                            if (canEdit) {
-                              setEditing(item);
-                              setView('form');
-                            } else {
-                              setPreviewing(item);
-                            }
-                          }}
-                        >
-                          {item.name}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="max-w-[340px] truncate text-left font-semibold text-slate-900 hover:text-orange-600 dark:text-white"
+                            onClick={() => {
+                              if (canEdit) {
+                                setEditing(item);
+                                setView('form');
+                              } else {
+                                setPreviewing(item);
+                              }
+                            }}
+                          >
+                            {item.name}
+                          </button>
+                          {isSystemItem && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800"
+                              title="Mẫu email hệ thống cốt lõi (Không thể xóa)"
+                            >
+                              <ShieldCheck className="size-3" />
+                              Hệ thống
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-1 max-w-[420px] truncate text-[11px] text-slate-500">{item.subject}</p>
                       </td>
                       <td className="p-3 text-xs">
@@ -508,14 +532,26 @@ export const EmailTemplatesManager: React.FC<Props> = ({
                             />
                           )}
                           {canDelete && (
-                            <CmsIconButton
-                              size="sm"
-                              variant="danger"
-                              aria-label="Xóa"
-                              title="Xóa mẫu email"
-                              icon={<Trash2 />}
-                              onClick={() => setDeleteTargets([item])}
-                            />
+                            isSystemItem ? (
+                              <span title="Mẫu email hệ thống phục vụ vận hành, không thể xóa">
+                                <CmsIconButton
+                                  size="sm"
+                                  aria-label="Mẫu hệ thống (Không thể xóa)"
+                                  disabled
+                                  className="opacity-30 cursor-not-allowed"
+                                  icon={<Trash2 />}
+                                />
+                              </span>
+                            ) : (
+                              <CmsIconButton
+                                size="sm"
+                                variant="danger"
+                                aria-label="Xóa"
+                                title="Xóa mẫu email"
+                                icon={<Trash2 />}
+                                onClick={() => setDeleteTargets([item])}
+                              />
+                            )
                           )}
                         </div>
                       </td>

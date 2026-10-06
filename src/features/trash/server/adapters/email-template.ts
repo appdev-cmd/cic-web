@@ -47,6 +47,7 @@ export async function moveEmailTemplateToTrash(
   const [tmpl] = await sql`
     SELECT 
       id::text, workspace, name, event_key, audience, status,
+      COALESCE(is_system, false) as is_system,
       draft_version_id::text, active_version_id::text,
       created_by, updated_by, activated_by,
       activated_at::text, created_at::text, updated_at::text
@@ -56,6 +57,10 @@ export async function moveEmailTemplateToTrash(
   `;
   if (!tmpl) {
     throw new Error('Không tìm thấy mẫu email để chuyển vào Thùng rác.');
+  }
+
+  if (tmpl.is_system || ['auth_activate', 'auth_forgot_password'].includes(tmpl.event_key)) {
+    throw new Error(`Mẫu email hệ thống "${tmpl.name}" được bảo vệ để phục vụ vận hành cốt lõi, không thể chuyển vào thùng rác.`);
   }
 
   // 2. Fetch versions

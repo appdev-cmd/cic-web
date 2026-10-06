@@ -23,6 +23,7 @@ export interface EmailTemplate {
   status: EmailTemplateStatus;
   version: number;
   updatedAt: string;
+  isSystem?: boolean;
 }
 
 export const EMAIL_EVENTS: Array<{ value: EmailEvent | string; label: string; labelEn: string }> = [
@@ -47,7 +48,7 @@ export const VARIABLE_GROUPS = [
   { label: 'Yêu cầu', tokens: ['{{request.reference}}', '{{request.type_name}}', '{{request.received_at}}'] },
   { label: 'Khách hàng', tokens: ['{{customer.full_name}}', '{{customer.company_name}}'] },
   { label: 'Sản phẩm', tokens: ['{{product.name}}', '{{product.public_url}}'] },
-  { label: 'Tài khoản', tokens: ['{{auth.activation_url}}', '{{auth.otp_code}}', '{{auth.reset_password_url}}'] },
+  { label: 'Tài khoản', tokens: ['{{auth.activation_url}}', '{{auth.otp_code}}', '{{auth.reset_password_url}}', '{{auth.username}}', '{{auth.password}}', '{{auth.role_name}}', '{{auth.login_url}}'] },
   { label: 'Đơn hàng', tokens: ['{{order.code}}', '{{order.total_amount}}', '{{order.payment_method}}', '{{order.items_table}}'] },
 ];
 
@@ -77,6 +78,10 @@ export const SAMPLE_VALUES: Record<string, string> = {
   '{{auth.activation_url}}': 'https://www.cic.com.vn/auth/activate?token=sample_token',
   '{{auth.otp_code}}': '849201',
   '{{auth.reset_password_url}}': 'https://www.cic.com.vn/auth/reset-password?token=sample_token',
+  '{{auth.username}}': 'nguyen.an',
+  '{{auth.password}}': 'P@ssw0rd2026',
+  '{{auth.role_name}}': 'Quản trị viên',
+  '{{auth.login_url}}': 'https://cms.cic.com.vn/cms/login',
   '{{order.code}}': 'DH2026-0089',
   '{{order.total_amount}}': '15.500.000 đ',
   '{{order.payment_method}}': 'Chuyển khoản ngân hàng / VNPay',

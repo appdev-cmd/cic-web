@@ -40,6 +40,7 @@ export interface EmailTemplate {
   activatedAt?: string | null;
   activatedBy?: number | null;
   versionsCount?: number;
+  isSystem?: boolean;
 }
 
 export interface EmailTemplateDetail extends EmailTemplate {

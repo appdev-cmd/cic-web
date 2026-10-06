@@ -49,7 +49,15 @@ export const VARIABLE_GROUPS = [
   },
   {
     label: 'Tài khoản & Xác thực',
-    tokens: ['{{auth.activation_url}}', '{{auth.otp_code}}', '{{auth.reset_password_url}}'],
+    tokens: [
+      '{{auth.activation_url}}',
+      '{{auth.otp_code}}',
+      '{{auth.reset_password_url}}',
+      '{{auth.username}}',
+      '{{auth.password}}',
+      '{{auth.role_name}}',
+      '{{auth.login_url}}',
+    ],
   },
   {
     label: 'Đơn hàng & Thanh toán',
@@ -87,6 +95,10 @@ export const SAMPLE_VALUES: Record<string, string> = {
   '{{auth.activation_url}}': 'https://www.cic.com.vn/auth/activate?token=sample_token_123',
   '{{auth.otp_code}}': '849201',
   '{{auth.reset_password_url}}': 'https://www.cic.com.vn/auth/reset-password?token=sample_token_456',
+  '{{auth.username}}': 'nguyen.an',
+  '{{auth.password}}': 'P@ssw0rd2026',
+  '{{auth.role_name}}': 'Quản trị viên',
+  '{{auth.login_url}}': 'https://cms.cic.com.vn/cms/login',
   '{{order.code}}': 'DH2026-0089',
   '{{order.total_amount}}': '15.500.000 đ',
   '{{order.payment_method}}': 'Chuyển khoản ngân hàng / VNPay',

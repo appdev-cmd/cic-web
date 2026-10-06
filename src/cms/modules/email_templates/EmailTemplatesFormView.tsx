@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft, Eye, Save, Send, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Eye, Save, Send, ShieldCheck, X } from 'lucide-react';
 import { CmsButton } from '../../components/ui/CmsButton';
 import { RichTextEditor } from '../static_pages/RichTextEditor';
 import {
@@ -144,7 +144,14 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
             <ArrowLeft className="size-5" />
           </button>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Mẫu Email</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Mẫu Email</p>
+              {templateToEdit?.isSystem && (
+                <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800">
+                  <ShieldCheck className="size-3" /> Hệ thống (Được bảo vệ)
+                </span>
+              )}
+            </div>
             <h1 className="text-base font-black text-slate-900 dark:text-white">
               {templateToEdit ? 'Chỉnh sửa mẫu email' : 'Thêm mới mẫu email'}
             </h1>
@@ -233,11 +240,12 @@ export const EmailTemplatesFormView: React.FC<Props> = ({
             </label>
 
             <label className="space-y-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Sự kiện kích hoạt
+              Sự kiện kích hoạt {templateToEdit?.isSystem && <span className="text-slate-400 font-normal">(Cố định cho mẫu hệ thống)</span>}
               <select
                 value={event}
+                disabled={Boolean(templateToEdit?.isSystem)}
                 onChange={(e) => setEvent(e.target.value as EmailEvent)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-medium text-slate-900 outline-none transition-colors focus:border-orange-500 disabled:opacity-75 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 {EMAIL_EVENTS.map((item) => (
                   <option key={item.value} value={item.value}>

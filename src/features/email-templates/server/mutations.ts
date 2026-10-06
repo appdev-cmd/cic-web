@@ -103,12 +103,16 @@ export async function updateEmailTemplate(
   const execute = async (sql: Sql) => {
     const actorId = principal.legacyUserId;
     const [template] = await sql`
-      SELECT id, workspace, name, status, active_version_id, draft_version_id
+      SELECT id, workspace, name, status, active_version_id, draft_version_id, COALESCE(is_system, false) as is_system, event_key
       FROM cic_email_templates
       WHERE id = ${id}
       FOR UPDATE
     `;
     if (!template) throw new Error('Email template not found');
+
+    if (template.is_system && data.event && data.event !== template.event_key) {
+      throw new Error('Không thể thay đổi sự kiện liên kết của mẫu email hệ thống.');
+    }
 
     let nextVersionId: string | null = null;
     let nextVersionNumber = 1;
@@ -143,7 +147,7 @@ export async function updateEmailTemplate(
       UPDATE cic_email_templates
       SET
         name = COALESCE(${data.name || null}, name),
-        event_key = COALESCE(${data.event || null}, event_key),
+        event_key = ${template.is_system ? template.event_key : (data.event || template.event_key)},
         audience = COALESCE(${data.audience || null}, audience),
         status = ${nextStatus},
         draft_version_id = COALESCE(${nextVersionId}, draft_version_id),
@@ -288,6 +292,16 @@ export async function trashEmailTemplates(
   if (!uniqueIds.length) return { trashedCount: 0 };
 
   const execute = async (sql: Sql) => {
+    // Kiểm tra và bảo vệ mẫu email hệ thống không được phép xóa/chuyển vào thùng rác
+    const systemRows = await sql`
+      SELECT name FROM cic_email_templates
+      WHERE id = ANY(${uniqueIds}) AND (is_system = true OR event_key IN ('auth_activate', 'auth_forgot_password'))
+    `;
+    if (systemRows.length > 0) {
+      const names = systemRows.map((r: any) => `"${r.name}"`).join(', ');
+      throw new Error(`Mẫu email hệ thống (${names}) được bảo vệ để phục vụ vận hành, không thể chuyển vào thùng rác.`);
+    }
+
     for (const id of uniqueIds) {
       const moved = await moveEmailTemplateToTrash(sql, id, principal.legacyUserId);
       await writeAuditEvent(principal, {
@@ -313,6 +327,16 @@ export async function deleteEmailTemplates(ids: string[], tx?: Sql) {
   if (!uniqueIds.length) return { deletedCount: 0 };
 
   const execute = async (sql: Sql) => {
+    // Bảo vệ không cho phép xóa vĩnh viễn mẫu email hệ thống
+    const systemRows = await sql`
+      SELECT name FROM cic_email_templates
+      WHERE id = ANY(${uniqueIds}) AND (is_system = true OR event_key IN ('auth_activate', 'auth_forgot_password'))
+    `;
+    if (systemRows.length > 0) {
+      const names = systemRows.map((r: any) => `"${r.name}"`).join(', ');
+      throw new Error(`Mẫu email hệ thống (${names}) được bảo vệ để phục vụ vận hành, không thể xóa.`);
+    }
+
     await sql`
       UPDATE cic_email_templates
       SET draft_version_id = NULL, active_version_id = NULL
