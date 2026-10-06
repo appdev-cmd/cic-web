@@ -279,7 +279,7 @@ export function hasEnterpriseSignals(input: CustomerRequestTriageInput, text: st
       company.length >= 6)
   );
 
-  // 3. Explicit large corporate context in text
+  // 3. Explicit large corporate context or enterprise-scale demand in text
   const hasOrgContextInText =
     normalized.includes('tap doan') ||
     normalized.includes('tong cong ty') ||
@@ -289,7 +289,14 @@ export function hasEnterpriseSignals(input: CustomerRequestTriageInput, text: st
     normalized.includes('du an metro') ||
     normalized.includes('vien thiet ke') ||
     normalized.includes('vien nghien cuu') ||
-    normalized.includes('cong trinh bien');
+    normalized.includes('cong trinh bien') ||
+    normalized.includes('ben minh la cong ty') ||
+    normalized.includes('cong ty minh can') ||
+    normalized.includes('phong thiet ke') ||
+    normalized.includes('phong ky thuat') ||
+    normalized.includes('mua cho phong') ||
+    normalized.includes('mua cho cong ty') ||
+    /\b([3-9]|\d{2,})\s*(license|licence|ban quyen|bo|may)\b/i.test(normalized);
 
   return isCorporateEmail || hasEnterpriseCompany || hasOrgContextInText;
 }
@@ -463,6 +470,8 @@ export async function analyzeCustomerRequestWithAi(
       ? 'Phân công Trưởng nhóm kinh doanh liên hệ trực tiếp xác nhận quy mô và nhu cầu triển khai'
       : category === 'irrelevant'
       ? 'Lưu trữ hoặc chuyển mục Không phù hợp (không phân bổ kinh doanh).'
+      : wasDemotedFromEnterprise
+      ? 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp, khéo léo tìm hiểu đơn vị công tác và quy mô số máy để báo giá phù hợp.'
       : 'Phân bổ nhân viên kinh doanh liên hệ tư vấn giải pháp, xác nhận quy mô nhu cầu và gửi báo giá.';
 
     let confidence = 85;
