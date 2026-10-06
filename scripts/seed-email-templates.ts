@@ -116,7 +116,7 @@ async function seed() {
     insertedCount++;
   }
 
-  // 2. Seed Standard Core Templates for all 5 product events + auth + order
+  // 2. Seed Standard Core Templates for all 5 product events + auth
   const standardEvents: Array<{ key: string; nameVi: string; nameEn: string }> = [
     { key: 'product_contact', nameVi: 'Liên hệ sản phẩm', nameEn: 'Product enquiry' },
     { key: 'product_download', nameVi: 'Tải tài liệu sản phẩm', nameEn: 'Product document download' },
@@ -125,8 +125,6 @@ async function seed() {
     { key: 'product_hardlock', nameVi: 'Yêu cầu khóa cứng', nameEn: 'Hardware lock request' },
     { key: 'auth_activate', nameVi: 'Kích hoạt tài khoản thành viên', nameEn: 'Account activation' },
     { key: 'auth_forgot_password', nameVi: 'Khôi phục mật khẩu (OTP)', nameEn: 'Password recovery OTP' },
-    { key: 'order_confirmation', nameVi: 'Xác nhận đơn hàng', nameEn: 'Order confirmation' },
-    { key: 'order_payment_success', nameVi: 'Thanh toán đơn hàng thành công', nameEn: 'Order payment success' },
   ];
 
   for (const workspace of ['vi', 'en'] as const) {
@@ -154,16 +152,6 @@ async function seed() {
           content = isEn
             ? `Dear {{customer.full_name}},\n\nYour OTP code to reset password is: {{auth.otp_code}}\n\nOr click the link: {{auth.reset_password_url}}\n\nThis code is valid for 15 minutes. If you did not request this, please ignore this email.\n\nBest regards,\n{{brand.name}}`
             : `Kính gửi {{customer.full_name}},\n\nMã OTP xác nhận đặt lại mật khẩu của bạn là: {{auth.otp_code}}\n\nHoặc bấm vào liên kết: {{auth.reset_password_url}}\n\nMã có hiệu lực trong 15 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua thư này.\n\nTrân trọng,\n{{brand.name}}`;
-        } else if (evt.key === 'order_confirmation') {
-          subject = isEn ? `[CIC] Order confirmation #{{order.code}}` : `[CIC] Xác nhận đơn hàng thành công #{{order.code}}`;
-          content = isEn
-            ? `Dear {{customer.full_name}},\n\nThank you for placing your order at CIC!\nOrder Code: {{order.code}}\nTotal Amount: {{order.total_amount}}\nPayment Method: {{order.payment_method}}\n\nOrder details:\n{{order.items_table}}\n\nOur team will review and contact you shortly.\n\nBest regards,\n{{brand.name}}`
-            : `Kính gửi {{customer.full_name}},\n\nCảm ơn bạn đã đặt hàng tại CIC!\nMã đơn hàng: {{order.code}}\nTổng giá trị thanh toán: {{order.total_amount}}\nPhương thức thanh toán: {{order.payment_method}}\n\nChi tiết đơn hàng:\n{{order.items_table}}\n\nĐội ngũ CIC sẽ liên hệ với bạn trong thời gian sớm nhất để bàn giao sản phẩm/dịch vụ.\n\nTrân trọng,\n{{brand.name}}`;
-        } else if (evt.key === 'order_payment_success') {
-          subject = isEn ? `[CIC] Payment received for order #{{order.code}}` : `[CIC] Xác nhận thanh toán thành công đơn hàng #{{order.code}}`;
-          content = isEn
-            ? `Dear {{customer.full_name}},\n\nWe have successfully received your payment for order #{{order.code}}.\nAmount: {{order.total_amount}}\n\nThank you for choosing CIC!\n\nBest regards,\n{{brand.name}}`
-            : `Kính gửi {{customer.full_name}},\n\nCIC xác nhận đã nhận được thanh toán thành công cho đơn hàng #{{order.code}}.\nSố tiền: {{order.total_amount}}\n\nCảm ơn bạn đã tin tưởng lựa chọn sản phẩm và giải pháp của CIC!\n\nTrân trọng,\n{{brand.name}}`;
         } else if (evt.key === 'product_download') {
           content = isEn
             ? `Dear {{customer.full_name}},\n\nThank you for your interest in {{product.name}}.\nPlease download the document/software using the link below:\n{{document.name}}: {{document.download_url}}\nLink expires at: {{document.expires_at}}\n{{document.download_instruction}}\n\nBest regards,\n{{brand.name}}`
@@ -200,7 +188,7 @@ async function seed() {
         insertedCount++;
       }
 
-      // Internal template (for requests & orders)
+      // Internal template (for requests)
       if (evt.key !== 'auth_activate' && evt.key !== 'auth_forgot_password') {
         const internalName = isEn ? `${evt.nameEn} (Internal Notification)` : `${evt.nameVi} (Thông báo nội bộ)`;
         const [existInt] = await sql`
