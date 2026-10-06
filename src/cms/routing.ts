@@ -22,6 +22,7 @@ export type CmsModuleKey =
   | 'cta'
   | 'forms'
   | 'customer_requests'
+  | 'notifications'
   | 'not_found';
 
 interface CmsRouteDefinition {
@@ -131,6 +132,12 @@ export const CMS_ROUTES: CmsRouteDefinition[] = [
       '/cms/contact-requests/',
       '/cms/contact-messages/',
     ],
+  },
+  {
+    module: 'notifications',
+    canonicalPath: '/cms/notifications',
+    aliases: ['/cms/notification-center', '/cms/alerts'],
+    nestedPrefixes: ['/cms/notifications/'],
   },
 ];
 
@@ -256,6 +263,15 @@ export function isFunctionSeoCmsPath(path: string): boolean {
     normalizedPath === '/cms/seo-modules' ||
     normalizedPath.startsWith('/cms/function-seo/') ||
     normalizedPath.startsWith('/cms/seo-modules/')
+  );
+}
+
+export function isNotificationsCmsPath(path: string): boolean {
+  const normalizedPath = normalizeCmsPath(path);
+  return (
+    normalizedPath === '/cms/notifications' ||
+    normalizedPath === '/cms/notification-center' ||
+    normalizedPath.startsWith('/cms/notifications/')
   );
 }
 
