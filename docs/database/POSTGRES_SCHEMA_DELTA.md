@@ -1333,3 +1333,31 @@ Các tài liệu audit chi tiết tương ứng đã có từ `09-projects-schem
 - **Chưa sẵn sàng chạy migration ngay**: các bước profiling, xác minh FK, cleanup Event, permission parity và phê duyệt năm bảng có điều kiện vẫn phải hoàn thành.
 - Không phát hiện nhu cầu thiết kế lại toàn bộ database. Hướng triển khai vẫn là mở rộng additive, giữ dữ liệu legacy và thay mock bằng data boundary theo từng module.
 - Tài liệu này chưa phải migration SQL và không tự cấp phép sửa database production.
+
+---
+
+## Trung tâm Thông báo CMS (CMS Notification Center)
+
+### Migration đã áp dụng: `20261006_cms_notifications.sql` (2026-10-06)
+
+### Bảng mới được tạo:
+1. `cms_notifications`: Lưu trữ sự kiện thông báo hệ thống và tương tác khách hàng.
+   - `id`: BIGSERIAL PRIMARY KEY
+   - `title`: VARCHAR(255) NOT NULL
+   - `description`: TEXT
+   - `type`: VARCHAR(50) NOT NULL ('contact', 'registration', 'quote', 'editorial', 'system', 'security')
+   - `target_module`: VARCHAR(100) (đối chiếu quyền RBAC: 'customer_requests', 'news', 'products', 'events', 'system')
+   - `target_action`: VARCHAR(50) DEFAULT 'view'
+   - `target_user_id`: BIGINT NULL REFERENCES cic_users(id) ON DELETE CASCADE
+   - `link_url`: TEXT
+   - `metadata`: JSONB DEFAULT '{}'::jsonb
+   - `created_at`: TIMESTAMPTZ DEFAULT NOW()
+   - Chỉ mục: `(target_module, target_action)`, `(target_user_id)`, `(created_at DESC)`
+
+2. `cms_notification_reads`: Lưu trữ trạng thái đã đọc độc lập cho từng tài khoản người dùng.
+   - `notification_id`: BIGINT NOT NULL REFERENCES cms_notifications(id) ON DELETE CASCADE
+   - `user_id`: BIGINT NOT NULL REFERENCES cic_users(id) ON DELETE CASCADE
+   - `read_at`: TIMESTAMPTZ DEFAULT NOW()
+   - PRIMARY KEY: `(notification_id, user_id)`
+   - Chỉ mục: `(user_id)`
+
