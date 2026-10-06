@@ -7,6 +7,8 @@ import { writeAuditEvent } from '@/server/audit/writer';
 import { requirePermission, invalidateCmsPrincipalCache } from '@/server/auth/guards';
 import { getPostgresClient } from '@/server/db/postgres';
 import { createSupabaseAdminClient } from '@/server/supabase/admin';
+import { getServerEnv } from '@/server/config/env';
+import { sendWelcomeUserEmail, sendPasswordResetEmail } from '@/lib/email/templates/auth-emails';
 import { accountStatusSchema, createUserInputSchema, updateUserInputSchema } from '../schemas/userInput';
 import { assertActorCanManageTargetUser, createUserRecord, trashUserRecord, updateUserRecord, updateUserStatuses, type AuthSyncTarget } from './repository';
 import { getCmsUserActivity } from './queries';
@@ -42,6 +44,29 @@ export async function createCmsUserAction(payload:unknown){
   // The immutable DB bridge is authoritative. Metadata only accelerates auth
   // lookup and must never turn a committed profile into an orphaned account.
   await admin.auth.admin.updateUserById(data.user.id,{app_metadata:{...data.user.app_metadata,cms_profile:true,legacy_user_id:id}});
+
+  // Gửi email chào mừng kèm thông tin tài khoản chuẩn thương hiệu CIC
+  try {
+    const appUrl = getServerEnv().APP_URL;
+    const loginUrl = `${appUrl}/cms/login`;
+    const sql = getPostgresClient();
+    const [roleRow] = await sql`SELECT name FROM cic_roles WHERE id = ${input.roleId} LIMIT 1`;
+    const roleName = roleRow?.name ? String(roleRow.name) : undefined;
+
+    void sendWelcomeUserEmail({
+      to: input.email,
+      fullName: `${input.lname} ${input.fname}`.trim(),
+      username: input.username,
+      password: input.password,
+      roleName,
+      loginUrl,
+    }).catch((err) => {
+      console.warn('[createCmsUserAction] Không thể gửi email thông tin tài khoản:', err);
+    });
+  } catch (mailErr) {
+    console.warn('[createCmsUserAction] Khởi tạo email thông tin tài khoản thất bại:', mailErr);
+  }
+
   refresh();return{id:String(id)};
 }
 
@@ -114,8 +139,39 @@ export async function sendCmsPasswordResetAction(id: string) {
     const { admin, user } = await findAuthUser({ authUserId: null, email: userEmail });
     userLabel = String(user.user_metadata?.username ?? user.email ?? `Tài khoản ${numericId}`);
 
-    const { error } = await admin.auth.resetPasswordForEmail(user.email!);
-    if (error) throw error;
+    const appUrl = getServerEnv().APP_URL;
+    const resetRedirectUrl = `${appUrl}/cms/login`;
+
+    // 1. Tạo liên kết khôi phục mật khẩu an toàn qua Supabase Admin API
+    let actionLink = '';
+    try {
+      const linkRes = await admin.auth.admin.generateLink({
+        type: 'recovery',
+        email: user.email!,
+        options: { redirectTo: resetRedirectUrl },
+      });
+      if (linkRes.data?.properties?.action_link) {
+        actionLink = linkRes.data.properties.action_link;
+      }
+    } catch (linkErr) {
+      console.warn('[sendCmsPasswordResetAction] generateLink fallback:', linkErr);
+    }
+
+    if (actionLink) {
+      // 2. Gửi thư HTML chuẩn thương hiệu CIC qua hệ thống email CIC
+      await sendPasswordResetEmail({
+        to: user.email!,
+        fullName: String(user.user_metadata?.full_name ?? userLabel),
+        username: String(user.user_metadata?.username ?? userLabel),
+        resetUrl: actionLink,
+      });
+    } else {
+      // Fallback: nếu không sinh được link riêng, dùng resetPasswordForEmail mặc định của Supabase
+      const { error } = await admin.auth.resetPasswordForEmail(user.email!, {
+        redirectTo: resetRedirectUrl,
+      });
+      if (error) throw error;
+    }
 
     await writeAuditEvent(actor, {
       action: AUDIT_ACTIONS.USER_PASSWORD_RESET_REQUESTED,
@@ -125,7 +181,7 @@ export async function sendCmsPasswordResetAction(id: string) {
       module: 'users',
       workspace: 'global',
       result: 'success',
-      metadata: { delivery: 'email', recipient: userEmail },
+      metadata: { delivery: actionLink ? 'cic_smtp_branded' : 'supabase_email', recipient: userEmail },
     });
     refresh();
   } catch (error) {
